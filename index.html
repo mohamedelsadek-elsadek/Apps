@@ -506,7 +506,9 @@ function seedIfEmpty(){
     ["مصاريف خطوبة منى","mona-engagement.html","حصر مصاريف الخطوبة.","شخصي","💍","#f9a8d4"],
     ["صيانتي","maintenance.html","دفتر صيانة البيت والعربية.","شخصي","🔧","#94a3b8"],
     ["شجرة العائلة","family-tree.html","شجرة العائلة مع حاسبة صلة القرابة ومزامنة.","شخصي","🌳","#34d399"],
-    ["دليل الأماكن","places.html","إدارة المواقع بخرائط وتصنيفات وقفل PIN.","شخصي","📍","#22d3ee"]
+    ["دليل الأماكن","places.html","إدارة المواقع بخرائط وتصنيفات وقفل PIN.","شخصي","📍","#22d3ee"],
+    ["شنطتي","shanta.html","تجهيز شنطة السفر + مخزن الحاجات المتسابة في الشاليه وكل مكان.","شخصي","🧳","#e8a94f"],
+    ["مشترياتي","market.html","قوايم السوبر ماركت بأقسام جاهزة وطباعة PDF.","شخصي","🛒","#7ec97e"]
   ];
   var t=now();
   seed.forEach(function(s,i){
@@ -925,7 +927,24 @@ load();
   });
   if(changed) persist();
 })();
-seedIfEmpty(); fillPickers(); render(); restoreSync();
+seedIfEmpty();
+/* برامج جديدة: بتتضاف تلقائيًا لو مش موجودة (بالرابط) — حدّث القايمة دي مع كل برنامج جديد */
+(function(){
+  var newApps=[
+    {title:"شنطتي",url:"shanta.html",desc:"تجهيز شنطة السفر + مخزن الحاجات المتسابة في الشاليه وكل مكان.",cat:"شخصي",emoji:"🧳",color:"#e8a94f"},
+    {title:"مشترياتي",url:"market.html",desc:"قوايم السوبر ماركت بأقسام جاهزة وطباعة PDF.",cat:"شخصي",emoji:"🛒",color:"#7ec97e"}
+  ];
+  var added=false;
+  newApps.forEach(function(a){
+    var exists=links.some(function(l){return !l.deleted && (l.url||"").replace(/^\.\//,"")===a.url});
+    if(!exists){
+      links.push({id:uid(),title:a.title,url:a.url,desc:a.desc,cat:a.cat,emoji:a.emoji,color:a.color,updatedAt:now(),deleted:false});
+      added=true;
+    }
+  });
+  if(added) persist();
+})();
+fillPickers(); render(); restoreSync();
 </script>
 </body>
 </html>

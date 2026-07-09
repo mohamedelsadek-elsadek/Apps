@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#141210">
+<title>شنطتي — تجهيز السفر ومخازن الأماكن</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#141210; --bg2:#1a1714; --surface:#221e19; --surface2:#2a2520;
+  --line:#3a332b; --line2:#4d4438;
+  --txt:#f3ede4; --muted:#a99e8e; --muted2:#7a7060;
+  --sand:#e8a94f; --sand2:#f2c37c; --leather:#b0713a; --sea:#4fb3a9;
+  --ink:#241a0d;
+  --ok:#7ec97e; --warn:#e8a94f; --danger:#e07862;
+  --r:18px;
+  --shadow:0 12px 32px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Cairo',system-ui,-apple-system,'SF Arabic',Tahoma,sans-serif;
+  background:
+    radial-gradient(900px 500px at 90% -5%, rgba(232,169,79,.08), transparent 55%),
+    radial-gradient(700px 460px at 0% 100%, rgba(79,179,169,.07), transparent 55%),
+    var(--bg);
+  color:var(--txt);
+  min-height:100vh;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:calc(86px + env(safe-area-inset-bottom));
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+/* ===== Header ===== */
+.top{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,rgba(20,18,16,.97),rgba(20,18,16,.85));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.top-in{display:flex;align-items:center;gap:12px;padding:13px 0}
+.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(140deg,var(--sand),var(--leather));display:grid;place-items:center;font-size:22px;box-shadow:0 6px 16px rgba(232,169,79,.3);flex:0 0 auto}
+.top h1{margin:0;font-size:19px;font-weight:900;line-height:1.1}
+.top .sub{margin:2px 0 0;font-size:12px;color:var(--muted);font-weight:600}
+.iconbtn{margin-inline-start:auto;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--txt);font-size:18px;cursor:pointer;display:grid;place-items:center;position:relative}
+.iconbtn:active{transform:scale(.93)}
+.sdot{position:absolute;top:7px;left:7px;width:8px;height:8px;border-radius:50%;background:var(--muted2)}
+.sdot.on{background:var(--ok);box-shadow:0 0 0 3px rgba(126,201,126,.15)}
+.sdot.err{background:var(--danger)}
+
+/* ===== Bottom tabs ===== */
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:50;background:linear-gradient(0deg,rgba(20,18,16,.99),rgba(20,18,16,.92));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;max-width:760px;margin:0 auto}
+.tab{flex:1;height:56px;border-radius:15px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:800;font-size:12.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.tab .ti{font-size:21px;line-height:1}
+.tab.on{background:var(--surface);border-color:var(--line2);color:var(--sand2)}
+.tab:active{transform:scale(.95)}
+
+/* ===== Section headers ===== */
+.sechead{display:flex;align-items:center;gap:10px;margin:20px 0 12px}
+.sechead h2{margin:0;font-size:17px;font-weight:900;flex:1}
+.mini-add{height:38px;padding:0 14px;border-radius:11px;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:13.5px;background:linear-gradient(135deg,var(--sand),var(--leather));color:var(--ink);display:flex;align-items:center;gap:6px}
+.mini-add:active{transform:scale(.95)}
+
+/* ===== Trip cards ===== */
+.trip{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.trip:active{transform:scale(.985)}
+.trip-top{display:flex;align-items:center;gap:11px}
+.trip-emo{width:46px;height:46px;border-radius:13px;background:rgba(232,169,79,.14);border:1px solid rgba(232,169,79,.25);display:grid;place-items:center;font-size:23px;flex:0 0 auto}
+.trip-tt{flex:1;min-width:0}
+.trip-tt b{display:block;font-size:16px;font-weight:900}
+.trip-tt span{font-size:12px;color:var(--muted);font-weight:600}
+.trip-pct{font-size:15px;font-weight:900;color:var(--sand2)}
+.trip.closed .trip-pct{color:var(--muted2)}
+/* signature: strap progress */
+.strap{margin-top:13px;height:14px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);position:relative;overflow:hidden}
+.strap-fill{position:absolute;inset:0 auto 0 auto;right:0;border-radius:99px;background:repeating-linear-gradient(-45deg,var(--sand) 0 10px,var(--sand2) 10px 20px);transition:width .4s cubic-bezier(.2,.8,.3,1)}
+.strap-buckle{position:absolute;top:50%;transform:translateY(-50%);width:10px;height:22px;border-radius:4px;background:var(--leather);border:2px solid var(--sand2);transition:right .4s cubic-bezier(.2,.8,.3,1)}
+.trip-meta{margin-top:9px;font-size:12px;color:var(--muted);font-weight:600;display:flex;gap:12px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:3px 11px;font-size:11.5px;font-weight:800;color:var(--muted)}
+.pill.done{color:var(--ok);border-color:rgba(126,201,126,.3)}
+
+/* ===== Place cards ===== */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px}
+.place{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:15px;cursor:pointer;text-align:center;transition:.15s;position:relative;overflow:hidden}
+.place::after{content:"";position:absolute;inset:auto 0 0 0;height:4px;background:var(--pc,var(--sea))}
+.place:active{transform:scale(.96)}
+.place .pe{font-size:34px}
+.place b{display:block;font-size:15px;font-weight:900;margin-top:7px}
+.place span{font-size:12px;color:var(--muted);font-weight:700}
+
+/* ===== Lists ===== */
+.row{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px}
+.row .re{font-size:20px;width:28px;text-align:center;flex:0 0 auto}
+.row .rt{flex:1;min-width:0}
+.row .rt b{display:block;font-size:14.5px;font-weight:800;word-break:break-word}
+.row .rt span{font-size:11.5px;color:var(--muted);font-weight:600}
+.row .qty{font-size:13px;font-weight:900;color:var(--sand2);background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:3px 10px;flex:0 0 auto}
+.rbtn{width:37px;height:37px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-size:15px;cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
+.rbtn:active{transform:scale(.9)}
+.rbtn.take{color:var(--sea);border-color:rgba(79,179,169,.35)}
+
+/* checklist */
+.chk{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.chk:active{transform:scale(.985)}
+.chk .box{width:26px;height:26px;border-radius:9px;border:2px solid var(--line2);flex:0 0 auto;display:grid;place-items:center;font-size:15px;color:var(--ink);transition:.15s}
+.chk.done .box{background:var(--sand);border-color:var(--sand)}
+.chk .ct{flex:1;min-width:0}
+.chk .ct b{display:block;font-size:14.5px;font-weight:800}
+.chk.done .ct b{text-decoration:line-through;color:var(--muted)}
+.chk .there{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--sea);background:rgba(79,179,169,.12);border:1px solid rgba(79,179,169,.3);border-radius:99px;padding:2px 9px;margin-top:3px}
+.chk .del{width:33px;height:33px;border-radius:9px;border:0;background:transparent;color:var(--muted2);font-size:16px;cursor:pointer;flex:0 0 auto}
+
+/* quick add */
+.qadd{display:flex;gap:8px;margin:12px 0}
+.qadd input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px 14px;color:var(--txt);font-family:inherit;font-size:15px;font-weight:600;outline:0;min-width:0}
+.qadd input:focus{border-color:var(--sand)}
+.qadd button{width:50px;border-radius:13px;border:0;background:linear-gradient(135deg,var(--sand),var(--leather));color:var(--ink);font-size:22px;font-weight:900;cursor:pointer;flex:0 0 auto}
+.chipbar{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chipbar::-webkit-scrollbar{display:none}
+.qchip{flex:0 0 auto;padding:7px 13px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.qchip:active{transform:scale(.93)}
+
+/* detail view header */
+.dethead{display:flex;align-items:center;gap:10px;margin:16px 0 6px}
+.back{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--txt);font-size:18px;cursor:pointer;flex:0 0 auto}
+.dethead h2{margin:0;font-size:18px;font-weight:900;flex:1;min-width:0}
+.dethead .dsub{font-size:12px;color:var(--muted);font-weight:700}
+
+/* empty */
+.empty{text-align:center;padding:46px 18px;color:var(--muted)}
+.empty .em{font-size:52px;margin-bottom:12px}
+.empty h3{margin:0 0 6px;font-size:17px;color:var(--txt);font-weight:900}
+.empty p{margin:0;font-size:13.5px;font-weight:600;line-height:1.7}
+
+/* big buttons */
+.bigbtn{width:100%;height:54px;border-radius:15px;border:0;cursor:pointer;font-family:inherit;font-weight:900;font-size:16px;background:linear-gradient(135deg,var(--sand),var(--leather));color:var(--ink);margin-top:8px}
+.bigbtn:active{transform:scale(.98)}
+.bigbtn.sea{background:linear-gradient(135deg,var(--sea),#3a8a82);color:#06211e}
+.bigbtn.ghost{background:var(--surface);border:1px solid var(--line);color:var(--txt)}
+
+/* ===== Sheets ===== */
+.overlay{position:fixed;inset:0;z-index:80;background:rgba(10,8,6,.68);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+@media(min-width:640px){.overlay{align-items:center}}
+.sheet{width:100%;max-width:560px;background:var(--bg2);border:1px solid var(--line);border-radius:22px 22px 0 0;max-height:92vh;overflow-y:auto;padding:0 0 calc(20px + env(safe-area-inset-bottom));animation:up .26s cubic-bezier(.2,.9,.25,1)}
+@media(min-width:640px){.sheet{border-radius:22px}}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.grip{width:42px;height:5px;border-radius:99px;background:var(--line2);margin:10px auto 2px}
+.shead{display:flex;align-items:center;gap:10px;padding:8px 20px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg2);z-index:2}
+.shead h2{margin:0;font-size:17.5px;font-weight:900;flex:1}
+.x{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:19px;cursor:pointer}
+.sbody{padding:18px 20px}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:13px;font-weight:800;color:var(--muted);margin-bottom:7px}
+.input,.textarea,select.input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:inherit;font-size:15px;font-weight:600;outline:0}
+.input:focus,.textarea:focus{border-color:var(--sand)}
+.textarea{resize:vertical;min-height:80px;line-height:1.7}
+.hint{font-size:11.5px;color:var(--muted2);margin-top:6px;font-weight:600}
+.two{display:flex;gap:10px}
+.two>.field{flex:1}
+.erow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.eq{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:19px;cursor:pointer}
+.eq:active{transform:scale(.9)}
+.epick{width:56px;text-align:center;font-size:21px}
+
+/* templates: أكورديون منسدل */
+.tpl{border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:10px;overflow:hidden}
+.tpl-h{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.tpl-h b{flex:1;font-size:14.5px;font-weight:900}
+.tpl-h .cnt{font-size:12px;color:var(--muted);font-weight:700}
+.tpl-h .chev{font-size:13px;color:var(--muted2);transition:transform .2s}
+.tpl.open .tpl-h .chev{transform:rotate(90deg)}
+.tpl-all{border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:9px;padding:5px 11px;font-family:inherit;font-weight:800;font-size:11.5px;cursor:pointer;flex:0 0 auto}
+.tpl-all:active{transform:scale(.93)}
+.tpl-items{display:none;padding:0 15px 13px;flex-wrap:wrap;gap:7px}
+.tpl.open .tpl-items{display:flex}
+.titem{padding:6px 12px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.titem.sel{background:rgba(232,169,79,.16);border-color:var(--sand);color:var(--sand2)}
+.tpl-search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px;color:var(--txt);font-family:inherit;font-size:14px;font-weight:600;outline:0;margin-bottom:12px}
+.tpl-search:focus{border-color:var(--sand)}
+.tpl-selcount{position:sticky;bottom:0;background:var(--bg2);padding-top:6px}
+
+/* wrap-up (تصفية) */
+.wrow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:8px}
+.wrow b{flex:1;font-size:14.5px;font-weight:800;min-width:0;word-break:break-word}
+.wseg{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--line);border-radius:11px;padding:3px;flex:0 0 auto}
+.wseg button{border:0;border-radius:8px;padding:7px 11px;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer;background:transparent;color:var(--muted)}
+.wseg button.a{background:var(--sea);color:#06211e}
+.wseg button.b{background:var(--sand);color:var(--ink)}
+
+/* settings */
+.scard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:13px}
+.scard h3{margin:0 0 5px;font-size:15px;font-weight:900}
+.scard p{margin:0 0 11px;font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.6}
+.srow{display:flex;gap:9px;flex-wrap:wrap}
+.sbtn{flex:1;min-width:125px;height:45px;border-radius:12px;cursor:pointer;font-family:inherit;font-weight:800;font-size:13.5px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toggle{width:52px;height:30px;border-radius:99px;background:var(--line2);position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
+.toggle.on{background:var(--ok)}
+.toggle::after{content:"";position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on::after{right:25px}
+
+.toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface2);border:1px solid var(--line2);color:var(--txt);padding:12px 19px;border-radius:14px;font-weight:800;font-size:13.5px;z-index:120;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ====== طباعة / PDF ====== */
+#printArea{display:none}
+@media print{
+  body{background:#fff!important;color:#111!important;padding:0!important}
+  body > *:not(#printArea){display:none!important}
+  #printArea{display:block!important;font-family:'Cairo',Tahoma,sans-serif;color:#111;padding:10mm}
+  #printArea h1{font-size:20px;margin:0 0 2px}
+  #printArea .psub{font-size:12px;color:#555;margin:0 0 14px}
+  #printArea .pgroup{font-size:14px;font-weight:900;margin:14px 0 6px;border-bottom:2px solid #111;padding-bottom:3px}
+  #printArea .prow{display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px dashed #ccc;font-size:13.5px;break-inside:avoid}
+  #printArea .pbox{width:14px;height:14px;border:1.6px solid #111;border-radius:3px;flex:0 0 auto;display:inline-block;text-align:center;line-height:12px;font-size:11px}
+  #printArea .pnote{font-size:11px;color:#3a8a82;font-weight:700;margin-inline-start:6px}
+  #printArea .pqty{margin-inline-start:auto;font-weight:800;color:#333}
+  #printArea .pdone{text-decoration:line-through;color:#888}
+  #printArea .pfoot{margin-top:16px;font-size:11px;color:#777;text-align:center}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="logo">🧳</div>
+    <div>
+      <h1>شنطتي</h1>
+      <p class="sub">تجهيز السفر ومخازن الأماكن</p>
+    </div>
+    <button class="iconbtn" id="btnSet">⚙️<span class="sdot" id="sdot"></span></button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ===== الرحلات ===== -->
+  <section id="vTrips">
+    <div class="sechead"><h2>رحلاتي</h2><button class="mini-add" id="btnNewTrip">＋ رحلة جديدة</button></div>
+    <div id="tripsList"></div>
+  </section>
+
+  <!-- تفاصيل رحلة -->
+  <section id="vTrip" style="display:none">
+    <div class="dethead">
+      <button class="back" data-goto="trips">→</button>
+      <div style="flex:1;min-width:0"><h2 id="tName"></h2><div class="dsub" id="tSub"></div></div>
+      <button class="rbtn" id="tPrint" title="طباعة / PDF">🖨️</button>
+      <button class="rbtn" id="tEdit" title="تعديل">✏️</button>
+    </div>
+    <div class="strap" style="margin:10px 0 4px"><div class="strap-fill" id="tFill" style="width:0%"></div><div class="strap-buckle" id="tBuckle" style="right:0%"></div></div>
+    <div class="trip-meta" id="tMeta"></div>
+
+    <div class="qadd">
+      <input id="tQuick" placeholder="ضيف حاجة للشنطة… (مثلاً: شاحن)" autocomplete="off">
+      <button id="tQuickAdd">＋</button>
+    </div>
+    <div class="chipbar" id="tChips"></div>
+    <button class="bigbtn ghost" id="tTpl" style="margin:0 0 14px">📋 ضيف من القوالب الجاهزة</button>
+
+    <div id="tList"></div>
+
+    <button class="bigbtn sea" id="tWrap">🏁 خلّصت الرحلة — تصفية المغادرة</button>
+    <button class="bigbtn ghost" id="tDelete" style="color:var(--danger)">حذف الرحلة</button>
+  </section>
+
+  <!-- ===== المخازن ===== -->
+  <section id="vPlaces" style="display:none">
+    <div class="sechead"><h2>مخازن الأماكن</h2><button class="mini-add" id="btnNewPlace">＋ مكان</button></div>
+    <p style="font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 14px;line-height:1.7">كل مكان (الشاليه، البيت…) ليه مخزن بالحاجات اللي سايبها هناك — عشان وانت بتجهّز الشنطة تعرف إيه اللي مستنيك ومتشيلوش تاني.</p>
+    <div class="pgrid" id="placesGrid"></div>
+  </section>
+
+  <!-- تفاصيل مكان -->
+  <section id="vPlace" style="display:none">
+    <div class="dethead">
+      <button class="back" data-goto="places">→</button>
+      <div style="flex:1;min-width:0"><h2 id="pName"></h2><div class="dsub" id="pSub"></div></div>
+      <button class="rbtn" id="pPrint" title="طباعة / PDF">🖨️</button>
+      <button class="rbtn" id="pEdit" title="تعديل">✏️</button>
+    </div>
+    <div class="qadd">
+      <input id="pQuick" placeholder="سجّل حاجة سايبها هنا… (مثلاً: شفاطة، فوط)" autocomplete="off">
+      <button id="pQuickAdd">＋</button>
+    </div>
+    <button class="bigbtn ghost" id="pTpl" style="margin:0 0 14px">📋 سجّل من القوائم الجاهزة</button>
+    <div id="pList"></div>
+  </section>
+</div>
+
+<!-- Tabs -->
+<nav class="tabs">
+  <button class="tab on" data-tab="trips"><span class="ti">🧳</span>الرحلات</button>
+  <button class="tab" data-tab="places"><span class="ti">📦</span>المخازن</button>
+</nav>
+
+<!-- Sheet: رحلة جديدة/تعديل -->
+<div class="overlay" id="ovTrip"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="ovTripTitle">رحلة جديدة</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <div class="field"><label>اسم الرحلة</label><input class="input" id="fTripName" placeholder="مثلاً: مصيف الساحل — أغسطس"></div>
+    <div class="two">
+      <div class="field"><label>الوجهة</label><select class="input" id="fTripPlace"></select></div>
+      <div class="field"><label>التاريخ (اختياري)</label><input class="input" id="fTripDate" type="date"></div>
+    </div>
+    <button class="bigbtn" id="fTripSave">حفظ</button>
+  </div>
+</div></div>
+
+<!-- Sheet: مكان جديد/تعديل -->
+<div class="overlay" id="ovPlace"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="ovPlaceTitle">مكان جديد</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <div class="field"><label>اسم المكان</label><input class="input" id="fPlaceName" placeholder="مثلاً: شاليه الساحل"></div>
+    <div class="field"><label>الأيقونة</label>
+      <div class="erow"><input class="input epick" id="fPlaceEmoji" maxlength="4" placeholder="🏖️"><span id="placeEmos"></span></div>
+    </div>
+    <button class="bigbtn" id="fPlaceSave">حفظ</button>
+    <button class="bigbtn ghost" id="fPlaceDel" style="color:var(--danger);display:none">حذف المكان</button>
+  </div>
+</div></div>
+
+<!-- Sheet: القوالب -->
+<div class="overlay" id="ovTpl"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="tplTitle">قوائم جاهزة</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <input class="tpl-search" id="tplSearch" placeholder="🔍 دوّر على أي حاجة… (مثلاً: شاحن، فوط، فحم)" autocomplete="off">
+    <p style="font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 13px" id="tplHint"></p>
+    <div id="tplList"></div>
+    <div class="tpl-selcount"><button class="bigbtn" id="tplAdd">ضيف المحدد (0)</button></div>
+  </div>
+</div></div>
+
+<!-- Sheet: تصفية المغادرة -->
+<div class="overlay" id="ovWrap"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>🏁 تصفية المغادرة</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <p style="font-size:13px;color:var(--muted);font-weight:600;margin:0 0 13px;line-height:1.7">حدد مصير كل حاجة كانت معاك: <b style="color:var(--sand2)">سايبها هناك</b> تتسجل في مخزن <b id="wPlaceName"></b> تلقائيًا، و<b style="color:var(--sea)">راجعة معايا</b> ترجع معاك عادي.</p>
+    <div id="wList"></div>
+    <button class="bigbtn" id="wDone">تأكيد وقفل الرحلة</button>
+  </div>
+</div></div>
+
+<!-- Sheet: إعدادات -->
+<div class="overlay" id="ovSet"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>الإعدادات والمزامنة</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <div class="scard">
+      <h3>☁️ مزامنة Firebase</h3>
+      <p>الصق إعدادات firebaseConfig وفعّل — بياناتك (الرحلات والمخازن) هتتحفظ على السحابة وتظهر على كل أجهزتك.</p>
+      <div class="field"><textarea class="textarea" id="fbConfig" dir="ltr" style="font-size:12px;min-height:90px" placeholder='{ "apiKey":"…", "databaseURL":"https://…", … }'></textarea></div>
+      <div class="switch"><div><b style="font-size:14px">تفعيل المزامنة</b><div style="font-size:12px;color:var(--muted);font-weight:600" id="fbStatus">غير مفعّلة</div></div><div class="toggle" id="fbToggle"></div></div>
+    </div>
+    <div class="scard">
+      <h3>💾 نسخة احتياطية</h3>
+      <p>صدّر كل بياناتك كملف JSON أو استورد نسخة قديمة.</p>
+      <div class="srow"><button class="sbtn" id="btnExport">⬇️ تصدير</button><button class="sbtn" id="btnImport">⬆️ استيراد</button></div>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+    <div class="scard">
+      <h3>🗑️ إعادة ضبط</h3>
+      <p>مسح كل البيانات من الجهاز نهائيًا.</p>
+      <div class="srow"><button class="sbtn" id="btnClear" style="color:var(--danger)">مسح الكل</button></div>
+    </div>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+"use strict";
+/* ============ ثوابت ============ */
+var LS_KEY="shanta.data.v1", LS_FB="shanta.fb.v1", LS_FBON="shanta.fbon.v1";
+var PLACE_EMOS=["🏖️","🏠","🏡","🌾","🚜","🏢","⛺","🛥️","🕌","🏨"];
+var PLACE_COLORS=["#4fb3a9","#e8a94f","#7ec97e","#c58bd6","#6fa8dc","#e07862"];
+var TEMPLATES=[
+  {n:"إلكترونيات وشواحن",e:"⚡",items:["شاحن الموبايل","باور بانك","وصلة كهربا","مشترك","سماعات","ساعة وشاحنها","لاب توب وشاحنه","تابلت","فلاشة أفلام","ريموت/ريسيفر","كشاف/بطاريات"]},
+  {n:"العناية الشخصية",e:"🪥",items:["فرشة ومعجون","شفرات حلاقة","معجون حلاقة","برفان","ديودورانت","شامبو","شاور جل","لوفة","كريم شمس","كريم بعد الشمس","مرطب","مشط","جل شعر","قطن وأعواد","عدسات ومحلول","نضارة طبية"]},
+  {n:"هدوم صيفي",e:"👕",items:["تيشيرتات","شورتات","مايوه","شبشب بحر","صندل","كاب","نضارة شمس","فانلات"]},
+  {n:"هدوم شتوي",e:"🧥",items:["جواكت","بلوفرات","إيشارب/كوفية","جوانتي صوف","طاقية","بيجامة تقيلة","شراب تقيل"]},
+  {n:"هدوم عامة",e:"👖",items:["بناطيل","هدوم داخلية","شراب","بيجامات","جزمة رياضية","جزمة كلاسيك","حزام","هدوم غيار زيادة"]},
+  {n:"صيدلية السفر",e:"💊",items:["مسكن","خافض حرارة","دوا برد","دوا معدة","دوا إسهال","أدوية الضغط/السكر الشخصية","بلاستر","شاش ومطهر","كريم حروق","مضاد حساسية","قطرة عين","ترمومتر","لصقات آلام"]},
+  {n:"البحر والبلاج",e:"🏖️",items:["فوط بحر","شمسية بلاج","كرسي بلاج","عوامات","لعب رمل","حصيرة","شنطة تلج/كولمان","مطرة مياه","كاميرا/جو برو","كيس ضد المية للموبايل"]},
+  {n:"مطبخ الشاليه",e:"🍳",items:["شفاطة/طباخ صغير","أنبوبة صغيرة","حلل","طاسة","أطباق","شوك ومعالق","سكاكين","فتاحة علب","براد شاي","كبايات","صابون مواعين","سفنجة","فوط مطبخ","مفرش سفرة","ولاعة/كبريت","فويل وأكياس حفظ"]},
+  {n:"الشوي والقعدة",e:"🔥",items:["شواية","فحم","ولاعة فحم","شيش","كماشة شوي","كراسي قابلة للطي","ترابيزة صغيرة","كوتشينة/طاولة","سماعة بلوتوث"]},
+  {n:"نوم ومفروشات",e:"🛏️",items:["ملايات","مخدات","بطاطين","لحاف خفيف","ناموسية","مروحة صغيرة","ستارة إضافية"]},
+  {n:"نظافة ومنظفات",e:"🧴",items:["صابون","شامبو أرضيات","كلور","مساحة","مقشة وجاروف","أكياس زبالة","مناديل مبللة","معطر جو","مبيد حشرات","صاعق ناموس"]},
+  {n:"الأطفال",e:"👶",items:["بامبرز","مناديل أطفال","أكل الأطفال/سيريلاك","ببرونة","تتينة","لعب","هدوم غيار كتير","عربية الطفل","كرسي سيارة","شمسية عربية","كريم تسلخات"]},
+  {n:"صلاة",e:"🕌",items:["سجادة صلاة","مصحف صغير","إسدال","سبحة"]},
+  {n:"العربية والطريق",e:"🚗",items:["رخصة العربية","رخصة القيادة","شاحن ولاعة","حامل موبايل","مياه رديتر","تشييك الاستبن","طفاية حريق","مثلث عاكس","كمبروسر هوا","فوطة للعربية"]},
+  {n:"مستندات وفلوس",e:"📄",items:["بطاقة شخصية","كاش","فيزا/ماستر","صور بطاقة","عقد الشاليه/إيصالات","مفاتيح احتياطية","دفتر شيكات"]},
+  {n:"صيد ورياضة",e:"🎣",items:["سنارة","طُعم وخيوط","شبكة","كورة","شنطة جيم","حبل نط","مضرب راكيت"]},
+  {n:"شغل ومأموريات",e:"💼",items:["لاب توب وشاحنه","دفتر وقلم","أوراق ومستندات","فلاشة","كروت شخصية","بروشورات","عقود"]},
+  {n:"مأمورية مزرعة/معمل",e:"🐔",items:["أوفرول","بوت مزرعة","كمامات","جوانتيات","أدوات تشريح","تيوبات عينات","شنطة تلج للعينات","كحول/مطهر","كشاف رأس","لصقات ترقيم","دفتر تسجيل"]},
+  {n:"أكل الطريق",e:"🥤",items:["مياه","ترمس شاي/قهوة","سناكس","فاكهة","ساندوتشات","شنطة أكل","مناديل","أكياس زبالة صغيرة","شنطة تلج صغيرة"]}
+];
+
+var S={places:[],items:[],trips:[]};
+var curTrip=null, curPlace=null, editingTrip=null, editingPlace=null;
+var fbRef=null, fbApplying=false;
+var wrapDecisions={}; // itemId -> "leave"|"take"
+
+/* ============ أدوات ============ */
+function $(s){return document.querySelector(s)}
+function $all(s){return document.querySelectorAll(s)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function now(){return Date.now()}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show")},2100)}
+/* تطبيع عربي للمطابقة الذكية: أ/إ/آ→ا ، ة→ه ، ى→ي ، شيل التشكيل والمسافات الزيادة */
+function norm(s){
+  return String(s||"").replace(/[\u064B-\u0652]/g,"")
+    .replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي")
+    .replace(/\s+/g," ").trim().toLowerCase();
+}
+function alive(arr){return arr.filter(function(x){return !x.deleted})}
+
+/* ============ تخزين ============ */
+function load(){
+  try{var d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&typeof d==="object"){S.places=d.places||[];S.items=d.items||[];S.trips=d.trips||[];}}catch(e){}
+}
+function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){toast("مساحة التخزين ممتلئة")}}
+function save(push){
+  persist();
+  if(push&&fbRef&&!fbApplying){try{fbRef.set(S)}catch(e){}}
+  renderAll();
+}
+function seed(){
+  if(S.places.length)return;
+  S.places.push({id:uid(),name:"الشاليه",emoji:"🏖️",color:"#4fb3a9",updatedAt:now(),deleted:false});
+  S.places.push({id:uid(),name:"البيت",emoji:"🏠",color:"#e8a94f",updatedAt:now()+1,deleted:false});
+  persist();
+}
+
+/* ============ مطابقة المخزون ============ */
+function placeItems(placeId){return alive(S.items).filter(function(i){return i.placeId===placeId})}
+function inPlace(name,placeId){
+  var n=norm(name); if(!n)return null;
+  var list=placeItems(placeId);
+  for(var i=0;i<list.length;i++){
+    var pn=norm(list[i].name);
+    if(pn===n||pn.indexOf(n)>-1||n.indexOf(pn)>-1)return list[i];
+  }
+  return null;
+}
+
+/* ============ تنقّل ============ */
+function show(view){
+  $("#vTrips").style.display = view==="trips"?"":"none";
+  $("#vTrip").style.display  = view==="trip"?"":"none";
+  $("#vPlaces").style.display= view==="places"?"":"none";
+  $("#vPlace").style.display = view==="place"?"":"none";
+  $all(".tab").forEach(function(t){
+    var on = (view==="trips"||view==="trip") ? t.getAttribute("data-tab")==="trips" : t.getAttribute("data-tab")==="places";
+    t.classList.toggle("on",on);
+  });
+  window.scrollTo(0,0);
+}
+
+/* ============ رسم: الرحلات ============ */
+function tripProgress(t){
+  var c=t.checklist||[]; if(!c.length)return 0;
+  var d=c.filter(function(x){return x.done}).length;
+  return Math.round(d/c.length*100);
+}
+function placeName(id){var p=S.places.find(function(x){return x.id===id});return p?p.name:"—"}
+function placeEmoji(id){var p=S.places.find(function(x){return x.id===id});return p?p.emoji:"📍"}
+function renderTrips(){
+  var list=alive(S.trips).sort(function(a,b){return (a.status==="open"?0:1)-(b.status==="open"?0:1)||(b.updatedAt||0)-(a.updatedAt||0)});
+  var el=$("#tripsList");
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="em">🧳</div><h3>لسه مفيش رحلات</h3><p>اعمل رحلة جديدة، جهّز شنطتك من القوالب،<br>والبرنامج هيفكّرك بالحاجات اللي سايبها هناك.</p></div>';
+    return;
+  }
+  el.innerHTML=list.map(function(t){
+    var pct=tripProgress(t), closed=t.status==="closed";
+    var cnt=(t.checklist||[]).length, done=(t.checklist||[]).filter(function(x){return x.done}).length;
+    return '<div class="trip'+(closed?' closed':'')+'" data-trip="'+t.id+'">'+
+      '<div class="trip-top">'+
+        '<div class="trip-emo">'+esc(placeEmoji(t.placeId))+'</div>'+
+        '<div class="trip-tt"><b>'+esc(t.title)+'</b><span>'+esc(placeName(t.placeId))+(t.date?(' · '+esc(t.date)):'')+'</span></div>'+
+        '<div class="trip-pct">'+(closed?'مقفولة':pct+'%')+'</div>'+
+      '</div>'+
+      '<div class="strap"><div class="strap-fill" style="width:'+pct+'%"></div><div class="strap-buckle" style="right:calc('+pct+'% - 5px)"></div></div>'+
+      '<div class="trip-meta"><span class="pill'+(done===cnt&&cnt?' done':'')+'">🎒 '+done+' / '+cnt+' اتلمّوا</span>'+(closed?'<span class="pill">🏁 اتقفلت</span>':'')+'</div>'+
+    '</div>';
+  }).join("");
+}
+
+/* ============ رسم: رحلة واحدة ============ */
+function catOrder(c){var o={"⚡":1,"🪥":2,"👕":3,"💊":4,"🏖️":5,"💼":6,"🥤":7,"✋":8};return o[c]||9}
+function renderTrip(){
+  var t=curTrip; if(!t)return;
+  $("#tName").textContent=t.title;
+  $("#tSub").textContent=placeEmoji(t.placeId)+" "+placeName(t.placeId)+(t.date?(" · "+t.date):"");
+  var pct=tripProgress(t);
+  $("#tFill").style.width=pct+"%";
+  $("#tBuckle").style.right="calc("+pct+"% - 5px)";
+  var c=t.checklist||[], done=c.filter(function(x){return x.done}).length;
+  var thereCnt=c.filter(function(x){return inPlace(x.name,t.placeId)}).length;
+  $("#tMeta").innerHTML='<span class="pill'+(done===c.length&&c.length?' done':'')+'">🎒 '+done+' / '+c.length+'</span>'+
+    (thereCnt?'<span class="pill" style="color:var(--sea)">📦 '+thereCnt+' موجودين هناك خلاص</span>':'');
+  // اقتراحات سريعة: من مخزن الوجهة + أساسيات
+  var sugg=[]; placeItems(t.placeId).slice(0,4).forEach(function(i){sugg.push(i.name)});
+  ["شاحن الموبايل","فرشة ومعجون","مايوه","أدوية شخصية"].forEach(function(s){if(sugg.indexOf(s)===-1)sugg.push(s)});
+  $("#tChips").innerHTML=sugg.slice(0,7).map(function(s){return '<button class="qchip" data-q="'+esc(s)+'">＋ '+esc(s)+'</button>'}).join("");
+  // القايمة
+  var el=$("#tList");
+  if(!c.length){el.innerHTML='<div class="empty" style="padding:28px 14px"><div class="em">🎒</div><h3>الشنطة فاضية</h3><p>ضيف حاجات بالخانة فوق أو من القوالب الجاهزة.</p></div>';}
+  else{
+    var sorted=c.slice().sort(function(a,b){return (a.done?1:0)-(b.done?1:0)||catOrder(a.cat)-catOrder(b.cat)});
+    el.innerHTML=sorted.map(function(x){
+      var there=inPlace(x.name,t.placeId);
+      return '<div class="chk'+(x.done?' done':'')+'" data-chk="'+x.id+'">'+
+        '<div class="box">'+(x.done?'✓':'')+'</div>'+
+        '<div class="ct"><b>'+esc(x.name)+'</b>'+(there?'<span class="there">📦 موجودة في '+esc(placeName(t.placeId))+' — متشلهاش</span>':'')+'</div>'+
+        '<button class="del" data-delchk="'+x.id+'">✕</button>'+
+      '</div>';
+    }).join("");
+  }
+  var closed=t.status==="closed";
+  $("#tWrap").style.display=closed?"none":"";
+  $("#tQuick").disabled=closed; $("#tQuickAdd").disabled=closed;
+}
+
+/* ============ رسم: الأماكن ============ */
+function renderPlaces(){
+  var list=alive(S.places);
+  var el=$("#placesGrid");
+  if(!list.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="em">📦</div><h3>ضيف أول مكان</h3><p>الشاليه، بيت العيلة، العزبة…</p></div>';return;}
+  el.innerHTML=list.map(function(p,i){
+    var cnt=placeItems(p.id).length;
+    return '<div class="place" style="--pc:'+esc(p.color||PLACE_COLORS[i%PLACE_COLORS.length])+'" data-place="'+p.id+'">'+
+      '<div class="pe">'+esc(p.emoji||"📍")+'</div><b>'+esc(p.name)+'</b><span>'+cnt+' حاجة متسابة</span></div>';
+  }).join("");
+}
+function renderPlace(){
+  var p=curPlace; if(!p)return;
+  $("#pName").textContent=(p.emoji||"📍")+" "+p.name;
+  var list=placeItems(p.id).sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});
+  $("#pSub").textContent=list.length+" حاجة متسابة هنا";
+  var el=$("#pList");
+  if(!list.length){el.innerHTML='<div class="empty" style="padding:30px 14px"><div class="em">🕊️</div><h3>مفيش حاجة متسجلة هنا</h3><p>سجّل اللي بتسيبه — ولما تجهّز رحلة للمكان ده<br>هنفكّرك إنهم مستنيينك.</p></div>';return;}
+  el.innerHTML=list.map(function(i){
+    return '<div class="row"><div class="re">'+esc(i.emoji||"📦")+'</div>'+
+      '<div class="rt"><b>'+esc(i.name)+'</b>'+(i.note?'<span>'+esc(i.note)+'</span>':'')+'</div>'+
+      (i.qty>1?'<span class="qty">×'+i.qty+'</span>':'')+
+      '<button class="rbtn take" title="رجّعتها معايا" data-take="'+i.id+'">🎒</button>'+
+      '<button class="rbtn" title="حذف" data-delitem="'+i.id+'">🗑️</button>'+
+    '</div>';
+  }).join("");
+}
+function renderAll(){renderTrips();renderPlaces();if(curTrip)renderTrip();if(curPlace)renderPlace()}
+
+/* ============ عمليات: رحلات ============ */
+function fillPlaceSelect(){
+  $("#fTripPlace").innerHTML=alive(S.places).map(function(p){return '<option value="'+p.id+'">'+esc(p.emoji+" "+p.name)+'</option>'}).join("");
+}
+function openTripSheet(t){
+  editingTrip=t||null;
+  fillPlaceSelect();
+  $("#ovTripTitle").textContent=t?"تعديل الرحلة":"رحلة جديدة";
+  $("#fTripName").value=t?t.title:"";
+  if(t)$("#fTripPlace").value=t.placeId;
+  $("#fTripDate").value=t&&t.date?t.date:"";
+  openOv("#ovTrip");
+}
+function saveTrip(){
+  var name=$("#fTripName").value.trim();
+  if(!name){toast("اكتب اسم الرحلة");return}
+  if(!alive(S.places).length){toast("ضيف مكان الأول من تبويب المخازن");return}
+  var placeId=$("#fTripPlace").value, date=$("#fTripDate").value;
+  if(editingTrip){
+    editingTrip.title=name;editingTrip.placeId=placeId;editingTrip.date=date;editingTrip.updatedAt=now();
+    toast("اتحفظ التعديل");
+  }else{
+    var t={id:uid(),title:name,placeId:placeId,date:date,status:"open",checklist:[],updatedAt:now(),deleted:false};
+    S.trips.push(t); curTrip=t; show("trip");
+    toast("الرحلة اتعملت — ابدأ لمّ الشنطة");
+  }
+  save(true); closeOv("#ovTrip");
+}
+function addChk(name,cat){
+  if(!curTrip||curTrip.status==="closed")return;
+  name=(name||"").trim(); if(!name)return;
+  var ex=(curTrip.checklist||[]).some(function(x){return norm(x.name)===norm(name)});
+  if(ex){toast("موجودة في الشنطة خلاص");return}
+  curTrip.checklist.push({id:uid(),name:name,cat:cat||"✋",done:false});
+  curTrip.updatedAt=now(); save(true);
+}
+
+/* القوائم الجاهزة (أكورديون + بحث + وضعين: شنطة/مخزن) */
+var tplSel={}, tplMode="trip";
+function tplBadgePlaceId(){return tplMode==="trip" ? (curTrip&&curTrip.placeId) : (curPlace&&curPlace.id)}
+function openTpl(mode){
+  tplMode=mode||"trip"; tplSel={};
+  $("#tplTitle").textContent = tplMode==="trip" ? "قوائم جاهزة — للشنطة" : "قوائم جاهزة — للمخزن";
+  $("#tplHint").textContent = tplMode==="trip"
+    ? "افتح أي قسم ودوس على الحاجات اللي عايزها. اللي عليها ✓هناك موجودة في مخزن الوجهة خلاص."
+    : "علّم على الحاجات اللي سايبها في المكان ده وهتتسجل في مخزنه مرة واحدة.";
+  $("#tplSearch").value="";
+  buildTpl("");
+  syncTplCount();
+  openOv("#ovTpl");
+}
+function buildTpl(q){
+  q=norm(q||"");
+  var pid=tplBadgePlaceId();
+  var html=TEMPLATES.map(function(g,gi){
+    var items=g.items.map(function(it,ii){
+      if(q && norm(it).indexOf(q)===-1) return "";
+      var there = tplMode==="trip" && pid && inPlace(it,pid);
+      var k=gi+"-"+ii;
+      return '<span class="titem'+(tplSel[k]?' sel':'')+'" data-ti="'+k+'">'+esc(it)+(there?' <b style="color:var(--sea)">✓هناك</b>':'')+'</span>';
+    }).join("");
+    if(q && !items) return "";
+    var open = q ? " open" : "";
+    return '<div class="tpl'+open+'"><div class="tpl-h" data-tg="'+gi+'">'+
+      '<span style="font-size:19px">'+g.e+'</span><b>'+esc(g.n)+'</b>'+
+      '<span class="cnt">'+g.items.length+'</span>'+
+      '<button class="tpl-all" data-all="'+gi+'">✓ الكل</button>'+
+      '<span class="chev">◀</span></div>'+
+      '<div class="tpl-items">'+items+'</div></div>';
+  }).join("");
+  $("#tplList").innerHTML=html || '<div class="empty" style="padding:24px"><div class="em">🔍</div><h3>مفيش نتايج</h3><p>جرّب كلمة تانية — أو اقفل البحث وضيفها يدوي من الخانة السريعة.</p></div>';
+}
+function syncTplCount(){
+  var n=Object.keys(tplSel).filter(function(k){return tplSel[k]}).length;
+  $("#tplAdd").textContent="ضيف المحدد ("+n+")";
+}
+function tplCommit(){
+  var added=0;
+  Object.keys(tplSel).forEach(function(k){
+    if(!tplSel[k])return;
+    var p=k.split("-"), g=TEMPLATES[+p[0]], it=g.items[+p[1]];
+    if(!g||it==null)return;
+    if(tplMode==="trip"){
+      if(!curTrip)return;
+      var ex=(curTrip.checklist||[]).some(function(x){return norm(x.name)===norm(it)});
+      if(!ex){curTrip.checklist.push({id:uid(),name:it,cat:g.e,done:false});added++;}
+    }else{
+      if(!curPlace)return;
+      var m=inPlace(it,curPlace.id);
+      if(m){m.qty=(m.qty||1)+1;m.updatedAt=now();}
+      else S.items.push({id:uid(),placeId:curPlace.id,name:it,qty:1,emoji:g.e,updatedAt:now(),deleted:false});
+      added++;
+    }
+  });
+  if(added){
+    if(tplMode==="trip")curTrip.updatedAt=now();
+    save(true);
+    toast("اتضاف "+added+" حاجة "+(tplMode==="trip"?"للشنطة 🎒":"للمخزن 📦"));
+  }
+  closeOv("#ovTpl");
+}
+
+/* تصفية المغادرة */
+function openWrap(){
+  var t=curTrip; if(!t)return;
+  var c=(t.checklist||[]).filter(function(x){return x.done});
+  if(!c.length){toast("مفيش حاجات متعلّمة إنها اتلمّت");return}
+  wrapDecisions={};
+  c.forEach(function(x){wrapDecisions[x.id]="take"});
+  $("#wPlaceName").textContent=placeName(t.placeId);
+  $("#wList").innerHTML=c.map(function(x){
+    return '<div class="wrow"><b>'+esc(x.name)+'</b>'+
+      '<div class="wseg" data-w="'+x.id+'">'+
+        '<button data-dec="take" class="a">🎒 راجعة معايا</button>'+
+        '<button data-dec="leave">📦 سايبها هناك</button>'+
+      '</div></div>';
+  }).join("");
+  openOv("#ovWrap");
+}
+function wrapCommit(){
+  var t=curTrip; var left=0;
+  Object.keys(wrapDecisions).forEach(function(id){
+    if(wrapDecisions[id]!=="leave")return;
+    var x=(t.checklist||[]).find(function(c){return c.id===id}); if(!x)return;
+    if(!inPlace(x.name,t.placeId)){
+      S.items.push({id:uid(),placeId:t.placeId,name:x.name,qty:1,emoji:"📦",note:"من رحلة: "+t.title,updatedAt:now(),deleted:false});
+    }
+    left++;
+  });
+  t.status="closed"; t.updatedAt=now();
+  save(true); closeOv("#ovWrap");
+  toast(left?("اتسجل "+left+" حاجة في مخزن "+placeName(t.placeId)+" 📦"):"الرحلة اتقفلت 🏁");
+  renderTrip();
+}
+
+/* ============ عمليات: أماكن ============ */
+function openPlaceSheet(p){
+  editingPlace=p||null;
+  $("#ovPlaceTitle").textContent=p?"تعديل المكان":"مكان جديد";
+  $("#fPlaceName").value=p?p.name:"";
+  $("#fPlaceEmoji").value=p?p.emoji:"";
+  $("#fPlaceDel").style.display=p?"":"none";
+  $("#placeEmos").innerHTML=PLACE_EMOS.map(function(e){return '<button class="eq" data-pe="'+e+'">'+e+'</button>'}).join("");
+  openOv("#ovPlace");
+}
+function savePlace(){
+  var name=$("#fPlaceName").value.trim();
+  if(!name){toast("اكتب اسم المكان");return}
+  if(editingPlace){
+    editingPlace.name=name;editingPlace.emoji=$("#fPlaceEmoji").value.trim()||"📍";editingPlace.updatedAt=now();
+  }else{
+    S.places.push({id:uid(),name:name,emoji:$("#fPlaceEmoji").value.trim()||"📍",color:PLACE_COLORS[alive(S.places).length%PLACE_COLORS.length],updatedAt:now(),deleted:false});
+  }
+  save(true); closeOv("#ovPlace"); toast("اتحفظ");
+}
+function addItem(placeId,name){
+  name=(name||"").trim(); if(!name)return;
+  var ex=inPlace(name,placeId);
+  if(ex){ex.qty=(ex.qty||1)+1;ex.updatedAt=now();save(true);toast("زوّدنا العدد ×"+ex.qty);return}
+  S.items.push({id:uid(),placeId:placeId,name:name,qty:1,emoji:"📦",updatedAt:now(),deleted:false});
+  save(true); toast("اتسجلت 📦");
+}
+
+/* ============ Overlays ============ */
+function openOv(s){$(s).classList.add("open");document.body.style.overflow="hidden"}
+function closeOv(s){$(s).classList.remove("open");document.body.style.overflow=""}
+$all(".overlay").forEach(function(ov){ov.addEventListener("click",function(e){if(e.target===ov)closeOv("#"+ov.id)})});
+$all("[data-close]").forEach(function(b){b.addEventListener("click",function(){closeOv("#"+b.closest(".overlay").id)})});
+
+/* ============ نسخ احتياطي ============ */
+function exportData(){
+  var blob=new Blob([JSON.stringify({app:"shanta",exportedAt:new Date().toISOString(),data:S},null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="شنطتي-نسخة-"+new Date().toISOString().slice(0,10)+".json";a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href)},900);toast("اتصدّرت");
+}
+function mergeColl(mine,theirs){
+  var map={};mine.forEach(function(x){map[x.id]=x});
+  theirs.forEach(function(x){if(!x||!x.id)return;if(!map[x.id]||(x.updatedAt||0)>(map[x.id].updatedAt||0))map[x.id]=x});
+  return Object.keys(map).map(function(k){return map[k]});
+}
+function importData(file){
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var d=JSON.parse(r.result); var data=d.data||d;
+      S.places=mergeColl(S.places,data.places||[]);
+      S.items=mergeColl(S.items,data.items||[]);
+      S.trips=mergeColl(S.trips,data.trips||[]);
+      save(true);toast("اتستوردت");closeOv("#ovSet");
+    }catch(e){toast("الملف مش صحيح")}
+  };
+  r.readAsText(file);
+}
+function clearAll(){
+  if(!confirm("هيتمسح كل حاجة من الجهاز. متأكد؟"))return;
+  S={places:[],items:[],trips:[]};persist();
+  if(fbRef){try{fbRef.set(S)}catch(e){}}
+  curTrip=null;curPlace=null;show("trips");renderAll();toast("اتمسح");closeOv("#ovSet");
+}
+
+/* ============ Firebase ============ */
+function setDot(st){$("#sdot").className="sdot"+(st?(" "+st):"")}
+function loadScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function initFB(cfg){
+  return loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js")
+  .then(function(){return loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js")})
+  .then(function(){
+    if(firebase.apps.length)firebase.app().delete().catch(function(){});
+    firebase.initializeApp(cfg);
+    fbRef=firebase.database().ref("shanta");
+    fbRef.on("value",function(snap){
+      var cloud=snap.val();
+      if(!cloud){if(S.places.length||S.trips.length||S.items.length)fbRef.set(S);return}
+      fbApplying=true;
+      S.places=mergeColl(S.places,cloud.places||[]);
+      S.items=mergeColl(S.items,cloud.items||[]);
+      S.trips=mergeColl(S.trips,cloud.trips||[]);
+      persist();renderAll();fbApplying=false;
+    },function(err){setDot("err");$("#fbStatus").textContent="خطأ اتصال: "+(err.code||"")});
+    setDot("on");$("#fbStatus").textContent="مفعّلة ومتصلة ✓";
+  });
+}
+function enableFB(){
+  var raw=$("#fbConfig").value.trim();if(!raw){toast("الصق الإعدادات الأول");return}
+  var cfg;try{cfg=JSON.parse(raw)}catch(e){
+    try{cfg=JSON.parse(raw.replace(/(\w+)\s*:/g,'"$1":').replace(/'/g,'"').replace(/,\s*}/g,"}"))}catch(e2){toast("صيغة الإعدادات غلط");return}
+  }
+  if(!cfg.databaseURL){toast("لازم databaseURL");return}
+  $("#fbStatus").textContent="جاري الاتصال…";
+  initFB(cfg).then(function(){
+    localStorage.setItem(LS_FB,JSON.stringify(cfg));localStorage.setItem(LS_FBON,"1");
+    $("#fbToggle").classList.add("on");toast("المزامنة اتفعّلت ☁️");
+  }).catch(function(e){setDot("err");$("#fbStatus").textContent="فشل: "+(e.message||e)});
+}
+function disableFB(){
+  try{if(fbRef)fbRef.off()}catch(e){}
+  try{if(window.firebase&&firebase.apps.length)firebase.app().delete()}catch(e){}
+  fbRef=null;localStorage.removeItem(LS_FBON);
+  $("#fbToggle").classList.remove("on");setDot("");$("#fbStatus").textContent="غير مفعّلة";toast("المزامنة اتوقفت");
+}
+function restoreFB(){
+  var raw=localStorage.getItem(LS_FB);
+  if(raw){try{$("#fbConfig").value=JSON.stringify(JSON.parse(raw),null,2)}catch(e){}}
+  if(localStorage.getItem(LS_FBON)==="1"&&raw){
+    try{initFB(JSON.parse(raw)).then(function(){$("#fbToggle").classList.add("on")}).catch(function(){setDot("err")})}catch(e){}
+  }
+}
+
+/* ============ أحداث ============ */
+$all(".tab").forEach(function(t){t.addEventListener("click",function(){show(t.getAttribute("data-tab"))})});
+$all(".back").forEach(function(b){b.addEventListener("click",function(){curTrip=null;curPlace=null;show(b.getAttribute("data-goto"))})});
+$("#btnSet").addEventListener("click",function(){openOv("#ovSet")});
+$("#btnNewTrip").addEventListener("click",function(){openTripSheet(null)});
+$("#btnNewPlace").addEventListener("click",function(){openPlaceSheet(null)});
+$("#fTripSave").addEventListener("click",saveTrip);
+$("#fPlaceSave").addEventListener("click",savePlace);
+$("#fPlaceDel").addEventListener("click",function(){
+  if(!editingPlace)return;
+  if(!confirm("حذف المكان وكل الحاجات المتسجلة فيه؟"))return;
+  editingPlace.deleted=true;editingPlace.updatedAt=now();
+  placeItems(editingPlace.id).forEach(function(i){i.deleted=true;i.updatedAt=now()});
+  curPlace=null;save(true);closeOv("#ovPlace");show("places");toast("اتمسح");
+});
+$("#ovPlace").addEventListener("click",function(e){var b=e.target.closest("[data-pe]");if(b)$("#fPlaceEmoji").value=b.getAttribute("data-pe")});
+
+$("#tripsList").addEventListener("click",function(e){
+  var c=e.target.closest("[data-trip]");if(!c)return;
+  curTrip=S.trips.find(function(t){return t.id===c.getAttribute("data-trip")});
+  if(curTrip){renderTrip();show("trip")}
+});
+$("#tEdit").addEventListener("click",function(){if(curTrip)openTripSheet(curTrip)});
+$("#tQuickAdd").addEventListener("click",function(){addChk($("#tQuick").value);$("#tQuick").value="";$("#tQuick").focus()});
+$("#tQuick").addEventListener("keydown",function(e){if(e.key==="Enter"){addChk(this.value);this.value=""}});
+$("#tChips").addEventListener("click",function(e){var b=e.target.closest("[data-q]");if(b)addChk(b.getAttribute("data-q"))});
+$("#tTpl").addEventListener("click",function(){if(curTrip.status!=="closed")openTpl("trip")});
+$("#tList").addEventListener("click",function(e){
+  var del=e.target.closest("[data-delchk]");
+  if(del){
+    var id=del.getAttribute("data-delchk");
+    curTrip.checklist=curTrip.checklist.filter(function(x){return x.id!==id});
+    curTrip.updatedAt=now();save(true);return;
+  }
+  var c=e.target.closest("[data-chk]");if(!c||curTrip.status==="closed")return;
+  var x=curTrip.checklist.find(function(i){return i.id===c.getAttribute("data-chk")});
+  if(x){x.done=!x.done;curTrip.updatedAt=now();save(true)}
+});
+$("#tWrap").addEventListener("click",openWrap);
+$("#tDelete").addEventListener("click",function(){
+  if(!curTrip)return;
+  if(!confirm("حذف الرحلة دي؟"))return;
+  curTrip.deleted=true;curTrip.updatedAt=now();curTrip=null;
+  save(true);show("trips");toast("اتمسحت");
+});
+
+$("#ovTpl").addEventListener("click",function(e){
+  var all=e.target.closest("[data-all]");
+  if(all){
+    e.stopPropagation();
+    var gi=+all.getAttribute("data-all"), g=TEMPLATES[gi];
+    var every=g.items.every(function(_,ii){return tplSel[gi+"-"+ii]});
+    g.items.forEach(function(_,ii){tplSel[gi+"-"+ii]=!every});
+    buildTpl($("#tplSearch").value); syncTplCount();
+    // خلّي القسم مفتوح بعد "الكل"
+    var box=$("#tplList").children[gi]; if(box)box.classList.add("open");
+    return;
+  }
+  var it=e.target.closest("[data-ti]");
+  if(it){var k=it.getAttribute("data-ti");tplSel[k]=!tplSel[k];it.classList.toggle("sel",!!tplSel[k]);syncTplCount();return}
+  var h=e.target.closest("[data-tg]");
+  if(h){h.parentElement.classList.toggle("open")}
+});
+$("#tplSearch").addEventListener("input",function(){buildTpl(this.value)});
+$("#tplAdd").addEventListener("click",tplCommit);
+
+$("#wList").addEventListener("click",function(e){
+  var b=e.target.closest("[data-dec]");if(!b)return;
+  var seg=b.closest("[data-w]"),id=seg.getAttribute("data-w"),dec=b.getAttribute("data-dec");
+  wrapDecisions[id]=dec;
+  seg.querySelectorAll("button").forEach(function(x){x.className=""});
+  b.className=dec==="leave"?"b":"a";
+});
+$("#wDone").addEventListener("click",wrapCommit);
+
+$("#placesGrid").addEventListener("click",function(e){
+  var c=e.target.closest("[data-place]");if(!c)return;
+  curPlace=S.places.find(function(p){return p.id===c.getAttribute("data-place")});
+  if(curPlace){renderPlace();show("place")}
+});
+$("#pEdit").addEventListener("click",function(){if(curPlace)openPlaceSheet(curPlace)});
+$("#pTpl").addEventListener("click",function(){if(curPlace)openTpl("place")});
+$("#pQuickAdd").addEventListener("click",function(){addItem(curPlace.id,$("#pQuick").value);$("#pQuick").value="";$("#pQuick").focus()});
+$("#pQuick").addEventListener("keydown",function(e){if(e.key==="Enter"){addItem(curPlace.id,this.value);this.value=""}});
+$("#pList").addEventListener("click",function(e){
+  var take=e.target.closest("[data-take]");
+  if(take){
+    var i=S.items.find(function(x){return x.id===take.getAttribute("data-take")});
+    if(i){
+      if((i.qty||1)>1){i.qty--;i.updatedAt=now();toast("خدت واحدة — فاضل ×"+i.qty)}
+      else{i.deleted=true;i.updatedAt=now();toast("رجّعتها معاك 🎒")}
+      save(true);
+    }
+    return;
+  }
+  var del=e.target.closest("[data-delitem]");
+  if(del){
+    var it=S.items.find(function(x){return x.id===del.getAttribute("data-delitem")});
+    if(it&&confirm("حذف \""+it.name+"\" من المخزن؟")){it.deleted=true;it.updatedAt=now();save(true)}
+  }
+});
+
+$("#btnExport").addEventListener("click",exportData);
+$("#btnImport").addEventListener("click",function(){$("#importFile").click()});
+$("#importFile").addEventListener("change",function(e){if(e.target.files[0])importData(e.target.files[0]);e.target.value=""});
+$("#btnClear").addEventListener("click",clearAll);
+$("#fbToggle").addEventListener("click",function(){if(this.classList.contains("on"))disableFB();else enableFB()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")$all(".overlay.open").forEach(function(o){closeOv("#"+o.id)})});
+
+
+/* ====== طباعة / PDF ====== */
+function catName(e){for(var i=0;i<TEMPLATES.length;i++)if(TEMPLATES[i].e===e)return TEMPLATES[i].n;return "حاجات تانية"}
+function printTrip(){
+  var t=curTrip;if(!t)return;
+  var c=t.checklist||[];if(!c.length){toast("الشنطة فاضية");return}
+  var groups={};
+  c.forEach(function(x){var g=catName(x.cat||"✋");if(!groups[g])groups[g]=[];groups[g].push(x)});
+  var html='<h1>🧳 '+esc(t.title)+'</h1><p class="psub">'+esc(placeName(t.placeId))+(t.date?(' · '+esc(t.date)):'')+' · '+c.length+' حاجة — شنطتي</p>';
+  Object.keys(groups).forEach(function(g){
+    html+='<div class="pgroup">'+esc(g)+'</div>';
+    groups[g].forEach(function(x){
+      var there=inPlace(x.name,t.placeId);
+      html+='<div class="prow'+(x.done?' pdone':'')+'"><span class="pbox">'+(x.done?'✓':'')+'</span><span>'+esc(x.name)+'</span>'+(there?'<span class="pnote">📦 موجودة هناك</span>':'')+'</div>';
+    });
+  });
+  html+='<div class="pfoot">اتطبعت من «شنطتي» — للحفظ PDF: اختار "حفظ كـ PDF" من شاشة الطباعة</div>';
+  $("#printArea").innerHTML=html;
+  window.print();
+}
+function printPlace(){
+  var p=curPlace;if(!p)return;
+  var list=placeItems(p.id);
+  if(!list.length){toast("المخزن فاضي");return}
+  var html='<h1>📦 مخزن '+esc(p.name)+'</h1><p class="psub">'+new Date().toLocaleDateString("ar-EG")+' · '+list.length+' حاجة متسابة — شنطتي</p>';
+  list.forEach(function(i){
+    html+='<div class="prow"><span class="pbox"></span><span>'+esc(i.name)+'</span>'+(i.note?'<span class="pnote">'+esc(i.note)+'</span>':'')+'<span class="pqty">×'+(i.qty||1)+'</span></div>';
+  });
+  html+='<div class="pfoot">اتطبعت من «شنطتي» — للحفظ PDF: اختار "حفظ كـ PDF" من شاشة الطباعة</div>';
+  $("#printArea").innerHTML=html;
+  window.print();
+}
+$("#tPrint").addEventListener("click",printTrip);
+$("#pPrint").addEventListener("click",printPlace);
+
+/* ============ إقلاع ============ */
+load();seed();renderAll();show("trips");restoreFB();
+</script>
+</body>
+</html>
