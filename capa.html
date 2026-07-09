@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام الدروس المستفادة وفحص ما قبل الإدخال</title>
+<style>
+:root{
+  --bg:#0a0e1a; --bg2:#0f1525; --card:#141b2e; --card2:#1a2236;
+  --border:#243049; --border2:#2e3c5a;
+  --primary:#3b82f6; --primary-d:#2563eb; --primary-l:#60a5fa;
+  --txt:#e6edf7; --txt2:#9fb0cc; --txt3:#6b7d9e;
+  --green:#22c55e; --red:#ef4444; --amber:#f59e0b; --cyan:#06b6d4; --purple:#a855f7;
+  --ok-bg:rgba(34,197,94,.12); --warn-bg:rgba(245,158,11,.12); --bad-bg:rgba(239,68,68,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:var(--primary)}
+
+input,select,textarea{background:var(--bg2);border:1px solid var(--border);color:var(--txt);padding:10px 12px;border-radius:10px;font-family:inherit;font-size:14px;outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+input::placeholder,textarea::placeholder{color:var(--txt3)}
+button{font-family:inherit;cursor:pointer;border:none;transition:.15s}
+.btn{background:var(--primary);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:600}
+.btn:hover{background:var(--primary-d)}
+.btn:active{transform:translateY(1px)}
+.btn-sec{background:var(--card2);color:var(--txt);border:1px solid var(--border2)}
+.btn-sec:hover{background:var(--border)}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{filter:brightness(1.1)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{filter:brightness(1.1)}
+.btn-amber{background:var(--amber);color:#fff}.btn-amber:hover{filter:brightness(1.1)}
+.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+.btn-xs{padding:4px 9px;font-size:11.5px;border-radius:7px}
+
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:12px 20px;flex-wrap:wrap}
+.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.topbar .brand .ic{font-size:24px}
+.topbar .spacer{flex:1}
+.topbar .sub{font-size:11.5px;color:var(--txt3);font-weight:400}
+
+.tabs{display:flex;gap:6px;padding:12px 20px 0;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.tab{padding:10px 16px;border-radius:10px 10px 0 0;color:var(--txt2);cursor:pointer;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;border:1px solid transparent;border-bottom:none}
+.tab:hover{color:var(--txt);background:var(--card)}
+.tab.active{background:var(--card);color:var(--primary-l);border-color:var(--border)}
+.tab .ic{font-size:16px}
+
+.main{padding:22px;max-width:1300px;margin:0 auto}
+.page{display:none;animation:fade .25s}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.page-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.page-head h2{font-size:21px;font-weight:700}
+.page-head .desc{color:var(--txt2);font-size:13px}
+.page-head .spacer{flex:1}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.card+.card{margin-top:16px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%;background:var(--primary)}
+.kpi.g::before{background:var(--green)}.kpi.r::before{background:var(--red)}.kpi.a::before{background:var(--amber)}.kpi.c::before{background:var(--cyan)}.kpi.p::before{background:var(--purple)}
+.kpi .lbl{font-size:12px;color:var(--txt2);margin-bottom:7px}
+.kpi .val{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.kpi .sub{font-size:11.5px;color:var(--txt3);margin-top:4px}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--bg2);color:var(--txt2);font-weight:600;padding:11px 12px;text-align:right;border-bottom:1px solid var(--border);font-size:12px}
+tbody td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--txt);vertical-align:top}
+tbody tr:hover{background:var(--card2)}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:center;font-variant-numeric:tabular-nums}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.b-ok{background:var(--ok-bg);color:var(--green)}
+.b-warn{background:var(--warn-bg);color:var(--amber)}
+.b-bad{background:var(--bad-bg);color:var(--red)}
+.b-info{background:rgba(59,130,246,.12);color:var(--primary-l)}
+.b-mut{background:var(--card2);color:var(--txt2)}
+.b-purple{background:rgba(168,85,247,.12);color:var(--purple)}
+
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input,.toolbar select{padding:8px 11px;font-size:13px}
+.search-box{position:relative;flex:1;min-width:160px;max-width:320px}
+.search-box input{width:100%;padding-right:34px}
+.search-box .ic{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--txt3)}
+
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;color:var(--txt2);margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%}
+.field textarea{resize:vertical;min-height:70px}
+.row-fields{display:grid;gap:13px}
+
+.empty{text-align:center;padding:46px 20px;color:var(--txt3)}
+.empty .ic{font-size:46px;margin-bottom:12px;opacity:.6}
+
+.modal-bg{position:fixed;inset:0;background:rgba(5,8,16,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:200;padding:18px}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal-h{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-h h3{font-size:16px;flex:1}
+.modal-h .x{background:var(--card2);border:1px solid var(--border);color:var(--txt2);width:30px;height:30px;border-radius:8px;font-size:16px}
+.modal-b{padding:20px}
+.modal-f{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;padding:12px 22px;border-radius:30px;font-weight:600;z-index:500;opacity:0;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.err{background:var(--red)}
+
+.divider{height:1px;background:var(--border);margin:16px 0}
+.hint{font-size:11.5px;color:var(--txt3);margin-top:4px}
+
+/* تنبيهات أعلى الصفحة */
+.alert-banner{border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:12px;border:1px solid}
+.alert-banner.warn{background:var(--warn-bg);border-color:rgba(245,158,11,.3)}
+.alert-banner.bad{background:var(--bad-bg);border-color:rgba(239,68,68,.3)}
+.alert-banner .ic{font-size:22px;flex-shrink:0}
+.alert-banner .t{font-weight:700;margin-bottom:3px}
+.alert-banner .d{font-size:12.5px;color:var(--txt2)}
+
+/* قائمة الفحص */
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--card2);cursor:pointer}
+.check-item:hover{border-color:var(--border2)}
+.check-item.done{border-color:rgba(34,197,94,.4);background:var(--ok-bg)}
+.check-box{width:24px;height:24px;border:2px solid var(--border2);border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:transparent;transition:.15s}
+.check-item.done .check-box{background:var(--green);border-color:var(--green);color:#fff}
+.check-item .c-body{flex:1}
+.check-item .c-title{font-weight:600;font-size:13.5px}
+.check-item .c-desc{font-size:12px;color:var(--txt2);margin-top:2px}
+.check-cat{font-size:12px;color:var(--primary-l);font-weight:700;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px}
+.check-cat:first-child{margin-top:0}
+
+.progress-bar{height:10px;background:var(--bg2);border-radius:20px;overflow:hidden;margin:10px 0}
+.progress-bar .fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));transition:.4s;border-radius:20px}
+
+.freq-pill{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:50%;font-weight:800;font-size:14px}
+.freq-1{background:var(--ok-bg);color:var(--green)}
+.freq-2{background:var(--warn-bg);color:var(--amber)}
+.freq-3{background:var(--bad-bg);color:var(--red)}
+
+.sol-box{background:var(--ok-bg);border-right:3px solid var(--green);padding:10px 12px;border-radius:8px;font-size:12.5px;color:var(--txt);margin-top:6px}
+
+details summary{cursor:pointer;font-weight:600;color:var(--primary-l);font-size:13px;padding:6px 0;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:'▸ ';color:var(--primary)}
+details[open] summary::before{content:'▾ '}
+
+@media(max-width:760px){
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .main{padding:14px}
+  table{font-size:12px}
+}
+@media print{
+  body{background:#fff;color:#000}
+  .topbar,.tabs,.toolbar,.btn,.no-print{display:none!important}
+  .page{display:block!important}
+  .card{border:1px solid #ccc;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="ic">🐔</span><div>نظام الدروس المستفادة وفحص ما قبل الإدخال<div class="sub">إدارة المشاكل المتكررة في المزارع — CAPA</div></div></div>
+  <div class="spacer"></div>
+  <button class="btn btn-sec btn-sm" onclick="exportData()">⬇️ نسخة احتياطية</button>
+  <button class="btn btn-sec btn-sm" onclick="document.getElementById('importFile').click()">⬆️ استرجاع</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-page="dashboard" onclick="go('dashboard')"><span class="ic">📊</span> اللوحة الرئيسية</div>
+  <div class="tab" data-page="checklist" onclick="go('checklist')"><span class="ic">✅</span> فحص ما قبل الإدخال</div>
+  <div class="tab" data-page="issues" data-page="issues" onclick="go('issues')"><span class="ic">⚠️</span> سجل المشاكل</div>
+  <div class="tab" data-page="farms" onclick="go('farms')"><span class="ic">🏠</span> المزارع</div>
+</div>
+
+<div class="main">
+
+  <!-- ========== اللوحة الرئيسية ========== -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-head">
+      <div><h2>📊 اللوحة الرئيسية</h2><div class="desc">نظرة عامة على المشاكل المتكررة والتنبيهات</div></div>
+    </div>
+
+    <div id="alertsArea"></div>
+
+    <div class="grid g4" style="margin-bottom:16px">
+      <div class="kpi"><div class="lbl">إجمالي المشاكل المسجلة</div><div class="val" id="kpiTotal">0</div></div>
+      <div class="kpi r"><div class="lbl">مشاكل متكررة (3+ مرات)</div><div class="val" id="kpiRepeat">0</div><div class="sub">تحتاج إجراء وقائي عاجل</div></div>
+      <div class="kpi a"><div class="lbl">مشاكل مفتوحة</div><div class="val" id="kpiOpen">0</div><div class="sub">لم يتم حلها بعد</div></div>
+      <div class="kpi g"><div class="lbl">مزارع مسجلة</div><div class="val" id="kpiFarms">0</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔁 أكثر المشاكل تكراراً</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>المشكلة</th><th>المزرعة</th><th>النوع</th><th class="num">عدد التكرار</th><th>آخر حدوث</th><th>الحل المقترح</th></tr></thead>
+          <tbody id="topIssuesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏠 المزارع حسب عدد المشاكل</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>المزرعة</th><th class="num">عدد المشاكل</th><th class="num">متكررة</th><th class="num">مفتوحة</th><th>الحالة</th></tr></thead>
+          <tbody id="farmStatsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== قائمة الفحص ========== -->
+  <div class="page" id="page-checklist">
+    <div class="page-head">
+      <div><h2>✅ فحص ما قبل إدخال الكتاكيت</h2><div class="desc">راجع كل البنود قبل وصول الدفعة الجديدة</div></div>
+      <div class="spacer"></div>
+      <button class="btn btn-sec btn-sm no-print" onclick="window.print()">🖨️ طباعة</button>
+    </div>
+
+    <div class="card">
+      <div class="row-fields g2" style="margin-bottom:14px">
+        <div class="field"><label>المزرعة / العنبر</label><select id="checkFarm"></select></div>
+        <div class="field"><label>تاريخ الإدخال المتوقع</label><input type="date" id="checkDate"></div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+        <strong id="checkProgressTxt">0 / 0 مكتمل</strong>
+        <div style="flex:1"></div>
+        <button class="btn btn-xs btn-sec no-print" onclick="resetCheck()">↺ تصفير</button>
+      </div>
+      <div class="progress-bar"><div class="fill" id="checkProgressFill" style="width:0%"></div></div>
+
+      <div id="checklistBody" style="margin-top:14px"></div>
+
+      <div class="divider"></div>
+      <div class="field"><label>ملاحظات إضافية على هذه الدفعة</label><textarea id="checkNotes" placeholder="أي ملاحظات خاصة بهذه المزرعة قبل الإدخال..."></textarea></div>
+    </div>
+
+    <div class="alert-banner warn" style="margin-top:16px" id="farmHistoryAlert" style="display:none"></div>
+  </div>
+
+  <!-- ========== سجل المشاكل ========== -->
+  <div class="page" id="page-issues">
+    <div class="page-head">
+      <div><h2>⚠️ سجل المشاكل</h2><div class="desc">كل مشكلة تحصل، سجّلها هنا — والنظام بيحسب التكرار تلقائياً</div></div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="openIssueModal()">+ تسجيل مشكلة</button>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box"><span class="ic">🔍</span><input type="text" id="issueSearch" placeholder="ابحث في المشاكل..." oninput="renderIssues()"></div>
+      <select id="filterFarm" onchange="renderIssues()"><option value="">كل المزارع</option></select>
+      <select id="filterType" onchange="renderIssues()">
+        <option value="">كل الأنواع</option>
+        <option>بيئية (تهوية/حرارة/رطوبة)</option>
+        <option>تطهير ونظافة</option>
+        <option>صحية ونفوق</option>
+        <option>تغذية ومياه</option>
+        <option>إدارية / تشغيلية</option>
+        <option>أخرى</option>
+      </select>
+      <select id="filterStatus" onchange="renderIssues()">
+        <option value="">كل الحالات</option>
+        <option value="open">مفتوحة</option>
+        <option value="resolved">تم حلها</option>
+      </select>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>المشكلة</th><th>المزرعة</th><th>النوع</th><th class="num">التكرار</th><th>آخر حدوث</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+        <tbody id="issuesBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== المزارع ========== -->
+  <div class="page" id="page-farms">
+    <div class="page-head">
+      <div><h2>🏠 المزارع والعنابر</h2><div class="desc">سجّل المزارع عشان تربط بيها المشاكل</div></div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="openFarmModal()">+ إضافة مزرعة</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>اسم المزرعة / العنبر</th><th>الموقع</th><th>المسؤول</th><th class="num">عدد المشاكل</th><th>إجراءات</th></tr></thead>
+        <tbody id="farmsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- مودال المشكلة -->
+<div class="modal-bg" id="issueModal">
+  <div class="modal">
+    <div class="modal-h"><h3 id="issueModalTitle">تسجيل مشكلة جديدة</h3><button class="x" onclick="closeModal('issueModal')">✕</button></div>
+    <div class="modal-b">
+      <input type="hidden" id="issueId">
+      <div class="row-fields g2">
+        <div class="field"><label>المزرعة / العنبر *</label><select id="iFarm"></select></div>
+        <div class="field"><label>نوع المشكلة *</label><select id="iType">
+          <option>بيئية (تهوية/حرارة/رطوبة)</option>
+          <option>تطهير ونظافة</option>
+          <option>صحية ونفوق</option>
+          <option>تغذية ومياه</option>
+          <option>إدارية / تشغيلية</option>
+          <option>أخرى</option>
+        </select></div>
+      </div>
+      <div class="field"><label>عنوان المشكلة * <span class="hint">(لو نفس المشكلة اتسجلت قبل كده هيزيد عداد التكرار تلقائياً)</span></label><input type="text" id="iTitle" placeholder="مثال: ارتفاع الرطوبة في الأسبوع الأول" list="issueSuggestions"><datalist id="issueSuggestions"></datalist></div>
+      <div class="field"><label>تفاصيل / السبب الجذري</label><textarea id="iDetails" placeholder="إيه اللي حصل بالظبط؟ وإيه السبب في رأيك؟"></textarea></div>
+      <div class="field"><label>الحل المقترح / الإجراء التصحيحي</label><textarea id="iSolution" placeholder="إزاي نمنع المشكلة دي تتكرر؟"></textarea></div>
+      <div class="row-fields g2">
+        <div class="field"><label>تاريخ الحدوث</label><input type="date" id="iDate"></div>
+        <div class="field"><label>الحالة</label><select id="iStatus"><option value="open">مفتوحة</option><option value="resolved">تم حلها</option></select></div>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-green" onclick="saveIssue()">💾 حفظ</button>
+      <button class="btn btn-sec" onclick="closeModal('issueModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- مودال المزرعة -->
+<div class="modal-bg" id="farmModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-h"><h3 id="farmModalTitle">إضافة مزرعة</h3><button class="x" onclick="closeModal('farmModal')">✕</button></div>
+    <div class="modal-b">
+      <input type="hidden" id="farmId">
+      <div class="field"><label>اسم المزرعة / العنبر *</label><input type="text" id="fName" placeholder="مثال: عنبر 3 - مزرعة الواحة"></div>
+      <div class="field"><label>الموقع</label><input type="text" id="fLocation" placeholder="مثال: طريق مصر إسكندرية الصحراوي"></div>
+      <div class="field"><label>المسؤول</label><input type="text" id="fManager" placeholder="اسم المشرف على العنبر"></div>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-green" onclick="saveFarm()">💾 حفظ</button>
+      <button class="btn btn-sec" onclick="closeModal('farmModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== التخزين =====
+const DB = {
+  farms: [], issues: [], checkState: {},
+  load(){ try{ const d=JSON.parse(localStorage.getItem('capaDB')); if(d){Object.assign(this,d)} }catch(e){} if(!this.farms.length) this.seed(); },
+  save(){ localStorage.setItem('capaDB', JSON.stringify({farms:this.farms,issues:this.issues,checkState:this.checkState})); },
+  seed(){
+    this.farms=[
+      {id:'f1',name:'عنبر 1 - المزرعة الرئيسية',location:'',manager:''},
+      {id:'f2',name:'عنبر 2 - المزرعة الرئيسية',location:'',manager:''}
+    ];
+    this.save();
+  }
+};
+
+// ===== بنود قائمة الفحص (قابلة للتعديل في الكود) =====
+const CHECKLIST = [
+  {cat:'التطهير والتنظيف', items:[
+    {t:'إزالة الفرشة القديمة بالكامل وتنظيف العنبر', d:'مفيش بقايا زرق أو ريش من الدفعة السابقة'},
+    {t:'غسيل وتطهير الأرضيات والحوائط', d:'باستخدام مطهر معتمد بالتركيز الصحيح'},
+    {t:'تطهير خطوط المياه (Water line cleaning)', d:'إزالة الـ biofilm بمحلول مناسب وشطف جيد'},
+    {t:'فترة راحة كافية للعنبر (Downtime)', d:'14 يوم على الأقل بعد التطهير قبل الإدخال'},
+    {t:'مكافحة القوارض والحشرات', d:'فحص محطات الطعوم والمصايد'},
+  ]},
+  {cat:'البيئة والتجهيز', items:[
+    {t:'تشغيل التدفئة قبل الإدخال بـ 24-48 ساعة (Pre-heating)', d:'الوصول لدرجة حرارة 32-34°م على مستوى الكتاكيت'},
+    {t:'معايرة أجهزة قياس الحرارة والرطوبة', d:'التأكد إنها بتقرأ صح'},
+    {t:'فحص نظام التهوية وعمل المراوح', d:'مفيش مراوح متعطلة أو تيارات هواء على الكتاكيت'},
+    {t:'فرش فرشة جديدة نظيفة وجافة', d:'بسماكة مناسبة وموزعة بالتساوي'},
+  ]},
+  {cat:'المياه والعلف', items:[
+    {t:'تجهيز السقايات والعلافات بالعدد الكافي', d:'موزعة بحيث يوصلها كل كتكوت في أول 3 متر'},
+    {t:'فحص ضغط ودرجة حرارة المياه', d:'مياه نظيفة بدرجة حرارة مناسبة (لا باردة جداً)'},
+    {t:'توفير علف البادئ (Starter) المناسب', d:'متاح وطازج قبل الوصول'},
+  ]},
+  {cat:'الاستعداد والتوثيق', items:[
+    {t:'التأكد من جاهزية الأدوية والفيتامينات الأساسية', d:'حسب البرنامج الوقائي'},
+    {t:'مراجعة سجل مشاكل هذه المزرعة السابقة', d:'الاطلاع على الدروس المستفادة من الدفعات القديمة'},
+    {t:'إبلاغ وتجهيز فريق العمل', d:'العمالة جاهزة في يوم الوصول'},
+  ]},
+];
+
+// ===== أدوات مساعدة =====
+function toast(msg,err){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); setTimeout(()=>t.className='toast',2500); }
+function uid(){ return 'x'+Date.now()+Math.random().toString(36).slice(2,6); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){ if(!d) return '-'; const dt=new Date(d); return dt.toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'}); }
+function daysAgo(d){ if(!d) return 999; return Math.floor((Date.now()-new Date(d))/86400000); }
+function farmName(id){ const f=DB.farms.find(x=>x.id===id); return f?f.name:'—'; }
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ===== التنقل =====
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelector('.tab[data-page="'+page+'"]').classList.add('active');
+  if(page==='dashboard') renderDashboard();
+  if(page==='checklist') renderChecklist();
+  if(page==='issues') renderIssues();
+  if(page==='farms') renderFarms();
+}
+
+// ===== ربط قوائم المزارع =====
+function fillFarmSelects(){
+  const opts='<option value="">— اختر —</option>'+DB.farms.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('');
+  ['iFarm','checkFarm'].forEach(id=>{ const el=document.getElementById(id); const v=el.value; el.innerHTML=opts; el.value=v; });
+  const filterOpts='<option value="">كل المزارع</option>'+DB.farms.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('');
+  document.getElementById('filterFarm').innerHTML=filterOpts;
+  // اقتراحات المشاكل السابقة
+  const titles=[...new Set(DB.issues.map(i=>i.title))];
+  document.getElementById('issueSuggestions').innerHTML=titles.map(t=>`<option value="${esc(t)}">`).join('');
+}
+
+// ===== تجميع المشاكل المتكررة =====
+function groupedIssues(){
+  // نجمع حسب (المزرعة + عنوان المشكلة) لحساب التكرار
+  const map={};
+  DB.issues.forEach(i=>{
+    const key=i.farmId+'||'+i.title.trim().toLowerCase();
+    if(!map[key]) map[key]={farmId:i.farmId,title:i.title,type:i.type,count:0,lastDate:'',solution:'',status:'resolved',ids:[]};
+    const g=map[key];
+    g.count++;
+    g.ids.push(i.id);
+    if(i.date>g.lastDate){ g.lastDate=i.date; g.type=i.type; }
+    if(i.solution) g.solution=i.solution;
+    if(i.status==='open') g.status='open';
+  });
+  return Object.values(map).sort((a,b)=>b.count-a.count || (b.lastDate>a.lastDate?1:-1));
+}
+
+// ===== اللوحة الرئيسية =====
+function renderDashboard(){
+  const groups=groupedIssues();
+  document.getElementById('kpiTotal').textContent=DB.issues.length;
+  document.getElementById('kpiRepeat').textContent=groups.filter(g=>g.count>=3).length;
+  document.getElementById('kpiOpen').textContent=DB.issues.filter(i=>i.status==='open').length;
+  document.getElementById('kpiFarms').textContent=DB.farms.length;
+
+  // تنبيهات
+  let alerts='';
+  const repeated=groups.filter(g=>g.count>=3);
+  if(repeated.length){
+    alerts+=`<div class="alert-banner bad"><span class="ic">🚨</span><div><div class="t">${repeated.length} مشكلة متكررة تحتاج إجراء وقائي عاجل</div><div class="d">${repeated.slice(0,3).map(g=>`«${esc(g.title)}» في ${esc(farmName(g.farmId))} (${g.count} مرات)`).join(' • ')}</div></div></div>`;
+  }
+  const recentRepeat=groups.filter(g=>g.count>=2 && daysAgo(g.lastDate)<=60);
+  if(recentRepeat.length){
+    alerts+=`<div class="alert-banner warn"><span class="ic">⏰</span><div><div class="t">تذكير: مشاكل تكررت خلال آخر شهرين</div><div class="d">راجع الحلول المقترحة قبل الإدخال القادم — ${recentRepeat.length} مشكلة نشطة</div></div></div>`;
+  }
+  document.getElementById('alertsArea').innerHTML=alerts;
+
+  // أكثر المشاكل تكراراً
+  const tb=document.getElementById('topIssuesBody');
+  const top=groups.filter(g=>g.count>=2);
+  if(!top.length){ tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="ic">🎉</div>مفيش مشاكل متكررة لحد دلوقتي</div></td></tr>'; }
+  else tb.innerHTML=top.map(g=>{
+    const fc=g.count>=3?'freq-3':(g.count>=2?'freq-2':'freq-1');
+    return `<tr>
+      <td><strong>${esc(g.title)}</strong></td>
+      <td>${esc(farmName(g.farmId))}</td>
+      <td><span class="badge b-mut">${esc(g.type)}</span></td>
+      <td class="num"><span class="freq-pill ${fc}">${g.count}</span></td>
+      <td>${fmtDate(g.lastDate)}</td>
+      <td>${g.solution?`<div class="sol-box">💡 ${esc(g.solution)}</div>`:'<span class="badge b-warn">لا يوجد حل بعد</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  // إحصائيات المزارع
+  const fb=document.getElementById('farmStatsBody');
+  const stats=DB.farms.map(f=>{
+    const fi=DB.issues.filter(i=>i.farmId===f.id);
+    const fg=groups.filter(g=>g.farmId===f.id);
+    return {f, total:fi.length, repeat:fg.filter(g=>g.count>=2).length, open:fi.filter(i=>i.status==='open').length};
+  }).filter(s=>s.total>0).sort((a,b)=>b.total-a.total);
+  if(!stats.length){ fb.innerHTML='<tr><td colspan="5"><div class="empty"><div class="ic">📋</div>لسه مفيش مشاكل مسجلة</div></td></tr>'; }
+  else fb.innerHTML=stats.map(s=>{
+    let st='<span class="badge b-ok">جيدة</span>';
+    if(s.repeat>=2) st='<span class="badge b-bad">تحتاج متابعة</span>';
+    else if(s.repeat>=1||s.open>=1) st='<span class="badge b-warn">انتبه</span>';
+    return `<tr><td><strong>${esc(s.f.name)}</strong></td><td class="num">${s.total}</td><td class="num">${s.repeat}</td><td class="num">${s.open}</td><td>${st}</td></tr>`;
+  }).join('');
+}
+
+// ===== قائمة الفحص =====
+function renderChecklist(){
+  fillFarmSelects();
+  if(!document.getElementById('checkDate').value) document.getElementById('checkDate').value=today();
+  const body=document.getElementById('checklistBody');
+  const farmId=document.getElementById('checkFarm').value||'_general';
+  const state=DB.checkState[farmId]||{};
+  let html='', total=0, done=0;
+  CHECKLIST.forEach((cat,ci)=>{
+    html+=`<div class="check-cat">${cat.cat}</div>`;
+    cat.items.forEach((it,ii)=>{
+      const key=ci+'_'+ii; total++;
+      const isDone=state[key]; if(isDone) done++;
+      html+=`<div class="check-item ${isDone?'done':''}" onclick="toggleCheck('${key}')">
+        <div class="check-box">✓</div>
+        <div class="c-body"><div class="c-title">${esc(it.t)}</div><div class="c-desc">${esc(it.d)}</div></div>
+      </div>`;
+    });
+  });
+  body.innerHTML=html;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('checkProgressFill').style.width=pct+'%';
+  document.getElementById('checkProgressTxt').textContent=`${done} / ${total} مكتمل (${pct}%)`;
+  document.getElementById('checkNotes').value=state._notes||'';
+
+  // تنبيه بمشاكل المزرعة السابقة
+  const alert=document.getElementById('farmHistoryAlert');
+  if(document.getElementById('checkFarm').value){
+    const fg=groupedIssues().filter(g=>g.farmId===document.getElementById('checkFarm').value);
+    if(fg.length){
+      alert.style.display='flex';
+      alert.className='alert-banner warn';
+      alert.innerHTML=`<span class="ic">📌</span><div><div class="t">دروس مستفادة من هذه المزرعة (${fg.length} مشكلة سابقة)</div><div class="d">${fg.slice(0,5).map(g=>`«${esc(g.title)}» (${g.count}×)${g.solution?' → '+esc(g.solution):''}`).join('<br>')}</div></div>`;
+    } else { alert.style.display='none'; }
+  } else { alert.style.display='none'; }
+}
+document.getElementById('checkFarm')?.addEventListener('change',renderChecklist);
+document.getElementById('checkNotes')?.addEventListener('input',function(){
+  const farmId=document.getElementById('checkFarm').value||'_general';
+  DB.checkState[farmId]=DB.checkState[farmId]||{};
+  DB.checkState[farmId]._notes=this.value; DB.save();
+});
+
+function toggleCheck(key){
+  const farmId=document.getElementById('checkFarm').value||'_general';
+  DB.checkState[farmId]=DB.checkState[farmId]||{};
+  DB.checkState[farmId][key]=!DB.checkState[farmId][key];
+  DB.save(); renderChecklist();
+}
+function resetCheck(){
+  const farmId=document.getElementById('checkFarm').value||'_general';
+  const notes=(DB.checkState[farmId]||{})._notes;
+  DB.checkState[farmId]={_notes:notes}; DB.save(); renderChecklist(); toast('تم التصفير');
+}
+
+// ===== سجل المشاكل =====
+function renderIssues(){
+  const q=document.getElementById('issueSearch').value.toLowerCase();
+  const ff=document.getElementById('filterFarm').value;
+  const ft=document.getElementById('filterType').value;
+  const fs=document.getElementById('filterStatus').value;
+  let groups=groupedIssues();
+  groups=groups.filter(g=>{
+    if(ff && g.farmId!==ff) return false;
+    if(ft && g.type!==ft) return false;
+    if(fs && g.status!==fs) return false;
+    if(q && !g.title.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const tb=document.getElementById('issuesBody');
+  if(!groups.length){ tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="ic">📭</div>مفيش مشاكل — اضغط «تسجيل مشكلة»</div></td></tr>'; return; }
+  tb.innerHTML=groups.map(g=>{
+    const fc=g.count>=3?'freq-3':(g.count>=2?'freq-2':'freq-1');
+    const st=g.status==='open'?'<span class="badge b-warn">مفتوحة</span>':'<span class="badge b-ok">تم حلها</span>';
+    const sol=g.solution?`<details><summary>الحل المقترح</summary><div class="sol-box">${esc(g.solution)}</div></details>`:'';
+    const lastId=g.ids[g.ids.length-1];
+    return `<tr>
+      <td><strong>${esc(g.title)}</strong>${sol}</td>
+      <td>${esc(farmName(g.farmId))}</td>
+      <td><span class="badge b-mut">${esc(g.type)}</span></td>
+      <td class="num"><span class="freq-pill ${fc}">${g.count}</span></td>
+      <td>${fmtDate(g.lastDate)}<div class="hint">${daysAgo(g.lastDate)<999?'منذ '+daysAgo(g.lastDate)+' يوم':''}</div></td>
+      <td>${st}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-xs btn-sec" onclick="editIssue('${lastId}')">تعديل</button>
+        <button class="btn btn-xs btn-amber" onclick="addOccurrence('${g.farmId}','${esc(g.title).replace(/'/g,"")}','${esc(g.type)}')">+ حدثت تاني</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openIssueModal(){
+  fillFarmSelects();
+  document.getElementById('issueModalTitle').textContent='تسجيل مشكلة جديدة';
+  document.getElementById('issueId').value='';
+  document.getElementById('iFarm').value='';
+  document.getElementById('iType').selectedIndex=0;
+  document.getElementById('iTitle').value='';
+  document.getElementById('iDetails').value='';
+  document.getElementById('iSolution').value='';
+  document.getElementById('iDate').value=today();
+  document.getElementById('iStatus').value='open';
+  document.getElementById('issueModal').classList.add('show');
+}
+function addOccurrence(farmId,title,type){
+  openIssueModal();
+  document.getElementById('iFarm').value=farmId;
+  document.getElementById('iTitle').value=title;
+  document.getElementById('iType').value=type;
+  // جيب آخر حل مسجل لنفس المشكلة
+  const prev=DB.issues.filter(i=>i.farmId===farmId && i.title.trim().toLowerCase()===title.trim().toLowerCase()).pop();
+  if(prev){ document.getElementById('iSolution').value=prev.solution||''; }
+  toast('سجّل التكرار الجديد — العداد هيزيد تلقائياً');
+}
+function editIssue(id){
+  const i=DB.issues.find(x=>x.id===id); if(!i) return;
+  fillFarmSelects();
+  document.getElementById('issueModalTitle').textContent='تعديل مشكلة';
+  document.getElementById('issueId').value=i.id;
+  document.getElementById('iFarm').value=i.farmId;
+  document.getElementById('iType').value=i.type;
+  document.getElementById('iTitle').value=i.title;
+  document.getElementById('iDetails').value=i.details||'';
+  document.getElementById('iSolution').value=i.solution||'';
+  document.getElementById('iDate').value=i.date||today();
+  document.getElementById('iStatus').value=i.status||'open';
+  document.getElementById('issueModal').classList.add('show');
+}
+function saveIssue(){
+  const farmId=document.getElementById('iFarm').value;
+  const title=document.getElementById('iTitle').value.trim();
+  if(!farmId){ toast('اختر المزرعة',true); return; }
+  if(!title){ toast('اكتب عنوان المشكلة',true); return; }
+  const id=document.getElementById('issueId').value;
+  const data={
+    farmId, title,
+    type:document.getElementById('iType').value,
+    details:document.getElementById('iDetails').value.trim(),
+    solution:document.getElementById('iSolution').value.trim(),
+    date:document.getElementById('iDate').value||today(),
+    status:document.getElementById('iStatus').value
+  };
+  if(id){ const i=DB.issues.find(x=>x.id===id); Object.assign(i,data); }
+  else { DB.issues.push({id:uid(),...data}); }
+  DB.save(); closeModal('issueModal'); renderIssues(); toast('تم الحفظ ✓');
+}
+
+// ===== المزارع =====
+function renderFarms(){
+  const tb=document.getElementById('farmsBody');
+  if(!DB.farms.length){ tb.innerHTML='<tr><td colspan="5"><div class="empty"><div class="ic">🏠</div>أضف أول مزرعة</div></td></tr>'; return; }
+  tb.innerHTML=DB.farms.map(f=>{
+    const cnt=DB.issues.filter(i=>i.farmId===f.id).length;
+    return `<tr>
+      <td><strong>${esc(f.name)}</strong></td>
+      <td>${esc(f.location)||'-'}</td>
+      <td>${esc(f.manager)||'-'}</td>
+      <td class="num">${cnt}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-xs btn-sec" onclick="editFarm('${f.id}')">تعديل</button>
+        <button class="btn btn-xs btn-red" onclick="delFarm('${f.id}')">حذف</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openFarmModal(){
+  document.getElementById('farmModalTitle').textContent='إضافة مزرعة';
+  document.getElementById('farmId').value='';
+  document.getElementById('fName').value='';
+  document.getElementById('fLocation').value='';
+  document.getElementById('fManager').value='';
+  document.getElementById('farmModal').classList.add('show');
+}
+function editFarm(id){
+  const f=DB.farms.find(x=>x.id===id); if(!f) return;
+  document.getElementById('farmModalTitle').textContent='تعديل مزرعة';
+  document.getElementById('farmId').value=f.id;
+  document.getElementById('fName').value=f.name;
+  document.getElementById('fLocation').value=f.location||'';
+  document.getElementById('fManager').value=f.manager||'';
+  document.getElementById('farmModal').classList.add('show');
+}
+function saveFarm(){
+  const name=document.getElementById('fName').value.trim();
+  if(!name){ toast('اكتب اسم المزرعة',true); return; }
+  const id=document.getElementById('farmId').value;
+  const data={name, location:document.getElementById('fLocation').value.trim(), manager:document.getElementById('fManager').value.trim()};
+  if(id){ const f=DB.farms.find(x=>x.id===id); Object.assign(f,data); }
+  else { DB.farms.push({id:uid(),...data}); }
+  DB.save(); closeModal('farmModal'); renderFarms(); fillFarmSelects(); toast('تم الحفظ ✓');
+}
+function delFarm(id){
+  const cnt=DB.issues.filter(i=>i.farmId===id).length;
+  if(cnt && !confirm('المزرعة دي عليها '+cnt+' مشكلة مسجلة. متأكد من الحذف؟')) return;
+  if(!cnt && !confirm('متأكد من حذف المزرعة؟')) return;
+  DB.farms=DB.farms.filter(f=>f.id!==id);
+  DB.issues=DB.issues.filter(i=>i.farmId!==id);
+  DB.save(); renderFarms(); fillFarmSelects(); toast('تم الحذف');
+}
+
+// ===== المودال =====
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('show'); }));
+
+// ===== نسخ احتياطي =====
+function exportData(){
+  const blob=new Blob([JSON.stringify({farms:DB.farms,issues:DB.issues,checkState:DB.checkState},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='نسخة-احتياطية-'+today()+'.json'; a.click(); toast('تم التصدير ✓');
+}
+function importData(e){
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); DB.farms=d.farms||[]; DB.issues=d.issues||[]; DB.checkState=d.checkState||{}; DB.save(); go('dashboard'); toast('تم الاسترجاع ✓'); }catch(err){ toast('ملف غير صالح',true); } };
+  r.readAsText(file); e.target.value='';
+}
+
+// ===== بدء التشغيل =====
+DB.load();
+fillFarmSelects();
+renderDashboard();
+</script>
+</body>
+</html>

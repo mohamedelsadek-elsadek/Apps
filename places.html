@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>دليل الأماكن</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#111726; --panel2:#161d31; --line:#222b45;
+    --primary:#3b82f6; --primary-dim:#1e3a8a; --text:#e6ebf5; --muted:#8a96b3;
+    --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden}
+  #map{position:absolute; inset:0; z-index:1}
+  .leaflet-control-zoom a{background:var(--panel)!important; color:var(--text)!important; border-color:var(--line)!important}
+
+  .topbar{position:absolute; top:0; left:0; right:0; z-index:1000; display:flex; gap:8px; padding:10px; background:linear-gradient(180deg,rgba(10,14,26,.95),rgba(10,14,26,0)); pointer-events:none}
+  .topbar > *{pointer-events:auto}
+  .search{flex:1; display:flex; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:0 12px; box-shadow:0 4px 20px rgba(0,0,0,.4)}
+  .search input{flex:1; background:none; border:none; color:var(--text); padding:12px 8px; font-size:15px; outline:none; font-family:inherit}
+  .search svg{color:var(--muted); flex-shrink:0}
+  .icon-btn{background:var(--panel); border:1px solid var(--line); border-radius:12px; width:46px; height:46px; display:flex; align-items:center; justify-content:center; color:var(--text); cursor:pointer; box-shadow:0 4px 20px rgba(0,0,0,.4)}
+  .icon-btn:active{background:var(--panel2)}
+
+  .cats{position:absolute; top:66px; left:0; right:0; z-index:999; display:flex; gap:8px; padding:6px 10px; overflow-x:auto; scrollbar-width:none}
+  .cats::-webkit-scrollbar{display:none}
+  .chip{flex-shrink:0; display:flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:7px 13px; font-size:13px; color:var(--text); cursor:pointer; white-space:nowrap; box-shadow:0 2px 10px rgba(0,0,0,.3)}
+  .chip.active{background:var(--primary); border-color:var(--primary); color:#fff}
+  .chip.manage{border-style:dashed; color:var(--muted)}
+
+  .fab{position:absolute; bottom:84px; left:18px; z-index:1000; width:56px; height:56px; border-radius:50%; background:var(--primary); border:none; color:#fff; font-size:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 24px rgba(59,130,246,.5)}
+  .fab:active{transform:scale(.94)}
+
+  .list-toggle{position:absolute; bottom:0; left:0; right:0; z-index:1000; background:var(--panel); border-top:1px solid var(--line); border-radius:18px 18px 0 0; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; box-shadow:0 -4px 24px rgba(0,0,0,.4)}
+  .list-toggle .count{font-size:14px; color:var(--muted)}
+  .list-toggle .title{font-weight:700; font-size:15px}
+  .list-toggle .menu{background:var(--panel2); border:1px solid var(--line); border-radius:9px; width:36px; height:36px; display:flex; align-items:center; justify-content:center}
+
+  .sheet{position:absolute; bottom:0; left:0; right:0; z-index:1100; background:var(--panel); border-radius:18px 18px 0 0; max-height:78vh; transform:translateY(100%); transition:transform .28s ease; display:flex; flex-direction:column; box-shadow:0 -8px 40px rgba(0,0,0,.6)}
+  .sheet.open{transform:translateY(0)}
+  .sheet-head{padding:14px 16px 8px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line)}
+  .sheet-head h2{font-size:17px}
+  .grip{width:38px; height:4px; background:var(--line); border-radius:3px; margin:8px auto 0}
+  .list{overflow-y:auto; padding:8px}
+  .empty{text-align:center; color:var(--muted); padding:40px 20px; font-size:14px}
+
+  .card{background:var(--panel2); border:1px solid var(--line); border-radius:14px; padding:13px; margin-bottom:8px; display:flex; gap:12px; cursor:pointer}
+  .card:active{border-color:var(--primary)}
+  .card .emoji{width:42px; height:42px; border-radius:11px; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0}
+  .card .body{flex:1; min-width:0}
+  .card .name{font-weight:700; font-size:15px; margin-bottom:3px}
+  .card .name .dist{font-size:12px; color:var(--ok); font-weight:600; margin-right:8px}
+  .card .desc{font-size:13px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
+  .card .tag{display:inline-block; font-size:11px; color:var(--primary); background:var(--primary-dim); padding:2px 8px; border-radius:8px; margin-top:6px}
+
+  .modal{position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.6); display:none; align-items:flex-end; justify-content:center}
+  .modal.open{display:flex}
+  .modal-box{background:var(--panel); width:100%; max-width:520px; border-radius:18px 18px 0 0; max-height:90vh; overflow-y:auto; padding:18px 16px 26px}
+  .modal-box h2{font-size:18px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between}
+  .field{margin-bottom:13px}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px}
+  .field input,.field textarea,.field select{width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:12px; color:var(--text); font-size:15px; font-family:inherit; outline:none}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary)}
+  .field textarea{resize:vertical; min-height:70px}
+  .row{display:flex; gap:10px}
+  .row .field{flex:1}
+  .loc-btn{width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:12px; color:var(--text); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px}
+  .loc-btn:active{border-color:var(--primary)}
+  .loc-hint{font-size:12px; color:var(--muted); margin-top:6px; text-align:center}
+  .open-link-btn{margin-top:8px; background:var(--primary); color:#fff; border:none; border-radius:9px; padding:9px 14px; font-size:13px; font-family:inherit; cursor:pointer}
+  .loc-ok{color:var(--ok)}
+  .btns{display:flex; gap:10px; margin-top:18px}
+  .btn{flex:1; padding:13px; border-radius:11px; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit}
+  .btn-primary{background:var(--primary); color:#fff}
+  .btn-ghost{background:var(--panel2); color:var(--text); border:1px solid var(--line)}
+  .btn-danger{background:transparent; color:var(--danger); border:1px solid var(--danger)}
+  .x-btn{background:var(--panel2); border:1px solid var(--line); border-radius:9px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text)}
+
+  .detail-actions{display:flex; gap:10px; margin-top:6px}
+  .detail-meta{font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:10px}
+  .detail-desc{font-size:15px; line-height:1.8; margin-bottom:14px; white-space:pre-wrap}
+  .contact-row{display:flex; gap:6px; margin-bottom:7px; align-items:center}
+  .contact-row select{flex:0 0 38%; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:9px; color:var(--text); font-size:13px; font-family:inherit}
+  .contact-row input{flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:9px; color:var(--text); font-size:14px; font-family:inherit}
+  .contact-row .del{flex:0 0 34px; height:36px; background:transparent; border:1px solid var(--line); border-radius:9px; color:var(--danger); cursor:pointer}
+  .dcontacts{margin-bottom:14px}
+  .dc-item{display:flex; align-items:center; gap:10px; background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:11px 13px; margin-bottom:7px; text-decoration:none; color:var(--text)}
+  .dc-item .dc-ico{font-size:18px; flex-shrink:0}
+  .dc-item .dc-body{flex:1; min-width:0}
+  .dc-item .dc-type{font-size:11px; color:var(--muted)}
+  .dc-item .dc-val{font-size:14px; word-break:break-all}
+  .dc-item .dc-copy{flex-shrink:0; font-size:12px; color:var(--primary); background:var(--primary-dim); padding:5px 10px; border-radius:8px; border:none; cursor:pointer; font-family:inherit}
+  .sync-dot{position:absolute; top:18px; left:64px; z-index:1001; font-size:11px; color:var(--muted); background:var(--panel); padding:3px 9px; border-radius:8px; border:1px solid var(--line); display:none}
+
+  /* إدارة التصنيفات */
+  .cat-row{display:flex; align-items:center; gap:10px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px}
+  .cat-row .ce{font-size:20px; width:34px; text-align:center}
+  .cat-row .cn{flex:1; font-size:15px}
+  .cat-row .cd{width:18px; height:18px; border-radius:5px; border:1px solid #fff3}
+  .add-cat-form{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:flex-end}
+  .add-cat-form .field{margin:0}
+  .mini{flex:0 0 60px}
+  .grow{flex:1; min-width:120px}
+
+  /* النسخ الاحتياطي */
+  .backup-row{display:flex; align-items:center; justify-content:space-between; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin-bottom:8px}
+  .backup-row .bi{font-size:13px}
+  .backup-row .bd{font-size:11px; color:var(--muted); margin-top:2px}
+  .backup-row .ba{display:flex; gap:6px}
+  .sm-btn{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:6px 11px; font-size:12px; color:var(--text); cursor:pointer; font-family:inherit}
+  .sm-btn.danger{color:var(--danger); border-color:var(--danger)}
+  .menu-item{display:flex; align-items:center; gap:12px; padding:14px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; margin-bottom:8px; cursor:pointer; font-size:15px}
+  .menu-item:active{border-color:var(--primary)}
+  .menu-item .mi-emoji{font-size:20px}
+  .note{font-size:12px; color:var(--muted); line-height:1.7; margin-top:6px}
+</style>
+</head>
+<body>
+
+<div id="pinLock" style="position:fixed;inset:0;z-index:5000;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px">
+  <div style="font-size:42px">🔒</div>
+  <div style="font-size:17px;font-weight:700" id="pinTitle">أدخل الرقم السري</div>
+  <input id="pinInput" inputmode="numeric" maxlength="8" type="password" style="width:200px;text-align:center;font-size:22px;letter-spacing:6px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--text);outline:none">
+  <button id="pinBtn" style="width:200px;background:var(--primary);color:#fff;border:none;border-radius:12px;padding:13px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer">دخول</button>
+  <div id="pinMsg" style="font-size:13px;color:var(--danger);min-height:18px"></div>
+</div>
+
+<div id="map"></div>
+<div class="sync-dot" id="syncDot">… مزامنة</div>
+
+<div class="topbar">
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="searchInput" placeholder="ابحث عن مكان…">
+  </div>
+  <div class="icon-btn" id="locateBtn" title="موقعي">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+  </div>
+</div>
+
+<div class="cats" id="cats"></div>
+
+<button class="fab" id="addBtn">+</button>
+
+<div class="list-toggle">
+  <div style="display:flex;align-items:center;gap:12px" id="listToggle">
+    <span class="title">الأماكن</span>
+    <span class="count" id="listCount">0 مكان</span>
+  </div>
+  <div class="menu" id="menuBtn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+  </div>
+</div>
+
+<!-- قائمة الأماكن -->
+<div class="sheet" id="sheet">
+  <div class="grip"></div>
+  <div class="sheet-head">
+    <h2>الأماكن</h2>
+    <div class="x-btn" id="closeSheet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+
+<!-- مودال إضافة/تعديل مكان -->
+<div class="modal" id="formModal">
+  <div class="modal-box">
+    <h2><span id="formTitle">إضافة مكان</span><span class="x-btn" id="cancelForm">✕</span></h2>
+    <div class="field"><label>اسم المكان</label><input id="fName" placeholder="مثال: مطعم الأصيل"></div>
+    <div class="field">
+      <label>📷 صورة (اختياري)</label>
+      <div id="photoBox"></div>
+      <input type="file" id="fPhoto" accept="image/*" style="display:none">
+      <button class="loc-btn" id="pickPhoto" style="margin-top:4px">اختر صورة</button>
+    </div>
+    <div class="field"><label>التصنيف</label><select id="fCat"></select></div>
+    <div class="field"><label>الوصف</label><textarea id="fDesc" placeholder="تفاصيل عن المكان…"></textarea></div>
+    <div class="field">
+      <label>📞 وسائل التواصل والدفع</label>
+      <div id="contactsBox"></div>
+      <button class="loc-btn" id="addContact" style="margin-top:4px">➕ إضافة وسيلة (تليفون / محفظة / إنستا / حساب بنكي…)</button>
+    </div>
+    <div class="field">
+      <label>📲 الصق لينك جوجل مابس (من الواتساب)</label>
+      <input id="fLink" placeholder="الصق اللينك هنا وسيُستخرج الموقع تلقائيًا">
+      <div class="loc-hint" id="linkHint" style="text-align:right"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>خط العرض (lat)</label><input id="fLat" inputmode="decimal" placeholder="30.0444"></div>
+      <div class="field"><label>خط الطول (lng)</label><input id="fLng" inputmode="decimal" placeholder="31.2357"></div>
+    </div>
+    <button class="loc-btn" id="useGps">📍 استخدم موقعي الحالي (GPS)</button>
+    <div class="loc-hint" id="locHint">أو اضغط على الخريطة لتحديد الموقع يدويًا</div>
+    <div class="btns">
+      <button class="btn btn-ghost" id="cancelForm2">إلغاء</button>
+      <button class="btn btn-primary" id="saveForm">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- مودال التفاصيل -->
+<div class="modal" id="detailModal">
+  <div class="modal-box">
+    <h2><span id="dName"></span><span class="x-btn" id="dClose">✕</span></h2>
+    <div class="detail-meta" id="dMeta"></div>
+    <div id="dPhoto"></div>
+    <div class="detail-desc" id="dDesc"></div>
+    <div class="dcontacts" id="dContacts"></div>
+    <div class="detail-actions">
+      <button class="btn btn-primary" id="dRoute">🧭 الاتجاهات</button>
+      <button class="btn btn-ghost" id="dShare">📤 مشاركة</button>
+    </div>
+    <div class="detail-actions" style="margin-top:10px">
+      <button class="btn btn-ghost" id="dWhats" style="background:#075e54;color:#fff;border:none">واتساب</button>
+      <button class="btn btn-ghost" id="dMsg" style="background:#0084ff;color:#fff;border:none">ماسنجر</button>
+      <button class="btn btn-ghost" id="dEdit">تعديل</button>
+    </div>
+    <div class="btns"><button class="btn btn-danger" id="dDelete">حذف</button></div>
+  </div>
+</div>
+
+<!-- مودال إدارة التصنيفات -->
+<div class="modal" id="catModal">
+  <div class="modal-box">
+    <h2><span>إدارة التصنيفات</span><span class="x-btn" id="catClose">✕</span></h2>
+    <div id="catList"></div>
+    <div class="add-cat-form">
+      <div class="field mini"><label>أيقونة</label><input id="ncEmoji" maxlength="2" placeholder="🍽️"></div>
+      <div class="field grow"><label>الاسم</label><input id="ncName" placeholder="تصنيف جديد"></div>
+      <div class="field mini"><label>لون</label><input id="ncColor" type="color" value="#3b82f6" style="padding:4px;height:46px"></div>
+      <button class="btn btn-primary" id="addCat" style="flex:0 0 70px">إضافة</button>
+    </div>
+    <div class="note">اضغط على أي تصنيف لتعديله. حذف تصنيف لا يحذف أماكنه؛ بتتحوّل لتصنيف "آخر".</div>
+  </div>
+</div>
+
+<!-- مودال القائمة (الإعدادات/النسخ) -->
+<div class="modal" id="menuModal">
+  <div class="modal-box">
+    <h2><span>القائمة</span><span class="x-btn" id="menuClose">✕</span></h2>
+    <div class="menu-item" id="openCats"><span class="mi-emoji">🏷️</span> إدارة التصنيفات</div>
+    <div class="menu-item" id="openBackup"><span class="mi-emoji">💾</span> النسخ الاحتياطية</div>
+    <div class="menu-item" id="exportNow"><span class="mi-emoji">⬇️</span> تصدير نسخة (تحميل ملف)</div>
+    <div class="menu-item" id="importBtn"><span class="mi-emoji">⬆️</span> استيراد نسخة من ملف</div>
+    <div class="menu-item" id="setPin"><span class="mi-emoji">🔒</span> <span id="setPinLabel">تفعيل قفل بالرقم السري</span></div>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+  </div>
+</div>
+
+<!-- مودال النسخ الاحتياطية -->
+<div class="modal" id="backupModal">
+  <div class="modal-box">
+    <h2><span>النسخ الاحتياطية</span><span class="x-btn" id="backupClose">✕</span></h2>
+    <div class="note" style="margin-bottom:12px">نسخة تلقائية تُحفظ مرة كل يوم على الجهاز، ويُحتفظ بآخر 30 يوم. تقدر تستعيد أي نسخة أو تحذفها.</div>
+    <div id="backupList"></div>
+  </div>
+</div>
+
+<script>
+/* ============ إعدادات Firebase ============ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA0ohTE9yFDeFvtsOnFMWz_H6hWJhIjPak",
+  authDomain: "my-location-f4a57.firebaseapp.com",
+  databaseURL: "https://my-location-f4a57-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "my-location-f4a57",
+  storageBucket: "my-location-f4a57.firebasestorage.app",
+  messagingSenderId: "636133713551",
+  appId: "1:636133713551:web:cf6124aae967c9dbd4b2fa"
+};
+/* ========================================== */
+
+const DEFAULT_CATEGORIES = [
+  {id:'rest',  name:'مطعم',     emoji:'🍽️', color:'#f59e0b'},
+  {id:'park',  name:'موقف',     emoji:'🅿️', color:'#22c55e'},
+  {id:'cafe',  name:'كافيه',    emoji:'☕', color:'#a855f7'},
+  {id:'shop',  name:'محل',      emoji:'🛒', color:'#ec4899'},
+  {id:'gas',   name:'محطة وقود',emoji:'⛽', color:'#ef4444'},
+  {id:'health',name:'صيدلية/مستشفى',emoji:'🏥', color:'#06b6d4'},
+  {id:'other', name:'آخر',      emoji:'📍', color:'#8a96b3'},
+];
+
+let places = [];
+let categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+let activeCat = 'all';
+let searchTerm = '';
+let editingId = null, detailId = null, editingCatId = null;
+let map, markersLayer, meMarker;
+
+const catById = id => categories.find(c=>c.id===id) || {id:'other',name:'آخر',emoji:'📍',color:'#8a96b3'};
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+
+/* ---------- تخزين آمن (يتعامل مع وضع iOS الخاص) ---------- */
+const LS={
+  get(k){try{return localStorage.getItem(k);}catch(e){return memStore[k]??null;}},
+  set(k,v){try{localStorage.setItem(k,v);}catch(e){memStore[k]=v;}},
+};
+let memStore={};
+
+/* ---------- التخزين ---------- */
+let db=null, useFirebase=false;
+function loadCats(){
+  if(useFirebase) return;
+  try{const c=LS.get('places_cats'); if(c){const p=JSON.parse(c); if(Array.isArray(p)&&p.length) categories=p;}}catch(e){}
+}
+function persistCats(){
+  if(useFirebase){ db.ref('categories').set(categories); }
+  else LS.set('places_cats',JSON.stringify(categories));
+}
+function persistLocal(){ if(!useFirebase) LS.set('places_data',JSON.stringify(places)); }
+
+function initStorage(){
+  if(FIREBASE_CONFIG.databaseURL){
+    const s1=document.createElement('script'); s1.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js";
+    s1.onload=()=>{const s2=document.createElement('script'); s2.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js";
+      s2.onload=()=>{
+        firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); useFirebase=true;
+        $('syncDot').style.display='block';
+        db.ref('categories').on('value',s=>{
+          const v=s.val();
+          categories = (v&&v.length) ? v : JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+          if(!v) db.ref('categories').set(categories);
+          renderCats(); fillCatSelect(); render();
+        });
+        db.ref('places').on('value',s=>{
+          const v=s.val()||{};
+          places=Object.keys(v).map(k=>({...v[k],id:k}));
+          $('syncDot').textContent='✓ متزامن'; render(); autoBackup();
+        });
+      }; document.head.appendChild(s2);
+    }; document.head.appendChild(s1);
+  } else {
+    loadCats();
+    places=JSON.parse(LS.get('places_data')||'[]');
+    renderCats(); fillCatSelect(); render(); autoBackup();
+  }
+}
+
+function savePlace(p){
+  if(useFirebase){
+    if(p.id){const id=p.id;const d={...p};delete d.id;db.ref('places/'+id).set(d);}
+    else db.ref('places').push().set(p);
+  } else {
+    if(p.id){const i=places.findIndex(x=>x.id===p.id);if(i>-1)places[i]={...p};else{places.push(p);}}
+    else {p.id='loc_'+Date.now();places.push(p);}
+    persistLocal(); render();
+    try{autoBackup();}catch(e){console.error('backup failed',e);}
+  }
+}
+function deletePlace(id){
+  if(useFirebase) db.ref('places/'+id).remove();
+  else {places=places.filter(p=>p.id!==id);persistLocal();render();try{autoBackup();}catch(e){}}
+}
+
+/* ---------- النسخ الاحتياطي اليومي (30 يوم) ---------- */
+function autoBackup(){
+  const today=new Date().toISOString().slice(0,10);
+  let backups={}; try{backups=JSON.parse(LS.get('places_backups')||'{}');}catch(e){backups={};}
+  backups[today]={date:today, time:Date.now(), places:JSON.parse(JSON.stringify(places)), categories:JSON.parse(JSON.stringify(categories))};
+  const keys=Object.keys(backups).sort().reverse();
+  if(keys.length>30) keys.slice(30).forEach(k=>delete backups[k]);
+  LS.set('places_backups',JSON.stringify(backups));
+}
+function renderBackups(){
+  const backups=JSON.parse(LS.get('places_backups')||'{}');
+  const keys=Object.keys(backups).sort().reverse();
+  const el=$('backupList');
+  if(!keys.length){ el.innerHTML='<div class="empty">لا توجد نسخ بعد.</div>'; return; }
+  el.innerHTML=keys.map(k=>{
+    const b=backups[k];
+    const t=new Date(b.time).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="backup-row">
+      <div><div class="bi">📅 ${b.date}</div><div class="bd">${b.places.length} مكان · ${b.categories.length} تصنيف · ${t}</div></div>
+      <div class="ba">
+        <button class="sm-btn" onclick="restoreBackup('${k}')">استعادة</button>
+        <button class="sm-btn danger" onclick="delBackup('${k}')">حذف</button>
+      </div></div>`;
+  }).join('');
+}
+function restoreBackup(k){
+  const backups=JSON.parse(LS.get('places_backups')||'{}');
+  const b=backups[k]; if(!b)return;
+  if(!confirm('استعادة نسخة '+b.date+'؟ ده هيستبدل البيانات الحالية.'))return;
+  categories=JSON.parse(JSON.stringify(b.categories||DEFAULT_CATEGORIES));
+  if(useFirebase){
+    const obj={}; b.places.forEach(p=>{const id=p.id||('loc_'+Math.random().toString(36).slice(2));const d={...p};delete d.id;obj[id]=d;});
+    db.ref('places').set(obj); db.ref('categories').set(categories);
+  } else {
+    places=JSON.parse(JSON.stringify(b.places)); persistLocal(); persistCats();
+    renderCats(); fillCatSelect(); render();
+  }
+  closeAll(); alert('تمت الاستعادة ✓');
+}
+function delBackup(k){
+  let backups=JSON.parse(LS.get('places_backups')||'{}');
+  delete backups[k]; LS.set('places_backups',JSON.stringify(backups)); renderBackups();
+}
+
+/* ---------- تصدير/استيراد ---------- */
+function exportNow(){
+  const data={exported:new Date().toISOString(), places, categories};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='places_backup_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+}
+function importData(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!Array.isArray(d.places)) throw 0;
+      if(!confirm('استيراد '+d.places.length+' مكان؟ ده هيستبدل البيانات الحالية.'))return;
+      if(d.categories&&d.categories.length) categories=d.categories;
+      if(useFirebase){
+        const obj={}; d.places.forEach(p=>{const id=p.id||('loc_'+Math.random().toString(36).slice(2));const x={...p};delete x.id;obj[id]=x;});
+        db.ref('places').set(obj); db.ref('categories').set(categories);
+      } else { places=d.places; persistLocal(); persistCats(); renderCats(); fillCatSelect(); render(); }
+      closeAll(); alert('تم الاستيراد ✓');
+    }catch(e){ alert('الملف غير صالح'); }
+  };
+  r.readAsText(file);
+}
+
+/* ---------- الخريطة ---------- */
+function initMap(){
+  map=L.map('map',{zoomControl:true}).setView([30.0444,31.2357],11);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap, © CARTO',maxZoom:19}).addTo(map);
+  markersLayer=L.layerGroup().addTo(map);
+  map.on('click',e=>{
+    if($('formModal').classList.contains('open')){
+      $('fLat').value=e.latlng.lat.toFixed(6); $('fLng').value=e.latlng.lng.toFixed(6);
+      $('locHint').innerHTML='<span class="loc-ok">✓ تم تحديد الموقع من الخريطة</span>';
+    }
+  });
+  // ضغط مطوّل على الخريطة = إضافة سريعة لمكان في النقطة دي
+  map.on('contextmenu',e=>{ quickAddAt(e.latlng.lat,e.latlng.lng); });
+  let pressTimer=null;
+  map.on('mousedown touchstart',e=>{
+    if($('formModal').classList.contains('open'))return;
+    const ll=e.latlng||(e.originalEvent&&map.mouseEventToLatLng(e.originalEvent.touches?e.originalEvent.touches[0]:e.originalEvent));
+    pressTimer=setTimeout(()=>{ if(ll) quickAddAt(ll.lat,ll.lng); },600);
+  });
+  map.on('mouseup touchend touchmove mousemove dragstart',()=>{ if(pressTimer){clearTimeout(pressTimer);pressTimer=null;} });
+}
+function quickAddAt(lat,lng){
+  openForm();
+  $('fLat').value=lat.toFixed(6); $('fLng').value=lng.toFixed(6);
+  $('locHint').innerHTML='<span class="loc-ok">✓ الموقع محدّد من الخريطة</span>';
+  setTimeout(()=>$('fName').focus(),100);
+}
+function pinIcon(cat){
+  const c=catById(cat);
+  return L.divIcon({className:'',iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-32],
+    html:`<div style="width:34px;height:34px;background:${c.color};border:2px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.5)"><span style="transform:rotate(45deg);font-size:16px">${c.emoji}</span></div>`});
+}
+
+/* ---------- العرض ---------- */
+let myLoc=null; // {lat,lng} موقع المستخدم الحالي
+function haversine(a,b,c,d){ // كم بين نقطتين
+  const R=6371, toR=x=>x*Math.PI/180;
+  const dLat=toR(c-a), dLng=toR(d-b);
+  const s=Math.sin(dLat/2)**2+Math.cos(toR(a))*Math.cos(toR(c))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
+}
+function fmtDist(km){
+  if(km<1) return Math.round(km*1000)+' م';
+  if(km<10) return km.toFixed(1)+' كم';
+  return Math.round(km)+' كم';
+}
+function filtered(){
+  let arr=places.filter(p=>{
+    const okCat=activeCat==='all'||p.cat===activeCat;
+    const okS=!searchTerm||(p.name+' '+(p.desc||'')).toLowerCase().includes(searchTerm.toLowerCase());
+    return okCat&&okS;
+  });
+  if(myLoc){
+    arr.forEach(p=>{ p._dist=(typeof p.lat==='number')?haversine(myLoc.lat,myLoc.lng,p.lat,p.lng):Infinity; });
+    arr.sort((x,y)=>x._dist-y._dist); // الأقرب أولاً
+  }
+  return arr;
+}
+function render(){
+  const data=filtered();
+  if(markersLayer){
+    markersLayer.clearLayers();
+    data.forEach(p=>{
+      if(typeof p.lat!=='number'||typeof p.lng!=='number')return;
+      L.marker([p.lat,p.lng],{icon:pinIcon(p.cat)}).addTo(markersLayer).on('click',()=>openDetail(p.id));
+    });
+  }
+  const list=$('list');
+  if(!data.length) list.innerHTML='<div class="empty">مفيش أماكن هنا.<br>اضغط زر + عشان تضيف مكان.</div>';
+  else list.innerHTML=data.map(p=>{const c=catById(p.cat);const dist=(myLoc&&isFinite(p._dist))?`<span class="dist">📍 ${fmtDist(p._dist)}</span>`:'';const thumb=p.photo?`<img src="${p.photo}" style="width:42px;height:42px;border-radius:11px;object-fit:cover;flex-shrink:0">`:`<div class="emoji">${c.emoji}</div>`;return `<div class="card" onclick="openDetail('${p.id}')">${thumb}<div class="body"><div class="name">${esc(p.name)}${dist}</div>${p.desc?`<div class="desc">${esc(p.desc)}</div>`:''}<span class="tag" style="color:${c.color};background:${c.color}22">${esc(c.name)}</span></div></div>`;}).join('');
+  $('listCount').textContent=data.length+' مكان';
+}
+
+/* ---------- التصنيفات (فلتر) ---------- */
+function renderCats(){
+  let html=`<div class="chip ${activeCat==='all'?'active':''}" onclick="setCat('all')">📌 الكل</div>`;
+  html+=categories.map(c=>`<div class="chip ${c.id===activeCat?'active':''}" onclick="setCat('${c.id}')">${c.emoji} ${esc(c.name)}</div>`).join('');
+  html+=`<div class="chip manage" onclick="openCatModal()">⚙️ تعديل</div>`;
+  $('cats').innerHTML=html;
+}
+function setCat(id){activeCat=id;renderCats();render();}
+function fillCatSelect(){
+  $('fCat').innerHTML=categories.map(c=>`<option value="${c.id}">${c.emoji} ${esc(c.name)}</option>`).join('');
+}
+
+/* ---------- إدارة التصنيفات ---------- */
+function openCatModal(){ editingCatId=null; renderCatList(); $('ncEmoji').value='';$('ncName').value='';$('ncColor').value='#3b82f6';$('addCat').textContent='إضافة'; $('catModal').classList.add('open'); }
+function renderCatList(){
+  $('catList').innerHTML=categories.map(c=>`<div class="cat-row" onclick="editCat('${c.id}')"><span class="ce">${c.emoji}</span><span class="cn">${esc(c.name)}</span><span class="cd" style="background:${c.color}"></span><span class="x-btn" onclick="event.stopPropagation();removeCat('${c.id}')">🗑️</span></div>`).join('');
+}
+function editCat(id){
+  const c=categories.find(x=>x.id===id);editingCatId=id;
+  $('ncEmoji').value=c.emoji;$('ncName').value=c.name;$('ncColor').value=c.color;$('addCat').textContent='تحديث';
+}
+function addOrUpdateCat(){
+  const emoji=$('ncEmoji').value.trim()||'📍';
+  const name=$('ncName').value.trim();
+  const color=$('ncColor').value;
+  if(!name){alert('اكتب اسم التصنيف');return;}
+  if(editingCatId){
+    const c=categories.find(x=>x.id===editingCatId); c.emoji=emoji;c.name=name;c.color=color; editingCatId=null;
+  } else {
+    categories.push({id:'cat_'+Date.now(),name,emoji,color});
+  }
+  persistCats(); renderCatList(); renderCats(); fillCatSelect(); render();
+  $('ncEmoji').value='';$('ncName').value='';$('ncColor').value='#3b82f6';$('addCat').textContent='إضافة';
+}
+function removeCat(id){
+  if(categories.length<=1){alert('لازم يفضل تصنيف واحد على الأقل');return;}
+  if(!confirm('حذف التصنيف؟ الأماكن بتاعته هتتحوّل لـ "آخر".'))return;
+  categories=categories.filter(c=>c.id!==id);
+  // تأكد وجود تصنيف "آخر"
+  let other=categories.find(c=>c.id==='other');
+  if(!other){other={id:'other',name:'آخر',emoji:'📍',color:'#8a96b3'};categories.push(other);}
+  places.filter(p=>p.cat===id).forEach(p=>{p.cat='other';savePlace(p);});
+  persistCats(); renderCatList(); renderCats(); fillCatSelect(); render();
+}
+
+/* ---------- الصور ---------- */
+let currentPhoto=null; // base64 للصورة الحالية في النموذج
+function compressImage(file,cb){
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1000; let {width:w,height:h}=img;
+      if(w>h && w>max){ h=h*max/w; w=max; } else if(h>max){ w=w*max/h; h=max; }
+      const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      cb(cv.toDataURL('image/jpeg',0.7));
+    };
+    img.onerror=()=>cb(null);
+    img.src=r.result;
+  };
+  r.onerror=()=>cb(null);
+  r.readAsDataURL(file);
+}
+function renderPhotoBox(){
+  const box=$('photoBox');
+  if(currentPhoto){
+    box.innerHTML=`<div style="position:relative;display:inline-block"><img src="${currentPhoto}" style="width:100%;max-height:180px;object-fit:cover;border-radius:11px;border:1px solid var(--line)"><button type="button" onclick="removePhoto()" style="position:absolute;top:8px;left:8px;background:#000c;color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer">✕</button></div>`;
+  } else box.innerHTML='';
+}
+function removePhoto(){ currentPhoto=null; renderPhotoBox(); }
+
+/* ---------- وسائل التواصل والدفع ---------- */
+const CONTACT_TYPES=[
+  {id:'phone',  name:'تليفون',      ico:'📞'},
+  {id:'whatsapp',name:'واتساب',     ico:'💬'},
+  {id:'wallet', name:'محفظة إلكترونية',ico:'💰'},
+  {id:'instapay',name:'إنستا باي',   ico:'⚡'},
+  {id:'instagram',name:'إنستجرام',   ico:'📷'},
+  {id:'facebook',name:'فيسبوك',     ico:'👍'},
+  {id:'bank',   name:'حساب بنكي',    ico:'🏦'},
+  {id:'iban',   name:'IBAN',         ico:'🏦'},
+  {id:'link',   name:'رابط',         ico:'🔗'},
+  {id:'other',  name:'أخرى',         ico:'📝'},
+];
+const cTypeById=id=>CONTACT_TYPES.find(t=>t.id===id)||CONTACT_TYPES[CONTACT_TYPES.length-1];
+
+function addContactRow(type,value){
+  const box=$('contactsBox');
+  const row=document.createElement('div'); row.className='contact-row';
+  const sel=document.createElement('select');
+  sel.innerHTML=CONTACT_TYPES.map(t=>`<option value="${t.id}">${t.ico} ${t.name}</option>`).join('');
+  if(type)sel.value=type;
+  const inp=document.createElement('input'); inp.placeholder='الرقم / الرابط / البيانات'; inp.value=value||'';
+  const del=document.createElement('button'); del.className='del'; del.textContent='✕'; del.type='button';
+  del.onclick=()=>row.remove();
+  row.append(sel,inp,del); box.appendChild(row);
+}
+function readContacts(){
+  return [...$('contactsBox').querySelectorAll('.contact-row')].map(r=>({
+    type:r.querySelector('select').value,
+    value:r.querySelector('input').value.trim()
+  })).filter(c=>c.value);
+}
+function loadContacts(arr){
+  $('contactsBox').innerHTML='';
+  (arr||[]).forEach(c=>addContactRow(c.type,c.value));
+}
+
+/* يبني رابط قابل للضغط حسب النوع */
+function contactHref(c){
+  const v=c.value.trim();
+  switch(c.type){
+    case 'phone': return 'tel:'+v.replace(/\s/g,'');
+    case 'whatsapp': return 'https://wa.me/'+v.replace(/[^\d]/g,'');
+    case 'instagram': return v.startsWith('http')?v:'https://instagram.com/'+v.replace('@','');
+    case 'facebook': return v.startsWith('http')?v:'https://facebook.com/'+v;
+    case 'instapay': return v.startsWith('http')?v:null;
+    case 'link': return v.startsWith('http')?v:'https://'+v;
+    default: return null;
+  }
+}
+
+/* ---------- نموذج المكان ---------- */
+function openForm(id){
+  editingId=id||null;
+  $('formTitle').textContent=id?'تعديل مكان':'إضافة مكان';
+  $('locHint').innerHTML='أو اضغط على الخريطة لتحديد الموقع يدويًا';
+  $('fLink').value=''; $('linkHint').textContent='';
+  if(id){const p=places.find(x=>x.id===id);$('fName').value=p.name;$('fCat').value=p.cat;$('fDesc').value=p.desc||'';$('fLat').value=p.lat??'';$('fLng').value=p.lng??''; loadContacts(p.contacts); currentPhoto=p.photo||null;}
+  else {$('fName').value='';$('fCat').value=categories[0]?.id||'';$('fDesc').value='';$('fLat').value='';$('fLng').value=''; loadContacts([]); currentPhoto=null;}
+  renderPhotoBox();
+  $('formModal').classList.add('open'); closeSheetFn();
+}
+function closeForm(){$('formModal').classList.remove('open');}
+function saveForm(){
+  const name=$('fName').value.trim(); if(!name){alert('اكتب اسم المكان');return;}
+  const lat=parseFloat($('fLat').value),lng=parseFloat($('fLng').value);
+  if(isNaN(lat)||isNaN(lng)){alert('حدد الموقع (GPS أو من الخريطة أو يدوي)');return;}
+  let cat=$('fCat').value;
+  if(!cat) cat=(categories[0]&&categories[0].id)||'other'; // احتياطي لو فاضي
+  const p={name,cat,desc:$('fDesc').value.trim(),lat,lng,contacts:readContacts(),photo:currentPhoto||'',updated:Date.now()};
+  if(editingId)p.id=editingId;
+  try{
+    savePlace(p);
+  }catch(e){
+    console.error(e); alert('حصل خطأ أثناء الحفظ: '+e.message); return;
+  }
+  closeForm();
+  openSheetFn(); // افتح القايمة عشان تشوف المكان اتحفظ
+  setTimeout(()=>{ try{map.setView([lat,lng],15);}catch(e){} },200);
+}
+
+/* ---------- التفاصيل ---------- */
+function openDetail(id){
+  detailId=id; const p=places.find(x=>x.id===id); if(!p)return; const c=catById(p.cat);
+  $('dName').textContent=p.name;
+  $('dMeta').innerHTML=`${c.emoji} ${esc(c.name)} &nbsp;·&nbsp; ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;
+  $('dPhoto').innerHTML=p.photo?`<img src="${p.photo}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-bottom:12px">`:'';
+  $('dDesc').textContent=p.desc||'لا يوجد وصف';
+  // وسائل التواصل والدفع
+  const dc=$('dContacts');
+  const cs=p.contacts||[];
+  if(!cs.length){ dc.innerHTML=''; }
+  else {
+    dc.innerHTML=cs.map((c,i)=>{
+      const t=cTypeById(c.type);
+      const href=contactHref(c);
+      const inner=`<span class="dc-ico">${t.ico}</span><div class="dc-body"><div class="dc-type">${t.name}</div><div class="dc-val">${esc(c.value)}</div></div><button class="dc-copy" onclick="event.preventDefault();event.stopPropagation();copyContact(${i})">نسخ</button>`;
+      return href
+        ? `<a class="dc-item" href="${esc(href)}" target="_blank" rel="noopener">${inner}</a>`
+        : `<div class="dc-item">${inner}</div>`;
+    }).join('');
+  }
+  $('detailModal').classList.add('open');
+}
+function copyContact(i){
+  const p=places.find(x=>x.id===detailId); if(!p||!p.contacts)return;
+  const v=p.contacts[i].value;
+  if(navigator.clipboard) navigator.clipboard.writeText(v).then(()=>toast('تم النسخ ✓')).catch(()=>prompt('انسخ:',v));
+  else prompt('انسخ:',v);
+}
+function toast(msg){
+  let t=document.getElementById('_toast');
+  if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#000c;color:#fff;padding:10px 18px;border-radius:20px;z-index:3000;font-size:14px;transition:opacity .3s';document.body.appendChild(t);}
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity='0',1500);
+}
+
+/* ---------- استخراج الموقع من لينك جوجل مابس ---------- */
+function parseMapLink(url){
+  if(!url) return null;
+  url=url.trim();
+  // أنماط شائعة لإحداثيات جوجل مابس
+  const patterns=[
+    /@(-?\d+\.\d+),(-?\d+\.\d+)/,                 // .../@30.594,31.487,15z
+    /[?&]q=(?:loc:)?(-?\d+\.\d+),\s*(-?\d+\.\d+)/, // ...?q=30.594,31.487 أو q=loc:..
+    /[?&]ll=(-?\d+\.\d+),\s*(-?\d+\.\d+)/,         // ...?ll=30.594,31.487
+    /[?&]query=(-?\d+\.\d+),\s*(-?\d+\.\d+)/,      // ...?query=30.594,31.487
+    /[?&]daddr=(-?\d+\.\d+),\s*(-?\d+\.\d+)/,      // اتجاهات
+    /destination=(-?\d+\.\d+),\s*(-?\d+\.\d+)/,    // dir destination
+    /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,              // صيغة المكان الداخلية
+    /(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/,  // أي رقمين إحداثيات مفصولين بفاصلة
+  ];
+  for(const re of patterns){
+    const m=url.match(re);
+    if(m){
+      const lat=parseFloat(m[1]), lng=parseFloat(m[2]);
+      if(!isNaN(lat)&&!isNaN(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180) return {lat,lng};
+    }
+  }
+  return null;
+}
+function handleLinkInput(){
+  const v=$('fLink').value.trim();
+  const hint=$('linkHint');
+  if(!v){ hint.textContent=''; return; }
+  const r=parseMapLink(v);
+  if(r){
+    $('fLat').value=r.lat.toFixed(6); $('fLng').value=r.lng.toFixed(6);
+    hint.innerHTML='<span class="loc-ok">✓ تم استخراج الموقع من اللينك</span>';
+    $('locHint').innerHTML='<span class="loc-ok">✓ الموقع جاهز من لينك جوجل مابس</span>';
+  } else if(/goo\.gl|app\.goo\.gl|maps\.apple/.test(v)){
+    hint.innerHTML=`اللينك مختصر — افتحه وانسخ الرابط الكامل اللي فيه الأرقام والزقه هنا:
+      <br><button type="button" class="open-link-btn" onclick="window.open('${encodeURI(v)}','_blank')">🔗 افتح الرابط في جوجل مابس</button>`;
+  } else {
+    hint.innerHTML='لم أجد إحداثيات في اللينك. تأكد إنه لينك جوجل مابس فيه موقع.';
+  }
+}
+
+/* ---------- GPS ---------- */
+function useGps(){
+  if(!navigator.geolocation){alert('الجهاز لا يدعم تحديد الموقع');return;}
+  $('locHint').textContent='⏳ جاري تحديد موقعك…';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    $('fLat').value=pos.coords.latitude.toFixed(6);$('fLng').value=pos.coords.longitude.toFixed(6);
+    $('locHint').innerHTML='<span class="loc-ok">✓ تم تسجيل موقعك الحالي</span>';
+  },err=>{
+    let msg='تعذّر تحديد الموقع — اضغط على الخريطة بدلاً منه';
+    if(err.code===1) msg='⚠️ الإذن مرفوض. فعّل إذن الموقع للمتصفح من إعدادات الجهاز';
+    else if(err.code===2) msg='تعذّر تحديد الموقع الآن — جرّب في مكان مكشوف أو اضغط على الخريطة';
+    else if(err.code===3) msg='انتهى وقت المحاولة — اضغط على الخريطة لتحديد الموقع';
+    $('locHint').textContent=msg;
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+function locateMe(){
+  if(!navigator.geolocation){alert('الجهاز لا يدعم تحديد الموقع');return;}
+  toast('⏳ جاري تحديد موقعك…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude,longitude}=pos.coords; map.setView([latitude,longitude],15);
+    myLoc={lat:latitude,lng:longitude};
+    if(meMarker)meMarker.remove();
+    meMarker=L.circleMarker([latitude,longitude],{radius:8,color:'#3b82f6',fillColor:'#3b82f6',fillOpacity:.9,weight:3}).addTo(map);
+    render(); // يعيد الترتيب بالأقرب
+    toast('✓ تم الترتيب حسب الأقرب لك');
+  },()=>alert('تعذّر تحديد موقعك'),{enableHighAccuracy:true,timeout:10000});
+}
+
+/* ---------- لوحات ---------- */
+function openSheetFn(){$('sheet').classList.add('open');}
+function closeSheetFn(){$('sheet').classList.remove('open');}
+function closeAll(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'));}
+
+/* ---------- ربط الأحداث ---------- */
+$('addBtn').onclick=()=>openForm();
+$('cancelForm').onclick=closeForm; $('cancelForm2').onclick=closeForm; $('saveForm').onclick=saveForm;
+$('useGps').onclick=useGps; $('locateBtn').onclick=locateMe;
+$('addContact').onclick=()=>addContactRow();
+$('pickPhoto').onclick=()=>$('fPhoto').click();
+$('fPhoto').onchange=e=>{ const f=e.target.files[0]; if(f){ toast('⏳ جاري معالجة الصورة…'); compressImage(f,d=>{ if(d){currentPhoto=d;renderPhotoBox();toast('✓ تمت إضافة الصورة');}else alert('تعذّر تحميل الصورة'); }); } e.target.value=''; };
+$('fLink').oninput=handleLinkInput;
+$('fLink').onpaste=()=>setTimeout(handleLinkInput,50);
+$('listToggle').onclick=openSheetFn; $('closeSheet').onclick=closeSheetFn;
+$('dClose').onclick=()=>$('detailModal').classList.remove('open');
+$('dEdit').onclick=()=>{$('detailModal').classList.remove('open');openForm(detailId);};
+$('dDelete').onclick=()=>{if(confirm('متأكد من حذف المكان؟')){deletePlace(detailId);$('detailModal').classList.remove('open');}};
+$('dRoute').onclick=()=>{const p=places.find(x=>x.id===detailId);window.open(`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`,'_blank');};
+
+/* ---------- المشاركة ---------- */
+function shareText(){
+  const p=places.find(x=>x.id===detailId); if(!p)return null;
+  const c=catById(p.cat);
+  const link=`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`;
+  let t=`📍 ${p.name}`;
+  t+=`\n${c.emoji} ${c.name}`;
+  if(p.desc) t+=`\n${p.desc}`;
+  if(p.contacts&&p.contacts.length){
+    t+='\n';
+    p.contacts.forEach(ct=>{ const tt=cTypeById(ct.type); t+=`\n${tt.ico} ${tt.name}: ${ct.value}`; });
+  }
+  t+=`\n\n${link}`;
+  return {text:t, name:p.name};
+}
+$('dShare').onclick=async()=>{
+  const s=shareText(); if(!s)return;
+  if(navigator.share){
+    try{ await navigator.share({title:s.name, text:s.text}); }catch(e){}
+  } else {
+    try{ await navigator.clipboard.writeText(s.text); alert('تم نسخ المكان ✓ الزقه في أي محادثة'); }
+    catch(e){ prompt('انسخ النص ده وابعته:', s.text); }
+  }
+};
+$('dWhats').onclick=()=>{ const s=shareText(); if(s) window.open('https://wa.me/?text='+encodeURIComponent(s.text),'_blank'); };
+$('dMsg').onclick=()=>{ const s=shareText(); if(s){ navigator.clipboard&&navigator.clipboard.writeText(s.text); window.open('https://www.messenger.com/','_blank'); alert('تم نسخ المكان ✓ الزقه في محادثة الماسنجر'); } };
+$('searchInput').oninput=e=>{searchTerm=e.target.value;render();};
+$('catClose').onclick=()=>$('catModal').classList.remove('open');
+$('addCat').onclick=addOrUpdateCat;
+$('menuBtn').onclick=()=>$('menuModal').classList.add('open');
+$('menuClose').onclick=()=>$('menuModal').classList.remove('open');
+$('openCats').onclick=()=>{$('menuModal').classList.remove('open');openCatModal();};
+$('openBackup').onclick=()=>{$('menuModal').classList.remove('open');renderBackups();$('backupModal').classList.add('open');};
+$('backupClose').onclick=()=>$('backupModal').classList.remove('open');
+$('exportNow').onclick=()=>{exportNow();$('menuModal').classList.remove('open');};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value='';};
+
+/* ---------- قفل الرقم السري ---------- */
+function getPin(){ return LS.get('places_pin')||''; }
+function updatePinLabel(){ $('setPinLabel').textContent=getPin()?'تغيير أو إلغاء الرقم السري':'تفعيل قفل بالرقم السري'; }
+function askPin(){
+  if(!getPin()) return; // مفيش قفل
+  $('pinLock').style.display='flex';
+  $('pinInput').value=''; $('pinMsg').textContent='';
+  setTimeout(()=>$('pinInput').focus(),100);
+}
+function tryUnlock(){
+  if($('pinInput').value===getPin()){ $('pinLock').style.display='none'; $('pinMsg').textContent=''; }
+  else { $('pinMsg').textContent='رقم غير صحيح'; $('pinInput').value=''; }
+}
+function managePin(){
+  $('menuModal').classList.remove('open');
+  if(getPin()){
+    const cur=prompt('أدخل الرقم السري الحالي:');
+    if(cur!==getPin()){ if(cur!==null)alert('رقم غير صحيح'); return; }
+    const n=prompt('أدخل رقم سري جديد (اتركه فارغًا لإلغاء القفل):');
+    if(n===null)return;
+    if(n.trim()===''){ LS.set('places_pin',''); alert('تم إلغاء القفل'); }
+    else { LS.set('places_pin',n.trim()); alert('تم تغيير الرقم السري ✓'); }
+  } else {
+    const n=prompt('اختر رقم سري (أرقام):');
+    if(n&&n.trim()){ LS.set('places_pin',n.trim()); alert('تم تفعيل القفل ✓ هيتطلب عند فتح التطبيق'); }
+  }
+  updatePinLabel();
+}
+$('setPin').onclick=managePin;
+$('pinBtn').onclick=tryUnlock;
+$('pinInput').onkeydown=e=>{ if(e.key==='Enter')tryUnlock(); };
+
+/* ---------- تشغيل ---------- */
+askPin(); updatePinLabel();
+initMap(); // يجهّز الخريطة و markersLayer أولًا
+renderCats(); fillCatSelect(); render();
+try{ initStorage(); }catch(e){ console.error(e); }
+</script>
+</body>
+</html>

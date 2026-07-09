@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>صيانتي — دفتر صيانة البيت والعربية</title>
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface2:#F0F3F7; --border:#E1E6EC;
+  --text:#1C2733; --muted:#66788A;
+  --amber:#D97E00; --amber-dim:rgba(217,126,0,.12);
+  --danger:#E23B3B; --danger-dim:rgba(226,59,59,.10);
+  --ok:#149E68; --ok-dim:rgba(20,158,104,.10);
+  --blue:#2673D8;
+  --shadow:0 1px 3px rgba(28,39,51,.08);
+  --radius:14px;
+}
+body.dark{
+  --bg:#101418; --surface:#1A2027; --surface2:#212A33; --border:#2A333D;
+  --text:#E8EDF2; --muted:#8B98A5;
+  --amber:#FFB020; --amber-dim:rgba(255,176,32,.14);
+  --danger:#FF5D5D; --danger-dim:rgba(255,93,93,.14);
+  --ok:#3DDC97; --ok-dim:rgba(61,220,151,.12);
+  --shadow:none;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:"Segoe UI",Tahoma,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.6;
+  padding-bottom:calc(80px + env(safe-area-inset-bottom));
+}
+header.app{
+  position:sticky; top:0; z-index:20;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px 10px;
+  padding-top:calc(12px + env(safe-area-inset-top));
+  display:flex; align-items:center; gap:10px;
+  box-shadow:var(--shadow);
+}
+header.app .logo{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--amber-dim); border:1px solid var(--amber);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+header.app h1{font-size:17px;margin:0;font-weight:700}
+header.app .sub{font-size:11.5px;color:var(--muted)}
+.themebtn{
+  margin-inline-start:auto;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;font-size:17px;padding:7px 11px;cursor:pointer;color:var(--text);
+}
+.page{display:none;padding:14px 14px 20px;max-width:760px;margin:0 auto}
+.page.active{display:block}
+h2.sec{font-size:14px;color:var(--muted);font-weight:700;margin:18px 2px 8px;letter-spacing:.3px}
+.card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:12px 14px; margin-bottom:10px;
+  position:relative; overflow:hidden; box-shadow:var(--shadow);
+}
+.card .stripe{position:absolute;top:0;bottom:0;right:0;width:4px;background:var(--border)}
+.card.overdue .stripe{background:var(--danger)}
+.card.soon .stripe{background:var(--amber)}
+.card.ok .stripe{background:var(--ok)}
+.row{display:flex;align-items:center;gap:10px}
+.row .grow{flex:1;min-width:0}
+.title{font-weight:700;font-size:15.5px}
+.meta{font-size:12.5px;color:var(--muted)}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 10px;border-radius:999px;white-space:nowrap}
+.badge.red{background:var(--danger-dim);color:var(--danger)}
+.badge.amber{background:var(--amber-dim);color:var(--amber)}
+.badge.green{background:var(--ok-dim);color:var(--ok)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;text-align:center;box-shadow:var(--shadow)}
+.kpi .num{font-size:26px;font-weight:800;line-height:1.2}
+.kpi .lbl{font-size:11.5px;color:var(--muted)}
+.kpi.red .num{color:var(--danger)} .kpi.amber .num{color:var(--amber)} .kpi.green .num{color:var(--ok)}
+button{font-family:inherit;font-size:14px;border:none;border-radius:11px;padding:9px 14px;cursor:pointer;font-weight:700}
+.btn-primary{background:var(--amber);color:#fff}
+body.dark .btn-primary{color:#1a1200}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-danger{background:var(--danger-dim);color:var(--danger)}
+.btn-ok{background:var(--ok-dim);color:var(--ok)}
+.btn-sm{padding:6px 11px;font-size:12.5px;border-radius:9px}
+.fab-row{display:flex;gap:8px;margin:4px 0 12px;flex-wrap:wrap}
+/* شريط الفلاتر المنسدلة */
+.filters{
+  display:flex;gap:8px;margin:2px 0 12px;
+}
+.filters select{
+  flex:1;font-family:inherit;font-size:13px;color:var(--text);font-weight:600;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:8px 10px;outline:none;box-shadow:var(--shadow);
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2366788A' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:left 10px center;
+  padding-left:26px;
+}
+.empty{text-align:center;color:var(--muted);padding:28px 10px;font-size:13.5px;border:1px dashed var(--border);border-radius:var(--radius)}
+nav.tabs{
+  position:fixed;bottom:0;right:0;left:0;z-index:30;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;align-items:flex-end;
+  padding:6px 4px calc(8px + env(safe-area-inset-bottom));
+  box-shadow:0 -1px 6px rgba(28,39,51,.06);
+}
+nav.tabs button{
+  background:none;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--muted);font-size:10.5px;font-weight:600;padding:5px 2px;position:relative;
+}
+nav.tabs button .ic{font-size:20px;line-height:1}
+nav.tabs button.active{color:var(--amber)}
+nav.tabs .addbtn{
+  flex:0 0 58px;background:var(--amber);color:#fff;border-radius:50%;
+  width:54px;height:54px;font-size:28px;font-weight:800;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 4px;transform:translateY(-14px);
+  box-shadow:0 4px 14px rgba(217,126,0,.4);padding:0;
+}
+body.dark nav.tabs .addbtn{color:#1a1200}
+nav.tabs .dot{
+  position:absolute;top:2px;inset-inline-start:calc(50% + 8px);
+  min-width:16px;height:16px;border-radius:999px;background:var(--danger);color:#fff;
+  font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;
+}
+/* modal */
+.modal-bk{display:none;position:fixed;inset:0;background:rgba(15,25,35,.45);z-index:50;align-items:flex-end;justify-content:center}
+.modal-bk.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px 18px 0 0;width:100%;max-width:760px;
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px 16px calc(20px + env(safe-area-inset-bottom));
+}
+.modal h3{margin:0 0 12px;font-size:16px}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px;font-weight:700}
+input,select,textarea{
+  width:100%;font-family:inherit;font-size:15px;color:var(--text);
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--amber)}
+textarea{min-height:64px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modal .actions{display:flex;gap:8px;margin-top:16px}
+.modal .actions button{flex:1;padding:12px}
+.chiprow{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.chip{font-size:12px;padding:5px 12px;border-radius:999px;cursor:pointer;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-weight:700}
+.chip.on{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
+/* زرار الاختيار الكبير في مودال الإضافة */
+.pickbtn{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:start;
+  background:var(--surface2);border:1px solid var(--border);border-radius:14px;
+  padding:14px;margin-bottom:8px;color:var(--text);
+}
+.pickbtn .pi{font-size:26px}
+.pickbtn .pt{font-weight:800;font-size:15px}
+.pickbtn .pd{font-size:12px;color:var(--muted);font-weight:400}
+.toast{
+  position:fixed;bottom:calc(92px + env(safe-area-inset-bottom));right:50%;transform:translateX(50%);
+  background:#22303C;color:#fff;border:1px solid rgba(255,255,255,.08);
+  padding:10px 18px;border-radius:12px;font-size:13.5px;z-index:60;
+  opacity:0;transition:opacity .25s;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.35);
+  max-width:90%;text-align:center;
+}
+.toast.show{opacity:1}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.cost{font-weight:800;color:var(--amber);font-size:13.5px;white-space:nowrap}
+.icbtn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:9px;padding:6px 9px;font-size:14px;cursor:pointer}
+.warnbox{background:var(--danger-dim);border:1px solid var(--danger);border-radius:var(--radius);padding:11px 13px;margin-bottom:10px;font-size:13.5px}
+.warnbox b{color:var(--danger)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="logo">🛠️</div>
+  <div>
+    <h1>صيانتي</h1>
+    <div class="sub">دفتر صيانة العربية والبيت — v3</div>
+  </div>
+  <button class="themebtn" id="themebtn" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
+</header>
+
+<!-- ============ الرئيسية ============ -->
+<div class="page active" id="pg-home">
+  <div class="kpis">
+    <div class="kpi red"><div class="num" id="k-over">0</div><div class="lbl">متأخرة</div></div>
+    <div class="kpi amber"><div class="num" id="k-soon">0</div><div class="lbl">خلال ١٤ يوم</div></div>
+    <div class="kpi green"><div class="num" id="k-ok">0</div><div class="lbl">تمام</div></div>
+  </div>
+  <div id="home-recurring"></div>
+  <h2 class="sec">⏰ مواعيد الصيانة</h2>
+  <div id="home-due"></div>
+</div>
+
+<!-- ============ الأصول ============ -->
+<div class="page" id="pg-assets">
+  <div class="filters">
+    <select id="flt-asset-place" onchange="render()"></select>
+    <select id="flt-asset-cat" onchange="render()"></select>
+  </div>
+  <div class="fab-row" style="margin-top:0">
+    <button class="btn-ghost btn-sm" onclick="openPlacesForm()">📍 إدارة الأماكن</button>
+  </div>
+  <div id="assets-list"></div>
+</div>
+
+<!-- ============ جدول الصيانة ============ -->
+<div class="page" id="pg-tasks">
+  <div class="filters">
+    <select id="flt-task-asset" onchange="render()"></select>
+    <select id="flt-task-st" onchange="render()">
+      <option value="">كل الحالات</option>
+      <option value="overdue">متأخرة</option>
+      <option value="soon">قرب معادها</option>
+      <option value="ok">تمام</option>
+    </select>
+  </div>
+  <div id="tasks-list"></div>
+</div>
+
+<!-- ============ الأعطال ============ -->
+<div class="page" id="pg-faults">
+  <div class="filters">
+    <select id="flt-fault-asset" onchange="render()"></select>
+    <select id="flt-fault-st" onchange="render()">
+      <option value="">كل الحالات</option>
+      <option value="open">قائم</option>
+      <option value="fixed">تم الإصلاح</option>
+    </select>
+  </div>
+  <div id="faults-recurring"></div>
+  <div id="faults-list"></div>
+</div>
+
+<!-- ============ السجل والتقارير ============ -->
+<div class="page" id="pg-log">
+  <div class="kpis" style="grid-template-columns:1fr 1fr">
+    <div class="kpi"><div class="num" id="k-cost-month">0</div><div class="lbl">مصاريف الشهر (ج.م)</div></div>
+    <div class="kpi"><div class="num" id="k-cost-year">0</div><div class="lbl">مصاريف السنة (ج.م)</div></div>
+  </div>
+  <div class="filters">
+    <select id="flt-log-asset" onchange="render()"></select>
+    <select id="flt-log-type" onchange="render()">
+      <option value="">صيانات وأعطال</option>
+      <option value="rec">🔧 صيانات فقط</option>
+      <option value="fault">⚡ أعطال فقط</option>
+    </select>
+  </div>
+  <div id="log-list"></div>
+  <h2 class="sec">⚙️ النسخ الاحتياطي والإعدادات</h2>
+  <div class="card">
+    <div class="fab-row" style="margin:0">
+      <button class="btn-ghost btn-sm" onclick="exportJSON()">⬇️ تصدير نسخة احتياطية</button>
+      <button class="btn-ghost btn-sm" onclick="document.getElementById('imp-file').click()">⬆️ استيراد نسخة</button>
+      <button class="btn-ghost btn-sm" onclick="loadTemplates()">📋 تحميل قوالب جاهزة</button>
+      <button class="btn-danger btn-sm" onclick="wipeAll()">🗑️ مسح كل البيانات</button>
+    </div>
+    <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importJSON(this)">
+    <div class="hint">البيانات محفوظة على الجهاز (localStorage). اعمل تصدير نسخة احتياطية بانتظام.</div>
+  </div>
+</div>
+
+<!-- ============ التبويبات ============ -->
+<nav class="tabs">
+  <button id="tab-home" class="active" onclick="go('home')"><span class="ic">🏠</span>الرئيسية<span class="dot" id="dot-home" style="display:none">0</span></button>
+  <button id="tab-assets" onclick="go('assets')"><span class="ic">🚗</span>الأصول</button>
+  <button class="addbtn" onclick="openQuickAdd()" title="إضافة">＋</button>
+  <button id="tab-faults" onclick="go('faults')"><span class="ic">⚡</span>الأعطال<span class="dot" id="dot-faults" style="display:none">0</span></button>
+  <button id="tab-log" onclick="go('log')"><span class="ic">📒</span>السجل</button>
+</nav>
+<!-- تبويب الصيانة موجود كصفحة، الوصول ليها من الرئيسية أو زرار الإضافة -->
+
+<div class="modal-bk" id="modal-bk" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= التخزين ================= */
+var LS_KEY = "siyanty_v1";
+var TH_KEY = "siyanty_theme";
+var state = { assets:[], tasks:[], records:[], faults:[], places:[] };
+
+function load(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw){ var d = JSON.parse(raw);
+      state.assets = d.assets||[]; state.tasks = d.tasks||[];
+      state.records = d.records||[]; state.faults = d.faults||[];
+      state.places = d.places||[];
+    }
+  }catch(e){ console.error(e); }
+}
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){ toast("⚠️ مشكلة في الحفظ — المساحة ممتلئة؟"); }
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ================= الثيم ================= */
+function applyTheme(){
+  var th = localStorage.getItem(TH_KEY) || "light";
+  document.body.classList.toggle("dark", th==="dark");
+  var b = document.getElementById("themebtn");
+  if(b) b.textContent = th==="dark" ? "☀️" : "🌙";
+}
+function toggleTheme(){
+  var th = localStorage.getItem(TH_KEY) || "light";
+  localStorage.setItem(TH_KEY, th==="dark" ? "light" : "dark");
+  applyTheme();
+}
+
+/* ================= أدوات ================= */
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function pad(n){ return n<10?"0"+n:""+n; }
+function parseD(s){ var p=(s||"").split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
+function addDays(s, n){ var d=parseD(s); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function diffDays(a, b){ return Math.round((parseD(b)-parseD(a))/86400000); }
+function fmtD(s){
+  if(!s) return "—";
+  var d=parseD(s);
+  var m=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  return d.getDate()+" "+m[d.getMonth()]+" "+d.getFullYear();
+}
+function fmtNum(n){ return (Math.round((+n||0)*100)/100).toLocaleString("en-US"); }
+function toast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._tm); t._tm=setTimeout(function(){ t.classList.remove("show"); },2200);
+}
+
+/* ================= التصنيفات ================= */
+var CATS = [
+  {id:"car",   name:"عربية",   ic:"🚗"},
+  {id:"ac",    name:"تكييف",   ic:"❄️"},
+  {id:"filter",name:"فلتر مياه",ic:"💧"},
+  {id:"appl",  name:"جهاز منزلي",ic:"🔌"},
+  {id:"elec",  name:"كهرباء ولمبات",ic:"💡"},
+  {id:"other", name:"أخرى",    ic:"📦"}
+];
+function catOf(id){ for(var i=0;i<CATS.length;i++) if(CATS[i].id===id) return CATS[i]; return CATS[CATS.length-1]; }
+function assetOf(id){ for(var i=0;i<state.assets.length;i++) if(state.assets[i].id===id) return state.assets[i]; return null; }
+function placeOf(id){ for(var i=0;i<state.places.length;i++) if(state.places[i].id===id) return state.places[i]; return null; }
+function taskOf(id){ for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id===id) return state.tasks[i]; return null; }
+
+/* ================= حالة المهمة ================= */
+function taskStatus(t){
+  var a = assetOf(t.assetId);
+  var byDays = null, byKm = null;
+  if(t.intervalDays && t.lastDone){
+    var due = addDays(t.lastDone, +t.intervalDays);
+    var d = diffDays(todayStr(), due);
+    byDays = { due:due, d:d };
+  }
+  if(t.intervalKm && a && a.currentKm != null && t.lastKm != null){
+    var remain = (+t.lastKm + +t.intervalKm) - +a.currentKm;
+    byKm = { remain:remain };
+  }
+  var st="ok", label="تمام";
+  if(byDays){
+    if(byDays.d < 0){ st="overdue"; label="متأخرة "+Math.abs(byDays.d)+" يوم"; }
+    else if(byDays.d <= 14){ st = (st==="overdue")?st:"soon"; label="باقي "+byDays.d+" يوم"; }
+    else { label="باقي "+byDays.d+" يوم"; }
+  }
+  if(byKm){
+    if(byKm.remain <= 0){ st="overdue"; label="متأخرة — عدّت "+fmtNum(Math.abs(byKm.remain))+" كم"; }
+    else if(byKm.remain <= 0.2*(+t.intervalKm) && st!=="overdue"){ st="soon"; label="باقي "+fmtNum(byKm.remain)+" كم"; }
+    else if(st==="ok" && !byDays){ label="باقي "+fmtNum(byKm.remain)+" كم"; }
+  }
+  if(t.intervalKm && !byKm && !byDays){
+    st="soon"; label="حدّث عداد العربية للمتابعة 🧭";
+  }
+  if(!t.intervalDays && !t.intervalKm){ st="ok"; label = t.lastDone ? "بدون جدولة" : "لم تُنفذ بعد"; }
+  var dueDate = byDays ? byDays.due : null;
+  return { st:st, label:label, due:dueDate };
+}
+
+/* ================= الأعطال المتكررة ================= */
+function recurringFaults(){
+  var cutoff = addDays(todayStr(), -90);
+  var byAsset = {};
+  for(var i=0;i<state.faults.length;i++){
+    var f = state.faults[i];
+    if(f.date >= cutoff){
+      if(!byAsset[f.assetId]) byAsset[f.assetId]=[];
+      byAsset[f.assetId].push(f);
+    }
+  }
+  var out=[];
+  for(var k in byAsset){
+    if(byAsset[k].length >= 2){
+      var a = assetOf(k);
+      if(a) out.push({ asset:a, faults:byAsset[k] });
+    }
+  }
+  return out;
+}
+
+/* ================= التنقل ================= */
+var curPage = "home";
+function go(p){
+  curPage = p;
+  var pages=["home","assets","tasks","faults","log"];
+  for(var i=0;i<pages.length;i++){
+    document.getElementById("pg-"+pages[i]).classList.toggle("active", pages[i]===p);
+    var tb=document.getElementById("tab-"+pages[i]);
+    if(tb) tb.classList.toggle("active", pages[i]===p);
+  }
+  render();
+  window.scrollTo(0,0);
+}
+
+/* ================= الفلاتر المنسدلة ================= */
+function fillFilterSelects(){
+  var opts = '<option value="">كل الأصول</option>';
+  for(var i=0;i<state.assets.length;i++){
+    var a=state.assets[i];
+    opts += '<option value="'+a.id+'">'+catOf(a.cat).ic+" "+esc(a.name)+'</option>';
+  }
+  ["flt-task-asset","flt-fault-asset","flt-log-asset"].forEach(function(id){
+    var el=document.getElementById(id);
+    var cur=el.value;
+    el.innerHTML=opts;
+    el.value=cur; /* لو الأصل اتمسح هترجع فاضية تلقائيًا */
+  });
+  var cel=document.getElementById("flt-asset-cat");
+  var curc=cel.value;
+  var ch='<option value="">كل التصنيفات</option>';
+  for(var j=0;j<CATS.length;j++) ch+='<option value="'+CATS[j].id+'">'+CATS[j].ic+" "+CATS[j].name+'</option>';
+  cel.innerHTML=ch; cel.value=curc;
+  var pel=document.getElementById("flt-asset-place");
+  var curp=pel.value;
+  var ph='<option value="">كل الأماكن</option>';
+  for(var q=0;q<state.places.length;q++) ph+='<option value="'+state.places[q].id+'">📍 '+esc(state.places[q].name)+'</option>';
+  ph+='<option value="__none">بدون مكان</option>';
+  pel.innerHTML=ph; pel.value=curp;
+}
+function fv(id){ var el=document.getElementById(id); return el?el.value:""; }
+
+/* ================= العرض ================= */
+function render(){
+  fillFilterSelects();
+  renderHome(); renderAssets(); renderTasks(); renderFaults(); renderLog(); renderBadges();
+}
+
+function renderBadges(){
+  var over=0;
+  for(var i=0;i<state.tasks.length;i++){
+    if(taskStatus(state.tasks[i]).st==="overdue") over++;
+  }
+  var dh=document.getElementById("dot-home");
+  if(over>0){ dh.style.display="flex"; dh.textContent=over; } else dh.style.display="none";
+  var rec = recurringFaults().length;
+  var df=document.getElementById("dot-faults");
+  if(rec>0){ df.style.display="flex"; df.textContent=rec; } else df.style.display="none";
+}
+
+function renderHome(){
+  var over=[], soon=[], ok=[];
+  for(var i=0;i<state.tasks.length;i++){
+    var t=state.tasks[i], s=taskStatus(t);
+    if(s.st==="overdue") over.push({t:t,s:s});
+    else if(s.st==="soon") soon.push({t:t,s:s});
+    else ok.push({t:t,s:s});
+  }
+  document.getElementById("k-over").textContent=over.length;
+  document.getElementById("k-soon").textContent=soon.length;
+  document.getElementById("k-ok").textContent=ok.length;
+
+  var rec = recurringFaults();
+  var rh="";
+  for(var r=0;r<rec.length;r++){
+    rh += '<div class="warnbox">🔁 <b>عطل متكرر:</b> '+esc(rec[r].asset.name)+' — عليه <b>'+rec[r].faults.length+' أعطال</b> خلال آخر ٩٠ يوم. راجع صفحة الأعطال.</div>';
+  }
+  document.getElementById("home-recurring").innerHTML = rh;
+
+  var list = over.concat(soon).concat(ok);
+  var h="";
+  if(state.tasks.length===0){
+    h='<div class="empty">لسه مفيش صيانات دورية.<br>اضغط زرار ＋ تحت في النص وابدأ، أو حمّل القوالب الجاهزة من «السجل».</div>';
+  }else{
+    for(var j=0;j<list.length;j++) h += taskCard(list[j].t, list[j].s, true);
+  }
+  document.getElementById("home-due").innerHTML = h;
+}
+
+function taskCard(t, s, compact){
+  var a = assetOf(t.assetId);
+  var cat = a ? catOf(a.cat) : catOf("other");
+  var badge = s.st==="overdue" ? '<span class="badge red">'+esc(s.label)+'</span>'
+            : s.st==="soon"    ? '<span class="badge amber">'+esc(s.label)+'</span>'
+            :                    '<span class="badge green">'+esc(s.label)+'</span>';
+  var sub = (a?esc(a.name):"—");
+  var pl = a&&a.placeId?placeOf(a.placeId):null;
+  if(pl) sub += " 📍"+esc(pl.name);
+  if(t.intervalDays) sub += " · كل "+t.intervalDays+" يوم";
+  if(t.intervalKm) sub += " · كل "+fmtNum(t.intervalKm)+" كم";
+  if(t.lastDone) sub += " · آخر مرة: "+fmtD(t.lastDone);
+  var btns = '<div class="fab-row" style="margin:8px 0 0">'
+    + '<button class="btn-ok btn-sm" onclick="openDoneForm(\''+t.id+'\')">✅ تمت الصيانة</button>'
+    + (s.due ? '<button class="btn-ghost btn-sm" onclick="downloadICS(\''+t.id+'\')">📅 للتقويم</button>' : '')
+    + '<button class="btn-ghost btn-sm" onclick="openTaskForm(\''+t.id+'\')">✏️</button>'
+    + '<button class="btn-danger btn-sm" onclick="delTask(\''+t.id+'\')">🗑️</button>'
+    + '</div>';
+  return '<div class="card '+s.st+'"><div class="stripe"></div>'
+    + '<div class="row"><div style="font-size:22px">'+cat.ic+'</div>'
+    + '<div class="grow"><div class="title">'+esc(t.title)+'</div><div class="meta">'+sub+'</div></div>'
+    + badge + '</div>' + btns + '</div>';
+}
+
+function assetCard(a){
+  var cat=catOf(a.cat);
+  var nTasks=0, nFaults=0, cost=0;
+  for(var j=0;j<state.tasks.length;j++) if(state.tasks[j].assetId===a.id) nTasks++;
+  for(var k=0;k<state.faults.length;k++) if(state.faults[k].assetId===a.id){ nFaults++; cost+=(+state.faults[k].cost||0); }
+  for(var m=0;m<state.records.length;m++) if(state.records[m].assetId===a.id) cost+=(+state.records[m].cost||0);
+  var meta = cat.name;
+  if(a.model) meta += " — "+esc(a.model);
+  meta += " · "+nTasks+" صيانة دورية · "+nFaults+" عطل";
+  if(a.cat==="car" && a.currentKm!=null) meta += " · عداد: "+fmtNum(a.currentKm)+" كم";
+  return '<div class="card ok"><div class="stripe"></div><div class="row">'
+    + '<div style="font-size:24px">'+cat.ic+'</div>'
+    + '<div class="grow"><div class="title">'+esc(a.name)+'</div><div class="meta">'+meta+'</div>'
+    + (cost>0?'<div class="meta">إجمالي التكاليف: <span class="cost">'+fmtNum(cost)+' ج.م</span></div>':'')
+    + '</div>'
+    + '<div style="display:flex;gap:6px;flex-direction:column">'
+    + (a.cat==="car"?'<button class="icbtn" title="تحديث العداد" onclick="openKmForm(\''+a.id+'\')">🧭</button>':'')
+    + '<button class="icbtn" onclick="openAssetForm(\''+a.id+'\')">✏️</button>'
+    + '<button class="icbtn" onclick="delAsset(\''+a.id+'\')">🗑️</button>'
+    + '</div></div></div>';
+}
+function renderAssets(){
+  var fcat = fv("flt-asset-cat"), fpl = fv("flt-asset-place");
+  var arr = state.assets.filter(function(a){
+    if(fcat && a.cat!==fcat) return false;
+    if(fpl==="__none" && a.placeId && placeOf(a.placeId)) return false;
+    if(fpl && fpl!=="__none" && a.placeId!==fpl) return false;
+    return true;
+  });
+  var h="";
+  if(state.assets.length===0){
+    h='<div class="empty">أضف أول أصل من زرار ＋ — العربية، تكييف الصالة، فلتر المياه...</div>';
+  }else if(arr.length===0){
+    h='<div class="empty">مفيش أصول على الفلتر ده.</div>';
+  }else{
+    /* تجميع تحت الأماكن */
+    var groups=[], noPlace=[];
+    for(var p=0;p<state.places.length;p++) groups.push({place:state.places[p], items:[]});
+    for(var i=0;i<arr.length;i++){
+      var a=arr[i], put=false;
+      for(var g=0;g<groups.length;g++){
+        if(a.placeId===groups[g].place.id){ groups[g].items.push(a); put=true; break; }
+      }
+      if(!put) noPlace.push(a);
+    }
+    for(var g2=0;g2<groups.length;g2++){
+      if(groups[g2].items.length===0) continue;
+      h += '<h2 class="sec">📍 '+esc(groups[g2].place.name)+' <span style="font-weight:400">('+groups[g2].items.length+')</span></h2>';
+      for(var x=0;x<groups[g2].items.length;x++) h += assetCard(groups[g2].items[x]);
+    }
+    if(noPlace.length){
+      if(state.places.length) h += '<h2 class="sec">📦 بدون مكان ('+noPlace.length+')</h2>';
+      for(var y=0;y<noPlace.length;y++) h += assetCard(noPlace[y]);
+    }
+  }
+  document.getElementById("assets-list").innerHTML=h;
+}
+
+function renderTasks(){
+  var fa = fv("flt-task-asset"), fs = fv("flt-task-st");
+  var h="";
+  var arr=[];
+  for(var i=0;i<state.tasks.length;i++){
+    var t=state.tasks[i], s=taskStatus(t);
+    if(fa && t.assetId!==fa) continue;
+    if(fs && s.st!==fs) continue;
+    arr.push({t:t,s:s});
+  }
+  if(state.tasks.length===0){
+    h='<div class="empty">أضف صيانة دورية من زرار ＋: تغيير زيت، تنظيف فلاتر التكييف، شمعة الفلتر...</div>';
+  }else if(arr.length===0){
+    h='<div class="empty">مفيش نتائج على الفلتر ده.</div>';
+  }else{
+    var ord={overdue:0,soon:1,ok:2};
+    arr.sort(function(x,y){ return ord[x.s.st]-ord[y.s.st]; });
+    for(var j=0;j<arr.length;j++) h += taskCard(arr[j].t, arr[j].s, false);
+  }
+  document.getElementById("tasks-list").innerHTML=h;
+}
+
+function renderFaults(){
+  var rec = recurringFaults(), rh="";
+  for(var r=0;r<rec.length;r++){
+    var names=[];
+    for(var q=0;q<rec[r].faults.length;q++) names.push(esc(rec[r].faults[q].desc));
+    rh += '<div class="warnbox">🔁 <b>'+esc(rec[r].asset.name)+'</b> — '+rec[r].faults.length
+        + ' أعطال في ٩٠ يوم: '+names.join("، ")
+        + '<div class="hint" style="color:inherit">التكرار ده ممكن يعني إن فيه سبب جذري محتاج فني متخصص بدل الإصلاح المؤقت.</div></div>';
+  }
+  document.getElementById("faults-recurring").innerHTML=rh;
+
+  var fa = fv("flt-fault-asset"), fs = fv("flt-fault-st");
+  var arr = state.faults.filter(function(f){
+    if(fa && f.assetId!==fa) return false;
+    if(fs==="open" && f.fixed) return false;
+    if(fs==="fixed" && !f.fixed) return false;
+    return true;
+  });
+  var h="";
+  if(state.faults.length===0){
+    h='<div class="empty">مفيش أعطال مسجلة — يا رب دايمًا 🙏</div>';
+  }else if(arr.length===0){
+    h='<div class="empty">مفيش نتائج على الفلتر ده.</div>';
+  }else{
+    arr = arr.slice().sort(function(a,b){ return a.date<b.date?1:-1; });
+    for(var i=0;i<arr.length;i++){
+      var f=arr[i], a=assetOf(f.assetId), cat=a?catOf(a.cat):catOf("other");
+      var fpl = a&&a.placeId?placeOf(a.placeId):null;
+      h += '<div class="card '+(f.fixed?"ok":"soon")+'"><div class="stripe"></div><div class="row">'
+        + '<div style="font-size:22px">'+cat.ic+'</div>'
+        + '<div class="grow"><div class="title">'+esc(f.desc)+'</div>'
+        + '<div class="meta">'+(a?esc(a.name):"—")+(fpl?' 📍'+esc(fpl.name):'')+' · '+fmtD(f.date)
+        + (f.cost?' · <span class="cost">'+fmtNum(f.cost)+' ج.م</span>':'')+'</div>'
+        + (f.notes?'<div class="meta">'+esc(f.notes)+'</div>':'')+'</div>'
+        + (f.fixed?'<span class="badge green">تم الإصلاح</span>':'<span class="badge amber">قائم</span>')
+        + '</div><div class="fab-row" style="margin:8px 0 0">'
+        + (f.fixed?'':'<button class="btn-ok btn-sm" onclick="fixFault(\''+f.id+'\')">✅ اتصلح</button>')
+        + '<button class="btn-ghost btn-sm" onclick="openFaultForm(\''+f.id+'\')">✏️ تعديل</button>'
+        + '<button class="btn-danger btn-sm" onclick="delFault(\''+f.id+'\')">🗑️</button>'
+        + '</div></div>';
+    }
+  }
+  document.getElementById("faults-list").innerHTML=h;
+}
+
+function renderLog(){
+  var now=new Date(), y=now.getFullYear(), mo=pad(now.getMonth()+1);
+  var mSum=0, ySum=0;
+  var all=[];
+  for(var i=0;i<state.records.length;i++){ var r=state.records[i]; all.push({d:r.date, title:r.title, cost:+r.cost||0, assetId:r.assetId, kind:"🔧 صيانة", type:"rec", id:r.id}); }
+  for(var j=0;j<state.faults.length;j++){ var f=state.faults[j]; all.push({d:f.date, title:f.desc, cost:+f.cost||0, assetId:f.assetId, kind:"⚡ عطل", type:"fault", id:f.id}); }
+  for(var k=0;k<all.length;k++){
+    if(all[k].d && all[k].d.slice(0,4)===String(y)) ySum+=all[k].cost;
+    if(all[k].d && all[k].d.slice(0,7)===y+"-"+mo) mSum+=all[k].cost;
+  }
+  document.getElementById("k-cost-month").textContent=fmtNum(mSum);
+  document.getElementById("k-cost-year").textContent=fmtNum(ySum);
+
+  var fa=fv("flt-log-asset"), ft=fv("flt-log-type");
+  all = all.filter(function(e){
+    if(fa && e.assetId!==fa) return false;
+    if(ft && e.type!==ft) return false;
+    return true;
+  });
+  all.sort(function(a,b){ return a.d<b.d?1:-1; });
+  var h="";
+  if(all.length===0){ h='<div class="empty">هيظهر هنا كل صيانة تعملها وكل عطل تسجله.</div>'; }
+  for(var m=0;m<Math.min(all.length,150);m++){
+    var e=all[m], a=assetOf(e.assetId);
+    h += '<div class="card ok"><div class="stripe"></div><div class="row">'
+      + '<div class="grow"><div class="title" style="font-size:14px">'+esc(e.title)+'</div>'
+      + '<div class="meta">'+e.kind+' · '+(a?esc(a.name):"—")+' · '+fmtD(e.d)+'</div></div>'
+      + (e.cost?'<span class="cost">'+fmtNum(e.cost)+' ج.م</span>':'')
+      + (e.type==="rec"?'<button class="icbtn" onclick="delRecord(\''+e.id+'\')">🗑️</button>':'')
+      + '</div></div>';
+  }
+  document.getElementById("log-list").innerHTML=h;
+}
+
+/* ================= المودالات ================= */
+function openModal(html){
+  document.getElementById("modal-body").innerHTML=html;
+  document.getElementById("modal-bk").classList.add("open");
+}
+function closeModal(){ document.getElementById("modal-bk").classList.remove("open"); }
+
+function assetOptions(sel){
+  var h="";
+  for(var i=0;i<state.assets.length;i++){
+    var a=state.assets[i];
+    var p=a.placeId?placeOf(a.placeId):null;
+    h+='<option value="'+a.id+'"'+(a.id===sel?" selected":"")+'>'+catOf(a.cat).ic+" "+esc(a.name)+(p?" — "+esc(p.name):"")+'</option>';
+  }
+  return h;
+}
+
+/* --- زرار الإضافة الموحّد: اختار عطل أو صيانة دورية أو أصل --- */
+function openQuickAdd(){
+  openModal(
+    '<h3>＋ إضافة جديد — اختار النوع</h3>'
+    +'<button class="pickbtn" onclick="closeModal();openFaultForm()">'
+    +'<span class="pi">⚡</span><span><span class="pt">تسجيل عطل</span><br><span class="pd">حاجة باظت أو عطلت — التكييف مش بيبرد، لمبة بتنور وتطفي</span></span></button>'
+    +'<button class="pickbtn" onclick="closeModal();openTaskForm()">'
+    +'<span class="pi">🔧</span><span><span class="pt">صيانة دورية</span><br><span class="pd">حاجة بتتكرر كل مدة — زيت العربية، فلاتر التكييف، شمعات الفلتر</span></span></button>'
+    +'<button class="pickbtn" onclick="closeModal();openAssetForm()">'
+    +'<span class="pi">🚗</span><span><span class="pt">أصل جديد</span><br><span class="pd">عربية، تكييف، جهاز... عشان تسجل عليه صيانات وأعطال</span></span></button>'
+    +'<div class="actions"><button class="btn-ghost" onclick="closeModal()">إلغاء</button></div>'
+  );
+}
+
+/* --- أصل --- */
+function placeSelectHTML(sel){
+  var h='<select id="af-place" onchange="afPlaceToggle()"><option value="">— بدون مكان —</option>';
+  for(var i=0;i<state.places.length;i++){
+    var p=state.places[i];
+    h+='<option value="'+p.id+'"'+(p.id===sel?" selected":"")+'>📍 '+esc(p.name)+'</option>';
+  }
+  h+='<option value="__new">＋ إضافة مكان جديد...</option></select>';
+  h+='<div id="af-newplace-wrap" style="display:none"><label class="f">اسم المكان الجديد</label><input id="af-newplace" placeholder="مثال: بيت الزقازيق، شقة العاصمة، ماونت فيو الساحل"></div>';
+  return h;
+}
+function afPlaceToggle(){
+  var v=document.getElementById("af-place").value;
+  document.getElementById("af-newplace-wrap").style.display = v==="__new"?"block":"none";
+}
+var editAssetId=null;
+function openAssetForm(id){
+  editAssetId=id||null;
+  var a = id?assetOf(id):null;
+  var chips="";
+  for(var i=0;i<CATS.length;i++){
+    var c=CATS[i];
+    chips+='<span class="chip'+((a?a.cat:"car")===c.id?" on":"")+'" data-cat="'+c.id+'" onclick="pickCat(this)">'+c.ic+" "+c.name+'</span>';
+  }
+  var isCar=(a?a.cat:"car")==="car";
+  openModal(
+    '<h3>'+(a?"تعديل أصل":"إضافة أصل جديد")+'</h3>'
+    +'<label class="f">الاسم</label><input id="af-name" placeholder="مثال: العربية، تكييف الصالة، فلتر المطبخ" value="'+(a?esc(a.name):"")+'">'
+    +'<label class="f">التصنيف</label><div class="chiprow" id="af-cats">'+chips+'</div>'
+    +'<label class="f" id="af-model-lbl">'+(isCar?"نوع العربية (الماركة والموديل)":"النوع / الماركة (اختياري)")+'</label>'
+    +'<input id="af-model" placeholder="'+(isCar?"مثال: لانسر 2016، توسان 2022":"مثال: شارب 1.5 حصان، توشيبا")+'" value="'+(a?esc(a.model||""):"")+'">'
+    +'<label class="f">📍 المكان</label>'+placeSelectHTML(a?a.placeId:null)
+    +'<div id="af-km-wrap" style="display:'+(isCar?"block":"none")+'">'
+    +'<label class="f">قراءة العداد الحالية (كم)</label><input id="af-km" type="number" inputmode="numeric" value="'+(a&&a.currentKm!=null?a.currentKm:"")+'" placeholder="مثال: 85000"></div>'
+    +'<label class="f">ملاحظات</label><textarea id="af-notes">'+(a?esc(a.notes||""):"")+'</textarea>'
+    +'<div class="actions"><button class="btn-ghost" onclick="closeModal()">إلغاء</button>'
+    +'<button class="btn-primary" onclick="saveAsset()">حفظ</button></div>'
+  );
+}
+function pickCat(el){
+  var chips=document.querySelectorAll("#af-cats .chip");
+  for(var i=0;i<chips.length;i++) chips[i].classList.remove("on");
+  el.classList.add("on");
+  var isCar = el.getAttribute("data-cat")==="car";
+  document.getElementById("af-km-wrap").style.display = isCar?"block":"none";
+  document.getElementById("af-model-lbl").textContent = isCar?"نوع العربية (الماركة والموديل)":"النوع / الماركة (اختياري)";
+}
+function saveAsset(){
+  var name=document.getElementById("af-name").value.trim();
+  if(!name){ toast("اكتب اسم الأصل"); return; }
+  var catEl=document.querySelector("#af-cats .chip.on");
+  var cat=catEl?catEl.getAttribute("data-cat"):"other";
+  var kmv=document.getElementById("af-km").value;
+  var notes=document.getElementById("af-notes").value.trim();
+  var model=document.getElementById("af-model").value.trim();
+  /* المكان: اختيار موجود أو إنشاء جديد */
+  var placeId=document.getElementById("af-place").value;
+  if(placeId==="__new"){
+    var pn=document.getElementById("af-newplace").value.trim();
+    if(!pn){ toast("اكتب اسم المكان الجديد"); return; }
+    var np={id:uid(), name:pn};
+    state.places.push(np);
+    placeId=np.id;
+  }
+  if(editAssetId){
+    var a=assetOf(editAssetId);
+    a.name=name; a.cat=cat; a.notes=notes; a.model=model;
+    a.placeId=placeId||null;
+    a.currentKm = (cat==="car" && kmv!=="") ? +kmv : a.currentKm;
+  }else{
+    state.assets.push({ id:uid(), name:name, cat:cat, notes:notes, model:model,
+      placeId:placeId||null,
+      currentKm:(cat==="car" && kmv!=="")?+kmv:null, createdAt:todayStr() });
+  }
+  save(); closeModal(); render(); toast("تم الحفظ ✅");
+}
+function delAsset(id){
+  var a=assetOf(id); if(!a) return;
+  if(!confirm("حذف «"+a.name+"» وكل الصيانات والأعطال المرتبطة بيه؟")) return;
+  state.assets = state.assets.filter(function(x){return x.id!==id;});
+  state.tasks = state.tasks.filter(function(x){return x.assetId!==id;});
+  state.faults = state.faults.filter(function(x){return x.assetId!==id;});
+  state.records = state.records.filter(function(x){return x.assetId!==id;});
+  save(); render(); toast("تم الحذف");
+}
+
+/* --- إدارة الأماكن --- */
+var PLACE_SUGGESTIONS = ["بيت الزقازيق","شقة العاصمة","ماونت فيو الساحل","شقة والدتي"];
+function openPlacesForm(){
+  var h='<h3>📍 إدارة الأماكن</h3>';
+  if(state.places.length===0){
+    h+='<div class="hint" style="margin-bottom:8px">أضف الأماكن اللي عندك فيها أجهزة، وبعدين حدد المكان لكل أصل من شاشة تعديله.</div>';
+  }
+  for(var i=0;i<state.places.length;i++){
+    var p=state.places[i], cnt=0;
+    for(var j=0;j<state.assets.length;j++) if(state.assets[j].placeId===p.id) cnt++;
+    h+='<div class="card ok" style="margin-bottom:8px"><div class="stripe"></div><div class="row">'
+      +'<div style="font-size:20px">📍</div>'
+      +'<div class="grow"><div class="title" style="font-size:14px">'+esc(p.name)+'</div>'
+      +'<div class="meta">'+cnt+' أصل</div></div>'
+      +'<button class="icbtn" onclick="renamePlace(\''+p.id+'\')">✏️</button>'
+      +'<button class="icbtn" onclick="delPlace(\''+p.id+'\')">🗑️</button>'
+      +'</div></div>';
+  }
+  /* اقتراحات سريعة للأماكن اللي لسه متضافتش */
+  var sug="";
+  for(var s=0;s<PLACE_SUGGESTIONS.length;s++){
+    var exists=false;
+    for(var k=0;k<state.places.length;k++) if(state.places[k].name===PLACE_SUGGESTIONS[s]) exists=true;
+    if(!exists) sug+='<span class="chip" onclick="quickAddPlace('+s+')">＋ '+esc(PLACE_SUGGESTIONS[s])+'</span>';
+  }
+  if(sug) h+='<label class="f">إضافة سريعة</label><div class="chiprow">'+sug+'</div>';
+  h+='<label class="f">مكان جديد</label>'
+    +'<div style="display:flex;gap:8px"><input id="pl-new" placeholder="اسم المكان" style="flex:1">'
+    +'<button class="btn-primary" style="flex:0 0 auto" onclick="addPlace()">إضافة</button></div>'
+    +'<div class="actions"><button class="btn-ghost" onclick="closeModal()">إغلاق</button></div>';
+  openModal(h);
+}
+function quickAddPlace(idx){
+  state.places.push({id:uid(), name:PLACE_SUGGESTIONS[idx]});
+  save(); render(); openPlacesForm(); toast("تمت الإضافة 📍");
+}
+function addPlace(){
+  var n=document.getElementById("pl-new").value.trim();
+  if(!n){ toast("اكتب اسم المكان"); return; }
+  for(var i=0;i<state.places.length;i++) if(state.places[i].name===n){ toast("المكان موجود بالفعل"); return; }
+  state.places.push({id:uid(), name:n});
+  save(); render(); openPlacesForm(); toast("تمت الإضافة 📍");
+}
+function renamePlace(id){
+  var p=placeOf(id); if(!p) return;
+  var n=prompt("الاسم الجديد للمكان:", p.name);
+  if(n===null) return;
+  n=n.trim();
+  if(!n){ toast("الاسم فاضي"); return; }
+  p.name=n;
+  save(); render(); openPlacesForm(); toast("تم التعديل ✏️");
+}
+function delPlace(id){
+  var p=placeOf(id); if(!p) return;
+  var cnt=0;
+  for(var i=0;i<state.assets.length;i++) if(state.assets[i].placeId===id) cnt++;
+  if(!confirm("حذف مكان «"+p.name+"»؟"+(cnt? " الـ"+cnt+" أصل اللي فيه هيتحولوا لـ«بدون مكان» (مش هيتمسحوا).":""))) return;
+  state.places = state.places.filter(function(x){return x.id!==id;});
+  for(var j=0;j<state.assets.length;j++) if(state.assets[j].placeId===id) state.assets[j].placeId=null;
+  save(); render(); openPlacesForm(); toast("تم الحذف");
+}
+
+/* --- تحديث العداد (مودال بدل prompt) --- */
+var kmAssetId=null;
+function openKmForm(id){
+  var a=assetOf(id); if(!a) return;
+  kmAssetId=id;
+  openModal(
+    '<h3>🧭 تحديث عداد — '+esc(a.name)+'</h3>'
+    +'<label class="f">قراءة العداد الحالية (كم)</label>'
+    +'<input id="km-val" type="number" inputmode="numeric" value="'+(a.currentKm!=null?a.currentKm:"")+'" placeholder="مثال: 87500">'
+    +'<div class="hint">تحديث العداد بيخلي حساب مواعيد الزيت والفلاتر مظبوط.</div>'
+    +'<div class="actions"><button class="btn-ghost" onclick="closeModal()">إلغاء</button>'
+    +'<button class="btn-primary" onclick="saveKm()">حفظ</button></div>'
+  );
+}
+function saveKm(){
+  var a=assetOf(kmAssetId); if(!a) return;
+  var v=document.getElementById("km-val").value;
+  if(v==="" || isNaN(+v)){ toast("اكتب قراءة صحيحة"); return; }
+  if(a.currentKm!=null && +v < +a.currentKm){
+    if(!confirm("القراءة الجديدة أقل من القديمة ("+fmtNum(a.currentKm)+" كم). متأكد؟")) return;
+  }
+  a.currentKm=+v;
+  save(); closeModal(); render(); toast("تم تحديث العداد 🧭");
+}
+
+/* --- صيانة دورية --- */
+var editTaskId=null;
+function openTaskForm(id){
+  if(state.assets.length===0){ toast("أضف أصل الأول"); openAssetForm(); return; }
+  editTaskId=id||null;
+  var t = id?taskOf(id):null;
+  openModal(
+    '<h3>'+(t?"تعديل صيانة دورية":"🔧 صيانة دورية جديدة")+'</h3>'
+    +'<label class="f">الأصل</label><select id="tf-asset" onchange="tfKmToggle()">'+assetOptions(t?t.assetId:null)+'</select>'
+    +'<label class="f">اسم الصيانة</label><input id="tf-title" placeholder="مثال: تغيير زيت الموتور، تنظيف فلاتر التكييف" value="'+(t?esc(t.title):"")+'">'
+    +'<div class="grid2">'
+    +'<div><label class="f">كل كام يوم؟</label><input id="tf-days" type="number" inputmode="numeric" placeholder="مثال: 90" value="'+(t&&t.intervalDays?t.intervalDays:"")+'"></div>'
+    +'<div id="tf-km-wrap"><label class="f">أو كل كام كم؟</label><input id="tf-km" type="number" inputmode="numeric" placeholder="مثال: 5000" value="'+(t&&t.intervalKm?t.intervalKm:"")+'"></div>'
+    +'</div>'
+    +'<label class="f">آخر مرة اتعملت (التاريخ)</label><input id="tf-last" type="date" value="'+(t&&t.lastDone?t.lastDone:todayStr())+'">'
+    +'<div id="tf-lastkm-wrap"><label class="f">قراءة العداد وقتها (كم)</label><input id="tf-lastkm" type="number" inputmode="numeric" value="'+(t&&t.lastKm!=null?t.lastKm:"")+'" placeholder="لو سبته فاضي هناخد عداد العربية الحالي"></div>'
+    +'<label class="f">ملاحظات</label><textarea id="tf-notes">'+(t?esc(t.notes||""):"")+'</textarea>'
+    +'<div class="actions"><button class="btn-ghost" onclick="closeModal()">إلغاء</button>'
+    +'<button class="btn-primary" onclick="saveTask()">حفظ</button></div>'
+  );
+  tfKmToggle();
+}
+function tfKmToggle(){
+  var sel=document.getElementById("tf-asset");
+  var a=assetOf(sel.value);
+  var isCar = a && a.cat==="car";
+  document.getElementById("tf-km-wrap").style.display = isCar?"block":"none";
+  document.getElementById("tf-lastkm-wrap").style.display = isCar?"block":"none";
+}
+function saveTask(){
+  var assetId=document.getElementById("tf-asset").value;
+  var title=document.getElementById("tf-title").value.trim();
+  var days=document.getElementById("tf-days").value;
+  var km=document.getElementById("tf-km").value;
+  var last=document.getElementById("tf-last").value;
+  var lastKm=document.getElementById("tf-lastkm").value;
+  if(!title){ toast("اكتب اسم الصيانة"); return; }
+  if(!days && !km){ toast("حدد المدة بالأيام أو بالكيلومترات"); return; }
+  var a=assetOf(assetId);
+  var lastKmVal = null;
+  if(km!==""){
+    if(lastKm!=="" && !isNaN(+lastKm)) lastKmVal=+lastKm;
+    else if(a && a.currentKm!=null) lastKmVal=+a.currentKm; /* افتراضي: عداد العربية الحالي */
+  }
+  var obj={
+    assetId:assetId, title:title,
+    intervalDays: days!==""?+days:null,
+    intervalKm: km!==""?+km:null,
+    lastDone: last||todayStr(),
+    lastKm: lastKmVal,
+    notes: document.getElementById("tf-notes").value.trim()
+  };
+  if(editTaskId){
+    for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id===editTaskId){
+      obj.id=editTaskId; state.tasks[i]=obj;
+    }
+  }else{ obj.id=uid(); state.tasks.push(obj); }
+  save(); closeModal(); render(); toast("تم الحفظ ✅");
+}
+function delTask(id){
+  if(!confirm("حذف الصيانة الدورية دي؟")) return;
+  state.tasks=state.tasks.filter(function(x){return x.id!==id;});
+  save(); render(); toast("تم الحذف");
+}
+
+/* --- تنفيذ صيانة (مودال بدل prompt) --- */
+var doneTaskId=null;
+function openDoneForm(id){
+  var t=taskOf(id); if(!t) return;
+  doneTaskId=id;
+  var a=assetOf(t.assetId);
+  var isCar = a && a.cat==="car";
+  openModal(
+    '<h3>✅ تمت الصيانة — '+esc(t.title)+'</h3>'
+    +'<div class="grid2">'
+    +'<div><label class="f">التاريخ</label><input id="df-date" type="date" value="'+todayStr()+'"></div>'
+    +'<div><label class="f">التكلفة (ج.م)</label><input id="df-cost" type="number" inputmode="decimal" placeholder="اختياري"></div>'
+    +'</div>'
+    +(isCar?'<label class="f">قراءة العداد دلوقتي (كم)</label><input id="df-km" type="number" inputmode="numeric" value="'+(a.currentKm!=null?a.currentKm:"")+'">':'')
+    +'<label class="f">ملاحظات (الفني / قطع الغيار)</label><textarea id="df-notes"></textarea>'
+    +'<div class="actions"><button class="btn-ghost" onclick="closeModal()">إلغاء</button>'
+    +'<button class="btn-primary" onclick="confirmDone()">تسجيل</button></div>'
+  );
+}
+function confirmDone(){
+  var t=taskOf(doneTaskId); if(!t) return;
+  var a=assetOf(t.assetId);
+  var date=document.getElementById("df-date").value||todayStr();
+  var cost=+document.getElementById("df-cost").value||0;
+  var notes=document.getElementById("df-notes").value.trim();
+  t.lastDone=date;
+  var kmEl=document.getElementById("df-km");
+  if(kmEl && kmEl.value!=="" && !isNaN(+kmEl.value)){
+    if(a) a.currentKm=+kmEl.value;
+    t.lastKm=+kmEl.value;
+  }
+  state.records.push({ id:uid(), assetId:t.assetId, taskId:t.id, date:date,
+    title:t.title, cost:cost, notes:notes });
+  save(); closeModal(); render(); toast("اتسجلت في السجل 📒");
+}
+function delRecord(id){
+  if(!confirm("حذف السجل ده؟")) return;
+  state.records=state.records.filter(function(x){return x.id!==id;});
+  save(); render();
+}
+
+/* --- عطل --- */
+var editFaultId=null;
+var ffFixed=false;
+function openFaultForm(id){
+  if(state.assets.length===0){ toast("أضف أصل الأول"); openAssetForm(); return; }
+  editFaultId=id||null;
+  var f=null;
+  if(id) for(var i=0;i<state.faults.length;i++) if(state.faults[i].id===id) f=state.faults[i];
+  ffFixed = f?!!f.fixed:false;
+  openModal(
+    '<h3>'+(f?"تعديل عطل":"⚡ تسجيل عطل")+'</h3>'
+    +'<label class="f">الأصل</label><select id="ff-asset">'+assetOptions(f?f.assetId:null)+'</select>'
+    +'<label class="f">وصف العطل</label><input id="ff-desc" placeholder="مثال: التكييف مش بيبرد، لمبة الصالة بتنور وتطفي" value="'+(f?esc(f.desc):"")+'">'
+    +'<div class="grid2">'
+    +'<div><label class="f">التاريخ</label><input id="ff-date" type="date" value="'+(f?f.date:todayStr())+'"></div>'
+    +'<div><label class="f">تكلفة الإصلاح (ج.م)</label><input id="ff-cost" type="number" inputmode="decimal" value="'+(f&&f.cost?f.cost:"")+'" placeholder="اختياري"></div>'
+    +'</div>'
+    +'<label class="f">الحالة</label><div class="chiprow">'
+    +'<span class="chip'+(ffFixed?"":" on")+'" id="ff-st-open" onclick="ffState(false)">⚠️ قائم</span>'
+    +'<span class="chip'+(ffFixed?" on":"")+'" id="ff-st-fixed" onclick="ffState(true)">✅ تم الإصلاح</span></div>'
+    +'<label class="f">ملاحظات (السبب / الفني / قطع الغيار)</label><textarea id="ff-notes">'+(f?esc(f.notes||""):"")+'</textarea>'
+    +'<div class="actions"><button class="btn-ghost" onclick="closeModal()">إلغاء</button>'
+    +'<button class="btn-primary" onclick="saveFault()">حفظ</button></div>'
+  );
+}
+function ffState(v){
+  ffFixed=v;
+  document.getElementById("ff-st-open").classList.toggle("on",!v);
+  document.getElementById("ff-st-fixed").classList.toggle("on",v);
+}
+function saveFault(){
+  var desc=document.getElementById("ff-desc").value.trim();
+  if(!desc){ toast("اكتب وصف العطل"); return; }
+  var obj={
+    assetId:document.getElementById("ff-asset").value,
+    desc:desc,
+    date:document.getElementById("ff-date").value||todayStr(),
+    cost:+document.getElementById("ff-cost").value||0,
+    fixed:ffFixed,
+    notes:document.getElementById("ff-notes").value.trim()
+  };
+  if(editFaultId){
+    for(var i=0;i<state.faults.length;i++) if(state.faults[i].id===editFaultId){ obj.id=editFaultId; state.faults[i]=obj; }
+  }else{ obj.id=uid(); state.faults.push(obj); }
+  save(); closeModal(); render(); toast("تم الحفظ ✅");
+}
+function fixFault(id){
+  for(var i=0;i<state.faults.length;i++) if(state.faults[i].id===id) state.faults[i].fixed=true;
+  save(); render(); toast("الحمد لله اتصلح ✅");
+}
+function delFault(id){
+  if(!confirm("حذف العطل ده؟")) return;
+  state.faults=state.faults.filter(function(x){return x.id!==id;});
+  save(); render(); toast("تم الحذف");
+}
+
+/* ================= ICS للتقويم ================= */
+function downloadICS(taskId){
+  var t=taskOf(taskId); if(!t) return;
+  var s=taskStatus(t);
+  if(!s.due){ toast("مفيش تاريخ استحقاق محسوب"); return; }
+  var a=assetOf(t.assetId);
+  var dt=s.due.replace(/-/g,"");
+  var ics="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Siyanty//AR\r\nBEGIN:VEVENT\r\n"
+    +"UID:"+t.id+"@siyanty\r\nDTSTART;VALUE=DATE:"+dt+"\r\n"
+    +"SUMMARY:🔧 "+(t.title)+(a?" — "+a.name:"")+"\r\n"
+    +"DESCRIPTION:موعد صيانة من تطبيق صيانتي\r\n"
+    +"BEGIN:VALARM\r\nTRIGGER:-P1D\r\nACTION:DISPLAY\r\nDESCRIPTION:تذكير صيانة\r\nEND:VALARM\r\n"
+    +"END:VEVENT\r\nEND:VCALENDAR";
+  var blob=new Blob([ics],{type:"text/calendar"});
+  var url=URL.createObjectURL(blob);
+  var link=document.createElement("a");
+  link.href=url; link.download="siyanty-"+dt+".ics";
+  document.body.appendChild(link); link.click();
+  setTimeout(function(){ document.body.removeChild(link); URL.revokeObjectURL(url); },500);
+  toast("افتح الملف وهيتضاف للتقويم 📅");
+}
+
+/* ================= نسخ احتياطي ================= */
+function exportJSON(){
+  var blob=new Blob([JSON.stringify(state,null,1)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var link=document.createElement("a");
+  link.href=url; link.download="siyanty-backup-"+todayStr()+".json";
+  document.body.appendChild(link); link.click();
+  setTimeout(function(){ document.body.removeChild(link); URL.revokeObjectURL(url); },500);
+  toast("تم تصدير النسخة ⬇️");
+}
+function importJSON(inp){
+  var f=inp.files&&inp.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var d=JSON.parse(rd.result);
+      if(!d.assets || !d.tasks) throw new Error("bad");
+      if(!confirm("هيتم استبدال البيانات الحالية بالنسخة المستوردة. متأكد؟")) return;
+      state.assets=d.assets||[]; state.tasks=d.tasks||[];
+      state.records=d.records||[]; state.faults=d.faults||[];
+      state.places=d.places||[];
+      save(); render(); toast("تم الاستيراد ✅");
+    }catch(e){ toast("الملف مش نسخة صحيحة ⚠️"); }
+    inp.value="";
+  };
+  rd.readAsText(f);
+}
+function wipeAll(){
+  if(!confirm("مسح كل البيانات نهائيًا؟ مفيش رجوع.")) return;
+  if(!confirm("متأكد تمامًا؟ اعمل تصدير نسخة الأول لو محتاج.")) return;
+  state={assets:[],tasks:[],records:[],faults:[],places:[]};
+  save(); render(); toast("تم المسح");
+}
+
+/* ================= قوالب جاهزة ================= */
+function loadTemplates(){
+  if(!confirm("هيتم إضافة أصول وصيانات جاهزة (عربية، تكييف، فلتر مياه، سخان، غسالة، كهرباء) — تقدر تعدلها بعدين. موافق؟")) return;
+  var today=todayStr();
+  function A(name,cat,km){ var id=uid(); state.assets.push({id:id,name:name,cat:cat,notes:"",currentKm:km!=null?km:null,createdAt:today}); return id; }
+  function T(assetId,title,days,km){ state.tasks.push({id:uid(),assetId:assetId,title:title,intervalDays:days||null,intervalKm:km||null,lastDone:today,lastKm:km?0:null,notes:""}); }
+  var car=A("العربية","car",0);
+  T(car,"تغيير زيت الموتور والفلتر",180,5000);
+  T(car,"فلتر الهواء",null,10000);
+  T(car,"مراجعة الفرامل (تيل)",null,20000);
+  T(car,"مياه التبريد والردياتير",365,null);
+  T(car,"ضغط الكاوتش والاستبن",30,null);
+  var ac=A("تكييف الصالة","ac",null);
+  T(ac,"تنظيف فلاتر التكييف",30,null);
+  T(ac,"غسيل وصيانة شاملة (فني)",365,null);
+  var fl=A("فلتر المياه","filter",null);
+  T(fl,"تغيير الشمعات 1-2-3",90,null);
+  T(fl,"تغيير الممبرين",365,null);
+  var wh=A("سخان المياه","appl",null);
+  T(wh,"صيانة السخان وتنظيف الترسيبات",365,null);
+  var ws=A("الغسالة","appl",null);
+  T(ws,"تنظيف الفلتر وفقاعة الصابون",90,null);
+  var el=A("كهرباء البيت واللمبات","elec",null);
+  T(el,"مراجعة اللمبات والمفاتيح",90,null);
+  T(el,"مراجعة لوحة الكهرباء والفلنكات (فني)",365,null);
+  save(); render(); go("assets"); toast("تم تحميل القوالب 📋 — عدّل التواريخ والعداد");
+}
+
+/* ================= تشغيل ================= */
+load(); applyTheme(); render();
+</script>
+</body>
+</html>

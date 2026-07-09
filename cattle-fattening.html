@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متابعة مشروع تسمين عجول</title>
+<style>
+:root{
+  --bg:#0f1419; --card:#1a212b; --card2:#222b38; --line:#2e3a4a;
+  --txt:#e6edf3; --muted:#8b98a9; --acc:#3b9eff; --acc2:#1f6feb;
+  --ok:#2ea043; --warn:#d29922; --bad:#f85149; --gold:#e3b341;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI","Tahoma",sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6}
+header{background:linear-gradient(135deg,#1f6feb,#0a2540);padding:14px 16px;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+header h1{font-size:17px;display:flex;align-items:center;gap:8px}
+header .sub{font-size:11px;color:#bcd4f5;margin-top:2px}
+nav{display:flex;gap:4px;overflow-x:auto;background:var(--card);padding:6px;position:sticky;top:58px;z-index:40;border-bottom:1px solid var(--line)}
+nav button{background:transparent;color:var(--muted);border:none;padding:9px 13px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit}
+nav button.active{background:var(--acc2);color:#fff}
+.wrap{padding:14px;max-width:1400px;margin:0 auto}
+.view{display:none}
+.view.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:15px;margin-bottom:12px;color:var(--acc);display:flex;align-items:center;gap:6px}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.field{flex:1;min-width:130px;margin-bottom:8px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:9px;border-radius:8px;font-family:inherit;font-size:13px}
+input:focus,select:focus{outline:none;border-color:var(--acc)}
+button.btn{background:var(--acc2);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600}
+button.btn:hover{background:var(--acc)}
+button.btn.ok{background:var(--ok)} button.btn.bad{background:var(--bad)} button.btn.warn{background:var(--warn);color:#222}
+button.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+.btn-sm{padding:5px 9px;font-size:11px;border-radius:6px}
+.tablewrap{overflow-x:auto;border-radius:10px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center}
+th{background:var(--card2);color:var(--acc);position:sticky;top:0;font-weight:600}
+tr:hover td{background:rgba(59,158,255,.05)}
+.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.b-act{background:rgba(46,160,67,.2);color:#3fb950}
+.b-sold{background:rgba(248,81,73,.15);color:#f85149}
+.b-trans{background:rgba(210,153,34,.2);color:var(--gold)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+.stat .v{font-size:22px;font-weight:700;color:var(--acc)}
+.stat .l{font-size:11px;color:var(--muted);margin-top:3px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal.show{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;max-width:600px;width:100%;margin-top:30px}
+.modal-box h3{color:var(--acc);margin-bottom:14px;font-size:16px}
+.close-x{float:left;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+.tag{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin:3px;font-size:12px}
+.tag span{color:var(--bad);cursor:pointer;margin-right:6px;font-weight:700}
+.muted{color:var(--muted)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--ok);color:#fff;padding:12px 18px;border-radius:10px;z-index:200;display:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.weigh-block{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}
+.weigh-block .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:var(--gold)}
+.pos{color:#3fb950}.neg{color:#f85149}
+.pen-pill{cursor:pointer;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;text-align:center;min-width:90px}
+.pen-pill.sel{border-color:var(--acc);background:rgba(59,158,255,.12)}
+.pen-pill .n{font-weight:700;font-size:15px}
+.pen-pill .c{font-size:10px;color:var(--muted)}
+small.hint{color:var(--muted);font-size:10px}
+@media(max-width:600px){.field{min-width:46%}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐂 متابعة مشروع تسمين عجول</h1>
+  <div class="sub">نظام متابعة دورية لوزن وزيادة وتحويلات وبيع العجول</div>
+</header>
+<nav id="nav"></nav>
+<div class="wrap">
+
+  <!-- لوحة التحكم -->
+  <div class="view active" id="v-dash">
+    <div class="card">
+      <h2>📊 ملخص المشروع</h2>
+      <div class="stat-grid" id="dashStats"></div>
+    </div>
+    <div class="card">
+      <h2>🏠 العنابر</h2>
+      <div class="row" id="penOverview"></div>
+    </div>
+  </div>
+
+  <!-- العجول -->
+  <div class="view" id="v-calves">
+    <div class="card">
+      <h2>➕ إدخال عجل جديد</h2>
+      <div class="row">
+        <div class="field"><label>رقم العجل</label><input id="c_no" placeholder="رقم"></div>
+        <div class="field"><label>المورد</label><select id="c_sup"></select></div>
+        <div class="field"><label>النوع</label><select id="c_type"></select></div>
+        <div class="field"><label>الجنس</label><select id="c_sex"></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>تاريخ التوريد</label><input type="date" id="c_date"></div>
+        <div class="field"><label>الوزن عند التوريد (كجم)</label><input type="number" id="c_w" placeholder="0"></div>
+        <div class="field"><label>سعر الشراء</label><input type="number" id="c_buy" placeholder="0"></div>
+        <div class="field"><label>العنبر</label><select id="c_pen"></select></div>
+      </div>
+      <button class="btn ok" onclick="addCalf()">حفظ العجل</button>
+    </div>
+    <div class="card">
+      <h2>🐂 قائمة العجول</h2>
+      <div class="row" style="margin-bottom:10px">
+        <div class="field"><input id="searchCalf" placeholder="🔍 بحث برقم العجل أو المورد..." oninput="renderCalves()"></div>
+        <div class="field"><select id="filterPen" onchange="renderCalves()"><option value="">كل العنابر</option></select></div>
+        <div class="field"><select id="filterStatus" onchange="renderCalves()">
+          <option value="">كل الحالات</option><option value="active">بالمعلف</option><option value="sold">مباع</option>
+        </select></div>
+      </div>
+      <div class="tablewrap"><table id="calvesTable"></table></div>
+    </div>
+  </div>
+
+  <!-- التحويلات -->
+  <div class="view" id="v-transfer">
+    <div class="card">
+      <h2>🔄 نقل عجل بين العنابر</h2>
+      <div class="row">
+        <div class="field"><label>العجل</label><select id="t_calf"></select></div>
+        <div class="field"><label>إلى عنبر</label><select id="t_pen"></select></div>
+        <div class="field"><label>تاريخ النقل</label><input type="date" id="t_date"></div>
+        <div class="field"><label>ملاحظة</label><input id="t_note" placeholder="اختياري"></div>
+      </div>
+      <button class="btn warn" onclick="doTransfer()">تنفيذ النقل</button>
+    </div>
+    <div class="card">
+      <h2>📋 سجل التحويلات</h2>
+      <div class="tablewrap"><table id="transferTable"></table></div>
+    </div>
+  </div>
+
+  <!-- البيع -->
+  <div class="view" id="v-sell">
+    <div class="card">
+      <h2>💰 بيع عجل</h2>
+      <div class="row">
+        <div class="field"><label>العجل</label><select id="s_calf" onchange="sellInfo()"></select></div>
+        <div class="field"><label>تاريخ البيع</label><input type="date" id="s_date"></div>
+        <div class="field"><label>الوزن النهائي (كجم)</label><input type="number" id="s_w" placeholder="0"></div>
+        <div class="field"><label>سعر البيع</label><input type="number" id="s_price" placeholder="0"></div>
+      </div>
+      <div id="sellPreview" class="muted" style="margin:8px 0"></div>
+      <button class="btn bad" onclick="doSell()">تأكيد البيع</button>
+    </div>
+    <div class="card">
+      <h2>🧾 العجول المباعة</h2>
+      <div class="tablewrap"><table id="soldTable"></table></div>
+    </div>
+  </div>
+
+  <!-- التقارير -->
+  <div class="view" id="v-report">
+    <div class="card">
+      <h2>📈 تقرير الأداء (متوسطات)</h2>
+      <div class="stat-grid" id="repStats"></div>
+    </div>
+    <div class="card">
+      <h2>🏆 ترتيب العجول حسب معدل الزيادة اليومي</h2>
+      <div class="tablewrap"><table id="rankTable"></table></div>
+    </div>
+  </div>
+
+  <!-- الإعدادات -->
+  <div class="view" id="v-settings">
+    <div class="card">
+      <h2>🏠 إدارة العنابر</h2>
+      <div class="row"><div class="field"><input id="newPen" placeholder="اسم/رقم العنبر"></div>
+      <button class="btn ok" onclick="addList('pens','newPen')">إضافة</button>
+      <button class="btn ghost" onclick="autoPens()">توليد 30 عنبر تلقائي</button></div>
+      <div id="pensTags"></div>
+    </div>
+    <div class="card">
+      <h2>📋 القوائم المنسدلة</h2>
+      <div class="row"><div class="field"><label>الموردين</label><input id="newSup" placeholder="اسم المورد"></div>
+      <button class="btn ok" onclick="addList('suppliers','newSup')">إضافة</button></div>
+      <div id="supTags"></div>
+      <div class="row" style="margin-top:10px"><div class="field"><label>الأنواع</label><input id="newType" placeholder="نوع (بقري/جاموسي..)"></div>
+      <button class="btn ok" onclick="addList('types','newType')">إضافة</button></div>
+      <div id="typeTags"></div>
+      <div class="row" style="margin-top:10px"><div class="field"><label>الجنس</label><input id="newSex" placeholder="ذكور/إناث"></div>
+      <button class="btn ok" onclick="addList('sexes','newSex')">إضافة</button></div>
+      <div id="sexTags"></div>
+    </div>
+    <div class="card">
+      <h2>💾 النسخ الاحتياطي</h2>
+      <p class="muted" style="margin-bottom:10px">نسخة تلقائية تُحفظ يومياً وتبقى لمدة 30 يوم. آخر نسخة: <span id="lastBk">—</span></p>
+      <div class="row">
+        <button class="btn" onclick="exportData()">⬇️ تصدير نسخة (ملف)</button>
+        <button class="btn ghost" onclick="document.getElementById('impFile').click()">⬆️ استيراد نسخة</button>
+        <input type="file" id="impFile" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn warn" onclick="showBackups()">🗂️ النسخ المحفوظة</button>
+      </div>
+      <div id="backupList" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: تفاصيل عجل / إضافة وزنة -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <span class="close-x" onclick="closeModal()">×</span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ بيانات ============ */
+const KEY='calf_fatten_v1';
+let DB = load();
+
+function defaults(){return{
+  calves:[], transfers:[],
+  pens:[], suppliers:['المعلم على ابو الحمد'], types:['بقري','جاموسي'], sexes:['ذكور','إناث'],
+  backups:[]
+};}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));return d?{...defaults(),...d}:defaults();}catch(e){return defaults();}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){toast('تعذّر الحفظ - وضع التصفح الخاص؟','bad');}autoBackup();}
+
+/* ============ نسخ احتياطي يومي ============ */
+function autoBackup(){
+  const today=new Date().toISOString().slice(0,10);
+  if(!DB.backups.some(b=>b.date===today)){
+    DB.backups.push({date:today,data:JSON.stringify({calves:DB.calves,transfers:DB.transfers,pens:DB.pens,suppliers:DB.suppliers,types:DB.types,sexes:DB.sexes})});
+    const cut=new Date();cut.setDate(cut.getDate()-30);
+    DB.backups=DB.backups.filter(b=>b.date>=cut.toISOString().slice(0,10));
+    try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}
+  }
+}
+
+/* ============ أدوات ============ */
+function toast(m,t='ok'){const e=document.getElementById('toast');e.textContent=m;e.style.background=t==='bad'?'var(--bad)':t==='warn'?'var(--warn)':'var(--ok)';e.style.display='block';setTimeout(()=>e.style.display='none',2500);}
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
+function fmt(n,d=2){if(n===null||n===undefined||isNaN(n))return '—';return Number(n).toLocaleString('en-US',{maximumFractionDigits:d});}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function fill(sel,arr,ph){const e=document.getElementById(sel);if(!e)return;const cur=e.value;e.innerHTML=(ph?`<option value="">${ph}</option>`:'')+arr.map(x=>`<option>${x}</option>`).join('');if(cur)e.value=cur;}
+
+/* حسابات الوزنات: لكل وزنة نحسب المدة من الوزنة السابقة، الزيادة الشهرية (كجم/30يوم)، عمر التسمين، الزيادة الكلية اليومية */
+function calcWeighings(calf){
+  const arr=[...calf.weighings].sort((a,b)=>a.date.localeCompare(b.date));
+  let prev={date:calf.intakeDate,weight:calf.intakeWeight};
+  return arr.map(w=>{
+    const dur=daysBetween(prev.date,w.date);
+    const gain=w.weight-prev.weight;
+    const monthly=dur>0?(gain/dur)*30:0;          // معدل الزيادة الشهري
+    const age=daysBetween(calf.intakeDate,w.date); // عمر التسمين بالأيام
+    const totGain=w.weight-calf.intakeWeight;
+    const dailyTot=age>0?totGain/age:0;            // معدل الزيادة الكلي اليومي
+    prev=w;
+    return {...w,dur,gain,monthly,age,totGain,dailyTot};
+  });
+}
+function lastWeight(calf){
+  if(calf.weighings.length){const s=[...calf.weighings].sort((a,b)=>b.date.localeCompare(a.date));return s[0];}
+  return {date:calf.intakeDate,weight:calf.intakeWeight};
+}
+
+/* ============ التنقل ============ */
+const VIEWS=[['dash','📊 الرئيسية'],['calves','🐂 العجول'],['transfer','🔄 التحويلات'],['sell','💰 البيع'],['report','📈 التقارير'],['settings','⚙️ الإعدادات']];
+function buildNav(){document.getElementById('nav').innerHTML=VIEWS.map((v,i)=>`<button class="${i===0?'active':''}" onclick="go('${v[0]}',this)">${v[1]}</button>`).join('');}
+function go(v,btn){document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));document.getElementById('v-'+v).classList.add('active');document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderAll();}
+
+/* ============ إضافة عجل ============ */
+function addCalf(){
+  const no=document.getElementById('c_no').value.trim();
+  if(!no){toast('أدخل رقم العجل','bad');return;}
+  if(DB.calves.some(c=>c.no===no&&c.status!=='sold')){toast('رقم العجل موجود بالفعل','bad');return;}
+  DB.calves.push({
+    id:Date.now(), no,
+    supplier:document.getElementById('c_sup').value, type:document.getElementById('c_type').value, sex:document.getElementById('c_sex').value,
+    intakeDate:document.getElementById('c_date').value||todayStr(),
+    intakeWeight:parseFloat(document.getElementById('c_w').value)||0,
+    buyPrice:parseFloat(document.getElementById('c_buy').value)||0,
+    pen:document.getElementById('c_pen').value,
+    weighings:[], status:'active', sale:null
+  });
+  save();
+  document.getElementById('c_no').value='';document.getElementById('c_w').value='';document.getElementById('c_buy').value='';
+  toast('تم حفظ العجل');renderAll();
+}
+
+/* ============ جدول العجول ============ */
+function renderCalves(){
+  const q=(document.getElementById('searchCalf').value||'').trim();
+  const fp=document.getElementById('filterPen').value, fs=document.getElementById('filterStatus').value;
+  let list=DB.calves.filter(c=>(!q||c.no.includes(q)||c.supplier.includes(q))&&(!fp||c.pen===fp)&&(!fs||c.status===fs));
+  let h=`<tr><th>رقم</th><th>المورد</th><th>النوع</th><th>العنبر</th><th>تاريخ التوريد</th><th>وزن التوريد</th><th>آخر وزن</th><th>عمر التسمين</th><th>زيادة كلية</th><th>معدل يومي</th><th>الحالة</th><th>إجراءات</th></tr>`;
+  if(!list.length)h+=`<tr><td colspan="12" class="muted">لا توجد بيانات</td></tr>`;
+  list.forEach(c=>{
+    const lw=lastWeight(c);const age=daysBetween(c.intakeDate,lw.date);const tg=lw.weight-c.intakeWeight;const dt=age>0?tg/age:0;
+    const st=c.status==='sold'?'<span class="badge b-sold">مباع</span>':'<span class="badge b-act">بالمعلف</span>';
+    h+=`<tr>
+      <td><b>${c.no}</b></td><td>${c.supplier||'—'}</td><td>${c.type||'—'}</td><td>${c.pen||'—'}</td>
+      <td>${c.intakeDate}</td><td>${fmt(c.intakeWeight,0)}</td><td>${fmt(lw.weight,0)}</td>
+      <td>${age} يوم</td><td class="pos">${fmt(tg,0)}</td><td>${fmt(dt,2)} كجم/يوم</td><td>${st}</td>
+      <td><button class="btn btn-sm" onclick="openCalf(${c.id})">عرض/وزن</button></td>
+    </tr>`;
+  });
+  document.getElementById('calvesTable').innerHTML=h;
+}
+
+/* ============ نافذة العجل + الوزنات ============ */
+let curCalf=null;
+function openCalf(id){
+  curCalf=DB.calves.find(c=>c.id===id);if(!curCalf)return;
+  const ws=calcWeighings(curCalf);const lw=lastWeight(curCalf);
+  let h=`<h3>🐂 عجل رقم ${curCalf.no} <span class="badge ${curCalf.status==='sold'?'b-sold':'b-act'}">${curCalf.status==='sold'?'مباع':'بالمعلف'}</span></h3>
+  <div class="muted" style="margin-bottom:10px">المورد: ${curCalf.supplier} | النوع: ${curCalf.type} | العنبر: ${curCalf.pen} | التوريد: ${curCalf.intakeDate} بوزن ${fmt(curCalf.intakeWeight,0)} كجم</div>`;
+  if(curCalf.status!=='sold'){
+    h+=`<div class="weigh-block"><div class="hd">➕ إضافة وزنة جديدة</div>
+      <div class="row">
+        <div class="field"><label>تاريخ الوزن</label><input type="date" id="w_date" value="${todayStr()}"></div>
+        <div class="field"><label>الوزن (كجم)</label><input type="number" id="w_val" placeholder="0"></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn ok" onclick="addWeigh()">حفظ الوزنة</button></div>
+      </div></div>`;
+  }
+  h+=`<div class="tablewrap" style="margin-top:8px"><table>
+    <tr><th>#</th><th>التاريخ</th><th>الوزن</th><th>المدة (يوم)</th><th>الزيادة</th><th>معدل شهري</th><th>عمر التسمين</th><th>زيادة كلية</th><th>معدل يومي كلي</th><th></th></tr>`;
+  if(!ws.length)h+=`<tr><td colspan="10" class="muted">لا توجد وزنات بعد</td></tr>`;
+  ws.forEach((w,i)=>{h+=`<tr><td>${i+1}</td><td>${w.date}</td><td><b>${fmt(w.weight,0)}</b></td><td>${w.dur}</td>
+    <td class="${w.gain>=0?'pos':'neg'}">${fmt(w.gain,1)}</td><td>${fmt(w.monthly,1)}</td><td>${w.age} يوم</td>
+    <td class="pos">${fmt(w.totGain,1)}</td><td>${fmt(w.dailyTot,2)}</td>
+    <td><span style="color:var(--bad);cursor:pointer" onclick="delWeigh('${w.date}')">حذف</span></td></tr>`;});
+  h+=`</table></div>`;
+  document.getElementById('modalBody').innerHTML=h;
+  document.getElementById('modal').classList.add('show');
+}
+function addWeigh(){
+  const d=document.getElementById('w_date').value,v=parseFloat(document.getElementById('w_val').value);
+  if(!d||!v){toast('أدخل التاريخ والوزن','bad');return;}
+  if(curCalf.weighings.some(w=>w.date===d)){toast('يوجد وزن بنفس التاريخ','bad');return;}
+  curCalf.weighings.push({date:d,weight:v});save();openCalf(curCalf.id);renderCalves();toast('تمت إضافة الوزنة');
+}
+function delWeigh(date){curCalf.weighings=curCalf.weighings.filter(w=>w.date!==date);save();openCalf(curCalf.id);renderCalves();}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+/* ============ التحويلات ============ */
+function doTransfer(){
+  const id=parseInt(document.getElementById('t_calf').value);const calf=DB.calves.find(c=>c.id===id);
+  const toPen=document.getElementById('t_pen').value;
+  if(!calf||!toPen){toast('اختر العجل والعنبر','bad');return;}
+  if(calf.pen===toPen){toast('العجل موجود بالفعل بهذا العنبر','warn');return;}
+  DB.transfers.push({date:document.getElementById('t_date').value||todayStr(),calfNo:calf.no,from:calf.pen,to:toPen,note:document.getElementById('t_note').value});
+  calf.pen=toPen;save();document.getElementById('t_note').value='';toast('تم النقل');renderAll();
+}
+function renderTransfers(){
+  let h=`<tr><th>التاريخ</th><th>العجل</th><th>من عنبر</th><th>إلى عنبر</th><th>ملاحظة</th></tr>`;
+  const list=[...DB.transfers].reverse();
+  if(!list.length)h+=`<tr><td colspan="5" class="muted">لا توجد تحويلات</td></tr>`;
+  list.forEach(t=>h+=`<tr><td>${t.date}</td><td><b>${t.calfNo}</b></td><td>${t.from||'—'}</td><td class="badge b-trans">${t.to}</td><td>${t.note||'—'}</td></tr>`);
+  document.getElementById('transferTable').innerHTML=h;
+}
+
+/* ============ البيع ============ */
+function sellInfo(){
+  const id=parseInt(document.getElementById('s_calf').value);const c=DB.calves.find(x=>x.id===id);if(!c){document.getElementById('sellPreview').innerHTML='';return;}
+  const lw=lastWeight(c);document.getElementById('s_w').value=lw.weight;
+  document.getElementById('sellPreview').innerHTML=`آخر وزن مسجل: <b>${fmt(lw.weight,0)}</b> كجم بتاريخ ${lw.date} — وزن التوريد ${fmt(c.intakeWeight,0)} كجم`;
+}
+function doSell(){
+  const id=parseInt(document.getElementById('s_calf').value);const c=DB.calves.find(x=>x.id===id);
+  if(!c){toast('اختر العجل','bad');return;}
+  const fw=parseFloat(document.getElementById('s_w').value),price=parseFloat(document.getElementById('s_price').value)||0,date=document.getElementById('s_date').value||todayStr();
+  if(!fw){toast('أدخل الوزن النهائي','bad');return;}
+  if(fw!==lastWeight(c).weight&&!c.weighings.some(w=>w.date===date))c.weighings.push({date,weight:fw});
+  const age=daysBetween(c.intakeDate,date);const tg=fw-c.intakeWeight;
+  c.status='sold';c.sale={date,finalWeight:fw,price,age,totalGain:tg,dailyGain:age>0?tg/age:0,profit:price-c.buyPrice};
+  save();document.getElementById('s_price').value='';toast('تم تسجيل البيع');renderAll();
+}
+function renderSold(){
+  let h=`<tr><th>رقم</th><th>تاريخ البيع</th><th>وزن نهائي</th><th>زيادة كلية</th><th>عمر التسمين</th><th>معدل يومي</th><th>سعر شراء</th><th>سعر بيع</th><th>الربح</th></tr>`;
+  const list=DB.calves.filter(c=>c.status==='sold');
+  if(!list.length)h+=`<tr><td colspan="9" class="muted">لا توجد عجول مباعة</td></tr>`;
+  list.forEach(c=>{const s=c.sale;h+=`<tr><td><b>${c.no}</b></td><td>${s.date}</td><td>${fmt(s.finalWeight,0)}</td>
+    <td class="pos">${fmt(s.totalGain,0)}</td><td>${s.age} يوم</td><td>${fmt(s.dailyGain,2)}</td>
+    <td>${fmt(c.buyPrice,0)}</td><td>${fmt(s.price,0)}</td><td class="${s.profit>=0?'pos':'neg'}">${fmt(s.profit,0)}</td></tr>`;});
+  document.getElementById('soldTable').innerHTML=h;
+}
+
+/* ============ لوحة التحكم ============ */
+function renderDash(){
+  const act=DB.calves.filter(c=>c.status==='active'),sold=DB.calves.filter(c=>c.status==='sold');
+  const totW=act.reduce((s,c)=>s+lastWeight(c).weight,0);
+  const totProfit=sold.reduce((s,c)=>s+(c.sale.profit||0),0);
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat"><div class="v">${act.length}</div><div class="l">عجول بالمعلف</div></div>
+    <div class="stat"><div class="v">${sold.length}</div><div class="l">عجول مباعة</div></div>
+    <div class="stat"><div class="v">${fmt(totW,0)}</div><div class="l">إجمالي الأوزان الحالية (كجم)</div></div>
+    <div class="stat"><div class="v">${DB.pens.length}</div><div class="l">عدد العنابر</div></div>
+    <div class="stat"><div class="v ${totProfit>=0?'pos':'neg'}">${fmt(totProfit,0)}</div><div class="l">إجمالي ربح المباع</div></div>`;
+  const ov=DB.pens.map(p=>{const n=act.filter(c=>c.pen===p).length;return `<div class="pen-pill ${n?'sel':''}"><div class="n">${n}</div><div class="c">${p}</div></div>`;}).join('');
+  document.getElementById('penOverview').innerHTML=ov||'<span class="muted">لا توجد عنابر — أضفها من الإعدادات</span>';
+}
+
+/* ============ التقارير ============ */
+function renderReport(){
+  const act=DB.calves.filter(c=>c.status==='active');
+  const rows=DB.calves.map(c=>{const lw=lastWeight(c);const age=daysBetween(c.intakeDate,lw.date);const tg=lw.weight-c.intakeWeight;return {no:c.no,pen:c.pen,age,tg,dt:age>0?tg/age:0,status:c.status};}).filter(r=>r.age>0);
+  const avgDaily=rows.length?rows.reduce((s,r)=>s+r.dt,0)/rows.length:0;
+  const avgGain=rows.length?rows.reduce((s,r)=>s+r.tg,0)/rows.length:0;
+  const best=rows.length?Math.max(...rows.map(r=>r.dt)):0;
+  document.getElementById('repStats').innerHTML=`
+    <div class="stat"><div class="v">${fmt(avgDaily,2)}</div><div class="l">متوسط الزيادة اليومية (كجم)</div></div>
+    <div class="stat"><div class="v">${fmt(avgDaily*30,1)}</div><div class="l">متوسط الزيادة الشهرية (كجم)</div></div>
+    <div class="stat"><div class="v">${fmt(avgGain,0)}</div><div class="l">متوسط الزيادة الكلية (كجم)</div></div>
+    <div class="stat"><div class="v pos">${fmt(best,2)}</div><div class="l">أعلى معدل يومي</div></div>`;
+  rows.sort((a,b)=>b.dt-a.dt);
+  let h=`<tr><th>الترتيب</th><th>رقم</th><th>العنبر</th><th>عمر التسمين</th><th>زيادة كلية</th><th>معدل يومي</th><th>الحالة</th></tr>`;
+  if(!rows.length)h+=`<tr><td colspan="7" class="muted">لا توجد بيانات كافية</td></tr>`;
+  rows.forEach((r,i)=>h+=`<tr><td>${i+1}</td><td><b>${r.no}</b></td><td>${r.pen||'—'}</td><td>${r.age} يوم</td><td class="pos">${fmt(r.tg,0)}</td><td>${fmt(r.dt,2)}</td><td><span class="badge ${r.status==='sold'?'b-sold':'b-act'}">${r.status==='sold'?'مباع':'بالمعلف'}</span></td></tr>`);
+  document.getElementById('rankTable').innerHTML=h;
+}
+
+/* ============ الإعدادات / القوائم ============ */
+function addList(key,inputId){
+  const v=document.getElementById(inputId).value.trim();if(!v)return;
+  if(DB[key].includes(v)){toast('موجود بالفعل','warn');return;}
+  DB[key].push(v);save();document.getElementById(inputId).value='';renderAll();toast('تمت الإضافة');
+}
+function delList(key,v){DB[key]=DB[key].filter(x=>x!==v);save();renderAll();}
+function autoPens(){for(let i=1;i<=30;i++){const n='عنبر '+i;if(!DB.pens.includes(n))DB.pens.push(n);}save();renderAll();toast('تم توليد 30 عنبر');}
+function renderTags(){
+  const t=(key,el)=>document.getElementById(el).innerHTML=DB[key].map(x=>`<span class="tag"><span onclick="delList('${key}','${x.replace(/'/g,"\\'")}')">×</span>${x}</span>`).join('')||'<span class="muted">فارغ</span>';
+  t('pens','pensTags');t('suppliers','supTags');t('types','typeTags');t('sexes','sexTags');
+}
+
+/* ============ نسخ احتياطي يدوي ============ */
+function exportData(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='تسمين_عجول_'+todayStr()+'.json';a.click();
+}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);DB={...defaults(),...d};save();toast('تم الاستيراد');renderAll();}catch(x){toast('ملف غير صالح','bad');}};
+  r.readAsText(f);
+}
+function showBackups(){
+  let h='<div class="tablewrap"><table><tr><th>التاريخ</th><th>عدد العجول</th><th>استرجاع</th></tr>';
+  if(!DB.backups.length)h+='<tr><td colspan="3" class="muted">لا توجد نسخ</td></tr>';
+  [...DB.backups].reverse().forEach(b=>{let cnt=0;try{cnt=JSON.parse(b.data).calves.length;}catch(e){}h+=`<tr><td>${b.date}</td><td>${cnt}</td><td><button class="btn btn-sm warn" onclick="restoreBackup('${b.date}')">استرجاع</button></td></tr>`;});
+  h+='</table></div>';document.getElementById('backupList').innerHTML=h;
+}
+function restoreBackup(date){
+  if(!confirm('استرجاع نسخة '+date+'؟ سيتم استبدال البيانات الحالية.'))return;
+  const b=DB.backups.find(x=>x.date===date);if(!b)return;
+  try{const d=JSON.parse(b.data);DB.calves=d.calves;DB.transfers=d.transfers;DB.pens=d.pens;DB.suppliers=d.suppliers;DB.types=d.types;DB.sexes=d.sexes;save();toast('تم الاسترجاع');renderAll();}catch(e){toast('خطأ','bad');}
+}
+
+/* ============ تحديث الكل ============ */
+function renderAll(){
+  fill('c_sup',DB.suppliers);fill('c_type',DB.types);fill('c_sex',DB.sexes);fill('c_pen',DB.pens);fill('t_pen',DB.pens);
+  fill('filterPen',DB.pens,'كل العنابر');
+  const act=DB.calves.filter(c=>c.status==='active');
+  fill('t_calf',act.map(c=>c.no));fill('s_calf',act.map(c=>c.no));
+  // إعادة ربط القيم بالـ id
+  const tc=document.getElementById('t_calf');if(tc)tc.innerHTML=act.map(c=>`<option value="${c.id}">${c.no} — ${c.pen}</option>`).join('');
+  const sc=document.getElementById('s_calf');if(sc)sc.innerHTML=act.map(c=>`<option value="${c.id}">${c.no} — ${c.pen}</option>`).join('');
+  document.getElementById('c_date').value=document.getElementById('c_date').value||todayStr();
+  document.getElementById('t_date').value=document.getElementById('t_date').value||todayStr();
+  document.getElementById('s_date').value=document.getElementById('s_date').value||todayStr();
+  renderCalves();renderTransfers();renderSold();renderDash();renderReport();renderTags();
+  const lb=DB.backups.length?DB.backups[DB.backups.length-1].date:'—';document.getElementById('lastBk').textContent=lb;
+}
+
+buildNav();
+if(!DB.pens.length){/* بداية فارغة */}
+autoBackup();
+renderAll();
+</script>
+</body>
+</html>

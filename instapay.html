@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>دفتر حسابات الإنستا والتحويلات</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#2a3340;
+  --txt:#e6edf3; --muted:#8b98a8; --accent:#7c5cff; --accent2:#5b3fd6;
+  --green:#1f9d57; --green-d:#177a43; --blue:#1f6feb; --red:#e5484d; --gold:#d6a83f;
+  --wa:#25d366;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{padding-bottom:90px}
+.topbar{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,#1b1430,#0d1117);
+  border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.topbar h1{font-size:18px;margin:0;flex:1;font-weight:700}
+.sync-pill{font-size:11px;padding:4px 9px;border-radius:20px;background:var(--panel2);
+  border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.sync-pill.ok{color:var(--green);border-color:var(--green-d)}
+.sync-pill.off{color:var(--gold);border-color:var(--gold)}
+.warn{display:none;background:#3a2a0a;color:var(--gold);padding:8px 14px;font-size:12px;
+  border-bottom:1px solid var(--gold);text-align:center}
+.wrap{padding:14px;max-width:720px;margin:0 auto}
+.search{width:100%;padding:12px 14px;border-radius:12px;background:var(--panel);
+  border:1px solid var(--line);color:var(--txt);font-size:15px;margin-bottom:14px}
+.search::placeholder{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:14px;margin-bottom:12px}
+.card-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.avatar{width:46px;height:46px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff}
+.card-info{flex:1;min-width:0}
+.card-name{font-size:16px;font-weight:700;margin:0}
+.card-handle{font-size:13px;color:var(--muted);margin:2px 0 0}
+.card-row{display:flex;gap:8px;font-size:13px;color:var(--muted);
+  padding:4px 0;align-items:center;word-break:break-all}
+.card-row b{color:var(--txt);font-weight:600}
+.ibanbox{background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  padding:8px 10px;font-size:13px;font-family:monospace;letter-spacing:.5px;
+  margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:8px;direction:ltr}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.btn{padding:11px;border-radius:11px;border:none;font-size:14px;font-weight:600;
+  cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{opacity:.8}
+.btn-pay{background:var(--green);grid-column:1/-1;font-size:15px;padding:13px}
+.btn-insta{background:linear-gradient(135deg,#dd2a7b,#8134af)}
+.btn-wa{background:var(--wa)}
+.btn-call{background:var(--blue)}
+.btn-copy{background:var(--panel2);color:var(--accent);border:1px solid var(--line)}
+.mini{padding:6px 10px;font-size:12px;border-radius:8px;background:var(--panel2);
+  border:1px solid var(--line);color:var(--accent);cursor:pointer}
+.edit-del{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
+.icn-btn{padding:6px 12px;font-size:12px;border-radius:8px;cursor:pointer;border:1px solid var(--line);
+  background:transparent;color:var(--muted)}
+.icn-btn.del{color:var(--red);border-color:#5a2326}
+.empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:15px}
+.empty .big{font-size:42px;margin-bottom:10px}
+.fab{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:40;
+  background:var(--accent);color:#fff;border:none;border-radius:30px;
+  padding:14px 26px;font-size:16px;font-weight:700;cursor:pointer;
+  box-shadow:0 6px 22px rgba(124,92,255,.45)}
+.fab:active{opacity:.85}
+/* modal */
+.overlay{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);
+  align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.sheet{background:var(--panel);width:100%;max-width:560px;border-radius:20px 20px 0 0;
+  padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+.sheet h2{margin:0 0 14px;font-size:18px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+.fld input,.fld select{width:100%;padding:11px 12px;border-radius:10px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-size:15px}
+.fld input::placeholder{color:#5a6573}
+.sheet-btns{display:flex;gap:10px;margin-top:6px}
+.sheet-btns button{flex:1;padding:13px;border-radius:11px;border:none;font-size:15px;
+  font-weight:700;cursor:pointer}
+.save{background:var(--accent);color:#fff}
+.cancel{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.action-sheet .opt{padding:15px;border-radius:12px;background:var(--panel2);
+  border:1px solid var(--line);margin-bottom:10px;font-size:16px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;gap:12px}
+.action-sheet .opt:active{background:#222b3a}
+.action-sheet .opt .ico{width:30px;text-align:center;font-size:20px}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:99;
+  background:#000;color:#fff;padding:10px 18px;border-radius:24px;font-size:14px;
+  opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:.95}
+.count{font-size:12px;color:var(--muted);margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>💸 حسابات الإنستا</h1>
+  <span class="sync-pill" id="syncPill">… مزامنة</span>
+</div>
+<div class="warn" id="warnBanner">⚠️ التخزين المحلي مش شغال — البيانات هتتحفظ مؤقت بس لحد ما تقفل الصفحة</div>
+
+<div class="wrap">
+  <input class="search" id="search" placeholder="🔍 دوّر باسم أو يوزر أو تليفون…" oninput="render()">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div class="count" id="count" style="margin:0"></div>
+    <button class="mini" style="color:var(--wa);border-color:#1a4d2e;padding:7px 12px" onclick="openMulti()">↗ مشاركة عدة حسابات</button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<button class="fab" onclick="openForm()">＋ حساب جديد</button>
+
+<!-- form sheet -->
+<div class="overlay" id="formOverlay">
+  <div class="sheet">
+    <h2 id="formTitle">حساب جديد</h2>
+    <div class="fld"><label>اسم صاحب الحساب *</label>
+      <input id="f_name" placeholder="مثال: محمد السيد"></div>
+    <div class="fld"><label>يوزر / لينك الإنستا</label>
+      <input id="f_insta" placeholder="@username أو لينك كامل" dir="ltr"></div>
+    <div class="fld"><label>رقم تليفون</label>
+      <input id="f_phone" type="tel" placeholder="01xxxxxxxxx" dir="ltr"></div>
+    <div class="fld"><label>IBAN (حساب بنكي)</label>
+      <input id="f_iban" placeholder="EG…" dir="ltr"></div>
+    <div class="fld"><label>اسم البنك (اختياري)</label>
+      <input id="f_bank" placeholder="مثال: بنك مصر"></div>
+    <div class="fld"><label>لينك InstaPay المباشر (اللي بيطلع من زرار مشاركة)</label>
+      <input id="f_ipa" placeholder="https://ipn.eg/S/user/instapay/xxxx" dir="ltr"></div>
+    <div class="fld"><label>ملاحظات</label>
+      <input id="f_note" placeholder="أي تفاصيل تانية"></div>
+    <div class="sheet-btns">
+      <button class="cancel" onclick="closeForm()">إلغاء</button>
+      <button class="save" onclick="saveAcc()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- action sheet -->
+<div class="overlay" id="actionOverlay">
+  <div class="sheet action-sheet">
+    <h2 id="actionTitle">حوّل الفلوس</h2>
+    <div id="actionOpts"></div>
+    <button class="cancel" style="width:100%;padding:13px;border-radius:11px;font-weight:700" onclick="closeAction()">إغلاق</button>
+  </div>
+</div>
+
+<!-- share sheet -->
+<div class="overlay" id="shareOverlay">
+  <div class="sheet">
+    <h2 id="shareTitle">مشاركة الحساب</h2>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 12px">اختار البيانات اللي عايز تبعتها:</p>
+    <div id="shareFields"></div>
+    <div style="height:1px;background:var(--line);margin:14px 0"></div>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 10px">ابعت عن طريق:</p>
+    <p id="fileShareWarn" style="display:none;background:#3a2a0a;color:var(--gold);font-size:12px;padding:8px 10px;border-radius:8px;margin:0 0 10px">⚠️ الملف مفتوح offline، فالأزرار هتنسخ البيانات وتقولك الصقها. للمشاركة المباشرة افتح البرنامج من لينك الإنترنت.</p>
+    <div class="btns" style="grid-template-columns:1fr 1fr">
+      <button class="btn btn-wa" onclick="doShare('wa')">🟢 واتساب</button>
+      <button class="btn" style="background:#0084ff" onclick="doShare('msg')">🔵 مسنجر</button>
+      <button class="btn btn-call" style="background:#34c759" onclick="doShare('sms')">💬 رسالة SMS</button>
+      <button class="btn btn-copy" onclick="doShare('copy')">📋 نسخ</button>
+    </div>
+    <button class="btn" style="background:var(--panel2);color:var(--accent);border:1px solid var(--line);width:100%;margin-top:8px" onclick="doShare('native')">↗ مشاركة (كل التطبيقات)</button>
+    <button class="cancel" style="width:100%;padding:13px;border-radius:11px;font-weight:700;margin-top:10px" onclick="closeShare()">إغلاق</button>
+  </div>
+</div>
+
+<!-- multi-select sheet -->
+<div class="overlay" id="multiOverlay">
+  <div class="sheet">
+    <h2>اختار الحسابات</h2>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 12px">علّم على الحسابات اللي عايز تشاركهم:</p>
+    <div id="multiList" style="max-height:50vh;overflow:auto"></div>
+    <div class="sheet-btns" style="margin-top:14px">
+      <button class="cancel" onclick="closeMulti()">إلغاء</button>
+      <button class="save" onclick="multiNext()">التالي ←</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+/* ============ تخزين آمن (Safari/iOS file:// safe) ============ */
+var memStore={};
+var storageOK=(function(){try{var k="__t";localStorage.setItem(k,"1");localStorage.removeItem(k);return true;}catch(e){return false;}})();
+if(!storageOK){document.getElementById("warnBanner").style.display="block";}
+function lsGet(k){try{return storageOK?localStorage.getItem(k):(memStore[k]||null);}catch(e){return memStore[k]||null;}}
+function lsSet(k,v){try{if(storageOK)localStorage.setItem(k,v);else memStore[k]=v;}catch(e){memStore[k]=v;}}
+
+var KEY="insta_accounts_v1";
+var accounts=[];
+try{accounts=JSON.parse(lsGet(KEY)||"[]");}catch(e){accounts=[];}
+
+/* ============ Firebase sync ============ */
+var FB_CONFIG={
+  databaseURL:"https://insta-pay-default-rtdb.europe-west1.firebasedatabase.app"
+};
+var db=null,fbOK=false;
+try{
+  firebase.initializeApp(FB_CONFIG);
+  db=firebase.database();
+  fbOK=true;
+  setSync("…","");
+  db.ref(KEY).on("value",function(snap){
+    var val=snap.val();
+    if(val&&Array.isArray(val)){
+      accounts=val;
+      lsSet(KEY,JSON.stringify(accounts));
+      render();
+      setSync("متزامن","ok");
+    }else{
+      setSync("متزامن","ok");
+    }
+  },function(err){setSync("بدون نت","off");});
+}catch(e){fbOK=false;setSync("بدون نت","off");}
+
+function setSync(t,cls){
+  var p=document.getElementById("syncPill");
+  p.textContent="☁︎ "+t;p.className="sync-pill"+(cls?" "+cls:"");
+}
+function persist(){
+  lsSet(KEY,JSON.stringify(accounts));
+  if(fbOK&&db){
+    db.ref(KEY).set(accounts).then(function(){setSync("متزامن","ok");})
+      .catch(function(){setSync("محلي بس","off");});
+  }
+  render();
+}
+
+/* ============ UI ============ */
+var editId=null;
+function esc(s){return (s||"").replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function instaUrl(v){
+  if(!v)return "";
+  v=v.trim();
+  if(/^https?:\/\//i.test(v))return v;
+  return "https://instagram.com/"+v.replace(/^@/,"");
+}
+function instaHandle(v){
+  if(!v)return "";
+  var m=v.match(/instagram\.com\/([^\/?#]+)/i);
+  if(m)return "@"+m[1];
+  return v.startsWith("@")?v:"@"+v;
+}
+
+function render(){
+  var q=(document.getElementById("search").value||"").trim().toLowerCase();
+  var list=document.getElementById("list");
+  var filtered=accounts.filter(function(a){
+    if(!q)return true;
+    return [a.name,a.insta,a.phone,a.iban,a.bank,a.note].join(" ").toLowerCase().indexOf(q)>-1;
+  });
+  document.getElementById("count").textContent=accounts.length?("عدد الحسابات: "+accounts.length):"";
+  if(!filtered.length){
+    list.innerHTML='<div class="empty"><div class="big">📭</div>'+
+      (accounts.length?"مفيش نتايج للبحث ده":"مفيش حسابات لسه — دوس ＋ وضيف أول حساب")+'</div>';
+    return;
+  }
+  list.innerHTML=filtered.map(function(a){
+    var initial=esc((a.name||"؟").trim().charAt(0));
+    var handle=a.insta?esc(instaHandle(a.insta)):"";
+    var rows="";
+    if(handle)rows+='<div class="card-row">📷 <span>'+handle+'</span></div>';
+    if(a.phone)rows+='<div class="card-row">📱 <b dir="ltr">'+esc(a.phone)+'</b></div>';
+    if(a.bank)rows+='<div class="card-row">🏦 <span>'+esc(a.bank)+'</span></div>';
+    var ibanBox=a.iban?'<div class="ibanbox"><span>'+esc(a.iban)+'</span>'+
+      '<button class="mini" onclick="copyText(\''+jsq(a.iban)+'\')">نسخ</button></div>':"";
+    return '<div class="card">'+
+      '<div class="card-head">'+
+        '<div class="avatar">'+initial+'</div>'+
+        '<div class="card-info">'+
+          '<p class="card-name">'+esc(a.name)+'</p>'+
+          (handle?'<p class="card-handle">'+handle+'</p>':'')+
+        '</div>'+
+      '</div>'+
+      rows+ibanBox+
+      '<button class="btn btn-pay" onclick="openAction('+a.id+')">💸 حوّل الفلوس</button>'+
+      (a.ipa?'<button class="btn" style="background:linear-gradient(135deg,#8134af,#5b3fd6);width:100%;margin-top:8px" onclick="go(\''+jsq(a.ipa)+'\')">💜 InstaPay مباشر</button>':'')+
+      '<div class="btns">'+
+        (a.insta?'<button class="btn btn-insta" onclick="go(\''+jsq(instaUrl(a.insta))+'\')">📷 إنستا</button>':'')+
+        (a.phone?'<button class="btn btn-call" onclick="go(\'tel:'+jsq(a.phone)+'\')">📞 اتصال</button>':'')+
+      '</div>'+
+      '<div class="edit-del">'+
+        '<button class="icn-btn" style="color:var(--wa);border-color:#1a4d2e" onclick="openShare('+a.id+')">↗ مشاركة</button>'+
+        '<button class="icn-btn" onclick="openForm('+a.id+')">✏️ تعديل</button>'+
+        '<button class="icn-btn del" onclick="delAcc('+a.id+')">🗑 حذف</button>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+}
+function jsq(s){return (s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
+
+/* form */
+function openForm(id){
+  editId=(typeof id==="number")?id:null;
+  var a=editId!=null?accounts.find(function(x){return x.id===editId;}):null;
+  document.getElementById("formTitle").textContent=a?"تعديل الحساب":"حساب جديد";
+  document.getElementById("f_name").value=a?a.name:"";
+  document.getElementById("f_insta").value=a?(a.insta||""):"";
+  document.getElementById("f_phone").value=a?(a.phone||""):"";
+  document.getElementById("f_iban").value=a?(a.iban||""):"";
+  document.getElementById("f_bank").value=a?(a.bank||""):"";
+  document.getElementById("f_ipa").value=a?(a.ipa||""):"";
+  document.getElementById("f_note").value=a?(a.note||""):"";
+  document.getElementById("formOverlay").classList.add("show");
+}
+function closeForm(){document.getElementById("formOverlay").classList.remove("show");}
+function saveAcc(){
+  var name=document.getElementById("f_name").value.trim();
+  if(!name){toast("اكتب اسم صاحب الحساب الأول");return;}
+  var obj={
+    name:name,
+    insta:document.getElementById("f_insta").value.trim(),
+    phone:document.getElementById("f_phone").value.trim(),
+    iban:document.getElementById("f_iban").value.trim(),
+    bank:document.getElementById("f_bank").value.trim(),
+    ipa:document.getElementById("f_ipa").value.trim(),
+    note:document.getElementById("f_note").value.trim()
+  };
+  if(editId!=null){
+    var i=accounts.findIndex(function(x){return x.id===editId;});
+    if(i>-1){obj.id=editId;accounts[i]=obj;}
+  }else{
+    obj.id=Date.now();
+    accounts.unshift(obj);
+  }
+  persist();closeForm();toast("اتحفظ ✓");
+}
+function delAcc(id){
+  var a=accounts.find(function(x){return x.id===id;});
+  if(!confirm("متأكد تمسح حساب \""+(a?a.name:"")+"\"؟"))return;
+  accounts=accounts.filter(function(x){return x.id!==id;});
+  persist();toast("اتمسح");
+}
+
+/* action sheet */
+function openAction(id){
+  var a=accounts.find(function(x){return x.id===id;});
+  if(!a)return;
+  document.getElementById("actionTitle").textContent="حوّل لـ "+a.name;
+  var opts="";
+  // InstaPay - لينك مباشر
+  if(a.ipa){
+    opts+=optHtml("💜","افتح InstaPay مباشر","go('"+jsq(a.ipa)+"')");
+  }
+  // فودافون كاش / محفظة (التليفون)
+  if(a.phone){
+    opts+=optHtml("🔴","فودافون كاش / محفظة","go('tel:*9*7*"+jsq(a.phone)+"%23')");
+  }
+  // واتساب
+  if(a.phone){
+    opts+=optHtml("🟢","واتساب","openWa('"+jsq(a.phone)+"')");
+  }
+  // نسخ IBAN
+  if(a.iban){
+    opts+=optHtml("📋","انسخ IBAN","copyText('"+jsq(a.iban)+"')");
+  }
+  if(a.ipa){
+    opts+=optHtml("📋","انسخ لينك InstaPay","copyText('"+jsq(a.ipa)+"')");
+  }
+  if(a.phone){
+    opts+=optHtml("📋","انسخ رقم التليفون","copyText('"+jsq(a.phone)+"')");
+  }
+  if(!opts)opts='<div style="color:var(--muted);text-align:center;padding:20px">مفيش بيانات دفع للحساب ده — عدّل وضيف IBAN أو تليفون</div>';
+  document.getElementById("actionOpts").innerHTML=opts;
+  document.getElementById("actionOverlay").classList.add("show");
+}
+function optHtml(ico,txt,fn){
+  return '<div class="opt" onclick="'+fn+';closeAction()"><span class="ico">'+ico+'</span><span>'+txt+'</span></div>';
+}
+function closeAction(){document.getElementById("actionOverlay").classList.remove("show");}
+
+function openWa(phone){
+  var p=phone.replace(/[^0-9]/g,"");
+  if(p.charAt(0)==="0")p="2"+p; // مصر
+  go("https://wa.me/"+p);
+}
+function go(url){try{window.open(url,"_blank");}catch(e){location.href=url;}}
+
+/* clipboard */
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){toast("اتنسخ ✓");},function(){fallbackCopy(t);});
+  }else{fallbackCopy(t);}
+}
+function fallbackCopy(t){
+  var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand("copy");toast("اتنسخ ✓");}catch(e){toast("انسخ يدوي: "+t);}
+  document.body.removeChild(ta);
+}
+
+/* toast */
+var toastT;
+function toast(msg){
+  var el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove("show");},1800);
+}
+
+/* close overlay on backdrop tap */
+["formOverlay","actionOverlay","shareOverlay","multiOverlay"].forEach(function(idd){
+  document.getElementById(idd).addEventListener("click",function(e){
+    if(e.target===this)this.classList.remove("show");
+  });
+});
+
+/* ============ مشاركة ============ */
+var shareIds=[];
+var FIELD_DEFS=[
+  {key:"name",  label:"الاسم"},
+  {key:"insta", label:"حساب الإنستا"},
+  {key:"phone", label:"رقم التليفون"},
+  {key:"iban",  label:"الـ IBAN"},
+  {key:"bank",  label:"اسم البنك"},
+  {key:"ipa",   label:"لينك InstaPay"},
+  {key:"note",  label:"ملاحظات"}
+];
+
+function openShare(id){
+  shareIds=[id];
+  buildShareFields();
+  document.getElementById("shareTitle").textContent="مشاركة الحساب";
+  document.getElementById("shareOverlay").classList.add("show");
+}
+
+function buildShareFields(){
+  document.getElementById("fileShareWarn").style.display=(location.protocol==="file:")?"block":"none";
+  var present={};
+  shareIds.forEach(function(id){
+    var a=accounts.find(function(x){return x.id===id;});
+    if(!a)return;
+    FIELD_DEFS.forEach(function(f){if((a[f.key]||"").trim())present[f.key]=true;});
+  });
+  var html=FIELD_DEFS.filter(function(f){return present[f.key];}).map(function(f){
+    var checked=(f.key==="name"||f.key==="iban"||f.key==="ipa"||f.key==="phone")?"checked":"";
+    return '<label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--panel2);'+
+      'border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer">'+
+      '<input type="checkbox" class="sharechk" value="'+f.key+'" '+checked+' style="width:18px;height:18px">'+
+      '<span style="font-size:15px">'+f.label+'</span></label>';
+  }).join("");
+  document.getElementById("shareFields").innerHTML=html||'<p style="color:var(--muted)">مفيش بيانات للمشاركة</p>';
+}
+
+function buildShareText(){
+  var checks=document.querySelectorAll(".sharechk:checked");
+  var keys=[];checks.forEach(function(c){keys.push(c.value);});
+  if(!keys.length){toast("اختار حاجة تبعتها الأول");return null;}
+  var parts=shareIds.map(function(id){
+    var a=accounts.find(function(x){return x.id===id;});
+    if(!a)return"";
+    var lines=[];
+    FIELD_DEFS.forEach(function(f){
+      if(keys.indexOf(f.key)===-1)return;
+      var v=(a[f.key]||"").trim();if(!v)return;
+      if(f.key==="insta")v=instaUrl(v);
+      var ico={name:"👤",insta:"📷",phone:"📱",iban:"🏦",bank:"🏛",ipa:"💜",note:"📝"}[f.key]||"•";
+      lines.push(ico+" "+f.label+": "+v);
+    });
+    return lines.join("\n");
+  }).filter(Boolean);
+  return parts.join("\n\n———————————\n\n");
+}
+
+function doShare(via){
+  var text=buildShareText();
+  if(text==null)return;
+  var enc=encodeURIComponent(text);
+  var isFile=(location.protocol==="file:");
+
+  if(via==="native"){
+    if(navigator.share){
+      navigator.share({text:text}).then(function(){closeShare();})
+        .catch(function(){copyAndTell(text);});
+      return;
+    }else{copyAndTell(text);closeShare();return;}
+  }
+
+  // محاولة فتح التطبيق
+  var opened=false;
+  try{
+    if(via==="wa"){window.location.href="https://wa.me/?text="+enc;opened=true;}
+    else if(via==="msg"){window.location.href="fb-messenger://share/?text="+enc;opened=true;}
+    else if(via==="sms"){window.location.href="sms:&body="+enc;opened=true;}
+    else if(via==="copy"){copyAndTell(text);closeShare();return;}
+  }catch(e){opened=false;}
+
+  // على file:// التطبيقات غالباً مش هتفتح — ننسخ كـ ضمان
+  if(isFile){copyAndTell(text);}
+  closeShare();
+}
+
+function copyAndTell(text){
+  copyText(text);
+  toast("✓ البيانات اتنسخت — الصقها في الشات");
+}
+function closeShare(){document.getElementById("shareOverlay").classList.remove("show");}
+
+function openMulti(){
+  if(!accounts.length){toast("مفيش حسابات");return;}
+  var html=accounts.map(function(a){
+    return '<label style="display:flex;align-items:center;gap:10px;padding:11px;background:var(--panel2);'+
+      'border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer">'+
+      '<input type="checkbox" class="multichk" value="'+a.id+'" style="width:18px;height:18px">'+
+      '<span style="font-size:15px;font-weight:600">'+esc(a.name)+'</span></label>';
+  }).join("");
+  document.getElementById("multiList").innerHTML=html;
+  document.getElementById("multiOverlay").classList.add("show");
+}
+function closeMulti(){document.getElementById("multiOverlay").classList.remove("show");}
+function multiNext(){
+  var checks=document.querySelectorAll(".multichk:checked");
+  if(!checks.length){toast("علّم على حساب على الأقل");return;}
+  shareIds=[];checks.forEach(function(c){shareIds.push(parseInt(c.value,10));});
+  closeMulti();
+  buildShareFields();
+  document.getElementById("shareTitle").textContent="مشاركة "+shareIds.length+" حساب";
+  document.getElementById("shareOverlay").classList.add("show");
+}
+
+render();
+</script>
+</body>
+</html>

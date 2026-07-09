@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>أسعار الدواجن</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--bg3:#1e293b;--bg4:#0f172a;
+  --br:#1e293b;--br2:#334155;
+  --tx:#f1f5f9;--tx2:#94a3b8;--tx3:#64748b;
+  --bl:#3b82f6;--gn:#10b981;--rd:#ef4444;--yw:#f59e0b;
+  --pp:#8b5cf6;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column}
+
+nav{background:var(--bg2);border-bottom:1px solid var(--br2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav::-webkit-scrollbar{display:none}
+.ni{display:flex;min-width:max-content}
+.nb{padding:12px 15px;font-size:12px;font-weight:600;color:var(--tx3);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.nb.on{color:var(--bl);border-bottom-color:var(--bl)}
+
+#pages{flex:1;overflow:hidden;position:relative}
+.pg{display:none;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px}
+.pg.on{display:block}
+
+.card{background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--br2)}
+.ct{font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:var(--bg3);border-radius:12px;padding:12px;border:1px solid var(--br2);text-align:center}
+.kpi .lb{font-size:10px;color:var(--tx3);margin-bottom:4px;font-weight:600}
+.kpi .vl{font-size:21px;font-weight:800;line-height:1.1}
+.kpi .sb{font-size:10px;color:var(--tx3);margin-top:2px}
+
+.tabs{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:var(--bg4);border:1px solid var(--br2);color:var(--tx3);border-radius:7px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.tab.on{background:var(--bl);border-color:#2563eb;color:#fff}
+
+canvas{display:block;width:100%!important}
+.cw{border-radius:8px;overflow:hidden}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+.ts{max-height:380px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:var(--bg4);color:var(--tx3);padding:8px 5px;text-align:center;font-size:10px;font-weight:700;border-bottom:1px solid var(--br2);position:sticky;top:0;z-index:1}
+td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--br)}
+tr:hover td{background:#ffffff06}
+
+/* Daily comparison table */
+.day-tbl th{min-width:70px}
+.day-tbl td{min-width:70px}
+.yr-hdr{font-size:10px;font-weight:700;padding:6px}
+
+.badge{display:inline-block;padding:2px 6px;border-radius:50px;font-size:10px;font-weight:700}
+.bg{background:#064e3b;color:#34d399}.br{background:#450a0a;color:#f87171}
+.by{background:#451a03;color:#fbbf24}.bb{background:#1e3a8a;color:#93c5fd}
+
+/* Entry */
+.inp-s{background:linear-gradient(135deg,#064e3b,#065f46);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #10b98155}
+.dd{background:#0f172a88;border-radius:8px;padding:9px;font-size:15px;color:#6ee7b7;font-weight:700;text-align:center;margin-bottom:10px}
+#pi{width:100%;background:#0f172a;border:2px solid #10b981;border-radius:12px;color:#6ee7b7;font-size:44px;font-weight:800;text-align:center;padding:12px;outline:none;margin-bottom:10px;-webkit-appearance:none}
+#pi:focus{border-color:#34d399}
+#pi::placeholder{color:#064e3b;font-size:18px}
+.ab{width:100%;background:#10b981;color:#fff;border:2px solid #059669;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer}
+.ab:active{background:#059669;transform:scale(.98)}
+
+select{background:var(--bg4);border:1px solid var(--br2);color:var(--tx);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;font-family:inherit;cursor:pointer}
+.sel-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.sel-row label{font-size:11px;color:var(--tx3);font-weight:600}
+
+.sr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--br)}
+.sr:last-child{border:none}
+.sl{font-size:12px;color:var(--tx2)}
+.sv{font-size:13px;font-weight:700}
+
+.ab-block{background:var(--bg4);border-radius:10px;padding:12px;margin-bottom:8px;border-right:3px solid var(--bl)}
+.ab-t{font-size:11px;font-weight:700;color:var(--bl);margin-bottom:3px}
+.ab-b{font-size:12px;color:var(--tx2);line-height:1.6}
+
+.hm{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:8px}
+.hmc{border-radius:7px;padding:7px 3px;text-align:center}
+.hmc .hm-m{font-size:9px;opacity:.8;margin-bottom:1px}
+.hmc .hm-v{font-size:12px;font-weight:700}
+
+.fc-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.fc-row::-webkit-scrollbar{display:none}
+.fc-c{background:var(--bg4);border-radius:10px;padding:10px;min-width:105px;flex-shrink:0;border:1px solid var(--br2);text-align:center}
+.fc-c .fm{font-size:10px;color:var(--tx3);margin-bottom:2px;font-weight:600}
+.fc-c .fv{font-size:17px;font-weight:800;color:var(--yw)}
+.fc-c .fr{font-size:10px;color:var(--tx3);margin-top:2px}
+
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mc-c{background:var(--bg4);border-radius:10px;padding:11px;border:1px solid var(--br2)}
+.bw{background:var(--bg);border-radius:50px;height:4px;overflow:hidden;margin-top:4px}
+.b{height:100%;border-radius:50px}
+
+.btn-col{display:flex;flex-direction:column;gap:8px}
+.ebtn{width:100%;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;color:#fff}
+.e1{background:#1e40af}.e2{background:#0f766e}.e3{background:#374151}
+
+/* حالة الشهر الجاري */
+.live-badge{background:#064e3b;color:#34d399;font-size:10px;font-weight:700;padding:2px 8px;border-radius:50px;margin-right:6px}
+
+/* Date range inputs */
+input[type=date]{background:var(--bg4);border:1px solid var(--br2);color:var(--tx);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;font-family:inherit}
+
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:12px}
+.sp{width:36px;height:36px;border:3px solid var(--br2);border-top-color:var(--bl);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:50px;font-weight:700;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:9999;white-space:nowrap}
+#toast.on{opacity:1}#toast.er{background:#ef4444}
+.up{color:#34d399}.dn{color:#f87171}.fl{color:#475569}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="sp"></div>
+  <div style="color:var(--tx3);font-size:13px">جار تحميل البيانات...</div>
+</div>
+
+<nav style="display:none" id="nav">
+  <div class="ni">
+    <button class="nb on"  onclick="go('ph',this)">🏠 رئيسية</button>
+    <button class="nb"     onclick="go('pe',this)">➕ إدخال</button>
+    <button class="nb"     onclick="go('pm',this)">📅 شهري</button>
+    <button class="nb"     onclick="go('pdy',this)">📊 يومي مقارن</button>
+    <button class="nb"     onclick="go('pc',this)">⚖️ مقارنة</button>
+    <button class="nb"     onclick="go('pa',this)">🔬 تحليل</button>
+    <button class="nb"     onclick="go('pf',this)">🔮 توقعات</button>
+    <button class="nb"     onclick="go('pd',this)">📋 بيانات</button>
+  </div>
+</nav>
+
+<div id="pages" style="display:none">
+
+<!-- ══ HOME ══════════════════════════════════════════════════════ -->
+<div id="ph" class="pg on">
+  <div style="background:linear-gradient(135deg,#1e3a5f,#1e40af);border-radius:16px;padding:16px;text-align:center;margin-bottom:12px">
+    <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:3px">🐔 لوحة تحليل الدواجن</div>
+    <div id="hSub" style="font-size:12px;color:#93c5fd">—</div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="lb">آخر سعر</div><div class="vl" id="hL" style="color:#34d399">—</div><div class="sb" id="hLD">—</div></div>
+    <div class="kpi"><div class="lb">التغير</div><div class="vl" id="hD">—</div><div class="sb" id="hDP">—</div></div>
+    <div class="kpi"><div class="lb">متوسط 2026</div><div class="vl" id="hA6" style="color:#f59e0b">—</div><div class="sb">جنيه/كجم</div></div>
+    <div class="kpi"><div class="lb">متوسط الكل</div><div class="vl" id="hAA" style="color:#60a5fa">—</div><div class="sb">2023-2026</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">📈 الرسم البياني</div>
+    <div class="tabs">
+      <button class="tab on" onclick="setHR(60,this)">60 يوم</button>
+      <button class="tab" onclick="setHR(180,this)">6 شهور</button>
+      <button class="tab" onclick="setHR(365,this)">سنة</button>
+      <button class="tab" onclick="setHR(0,this)">الكل</button>
+    </div>
+    <div class="cw"><canvas id="cH" height="160"></canvas></div>
+  </div>
+  <div class="card"><div class="ct">📊 مقارنة سنوية</div><div id="yrCards"></div></div>
+  <div class="card"><div class="ct">🌡️ Heatmap الشهري</div><div class="hm" id="hmG"></div></div>
+</div>
+
+<!-- ══ ENTRY ══════════════════════════════════════════════════════ -->
+<div id="pe" class="pg">
+  <div class="inp-s">
+    <div class="dd" id="eDis">—</div>
+    <input type="number" id="pi" placeholder="السعر" inputmode="decimal" step="0.5" min="1" max="500">
+    <button class="ab" onclick="addP()">✅  أضف السعر</button>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="lb">آخر سعر</div><div class="vl up" id="eL">—</div><div class="sb" id="eLD">—</div></div>
+    <div class="kpi"><div class="lb">التغير المتوقع</div><div class="vl" id="eD">—</div><div class="sb" id="eDP">—</div></div>
+    <div class="kpi"><div class="lb">متوسط الشهر الحالي</div><div class="vl" id="eMa" style="color:#fbbf24">—</div><div class="sb" id="eMaN">—</div></div>
+    <div class="kpi"><div class="lb">إجمالي الأيام</div><div class="vl" id="eTot" style="color:#60a5fa">—</div><div class="sb">يوم</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">📋 آخر 10 إدخالات</div>
+    <div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>السعر</th><th>التغير</th></tr></thead><tbody id="eTbl"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══ MONTHLY ════════════════════════════════════════════════════ -->
+<div id="pm" class="pg">
+  <div class="card">
+    <div class="ct">📅 تحليل شهري</div>
+    <div class="sel-row">
+      <label>السنة:</label>
+      <select id="selY" onchange="rMonth()">
+        <option value="all">كل السنوات</option>
+        <option value="2023">2023</option><option value="2024">2024</option>
+        <option value="2025">2025</option><option value="2026">2026</option>
+      </select>
+      <span id="liveBadge" class="live-badge" style="display:none">🔴 الشهر الجاري</span>
+    </div>
+    <div class="cw"><canvas id="cM" height="180"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">📊 تفاصيل الأشهر</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>الشهر</th><th>السنة</th><th>متوسط</th><th>أعلى</th><th>أقل</th><th>أيام</th><th>تذبذب</th></tr></thead>
+        <tbody id="mTbl"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DAILY COMPARE ══════════════════════════════════════════════ -->
+<div id="pdy" class="pg">
+  <div class="card">
+    <div class="ct">📊 البيانات اليومية مقارنة بين السنوات</div>
+    
+    <!-- نوع الفلتر -->
+    <div class="sel-row" style="margin-bottom:10px">
+      <label>عرض:</label>
+      <select id="dyFilter" onchange="switchDyFilter()">
+        <option value="month">بالشهر</option>
+        <option value="week">بالأسبوع</option>
+        <option value="range">فترة زمنية</option>
+      </select>
+    </div>
+
+    <!-- فلتر الشهر -->
+    <div id="fMonth" class="sel-row">
+      <label>الشهر:</label>
+      <select id="dyMonth" onchange="rDaily()">
+        <option value="1">يناير</option><option value="2">فبراير</option>
+        <option value="3">مارس</option><option value="4">أبريل</option>
+        <option value="5" selected>مايو</option><option value="6">يونيو</option>
+        <option value="7">يوليو</option><option value="8">أغسطس</option>
+        <option value="9">سبتمبر</option><option value="10">أكتوبر</option>
+        <option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+      </select>
+    </div>
+
+    <!-- فلتر الأسبوع -->
+    <div id="fWeek" class="sel-row" style="display:none">
+      <label>السنة:</label>
+      <select id="dyWY" onchange="buildWks();
+  // قيم افتراضية للفترة
+  try{
+    var today=new Date(), lastR=allRec();
+    if(lastR.length){
+      var ld=lastR[lastR.length-1].date;
+      var fd=new Date(ld); fd.setMonth(fd.getMonth()-1);
+      var fdStr=fd.toISOString().split('T')[0];
+      var fromEl=document.getElementById('dyFrom');
+      var toEl=document.getElementById('dyTo');
+      if(fromEl)fromEl.value=fdStr;
+      if(toEl)toEl.value=ld;
+    }
+  }catch(e){}rDaily()">
+        <option value="2026">2026</option><option value="2025">2025</option>
+        <option value="2024">2024</option><option value="2023">2023</option>
+      </select>
+      <label style="margin-right:8px">الأسبوع:</label>
+      <select id="dyWk" onchange="rDaily()" style="width:90px"></select>
+    </div>
+
+    <!-- فلتر الفترة -->
+    <div id="fRange" style="display:none;margin-bottom:10px">
+      <div class="sel-row">
+        <label>من:</label>
+        <input type="date" id="dyFrom" onchange="rDaily()">
+        <label style="margin-right:8px">إلى:</label>
+        <input type="date" id="dyTo" onchange="rDaily()">
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div id="dyInfo" style="font-size:11px;color:var(--tx3);flex:1">—</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span style="font-size:10px;color:var(--tx3)">حجم</span>
+        <input type="range" id="dySize" min="1" max="3" value="1" step="1"
+          oninput="applyDySize(this.value)"
+          style="width:60px;accent-color:#3b82f6;cursor:pointer">
+        <span id="dySizeLbl" style="font-size:10px;color:#94a3b8;width:30px">M</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- الجدول الرئيسي -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div id="dyTbl" style="overflow-x:auto;-webkit-overflow-scrolling:touch;max-height:70vh;overflow-y:auto"></div>
+  </div>
+
+  <!-- رسم مقارن -->
+  <div class="card">
+    <div class="ct">📈 رسم مقارن</div>
+    <div class="cw"><canvas id="cDy" height="170"></canvas></div>
+  </div>
+
+  <!-- إحصائيات -->
+  <div class="card">
+    <div class="ct">📊 إحصائيات المقارنة</div>
+    <div id="dyStats"></div>
+  </div>
+</div>
+
+<!-- ══ COMPARE ════════════════════════════════════════════════════ -->
+<div id="pc" class="pg">
+  <div class="card">
+    <div class="ct">⚖️ نفس الشهر — كل السنوات</div>
+    <select id="cM1" onchange="rCmp1()" style="width:100%;margin-bottom:10px">
+      <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
+      <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
+      <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
+      <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+    </select>
+    <div class="cw"><canvas id="cC1" height="170"></canvas></div>
+    <div id="cCards" class="mc-grid" style="margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <div class="ct">📊 شهور السنة — مقارنة داخلية</div>
+    <select id="cY2" onchange="rCmp2()" style="width:100%;margin-bottom:10px">
+      <option value="2023">2023</option><option value="2024">2024</option>
+      <option value="2025">2025</option><option value="2026" selected>2026</option>
+    </select>
+    <div class="cw"><canvas id="cC2" height="170"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">📈 مقارنة سنتين</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <select id="yA" onchange="rCmp3()"><option value="2023">2023</option><option value="2024">2024</option><option value="2025" selected>2025</option><option value="2026">2026</option></select>
+      <select id="yB" onchange="rCmp3()"><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option></select>
+    </div>
+    <div class="cw"><canvas id="cC3" height="170"></canvas></div>
+    <div id="c3Stats" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- ══ ANALYSIS ════════════════════════════════════════════════════ -->
+<div id="pa" class="pg">
+  <div class="kpis">
+    <div class="kpi"><div class="lb">أعلى سعر</div><div class="vl" style="color:#ef4444" id="aMax">—</div><div class="sb" id="aMaxD">—</div></div>
+    <div class="kpi"><div class="lb">أقل سعر</div><div class="vl" style="color:#34d399" id="aMin">—</div><div class="sb" id="aMinD">—</div></div>
+    <div class="kpi"><div class="lb">الانحراف المعياري</div><div class="vl" style="color:#f59e0b" id="aStd">—</div><div class="sb">تشتت الأسعار</div></div>
+    <div class="kpi"><div class="lb">معامل التذبذب</div><div class="vl" style="color:#8b5cf6" id="aVol">—</div><div class="sb">%</div></div>
+  </div>
+  <div class="card"><div class="ct">📈 الاتجاه + MA-7 + MA-30</div><div class="cw"><canvas id="cTr" height="170"></canvas></div></div>
+  <div class="card">
+    <div class="ct">🌙 المؤشر الموسمي</div>
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">1 = متوسط | >1 أعلى | <1 أدنى</div>
+    <div class="cw"><canvas id="cSeas" height="140"></canvas></div>
+    <div id="seasTxt" style="margin-top:10px"></div>
+  </div>
+  <div class="card"><div class="ct">🔬 رؤى تحليلية</div><div id="insightsDiv"></div></div>
+  <div class="card">
+    <div class="ct">🏆 أعلى 10 أسعار</div>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>التاريخ</th><th>السعر</th></tr></thead><tbody id="t10"></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="ct">📉 أقل 10 أسعار</div>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>التاريخ</th><th>السعر</th></tr></thead><tbody id="b10"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══ FORECAST ════════════════════════════════════════════════════ -->
+<div id="pf" class="pg">
+  <div class="card">
+    <div class="ct">🔮 توقعات النصف الثاني 2026</div>
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:10px">اتجاه تاريخي + مؤشر موسمي</div>
+    <div class="fc-row" id="fcC"></div>
+    <div class="cw"><canvas id="cFc" height="180"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">📊 جدول التوقعات</div>
+    <div class="tbl-wrap"><table><thead><tr><th>الشهر</th><th>مركزي</th><th>متفائل</th><th>متشائم</th><th>2025</th></tr></thead><tbody id="fcTbl"></tbody></table></div>
+  </div>
+  <div class="card"><div class="ct">📌 توصيات</div><div id="fcRec"></div></div>
+</div>
+
+<!-- ══ DATA ════════════════════════════════════════════════════════ -->
+<div id="pd" class="pg">
+  <div class="card" style="padding:12px">
+    <input type="text" id="srch" placeholder="🔍 بحث بالتاريخ..." oninput="rData()"
+      style="width:100%;background:var(--bg4);border:1px solid var(--br2);color:var(--tx);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;margin-bottom:8px">
+    <div class="tabs" id="yTabs"></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="ts"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>السعر</th><th>تغير</th><th>%</th></tr></thead><tbody id="dTbl"></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="ct">💾 تصدير</div>
+    <div class="btn-col">
+      <button class="ebtn e1" onclick="xCSV()">📥 تصدير CSV</button>
+      <button class="ebtn e2" onclick="xJSON()">💾 نسخة احتياطية</button>
+      <button class="ebtn e3" onclick="document.getElementById('impF').click()">📤 استيراد</button>
+    </div>
+    <input type="file" id="impF" accept=".json" style="display:none" onchange="impJSON(this)">
+  </div>
+</div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+var DB=null;
+const MON=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const YCLR={2023:'#3b82f6',2024:'#10b981',2025:'#f59e0b',2026:'#f87171'};
+const SK='pp_v5';
+
+function b64ToArr(b){var s=atob(b),a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+async function loadData(){
+  try{
+    var comp=b64ToArr("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");
+    var ds=new DecompressionStream('gzip');
+    var w=ds.writable.getWriter(),r=ds.readable.getReader();
+    w.write(comp);w.close();
+    var chunks=[],done=false;
+    while(!done){var x=await r.read();done=x.done;if(x.value)chunks.push(x.value);}
+    var tot=chunks.reduce(function(s,c){return s+c.length;},0);
+    var all=new Uint8Array(tot),off=0;
+    chunks.forEach(function(c){all.set(c,off);off+=c.length;});
+    DB=JSON.parse(new TextDecoder().decode(all));
+    initApp();
+  }catch(e){document.getElementById('loading').innerHTML='<div style="color:#ef4444;padding:20px;font-size:13px">خطأ: '+e.message+'</div>';}
+}
+
+function loadNew(){try{return JSON.parse(localStorage.getItem(SK)||'[]');}catch{return[];}}
+function saveNew(a){localStorage.setItem(SK,JSON.stringify(a));}
+var NEW_E=[];
+
+function allRec(){
+  var all=DB.records.slice();
+  var ex={};
+  DB.records.forEach(function(e){ex[e.date]=1;});
+  NEW_E.forEach(function(e){
+    if(!ex[e.date]){all.push(e);ex[e.date]=1;}
+    else{var i=all.findIndex(function(x){return x.date===e.date;});if(i>=0)all[i]=e;}
+  });
+  return all.sort(function(a,b){return a.date.localeCompare(b.date);});
+}
+
+// حساب إحصائيات شهرية من allRec (يشمل الشهر الجاري والإدخالات الجديدة)
+function calcMonthly(all){
+  var m={};
+  all.forEach(function(e){
+    var k=e.year+'-'+String(e.month).padStart(2,'0');
+    if(!m[k])m[k]={year:e.year,month:e.month,monthName:MON[e.month-1],prices:[]};
+    m[k].prices.push(e.price);
+  });
+  Object.keys(m).forEach(function(k){
+    var p=m[k].prices;
+    var avg=p.reduce(function(s,v){return s+v;},0)/p.length;
+    m[k].avg=+avg.toFixed(2);
+    m[k].max=Math.max.apply(null,p);
+    m[k].min=Math.min.apply(null,p);
+    m[k].days=p.length;
+    var std=Math.sqrt(p.reduce(function(s,v){return s+(v-avg)*(v-avg);},0)/p.length);
+    m[k].std=+std.toFixed(2);
+    m[k].vol=avg>0?+(std/avg*100).toFixed(1):0;
+    delete m[k].prices;
+  });
+  return m;
+}
+
+function getNext(){
+  var a=allRec(),l=a[a.length-1],d=new Date(l.date);
+  d.setDate(d.getDate()+1);return d.toISOString().split('T')[0];
+}
+
+function initApp(){
+  NEW_E=loadNew();
+  buildWks();
+  document.getElementById('loading').style.display='none';
+  document.getElementById('nav').style.display='';
+  document.getElementById('pages').style.display='';
+  renderHome();updateED();
+}
+
+// ── NAV ──────────────────────────────────────────────────────────
+function go(id,btn){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  setTimeout(function(){
+    if(id==='ph')renderHome();
+    else if(id==='pe')renderEntry();
+    else if(id==='pm')rMonth();
+    else if(id==='pdy')rDaily();
+    else if(id==='pc'){rCmp1();rCmp2();rCmp3();}
+    else if(id==='pa')renderAnalysis();
+    else if(id==='pf')renderForecast();
+    else if(id==='pd')rData();
+  },10);
+}
+
+// ── HOME ─────────────────────────────────────────────────────────
+var hR=60;
+function setHR(n,btn){hR=n;document.querySelectorAll('#ph .tab').forEach(function(t){t.classList.remove('on');});btn.classList.add('on');drawH();}
+function renderHome(){
+  var all=allRec(),last=all[all.length-1];
+  var s=last.diff>0?'+':'';
+  document.getElementById('hSub').textContent='2023 → '+last.date.slice(0,7)+' | '+all.length.toLocaleString('ar')+' يوم';
+  set('hL',last.price+' ج');set('hLD',last.date);
+  document.getElementById('hD').textContent=s+last.diff;
+  document.getElementById('hD').className='vl '+(last.diff>0?'up':last.diff<0?'dn':'fl');
+  set('hDP',s+last.diffPct+'%');
+  var s26=all.filter(function(e){return e.year===2026;});
+  set('hA6',s26.length?(s26.reduce(function(s,e){return s+e.price;},0)/s26.length).toFixed(1):'—');
+  set('hAA',DB.overall_avg);
+  var monthly=calcMonthly(all);
+  var avgs=Object.values(monthly).map(function(m){return m.avg;});
+  var gmn=Math.min.apply(null,avgs),gmx=Math.max.apply(null,avgs);
+  // year cards
+  var yh='';
+  [2023,2024,2025,2026].forEach(function(y){
+    var ys=all.filter(function(e){return e.year===y;});
+    if(!ys.length)return;
+    var avg=(ys.reduce(function(s,e){return s+e.price;},0)/ys.length).toFixed(2);
+    var prev=DB.yearly[y-1];
+    var chg=prev?((avg-prev.avg)/prev.avg*100).toFixed(1):null;
+    yh+='<div class="sr"><div style="display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:'+YCLR[y]+'"></div><span style="font-weight:700;color:'+YCLR[y]+'">'+y+'</span></div>';
+    yh+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:800">'+avg+'</span>';
+    if(chg)yh+='<span class="badge '+(parseFloat(chg)>0?'bg':'br')+'">'+(parseFloat(chg)>0?'+':'')+chg+'%</span>';
+    yh+='</div></div>';
+  });
+  document.getElementById('yrCards').innerHTML=yh;
+  // heatmap
+  var hmH='';
+  MON.forEach(function(m,i){
+    var vs=Object.values(monthly).filter(function(x){return x.month===i+1;}).map(function(x){return x.avg;});
+    var v=vs.length?(vs.reduce(function(s,x){return s+x;},0)/vs.length):null;
+    if(!v){hmH+='<div class="hmc" style="background:var(--bg3)"><div class="hm-m">'+m.slice(0,3)+'</div><div class="hm-v" style="font-size:10px">—</div></div>';return;}
+    var t=(v-gmn)/(gmx-gmn||1);
+    var r=Math.round(16+t*204),g2=Math.round(185-t*145),b2=Math.round(129-t*89);
+    hmH+='<div class="hmc" style="background:rgb('+r+','+g2+','+b2+')"><div class="hm-m">'+m.slice(0,3)+'</div><div class="hm-v">'+v.toFixed(0)+'</div></div>';
+  });
+  document.getElementById('hmG').innerHTML=hmH;
+  drawH();
+}
+function drawH(){var all=allRec(),d=hR===0?all:all.slice(-hR);drawLine('cH',d.map(function(e){return e.date.slice(5);}),[{d:d.map(function(e){return e.price;}),c:'#10b981'}],160);}
+
+// ── ENTRY ────────────────────────────────────────────────────────
+function updateED(){var d=getNext(),nd=new Date(d);document.getElementById('eDis').textContent='📅 '+d+' — '+DAYS[nd.getDay()];}
+function addP(){
+  var inp=document.getElementById('pi'),price=parseFloat(inp.value);
+  if(!price||price<=0||price>500){toast('❌ أدخل سعراً صحيحاً',1);inp.focus();return;}
+  var date=getNext(),all=allRec(),prev=all[all.length-1].price;
+  var diff=+(price-prev).toFixed(2),dp=+(diff/prev*100).toFixed(1);
+  var d=new Date(date);
+  var entry={date:date,price:price,diff:diff,diffPct:dp,dayName:DAYS[d.getDay()],year:d.getFullYear(),month:d.getMonth()+1};
+  var xi=NEW_E.findIndex(function(e){return e.date===date;});
+  if(xi>=0){if(!confirm('التاريخ موجود. تحديث؟'))return;NEW_E[xi]=entry;}
+  else NEW_E.push(entry);
+  saveNew(NEW_E);
+  inp.value='';
+  toast('✅ '+date+' — '+price+' جنيه');
+  renderEntry();updateED();
+}
+document.getElementById('pi').addEventListener('keydown',function(e){if(e.key==='Enter')addP();});
+document.getElementById('pi').addEventListener('input',function(){
+  if(!document.getElementById('pe').classList.contains('on'))return;
+  var v=parseFloat(this.value),all=allRec(),last=all[all.length-1];
+  if(v>0){var d=+(v-last.price).toFixed(2),dp=+(d/last.price*100).toFixed(1),s=d>0?'+':'';
+    document.getElementById('eD').textContent=s+d;
+    document.getElementById('eD').className='vl '+(d>0?'up':d<0?'dn':'fl');
+    document.getElementById('eDP').textContent=s+dp+'%';}
+});
+function renderEntry(){
+  var all=allRec(),last=all[all.length-1],monthly=calcMonthly(all);
+  set('eL',last.price+' ج');set('eLD',last.date);set('eTot',all.length.toLocaleString('ar'));
+  // متوسط الشهر الحالي من calcMonthly (يشمل الإدخالات الجديدة)
+  var nd=new Date(getNext());
+  var curKey=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');
+  var ms=monthly[curKey];
+  if(!ms){var pm=new Date(nd);pm.setMonth(pm.getMonth()-1);curKey=pm.getFullYear()+'-'+String(pm.getMonth()+1).padStart(2,'0');ms=monthly[curKey];}
+  set('eMa',ms?ms.avg:'—');set('eMaN',ms?(MON[ms.month-1]+' '+ms.year+' ('+ms.days+' يوم)'):'—');
+  var rows=NEW_E.slice().reverse().slice(0,10);
+  document.getElementById('eTbl').innerHTML=rows.length?rows.map(function(e){
+    var sc=e.diff>0?'bg':e.diff<0?'br':'by',sg=e.diff>0?'+':'';
+    return'<tr><td style="color:#94a3b8;font-size:10px">'+e.date+'</td><td style="color:#64748b;font-size:10px">'+e.dayName+'</td><td style="font-weight:700;color:#34d399">'+e.price+'</td><td><span class="badge '+sc+'">'+sg+e.diff+'</span></td></tr>';
+  }).join(''):'<tr><td colspan="4" style="color:var(--tx3);padding:14px;text-align:center">لا توجد إدخالات جديدة</td></tr>';
+  document.getElementById('eD').textContent='—';document.getElementById('eDP').textContent='أدخل سعراً';
+}
+
+// ── MONTHLY (يشمل الشهر الجاري والإدخالات الجديدة) ──────────────
+function rMonth(){
+  var yr=document.getElementById('selY').value;
+  var all=allRec(),monthly=calcMonthly(all);
+  var now=new Date(),curKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var isLive=monthly[curKey]&&(yr==='all'||yr==now.getFullYear());
+  document.getElementById('liveBadge').style.display=isLive?'inline':'none';
+
+  var data=MON.map(function(_,mi){
+    if(yr==='all'){
+      var vs=Object.values(monthly).filter(function(m){return m.month===mi+1;});
+      if(!vs.length)return{m:MON[mi],avg:null,max:null,min:null,days:0,vol:null,live:false};
+      var isL=vs.some(function(v){return (v.year+'-'+String(v.month).padStart(2,'0'))===curKey;});
+      return{m:MON[mi],avg:+(vs.reduce(function(s,v){return s+v.avg;},0)/vs.length).toFixed(2),max:Math.max.apply(null,vs.map(function(v){return v.max;})),min:Math.min.apply(null,vs.map(function(v){return v.min;})),days:vs.reduce(function(s,v){return s+v.days;},0),vol:+(vs.reduce(function(s,v){return s+v.vol;},0)/vs.length).toFixed(1),live:isL};
+    }else{
+      var k=yr+'-'+String(mi+1).padStart(2,'0'),s=monthly[k];
+      return{m:MON[mi],avg:s?s.avg:null,max:s?s.max:null,min:s?s.min:null,days:s?s.days:0,vol:s?s.vol:null,live:k===curKey};
+    }
+  });
+
+  drawBar('cM',data.map(function(d){return d.m;}),data.map(function(d){return d.avg||0;}),null,180,true,data.map(function(d){return d.live;}));
+  document.getElementById('mTbl').innerHTML=data.map(function(d,i){
+    if(!d.avg)return'<tr><td style="color:#475569">'+d.m+'</td><td colspan="6" style="color:#475569">—</td></tr>';
+    return'<tr'+(d.live?' style="background:#064e3b22"':'')+'><td style="font-weight:700">'+d.m+(d.live?'<span class="live-badge" style="margin-right:4px">جاري</span>':'')+'</td>'+(yr==='all'?'<td style="color:var(--tx3)">كل</td>':'<td style="color:'+YCLR[parseInt(yr)]+'">'+yr+'</td>')+'<td style="font-weight:800">'+d.avg+'</td><td style="color:#f87171">'+d.max+'</td><td style="color:#34d399">'+d.min+'</td><td style="color:var(--tx3)">'+d.days+'</td><td><span class="badge bb">'+d.vol+'%</span></td></tr>';
+  }).join('');
+}
+
+// ── DAILY COMPARE ────────────────────────────────────────────────
+function switchDyFilter(){
+  var v=document.getElementById('dyFilter').value;
+  document.getElementById('fMonth').style.display=v==='month'?'flex':'none';
+  document.getElementById('fWeek').style.display=v==='week'?'flex':'none';
+  document.getElementById('fRange').style.display=v==='range'?'block':'none';
+  rDaily();
+}
+
+function buildWks(){
+  var yr=parseInt(document.getElementById('dyWY').value);
+  var sel=document.getElementById('dyWk');
+  var cur=sel.value;
+  sel.innerHTML='';
+  for(var w=1;w<=52;w++){
+    var o=document.createElement('option');
+    o.value=w; o.text='أسبوع '+w;
+    if(w==cur)o.selected=true;
+    sel.appendChild(o);
+  }
+}
+
+function getWeekRange(yr,wk){
+  // ISO week: أول يوم الاثنين
+  var jan4=new Date(yr,0,4);
+  var dow=jan4.getDay()||7;
+  var mon=new Date(jan4); mon.setDate(jan4.getDate()-(dow-1)+(wk-1)*7);
+  var sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  return{from:mon.toISOString().split('T')[0], to:sun.toISOString().split('T')[0]};
+}
+
+function rDaily(){
+  var all=allRec();
+  var filter=document.getElementById('dyFilter').value;
+  var YEARS=[2023,2024,2025,2026];
+  var title='';
+  
+  // ─── تحديد الفلتر ───────────────────────────────────────────
+  var rowFn; // ترجع قيمة المحور (يوم الشهر أو رقم اليوم)
+  var matchFn; // تفلتر السجلات
+  
+  if(filter==='month'){
+    var m=parseInt(document.getElementById('dyMonth').value);
+    matchFn=function(e){return e.month===m;};
+    rowFn=function(e){return e.day||parseInt(e.date.slice(8,10));};
+    title=MON[m-1];
+    
+  }else if(filter==='week'){
+    var wy=parseInt(document.getElementById('dyWY').value);
+    var wk=parseInt(document.getElementById('dyWk').value)||1;
+    var wr=getWeekRange(wy,wk);
+    matchFn=function(e){return e.date>=wr.from&&e.date<=wr.to;};
+    rowFn=function(e){return e.date;}; // نستخدم التاريخ كاملاً
+    title='أسبوع '+wk+' | '+wr.from+' → '+wr.to;
+    
+  }else{
+    var fr=document.getElementById('dyFrom').value;
+    var to=document.getElementById('dyTo').value;
+    if(!fr||!to){document.getElementById('dyInfo').textContent='اختار الفترة';return;}
+    matchFn=function(e){return e.date>=fr&&e.date<=to;};
+    rowFn=function(e){return e.date;};
+    title=fr+' → '+to;
+  }
+
+  // ─── تجميع البيانات ──────────────────────────────────────────
+  // byYear[year][rowKey] = entry
+  var byYear={};
+  var rowKeys=[];
+  var rowSet={};
+  
+  YEARS.forEach(function(y){byYear[y]={};});
+  
+  all.forEach(function(e){
+    if(!matchFn(e))return;
+    if(!byYear[e.year])return;
+    var rk=rowFn(e);
+    byYear[e.year][rk]=e;
+    if(!rowSet[rk]){rowSet[rk]=1;rowKeys.push(rk);}
+  });
+  
+  // ترتيب المفاتيح
+  rowKeys.sort(function(a,b){
+    if(typeof a==='string')return a.localeCompare(b);
+    return a-b;
+  });
+  
+  document.getElementById('dyInfo').textContent=title+' | '+rowKeys.length+' يوم';
+  
+  if(!rowKeys.length){
+    document.getElementById('dyTbl').innerHTML='<div style="padding:20px;text-align:center;color:var(--tx3)">لا توجد بيانات في هذه الفترة</div>';
+    document.getElementById('dyStats').innerHTML='';
+    return;
+  }
+
+  // ─── بناء الجدول ─────────────────────────────────────────────
+  var sz=parseInt(document.getElementById('dySize').value)||2;
+  var cellPad=sz===1?'2px 3px':sz===2?'4px 5px':'6px 8px';
+  var fontSize=sz===1?'10px':sz===2?'11px':'13px';
+  var subSize=sz===1?'8px':sz===2?'8px':'10px';
+  var minW=sz===1?'44px':sz===2?'58px':'75px';
+  var html='<table style="width:100%;border-collapse:collapse;font-size:'+fontSize+';line-height:1">';
+  
+  // Header
+  html+='<thead><tr>';
+  html+='<th style="background:#0f172a;color:#94a3b8;padding:'+cellPad+';text-align:center;font-size:'+subSize+';font-weight:700;position:sticky;top:0;right:0;z-index:3;min-width:'+minW+';border-left:1px solid #334155;border-bottom:2px solid #334155">التاريخ</th>';
+  YEARS.forEach(function(y){
+    var clr=YCLR[y]||'#60a5fa';
+    html+='<th style="background:'+clr+'33;color:'+clr+';padding:'+cellPad+';text-align:center;font-size:'+fontSize+';font-weight:800;position:sticky;top:0;z-index:2;min-width:'+minW+';border-bottom:3px solid '+clr+';letter-spacing:.5px">'+y+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+  
+  // Rows
+  rowKeys.forEach(function(rk,ri){
+    var rowBg=ri%2===0?'background:#0f172a':'background:#111827';
+    html+='<tr style="'+rowBg+'">';
+    
+    // عمود التاريخ
+    var label=typeof rk==='string'&&rk.length===10?rk.slice(5):String(rk);
+    // أضف اسم اليوم
+    var dayLabel='';
+    YEARS.forEach(function(y){var e=byYear[y][rk];if(e&&e.dayName&&!dayLabel)dayLabel=e.dayName;});
+    html+='<td style="background:#0f172a;position:sticky;right:0;z-index:1;padding:'+cellPad+';text-align:center;font-weight:600;color:#e2e8f0;font-size:'+fontSize+';font-weight:700;border-left:1px solid #334155">';
+    html+=label+'<div style="font-size:'+subSize+';color:#64748b">'+dayLabel+'</div></td>';
+    
+    // أعمدة السنوات
+    YEARS.forEach(function(y){
+      var e=byYear[y][rk];
+      if(!e){html+='<td style="color:#1e3a5f;text-align:center;padding:'+cellPad+';border-bottom:1px solid #1e293b">—</td>';return;}
+      var clr=e.diff>0?'#34d399':e.diff<0?'#f87171':'#94a3b8';
+      var sign=e.diff>0?'▲':e.diff<0?'▼':'';
+      var signStr=e.diff>0?'+':'';
+      html+='<td style="text-align:center;padding:'+cellPad+';border-bottom:1px solid #1e293b">';
+      html+='<div style="font-weight:900;font-size:'+fontSize+';color:#ffffff;letter-spacing:-.3px">'+e.price+'</div>';
+      if(e.diff!==0)html+='<div style="font-size:'+subSize+';color:'+clr+';font-weight:700">'+sign+signStr+e.diff+'</div>';
+      html+='</td>';
+    });
+    html+='</tr>';
+  });
+  
+  html+='</tbody></table>';
+  document.getElementById('dyTbl').innerHTML=html;
+
+  // ─── رسم بياني ───────────────────────────────────────────────
+  var series=[];
+  YEARS.forEach(function(y){
+    var data=rowKeys.map(function(rk){var e=byYear[y][rk];return e?e.price:null;});
+    var hasData=data.some(function(v){return v!==null;});
+    if(hasData)series.push({d:data,c:YCLR[y]||'#60a5fa',l:String(y)});
+  });
+  
+  var xLabels=rowKeys.map(function(rk){
+    return typeof rk==='string'&&rk.length===10?rk.slice(5):String(rk);
+  });
+  drawLine('cDy',xLabels,series,170);
+
+  // ─── إحصائيات ────────────────────────────────────────────────
+  var statsH='';
+  YEARS.forEach(function(y){
+    var entries=rowKeys.map(function(rk){return byYear[y][rk];}).filter(Boolean);
+    if(!entries.length)return;
+    var prices=entries.map(function(e){return e.price;});
+    var avg=(prices.reduce(function(s,v){return s+v;},0)/prices.length).toFixed(1);
+    var mx=Math.max.apply(null,prices);
+    var mn=Math.min.apply(null,prices);
+    var clr=YCLR[y]||'#60a5fa';
+    statsH+='<div class="sr"><span class="sl" style="color:'+clr+';font-weight:700">'+y+'</span>';
+    statsH+='<span class="sv" style="font-size:12px">متوسط: <b>'+avg+'</b> &nbsp;↑<b>'+mx+'</b> &nbsp;↓<b>'+mn+'</b> &nbsp;<span style="color:var(--tx3)">('+entries.length+' يوم)</span></span></div>';
+  });
+  document.getElementById('dyStats').innerHTML=statsH||'<div style="color:var(--tx3);text-align:center;padding:10px">لا توجد بيانات</div>';
+}
+// ── حجم الخانات ──────────────────────────────────────────────────
+function applyDySize(v){
+  var lbls={1:'XS',2:'S',3:'M'};
+  document.getElementById('dySizeLbl').textContent=lbls[v]||'M';
+  rDaily();
+}
+// ── END DAILY ────────────────────────────────────────────────────
+
+// ── COMPARE ──────────────────────────────────────────────────────
+function rCmp1(){
+  var m=parseInt(document.getElementById('cM1').value);
+  var all=allRec(),monthly=calcMonthly(all);
+  var lbls=[],vals=[];
+  [2023,2024,2025,2026].forEach(function(y){var k=y+'-'+String(m).padStart(2,'0'),s=monthly[k];if(s){lbls.push(String(y));vals.push(s.avg);}});
+  drawBar('cC1',lbls,vals,null,170,true);
+  var mx=Math.max.apply(null,vals);
+  document.getElementById('cCards').innerHTML=lbls.map(function(l,i){
+    var y=parseInt(l),k=y+'-'+String(m).padStart(2,'0'),s=monthly[k];if(!s)return'';
+    var w=((s.avg/mx)*100).toFixed(0);
+    return'<div class="mc-c"><div style="font-size:10px;font-weight:700;color:'+YCLR[y]+';margin-bottom:4px">'+y+'</div><div style="font-size:18px;font-weight:800;color:'+YCLR[y]+'">'+s.avg+'</div><div style="font-size:9px;color:var(--tx3)">↑'+s.max+' ↓'+s.min+' ('+s.days+' يوم)</div><div class="bw"><div class="b" style="width:'+w+'%;background:'+YCLR[y]+'"></div></div></div>';
+  }).join('');
+}
+function rCmp2(){
+  var y=parseInt(document.getElementById('cY2').value);
+  var all=allRec(),monthly=calcMonthly(all);
+  var d=MON.map(function(_,mi){var k=y+'-'+String(mi+1).padStart(2,'0'),s=monthly[k];return s?s.avg:null;});
+  drawBar('cC2',MON,d,YCLR[y]||'#3b82f6',170,false);
+}
+function rCmp3(){
+  var yA=parseInt(document.getElementById('yA').value),yB=parseInt(document.getElementById('yB').value);
+  var all=allRec(),monthly=calcMonthly(all);
+  var dA=MON.map(function(_,mi){var k=yA+'-'+String(mi+1).padStart(2,'0'),s=monthly[k];return s?s.avg:null;});
+  var dB=MON.map(function(_,mi){var k=yB+'-'+String(mi+1).padStart(2,'0'),s=monthly[k];return s?s.avg:null;});
+  drawLine('cC3',MON,[{d:dA,c:YCLR[yA]||'#3b82f6',l:String(yA)},{d:dB,c:YCLR[yB]||'#f87171',l:String(yB)}],170);
+  var sA=DB.yearly[yA],sB=DB.yearly[yB];
+  if(sA&&sB){
+    var df=+((sB.avg-sA.avg)/sA.avg*100).toFixed(1);
+    document.getElementById('c3Stats').innerHTML=
+      '<div class="sr"><span class="sl">متوسط '+yA+'</span><span class="sv" style="color:'+YCLR[yA]+'">'+sA.avg+' ج</span></div>'+
+      '<div class="sr"><span class="sl">متوسط '+yB+'</span><span class="sv" style="color:'+YCLR[yB]+'">'+sB.avg+' ج</span></div>'+
+      '<div class="sr"><span class="sl">الفرق</span><span class="sv"><span class="badge '+(df>0?'bg':'br')+'">'+(df>0?'+':'')+df+'%</span></span></div>';
+  }
+}
+
+// ── ANALYSIS ─────────────────────────────────────────────────────
+function renderAnalysis(){
+  set('aMax',DB.overall_max+' ج');set('aMaxD',DB.top10[0]?DB.top10[0].date:'—');
+  set('aMin',DB.overall_min+' ج');set('aMinD',DB.bot10[0]?DB.bot10[0].date:'—');
+  set('aStd',DB.overall_std);set('aVol',(DB.overall_std/DB.overall_avg*100).toFixed(1)+'%');
+  var all=allRec(),step=Math.max(1,Math.floor(all.length/180));
+  var s=all.filter(function(_,i){return i%step===0||i===all.length-1;});
+  var si=s.map(function(e){return all.findIndex(function(x){return x.date===e.date;});});
+  drawLine('cTr',s.map(function(e){return e.date.slice(5);}),
+    [{d:s.map(function(e){return e.price;}),c:'#3b82f666',l:'السعر'},
+     {d:si.map(function(i){return DB.ma7[i];}).filter(function(v){return v!=null;}),c:'#10b981',l:'MA-7',si:si},
+     {d:si.map(function(i){return DB.ma30[i];}).filter(function(v){return v!=null;}),c:'#f59e0b',l:'MA-30',si:si}],170);
+  // fix: re-pass properly
+  drawLine('cTr',s.map(function(e){return e.date.slice(5);}),
+    [{d:s.map(function(e){return e.price;}),c:'#3b82f666',l:'السعر'},
+     {d:si.map(function(i){return DB.ma7[i];}).map(function(v){return v===undefined?null:v;}),c:'#10b981',l:'MA-7'},
+     {d:si.map(function(i){return DB.ma30[i];}).map(function(v){return v===undefined?null:v;}),c:'#f59e0b',l:'MA-30'}],170);
+  var seas=DB.seasonal;
+  var sd=MON.map(function(m,i){return{m:m,v:seas[i+1]};});
+  drawSeas('cSeas',sd);
+  var pk=sd.reduce(function(a,b){return b.v>a.v?b:a;}),tr2=sd.reduce(function(a,b){return b.v<a.v?b:a;});
+  document.getElementById('seasTxt').innerHTML=
+    '<div class="ab-block"><div class="ab-t">🔺 ذروة: '+pk.m+'</div><div class="ab-b">مؤشر '+pk.v+' — أعلى من المتوسط بـ '+((pk.v-1)*100).toFixed(1)+'%</div></div>'+
+    '<div class="ab-block" style="border-right-color:#10b981"><div class="ab-t" style="color:#10b981">🔻 أدنى: '+tr2.m+'</div><div class="ab-b">مؤشر '+tr2.v+' — أدنى من المتوسط بـ '+((1-tr2.v)*100).toFixed(1)+'%</div></div>';
+  var yr25=DB.yearly[2025],yr26=DB.yearly[2026],tr=DB.trend;
+  document.getElementById('insightsDiv').innerHTML=[
+    {t:'📈 الاتجاه',c:tr.direction==='صاعد'?'#10b981':'#ef4444',b:'الاتجاه العام <b style="color:'+(tr.direction==='صاعد'?'#10b981':'#ef4444')+'">'+tr.direction+'</b> بمعدل '+tr.slope+' جنيه/يوم. R²='+tr.r2+'.'},
+    {t:'📊 2025 الأكثر تذبذباً',c:'#f59e0b',b:'انحراف معياري <b>'+yr25.std+'</b> — معامل تذبذب <b>'+yr25.vol+'%</b>'},
+    {t:'🌙 نمط رمضان',c:'#8b5cf6',b:'فبراير ومارس دائماً الأعلى (مؤشر > 1.18). ابدأ الدفعة قبل رمضان بـ 45 يوم.'},
+    {t:'💹 2026 الأعلى',c:'#f87171',b:'متوسط 2026 حتى الآن <b>'+yr26.avg+'</b> جنيه (+'+((yr26.avg-yr25.avg)/yr25.avg*100).toFixed(1)+'% عن 2025)'}
+  ].map(function(x){return'<div class="ab-block" style="border-right-color:'+x.c+';margin-bottom:8px"><div class="ab-t" style="color:'+x.c+'">'+x.t+'</div><div class="ab-b">'+x.b+'</div></div>';}).join('');
+  document.getElementById('t10').innerHTML=DB.top10.map(function(e,i){return'<tr><td style="color:var(--tx3)">'+(i+1)+'</td><td style="color:#94a3b8;font-size:10px">'+e.date+'</td><td style="font-weight:800;color:#ef4444">'+e.price+'</td></tr>';}).join('');
+  document.getElementById('b10').innerHTML=DB.bot10.map(function(e,i){return'<tr><td style="color:var(--tx3)">'+(i+1)+'</td><td style="color:#94a3b8;font-size:10px">'+e.date+'</td><td style="font-weight:800;color:#34d399">'+e.price+'</td></tr>';}).join('');
+}
+
+// ── FORECAST ─────────────────────────────────────────────────────
+function renderForecast(){
+  var yr26=DB.yearly[2026],ea=Math.max(yr26.avg,DB.yearly[2025].avg*1.05),seas=DB.seasonal;
+  var months=[6,7,8,9,10,11,12];
+  var fc=months.map(function(m){
+    var si=seas[m],c=+(ea*si).toFixed(1);
+    var k25='2025-'+String(m).padStart(2,'0'),a25=DB.monthly[k25];
+    var yoy=a25?+((c-a25.avg)/a25.avg*100).toFixed(1):null;
+    return{month:m,name:MON[m-1],central:c,opt:+(c+12.75).toFixed(1),pes:+(c-12.75).toFixed(1),a25:a25?a25.avg:null,yoy:yoy};
+  });
+  document.getElementById('fcC').innerHTML=fc.map(function(f){
+    return'<div class="fc-c"><div class="fm">'+f.name+'</div><div class="fv">'+f.central+'</div><div class="fr">'+(f.yoy!==null?(f.yoy>0?'↑':'↓')+Math.abs(f.yoy)+'% عن 2025':'')+'</div></div>';
+  }).join('');
+  drawLine('cFc',fc.map(function(f){return f.name;}),
+    [{d:fc.map(function(f){return f.central;}),c:'#f59e0b',l:'مركزي'},
+     {d:fc.map(function(f){return f.opt;}),c:'#10b981',l:'متفائل'},
+     {d:fc.map(function(f){return f.pes;}),c:'#ef4444',l:'متشائم'},
+     {d:fc.map(function(f){return f.a25;}),c:'#3b82f6',l:'2025'}],180);
+  document.getElementById('fcTbl').innerHTML=fc.map(function(f){
+    return'<tr><td style="font-weight:700">'+f.name+'</td><td style="color:#f59e0b;font-weight:700">'+f.central+'</td><td style="color:#34d399">'+f.opt+'</td><td style="color:#f87171">'+f.pes+'</td><td style="color:#60a5fa">'+(f.a25||'—')+'</td></tr>';
+  }).join('');
+  var best=fc.reduce(function(a,b){return b.central>a.central?b:a;}),worst=fc.reduce(function(a,b){return b.central<a.central?b:a;});
+  document.getElementById('fcRec').innerHTML=
+    '<div class="ab-block" style="border-right-color:#10b981;margin-bottom:8px"><div class="ab-t" style="color:#10b981">🟢 أفضل وقت للبيع: '+best.name+'</div><div class="ab-b">توقع <b>'+best.central+'</b> جنيه — ابدأ الدفعة قبله بـ 45 يوم.</div></div>'+
+    '<div class="ab-block" style="border-right-color:#ef4444"><div class="ab-t" style="color:#ef4444">🔴 أضعف شهر: '+worst.name+'</div><div class="ab-b">توقع <b>'+worst.central+'</b> جنيه — قلل الكميات.</div></div>';
+}
+
+// ── DATA ─────────────────────────────────────────────────────────
+var dY='all';
+function rData(){
+  var all=allRec(),newD={};NEW_E.forEach(function(e){newD[e.date]=1;});
+  var data=all.slice().reverse();
+  if(dY!=='all')data=data.filter(function(e){return e.year==dY;});
+  var s=document.getElementById('srch').value.trim();
+  if(s)data=data.filter(function(e){return e.date.includes(s);});
+  data=data.slice(0,300);
+  document.getElementById('yTabs').innerHTML=['all',2023,2024,2025,2026].map(function(y){
+    return'<button class="tab'+(dY==y?' on':'')+'" onclick="setDY(\''+y+'\')">'+( y==='all'?'الكل':y)+'</button>';
+  }).join('');
+  document.getElementById('dTbl').innerHTML=data.map(function(e){
+    var sc=e.diff>0?'bg':e.diff<0?'br':'by',sg=e.diff>0?'+':'',clr=newD[e.date]?'#34d399':'#f1f5f9';
+    return'<tr><td style="color:#94a3b8;font-size:10px">'+e.date+'</td><td style="color:#64748b;font-size:10px">'+e.dayName+'</td><td style="font-weight:700;color:'+clr+'">'+e.price+'</td><td><span class="badge '+sc+'">'+sg+e.diff+'</span></td><td style="font-size:10px;color:'+(e.diffPct>0?'#34d399':e.diffPct<0?'#f87171':'#64748b')+'">'+sg+e.diffPct+'%</td></tr>';
+  }).join('');
+}
+function setDY(y){dY=y;rData();}
+
+// ── CHART UTILS ──────────────────────────────────────────────────
+function gc(id,h){
+  var c=document.getElementById(id);if(!c)return null;
+  var ctx=c.getContext('2d'),DPR=window.devicePixelRatio||1;
+  var W=c.parentElement.clientWidth||320;
+  c.width=W*DPR;c.height=h*DPR;c.style.width=W+'px';c.style.height=h+'px';
+  ctx.scale(DPR,DPR);ctx.clearRect(0,0,W,h);
+  return{ctx:ctx,W:W,H:h};
+}
+function drawLine(id,labels,series,H){
+  var g=gc(id,H);if(!g)return;
+  var ctx=g.ctx,W=g.W;
+  var all2=[];series.forEach(function(s){s.d.forEach(function(v){if(v!=null)all2.push(v);});});
+  if(!all2.length)return;
+  var mn=Math.min.apply(null,all2)-2,mx=Math.max.apply(null,all2)+2;
+  var P={t:10,r:10,b:22,l:32},cW=W-P.l-P.r,cH=H-P.t-P.b,n=labels.length;
+  var xP=function(i){return P.l+(n>1?i/(n-1):0.5)*cW;};
+  var yP=function(v){return P.t+(1-(v-mn)/(mx-mn||1))*cH;};
+  for(var t=0;t<=4;t++){
+    var y=P.t+(t/4)*cH;
+    ctx.strokeStyle='#1e293b';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(W-P.r,y);ctx.stroke();
+    ctx.fillStyle='#475569';ctx.font='9px Arial';ctx.textAlign='right';
+    ctx.fillText((mx-t/4*(mx-mn)).toFixed(0),P.l-2,y+3);
+  }
+  series.forEach(function(s){
+    var vld=s.d.map(function(v,i){return v!=null?{v:v,i:i}:null;}).filter(Boolean);
+    if(vld.length<2)return;
+    if(series.length===1){
+      var gr=ctx.createLinearGradient(0,P.t,0,P.t+cH);
+      gr.addColorStop(0,s.c+'44');gr.addColorStop(1,s.c+'00');
+      ctx.beginPath();ctx.moveTo(xP(vld[0].i),yP(vld[0].v));
+      vld.forEach(function(p){ctx.lineTo(xP(p.i),yP(p.v));});
+      ctx.lineTo(xP(vld[vld.length-1].i),P.t+cH);ctx.lineTo(xP(vld[0].i),P.t+cH);
+      ctx.closePath();ctx.fillStyle=gr;ctx.fill();
+    }
+    ctx.beginPath();ctx.moveTo(xP(vld[0].i),yP(vld[0].v));
+    vld.forEach(function(p){ctx.lineTo(xP(p.i),yP(p.v));});
+    ctx.strokeStyle=s.c;ctx.lineWidth=s.lw||2;ctx.lineJoin='round';ctx.stroke();
+  });
+  ctx.fillStyle='#475569';ctx.font='9px Arial';ctx.textAlign='center';
+  var step=Math.max(1,Math.floor(n/5));
+  for(var i=0;i<n;i+=step)ctx.fillText(labels[i],xP(i),H-6);
+  if(n>1)ctx.fillText(labels[n-1],xP(n-1),H-6);
+  if(series.length>1){
+    var lx=P.l;
+    series.forEach(function(s){
+      ctx.fillStyle=s.c;ctx.fillRect(lx,3,10,4);
+      ctx.fillStyle='#94a3b8';ctx.font='9px Arial';ctx.textAlign='right';
+      ctx.fillText(s.l||'',lx+48,10);lx+=58;
+    });
+  }
+}
+function drawBar(id,labels,vals,baseC,H,multi,liveFlags){
+  var g=gc(id,H);if(!g)return;
+  var ctx=g.ctx,W=g.W;
+  var valid=vals.filter(function(v){return v>0;});if(!valid.length)return;
+  var mx=Math.max.apply(null,valid)*1.12;
+  var P={t:10,r:6,b:22,l:32},cW=W-P.l-P.r,cH=H-P.t-P.b,n=labels.length;
+  var bW=Math.max(3,(cW/n)-3);
+  var cls=['#3b82f6','#10b981','#f59e0b','#f87171','#8b5cf6','#14b8a6','#f97316','#ec4899','#64748b','#84cc16','#06b6d4','#a855f7'];
+  for(var t=0;t<=4;t++){
+    var y=P.t+(t/4)*cH;
+    ctx.strokeStyle='#1e293b';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(W-P.r,y);ctx.stroke();
+    ctx.fillStyle='#475569';ctx.font='9px Arial';ctx.textAlign='right';
+    ctx.fillText((mx-t/4*mx).toFixed(0),P.l-2,y+3);
+  }
+  labels.forEach(function(lbl,i){
+    if(!vals[i])return;
+    var x=P.l+(i/n)*cW+(cW/n-bW)/2;
+    var h=(vals[i]/mx)*cH,y=P.t+cH-h;
+    var isLive=liveFlags&&liveFlags[i];
+    var clr=isLive?'#34d399':(multi?(cls[i%cls.length]):(baseC||cls[i%cls.length]));
+    ctx.fillStyle=clr+(isLive?'':'aa');ctx.fillRect(x,y,bW,h);
+    ctx.fillStyle=clr;ctx.fillRect(x,y,bW,Math.min(3,h));
+    if(isLive){ctx.strokeStyle='#34d399';ctx.lineWidth=1.5;ctx.strokeRect(x,y,bW,h);}
+    if(bW>14){ctx.fillStyle='#f1f5f9';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(vals[i].toFixed(0),x+bW/2,y-3);}
+  });
+  ctx.fillStyle='#475569';ctx.font='9px Arial';ctx.textAlign='center';
+  var step=Math.max(1,Math.floor(n/6));
+  labels.forEach(function(l,i){if(i%step===0||i===n-1)ctx.fillText(l.slice(0,4),P.l+(i/n)*cW+cW/n/2,H-6);});
+}
+function drawSeas(id,data){
+  var g=gc(id,140);if(!g)return;
+  var ctx=g.ctx,W=g.W,H=140;
+  var vals=data.map(function(d){return d.v;});
+  var mn=Math.min.apply(null,vals)*0.98,mx=Math.max.apply(null,vals)*1.02;
+  var P={t:10,r:6,b:22,l:32},cW=W-P.l-P.r,cH=H-P.t-P.b,n=data.length;
+  var yP=function(v){return P.t+(1-(v-mn)/(mx-mn||1))*cH;};
+  var y1=yP(1);
+  ctx.strokeStyle='#334155';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(P.l,y1);ctx.lineTo(W-P.r,y1);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#64748b';ctx.font='9px Arial';ctx.textAlign='right';ctx.fillText('1.0',P.l-2,y1+3);
+  var bW=(cW/n)-2;
+  data.forEach(function(d,i){
+    var x=P.l+(i/n)*cW+1;
+    var above=d.v>=1,y=above?yP(d.v):y1,h=Math.abs(yP(d.v)-y1);
+    ctx.fillStyle=above?'#10b98177':'#ef444477';ctx.fillRect(x,y,bW,h);
+    ctx.fillStyle='#94a3b8';ctx.font='8px Arial';ctx.textAlign='center';
+    ctx.fillText(d.v.toFixed(2),x+bW/2,above?yP(d.v)-2:yP(d.v)+9);
+    ctx.fillText(d.m.slice(0,3),x+bW/2,H-6);
+  });
+}
+
+// ── EXPORT ───────────────────────────────────────────────────────
+function xCSV(){var all=allRec(),c='\ufeffالتاريخ,اليوم,السعر,التغير,التغير%\n';all.forEach(function(e){c+=e.date+','+e.dayName+','+e.price+','+e.diff+','+e.diffPct+'\n';});dl(c,'اسعار_الدواجن.csv','text/csv');toast('✅ تصدير '+all.length+' سجل');}
+function xJSON(){dl(JSON.stringify({entries:NEW_E},null,2),'backup.json','application/json');toast('✅ نسخة احتياطية');}
+function impJSON(input){var file=input.files[0];if(!file)return;var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);var arr=d.entries||d;if(!Array.isArray(arr))throw new Error('');NEW_E=arr;saveNew(NEW_E);toast('✅ استيراد '+arr.length);var pg=document.querySelector('.pg.on');if(pg){if(pg.id==='ph')renderHome();else if(pg.id==='pe')renderEntry();else if(pg.id==='pd')rData();else if(pg.id==='pm')rMonth();}}catch(err){toast('❌ خطأ',1);};input.value='';};;r.readAsText(file);}
+function dl(c,n,t){var a=document.createElement('a'),u=URL.createObjectURL(new Blob([c],{type:t}));a.href=u;a.download=n;a.click();URL.revokeObjectURL(u);}
+function toast(msg,err){var el=document.getElementById('toast');el.textContent=msg;el.className='on'+(err?' er':'');setTimeout(function(){el.className=err?'er':'';},2500);}
+function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+
+// ── INIT ─────────────────────────────────────────────────────────
+window.addEventListener('load',function(){loadData();});
+window.addEventListener('resize',function(){
+  var pg=document.querySelector('.pg.on');
+  if(pg&&DB){
+    var id=pg.id;
+    setTimeout(function(){
+      if(id==='ph')drawH();
+      else if(id==='pm')rMonth();
+      else if(id==='pdy')rDaily();
+      else if(id==='pc'){rCmp1();rCmp2();rCmp3();}
+      else if(id==='pa')renderAnalysis();
+      else if(id==='pf')renderForecast();
+    },50);
+  }
+});
+</script>
+</body>
+</html>

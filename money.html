@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>دفتر الفلوس</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root{
+    --bg:#0a0e1a; --card:#141a2e; --card2:#1c2440; --line:#26304f;
+    --blue:#3b82f6; --green:#22c55e; --red:#ef4444; --amber:#f59e0b;
+    --txt:#e8edf7; --mut:#8b96b3;
+  }
+  body{
+    font-family:-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif;
+    background:var(--bg); color:var(--txt);
+    min-height:100vh; padding-bottom:90px; font-size:16px;
+  }
+  .head{
+    padding:22px 18px 16px; position:sticky; top:0; z-index:10;
+    background:linear-gradient(180deg,#0a0e1a 70%,transparent);
+  }
+  .head h1{ font-size:22px; font-weight:800; }
+  .head p{ color:var(--mut); font-size:13px; margin-top:3px; }
+
+  .summary{ display:flex; gap:10px; padding:0 18px 14px; }
+  .sbox{ flex:1; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; }
+  .sbox .lbl{ font-size:12px; color:var(--mut); margin-bottom:6px; }
+  .sbox .val{ font-size:20px; font-weight:800; }
+  .sbox.me .val{ color:var(--green); }
+  .sbox.them .val{ color:var(--red); }
+  .net{ margin:0 18px 16px; background:var(--card2); border:1px solid var(--line);
+    border-radius:14px; padding:13px 16px; display:flex; justify-content:space-between; align-items:center; }
+  .net .lbl{ font-size:13px; color:var(--mut); }
+  .net .val{ font-size:18px; font-weight:800; }
+
+  .tabs{ display:flex; gap:8px; padding:0 18px 14px; }
+  .tab{ flex:1; padding:9px; text-align:center; border-radius:11px; font-size:13px;
+    background:var(--card); border:1px solid var(--line); color:var(--mut); font-weight:600; }
+  .tab.on{ background:var(--blue); color:#fff; border-color:var(--blue); }
+
+  .list{ padding:0 18px; }
+  .empty{ text-align:center; color:var(--mut); padding:50px 20px; font-size:14px; }
+  .item{ background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:14px 16px; margin-bottom:10px; }
+  .item .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .item .nm{ font-size:16px; font-weight:700; }
+  .item .am{ font-size:17px; font-weight:800; white-space:nowrap; }
+  .item.lik .am{ color:var(--green); }
+  .item.alaya .am{ color:var(--red); }
+  .item .meta{ display:flex; justify-content:space-between; margin-top:6px; font-size:12px; color:var(--mut); flex-wrap:wrap; gap:6px; }
+  .item .note{ font-size:13px; color:var(--mut); margin-top:6px; }
+  .due{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600;
+    padding:3px 9px; border-radius:8px; margin-top:8px; }
+  .due.ok{ background:rgba(245,158,11,.13); color:var(--amber); }
+  .due.soon{ background:rgba(245,158,11,.2); color:var(--amber); }
+  .due.late{ background:rgba(239,68,68,.18); color:var(--red); }
+  .item .acts{ display:flex; gap:8px; margin-top:11px; }
+  .item .acts button{ flex:1; padding:8px; border-radius:10px; border:1px solid var(--line);
+    background:var(--card2); color:var(--txt); font-size:13px; font-weight:600; }
+  .item .acts .pay{ color:var(--blue); }
+  .item .acts .edit{ color:var(--amber); }
+  .item .acts .del{ color:var(--red); }
+  .badge{ display:inline-block; font-size:11px; padding:2px 8px; border-radius:7px; margin-bottom:8px; font-weight:600; }
+  .badge.lik{ background:rgba(34,197,94,.15); color:var(--green); }
+  .badge.alaya{ background:rgba(239,68,68,.15); color:var(--red); }
+  .paid{ background:rgba(139,150,179,.15); color:var(--mut); }
+
+  .fabwrap{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    display:flex; gap:10px; z-index:20; }
+  .fab{ background:var(--blue); color:#fff; border:none; border-radius:16px;
+    padding:15px 26px; font-size:16px; font-weight:700; box-shadow:0 8px 24px rgba(59,130,246,.4);
+    display:flex; align-items:center; gap:8px; }
+  .fab.xfer{ background:var(--card2); border:1px solid var(--line); box-shadow:none; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:30;
+    display:none; align-items:flex-end; }
+  .overlay.show{ display:flex; }
+  .sheet{ background:var(--card); width:100%; border-radius:22px 22px 0 0;
+    padding:22px 18px calc(22px + env(safe-area-inset-bottom)); max-height:92vh; overflow-y:auto; }
+  .sheet h2{ font-size:18px; font-weight:800; margin-bottom:16px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:13px; color:var(--mut); margin-bottom:6px; }
+  .field input, .field textarea, .field select{ width:100%; background:var(--bg); border:1px solid var(--line);
+    border-radius:12px; padding:13px; color:var(--txt); font-size:16px; font-family:inherit; }
+  .field textarea{ resize:none; height:64px; }
+  .seg{ display:flex; gap:10px; }
+  .seg button{ flex:1; padding:13px; border-radius:12px; border:1px solid var(--line);
+    background:var(--bg); color:var(--mut); font-size:14px; font-weight:700; }
+  .seg button.lik.on{ background:var(--green); color:#fff; border-color:var(--green); }
+  .seg button.alaya.on{ background:var(--red); color:#fff; border-color:var(--red); }
+  .duewrap{ display:none; }
+  .duewrap.show{ display:block; }
+  .duemode{ display:flex; gap:8px; margin-bottom:10px; }
+  .duemode button{ flex:1; padding:10px; border-radius:10px; border:1px solid var(--line);
+    background:var(--bg); color:var(--mut); font-size:13px; font-weight:600; }
+  .duemode button.on{ background:var(--blue); color:#fff; border-color:var(--blue); }
+  .relrow{ display:flex; gap:8px; }
+  .relrow input{ flex:2; }
+  .relrow select{ flex:1; }
+  .toggle{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .toggle .box{ width:46px; height:26px; border-radius:14px; background:var(--line); position:relative; transition:.2s; flex:none; }
+  .toggle .box::after{ content:''; position:absolute; top:3px; right:3px; width:20px; height:20px;
+    border-radius:50%; background:#fff; transition:.2s; }
+  .toggle.on .box{ background:var(--blue); }
+  .toggle.on .box::after{ right:23px; }
+  .save{ width:100%; background:var(--blue); color:#fff; border:none; border-radius:14px;
+    padding:15px; font-size:16px; font-weight:700; margin-top:6px; }
+  .cancel{ width:100%; background:transparent; color:var(--mut); border:none; padding:13px; font-size:14px; margin-top:4px; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>دفتر الفلوس</h1>
+  <p>الديون اللي ليك واللي عليك</p>
+</div>
+
+<div id="storeWarn" style="display:none;margin:0 18px 12px;padding:11px 14px;border-radius:12px;
+  background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#f59e0b;font-size:13px;line-height:1.6">
+  ⚠️ الحفظ التلقائي مش شغال على المتصفح ده (غالباً لأنك فاتح الملف مباشرة). البيانات هتضيع لو قفلت الصفحة — استخدم زرار "نسخة احتياطية" تحت، أو افتح التطبيق من رابط https.
+</div>
+
+<div style="display:flex;gap:8px;padding:0 18px 12px">
+  <button onclick="exportData()" style="flex:1;padding:9px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--mut);font-size:13px;font-weight:600">⬇️ نسخة احتياطية</button>
+  <button onclick="document.getElementById('importFile').click()" style="flex:1;padding:9px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--mut);font-size:13px;font-weight:600">⬆️ استرجاع نسخة</button>
+  <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(this)">
+</div>
+
+<div class="summary">
+  <div class="sbox me"><div class="lbl">ليك (استلمها)</div><div class="val" id="sumMe">0</div></div>
+  <div class="sbox them"><div class="lbl">عليك (ادفعها)</div><div class="val" id="sumThem">0</div></div>
+</div>
+<div class="net">
+  <span class="lbl">الصافي</span>
+  <span class="val" id="sumNet">0</span>
+</div>
+
+<div class="tabs">
+  <div class="tab on" data-f="all">الكل</div>
+  <div class="tab" data-f="lik">ليك</div>
+  <div class="tab" data-f="alaya">عليك</div>
+  <div class="tab" data-f="paid">مسدد</div>
+</div>
+
+<div class="list" id="list"></div>
+
+<div class="fabwrap">
+  <button class="fab xfer" onclick="openXfer()">⇄ تحويل</button>
+  <button class="fab" onclick="openAdd()">＋ إضافة</button>
+</div>
+
+<!-- مودال الإضافة/التعديل -->
+<div class="overlay" id="addOverlay">
+  <div class="sheet">
+    <h2 id="sheetTitle">دين جديد</h2>
+    <div class="field">
+      <label>النوع</label>
+      <div class="seg">
+        <button class="lik" id="typeLik" onclick="setType('lik')">ليك (انت استلمت أو هتاخد)</button>
+        <button class="alaya" id="typeAlaya" onclick="setType('alaya')">عليك (انت اديت أو هتدي)</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>مين الشخص؟</label>
+      <input id="fName" placeholder="اسم الشخص">
+    </div>
+    <div class="field">
+      <label>المبلغ (جنيه)</label>
+      <input id="fAmount" type="number" inputmode="decimal" placeholder="0">
+    </div>
+
+    <div class="field">
+      <label class="toggle" id="dueToggle" onclick="toggleDue()">
+        <span class="box"></span>
+        <span>ليه تاريخ استحقاق؟</span>
+      </label>
+    </div>
+
+    <div class="duewrap" id="dueWrap">
+      <div class="duemode">
+        <button id="modeDate" class="on" onclick="setDueMode('date')">بتاريخ محدد</button>
+        <button id="modeRel" onclick="setDueMode('rel')">بعد مدة</button>
+      </div>
+      <div class="field" id="dateField">
+        <label>تاريخ الاستحقاق</label>
+        <input id="fDueDate" type="date">
+      </div>
+      <div class="field" id="relField" style="display:none">
+        <label>يستحق بعد</label>
+        <div class="relrow">
+          <input id="fRelNum" type="number" inputmode="numeric" placeholder="مثلاً 3">
+          <select id="fRelUnit">
+            <option value="day">يوم</option>
+            <option value="month" selected>شهر</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ملاحظة (اختياري)</label>
+      <textarea id="fNote" placeholder="سبب الدين أو أي تفاصيل"></textarea>
+    </div>
+    <button class="save" onclick="saveDebt()">حفظ</button>
+    <button class="cancel" onclick="closeAdd()">إلغاء</button>
+  </div>
+</div>
+
+<!-- مودال السداد الجزئي -->
+<div class="overlay" id="payOverlay">
+  <div class="sheet">
+    <h2>تسجيل دفعة</h2>
+    <p style="color:var(--mut);font-size:13px;margin-bottom:14px" id="payInfo"></p>
+    <div class="field">
+      <label>المبلغ المدفوع</label>
+      <input id="payAmount" type="number" inputmode="decimal" placeholder="0">
+    </div>
+    <button class="save" onclick="confirmPay()">تأكيد الدفعة</button>
+    <button class="cancel" onclick="closePay()">إلغاء</button>
+  </div>
+</div>
+
+<!-- مودال التحويل -->
+<div class="overlay" id="xferOverlay">
+  <div class="sheet">
+    <h2>تحويل فلوس</h2>
+    <p style="color:var(--mut);font-size:13px;margin-bottom:16px">فلوس استلمتها من حد، تستخدمها تسدد لحد تاني</p>
+    <div class="field">
+      <label>استلمت من (دين ليك)</label>
+      <select id="xFrom"></select>
+    </div>
+    <div class="field">
+      <label>سددت لـ (دين عليك)</label>
+      <select id="xTo"></select>
+    </div>
+    <div class="field">
+      <label>المبلغ المحوّل</label>
+      <input id="xAmount" type="number" inputmode="decimal" placeholder="0">
+    </div>
+    <button class="save" onclick="confirmXfer()">تأكيد التحويل</button>
+    <button class="cancel" onclick="closeXfer()">إلغاء</button>
+  </div>
+</div>
+
+<script>
+const KEY='debtbook_v1';
+
+// تخزين آمن: لو localStorage مقفول (file:// على iOS) الكود ميقعش
+const store={
+  ok:false,
+  get(){ try{ const v=localStorage.getItem(KEY); this.ok=true; return v; }catch(e){ this.ok=false; return null; } },
+  set(v){ try{ localStorage.setItem(KEY,v); this.ok=true; }catch(e){ this.ok=false; } }
+};
+
+let data=[];
+try{ data=JSON.parse(store.get()||'[]'); if(!Array.isArray(data)) data=[]; }catch(e){ data=[]; }
+
+let curType='lik', filter='all', payId=null, editId=null;
+let dueOn=false, dueMode='date';
+
+function save(){
+  store.set(JSON.stringify(data));
+  render();
+  showStorageWarn();
+}
+function showStorageWarn(){
+  const w=document.getElementById('storeWarn');
+  if(!w) return;
+  w.style.display = store.ok ? 'none' : 'block';
+}
+function fmt(n){ return Number(n).toLocaleString('en-US'); }
+
+function setType(t){
+  curType=t;
+  document.getElementById('typeLik').classList.toggle('on', t==='lik');
+  document.getElementById('typeAlaya').classList.toggle('on', t==='alaya');
+}
+function toggleDue(){
+  dueOn=!dueOn;
+  document.getElementById('dueToggle').classList.toggle('on', dueOn);
+  document.getElementById('dueWrap').classList.toggle('show', dueOn);
+}
+function setDueMode(m){
+  dueMode=m;
+  document.getElementById('modeDate').classList.toggle('on', m==='date');
+  document.getElementById('modeRel').classList.toggle('on', m==='rel');
+  document.getElementById('dateField').style.display = m==='date'?'block':'none';
+  document.getElementById('relField').style.display = m==='rel'?'block':'none';
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('sheetTitle').textContent='دين جديد';
+  setType('lik');
+  document.getElementById('fName').value='';
+  document.getElementById('fAmount').value='';
+  document.getElementById('fNote').value='';
+  document.getElementById('fDueDate').value='';
+  document.getElementById('fRelNum').value='';
+  document.getElementById('fRelUnit').value='month';
+  if(dueOn) toggleDue();
+  setDueMode('date');
+  document.getElementById('addOverlay').classList.add('show');
+}
+
+function openEdit(id){
+  const d=data.find(x=>x.id===id); if(!d) return;
+  editId=id;
+  document.getElementById('sheetTitle').textContent='تعديل البند';
+  setType(d.type);
+  document.getElementById('fName').value=d.name;
+  document.getElementById('fAmount').value=d.amount;
+  document.getElementById('fNote').value=d.note||'';
+  document.getElementById('fRelNum').value='';
+  document.getElementById('fRelUnit').value='month';
+  setDueMode('date');
+  if(d.due){
+    if(!dueOn) toggleDue();
+    document.getElementById('fDueDate').value=d.due;
+  } else {
+    if(dueOn) toggleDue();
+    document.getElementById('fDueDate').value='';
+  }
+  document.getElementById('addOverlay').classList.add('show');
+}
+
+function closeAdd(){ document.getElementById('addOverlay').classList.remove('show'); }
+
+function computeDue(){
+  if(!dueOn) return null;
+  if(dueMode==='date'){
+    const v=document.getElementById('fDueDate').value;
+    return v || null;
+  } else {
+    const num=parseInt(document.getElementById('fRelNum').value);
+    const unit=document.getElementById('fRelUnit').value;
+    if(!num || num<=0) return null;
+    const dt=new Date();
+    if(unit==='day') dt.setDate(dt.getDate()+num);
+    else dt.setMonth(dt.getMonth()+num);
+    return dt.toISOString().slice(0,10);
+  }
+}
+
+function saveDebt(){
+  const name=document.getElementById('fName').value.trim();
+  const amount=parseFloat(document.getElementById('fAmount').value);
+  const note=document.getElementById('fNote').value.trim();
+  if(!name){ alert('اكتب اسم الشخص'); return; }
+  if(!amount || amount<=0){ alert('اكتب مبلغ صحيح'); return; }
+  const due=computeDue();
+
+  if(editId){
+    const d=data.find(x=>x.id===editId);
+    d.type=curType; d.name=name; d.amount=amount; d.note=note; d.due=due;
+    if(d.paid>d.amount) d.paid=d.amount;
+  } else {
+    data.unshift({
+      id:Date.now(), type:curType, name, amount, paid:0, note, due,
+      date:new Date().toLocaleDateString('ar-EG',{day:'2-digit',month:'short',year:'numeric'})
+    });
+  }
+  closeAdd(); save();
+}
+
+function openPay(id){
+  payId=id;
+  const d=data.find(x=>x.id===id);
+  const rem=d.amount-d.paid;
+  document.getElementById('payInfo').textContent=`${d.name} — المتبقي ${fmt(rem)} ج`;
+  document.getElementById('payAmount').value='';
+  document.getElementById('payOverlay').classList.add('show');
+}
+function closePay(){ document.getElementById('payOverlay').classList.remove('show'); }
+function confirmPay(){
+  const amt=parseFloat(document.getElementById('payAmount').value);
+  const d=data.find(x=>x.id===payId);
+  if(!amt || amt<=0){ alert('اكتب مبلغ صحيح'); return; }
+  d.paid=Math.min(d.amount, d.paid+amt);
+  closePay(); save();
+}
+
+function delDebt(id){
+  if(confirm('متأكد إنك عايز تمسحه؟')){
+    data=data.filter(x=>x.id!==id); save();
+  }
+}
+
+function openXfer(){
+  const liks=data.filter(d=>d.type==='lik' && d.paid<d.amount);
+  const alayas=data.filter(d=>d.type==='alaya' && d.paid<d.amount);
+  if(liks.length===0 || alayas.length===0){
+    alert('محتاج يكون عندك دين ليك (تستلمه) ودين عليك (تسدده) عشان تعمل تحويل');
+    return;
+  }
+  const opt=d=>`<option value="${d.id}">${d.name} — متبقي ${fmt(d.amount-d.paid)} ج</option>`;
+  document.getElementById('xFrom').innerHTML=liks.map(opt).join('');
+  document.getElementById('xTo').innerHTML=alayas.map(opt).join('');
+  document.getElementById('xAmount').value='';
+  document.getElementById('xferOverlay').classList.add('show');
+}
+function closeXfer(){ document.getElementById('xferOverlay').classList.remove('show'); }
+function confirmXfer(){
+  const fromId=parseInt(document.getElementById('xFrom').value);
+  const toId=parseInt(document.getElementById('xTo').value);
+  const amt=parseFloat(document.getElementById('xAmount').value);
+  if(!amt || amt<=0){ alert('اكتب مبلغ صحيح'); return; }
+  const from=data.find(x=>x.id===fromId);
+  const to=data.find(x=>x.id===toId);
+  const remFrom=from.amount-from.paid;
+  const remTo=to.amount-to.paid;
+  if(amt>remFrom){ alert(`المبلغ أكبر من المتبقي على ${from.name} (${fmt(remFrom)} ج)`); return; }
+  if(amt>remTo){ alert(`المبلغ أكبر من المتبقي لـ ${to.name} (${fmt(remTo)} ج)`); return; }
+  from.paid+=amt;
+  to.paid+=amt;
+  const note=`تحويل: من ${from.name} إلى ${to.name}`;
+  from.note = from.note ? from.note+' • '+note : note;
+  to.note = to.note ? to.note+' • '+note : note;
+  closeXfer(); save();
+}
+
+function dueInfo(iso){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const due=new Date(iso+'T00:00:00');
+  const diff=Math.round((due-today)/86400000);
+  const txt=due.toLocaleDateString('ar-EG',{day:'2-digit',month:'short',year:'numeric'});
+  if(diff<0) return {cls:'late', label:`متأخر ${Math.abs(diff)} يوم — كان ${txt}`};
+  if(diff===0) return {cls:'soon', label:`يستحق النهاردة — ${txt}`};
+  if(diff<=7) return {cls:'soon', label:`باقي ${diff} يوم — ${txt}`};
+  if(diff<=30) return {cls:'ok', label:`باقي ${diff} يوم — ${txt}`};
+  const months=Math.round(diff/30);
+  return {cls:'ok', label:`باقي حوالي ${months} شهر — ${txt}`};
+}
+
+function render(){
+  let me=0, them=0;
+  data.forEach(d=>{
+    const rem=d.amount-d.paid;
+    if(d.type==='lik') me+=rem; else them+=rem;
+  });
+  document.getElementById('sumMe').textContent=fmt(me);
+  document.getElementById('sumThem').textContent=fmt(them);
+  const net=me-them;
+  const netEl=document.getElementById('sumNet');
+  netEl.textContent=(net>=0?'+':'')+fmt(net);
+  netEl.style.color = net>=0?'var(--green)':'var(--red)';
+
+  let items=data;
+  if(filter==='lik') items=data.filter(d=>d.type==='lik' && d.paid<d.amount);
+  else if(filter==='alaya') items=data.filter(d=>d.type==='alaya' && d.paid<d.amount);
+  else if(filter==='paid') items=data.filter(d=>d.paid>=d.amount);
+  else items=data.filter(d=>d.paid<d.amount);
+
+  // ترتيب: الأقرب استحقاقاً أولاً (للمفتوحة)
+  if(filter!=='paid'){
+    items=[...items].sort((a,b)=>{
+      if(a.due&&b.due) return new Date(a.due)-new Date(b.due);
+      if(a.due) return -1; if(b.due) return 1; return 0;
+    });
+  }
+
+  const list=document.getElementById('list');
+  if(items.length===0){
+    list.innerHTML='<div class="empty">مفيش حاجة هنا.<br>اضغط ＋ لإضافة دين جديد</div>';
+    return;
+  }
+  list.innerHTML=items.map(d=>{
+    const rem=d.amount-d.paid;
+    const done=d.paid>=d.amount;
+    const cls=d.type==='lik'?'lik':'alaya';
+    const badge = done ? '<span class="badge paid">مسدد</span>'
+      : (d.type==='lik'?'<span class="badge lik">ليك</span>':'<span class="badge alaya">عليك</span>');
+    const paidLine = d.paid>0 && !done ? `<div class="note">مدفوع ${fmt(d.paid)} ج — متبقي ${fmt(rem)} ج</div>` : '';
+    const noteLine = d.note ? `<div class="note">${d.note}</div>` : '';
+    let dueLine='';
+    if(d.due && !done){ const di=dueInfo(d.due); dueLine=`<div><span class="due ${di.cls}">⏰ ${di.label}</span></div>`; }
+    const acts = done
+      ? `<div class="acts"><button class="edit" onclick="openEdit(${d.id})">تعديل</button><button class="del" onclick="delDebt(${d.id})">مسح</button></div>`
+      : `<div class="acts"><button class="pay" onclick="openPay(${d.id})">دفعة</button><button class="edit" onclick="openEdit(${d.id})">تعديل</button><button class="del" onclick="delDebt(${d.id})">مسح</button></div>`;
+    return `<div class="item ${cls}">
+      ${badge}
+      <div class="top">
+        <div class="nm">${d.name}</div>
+        <div class="am">${fmt(done?d.amount:rem)} ج</div>
+      </div>
+      <div class="meta"><span>${d.date}</span></div>
+      ${dueLine}${paidLine}${noteLine}${acts}
+    </div>`;
+  }).join('');
+}
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on'); filter=t.dataset.f; render();
+  };
+});
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.onclick=e=>{ if(e.target===o) o.classList.remove('show'); };
+});
+
+function exportData(){
+  try{
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    const d=new Date();
+    a.download=`debts-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){ alert('حصلت مشكلة في التصدير: '+e.message); }
+}
+
+function importData(input){
+  const file=input.files && input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const arr=JSON.parse(reader.result);
+      if(!Array.isArray(arr)) throw new Error('الملف مش نسخة صحيحة');
+      if(data.length>0 && !confirm('في بيانات حالية. الاسترجاع هيستبدلها بالنسخة دي. نكمل؟')){ input.value=''; return; }
+      data=arr; save();
+      alert('تم الاسترجاع بنجاح ✅ — عدد البنود: '+data.length);
+    }catch(e){ alert('الملف مش صالح: '+e.message); }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+// تهيئة آمنة: أي خطأ في الرسم ميمنعش باقي الصفحة
+try{ render(); }catch(e){ console.error(e); }
+showStorageWarn();
+// اختبار التخزين عند الفتح عشان التحذير يظهر من الأول
+store.get(); showStorageWarn();
+</script>
+</body>
+</html>

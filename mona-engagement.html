@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>مصاريف خطوبة منى</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@700&display=swap');
+
+:root {
+  --gold: #c9a227;
+  --gold-soft: #e3c766;
+  --rose: #b9657a;
+  --ink: #1a1420;
+  --ink2: #241b2e;
+  --ink3: #2f2440;
+  --cream: #f5ecdb;
+  --muted: #9d8fb0;
+  --green: #4caf7d;
+  --line: rgba(201,162,39,0.18);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family:'Cairo',sans-serif;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(185,101,122,0.12), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(201,162,39,0.10), transparent 45%),
+    var(--ink);
+  color:var(--cream);
+  min-height:100vh;
+  padding-bottom:90px;
+}
+
+.wrap { max-width:560px; margin:0 auto; padding:0 14px; }
+
+/* Header */
+header {
+  text-align:center;
+  padding:26px 14px 18px;
+  position:relative;
+}
+header::before {
+  content:'❦';
+  display:block;
+  color:var(--gold);
+  font-size:22px;
+  margin-bottom:6px;
+  opacity:0.8;
+}
+header h1 {
+  font-family:'Amiri',serif;
+  font-size:27px;
+  font-weight:700;
+  color:var(--gold-soft);
+  letter-spacing:0.5px;
+}
+header .sub {
+  font-size:12.5px;
+  color:var(--muted);
+  margin-top:5px;
+  letter-spacing:1px;
+}
+.divider {
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:14px auto;
+  max-width:300px;
+}
+
+/* Tabs */
+.tabs {
+  display:flex;
+  gap:6px;
+  background:var(--ink2);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:5px;
+  position:sticky;
+  top:8px;
+  z-index:50;
+  box-shadow:0 8px 24px rgba(0,0,0,0.35);
+}
+.tab {
+  flex:1;
+  text-align:center;
+  padding:10px 4px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .25s;
+  border:none;
+  background:none;
+  font-family:inherit;
+}
+.tab.active {
+  background:linear-gradient(135deg,var(--gold),var(--gold-soft));
+  color:var(--ink);
+  box-shadow:0 4px 12px rgba(201,162,39,0.35);
+}
+
+.page { display:none; animation:fade .4s ease; }
+.page.active { display:block; }
+@keyframes fade { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+/* Cards */
+.card {
+  background:var(--ink2);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px 16px;
+  margin-top:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.25);
+}
+.card h2 {
+  font-size:15px;
+  color:var(--gold-soft);
+  margin-bottom:14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.card h2 span.dot { width:7px;height:7px;border-radius:50%;background:var(--gold); }
+
+label { display:block; font-size:12.5px; color:var(--muted); margin:0 2px 6px; font-weight:600; }
+
+input, select, textarea {
+  width:100%;
+  padding:13px 14px;
+  background:var(--ink3);
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--cream);
+  font-family:inherit;
+  font-size:15px;
+  margin-bottom:14px;
+  outline:none;
+  transition:border .2s;
+}
+input:focus, select:focus, textarea:focus { border-color:var(--gold); }
+select { appearance:none; background-image:url("data:image/svg+xml;utf8,<svg fill='%23c9a227' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"); background-repeat:no-repeat; background-position:left 12px center; padding-left:40px; }
+
+.row2 { display:flex; gap:10px; }
+.row2 > div { flex:1; }
+
+.btn {
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-soft));
+  color:var(--ink);
+  font-family:inherit;
+  font-weight:900;
+  font-size:15px;
+  cursor:pointer;
+  letter-spacing:0.5px;
+  box-shadow:0 6px 16px rgba(201,162,39,0.3);
+  transition:transform .15s;
+}
+.btn:active { transform:scale(0.97); }
+
+/* expense list */
+.exp-item {
+  background:var(--ink3);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px 14px;
+  margin-bottom:10px;
+  position:relative;
+  border-right:4px solid var(--gold);
+}
+.exp-item .top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.exp-item .who { font-weight:700; font-size:14px; }
+.exp-item .who.m1 { color:#e3c766; }
+.exp-item .who.m2 { color:#7fb3e8; }
+.exp-item .who.m3 { color:#c98ab0; }
+.exp-item .amt { font-weight:900; color:var(--green); font-size:16px; white-space:nowrap; }
+.exp-item .cat { display:inline-block; font-size:11px; background:rgba(201,162,39,0.15); color:var(--gold-soft); padding:3px 9px; border-radius:8px; margin-top:7px; }
+.exp-item .desc { font-size:13px; color:var(--cream); margin-top:7px; line-height:1.5; }
+.exp-item .date { font-size:11px; color:var(--muted); margin-top:7px; }
+.exp-item .del {
+  position:absolute; bottom:11px; left:12px;
+  background:rgba(185,101,122,0.18); color:#e08ba0;
+  border:none; border-radius:8px; padding:5px 11px;
+  font-size:11px; cursor:pointer; font-family:inherit; font-weight:700;
+}
+.empty { text-align:center; color:var(--muted); font-size:13.5px; padding:30px 10px; line-height:1.8; }
+
+/* report */
+.stat-grand {
+  text-align:center;
+  background:linear-gradient(135deg,var(--ink3),var(--ink2));
+  border:1px solid var(--gold);
+  border-radius:18px;
+  padding:22px;
+  margin-top:14px;
+}
+.stat-grand .lbl { font-size:13px; color:var(--muted); }
+.stat-grand .val { font-family:'Amiri',serif; font-size:38px; color:var(--gold-soft); font-weight:700; margin-top:4px; }
+.stat-grand .unit { font-size:14px; color:var(--muted); }
+
+.person-card {
+  background:var(--ink3);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  margin-top:12px;
+}
+.person-card .head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.person-card .name { font-weight:700; font-size:15px; }
+.person-card .total { font-weight:900; font-size:17px; color:var(--green); }
+.person-card .meta { font-size:11.5px; color:var(--muted); margin-bottom:8px; }
+.bar { height:9px; background:var(--ink); border-radius:6px; overflow:hidden; }
+.bar > div { height:100%; border-radius:6px; transition:width .6s ease; }
+
+.cat-report { margin-top:8px; }
+.cat-line { display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; border-bottom:1px dashed var(--line); }
+.cat-line:last-child { border:none; }
+.cat-line .c-name { color:var(--cream); }
+.cat-line .c-val { color:var(--gold-soft); font-weight:700; }
+
+/* updates feed */
+.feed-item {
+  display:flex; gap:11px; padding:12px 4px;
+  border-bottom:1px solid var(--line);
+}
+.feed-item:last-child { border:none; }
+.feed-dot { width:9px;height:9px;border-radius:50%;background:var(--gold);margin-top:6px;flex-shrink:0;box-shadow:0 0 0 4px rgba(201,162,39,0.12); }
+.feed-body { flex:1; }
+.feed-body .ftxt { font-size:13.5px; line-height:1.5; }
+.feed-body .ftxt b { color:var(--gold-soft); }
+.feed-body .ftime { font-size:11px; color:var(--muted); margin-top:3px; }
+
+/* snapshots */
+.snap-bar {
+  display:flex; gap:8px; align-items:center;
+  background:var(--ink3); border:1px solid var(--line);
+  border-radius:12px; padding:11px 13px; margin-bottom:10px;
+}
+.snap-bar .num { font-size:12px; color:var(--muted); flex:1; }
+.snap-day {
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--ink3); border:1px solid var(--line);
+  border-radius:12px; padding:12px 14px; margin-bottom:9px;
+}
+.snap-day .d-info .d-title { font-weight:700; font-size:13.5px; color:var(--gold-soft); }
+.snap-day .d-info .d-sub { font-size:11px; color:var(--muted); margin-top:3px; }
+.snap-day .d-val { font-weight:900; color:var(--green); font-size:15px; }
+
+.note { font-size:11.5px; color:var(--muted); text-align:center; line-height:1.7; margin-top:14px; padding:0 8px; }
+
+.toast {
+  position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--green); color:#fff; padding:12px 22px; border-radius:30px;
+  font-size:13.5px; font-weight:700; opacity:0; transition:all .35s; z-index:200;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4); pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+.mini-btn {
+  background:var(--ink3); border:1px solid var(--line); color:var(--gold-soft);
+  border-radius:10px; padding:9px 14px; font-family:inherit; font-weight:700;
+  font-size:12.5px; cursor:pointer;
+}
+.manage-row {
+  display:flex; align-items:center; gap:8px;
+  background:var(--ink3); border:1px solid var(--line);
+  border-radius:11px; padding:10px 12px; margin-bottom:8px;
+}
+.manage-row .m-name { flex:1; font-size:14px; font-weight:600; }
+.manage-row .m-count { font-size:11px; color:var(--muted); }
+.manage-row .ico {
+  border:none; border-radius:8px; padding:7px 11px; cursor:pointer;
+  font-family:inherit; font-size:12px; font-weight:700;
+}
+.ico.edit { background:rgba(74,127,201,0.18); color:#7fb3e8; }
+.ico.del { background:rgba(185,101,122,0.18); color:#e08ba0; }
+.swatch { width:14px;height:14px;border-radius:50%;flex-shrink:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>مصاريف خطوبة منى</h1>
+    <div class="sub">من أول يوم لحد الجواز</div>
+    <div class="divider"></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-page="add">➕ إضافة</button>
+    <button class="tab" data-page="list">📋 المصاريف</button>
+    <button class="tab" data-page="report">📊 التقرير</button>
+    <button class="tab" data-page="updates">🔔 التحديثات</button>
+    <button class="tab" data-page="snaps">💾 الأيام</button>
+    <button class="tab" data-page="sys">⚙️ النظام</button>
+  </div>
+
+  <!-- ADD -->
+  <div class="page active" id="page-add">
+    <div class="card">
+      <h2><span class="dot"></span> تسجيل مصروف جديد</h2>
+      <label>مين اللي صرف؟</label>
+      <select id="f-who"></select>
+
+      <label>البند / نوع المصروف</label>
+      <select id="f-cat"></select>
+
+      <label>تفاصيل (صرف في إيه بالظبط؟)</label>
+      <textarea id="f-desc" rows="2" placeholder="مثال: دفعة مقدم القاعة"></textarea>
+
+      <div class="row2">
+        <div>
+          <label>المبلغ (جنيه)</label>
+          <input type="number" id="f-amt" inputmode="numeric" placeholder="0">
+        </div>
+        <div>
+          <label>التاريخ</label>
+          <input type="date" id="f-date">
+        </div>
+      </div>
+
+      <button class="btn" onclick="addExpense()">💰 سجّل المصروف</button>
+    </div>
+    <div class="note">كل البيانات بتتحفظ على جهازك تلقائيًا — شغّال أوفلاين من غير إنترنت.</div>
+  </div>
+
+  <!-- LIST -->
+  <div class="page" id="page-list">
+    <div class="card">
+      <h2><span class="dot"></span> كل المصاريف</h2>
+      <select id="filter-who" onchange="renderList()" style="margin-bottom:6px;">
+        <option value="">كل الإخوة</option>
+      </select>
+      <div id="list-container"></div>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="page" id="page-report">
+    <div class="stat-grand">
+      <div class="lbl">إجمالي مصاريف الخطوبة</div>
+      <div class="val" id="grand-total">0</div>
+      <div class="unit">جنيه مصري</div>
+    </div>
+    <div class="card">
+      <h2><span class="dot"></span> نصيب كل أخ</h2>
+      <div id="persons-report"></div>
+    </div>
+    <div class="card">
+      <h2><span class="dot"></span> المصاريف حسب البند</h2>
+      <div class="cat-report" id="cat-report"></div>
+    </div>
+  </div>
+
+  <!-- UPDATES -->
+  <div class="page" id="page-updates">
+    <div class="card">
+      <h2><span class="dot"></span> آخر التحديثات</h2>
+      <div id="updates-feed"></div>
+    </div>
+  </div>
+
+  <!-- SNAPSHOTS -->
+  <div class="page" id="page-snaps">
+    <div class="card">
+      <h2><span class="dot"></span> الحفظ اليومي (30 يوم)</h2>
+      <div class="snap-bar">
+        <div class="num" id="snap-count">0 / 30 يوم محفوظ</div>
+        <button class="mini-btn" onclick="saveSnapshot(true)">احفظ نسخة النهاردة</button>
+      </div>
+      <div id="snaps-list"></div>
+  </div>
+
+  <!-- SYSTEM -->
+  <div class="page" id="page-sys">
+    <div class="card">
+      <h2><span class="dot"></span> إدارة البنود</h2>
+      <div class="row2" style="align-items:flex-start;">
+        <div style="flex:2;"><input type="text" id="new-cat" placeholder="اسم بند جديد" style="margin-bottom:0;"></div>
+        <div style="flex:1;"><button class="mini-btn" style="width:100%;padding:13px 0;" onclick="addCat()">+ إضافة</button></div>
+      </div>
+      <div id="cats-manage" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span> إدارة الإخوة (الأسماء)</h2>
+      <div class="row2" style="align-items:flex-start;">
+        <div style="flex:2;"><input type="text" id="new-person" placeholder="اسم جديد" style="margin-bottom:0;"></div>
+        <div style="flex:1;"><button class="mini-btn" style="width:100%;padding:13px 0;" onclick="addPerson()">+ إضافة</button></div>
+      </div>
+      <div id="persons-manage" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span> النسخ الاحتياطي والمشاركة</h2>
+      <div class="note" style="margin-top:0;text-align:right;padding:0 2px 4px;">
+        البيانات محفوظة تلقائيًا في متصفحك. للمشاركة بينكم الـ3: كل واحد يصدّر ملف JSON ويبعته للتاني، والتاني يستورده ويضيفه على بياناته.
+      </div>
+      <button class="btn" onclick="exportData()" style="margin-bottom:12px;">📤 تصدير البيانات (JSON)</button>
+      <button class="btn" onclick="document.getElementById('import-file').click()" style="background:linear-gradient(135deg,#4a7fc9,#6ea0e3);box-shadow:0 6px 16px rgba(74,127,201,0.3);margin-bottom:12px;">📥 استيراد بيانات</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn" onclick="resetData()" style="background:linear-gradient(135deg,#c95565,#e07a88);box-shadow:0 6px 16px rgba(201,85,101,0.3);">♻️ إعادة تعيين (مسح الكل)</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span> معلومات النظام</h2>
+      <div class="cat-report" id="sys-info"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'wedding_mona_v1';
+const SNAP_KEY = 'wedding_mona_snaps_v1';
+const FEED_KEY = 'wedding_mona_feed_v1';
+const PERSONS_KEY = 'wedding_mona_persons_v1';
+const CATS_KEY = 'wedding_mona_cats_v1';
+
+const PALETTE = ['#e3c766','#7fb3e8','#c98ab0','#84c9a0','#e0a87a','#b39ddb','#80cbc4','#f48fb1'];
+const DEFAULT_PERSONS = ['محمد','أحمد','عبد العظيم'];
+const DEFAULT_CATS = ['شبكة وذهب','حفلة الخطوبة','ملابس','أثاث وجهاز','مأكولات وحلويات','مشروبات','تصوير وفيديو','إيجار / قاعة','هدايا','مواصلات','أخرى'];
+
+let data = load(KEY, []);
+let snaps = load(SNAP_KEY, []);
+let feed = load(FEED_KEY, []);
+let persons = load(PERSONS_KEY, DEFAULT_PERSONS);
+let cats = load(CATS_KEY, DEFAULT_CATS);
+
+function colorOf(p){ const i=persons.indexOf(p); return PALETTE[(i<0?0:i)%PALETTE.length]; }
+
+function load(k,def){ try{ const v=JSON.parse(localStorage.getItem(k)); return v||def; }catch(e){ return def; } }
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(data));
+  localStorage.setItem(SNAP_KEY,JSON.stringify(snaps));
+  localStorage.setItem(FEED_KEY,JSON.stringify(feed));
+  localStorage.setItem(PERSONS_KEY,JSON.stringify(persons));
+  localStorage.setItem(CATS_KEY,JSON.stringify(cats));
+}
+
+function fillSelect(el,arr,keepEmpty){
+  const cur=el.value;
+  el.innerHTML=(keepEmpty?'<option value="">كل الإخوة</option>':'')+arr.map(x=>`<option value="${x}">${x}</option>`).join('');
+  if(arr.includes(cur)||(keepEmpty&&cur==='')) el.value=cur;
+}
+function refreshSelects(){
+  fillSelect(document.getElementById('f-who'),persons,false);
+  fillSelect(document.getElementById('f-cat'),cats,false);
+  fillSelect(document.getElementById('filter-who'),persons,true);
+}
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmt(n){ return Number(n).toLocaleString('ar-EG'); }
+function fmtDate(s){ const d=new Date(s); return d.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'}); }
+
+// init date field + selects
+document.getElementById('f-date').value = todayStr();
+refreshSelects();
+
+// tabs
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('page-'+t.dataset.page).classList.add('active');
+    if(t.dataset.page==='list') renderList();
+    if(t.dataset.page==='report') renderReport();
+    if(t.dataset.page==='updates') renderFeed();
+    if(t.dataset.page==='snaps') renderSnaps();
+    if(t.dataset.page==='sys'){ renderSysInfo(); renderManage(); }
+  };
+});
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function addExpense(){
+  const who=document.getElementById('f-who').value;
+  const cat=document.getElementById('f-cat').value;
+  const desc=document.getElementById('f-desc').value.trim();
+  const amt=parseFloat(document.getElementById('f-amt').value);
+  const date=document.getElementById('f-date').value;
+  if(!amt||amt<=0){ toast('اكتب مبلغ صحيح'); return; }
+  if(!date){ toast('اختار التاريخ'); return; }
+  const item={id:Date.now(),who,cat,desc,amt,date,added:new Date().toISOString()};
+  data.push(item);
+  feed.unshift({type:'add',who,cat,amt,date,t:new Date().toISOString()});
+  if(feed.length>50) feed=feed.slice(0,50);
+  save();
+  autoSnapshot();
+  document.getElementById('f-amt').value='';
+  document.getElementById('f-desc').value='';
+  toast('✓ اتسجل: '+fmt(amt)+' جنيه');
+}
+
+function delExpense(id){
+  const it=data.find(x=>x.id===id);
+  if(it){ feed.unshift({type:'del',who:it.who,cat:it.cat,amt:it.amt,t:new Date().toISOString()}); }
+  data=data.filter(x=>x.id!==id);
+  save();
+  renderList();
+  toast('اتمسح المصروف');
+}
+
+function renderList(){
+  const filter=document.getElementById('filter-who').value;
+  const c=document.getElementById('list-container');
+  let arr=[...data].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(filter) arr=arr.filter(x=>x.who===filter);
+  if(arr.length===0){ c.innerHTML='<div class="empty">مفيش مصاريف متسجلة لسه.<br>روح تاب «إضافة» وابدأ تسجّل.</div>'; return; }
+  c.innerHTML=arr.map(x=>`
+    <div class="exp-item">
+      <div class="top">
+        <div>
+          <div class="who" style="color:${colorOf(x.who)}">${x.who}</div>
+          <div class="cat">${x.cat}</div>
+        </div>
+        <div class="amt">${fmt(x.amt)} ج</div>
+      </div>
+      ${x.desc?`<div class="desc">${x.desc}</div>`:''}
+      <div class="date">📅 ${fmtDate(x.date)}</div>
+      <button class="del" onclick="delExpense(${x.id})">حذف</button>
+    </div>`).join('');
+}
+
+function renderReport(){
+  const total=data.reduce((s,x)=>s+x.amt,0);
+  document.getElementById('grand-total').textContent=fmt(total);
+  // per person
+  const pc=document.getElementById('persons-report');
+  pc.innerHTML=persons.map(p=>{
+    const items=data.filter(x=>x.who===p);
+    const sum=items.reduce((s,x)=>s+x.amt,0);
+    const pct=total>0?(sum/total*100):0;
+    return `<div class="person-card">
+      <div class="head"><div class="name" style="color:${colorOf(p)}">${p}</div><div class="total">${fmt(sum)} ج</div></div>
+      <div class="meta">${items.length} عملية • ${pct.toFixed(1)}% من الإجمالي</div>
+      <div class="bar"><div style="width:${pct}%;background:${colorOf(p)}"></div></div>
+    </div>`;
+  }).join('');
+  // per category
+  const cats={};
+  data.forEach(x=>{ cats[x.cat]=(cats[x.cat]||0)+x.amt; });
+  const cr=document.getElementById('cat-report');
+  const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  cr.innerHTML = sorted.length? sorted.map(([k,v])=>`<div class="cat-line"><span class="c-name">${k}</span><span class="c-val">${fmt(v)} ج</span></div>`).join('') : '<div class="empty">لسه مفيش بيانات</div>';
+}
+
+function renderFeed(){
+  const f=document.getElementById('updates-feed');
+  if(feed.length===0){ f.innerHTML='<div class="empty">مفيش تحديثات لسه</div>'; return; }
+  f.innerHTML=feed.map(e=>{
+    const time=new Date(e.t).toLocaleString('ar-EG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    let txt;
+    if(e.type==='add') txt=`<b>${e.who}</b> سجّل <b>${fmt(e.amt)} ج</b> على «${e.cat}»`;
+    else if(e.type==='del') txt=`اتمسح مصروف <b>${e.who}</b> (${fmt(e.amt)} ج - ${e.cat})`;
+    else txt=`اتحفظت نسخة يومية — الإجمالي <b>${fmt(e.amt)} ج</b>`;
+    return `<div class="feed-item"><div class="feed-dot"></div><div class="feed-body"><div class="ftxt">${txt}</div><div class="ftime">${time}</div></div></div>`;
+  }).join('');
+}
+
+function buildSnap(){
+  const total=data.reduce((s,x)=>s+x.amt,0);
+  const byP={};
+  persons.forEach(p=>byP[p]=data.filter(x=>x.who===p).reduce((s,x)=>s+x.amt,0));
+  return {date:todayStr(), total, byP, count:data.length, t:new Date().toISOString()};
+}
+
+function autoSnapshot(){
+  const today=todayStr();
+  const idx=snaps.findIndex(s=>s.date===today);
+  const snap=buildSnap();
+  if(idx>=0) snaps[idx]=snap; else snaps.push(snap);
+  // keep last 30
+  snaps=snaps.sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-30);
+  save();
+}
+
+function saveSnapshot(manual){
+  autoSnapshot();
+  const total=data.reduce((s,x)=>s+x.amt,0);
+  feed.unshift({type:'snap',amt:total,t:new Date().toISOString()});
+  if(feed.length>50) feed=feed.slice(0,50);
+  save();
+  renderSnaps();
+  if(manual) toast('✓ اتحفظت نسخة النهاردة');
+}
+
+function renderSnaps(){
+  document.getElementById('snap-count').textContent=`${snaps.length} / 30 يوم محفوظ`;
+  const c=document.getElementById('snaps-list');
+  if(snaps.length===0){ c.innerHTML='<div class="empty">لسه مفيش أيام محفوظة</div>'; return; }
+  const arr=[...snaps].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  c.innerHTML=arr.map((s,i)=>{
+    const dayNum=snaps.findIndex(x=>x.date===s.date)+1;
+    const sub=Object.keys(s.byP||{}).map(p=>`${p} ${fmt(s.byP[p])}`).join(' • ');
+    return `<div class="snap-day">
+      <div class="d-info">
+        <div class="d-title">يوم ${dayNum} • ${fmtDate(s.date)}</div>
+        <div class="d-sub">${s.count} عملية • ${sub}</div>
+      </div>
+      <div class="d-val">${fmt(s.total)} ج</div>
+    </div>`;
+  }).join('');
+}
+
+// auto-save snapshot once per day on load
+(function(){
+  const today=todayStr();
+  if(!snaps.find(s=>s.date===today) && data.length>0){ autoSnapshot(); }
+})();
+
+function renderManage(){
+  // categories
+  const cm=document.getElementById('cats-manage');
+  cm.innerHTML=cats.map((c,i)=>{
+    const used=data.filter(x=>x.cat===c).length;
+    return `<div class="manage-row">
+      <div class="m-name">${c}<div class="m-count">${used} مصروف</div></div>
+      <button class="ico edit" onclick="editCat(${i})">تعديل</button>
+      <button class="ico del" onclick="delCat(${i})">حذف</button>
+    </div>`;
+  }).join('');
+  // persons
+  const pm=document.getElementById('persons-manage');
+  pm.innerHTML=persons.map((p,i)=>{
+    const used=data.filter(x=>x.who===p).length;
+    return `<div class="manage-row">
+      <span class="swatch" style="background:${colorOf(p)}"></span>
+      <div class="m-name">${p}<div class="m-count">${used} مصروف</div></div>
+      <button class="ico edit" onclick="editPerson(${i})">تعديل</button>
+      <button class="ico del" onclick="delPerson(${i})">حذف</button>
+    </div>`;
+  }).join('');
+}
+
+function addCat(){
+  const inp=document.getElementById('new-cat');
+  const v=inp.value.trim();
+  if(!v){ toast('اكتب اسم البند'); return; }
+  if(cats.includes(v)){ toast('البند موجود بالفعل'); return; }
+  cats.push(v); save(); inp.value=''; refreshSelects(); renderManage(); toast('✓ اتضاف البند');
+}
+function editCat(i){
+  const old=cats[i];
+  const v=prompt('تعديل اسم البند:',old);
+  if(v===null) return;
+  const nv=v.trim(); if(!nv) return;
+  if(cats.includes(nv)&&nv!==old){ toast('الاسم موجود بالفعل'); return; }
+  cats[i]=nv;
+  data.forEach(x=>{ if(x.cat===old) x.cat=nv; }); // تحديث المصاريف القديمة
+  save(); refreshSelects(); renderManage(); toast('✓ اتعدّل البند');
+}
+function delCat(i){
+  const c=cats[i];
+  const used=data.filter(x=>x.cat===c).length;
+  if(used>0){ if(!confirm(`«${c}» فيه ${used} مصروف. لو مسحته المصاريف دي هتفضل بنفس الاسم بس مش هيظهر في القائمة. تكمل؟`)) return; }
+  cats.splice(i,1); save(); refreshSelects(); renderManage(); toast('اتمسح البند');
+}
+
+function addPerson(){
+  const inp=document.getElementById('new-person');
+  const v=inp.value.trim();
+  if(!v){ toast('اكتب الاسم'); return; }
+  if(persons.includes(v)){ toast('الاسم موجود بالفعل'); return; }
+  persons.push(v); save(); inp.value=''; refreshSelects(); renderManage(); toast('✓ اتضاف الاسم');
+}
+function editPerson(i){
+  const old=persons[i];
+  const v=prompt('تعديل الاسم:',old);
+  if(v===null) return;
+  const nv=v.trim(); if(!nv) return;
+  if(persons.includes(nv)&&nv!==old){ toast('الاسم موجود بالفعل'); return; }
+  persons[i]=nv;
+  data.forEach(x=>{ if(x.who===old) x.who=nv; });
+  save(); refreshSelects(); renderManage(); toast('✓ اتعدّل الاسم');
+}
+function delPerson(i){
+  if(persons.length<=1){ toast('لازم يفضل اسم واحد على الأقل'); return; }
+  const p=persons[i];
+  const used=data.filter(x=>x.who===p).length;
+  if(used>0){ if(!confirm(`«${p}» سجّل ${used} مصروف. لو مسحته الاسم مش هيظهر في القوائم بس المصاريف هتفضل. تكمل؟`)) return; }
+  persons.splice(i,1); save(); refreshSelects(); renderManage(); toast('اتمسح الاسم');
+}
+
+function exportData(){
+  const payload={app:'wedding_mona', version:1, exported:new Date().toISOString(), data, snaps, feed, persons, cats};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='مصاريف_خطوبة_منى_'+todayStr()+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✓ اتصدّر الملف');
+}
+
+function importData(ev){
+  const file=ev.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const p=JSON.parse(reader.result);
+      if(p.app!=='wedding_mona'||!Array.isArray(p.data)) throw new Error('ملف غير صالح');
+      // merge by id (avoid duplicates)
+      const ids=new Set(data.map(x=>x.id));
+      let added=0;
+      p.data.forEach(x=>{ if(!ids.has(x.id)){ data.push(x); ids.add(x.id); added++; } });
+      // merge feed
+      if(Array.isArray(p.feed)){
+        p.feed.forEach(f=>feed.push(f));
+        feed.sort((a,b)=>new Date(b.t)-new Date(a.t));
+        feed=feed.slice(0,50);
+      }
+      // merge persons & cats (دمج الأسماء والبنود الجديدة)
+      if(Array.isArray(p.persons)) p.persons.forEach(x=>{ if(!persons.includes(x)) persons.push(x); });
+      if(Array.isArray(p.cats)) p.cats.forEach(x=>{ if(!cats.includes(x)) cats.push(x); });
+      save();
+      autoSnapshot();
+      refreshSelects();
+      toast('✓ اتضاف '+added+' مصروف جديد');
+      renderSysInfo();
+    }catch(e){ toast('الملف مش صحيح'); }
+  };
+  reader.readAsText(file);
+  ev.target.value='';
+}
+
+function resetData(){
+  if(!confirm('متأكد إنك عايز تمسح كل المصاريف والنسخ؟ مفيش رجوع.')) return;
+  if(!confirm('تأكيد أخير: هيتمسح كل حاجة نهائيًا.')) return;
+  data=[]; snaps=[]; feed=[];
+  persons=[...DEFAULT_PERSONS]; cats=[...DEFAULT_CATS];
+  save();
+  refreshSelects();
+  renderSysInfo();
+  renderManage();
+  toast('اتمسح كل شيء');
+}
+
+function renderSysInfo(){
+  const total=data.reduce((s,x)=>s+x.amt,0);
+  const cats=new Set(data.map(x=>x.cat)).size;
+  const dates=data.map(x=>x.date).sort();
+  const rows=[
+    ['عدد المصاريف المسجلة', data.length+' عملية'],
+    ['عدد البنود المختلفة', cats+' بند'],
+    ['إجمالي المبلغ', fmt(total)+' ج'],
+    ['عدد الأيام المحفوظة', snaps.length+' / 30'],
+    ['أول مصروف', dates.length?fmtDate(dates[0]):'—'],
+    ['آخر مصروف', dates.length?fmtDate(dates[dates.length-1]):'—'],
+  ];
+  document.getElementById('sys-info').innerHTML=rows.map(([k,v])=>
+    `<div class="cat-line"><span class="c-name">${k}</span><span class="c-val">${v}</span></div>`).join('');
+}
+</script>
+</body>
+</html>

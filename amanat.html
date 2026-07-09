@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الأمانات">
+<meta name="theme-color" content="#0f1420">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f1420'/%3E%3Ctext x='50' y='65' font-size='55' text-anchor='middle'%3E%F0%9F%97%82%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<title>دفتر الأمانات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1420; --bg2:#161d2e; --card:#1b2436; --card2:#212c42;
+  --border:#2a3550; --text:#e8ecf5; --muted:#8a93ab;
+  --accent:#c9a227; --accent2:#e0bb3d;
+  --green:#2fbf71; --red:#e6584f; --blue:#4a90e2;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:'Cairo',sans-serif; background:linear-gradient(160deg,var(--bg),#0a0e18);
+  color:var(--text); min-height:100vh; direction:rtl;
+}
+.hidden{display:none !important;}
+.wrap{max-width:520px; margin:0 auto; padding:16px; padding-bottom:80px;}
+.wrap.wide{max-width:900px;}
+
+/* ---- Login ---- */
+#loginScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;}
+.login-box{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:28px 22px; width:100%; max-width:380px; text-align:center;}
+.login-logo{font-size:44px; margin-bottom:6px;}
+.login-title{font-size:22px; font-weight:800; margin-bottom:4px;}
+.login-sub{color:var(--muted); font-size:13px; margin-bottom:22px;}
+.role-btns{display:flex; flex-direction:column; gap:10px; margin-bottom:16px;}
+.role-btn{
+  background:var(--card2); border:1px solid var(--border); color:var(--text);
+  padding:14px; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px; transition:.15s;
+}
+.role-btn:active{transform:scale(.97);}
+.role-btn.admin{border-color:var(--accent); color:var(--accent2);}
+.pin-pad{display:none; margin-top:14px;}
+.pin-pad.show{display:block;}
+.pin-dots{display:flex; justify-content:center; gap:10px; margin-bottom:16px;}
+.pin-dot{width:14px; height:14px; border-radius:50%; border:2px solid var(--border); transition:.15s;}
+.pin-dot.filled{background:var(--accent); border-color:var(--accent);}
+.pin-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.pin-key{
+  background:var(--card2); border:1px solid var(--border); color:var(--text);
+  padding:16px 0; border-radius:12px; font-size:19px; font-weight:700; cursor:pointer;
+}
+.pin-key:active{background:var(--border);}
+.pin-key.wide{grid-column:span 1; font-size:14px; color:var(--muted);}
+.login-error{color:var(--red); font-size:13px; margin-top:10px; min-height:16px;}
+.back-link{color:var(--muted); font-size:13px; margin-top:14px; cursor:pointer; display:inline-block;}
+
+/* ---- Top bar ---- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; background:var(--bg2); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:20;
+}
+.topbar h1{font-size:17px; font-weight:800;}
+.topbar .sub{font-size:11px; color:var(--muted); font-weight:400;}
+.icon-btn{
+  background:var(--card2); border:1px solid var(--border); color:var(--text);
+  width:38px; height:38px; border-radius:10px; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ---- Cards / layout ---- */
+.card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px;}
+.card h3{font-size:14px; color:var(--muted); margin-bottom:10px; font-weight:600;}
+.totals-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.total-box{background:var(--card2); border-radius:12px; padding:12px 6px; text-align:center;}
+.total-box .emoji{font-size:20px;}
+.total-box .val{font-size:15px; font-weight:800; margin-top:4px;}
+.total-box .lbl{font-size:11px; color:var(--muted); margin-top:2px;}
+
+.search-bar{display:flex; gap:8px; margin-bottom:12px;}
+.search-bar input{flex:1;}
+input, select, textarea{
+  background:var(--card2); border:1px solid var(--border); color:var(--text);
+  padding:11px 12px; border-radius:10px; font-family:'Cairo',sans-serif; font-size:14px; width:100%;
+}
+input:focus, select:focus, textarea:focus{outline:none; border-color:var(--accent);}
+label{font-size:12px; color:var(--muted); margin-bottom:5px; display:block;}
+.field{margin-bottom:12px;}
+
+.btn{
+  background:var(--accent); color:#111; border:none; padding:12px 16px; border-radius:11px;
+  font-family:'Cairo',sans-serif; font-weight:800; font-size:14px; cursor:pointer; width:100%;
+}
+.btn:active{transform:scale(.98);}
+.btn.secondary{background:var(--card2); color:var(--text); border:1px solid var(--border);}
+.btn.danger{background:var(--red); color:#fff;}
+.btn.green{background:var(--green); color:#052;}
+.btn.small{width:auto; padding:8px 14px; font-size:13px;}
+.btn-row{display:flex; gap:8px;}
+.btn-row .btn{flex:1;}
+
+.person-item{
+  background:var(--card2); border:1px solid var(--border); border-radius:13px;
+  padding:13px 14px; margin-bottom:9px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+}
+.person-item:active{background:var(--border);}
+.person-name{font-weight:700; font-size:15px;}
+.person-mini{font-size:11px; color:var(--muted); margin-top:3px;}
+.person-balances{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+.mini-badge{font-size:11px; background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:3px 7px;}
+.mini-badge.pos{color:var(--green);}
+.mini-badge.neg{color:var(--red);}
+
+.empty-state{text-align:center; padding:40px 10px; color:var(--muted);}
+.empty-state .emoji{font-size:36px; margin-bottom:10px;}
+
+/* Person detail */
+.balance-strip{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px;}
+.bal-card{background:var(--card2); border-radius:12px; padding:12px 8px; text-align:center; border:1px solid var(--border);}
+.bal-card .emoji{font-size:18px;}
+.bal-card .num{font-size:14px; font-weight:800; margin-top:4px;}
+.bal-card .name{font-size:10px; color:var(--muted); margin-top:2px;}
+
+.tx-item{background:var(--card2); border-radius:11px; padding:11px 13px; margin-bottom:8px; border-right:3px solid var(--border);}
+.tx-item.in{border-right-color:var(--green);}
+.tx-item.out{border-right-color:var(--red);}
+.tx-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
+.tx-type{font-weight:700; font-size:13px;}
+.tx-amount{font-weight:800; font-size:14px;}
+.tx-amount.in{color:var(--green);}
+.tx-amount.out{color:var(--red);}
+.tx-date{font-size:11px; color:var(--muted);}
+.tx-desc{font-size:12px; color:var(--muted); margin-top:3px;}
+.tx-del{color:var(--red); font-size:11px; cursor:pointer; margin-top:6px; display:inline-block;}
+
+/* Modal */
+.modal-bg{
+  position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:50;
+  display:flex; align-items:flex-end; justify-content:center;
+}
+.modal-bg.hidden{display:none;}
+.modal{
+  background:var(--bg2); border-radius:20px 20px 0 0; padding:20px; width:100%; max-width:520px;
+  max-height:88vh; overflow-y:auto; animation:slideUp .2s ease;
+}
+@keyframes slideUp{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+.modal h2{font-size:17px; margin-bottom:16px; font-weight:800;}
+.type-select{display:flex; gap:8px; margin-bottom:12px;}
+.type-opt{
+  flex:1; text-align:center; padding:12px 4px; border-radius:11px; border:1px solid var(--border);
+  background:var(--card2); cursor:pointer; font-size:13px;
+}
+.type-opt.active{border-color:var(--accent); background:rgba(201,162,39,.15); color:var(--accent2);}
+.op-select{display:flex; gap:8px; margin-bottom:12px;}
+.op-opt{flex:1; text-align:center; padding:12px 4px; border-radius:11px; border:1px solid var(--border); background:var(--card2); cursor:pointer; font-size:13px; font-weight:700;}
+.op-opt.active.in{border-color:var(--green); background:rgba(47,191,113,.15); color:var(--green);}
+.op-opt.active.out{border-color:var(--red); background:rgba(230,88,79,.15); color:var(--red);}
+
+.tab-bar{display:flex; gap:6px; margin-bottom:14px; background:var(--card2); border-radius:12px; padding:4px;}
+.tab-btn{flex:1; text-align:center; padding:9px; border-radius:9px; font-size:12px; cursor:pointer; color:var(--muted); font-weight:700;}
+.tab-btn.active{background:var(--accent); color:#111;}
+
+.toast{
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+  background:var(--green); color:#052; padding:11px 20px; border-radius:11px; font-weight:700; font-size:13px;
+  z-index:100; animation:fadeInOut 2.2s ease forwards;
+}
+@keyframes fadeInOut{0%{opacity:0; transform:translate(-50%,10px);} 15%{opacity:1; transform:translate(-50%,0);} 85%{opacity:1;} 100%{opacity:0;}}
+
+.fab{
+  position:fixed; bottom:20px; left:20px; background:var(--accent); color:#111;
+  width:56px; height:56px; border-radius:50%; border:none; font-size:26px; font-weight:800;
+  box-shadow:0 6px 18px rgba(201,162,39,.4); cursor:pointer; z-index:15;
+}
+.settings-list{display:flex; flex-direction:column; gap:8px;}
+small.hint{display:block; color:var(--muted); font-size:11px; margin-top:4px;}
+
+/* Sync (QR share / scan) */
+.sync-row{display:flex; gap:8px; margin-top:10px;}
+.sync-row .btn{flex:1; font-size:12px; padding:10px 6px;}
+#qrCanvasWrap{display:flex; justify-content:center; padding:16px 0;}
+.code-box{
+  background:var(--card2); border:1px solid var(--border); border-radius:10px;
+  padding:10px; font-size:11px; color:var(--muted); word-break:break-all; margin-top:8px; max-height:70px; overflow-y:auto;
+}
+.scan-video-wrap{position:relative; border-radius:14px; overflow:hidden; background:#000; margin-bottom:12px;}
+#scanVideo{width:100%; display:block; max-height:280px; object-fit:cover;}
+.scan-frame{
+  position:absolute; inset:15%; border:2px solid var(--accent); border-radius:14px; pointer-events:none;
+}
+.scan-status{text-align:center; font-size:12px; color:var(--muted); margin-bottom:12px;}
+.divider-or{display:flex; align-items:center; gap:10px; margin:14px 0; color:var(--muted); font-size:12px;}
+.divider-or:before, .divider-or:after{content:''; flex:1; height:1px; background:var(--border);}
+.mini-link{color:var(--accent2); font-size:11px; cursor:pointer; margin-right:8px;}
+
+/* Alert banner */
+.alert-banner{
+  background:rgba(230,88,79,.12); border:1px solid rgba(230,88,79,.4); color:#ffb3ae;
+  border-radius:12px; padding:11px 13px; margin-bottom:12px; font-size:12px;
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+.alert-banner .x{cursor:pointer; font-weight:800; padding:0 4px;}
+.alert-banner.warn{background:rgba(201,162,39,.12); border-color:rgba(201,162,39,.4); color:var(--accent2);}
+
+/* Stats row + sort */
+.stats-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:12px; color:var(--muted);}
+.sort-select{width:auto; padding:8px 10px; font-size:12px;}
+.search-row{display:flex; gap:8px; margin-bottom:12px;}
+.search-row input{flex:2;}
+.search-row select{flex:1;}
+
+/* Activity feed */
+.feed-item{display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); cursor:pointer;}
+.feed-item:last-child{border-bottom:none;}
+.feed-left{display:flex; flex-direction:column;}
+.feed-name{font-size:13px; font-weight:700;}
+.feed-meta{font-size:11px; color:var(--muted);}
+.feed-amount{font-weight:800; font-size:13px;}
+.feed-amount.in{color:var(--green);}
+.feed-amount.out{color:var(--red);}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🗂️</div>
+    <div class="login-title">دفتر الأمانات</div>
+    <div class="login-sub">ورق · دهب · فلوس</div>
+
+    <div id="roleChoice" class="role-btns">
+      <button class="role-btn admin" id="bioLoginBtn" onclick="loginWithBiometric()" style="display:none;">🔓 دخول بالبصمة</button>
+      <button class="role-btn admin" onclick="startLogin('admin')">👤 الإدارة</button>
+      <button class="role-btn" onclick="startLogin('person')">🔑 حسابي (صاحب أمانة)</button>
+      <button class="role-btn" onclick="openScanForSetup()">📷 عندي كود إعداد من محمد</button>
+    </div>
+
+    <div id="pinPad" class="pin-pad">
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-grid">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key wide" onclick="pinClear()">مسح</button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key wide" onclick="pinBack()">⌫</button>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <div class="back-link" onclick="cancelLogin()">‹ رجوع</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN APP ============ -->
+<div id="adminApp" class="hidden">
+  <div class="topbar">
+    <div>
+      <h1 id="adminTitle">دفتر الأمانات</h1>
+      <div class="sub">لوحة الإدارة</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn" onclick="openSettings()">⚙️</button>
+      <button class="icon-btn" onclick="logout()">🚪</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="cdnWarningBanner" class="alert-banner hidden">
+      <span>⚠️ فاتح التطبيق بطريقة بتمنع تحميل مكتبات (QR / الكاميرا / PDF / المزامنة) - ارفعه على GitHub Pages وافتحه من رابط https عشان كل حاجة تشتغل</span>
+      <span class="x" onclick="dismissCdnWarning('cdnWarningBanner')">✕</span>
+    </div>
+    <div id="pinNagBanner" class="alert-banner warn hidden">
+      <span>⚠️ لسه حاطط الرقم السري الافتراضي (1234)، غيّره من ⚙️ الإعدادات</span>
+      <span class="x" onclick="dismissPinNag()">✕</span>
+    </div>
+    <div id="backupNagBanner" class="alert-banner hidden">
+      <span id="backupNagText"></span>
+      <span class="x" onclick="dismissBackupNag()">✕</span>
+    </div>
+
+    <div class="card">
+      <h3>الإجمالي العام</h3>
+      <div class="totals-grid" id="grandTotals"></div>
+    </div>
+
+    <div class="stats-row">
+      <span id="peopleCountText"></span>
+    </div>
+
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="🔍 دور على اسم..." oninput="renderPeopleList()">
+      <select id="sortSelect" class="sort-select" onchange="renderPeopleList()">
+        <option value="name">الاسم</option>
+        <option value="recent">آخر نشاط</option>
+        <option value="balance">أعلى رصيد</option>
+      </select>
+    </div>
+
+    <div id="remindersCard" class="card hidden" style="border-color:rgba(230,88,79,.4);">
+      <h3>🔔 التذكيرات (استحقاقات قريبة أو متأخرة)</h3>
+      <div id="remindersList"></div>
+    </div>
+
+    <div id="peopleList"></div>
+
+    <div class="card" style="margin-top:6px;">
+      <h3>آخر العمليات</h3>
+      <div id="activityFeed"></div>
+    </div>
+  </div>
+
+  <button class="fab" onclick="openAddPerson()">+</button>
+</div>
+
+<!-- ============ PERSON DETAIL (admin drilldown) ============ -->
+<div id="personDetail" class="hidden">
+  <div class="topbar">
+    <div>
+      <h1 id="pdName">-</h1>
+      <div class="sub" id="pdSub"></div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn" onclick="editPerson()">✏️</button>
+      <button class="icon-btn" onclick="backToAdmin()">‹</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="balance-strip" id="pdBalances"></div>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn" onclick="openAddTx()">+ عملية جديدة</button>
+    </div>
+    <div class="btn-row" style="margin-bottom:16px;">
+      <button class="btn secondary" onclick="shareAccountSetup()">📤 إعداد الحساب على جهازه</button>
+      <button class="btn secondary" onclick="exportPersonPackage()">📦 تصدير سجله كامل</button>
+    </div>
+    <div class="btn-row" style="margin-bottom:16px;">
+      <button class="btn secondary" onclick="shareStatement()">📝 كشف حساب (واتساب)</button>
+      <button class="btn secondary" onclick="generatePdfReceipt()">🧾 إيصال PDF</button>
+    </div>
+    <div class="card">
+      <h3>سجل العمليات</h3>
+      <div id="pdTxList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CLIENT VIEW (person logs in) ============ -->
+<div id="clientApp" class="hidden">
+  <div class="topbar">
+    <div>
+      <h1 id="clientName">-</h1>
+      <div class="sub">حسابي عند محمد</div>
+    </div>
+    <button class="icon-btn" onclick="logout()">🚪</button>
+  </div>
+  <div class="wrap">
+    <div id="cdnWarningBannerClient" class="alert-banner hidden">
+      <span>⚠️ فاتح التطبيق بطريقة بتمنع تحميل الكاميرا/QR - افتحه من رابط https</span>
+      <span class="x" onclick="dismissCdnWarning('cdnWarningBannerClient')">✕</span>
+    </div>
+    <div class="btn-row" style="margin-bottom:14px;">
+      <button class="btn secondary" onclick="openScanForUpdate()">📷 استلام تحديث</button>
+      <button class="btn secondary" onclick="document.getElementById('clientImportFile').click()">📁 استيراد ملف</button>
+    </div>
+    <input type="file" id="clientImportFile" accept=".json" class="hidden" onchange="importBackup(event)">
+    <div class="balance-strip" id="clientBalances"></div>
+    <div class="card">
+      <h3>سجل العمليات</h3>
+      <div id="clientTxList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Add/Edit Person ============ -->
+<div class="modal-bg hidden" id="personModalBg">
+  <div class="modal">
+    <h2 id="personModalTitle">إضافة صاحب أمانة</h2>
+    <div class="field">
+      <label>الاسم</label>
+      <input type="text" id="pmName" placeholder="اسم الشخص">
+    </div>
+    <div class="field">
+      <label>رقم سري (PIN) من 4 أرقام</label>
+      <input type="text" id="pmPin" placeholder="مثال: 4321" maxlength="4" inputmode="numeric">
+      <small class="hint">هيدخل بيه الشخص يشوف حسابه بس</small>
+    </div>
+    <div class="field">
+      <label>ملاحظات (اختياري)</label>
+      <input type="text" id="pmNote" placeholder="رقم تليفون / ملاحظة">
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="closePersonModal()">إلغاء</button>
+      <button class="btn" onclick="savePerson()">حفظ</button>
+    </div>
+    <div id="pmDeleteRow" class="hidden" style="margin-top:10px;">
+      <button class="btn danger" onclick="deletePerson()">حذف الشخص نهائيًا</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Add Transaction ============ -->
+<div class="modal-bg hidden" id="txModalBg">
+  <div class="modal">
+    <h2 id="txModalTitle">عملية جديدة</h2>
+    <label>النوع</label>
+    <div class="type-select">
+      <div class="type-opt active" data-type="ورق" onclick="selectTxType('ورق')">📄 ورق</div>
+      <div class="type-opt" data-type="دهب" onclick="selectTxType('دهب')">🥇 دهب</div>
+      <div class="type-opt" data-type="فلوس" onclick="selectTxType('فلوس')">💵 فلوس</div>
+    </div>
+
+    <label>نوع العملية</label>
+    <div class="op-select">
+      <div class="op-opt active in" data-op="in" onclick="selectTxOp('in')">⬇️ استلمت (زيادة أمانة)</div>
+      <div class="op-opt out" data-op="out" onclick="selectTxOp('out')">⬆️ سلّمت (رجّعت جزء)</div>
+    </div>
+
+    <div class="field">
+      <label id="txAmountLabel">الكمية / القيمة</label>
+      <input type="number" id="txAmount" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>تفاصيل / وصف (اختياري)</label>
+      <input type="text" id="txDesc" placeholder="مثال: شيك رقم 123 / عيار 21 / ...">
+    </div>
+    <div class="field">
+      <label>التاريخ</label>
+      <input type="date" id="txDate">
+    </div>
+    <div class="field">
+      <label>تاريخ الاستحقاق (اختياري)</label>
+      <input type="date" id="txDueDate">
+      <small class="hint">لو المفروض يتسلم/يترجع جزء في تاريخ معين، هيفكرك في التذكيرات</small>
+    </div>
+    <div class="field">
+      <label>صورة إثبات (اختياري)</label>
+      <input type="file" accept="image/*" capture="environment" id="txPhotoInput" onchange="handleTxPhoto(event)">
+      <div id="txPhotoPreviewWrap" class="hidden" style="margin-top:8px; position:relative; display:inline-block;">
+        <img id="txPhotoPreview" style="max-width:120px; max-height:120px; border-radius:10px; border:1px solid var(--border);">
+        <span onclick="removeTxPhoto()" style="position:absolute; top:-8px; left:-8px; background:var(--red); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer;">✕</span>
+      </div>
+      <small class="hint">الصورة بتتحفظ في الجهاز والباك أب - مش بتتبعت عن طريق كود QR لكبر حجمها</small>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="closeTxModal()">إلغاء</button>
+      <button class="btn" id="txSaveBtn" onclick="saveTx()">حفظ العملية</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Hidden PDF Receipt Template ============ -->
+<div id="pdfReceiptTemplate" style="position:fixed; top:-9999px; left:-9999px; width:700px; background:#fff; color:#111; font-family:'Cairo',sans-serif; direction:rtl; padding:30px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #c9a227; padding-bottom:16px; margin-bottom:20px;">
+    <div>
+      <div style="font-size:22px; font-weight:800;" id="pdfCompanyName">دفتر الأمانات</div>
+      <div style="font-size:12px; color:#555;" id="pdfCompanyPhone"></div>
+    </div>
+    <div style="font-size:30px;">🗂️</div>
+  </div>
+  <div style="font-size:18px; font-weight:800; margin-bottom:4px;">إيصال / كشف حساب أمانة</div>
+  <div style="font-size:12px; color:#555; margin-bottom:18px;" id="pdfDate"></div>
+
+  <div style="background:#f5f5f5; border-radius:10px; padding:14px; margin-bottom:18px;">
+    <div style="font-size:13px; color:#555;">اسم صاحب الأمانة</div>
+    <div style="font-size:18px; font-weight:800;" id="pdfPersonName"></div>
+  </div>
+
+  <div style="font-weight:800; margin-bottom:8px;">الرصيد الحالي</div>
+  <table style="width:100%; border-collapse:collapse; margin-bottom:20px;" id="pdfBalanceTable"></table>
+
+  <div style="font-weight:800; margin-bottom:8px;">سجل العمليات</div>
+  <table style="width:100%; border-collapse:collapse; font-size:12px;" id="pdfTxTable"></table>
+
+  <div style="margin-top:30px; display:flex; justify-content:space-between; font-size:12px; color:#777;">
+    <div>تم إصدار الإيصال ده أوتوماتيك من دفتر الأمانات</div>
+    <div id="pdfIssuedAt"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Photo Viewer ============ -->
+<div class="modal-bg hidden" id="photoModalBg" onclick="closePhotoModal()">
+  <img id="photoModalImg" style="max-width:92%; max-height:80vh; border-radius:12px;">
+</div>
+
+<!-- ============ MODAL: Share QR ============ -->
+<div class="modal-bg hidden" id="shareModalBg">
+  <div class="modal">
+    <h2 id="shareModalTitle">مشاركة</h2>
+    <div class="scan-status">افتح "استلام تحديث" عند الطرف التاني وامسح الكود ده</div>
+    <div id="qrCanvasWrap"></div>
+    <div class="code-box" id="shareCodeText"></div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn secondary" onclick="copyShareCode()">📋 نسخ الكود كنص</button>
+      <button class="btn" onclick="closeShareModal()">تم</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Scan QR ============ -->
+<div class="modal-bg hidden" id="scanModalBg">
+  <div class="modal">
+    <h2>استلام تحديث</h2>
+    <div class="scan-video-wrap">
+      <video id="scanVideo" playsinline muted></video>
+      <div class="scan-frame"></div>
+    </div>
+    <div class="scan-status" id="scanStatusText">وجّه الكاميرا على الـ QR...</div>
+    <div class="divider-or">أو الصق الكود يدويًا</div>
+    <div class="field">
+      <textarea id="pasteCodeInput" rows="3" placeholder="الصق الكود اللي بعته ليك محمد هنا"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="closeScanModal()">إلغاء</button>
+      <button class="btn" onclick="submitPastedCode()">تأكيد الكود الملصوق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Settings ============ -->
+<div class="modal-bg hidden" id="settingsModalBg">
+  <div class="modal">
+    <h2>الإعدادات</h2>
+    <div class="tab-bar">
+      <div class="tab-btn active" data-tab="general" onclick="switchSettingsTab('general')">عام</div>
+      <div class="tab-btn" data-tab="admins" onclick="switchSettingsTab('admins')">الإدارة</div>
+      <div class="tab-btn" data-tab="sync" onclick="switchSettingsTab('sync')">المزامنة</div>
+      <div class="tab-btn" data-tab="backup" onclick="switchSettingsTab('backup')">نسخ احتياطي</div>
+    </div>
+
+    <div id="settingsTabGeneral" class="settings-list">
+      <div class="field">
+        <label>اسم الشركة/النشاط (هيظهر في الإيصال PDF)</label>
+        <input type="text" id="companyName" placeholder="مثال: مكتب محمد للأمانات">
+      </div>
+      <div class="field">
+        <label>رقم تواصل (اختياري)</label>
+        <input type="text" id="companyPhone" placeholder="01xxxxxxxxx">
+      </div>
+      <button class="btn secondary" onclick="saveCompanyInfo()">حفظ بيانات الشركة</button>
+      <div style="margin-top:18px; border-top:1px solid var(--border); padding-top:14px;">
+        <label>الدخول ببصمة الوجه/اللمس على الجهاز ده</label>
+        <div id="biometricStatusText" class="hint" style="margin-bottom:8px;"></div>
+        <button class="btn secondary" id="biometricBtn" onclick="enrollBiometric()">🔓 تفعيل الدخول بالبصمة</button>
+      </div>
+    </div>
+
+    <div id="settingsTabAdmins" class="settings-list hidden">
+      <small class="hint">أي حد في القائمة دي عنده صلاحية كاملة (يضيف/يعدل/يحذف زيك بالظبط).</small>
+      <div id="adminsList" style="margin-top:10px;"></div>
+      <div style="margin-top:14px; border-top:1px solid var(--border); padding-top:14px;">
+        <div class="field">
+          <label>اسم المسؤول الجديد</label>
+          <input type="text" id="newAdminName" placeholder="مثال: أحمد">
+        </div>
+        <div class="field">
+          <label>رقم سري (4 أرقام)</label>
+          <input type="text" id="newAdminPinInput" placeholder="مثال: 5678" maxlength="4" inputmode="numeric">
+        </div>
+        <button class="btn" onclick="addAdmin()">+ إضافة مسؤول</button>
+      </div>
+    </div>
+
+    <div id="settingsTabSync" class="settings-list hidden">
+      <div class="field">
+        <label>Firebase Config (JSON)</label>
+        <textarea id="fbConfig" rows="6" placeholder='{"apiKey":"...","databaseURL":"https://...europe-west1.firebasedatabase.app",...}'></textarea>
+        <small class="hint">اختياري - لو عايز البيانات تتزامن بين أكتر من جهاز. ملحوظة: الصور بتكبر حجم قاعدة البيانات.</small>
+      </div>
+      <button class="btn" onclick="saveFirebaseConfig()">حفظ وتفعيل المزامنة</button>
+      <div id="syncStatus" style="margin-top:10px; font-size:12px; color:var(--muted);"></div>
+    </div>
+
+    <div id="settingsTabBackup" class="settings-list hidden">
+      <small class="hint">ده نسخة احتياطية لكل بيانات جهازك إنت (كل الأشخاص). لو عايز تبعت لصاحب أمانة بياناته هو بس، روح لحسابه واضغط "تصدير سجله كامل".</small>
+      <button class="btn secondary" style="margin-top:10px;" onclick="exportBackup()">⬇️ تنزيل نسخة احتياطية كاملة (JSON)</button>
+      <div class="field" style="margin-top:12px;">
+        <label>استيراد نسخة احتياطية كاملة</label>
+        <input type="file" id="importFile" accept=".json" onchange="importBackup(event)">
+      </div>
+    </div>
+
+    <button class="btn secondary" style="margin-top:16px;" onclick="closeSettings()">إغلاق</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+/* ==================== DATA LAYER ==================== */
+const STORAGE_KEY = 'amanat_data_v1';
+const TYPES = [
+  {key:'ورق', emoji:'📄', unit:''},
+  {key:'دهب', emoji:'🥇', unit:'جم'},
+  {key:'فلوس', emoji:'💵', unit:'ج.م'}
+];
+
+let state = loadState();
+let fbApp = null, fbDb = null, fbSyncing = false;
+
+function defaultState(){
+  return {
+    admins: [{id:'admin_default', name:'محمد', pin:'1234'}],
+    companyName: '', companyPhone: '',
+    people: [],       // {id, name, pin, note, createdAt}
+    transactions: [], // {id, personId, type, op:'in'|'out', amount, desc, date, dueDate, photo, createdAt}
+    updatedAt: Date.now()
+  };
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const data = JSON.parse(raw);
+      const merged = Object.assign(defaultState(), data);
+      // ترحيل من نظام الرقم السري الواحد القديم لنظام المسؤولين المتعددين
+      if(data.adminPin !== undefined && !data.admins){
+        merged.admins = [{id:'admin_default', name:'محمد', pin:data.adminPin}];
+      }
+      return merged;
+    }
+  }catch(e){ console.error('load error', e); }
+  return defaultState();
+}
+
+function saveState(pushToCloud=true){
+  state.updatedAt = Date.now();
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ console.error('save error', e); }
+  if(pushToCloud) pushToFirebase();
+}
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function toWesternDigits(str){
+  if(!str) return str;
+  const eastern = '٠١٢٣٤٥٦٧٨٩', persian = '۰۱۲۳۴۵۶۷۸۹';
+  return String(str).replace(/[٠-٩۰-۹]/g, d=>{
+    let i = eastern.indexOf(d);
+    if(i===-1) i = persian.indexOf(d);
+    return i!==-1 ? i : d;
+  }).trim();
+}
+
+/* ==================== FIREBASE SYNC (simple last-write-wins) ==================== */
+function initFirebaseIfConfigured(){
+  const cfgRaw = localStorage.getItem('amanat_fb_config');
+  if(!cfgRaw) return;
+  try{
+    const cfg = JSON.parse(cfgRaw);
+    if(!fbApp){
+      fbApp = firebase.initializeApp(cfg);
+      fbDb = firebase.database();
+    }
+    fbDb.ref('amanat/data').on('value', snap => {
+      const remote = snap.val();
+      if(!remote) return;
+      if(fbSyncing) return; // avoid loop right after our own push
+      if(!state.updatedAt || remote.updatedAt > state.updatedAt){
+        state = Object.assign(defaultState(), remote);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        rerenderCurrentScreen();
+        showToast('تم تحديث البيانات من السحابة');
+      }
+    });
+    document.getElementById('syncStatus').textContent = '✅ متصل ومتزامن';
+  }catch(e){
+    console.error('firebase init error', e);
+    const el = document.getElementById('syncStatus');
+    if(el) el.textContent = '❌ خطأ في إعدادات Firebase: ' + e.message;
+  }
+}
+
+function pushToFirebase(){
+  if(!fbDb) return;
+  fbSyncing = true;
+  fbDb.ref('amanat/data').set(state).finally(()=>{
+    setTimeout(()=>{ fbSyncing = false; }, 800);
+  });
+}
+
+function saveFirebaseConfig(){
+  const raw = document.getElementById('fbConfig').value.trim();
+  if(!raw){ showToast('حط إعدادات Firebase الأول'); return; }
+  try{
+    JSON.parse(raw);
+    localStorage.setItem('amanat_fb_config', raw);
+    document.getElementById('syncStatus').textContent = 'جارِ الاتصال...';
+    initFirebaseIfConfigured();
+    showToast('تم الحفظ');
+  }catch(e){
+    document.getElementById('syncStatus').textContent = '❌ الصيغة JSON غلط';
+  }
+}
+
+/* ==================== BALANCE CALC ==================== */
+function calcBalances(personId){
+  const bal = {'ورق':0,'دهب':0,'فلوس':0};
+  state.transactions.filter(t=>t.personId===personId).forEach(t=>{
+    bal[t.type] += (t.op==='in' ? 1 : -1) * Number(t.amount||0);
+  });
+  return bal;
+}
+function calcGrandTotals(){
+  const bal = {'ورق':0,'دهب':0,'فلوس':0};
+  state.transactions.forEach(t=>{
+    bal[t.type] += (t.op==='in' ? 1 : -1) * Number(t.amount||0);
+  });
+  return bal;
+}
+function fmtNum(n){
+  n = Number(n)||0;
+  return n.toLocaleString('ar-EG', {maximumFractionDigits:2});
+}
+
+/* ==================== LOGIN ==================== */
+let loginMode = null; // 'admin' | 'person'
+let pinBuffer = '';
+
+function startLogin(mode){
+  loginMode = mode;
+  pinBuffer = '';
+  document.getElementById('roleChoice').classList.add('hidden');
+  document.getElementById('pinPad').classList.add('show');
+  document.getElementById('loginError').textContent = '';
+  updatePinDots();
+}
+function cancelLogin(){
+  loginMode = null; pinBuffer='';
+  document.getElementById('roleChoice').classList.remove('hidden');
+  document.getElementById('pinPad').classList.remove('show');
+}
+function pinPress(d){
+  if(pinBuffer.length>=4) return;
+  pinBuffer += d;
+  updatePinDots();
+  if(pinBuffer.length===4) setTimeout(tryLogin, 150);
+}
+function pinBack(){ pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); }
+function pinClear(){ pinBuffer=''; updatePinDots(); }
+function updatePinDots(){
+  const dots = document.querySelectorAll('.pin-dot');
+  dots.forEach((d,i)=> d.classList.toggle('filled', i < pinBuffer.length));
+}
+function tryLogin(){
+  const err = document.getElementById('loginError');
+  if(loginMode==='admin'){
+    if(state.admins.some(a=>a.pin===pinBuffer)){
+      enterAdmin();
+    }else{
+      err.textContent = 'الرقم غلط، حاول تاني';
+      pinBuffer=''; updatePinDots();
+    }
+  }else{
+    const person = state.people.find(p=>p.pin===pinBuffer);
+    if(person){
+      enterClient(person.id);
+    }else{
+      err.textContent = 'الرقم مش متسجل';
+      pinBuffer=''; updatePinDots();
+    }
+  }
+}
+
+let currentClientId = null;
+function enterAdmin(){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('adminApp').classList.remove('hidden');
+  renderAdminHome();
+  initFirebaseIfConfigured();
+}
+function enterClient(personId){
+  currentClientId = personId;
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('clientApp').classList.remove('hidden');
+  renderClientView();
+  initFirebaseIfConfigured();
+}
+function logout(){
+  currentClientId = null; currentPersonId = null;
+  document.getElementById('adminApp').classList.add('hidden');
+  document.getElementById('personDetail').classList.add('hidden');
+  document.getElementById('clientApp').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  cancelLogin();
+}
+function rerenderCurrentScreen(){
+  if(!document.getElementById('adminApp').classList.contains('hidden')) renderAdminHome();
+  if(!document.getElementById('personDetail').classList.contains('hidden')) renderPersonDetail(currentPersonId);
+  if(!document.getElementById('clientApp').classList.contains('hidden')) renderClientView();
+}
+
+/* ==================== ADMIN HOME ==================== */
+function renderAdminHome(){
+  const totals = calcGrandTotals();
+  const grid = document.getElementById('grandTotals');
+  grid.innerHTML = TYPES.map(t=>`
+    <div class="total-box">
+      <div class="emoji">${t.emoji}</div>
+      <div class="val">${fmtNum(totals[t.key])}${t.unit?(' '+t.unit):''}</div>
+      <div class="lbl">${t.key}</div>
+    </div>
+  `).join('');
+  document.getElementById('peopleCountText').textContent = `👥 عدد الأشخاص: ${state.people.length}`;
+  checkCdnWarning('cdnWarningBanner');
+  checkPinNag();
+  checkBackupNag();
+  renderPeopleList();
+  renderActivityFeed();
+  renderReminders();
+}
+function checkCdnWarning(bannerId){
+  const banner = document.getElementById(bannerId);
+  if(!banner) return;
+  const dismissed = sessionStorage.getItem('amanat_cdn_nag_dismissed');
+  const missing = (typeof QRCode === 'undefined') || (typeof jsQR === 'undefined');
+  banner.classList.toggle('hidden', !missing || !!dismissed);
+}
+function dismissCdnWarning(bannerId){
+  sessionStorage.setItem('amanat_cdn_nag_dismissed', '1');
+  document.getElementById(bannerId).classList.add('hidden');
+}
+function checkPinNag(){
+  const banner = document.getElementById('pinNagBanner');
+  const dismissed = sessionStorage.getItem('amanat_pin_nag_dismissed');
+  const hasDefault = state.admins.some(a=>a.pin==='1234');
+  banner.classList.toggle('hidden', !hasDefault || dismissed);
+}
+function dismissPinNag(){
+  sessionStorage.setItem('amanat_pin_nag_dismissed', '1');
+  document.getElementById('pinNagBanner').classList.add('hidden');
+}
+function checkBackupNag(){
+  const banner = document.getElementById('backupNagBanner');
+  const dismissed = sessionStorage.getItem('amanat_backup_nag_dismissed');
+  const last = Number(localStorage.getItem('amanat_last_backup')||0);
+  const days = last ? Math.floor((Date.now()-last)/86400000) : null;
+  if(dismissed || (state.transactions.length===0)){ banner.classList.add('hidden'); return; }
+  if(!last){
+    document.getElementById('backupNagText').textContent = '💾 لسه ما عملتش نسخة احتياطية خالص - اعملها من ⚙️ الإعدادات';
+    banner.classList.remove('hidden');
+  }else if(days >= 14){
+    document.getElementById('backupNagText').textContent = `💾 آخر نسخة احتياطية من ${days} يوم - يفضل تعمل واحدة جديدة`;
+    banner.classList.remove('hidden');
+  }else{
+    banner.classList.add('hidden');
+  }
+}
+function dismissBackupNag(){
+  sessionStorage.setItem('amanat_backup_nag_dismissed', '1');
+  document.getElementById('backupNagBanner').classList.add('hidden');
+}
+function renderPeopleList(){
+  const q = (document.getElementById('searchInput').value||'').trim();
+  const sortBy = document.getElementById('sortSelect').value;
+  const list = document.getElementById('peopleList');
+  let people = [...state.people];
+  if(q) people = people.filter(p=> p.name.includes(q) || (p.note||'').includes(q));
+
+  if(sortBy === 'name'){
+    people.sort((a,b)=> a.name.localeCompare(b.name,'ar'));
+  }else if(sortBy === 'recent'){
+    const lastTx = pid => {
+      const txs = state.transactions.filter(t=>t.personId===pid);
+      return txs.length ? Math.max(...txs.map(t=>t.createdAt)) : 0;
+    };
+    people.sort((a,b)=> lastTx(b.id) - lastTx(a.id));
+  }else if(sortBy === 'balance'){
+    const totalAbs = pid => { const b = calcBalances(pid); return Math.abs(b['ورق'])+Math.abs(b['دهب'])+Math.abs(b['فلوس']); };
+    people.sort((a,b)=> totalAbs(b.id) - totalAbs(a.id));
+  }
+
+  if(people.length===0){
+    list.innerHTML = `<div class="empty-state"><div class="emoji">🗂️</div>لسه مفيش حد مسجل<br>اضغط + عشان تضيف أول شخص</div>`;
+    return;
+  }
+  list.innerHTML = people.map(p=>{
+    const bal = calcBalances(p.id);
+    const badges = TYPES.filter(t=>bal[t.key]!==0).map(t=>{
+      const cls = bal[t.key]>0 ? 'pos':'neg';
+      return `<span class="mini-badge ${cls}">${t.emoji} ${fmtNum(bal[t.key])}</span>`;
+    }).join('');
+    return `
+      <div class="person-item" onclick="openPersonDetail('${p.id}')">
+        <div>
+          <div class="person-name">${p.name}</div>
+          <div class="person-mini">${p.note||''}</div>
+        </div>
+        <div class="person-balances">${badges || '<span class="mini-badge">مفيش أمانة</span>'}</div>
+      </div>
+    `;
+  }).join('');
+}
+function renderReminders(){
+  const card = document.getElementById('remindersCard');
+  const list = document.getElementById('remindersList');
+  const today = new Date(new Date().toDateString());
+  const items = state.transactions
+    .filter(t=>t.dueDate)
+    .map(t=>({t, days: Math.floor((new Date(t.dueDate)-today)/86400000)}))
+    .filter(x=>x.days <= 7)
+    .sort((a,b)=> a.days - b.days);
+  if(items.length===0){
+    card.classList.add('hidden');
+    return;
+  }
+  card.classList.remove('hidden');
+  list.innerHTML = items.map(({t,days})=>{
+    const p = state.people.find(x=>x.id===t.personId);
+    const typeInfo = TYPES.find(x=>x.key===t.type);
+    const statusTxt = days < 0 ? `⚠️ متأخر ${Math.abs(days)} يوم` : days===0 ? '⏰ مستحق النهاردة' : `⏰ بعد ${days} يوم`;
+    return `
+      <div class="feed-item" onclick="openPersonDetail('${t.personId}')">
+        <div class="feed-left">
+          <div class="feed-name">${p ? p.name : 'شخص محذوف'} — ${typeInfo.emoji} ${t.type} ${fmtNum(t.amount)}</div>
+          <div class="feed-meta">${statusTxt} · ${t.dueDate}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+function renderActivityFeed(){
+  const feed = document.getElementById('activityFeed');
+  const txs = [...state.transactions].sort((a,b)=> b.createdAt - a.createdAt).slice(0, 10);
+  if(txs.length===0){
+    feed.innerHTML = `<div class="empty-state" style="padding:16px 10px;"><div class="emoji">📭</div>مفيش عمليات لسه</div>`;
+    return;
+  }
+  feed.innerHTML = txs.map(t=>{
+    const p = state.people.find(x=>x.id===t.personId);
+    const typeInfo = TYPES.find(x=>x.key===t.type);
+    return `
+      <div class="feed-item" onclick="openPersonDetail('${t.personId}')">
+        <div class="feed-left">
+          <div class="feed-name">${p ? p.name : 'شخص محذوف'}</div>
+          <div class="feed-meta">${typeInfo.emoji} ${t.type} · ${t.date}</div>
+        </div>
+        <div class="feed-amount ${t.op}">${t.op==='in'?'+':'-'}${fmtNum(t.amount)}${typeInfo.unit?(' '+typeInfo.unit):''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ==================== PERSON DETAIL (admin) ==================== */
+let currentPersonId = null;
+function openPersonDetail(id){
+  currentPersonId = id;
+  document.getElementById('adminApp').classList.add('hidden');
+  document.getElementById('personDetail').classList.remove('hidden');
+  renderPersonDetail(id);
+}
+function backToAdmin(){
+  document.getElementById('personDetail').classList.add('hidden');
+  document.getElementById('adminApp').classList.remove('hidden');
+  renderAdminHome();
+}
+function renderPersonDetail(id){
+  const p = state.people.find(x=>x.id===id);
+  if(!p) return backToAdmin();
+  document.getElementById('pdName').textContent = p.name;
+  document.getElementById('pdSub').textContent = p.note || ('PIN: ' + p.pin);
+  const bal = calcBalances(id);
+  document.getElementById('pdBalances').innerHTML = TYPES.map(t=>`
+    <div class="bal-card">
+      <div class="emoji">${t.emoji}</div>
+      <div class="num">${fmtNum(bal[t.key])}${t.unit?(' '+t.unit):''}</div>
+      <div class="name">${t.key}</div>
+    </div>
+  `).join('');
+  const txs = state.transactions.filter(t=>t.personId===id).sort((a,b)=> new Date(b.date)-new Date(a.date) || b.createdAt-a.createdAt);
+  const list = document.getElementById('pdTxList');
+  if(txs.length===0){
+    list.innerHTML = `<div class="empty-state"><div class="emoji">📭</div>مفيش عمليات لسه</div>`;
+    return;
+  }
+  list.innerHTML = txs.map(t=>{
+    const typeInfo = TYPES.find(x=>x.key===t.type);
+    return `
+      <div class="tx-item ${t.op}">
+        <div class="tx-top">
+          <div class="tx-type">${typeInfo.emoji} ${t.type} — ${t.op==='in'?'استلمت':'سلّمت'}</div>
+          <div class="tx-amount ${t.op}">${t.op==='in'?'+':'-'}${fmtNum(t.amount)}${typeInfo.unit?(' '+typeInfo.unit):''}</div>
+        </div>
+        <div class="tx-date">${t.date}${dueDateBadge(t)}</div>
+        ${t.desc? `<div class="tx-desc">${t.desc}</div>`:''}
+        ${photoThumb(t)}
+        <div>
+          <span class="mini-link" onclick="openEditTx('${t.id}')">✏️ تعديل</span>
+          <span class="mini-link" onclick="shareTx('${t.id}')">📤 مشاركة</span>
+          <span class="tx-del" onclick="deleteTx('${t.id}')">حذف العملية</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+function dueDateBadge(t){
+  if(!t.dueDate) return '';
+  const days = Math.floor((new Date(t.dueDate) - new Date(new Date().toDateString())) / 86400000);
+  let cls = 'mini-badge', txt = '⏰ استحقاق ' + t.dueDate;
+  if(days < 0){ cls += ' neg'; txt = '⚠️ متأخر - كان المفروض ' + t.dueDate; }
+  else if(days <= 3){ cls += ' neg'; txt = '⏰ قرّب الاستحقاق ' + t.dueDate; }
+  return ` <span class="${cls}" style="margin-right:6px;">${txt}</span>`;
+}
+function photoThumb(t){
+  if(!t.photo) return '';
+  return `<div style="margin-top:6px;"><img src="${t.photo}" onclick="openPhotoModal('${t.id}')" style="max-width:70px; max-height:70px; border-radius:8px; border:1px solid var(--border); cursor:pointer;"></div>`;
+}
+function openPhotoModal(txId){
+  const t = state.transactions.find(x=>x.id===txId);
+  if(!t || !t.photo) return;
+  document.getElementById('photoModalImg').src = t.photo;
+  document.getElementById('photoModalBg').classList.remove('hidden');
+}
+function closePhotoModal(){ document.getElementById('photoModalBg').classList.add('hidden'); }
+function deleteTx(txId){
+  if(!confirm('متأكد إنك عايز تحذف العملية دي؟')) return;
+  state.transactions = state.transactions.filter(t=>t.id!==txId);
+  saveState();
+  renderPersonDetail(currentPersonId);
+}
+
+/* ==================== ADD / EDIT PERSON ==================== */
+let editingPersonId = null;
+function openAddPerson(){
+  editingPersonId = null;
+  document.getElementById('personModalTitle').textContent = 'إضافة صاحب أمانة';
+  document.getElementById('pmName').value = '';
+  document.getElementById('pmPin').value = '';
+  document.getElementById('pmNote').value = '';
+  document.getElementById('pmDeleteRow').classList.add('hidden');
+  document.getElementById('personModalBg').classList.remove('hidden');
+}
+function editPerson(){
+  const p = state.people.find(x=>x.id===currentPersonId);
+  if(!p) return;
+  editingPersonId = p.id;
+  document.getElementById('personModalTitle').textContent = 'تعديل بيانات الشخص';
+  document.getElementById('pmName').value = p.name;
+  document.getElementById('pmPin').value = p.pin;
+  document.getElementById('pmNote').value = p.note||'';
+  document.getElementById('pmDeleteRow').classList.remove('hidden');
+  document.getElementById('personModalBg').classList.remove('hidden');
+}
+function closePersonModal(){ document.getElementById('personModalBg').classList.add('hidden'); }
+function savePerson(){
+  const name = document.getElementById('pmName').value.trim();
+  const pin = toWesternDigits(document.getElementById('pmPin').value);
+  const note = document.getElementById('pmNote').value.trim();
+  if(!name){ alert('اكتب الاسم'); return; }
+  if(!/^\d{4}$/.test(pin)){ alert('الرقم السري لازم يكون 4 أرقام'); return; }
+  const dup = state.people.find(p=>p.pin===pin && p.id!==editingPersonId);
+  if(dup){ alert('الرقم السري ده مستخدم قبل كده لشخص تاني'); return; }
+
+  if(editingPersonId){
+    const p = state.people.find(x=>x.id===editingPersonId);
+    p.name=name; p.pin=pin; p.note=note;
+  }else{
+    state.people.push({id:uid(), name, pin, note, createdAt:Date.now()});
+  }
+  saveState();
+  closePersonModal();
+  if(editingPersonId){ renderPersonDetail(editingPersonId); }
+  renderAdminHome();
+  showToast('تم الحفظ');
+}
+function deletePerson(){
+  if(!confirm('حذف الشخص هيمسح كل سجل عملياته كمان. متأكد؟')) return;
+  state.people = state.people.filter(p=>p.id!==editingPersonId);
+  state.transactions = state.transactions.filter(t=>t.personId!==editingPersonId);
+  saveState();
+  closePersonModal();
+  backToAdmin();
+}
+
+/* ==================== ADD TRANSACTION ==================== */
+let txType = 'ورق', txOp = 'in', editingTxId = null, currentTxPhoto = null;
+function openAddTx(){
+  editingTxId = null;
+  txType='ورق'; txOp='in';
+  currentTxPhoto = null;
+  document.getElementById('txModalTitle').textContent = 'عملية جديدة';
+  document.getElementById('txSaveBtn').textContent = 'حفظ العملية';
+  document.querySelectorAll('.type-opt').forEach(el=>el.classList.toggle('active', el.dataset.type===txType));
+  document.querySelectorAll('.op-opt').forEach(el=>el.classList.toggle('active', el.dataset.op===txOp));
+  document.getElementById('txAmount').value='';
+  document.getElementById('txDesc').value='';
+  document.getElementById('txDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('txDueDate').value = '';
+  document.getElementById('txPhotoInput').value = '';
+  document.getElementById('txPhotoPreviewWrap').classList.add('hidden');
+  updateTxAmountLabel();
+  document.getElementById('txModalBg').classList.remove('hidden');
+}
+function openEditTx(txId){
+  const t = state.transactions.find(x=>x.id===txId);
+  if(!t) return;
+  editingTxId = txId;
+  txType = t.type; txOp = t.op;
+  currentTxPhoto = t.photo || null;
+  document.getElementById('txModalTitle').textContent = 'تعديل العملية';
+  document.getElementById('txSaveBtn').textContent = 'حفظ التعديل';
+  document.querySelectorAll('.type-opt').forEach(el=>el.classList.toggle('active', el.dataset.type===txType));
+  document.querySelectorAll('.op-opt').forEach(el=>el.classList.toggle('active', el.dataset.op===txOp));
+  document.getElementById('txAmount').value = t.amount;
+  document.getElementById('txDesc').value = t.desc || '';
+  document.getElementById('txDate').value = t.date;
+  document.getElementById('txDueDate').value = t.dueDate || '';
+  document.getElementById('txPhotoInput').value = '';
+  if(currentTxPhoto){
+    document.getElementById('txPhotoPreview').src = currentTxPhoto;
+    document.getElementById('txPhotoPreviewWrap').classList.remove('hidden');
+  }else{
+    document.getElementById('txPhotoPreviewWrap').classList.add('hidden');
+  }
+  updateTxAmountLabel();
+  document.getElementById('txModalBg').classList.remove('hidden');
+}
+function closeTxModal(){ document.getElementById('txModalBg').classList.add('hidden'); }
+function selectTxType(t){
+  txType = t;
+  document.querySelectorAll('.type-opt').forEach(el=>el.classList.toggle('active', el.dataset.type===t));
+  updateTxAmountLabel();
+}
+function selectTxOp(op){
+  txOp = op;
+  document.querySelectorAll('.op-opt').forEach(el=>{
+    el.classList.toggle('active', el.dataset.op===op);
+  });
+}
+function updateTxAmountLabel(){
+  const info = TYPES.find(t=>t.key===txType);
+  document.getElementById('txAmountLabel').textContent =
+    txType==='دهب' ? 'الوزن (جرام)' : txType==='فلوس' ? 'المبلغ (جنيه)' : 'الكمية / العدد';
+}
+
+/* ---- Photo capture + compression (keeps localStorage/Firebase small) ---- */
+function handleTxPhoto(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      const maxW = 900;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      currentTxPhoto = canvas.toDataURL('image/jpeg', 0.6);
+      document.getElementById('txPhotoPreview').src = currentTxPhoto;
+      document.getElementById('txPhotoPreviewWrap').classList.remove('hidden');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeTxPhoto(){
+  currentTxPhoto = null;
+  document.getElementById('txPhotoInput').value = '';
+  document.getElementById('txPhotoPreviewWrap').classList.add('hidden');
+}
+
+function saveTx(){
+  const amount = Number(document.getElementById('txAmount').value);
+  const desc = document.getElementById('txDesc').value.trim();
+  const date = document.getElementById('txDate').value || new Date().toISOString().slice(0,10);
+  const dueDate = document.getElementById('txDueDate').value || '';
+  if(!amount || amount<=0){ alert('اكتب كمية صحيحة'); return; }
+
+  // تحذير لو العملية "تسليم" هتخلي الرصيد سالب
+  if(txOp === 'out'){
+    let bal = calcBalances(currentPersonId)[txType];
+    if(editingTxId){
+      const old = state.transactions.find(x=>x.id===editingTxId);
+      if(old) bal -= (old.op==='in'?1:-1) * Number(old.amount||0);
+    }
+    if((bal - amount) < 0){
+      const ok = confirm(`الرصيد المتاح من ${txType} حاليًا ${fmtNum(bal)}، والعملية دي هتخلي الرصيد سالب. تكمل؟`);
+      if(!ok) return;
+    }
+  }
+
+  if(editingTxId){
+    const t = state.transactions.find(x=>x.id===editingTxId);
+    Object.assign(t, {type:txType, op:txOp, amount, desc, date, dueDate, photo:currentTxPhoto||undefined});
+    if(!currentTxPhoto) delete t.photo;
+    saveState();
+    closeTxModal();
+    renderPersonDetail(currentPersonId);
+    showToast('تم حفظ التعديل');
+    shareTx(t.id);
+  }else{
+    const newTx = {
+      id: uid(), personId: currentPersonId, type: txType, op: txOp,
+      amount, desc, date, dueDate, createdAt: Date.now()
+    };
+    if(currentTxPhoto) newTx.photo = currentTxPhoto;
+    state.transactions.push(newTx);
+    saveState();
+    closeTxModal();
+    renderPersonDetail(currentPersonId);
+    showToast('تمت إضافة العملية');
+    shareTx(newTx.id);
+  }
+}
+
+/* ==================== SYNC: QR SHARE / SCAN (offline, no internet) ==================== */
+function encodePayload(obj){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function decodePayload(str){
+  return JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
+}
+
+/* ---- Share (generate) ---- */
+let lastShareCode = '';
+function openShareModal(payload, title){
+  const code = encodePayload(payload);
+  lastShareCode = code;
+  document.getElementById('shareModalTitle').textContent = title;
+  document.getElementById('shareCodeText').textContent = code;
+  const wrap = document.getElementById('qrCanvasWrap');
+  wrap.innerHTML = '';
+  document.getElementById('shareModalBg').classList.remove('hidden'); // يفتح المودال الأول مهما حصل
+  try{
+    if(typeof QRCode === 'undefined') throw new Error('QRCode library not loaded');
+    new QRCode(wrap, {text: code, width: 220, height: 220, colorDark:'#000000', colorLight:'#ffffff'});
+  }catch(e){
+    wrap.innerHTML = `<div style="text-align:center; color:var(--muted); font-size:12px; padding:20px;">
+      ⚠️ مكتبة رسم الـ QR ما اتحملتش (غالبًا لأنك فاتح الملف مباشرة مش من رابط https).<br>
+      استخدم "نسخ الكود كنص" تحت وابعته واتساب بدالها.
+    </div>`;
+  }
+}
+function closeShareModal(){ document.getElementById('shareModalBg').classList.add('hidden'); }
+function copyShareCode(){
+  navigator.clipboard.writeText(lastShareCode).then(()=>showToast('اتنسخ - ابعته على واتساب مثلاً'));
+}
+function shareTx(txId){
+  const t = state.transactions.find(x=>x.id===txId);
+  if(!t) return;
+  const txForQr = Object.assign({}, t);
+  const hasPhoto = !!txForQr.photo;
+  delete txForQr.photo; // الصورة كبيرة على QR - بتتبعت بس عن طريق تصدير الملف
+  openShareModal({type:'tx', tx:txForQr}, hasPhoto ? 'مشاركة العملية (بدون الصورة)' : 'مشاركة العملية دي');
+}
+function shareAccountSetup(){
+  const p = state.people.find(x=>x.id===currentPersonId);
+  if(!p) return;
+  openShareModal({type:'person', person:p}, 'كود إعداد حساب ' + p.name);
+}
+function exportPersonPackage(){
+  const p = state.people.find(x=>x.id===currentPersonId);
+  if(!p) return;
+  const txs = state.transactions.filter(t=>t.personId===p.id);
+  const pkg = {type:'person_package', person:p, transactions:txs};
+  const blob = new Blob([JSON.stringify(pkg, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'حساب_' + p.name + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('اتنزل - ابعته له بأي طريقة (AirDrop / بلوتوث)');
+}
+function generatePdfReceipt(){
+  const p = state.people.find(x=>x.id===currentPersonId);
+  if(!p) return;
+  if(typeof html2pdf === 'undefined'){
+    alert('مكتبة توليد الـ PDF ما اتحملتش. ده بيحصل لو فاتح الملف مباشرة (edge://external-file) بدل رابط https. ارفع الملف على GitHub Pages أو استضافة وافتحه من الرابط.');
+    return;
+  }
+  const bal = calcBalances(p.id);
+  const txs = state.transactions.filter(t=>t.personId===p.id).sort((a,b)=> new Date(b.date)-new Date(a.date) || b.createdAt-a.createdAt);
+
+  document.getElementById('pdfCompanyName').textContent = state.companyName || 'دفتر الأمانات';
+  document.getElementById('pdfCompanyPhone').textContent = state.companyPhone || '';
+  document.getElementById('pdfDate').textContent = 'تاريخ الإصدار: ' + new Date().toLocaleDateString('ar-EG');
+  document.getElementById('pdfPersonName').textContent = p.name;
+  document.getElementById('pdfIssuedAt').textContent = new Date().toLocaleString('ar-EG');
+
+  document.getElementById('pdfBalanceTable').innerHTML = TYPES.map(t=>`
+    <tr style="border-bottom:1px solid #ddd;">
+      <td style="padding:8px;">${t.emoji} ${t.key}</td>
+      <td style="padding:8px; font-weight:800; text-align:left;">${fmtNum(bal[t.key])}${t.unit?(' '+t.unit):''}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('pdfTxTable').innerHTML =
+    `<tr style="background:#f0f0f0;">
+      <td style="padding:6px; font-weight:800;">التاريخ</td>
+      <td style="padding:6px; font-weight:800;">النوع</td>
+      <td style="padding:6px; font-weight:800;">العملية</td>
+      <td style="padding:6px; font-weight:800;">الكمية</td>
+      <td style="padding:6px; font-weight:800;">تفاصيل</td>
+    </tr>` +
+    txs.map(t=>{
+      const typeInfo = TYPES.find(x=>x.key===t.type);
+      return `<tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px;">${t.date}</td>
+        <td style="padding:6px;">${typeInfo.emoji} ${t.type}</td>
+        <td style="padding:6px;">${t.op==='in'?'استلام':'تسليم'}</td>
+        <td style="padding:6px;">${fmtNum(t.amount)}${typeInfo.unit?(' '+typeInfo.unit):''}</td>
+        <td style="padding:6px;">${t.desc||'-'}</td>
+      </tr>`;
+    }).join('');
+
+  showToast('جارِ تجهيز الإيصال...');
+  const el = document.getElementById('pdfReceiptTemplate');
+  html2pdf().set({
+    margin: 10,
+    filename: 'إيصال_' + p.name + '.pdf',
+    image:{type:'jpeg', quality:0.95},
+    html2canvas:{scale:2},
+    jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}
+  }).from(el).save();
+}
+function shareStatement(){
+  const p = state.people.find(x=>x.id===currentPersonId);
+  if(!p) return;
+  const bal = calcBalances(p.id);
+  const txs = state.transactions.filter(t=>t.personId===p.id).sort((a,b)=> new Date(b.date)-new Date(a.date) || b.createdAt-a.createdAt);
+  let text = `📋 كشف حساب أمانة\n👤 ${p.name}\n📅 ${new Date().toLocaleDateString('ar-EG')}\n\n`;
+  text += `الرصيد الحالي:\n`;
+  TYPES.forEach(t=>{
+    if(bal[t.key] !== 0) text += `${t.emoji} ${t.key}: ${fmtNum(bal[t.key])}${t.unit?(' '+t.unit):''}\n`;
+  });
+  if(TYPES.every(t=>bal[t.key]===0)) text += 'لا يوجد رصيد حاليًا\n';
+  text += `\nآخر العمليات:\n`;
+  txs.slice(0,10).forEach(t=>{
+    const typeInfo = TYPES.find(x=>x.key===t.type);
+    text += `- ${t.date}: ${t.op==='in'?'استلام':'تسليم'} ${typeInfo.emoji} ${t.type} ${fmtNum(t.amount)}${typeInfo.unit?(' '+typeInfo.unit):''}${t.desc?(' ('+t.desc+')'):''}\n`;
+  });
+
+  if(navigator.share){
+    navigator.share({title:'كشف حساب - ' + p.name, text}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text).then(()=>showToast('اتنسخ الكشف - الصقه في واتساب'));
+  }
+}
+
+/* ---- Scan (camera) ---- */
+let scanStream = null, scanRAF = null, scanCallback = null;
+function openScanModal(callback){
+  scanCallback = callback;
+  document.getElementById('pasteCodeInput').value = '';
+  document.getElementById('scanStatusText').textContent = 'وجّه الكاميرا على الـ QR...';
+  document.getElementById('scanModalBg').classList.remove('hidden');
+  startCamera();
+}
+function closeScanModal(){
+  stopCamera();
+  document.getElementById('scanModalBg').classList.add('hidden');
+}
+function openScanForUpdate(){
+  openScanModal(payload => {
+    processIncomingPayload(payload);
+    closeScanModal();
+    renderClientView();
+  });
+}
+function openScanForSetup(){
+  openScanModal(payload => {
+    if(payload.type !== 'person'){
+      document.getElementById('scanStatusText').textContent = 'الكود ده مش كود إعداد حساب';
+      return;
+    }
+    processIncomingPayload(payload);
+    closeScanModal();
+    showToast('تم استلام الحساب - ادخل بالرقم السري دلوقتي');
+    cancelLogin();
+    startLogin('person');
+  });
+}
+function startCamera(){
+  const video = document.getElementById('scanVideo');
+  if(typeof jsQR === 'undefined'){
+    document.getElementById('scanStatusText').textContent = '⚠️ مكتبة قراءة الـ QR ما اتحملتش - استخدم لصق الكود تحت';
+    document.querySelector('.scan-video-wrap').classList.add('hidden');
+    return;
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    document.getElementById('scanStatusText').textContent = '⚠️ الكاميرا مش متاحة (محتاج رابط https) - استخدم لصق الكود تحت';
+    document.querySelector('.scan-video-wrap').classList.add('hidden');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+    .then(stream=>{
+      scanStream = stream;
+      video.srcObject = stream;
+      video.setAttribute('playsinline', true);
+      video.play();
+      scanLoop();
+    })
+    .catch(()=>{
+      document.getElementById('scanStatusText').textContent = 'مفيش إذن للكاميرا - استخدم لصق الكود تحت';
+    });
+}
+function stopCamera(){
+  if(scanRAF) cancelAnimationFrame(scanRAF);
+  if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
+}
+function scanLoop(){
+  const video = document.getElementById('scanVideo');
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    const code = jsQR(imgData.data, imgData.width, imgData.height);
+    if(code && code.data){
+      try{
+        const payload = decodePayload(code.data);
+        stopCamera();
+        scanCallback && scanCallback(payload);
+        return;
+      }catch(e){ /* not our format, keep scanning */ }
+    }
+  }
+  scanRAF = requestAnimationFrame(scanLoop);
+}
+function submitPastedCode(){
+  const raw = document.getElementById('pasteCodeInput').value.trim();
+  if(!raw){ showToast('الصق الكود الأول'); return; }
+  try{
+    const payload = decodePayload(raw);
+    scanCallback && scanCallback(payload);
+  }catch(e){
+    document.getElementById('scanStatusText').textContent = 'الكود مش صحيح، اتأكد وحاول تاني';
+  }
+}
+
+/* ---- Merge incoming data (upsert, never wipes other people's data) ---- */
+function processIncomingPayload(payload){
+  if(!payload || !payload.type) return;
+  if(payload.type === 'person'){
+    upsertPerson(payload.person);
+    saveState(false);
+    showToast('تم استلام بيانات الحساب');
+  }else if(payload.type === 'tx'){
+    upsertTx(payload.tx);
+    saveState(false);
+    showToast('تم استلام العملية');
+  }else if(payload.type === 'person_package'){
+    upsertPerson(payload.person);
+    (payload.transactions||[]).forEach(upsertTx);
+    saveState(false);
+    showToast('تم استلام السجل كامل');
+  }
+}
+function upsertPerson(p){
+  if(!p || !p.id) return;
+  const i = state.people.findIndex(x=>x.id===p.id);
+  if(i>=0) state.people[i] = p; else state.people.push(p);
+}
+function upsertTx(t){
+  if(!t || !t.id) return;
+  const i = state.transactions.findIndex(x=>x.id===t.id);
+  if(i>=0){
+    // نحافظ على الصورة المحفوظة محليًا لو التحديث الجديد (زي كود QR) مبعتش صورة
+    if(!t.photo && state.transactions[i].photo) t.photo = state.transactions[i].photo;
+    state.transactions[i] = t;
+  }else{
+    state.transactions.push(t);
+  }
+}
+
+/* ==================== CLIENT VIEW ==================== */
+function renderClientView(){
+  const p = state.people.find(x=>x.id===currentClientId);
+  if(!p) return;
+  checkCdnWarning('cdnWarningBannerClient');
+  document.getElementById('clientName').textContent = p.name;
+  const bal = calcBalances(p.id);
+  document.getElementById('clientBalances').innerHTML = TYPES.map(t=>`
+    <div class="bal-card">
+      <div class="emoji">${t.emoji}</div>
+      <div class="num">${fmtNum(bal[t.key])}${t.unit?(' '+t.unit):''}</div>
+      <div class="name">${t.key}</div>
+    </div>
+  `).join('');
+  const txs = state.transactions.filter(t=>t.personId===p.id).sort((a,b)=> new Date(b.date)-new Date(a.date) || b.createdAt-a.createdAt);
+  const list = document.getElementById('clientTxList');
+  if(txs.length===0){
+    list.innerHTML = `<div class="empty-state"><div class="emoji">📭</div>مفيش عمليات لسه</div>`;
+    return;
+  }
+  list.innerHTML = txs.map(t=>{
+    const typeInfo = TYPES.find(x=>x.key===t.type);
+    return `
+      <div class="tx-item ${t.op}">
+        <div class="tx-top">
+          <div class="tx-type">${typeInfo.emoji} ${t.type} — ${t.op==='in'?'استلم محمد':'رجّع محمد'}</div>
+          <div class="tx-amount ${t.op}">${t.op==='in'?'+':'-'}${fmtNum(t.amount)}${typeInfo.unit?(' '+typeInfo.unit):''}</div>
+        </div>
+        <div class="tx-date">${t.date}${dueDateBadge(t)}</div>
+        ${t.desc? `<div class="tx-desc">${t.desc}</div>`:''}
+        ${photoThumb(t)}
+      </div>
+    `;
+  }).join('');
+}
+
+/* ==================== SETTINGS ==================== */
+function openSettings(){
+  document.getElementById('fbConfig').value = localStorage.getItem('amanat_fb_config') || '';
+  document.getElementById('companyName').value = state.companyName || '';
+  document.getElementById('companyPhone').value = state.companyPhone || '';
+  renderAdminsList();
+  updateBiometricUI();
+  document.getElementById('settingsModalBg').classList.remove('hidden');
+}
+function closeSettings(){ document.getElementById('settingsModalBg').classList.add('hidden'); }
+function switchSettingsTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.getElementById('settingsTabGeneral').classList.toggle('hidden', tab!=='general');
+  document.getElementById('settingsTabAdmins').classList.toggle('hidden', tab!=='admins');
+  document.getElementById('settingsTabSync').classList.toggle('hidden', tab!=='sync');
+  document.getElementById('settingsTabBackup').classList.toggle('hidden', tab!=='backup');
+}
+function saveCompanyInfo(){
+  state.companyName = document.getElementById('companyName').value.trim();
+  state.companyPhone = document.getElementById('companyPhone').value.trim();
+  saveState();
+  showToast('تم الحفظ');
+}
+/* ---- Multiple admins ---- */
+function renderAdminsList(){
+  const wrap = document.getElementById('adminsList');
+  wrap.innerHTML = state.admins.map(a=>`
+    <div class="person-item" style="cursor:default;">
+      <div>
+        <div class="person-name">${a.name}</div>
+        <div class="person-mini">PIN: ${a.pin}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <span class="mini-link" onclick="editAdminPin('${a.id}')">✏️ الرقم السري</span>
+        ${state.admins.length>1 ? `<span class="tx-del" onclick="removeAdmin('${a.id}')">حذف</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+function addAdmin(){
+  const name = document.getElementById('newAdminName').value.trim();
+  const pin = toWesternDigits(document.getElementById('newAdminPinInput').value);
+  if(!name){ alert('اكتب الاسم'); return; }
+  if(!/^\d{4}$/.test(pin)){ alert('الرقم السري لازم يكون 4 أرقام'); return; }
+  if(state.admins.some(a=>a.pin===pin)){ alert('الرقم السري ده مستخدم قبل كده'); return; }
+  state.admins.push({id:uid(), name, pin});
+  saveState();
+  document.getElementById('newAdminName').value='';
+  document.getElementById('newAdminPinInput').value='';
+  renderAdminsList();
+  checkPinNag();
+  showToast('تمت إضافة المسؤول');
+}
+function editAdminPin(adminId){
+  const a = state.admins.find(x=>x.id===adminId);
+  if(!a) return;
+  const raw = prompt('الرقم السري الجديد لـ ' + a.name + ' (4 أرقام):', a.pin);
+  if(raw===null) return;
+  const val = toWesternDigits(raw);
+  if(!/^\d{4}$/.test(val)){ alert('لازم 4 أرقام'); return; }
+  if(state.admins.some(x=>x.pin===val && x.id!==adminId)){ alert('الرقم مستخدم قبل كده'); return; }
+  a.pin = val;
+  saveState();
+  renderAdminsList();
+  checkPinNag();
+  showToast('تم التغيير');
+}
+function removeAdmin(adminId){
+  if(state.admins.length<=1){ alert('لازم يفضل مسؤول واحد على الأقل'); return; }
+  if(!confirm('متأكد إنك عايز تحذف المسؤول ده؟')) return;
+  state.admins = state.admins.filter(a=>a.id!==adminId);
+  saveState();
+  renderAdminsList();
+  showToast('تم الحذف');
+}
+/* ---- Biometric (WebAuthn, per-device) ---- */
+function isBiometricAvailable(){
+  return !!(window.PublicKeyCredential);
+}
+function updateBiometricUI(){
+  const txt = document.getElementById('biometricStatusText');
+  const btn = document.getElementById('biometricBtn');
+  if(!isBiometricAvailable()){
+    txt.textContent = 'المتصفح ده مش بيدعم البصمة/Face ID';
+    btn.classList.add('hidden');
+    return;
+  }
+  const enrolled = localStorage.getItem('amanat_webauthn_admin');
+  if(enrolled){
+    txt.textContent = '✅ الدخول بالبصمة مفعّل على الجهاز ده';
+    btn.textContent = '🔓 إلغاء تفعيل البصمة';
+    btn.onclick = disableBiometric;
+  }else{
+    txt.textContent = 'لسه مش مفعّل على الجهاز ده';
+    btn.textContent = '🔓 تفعيل الدخول بالبصمة';
+    btn.onclick = enrollBiometric;
+  }
+}
+function enrollBiometric(){
+  if(!isBiometricAvailable()){ alert('الجهاز/المتصفح ده مش بيدعم البصمة'); return; }
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  navigator.credentials.create({
+    publicKey:{
+      challenge,
+      rp:{name:'دفتر الأمانات'},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)), name:'admin', displayName:'الإدارة'},
+      pubKeyCredParams:[{type:'public-key', alg:-7},{type:'public-key', alg:-257}],
+      authenticatorSelection:{authenticatorAttachment:'platform', userVerification:'required'},
+      timeout:60000
+    }
+  }).then(cred=>{
+    const id = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+    localStorage.setItem('amanat_webauthn_admin', id);
+    updateBiometricUI();
+    showToast('تم تفعيل الدخول بالبصمة');
+  }).catch(err=>{
+    alert('معرفش أفعّل البصمة: ' + err.message);
+  });
+}
+function disableBiometric(){
+  localStorage.removeItem('amanat_webauthn_admin');
+  updateBiometricUI();
+  showToast('اتلغى');
+}
+function loginWithBiometric(){
+  const idStr = localStorage.getItem('amanat_webauthn_admin');
+  if(!idStr) return;
+  const rawId = Uint8Array.from(atob(idStr), c=>c.charCodeAt(0));
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  navigator.credentials.get({
+    publicKey:{
+      challenge,
+      allowCredentials:[{id:rawId, type:'public-key'}],
+      userVerification:'required',
+      timeout:60000
+    }
+  }).then(()=>{
+    enterAdmin();
+  }).catch(()=>{
+    document.getElementById('loginError').textContent = 'مقدرش أتحقق من البصمة، استخدم الرقم السري';
+  });
+}
+function exportBackup(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'amanat_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  localStorage.setItem('amanat_last_backup', Date.now().toString());
+  sessionStorage.removeItem('amanat_backup_nag_dismissed');
+  checkBackupNag();
+  showToast('تم تنزيل النسخة الاحتياطية');
+}
+function importBackup(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(data.type === 'person_package'){
+        processIncomingPayload(data);
+        rerenderCurrentScreen();
+        if(document.getElementById('settingsModalBg')) closeSettings();
+      }else if((data.adminPin !== undefined || data.admins !== undefined) && data.people && data.transactions){
+        if(!confirm('ده ملف نسخة احتياطية كاملة، هيستبدل كل البيانات الحالية. متأكد؟')) return;
+        state = Object.assign(defaultState(), data);
+        if(data.adminPin !== undefined && !data.admins){
+          state.admins = [{id:'admin_default', name:'محمد', pin:data.adminPin}];
+        }
+        saveState();
+        rerenderCurrentScreen();
+        showToast('تم الاستيراد بنجاح');
+        closeSettings();
+      }else{
+        alert('صيغة الملف غير معروفة');
+      }
+    }catch(err){
+      alert('الملف مش صالح');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ==================== TOAST ==================== */
+function showToast(msg){
+  const t = document.createElement('div');
+  t.className='toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2200);
+}
+
+/* ==================== INIT ==================== */
+document.getElementById('txDate') && (document.getElementById('txDate').value = new Date().toISOString().slice(0,10));
+if(localStorage.getItem('amanat_webauthn_admin')){
+  document.getElementById('bioLoginBtn').style.display = 'flex';
+}
+</script>
+</body>
+</html>
