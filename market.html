@@ -160,6 +160,8 @@ body{
   #printArea .pbox{width:14px;height:14px;border:1.6px solid #111;border-radius:3px;flex:0 0 auto;display:inline-block;text-align:center;line-height:12px;font-size:11px}
   #printArea .pqty{margin-inline-start:auto;font-weight:800;color:#333}
   #printArea .pdone{text-decoration:line-through;color:#888}
+  #printArea .pprice{font-weight:800;color:#333;min-width:62px;text-align:left}
+  #printArea .ptotal{margin-top:12px;font-size:15px;font-weight:900;text-align:left;border-top:2px solid #111;padding-top:8px}
   #printArea .pfoot{margin-top:16px;font-size:11px;color:#777;text-align:center}
 }
 /* شريط السلة العايم */
@@ -180,6 +182,59 @@ body{
 .cartbar:active{transform:translateX(-50%) scale(.97)}
 @keyframes cartpulse{0%{transform:translateX(-50%) scale(1)}40%{transform:translateX(-50%) scale(1.07)}100%{transform:translateX(-50%) scale(1)}}
 .cartbar.pulse{animation:cartpulse .35s ease}
+/* أسعار وفواتير */
+.pricechip{font-size:11.5px;font-weight:900;color:var(--lemon);background:rgba(232,201,79,.1);border:1px solid rgba(232,201,79,.3);border-radius:99px;padding:2px 9px;margin-top:2px;display:inline-block}
+.total-pill{color:var(--lemon)!important;border-color:rgba(232,201,79,.35)!important}
+.prow-in{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:10px 13px;margin-bottom:8px}
+.prow-in b{flex:1;font-size:14px;font-weight:800;min-width:0}
+.prow-in .pold{font-size:11px;color:var(--muted2);font-weight:700}
+.prow-in input{width:92px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;color:var(--txt);font-family:inherit;font-size:15px;font-weight:800;outline:0;text-align:center}
+.prow-in input:focus{border-color:var(--lemon)}
+.pdiff{font-size:11px;font-weight:900;border-radius:99px;padding:2px 8px;display:none}
+.pdiff.up{display:inline-block;color:#ffb4a6;background:rgba(232,101,79,.14);border:1px solid rgba(232,101,79,.35)}
+.pdiff.down{display:inline-block;color:var(--green2);background:rgba(123,200,108,.13);border:1px solid rgba(123,200,108,.35)}
+.pdiff.same{display:inline-block;color:var(--muted);background:var(--surface2);border:1px solid var(--line)}
+.pricechip .tup{color:#ffb4a6;font-weight:900}
+.pricechip .tdown{color:var(--green2);font-weight:900}
+/* شاشة أسعاري */
+.stat-row{display:flex;gap:9px;margin:0 0 14px;flex-wrap:wrap}
+.stat{flex:1;min-width:100px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 13px;text-align:center}
+.stat b{display:block;font-size:17px;font-weight:900;color:var(--green2)}
+.stat.red b{color:#ffb4a6}
+.stat span{font-size:11px;color:var(--muted);font-weight:700}
+.pr-item{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:8px;cursor:pointer}
+.pr-item:active{transform:scale(.985)}
+.pr-item .pi-t{flex:1;min-width:0}
+.pr-item .pi-t b{display:block;font-size:14.5px;font-weight:800}
+.pr-item .pi-t span{font-size:11px;color:var(--muted2);font-weight:700}
+.pr-item .pi-now{font-size:14.5px;font-weight:900;color:var(--lemon);flex:0 0 auto}
+.pr-item svg{flex:0 0 auto}
+.spark-up{stroke:#e8654f}
+.spark-down{stroke:#7bc86c}
+.spark-flat{stroke:#9db1a4}
+.chart-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.chart-box svg{width:100%;height:auto;display:block}
+.hist-row{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);padding:7px 4px;border-bottom:1px dashed var(--line)}
+.hist-row b{color:var(--txt)}
+/* لصق الأسعار */
+.paste-ta{min-height:130px;direction:rtl;font-size:14.5px;line-height:1.9}
+.match-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:10px 13px;margin-bottom:8px}
+.match-row b{flex:1;font-size:14px;font-weight:800;min-width:0}
+.match-row .mprice{font-size:14px;font-weight:900;color:var(--lemon)}
+.match-row.miss{opacity:.65;border-style:dashed}
+.match-row .mtag{font-size:11px;font-weight:800;border-radius:99px;padding:2px 9px}
+.match-row .mtag.ok{color:var(--green2);background:rgba(123,200,108,.12);border:1px solid rgba(123,200,108,.3)}
+.match-row .mtag.new{color:var(--lemon);background:rgba(232,201,79,.1);border:1px solid rgba(232,201,79,.3)}
+.match-row .mtag.no{color:var(--muted);background:var(--surface2);border:1px solid var(--line)}
+.photos{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+.photos::-webkit-scrollbar{display:none}
+.photo-th{position:relative;flex:0 0 auto;width:74px;height:74px;border-radius:12px;overflow:hidden;border:1px solid var(--line);cursor:pointer}
+.photo-th img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-th .pdel{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:7px;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:12px;cursor:pointer}
+.photo-add{flex:0 0 auto;width:74px;height:74px;border-radius:12px;border:1.5px dashed var(--line2);background:var(--surface);color:var(--muted);font-size:22px;cursor:pointer;display:grid;place-items:center;font-family:inherit}
+.photo-view{position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;cursor:zoom-out}
+.photo-view.open{display:flex}
+.photo-view img{max-width:96%;max-height:92%;border-radius:8px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -198,7 +253,7 @@ body{
 
 <div class="wrap">
   <section id="vLists">
-    <div class="sechead"><h2>قوايم الشرا</h2><button class="mini-add" id="btnNew">＋ قايمة جديدة</button></div>
+    <div class="sechead"><h2>قوايم الشرا</h2><button class="mini-add" id="btnPrices" style="background:var(--surface);border:1px solid var(--line);color:var(--lemon)">📈 أسعاري</button><button class="mini-add" id="btnNew">＋ قايمة جديدة</button></div>
     <div id="listsEl"></div>
   </section>
 
@@ -206,11 +261,14 @@ body{
     <div class="dethead">
       <button class="back" id="backBtn">→</button>
       <div style="flex:1;min-width:0"><h2 id="lName"></h2><div class="dsub" id="lSub"></div></div>
+      <button class="rbtn" id="lPrice" title="تسجيل الأسعار">💰</button>
       <button class="rbtn" id="lPrint" title="طباعة / PDF">🖨️</button>
       <button class="rbtn" id="lEdit" title="تعديل">✏️</button>
     </div>
     <div class="rail" style="margin:10px 0 4px"><div class="rail-fill" id="lFill" style="width:0%"></div><div class="rail-cart" id="lCart" style="right:0%">🛒</div></div>
     <div class="lmeta" id="lMeta"></div>
+    <div class="photos" id="lPhotos"></div>
+    <input type="file" id="photoFile" accept="image/*" capture="environment" hidden>
 
     <div class="qadd">
       <input id="lQuick" placeholder="ضيف صنف… (مثلاً: طماطم)" autocomplete="off">
@@ -227,7 +285,44 @@ body{
 
     <button class="bigbtn ghost" id="lDelete" style="color:var(--danger);margin-top:18px">حذف القايمة</button>
   </section>
+
+  <section id="vPrices" style="display:none">
+    <div class="dethead">
+      <button class="back" id="prBack">→</button>
+      <div style="flex:1;min-width:0"><h2>📈 أسعاري</h2><div class="dsub" id="prSub"></div></div>
+    </div>
+    <div class="stat-row" id="prStats"></div>
+    <input class="tpl-search" id="prSearch" placeholder="🔍 دوّر على صنف…" autocomplete="off">
+    <div id="prList"></div>
+  </section>
 </div>
+
+<!-- لصق أسعار -->
+<div class="overlay" id="ovPaste"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>🤖 لصق الأسعار</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <p style="font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 12px;line-height:1.8">
+      صوّر الفاتورة وابعتها لكلود (أو أي مساعد ذكي) وقوله: <b style="color:var(--txt)">"طلعلي الأصناف والأسعار، كل صنف في سطر بصيغة اسم = سعر"</b> — وانسخ الرد والصقه هنا. بيفهم صيغ كتير: <span dir="rtl" style="color:var(--txt)">طماطم = 15.5 · لبن: 38 · رز 42</span> — وللوزني: <span dir="rtl" style="color:var(--txt)">كفتة = 689.95 × 0.444</span> (سعر الكيلو × الوزن)
+    </p>
+    <div class="field"><textarea class="textarea paste-ta" id="pasteText" placeholder="طماطم = 15.5&#10;لبن : 38&#10;رز 42&#10;جبنة بيضا = 95"></textarea></div>
+    <button class="bigbtn" id="pasteParse">اقرا وطابق</button>
+    <div id="matchResults" style="margin-top:14px"></div>
+    <button class="bigbtn" id="pasteApply" style="display:none">اعتمد الأسعار</button>
+  </div>
+</div></div>
+
+<!-- رسم بياني لصنف -->
+<div class="overlay" id="ovChart"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="chTitle">📈</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <div class="chart-box" id="chBox"></div>
+    <div class="stat-row" id="chStats"></div>
+    <div id="chHist"></div>
+    <button class="bigbtn ghost" id="chForget" style="color:var(--danger)">🗑️ امسح تتبع الصنف ده</button>
+  </div>
+</div></div>
 
 <!-- قائمة جديدة -->
 <div class="overlay" id="ovList"><div class="sheet">
@@ -263,6 +358,20 @@ body{
     </div>
   </div>
 </div></div>
+
+<!-- تسجيل الأسعار -->
+<div class="overlay" id="ovPrice"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>💰 تسجيل الأسعار</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <p style="font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 13px;line-height:1.7">اكتب سعر الوحدة من على الفاتورة — اللي فاكرينه من مرة فاتت مليناه لك جاهز. سيب الفاضي عادي.</p>
+    <button class="bigbtn ghost" id="btnPaste" style="margin:0 0 14px">🤖 لصق أسعار من كلود / الذكاء الاصطناعي</button>
+    <div id="priceRows"></div>
+    <button class="bigbtn" id="priceSave">حفظ الأسعار</button>
+  </div>
+</div></div>
+
+<div class="photo-view" id="photoView"><img id="photoViewImg" alt=""></div>
 
 <button class="cartbar" id="cartBar">
   <span class="cb-count" id="cbCount">0</span>
@@ -326,6 +435,7 @@ function progress(l){var c=l.items||[];if(!c.length)return 0;return Math.round(c
 function show(v){
   $("#vLists").style.display=v==="lists"?"":"none";
   $("#vList").style.display=v==="list"?"":"none";
+  $("#vPrices").style.display="none";
   if(v==="list")updateCartBar();else $("#cartBar").classList.remove("show");
   window.scrollTo(0,0);
 }
@@ -358,7 +468,10 @@ function renderList(){
   var pct=progress(l);
   $("#lFill").style.width=pct+"%";
   $("#lCart").style.right="calc("+pct+"% - 10px)";
-  $("#lMeta").innerHTML='<span class="pill'+(d===c.length&&c.length?' done':'')+'">🧺 '+d+' / '+c.length+' اتشروا</span>';
+  var tot=listTotal(l);
+  $("#lMeta").innerHTML='<span class="pill'+(d===c.length&&c.length?' done':'')+'">🧺 '+d+' / '+c.length+' اتشروا</span>'+
+    (tot>0?'<span class="pill total-pill">💰 الإجمالي: '+fmtMoney(tot)+'</span>':'');
+  renderPhotos();
   var freq=frequentItems().filter(function(n){return !(c||[]).some(function(x){return norm(x.name)===norm(n)})}).slice(0,7);
   $("#lChips").innerHTML=freq.map(function(s){return '<button class="qchip" data-q="'+esc(s)+'">＋ '+esc(s)+'</button>'}).join("");
   var el=$("#lItems");
@@ -367,8 +480,10 @@ function renderList(){
   el.innerHTML=sorted.map(function(x){
     return '<div class="chk'+(x.done?' done':'')+'" data-id="'+x.id+'">'+
       '<div class="box" data-tick="'+x.id+'">'+(x.done?'✓':'')+'</div>'+
-      '<div class="ct" data-tick2="'+x.id+'"><b>'+esc((x.emoji||catEmoji(x.name))+" "+x.name)+'</b></div>'+
-      '<div class="stepper"><button data-minus="'+x.id+'">−</button><span>'+(x.qty||1)+'</span><button data-plus="'+x.id+'">＋</button></div>'+
+      '<div class="ct" data-tick2="'+x.id+'"><b>'+esc((x.emoji||catEmoji(x.name))+" "+x.name)+'</b>'+(x.price!=null?'<span class="pricechip">'+fmtMoney(x.price)+(x.unit==="kg"?"/كجم":"")+((x.unit==="kg"||x.qty>1)?' · '+fmtMoney(x.price*(x.qty||1)):'')+(x.prevPrice!=null?(x.price>x.prevPrice?' <span class="tup">↑ كان '+fmtMoney(x.prevPrice)+'</span>':' <span class="tdown">↓ كان '+fmtMoney(x.prevPrice)+'</span>'):'')+'</span>':'')+'</div>'+
+      (x.unit==="kg"
+        ? '<div class="stepper"><button data-minus="'+x.id+'">−</button><span data-wq="'+x.id+'" style="cursor:pointer;text-decoration:underline dotted">'+(x.qty||1)+' كجم</span><button data-plus="'+x.id+'">＋</button></div>'
+        : '<div class="stepper"><button data-minus="'+x.id+'">−</button><span>'+(x.qty||1)+'</span><button data-plus="'+x.id+'">＋</button></div>')+
       '<button class="del" data-del="'+x.id+'">✕</button>'+
     '</div>';
   }).join("");
@@ -433,9 +548,12 @@ function printList(){
   Object.keys(groups).forEach(function(g){
     html+='<div class="pgroup">'+esc(g)+'</div>';
     groups[g].forEach(function(x){
-      html+='<div class="prow'+(x.done?' pdone':'')+'"><span class="pbox">'+(x.done?'✓':'')+'</span><span>'+esc(x.name)+'</span><span class="pqty">×'+(x.qty||1)+'</span></div>';
+      var qtxt=x.unit==="kg"?((x.qty||1)+" كجم"):"×"+(x.qty||1);
+      html+='<div class="prow'+(x.done?' pdone':'')+'"><span class="pbox">'+(x.done?'✓':'')+'</span><span>'+esc(x.name)+(x.unit==="kg"&&x.price!=null?' ('+fmtMoney(x.price)+'/كجم)':'')+'</span><span class="pqty">'+qtxt+'</span>'+(x.price!=null?'<span class="pprice">'+fmtMoney(x.price*(x.qty||1))+'</span>':'')+'</div>';
     });
   });
+  var ptot=listTotal(l);
+  if(ptot>0)html+='<div class="ptotal">الإجمالي: '+fmtMoney(ptot)+'</div>';
   html+='<div class="pfoot">اتطبعت من «مشترياتي» — للحفظ PDF: اختار "حفظ كـ PDF" من شاشة الطباعة</div>';
   $("#printArea").innerHTML=html;
   window.print();
@@ -458,6 +576,338 @@ $("#cartBar").addEventListener("click",function(){
   var el=$("#lItems");
   try{el.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){window.scrollTo(0,0)}
 });
+
+
+/* ============ ذاكرة الأسعار ============ */
+var LS_PRICES="market.prices.v1";
+function loadPrices(){try{return JSON.parse(localStorage.getItem(LS_PRICES))||{}}catch(e){return{}}}
+function lastPrice(name){var p=loadPrices()[norm(name)];return p?p.price:null}
+function rememberPrice(name,price){
+  var all=loadPrices(),k=norm(name);
+  if(!all[k])all[k]={name:name,history:[]};
+  all[k].price=price;all[k].date=Date.now();
+  all[k].history.push({p:price,d:Date.now()});
+  if(all[k].history.length>20)all[k].history=all[k].history.slice(-20);
+  try{localStorage.setItem(LS_PRICES,JSON.stringify(all))}catch(e){}
+}
+function listTotal(l){
+  return (l.items||[]).reduce(function(a,x){return a+((x.price||0)*(x.qty||1))},0);
+}
+function fmtMoney(v){return (Math.round(v*100)/100)+" ج"}
+
+/* ============ شيت التسعير ============ */
+function openPrice(){
+  var l=cur;if(!l)return;
+  var c=(l.items||[]);
+  if(!c.length){toast("القايمة فاضية");return}
+  // اللي اتشرا الأول، وبعده الباقي
+  var sorted=c.slice().sort(function(a,b){return (b.done?1:0)-(a.done?1:0)});
+  $("#priceRows").innerHTML=sorted.map(function(x){
+    var last=lastPrice(x.name);
+    var val=x.price!=null?x.price:(last!=null?last:"");
+    var qlbl=x.unit==="kg"?' <span style="color:var(--muted)">'+(x.qty||1)+' كجم — اكتب سعر الكيلو</span>':(x.qty>1?' <span style="color:var(--muted)">×'+x.qty+'</span>':'');
+    return '<div class="prow-in"><b>'+esc((x.emoji||catEmoji(x.name))+" "+x.name)+qlbl+
+      (last!=null?'<span class="pold">آخر مرة: '+fmtMoney(last)+'</span>':'')+
+      '<span class="pdiff" data-diff="'+x.id+'"></span></b>'+
+      '<input type="number" inputmode="decimal" step="0.25" min="0" placeholder="سعر" value="'+val+'" data-price="'+x.id+'" data-last="'+(last!=null?last:"")+'"></div>';
+  }).join("");
+  openOv("#ovPrice");
+}
+function savePrices(){
+  var l=cur;if(!l)return;
+  var changed=0,up=0,down=0;
+  $all("#priceRows [data-price]").forEach(function(inp){
+    var id=inp.getAttribute("data-price");
+    var x=(l.items||[]).find(function(i){return i.id===id});
+    if(!x)return;
+    var v=parseFloat(inp.value);
+    if(!isNaN(v)&&v>=0&&inp.value!==""){
+      if(x.price!==v){
+        var old=lastPrice(x.name);
+        if(old!=null&&Math.abs(old-v)>0.001){x.prevPrice=old;if(v>old)up++;else down++;}
+        else if(old!=null){x.prevPrice=null;}
+        x.price=v;rememberPrice(x.name,v);changed++;
+      }
+    }
+  });
+  l.updatedAt=now();save(true);closeOv("#ovPrice");
+  var msg=changed?("اتسجل "+changed+" سعر 💰 — الإجمالي: "+fmtMoney(listTotal(l))):"مفيش أسعار جديدة";
+  if(up||down)msg+=" · "+(up?("↑ غلي "+up):"")+(up&&down?" و":"")+(down?("↓ رخص "+down):"");
+  toast(msg);
+}
+$("#priceRows").addEventListener("input",function(e){
+  var inp=e.target.closest("[data-price]");if(!inp)return;
+  var id=inp.getAttribute("data-price");
+  var badge=document.querySelector('[data-diff="'+id+'"]');if(!badge)return;
+  var last=parseFloat(inp.getAttribute("data-last"));
+  var v=parseFloat(inp.value);
+  if(isNaN(last)||isNaN(v)||inp.value===""){badge.className="pdiff";badge.textContent="";return}
+  var d=v-last;
+  if(Math.abs(d)<0.001){badge.className="pdiff same";badge.textContent="زي المرة اللي فاتت"}
+  else if(d>0){badge.className="pdiff up";badge.textContent="↑ غلي "+fmtMoney(d)+" (+"+Math.round(d/last*100)+"%)"}
+  else{badge.className="pdiff down";badge.textContent="↓ رخص "+fmtMoney(-d)+" (−"+Math.round(-d/last*100)+"%)"}
+});
+$("#lPrice").addEventListener("click",openPrice);
+$("#priceSave").addEventListener("click",savePrices);
+
+/* ============ صور الفواتير ============ */
+function renderPhotos(){
+  var l=cur;var el=$("#lPhotos");
+  if(!l){el.innerHTML="";return}
+  var ph=l.photos||[];
+  var html=ph.map(function(p,i){
+    return '<div class="photo-th" data-view="'+i+'"><img src="'+p.src+'" alt="فاتورة"><button class="pdel" data-pdel="'+i+'">✕</button></div>';
+  }).join("");
+  html+='<button class="photo-add" id="photoAdd" title="صوّر الفاتورة">📷</button>';
+  el.innerHTML=html;
+}
+function compressImage(file,cb){
+  var r=new FileReader();
+  r.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var max=1000, w=img.width, h=img.height;
+      if(w>h&&w>max){h=h*max/w;w=max}else if(h>max){w=w*max/h;h=max}
+      var cv=document.createElement("canvas");cv.width=w;cv.height=h;
+      cv.getContext("2d").drawImage(img,0,0,w,h);
+      cb(cv.toDataURL("image/jpeg",0.62));
+    };
+    img.onerror=function(){toast("الصورة مش مقروءة")};
+    img.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+$("#lPhotos").addEventListener("click",function(e){
+  if(e.target.closest("#photoAdd")){$("#photoFile").click();return}
+  var del=e.target.closest("[data-pdel]");
+  if(del){
+    if(!confirm("حذف صورة الفاتورة دي؟"))return;
+    cur.photos.splice(+del.getAttribute("data-pdel"),1);
+    cur.updatedAt=now();save(true);return;
+  }
+  var v=e.target.closest("[data-view]");
+  if(v){
+    var p=(cur.photos||[])[+v.getAttribute("data-view")];
+    if(p){$("#photoViewImg").src=p.src;$("#photoView").classList.add("open")}
+  }
+});
+$("#photoView").addEventListener("click",function(){this.classList.remove("open");$("#photoViewImg").src=""});
+$("#photoFile").addEventListener("change",function(e){
+  var f=e.target.files[0];e.target.value="";
+  if(!f||!cur)return;
+  if((cur.photos||[]).length>=4){toast("أقصى عدد 4 فواتير للقايمة");return}
+  compressImage(f,function(src){
+    if(!cur.photos)cur.photos=[];
+    cur.photos.push({src:src,d:Date.now()});
+    cur.updatedAt=now();
+    try{save(true);toast("اتحفظت الفاتورة 📷 — دوس 💰 وسجّل الأسعار منها")}
+    catch(err){cur.photos.pop();toast("الصورة كبيرة على التخزين")}
+  });
+});
+
+
+/* ============ شاشة أسعاري ============ */
+var chartKey=null;
+function trackedItems(){
+  var all=loadPrices();
+  return Object.keys(all).map(function(k){var o=all[k];o._k=k;return o})
+    .filter(function(o){return o.history&&o.history.length})
+    .sort(function(a,b){return (b.date||0)-(a.date||0)});
+}
+function itemChange(o){
+  var h=o.history||[];
+  if(h.length<2)return null;
+  var prev=h[h.length-2].p, curP=h[h.length-1].p;
+  if(prev===0)return null;
+  return {prev:prev,cur:curP,diff:curP-prev,pct:Math.round((curP-prev)/prev*100)};
+}
+function sparkSVG(hist,w,hh){
+  w=w||90;hh=hh||30;
+  var pts=hist.slice(-10).map(function(x){return x.p});
+  if(pts.length<2)return "";
+  var mn=Math.min.apply(null,pts),mx=Math.max.apply(null,pts),rng=(mx-mn)||1;
+  var step=w/(pts.length-1);
+  var d=pts.map(function(p,i){return (i*step).toFixed(1)+","+(hh-3-((p-mn)/rng*(hh-6))).toFixed(1)}).join(" ");
+  var cls=pts[pts.length-1]>pts[0]?"spark-up":(pts[pts.length-1]<pts[0]?"spark-down":"spark-flat");
+  return '<svg width="'+w+'" height="'+hh+'" viewBox="0 0 '+w+" "+hh+'"><polyline class="'+cls+'" points="'+d+'" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+}
+function bigChartSVG(hist){
+  var W=520,H=220,padR=14,padL=44,padT=14,padB=30;
+  var pts=hist.slice(-20);
+  if(pts.length<2)return '<p style="color:var(--muted);font-weight:700;text-align:center;margin:20px 0">محتاج تسعيرتين على الأقل عشان الرسم يظهر 📈</p>';
+  var vals=pts.map(function(x){return x.p});
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);var rng=(mx-mn)||1;
+  var iw=W-padL-padR,ih=H-padT-padB,step=iw/(pts.length-1);
+  function X(i){return padR+ (iw-i*step)} /* RTL: الأقدم يمين */
+  function Y(p){return padT+ih-((p-mn)/rng*ih)}
+  var line=pts.map(function(x,i){return X(i).toFixed(1)+","+Y(x.p).toFixed(1)}).join(" ");
+  var dots=pts.map(function(x,i){return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(x.p).toFixed(1)+'" r="3.4" fill="#e8c94f"/>'}).join("");
+  var labels="";
+  pts.forEach(function(x,i){
+    if(i===0||i===pts.length-1||i===Math.floor(pts.length/2)){
+      var dt=new Date(x.d);
+      labels+='<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" font-size="10" fill="#9db1a4" text-anchor="middle">'+dt.getDate()+"/"+(dt.getMonth()+1)+'</text>';
+    }
+  });
+  var up=vals[vals.length-1]>=vals[0];
+  return '<svg viewBox="0 0 '+W+" "+H+'">'+
+    '<line x1="'+padR+'" y1="'+Y(mx)+'" x2="'+(W-padL)+'" y2="'+Y(mx)+'" stroke="#2f3d34" stroke-dasharray="4 4"/>'+
+    '<line x1="'+padR+'" y1="'+Y(mn)+'" x2="'+(W-padL)+'" y2="'+Y(mn)+'" stroke="#2f3d34" stroke-dasharray="4 4"/>'+
+    '<text x="'+(W-padL+6)+'" y="'+(Y(mx)+4)+'" font-size="11" fill="#9db1a4">'+mx+'</text>'+
+    '<text x="'+(W-padL+6)+'" y="'+(Y(mn)+4)+'" font-size="11" fill="#9db1a4">'+mn+'</text>'+
+    '<polyline points="'+line+'" fill="none" stroke="'+(up?"#e8654f":"#7bc86c")+'" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>'+
+    dots+labels+'</svg>';
+}
+function renderPrices(){
+  var items=trackedItems();
+  var q=norm($("#prSearch").value||"");
+  if(q)items=items.filter(function(o){return norm(o.name).indexOf(q)>-1});
+  $("#prSub").textContent=trackedItems().length+" صنف متتبع";
+  // إحصائيات: أكبر غلا وأكبر رخص
+  var moves=trackedItems().map(function(o){var c=itemChange(o);return c?{name:o.name,pct:c.pct}:null}).filter(Boolean);
+  var maxUp=null,maxDown=null;
+  moves.forEach(function(m){
+    if(m.pct>0&&(!maxUp||m.pct>maxUp.pct))maxUp=m;
+    if(m.pct<0&&(!maxDown||m.pct<maxDown.pct))maxDown=m;
+  });
+  $("#prStats").innerHTML=
+    '<div class="stat"><b>'+trackedItems().length+'</b><span>صنف متتبع</span></div>'+
+    (maxUp?'<div class="stat red"><b>'+esc(maxUp.name)+' +'+maxUp.pct+'%</b><span>أكتر صنف غلي</span></div>':'')+
+    (maxDown?'<div class="stat"><b>'+esc(maxDown.name)+' '+maxDown.pct+'%</b><span>أكتر صنف رخص</span></div>':'');
+  var el=$("#prList");
+  if(!items.length){el.innerHTML='<div class="empty"><div class="em">📈</div><h3>لسه مفيش أسعار متتبعة</h3><p>كل ما تسجّل أسعار بعد الشرا (زرار 💰)، الصنف بيتضاف هنا لوحده<br>وتاريخه بيتبني مع الوقت.</p></div>';return}
+  el.innerHTML=items.map(function(o){
+    var c=itemChange(o);
+    var sub=new Date(o.date||0).toLocaleDateString("ar-EG");
+    var badge=c?(c.diff>0?'<span class="pricechip"><span class="tup">↑ +'+c.pct+'%</span></span>':(c.diff<0?'<span class="pricechip"><span class="tdown">↓ '+c.pct+'%</span></span>':'')):'';
+    return '<div class="pr-item" data-ch="'+esc(o._k)+'">'+
+      sparkSVG(o.history)+
+      '<div class="pi-t"><b>'+esc((catEmoji(o.name))+" "+o.name)+' '+badge+'</b><span>آخر تحديث: '+sub+' · '+(o.history||[]).length+' تسعيرة</span></div>'+
+      '<div class="pi-now">'+fmtMoney(o.price)+'</div>'+
+    '</div>';
+  }).join("");
+}
+function openChart(key){
+  var all=loadPrices(),o=all[key];if(!o)return;
+  chartKey=key;
+  $("#chTitle").textContent="📈 "+o.name;
+  $("#chBox").innerHTML=bigChartSVG(o.history||[]);
+  var vals=(o.history||[]).map(function(x){return x.p});
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+  var avg=vals.reduce(function(a,b){return a+b},0)/vals.length;
+  var c=itemChange(o);
+  $("#chStats").innerHTML=
+    '<div class="stat"><b>'+fmtMoney(o.price)+'</b><span>السعر الحالي</span></div>'+
+    '<div class="stat"><b>'+fmtMoney(mn)+'</b><span>أقل سعر</span></div>'+
+    '<div class="stat red"><b>'+fmtMoney(mx)+'</b><span>أعلى سعر</span></div>'+
+    '<div class="stat"><b>'+fmtMoney(avg)+'</b><span>المتوسط</span></div>';
+  $("#chHist").innerHTML=(o.history||[]).slice().reverse().map(function(h){
+    return '<div class="hist-row"><span>'+new Date(h.d).toLocaleDateString("ar-EG")+'</span><b>'+fmtMoney(h.p)+'</b></div>';
+  }).join("");
+  openOv("#ovChart");
+}
+$("#btnPrices").addEventListener("click",function(){$("#prSearch").value="";renderPrices();showPrices()});
+function showPrices(){
+  $("#vLists").style.display="none";$("#vList").style.display="none";
+  $("#vPrices").style.display="";$("#cartBar").classList.remove("show");
+  window.scrollTo(0,0);
+}
+$("#prBack").addEventListener("click",function(){$("#vPrices").style.display="none";show("lists")});
+$("#prSearch").addEventListener("input",renderPrices);
+$("#prList").addEventListener("click",function(e){
+  var r=e.target.closest("[data-ch]");if(r)openChart(r.getAttribute("data-ch"));
+});
+$("#chForget").addEventListener("click",function(){
+  if(!chartKey)return;
+  if(!confirm("مسح كل تاريخ أسعار الصنف ده؟"))return;
+  var all=loadPrices();delete all[chartKey];
+  try{localStorage.setItem(LS_PRICES,JSON.stringify(all))}catch(e){}
+  closeOv("#ovChart");renderPrices();toast("اتمسح التتبع");
+});
+
+
+/* ============ لصق أسعار من الذكاء الاصطناعي ============ */
+var pasteMatches=[];
+/* أرقام عربية -> إنجليزية */
+function arDigits(t){
+  var map={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9","٫":"."};
+  return String(t||"").replace(/[٠-٩٫]/g,function(c){return map[c]||c});
+}
+function parsePasteLine(line){
+  line=arDigits(line).trim();
+  if(!line)return null;
+  /* شيل الترقيم في الأول: "1. " أو "- " أو "• " */
+  line=line.replace(/^\s*(?:[-•*]|\d+[.)])\s*/,"");
+  /* صيغة وزنية: اسم = سعر_الكيلو × وزن  (مثال: كفتة = 689.95 × 0.444) */
+  var w=line.match(/^(.+?)\s*[=:]\s*([\d.]+)\s*[×x*]\s*([\d.]+)\s*(?:كجم|كيلو|kg)?\.?\s*$/i);
+  if(w){
+    var wname=w[1].trim(), wp=parseFloat(w[2]), wq=parseFloat(w[3]);
+    if(wname&&!isNaN(wp)&&wp>0&&!isNaN(wq)&&wq>0)return {name:wname,price:wp,qty:wq,unit:"kg"};
+  }
+  /* صيغ عادية: اسم = سعر | اسم : سعر | اسم سعر */
+  var m=line.match(/^(.+?)\s*[=:]\s*([\d.]+)\s*(?:ج|جم|جنيه|le|egp)?\.?\s*$/i);
+  if(!m)m=line.match(/^(.+?)\s+([\d.]+)\s*(?:ج|جم|جنيه|le|egp)?\.?\s*$/i);
+  if(!m)return null;
+  var name=m[1].replace(/[×x]\s*\d+\s*$/,"").trim();
+  var price=parseFloat(m[2]);
+  if(!name||isNaN(price)||price<=0||price>100000)return null;
+  return {name:name,price:price};
+}
+function parsePaste(text){
+  return String(text||"").split(/\r?\n/).map(parsePasteLine).filter(Boolean);
+}
+function matchPaste(){
+  var parsed=parsePaste($("#pasteText").value);
+  if(!parsed.length){toast("مقدرتش أقرا أي سطر — اتأكد إن كل سطر فيه اسم وسعر");return}
+  pasteMatches=parsed.map(function(p){
+    /* طابق مع أصناف القايمة بالتطبيع الذكي */
+    var hit=null;
+    (cur.items||[]).forEach(function(x){
+      if(hit)return;
+      var a=norm(x.name),b=norm(p.name);
+      if(a===b||a.indexOf(b)>-1||b.indexOf(a)>-1)hit=x;
+    });
+    return {name:p.name,price:p.price,qty:p.qty,unit:p.unit,item:hit};
+  });
+  var okCnt=pasteMatches.filter(function(m){return m.item}).length;
+  $("#matchResults").innerHTML=pasteMatches.map(function(m,i){
+    var pr=fmtMoney(m.price)+(m.unit==="kg"?("/كجم · "+m.qty+" كجم"):"");
+    if(m.item)return '<div class="match-row"><span class="mtag ok">✓ اتطابق</span><b>'+esc(m.item.name)+'</b><span class="mprice">'+pr+'</span></div>';
+    return '<div class="match-row"><span class="mtag new">＋ جديد</span><b>'+esc(m.name)+' <span style="color:var(--muted2);font-weight:600;font-size:11px">مش في القايمة — هيتضاف ويتسعّر</span></b><span class="mprice">'+pr+'</span></div>';
+  }).join("");
+  $("#pasteApply").style.display="";
+  $("#pasteApply").textContent="اعتمد الأسعار ("+pasteMatches.length+")";
+  toast("اتطابق "+okCnt+" من "+pasteMatches.length);
+}
+function applyPaste(){
+  if(!cur||!pasteMatches.length)return;
+  var applied=0,up=0,down=0;
+  pasteMatches.forEach(function(m){
+    var x=m.item;
+    if(!x){
+      x={id:uid(),name:m.name,emoji:catEmoji(m.name),qty:1,done:true};
+      cur.items.push(x);
+    }
+    if(m.unit==="kg"){x.unit="kg";if(m.qty)x.qty=m.qty;}
+    var old=lastPrice(x.name);
+    if(old!=null&&Math.abs(old-m.price)>0.001){x.prevPrice=old;if(m.price>old)up++;else down++;}
+    x.price=m.price;
+    rememberPrice(x.name,m.price);
+    applied++;
+  });
+  cur.updatedAt=now();save(true);
+  closeOv("#ovPaste");closeOv("#ovPrice");
+  var msg="اتسعّر "+applied+" صنف 🤖 — الإجمالي: "+fmtMoney(listTotal(cur));
+  if(up||down)msg+=" · "+(up?("↑ غلي "+up):"")+(up&&down?" و":"")+(down?("↓ رخص "+down):"");
+  toast(msg);
+  pasteMatches=[];
+}
+$("#btnPaste").addEventListener("click",function(){
+  $("#pasteText").value="";$("#matchResults").innerHTML="";$("#pasteApply").style.display="none";
+  pasteMatches=[];openOv("#ovPaste");
+});
+$("#pasteParse").addEventListener("click",matchPaste);
+$("#pasteApply").addEventListener("click",applyPaste);
 
 /* Overlays */
 function openOv(s){$(s).classList.add("open");document.body.style.overflow="hidden"}
@@ -562,10 +1012,19 @@ $("#lItems").addEventListener("click",function(e){
     if(x){x.done=!x.done;cur.updatedAt=now();save(true)}
     return;
   }
+  var wq=e.target.closest("[data-wq]");
+  if(wq){
+    var xw=cur.items.find(function(i){return i.id===wq.getAttribute("data-wq")});
+    if(xw){
+      var v=prompt("الوزن بالكيلو (مثلاً 0.444):",xw.qty||1);
+      if(v!=null){var f=parseFloat(arDigits(v));if(!isNaN(f)&&f>0){xw.qty=Math.round(f*1000)/1000;cur.updatedAt=now();save(true)}}
+    }
+    return;
+  }
   var p=e.target.closest("[data-plus]");
-  if(p){var x2=cur.items.find(function(i){return i.id===p.getAttribute("data-plus")});if(x2){x2.qty=(x2.qty||1)+1;cur.updatedAt=now();save(true)}return}
+  if(p){var x2=cur.items.find(function(i){return i.id===p.getAttribute("data-plus")});if(x2){var st2=x2.unit==="kg"?0.1:1;x2.qty=Math.round(((x2.qty||1)+st2)*1000)/1000;cur.updatedAt=now();save(true)}return}
   var m=e.target.closest("[data-minus]");
-  if(m){var x3=cur.items.find(function(i){return i.id===m.getAttribute("data-minus")});if(x3&&(x3.qty||1)>1){x3.qty--;cur.updatedAt=now();save(true)}return}
+  if(m){var x3=cur.items.find(function(i){return i.id===m.getAttribute("data-minus")});if(x3){var st3=x3.unit==="kg"?0.1:1;if((x3.qty||1)>st3){x3.qty=Math.round(((x3.qty||1)-st3)*1000)/1000;cur.updatedAt=now();save(true)}}return}
   var d=e.target.closest("[data-del]");
   if(d){cur.items=cur.items.filter(function(i){return i.id!==d.getAttribute("data-del")});cur.updatedAt=now();save(true)}
 });
