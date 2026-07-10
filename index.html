@@ -263,6 +263,12 @@ body{
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
 .toast.err{border-color:color-mix(in srgb,var(--danger) 50%,transparent)}
+.bk-row{display:flex;align-items:center;gap:9px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:9px 12px;margin-bottom:7px}
+.bk-row b{flex:1;font-size:13px;font-weight:800}
+.bk-row span{font-size:11px;color:var(--muted2);font-weight:700}
+.bk-btn{height:32px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--txt);font-family:inherit;font-weight:800;font-size:12px;cursor:pointer}
+.bk-btn:active{transform:scale(.93)}
+.bk-btn.res{color:var(--warn)}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -419,6 +425,22 @@ body{
         <input type="file" id="importFile" accept="application/json,.json" hidden>
       </div>
 
+      <div class="scard">
+        <h3>🗄️ نسخة شاملة — كل البرامج مرة واحدة</h3>
+        <p>بتلمّ بيانات <b>كل برامجك</b> المخزنة على الموقع ده (المركز، شنطتي، مشترياتي، مخازن الأدوية… وأي برنامج تاني) في ملف واحد — واسترجاعها بيرجّع كل حاجة مرة واحدة. اعملها بشكل دوري.</p>
+        <div class="srow">
+          <button class="sbtn" id="btnMasterExport">⬇️ تصدير شامل</button>
+          <button class="sbtn" id="btnMasterImport">⬆️ استرجاع شامل</button>
+        </div>
+        <input type="file" id="masterFile" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="scard">
+        <h3>⏰ نسخ يومي تلقائي — آخر 15 يوم</h3>
+        <p>كل يوم تفتح فيه المركز بياخد <b>لقطة كاملة لكل البرامج تلقائيًا</b> ويحتفظ بآخر 15 لقطة. تقدر تنزّل أي يوم كملف أو ترجعله بضغطة.</p>
+        <div id="autoBkList" style="max-height:260px;overflow-y:auto"></div>
+      </div>
+
       <div class="set-card">
         <h3>🗑️ إعادة ضبط</h3>
         <p>مسح كل الروابط من هذا الجهاز نهائيًا. اعمل نسخة احتياطية الأول.</p>
@@ -435,6 +457,7 @@ body{
 
 <script>
 "use strict";
+var DEFAULT_FB={"apiKey": "AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs", "authDomain": "my-app-sync-11ad9.firebaseapp.com", "databaseURL": "https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "my-app-sync-11ad9", "storageBucket": "my-app-sync-11ad9.firebasestorage.app", "messagingSenderId": "177039534756", "appId": "1:177039534756:web:367ecccc684c2cdfdd1431"};
 /* ================= المتغيرات ================= */
 var LS_KEY   = "appHub.links.v1";
 var LS_FB    = "appHub.fbconfig.v1";
@@ -588,8 +611,8 @@ function render(){
 window.openLink=function(id){
   var l=links.find(function(x){return x.id===id}); if(!l) return;
   if(!l.url || !l.url.trim()){ openLinkModal(id); return; }
-  var target=absUrl(l.url);
-  var w=window.open(target,"_blank","noopener"); if(!w) location.href=target;
+  /* فتح في نفس الصفحة: الرجوع للمركز بسحبة/زرار رجوع عادي */
+  location.href=absUrl(l.url);
 };
 
 /* ================= مودال الإضافة/التعديل ================= */
@@ -775,10 +798,17 @@ document.querySelectorAll("[data-close]").forEach(function(b){
 });
 
 /* ================= النسخ الاحتياطي ================= */
+function fileBase(){
+  try{
+    var p=(location.pathname.split("/").pop()||"").replace(/\.html?$/i,"");
+    p=decodeURIComponent(p);
+    return p||"links";
+  }catch(e){return "links"}
+}
 function exportData(){
   var blob=new Blob([JSON.stringify({app:"appHub",exportedAt:new Date().toISOString(),links:links},null,2)],{type:"application/json"});
   var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  a.download="روابط-نسخة-"+new Date().toISOString().slice(0,10)+".json"; a.click();
+  a.download=fileBase()+"-نسخة-"+new Date().toISOString().slice(0,10)+".json"; a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href)},1000); toast("اتصدّرت النسخة","ok");
 }
 function importData(file){
@@ -867,15 +897,18 @@ function disableSync(){
   try{ if(fbRef) fbRef.off(); }catch(e){}
   try{ if(window.firebase && firebase.apps.length) firebase.app().delete(); }catch(e){}
   fbRef=null; fbDb=null;
-  localStorage.removeItem(LS_FBON);
+  localStorage.setItem(LS_FBON,"0");
   $("#fbToggle").classList.remove("on");
   setDot(""); fbStatusTxt("غير مفعّلة"); toast("المزامنة اتوقفت");
 }
 function restoreSync(){
   var on=localStorage.getItem(LS_FBON), raw=localStorage.getItem(LS_FB);
-  if(raw){ try{ $("#fbConfig").value=JSON.stringify(JSON.parse(raw),null,2); }catch(e){} }
-  if(on==="1" && raw){
-    try{ var cfg=JSON.parse(raw); initFirebase(cfg).then(function(){$("#fbToggle").classList.add("on");}).catch(function(){ setDot("err"); }); }catch(e){}
+  var cfg=null;
+  if(raw){ try{ cfg=JSON.parse(raw); }catch(e){} }
+  if(!cfg && DEFAULT_FB && DEFAULT_FB.databaseURL){ cfg=DEFAULT_FB; }        /* إعداد افتراضي جاهز */
+  if(cfg){ try{ $("#fbConfig").value=JSON.stringify(cfg,null,2); }catch(e){} }
+  if(cfg && (on==="1" || (!raw && localStorage.getItem(LS_FBON)!=="0"))){    /* فعّل تلقائيًا أول مرة */
+    try{ initFirebase(cfg).then(function(){ $("#fbToggle").classList.add("on"); localStorage.setItem(LS_FB,JSON.stringify(cfg)); localStorage.setItem(LS_FBON,"1"); }).catch(function(){ setDot("err"); }); }catch(e){}
   }
 }
 
@@ -907,6 +940,137 @@ $("#colorRow").addEventListener("click",function(e){
 $("#shareTargets").addEventListener("click",function(e){
   var t=e.target.closest(".share-target"); if(!t) return; doShare(t.getAttribute("data-k"));
 });
+/* ============ نسخة شاملة لكل البرامج (نفس النطاق = نفس التخزين) ============ */
+function masterExport(){
+  var data={};var n=0;
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k===null)continue;
+    data[k]=localStorage.getItem(k);n++;
+  }
+  var blob=new Blob([JSON.stringify({app:"apps-master",exportedAt:new Date().toISOString(),origin:location.origin,keys:n,data:data},null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="نسخة-شاملة-كل-البرامج-"+new Date().toISOString().slice(0,10)+".json";a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href)},900);
+  toast("اتصدّرت نسخة شاملة ("+n+" مفتاح بيانات)","ok");
+}
+function masterImport(file){
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var d=JSON.parse(r.result);
+      var data=d.data;if(!data||typeof data!=="object")throw 0;
+      var keys=Object.keys(data);
+      if(!confirm("هيتم استرجاع "+keys.length+" مفتاح بيانات لكل البرامج.\nالبيانات الحالية بنفس الأسماء هتتستبدل. متأكد؟"))return;
+      var ok=0;
+      keys.forEach(function(k){try{localStorage.setItem(k,data[k]);ok++;}catch(e){}});
+      toast("اترجّع "+ok+" مفتاح — جاري إعادة التحميل");
+      setTimeout(function(){location.reload()},900);
+    }catch(e){toast("الملف مش نسخة شاملة صحيحة","err")}
+  };
+  r.readAsText(file);
+}
+/* ============ نسخ يومي تلقائي (IndexedDB - آخر 15 يوم) ============ */
+var BK_DB="appHubBackups", BK_STORE="days", BK_KEEP=15;
+function bkOpen(){
+  return new Promise(function(res,rej){
+    var rq=indexedDB.open(BK_DB,1);
+    rq.onupgradeneeded=function(){ rq.result.createObjectStore(BK_STORE,{keyPath:"date"}); };
+    rq.onsuccess=function(){res(rq.result)}; rq.onerror=function(){rej(rq.error)};
+  });
+}
+function bkAll(db){
+  return new Promise(function(res,rej){
+    var out=[], tx=db.transaction(BK_STORE,"readonly").objectStore(BK_STORE).openCursor();
+    tx.onsuccess=function(){var c=tx.result; if(c){out.push(c.value);c.continue();} else res(out);};
+    tx.onerror=function(){rej(tx.error)};
+  });
+}
+function bkPut(db,rec){
+  return new Promise(function(res,rej){
+    var tx=db.transaction(BK_STORE,"readwrite");
+    tx.objectStore(BK_STORE).put(rec);
+    tx.oncomplete=function(){res()}; tx.onerror=function(){rej(tx.error)};
+  });
+}
+function bkDel(db,key){
+  return new Promise(function(res){
+    var tx=db.transaction(BK_STORE,"readwrite");
+    tx.objectStore(BK_STORE).delete(key);
+    tx.oncomplete=function(){res()}; tx.onerror=function(){res()};
+  });
+}
+function snapshotAll(){
+  var data={};
+  for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i); if(k!==null) data[k]=localStorage.getItem(k);}
+  return data;
+}
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function runDailyBackup(){
+  if(!window.indexedDB) return;
+  bkOpen().then(function(db){
+    return bkAll(db).then(function(all){
+      var today=todayStr();
+      var have=all.some(function(r){return r.date===today});
+      var chain=Promise.resolve();
+      if(!have){
+        var data=snapshotAll();
+        chain=bkPut(db,{date:today,createdAt:Date.now(),keys:Object.keys(data).length,data:data});
+        all.push({date:today});
+      }
+      /* احتفظ بآخر 15 يوم بس */
+      return chain.then(function(){
+        var sorted=all.map(function(r){return r.date}).sort();      /* الأقدم أولًا */
+        var extra=sorted.length-BK_KEEP;
+        var dels=Promise.resolve();
+        for(var i=0;i<extra;i++)(function(d){dels=dels.then(function(){return bkDel(db,d)})})(sorted[i]);
+        return dels;
+      });
+    }).then(function(){ renderAutoBk(db); });
+  }).catch(function(e){ /* IndexedDB غير متاح — تجاهل بهدوء */ });
+}
+function renderAutoBk(db){
+  var el=document.querySelector("#autoBkList"); if(!el) return;
+  (db?Promise.resolve(db):bkOpen()).then(function(d){ return bkAll(d); }).then(function(all){
+    all.sort(function(a,b){return b.date<a.date?-1:1});
+    if(!all.length){ el.innerHTML='<p style="font-size:12px;color:var(--muted2);font-weight:700">لسه مفيش لقطات — أول لقطة بتتاخد تلقائيًا مع فتح المركز.</p>'; return; }
+    el.innerHTML=all.map(function(r){
+      var sz=r.data?Math.round(JSON.stringify(r.data).length/1024):0;
+      return '<div class="bk-row"><b>📅 '+esc(r.date)+'</b><span>'+(r.keys||0)+' مفتاح · '+sz+'KB</span>'+
+        '<button class="bk-btn" data-bkdl="'+esc(r.date)+'">⬇️ تنزيل</button>'+
+        '<button class="bk-btn res" data-bkres="'+esc(r.date)+'">↩️ استرجاع</button></div>';
+    }).join("");
+  }).catch(function(){ el.innerHTML=""; });
+}
+function bkDownload(date){
+  bkOpen().then(bkAll).then(function(all){
+    var r=all.filter(function(x){return x.date===date})[0]; if(!r) return;
+    var blob=new Blob([JSON.stringify({app:"apps-master",exportedAt:r.date,keys:r.keys,data:r.data},null,2)],{type:"application/json"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    a.download="نسخة-يومية-"+date+".json";a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href)},900);
+    toast("اتنزّلت لقطة "+date,"ok");
+  });
+}
+function bkRestore(date){
+  bkOpen().then(bkAll).then(function(all){
+    var r=all.filter(function(x){return x.date===date})[0]; if(!r||!r.data){toast("اللقطة مش موجودة","err");return}
+    var keys=Object.keys(r.data);
+    if(!confirm("استرجاع لقطة يوم "+date+" ("+keys.length+" مفتاح)؟\nالبيانات الحالية هتتستبدل ببيانات اليوم ده لكل البرامج."))return;
+    keys.forEach(function(k){try{localStorage.setItem(k,r.data[k])}catch(e){}});
+    toast("اترجّعت لقطة "+date+" — جاري إعادة التحميل");
+    setTimeout(function(){location.reload()},900);
+  });
+}
+document.addEventListener("click",function(e){
+  var d=e.target.closest("[data-bkdl]"); if(d){bkDownload(d.getAttribute("data-bkdl"));return}
+  var r=e.target.closest("[data-bkres]"); if(r){bkRestore(r.getAttribute("data-bkres"))}
+});
+runDailyBackup();
+
+$("#btnMasterExport").addEventListener("click",masterExport);
+$("#btnMasterImport").addEventListener("click",function(){$("#masterFile").click()});
+$("#masterFile").addEventListener("change",function(e){if(e.target.files[0])masterImport(e.target.files[0]);e.target.value="";});
 $("#btnExport").addEventListener("click",exportData);
 $("#btnImport").addEventListener("click",function(){$("#importFile").click()});
 $("#importFile").addEventListener("change",function(e){ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });

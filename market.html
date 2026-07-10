@@ -383,6 +383,7 @@ body{
 
 <script>
 "use strict";
+var DEFAULT_FB={"apiKey": "AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs", "authDomain": "my-app-sync-11ad9.firebaseapp.com", "databaseURL": "https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "my-app-sync-11ad9", "storageBucket": "my-app-sync-11ad9.firebasestorage.app", "messagingSenderId": "177039534756", "appId": "1:177039534756:web:367ecccc684c2cdfdd1431"};
 var LS_KEY="market.data.v1", LS_FB="market.fb.v1", LS_FBON="market.fbon.v1";
 var CATALOG=[
   {n:"خضار",e:"🍅",items:["طماطم","بطاطس","بصل","توم","جزر","كوسة","باذنجان","فلفل رومي","فلفل ألوان","خيار","خس","جرجير","فجل","ليمون","بقدونس","كزبرة","شبت","سبانخ","ملوخية","فاصوليا خضرا","بسلة","كرنب","قرنبيط","بطاطا"]},
@@ -921,10 +922,11 @@ function mergeColl(mine,theirs){
   theirs.forEach(function(x){if(!x||!x.id)return;if(!map[x.id]||(x.updatedAt||0)>(map[x.id].updatedAt||0))map[x.id]=x});
   return Object.keys(map).map(function(k){return map[k]});
 }
+function fileBase(){try{var p=(location.pathname.split("/").pop()||"").replace(/\.html?$/i,"");p=decodeURIComponent(p);return p||"market"}catch(e){return "market"}}
 function exportData(){
   var blob=new Blob([JSON.stringify({app:"market",exportedAt:new Date().toISOString(),data:S},null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download="مشترياتي-نسخة-"+new Date().toISOString().slice(0,10)+".json";a.click();
+  a.download=fileBase()+"-نسخة-"+new Date().toISOString().slice(0,10)+".json";a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href)},900);toast("اتصدّرت");
 }
 function importData(file){
@@ -978,14 +980,17 @@ function enableFB(){
 function disableFB(){
   try{if(fbRef)fbRef.off()}catch(e){}
   try{if(window.firebase&&firebase.apps.length)firebase.app().delete()}catch(e){}
-  fbRef=null;localStorage.removeItem(LS_FBON);
+  fbRef=null;localStorage.setItem(LS_FBON,"0");
   $("#fbToggle").classList.remove("on");setDot("");$("#fbStatus").textContent="غير مفعّلة";toast("المزامنة اتوقفت");
 }
 function restoreFB(){
-  var raw=localStorage.getItem(LS_FB);
-  if(raw){try{$("#fbConfig").value=JSON.stringify(JSON.parse(raw),null,2)}catch(e){}}
-  if(localStorage.getItem(LS_FBON)==="1"&&raw){
-    try{initFB(JSON.parse(raw)).then(function(){$("#fbToggle").classList.add("on")}).catch(function(){setDot("err")})}catch(e){}
+  var raw=localStorage.getItem(LS_FB), on=localStorage.getItem(LS_FBON);
+  var cfg=null;
+  if(raw){try{cfg=JSON.parse(raw)}catch(e){}}
+  if(!cfg&&DEFAULT_FB&&DEFAULT_FB.databaseURL){cfg=DEFAULT_FB;}
+  if(cfg){try{$("#fbConfig").value=JSON.stringify(cfg,null,2)}catch(e){}}
+  if(cfg&&(on==="1"||(!raw&&on!=="0"))){
+    try{initFB(cfg).then(function(){$("#fbToggle").classList.add("on");localStorage.setItem(LS_FB,JSON.stringify(cfg));localStorage.setItem(LS_FBON,"1")}).catch(function(){setDot("err")})}catch(e){}
   }
 }
 

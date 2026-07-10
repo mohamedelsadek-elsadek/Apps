@@ -376,6 +376,7 @@ body{
 
 <script>
 "use strict";
+var DEFAULT_FB={"apiKey": "AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs", "authDomain": "my-app-sync-11ad9.firebaseapp.com", "databaseURL": "https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "my-app-sync-11ad9", "storageBucket": "my-app-sync-11ad9.firebasestorage.app", "messagingSenderId": "177039534756", "appId": "1:177039534756:web:367ecccc684c2cdfdd1431"};
 /* ============ ثوابت ============ */
 var LS_KEY="shanta.data.v1", LS_FB="shanta.fb.v1", LS_FBON="shanta.fbon.v1";
 var PLACE_EMOS=["🏖️","🏠","🏡","🌾","🚜","🏢","⛺","🛥️","🕌","🏨"];
@@ -729,10 +730,11 @@ $all(".overlay").forEach(function(ov){ov.addEventListener("click",function(e){if
 $all("[data-close]").forEach(function(b){b.addEventListener("click",function(){closeOv("#"+b.closest(".overlay").id)})});
 
 /* ============ نسخ احتياطي ============ */
+function fileBase(){try{var p=(location.pathname.split("/").pop()||"").replace(/\.html?$/i,"");p=decodeURIComponent(p);return p||"shanta"}catch(e){return "shanta"}}
 function exportData(){
   var blob=new Blob([JSON.stringify({app:"shanta",exportedAt:new Date().toISOString(),data:S},null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download="شنطتي-نسخة-"+new Date().toISOString().slice(0,10)+".json";a.click();
+  a.download=fileBase()+"-نسخة-"+new Date().toISOString().slice(0,10)+".json";a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href)},900);toast("اتصدّرت");
 }
 function mergeColl(mine,theirs){
@@ -797,14 +799,17 @@ function enableFB(){
 function disableFB(){
   try{if(fbRef)fbRef.off()}catch(e){}
   try{if(window.firebase&&firebase.apps.length)firebase.app().delete()}catch(e){}
-  fbRef=null;localStorage.removeItem(LS_FBON);
+  fbRef=null;localStorage.setItem(LS_FBON,"0");
   $("#fbToggle").classList.remove("on");setDot("");$("#fbStatus").textContent="غير مفعّلة";toast("المزامنة اتوقفت");
 }
 function restoreFB(){
-  var raw=localStorage.getItem(LS_FB);
-  if(raw){try{$("#fbConfig").value=JSON.stringify(JSON.parse(raw),null,2)}catch(e){}}
-  if(localStorage.getItem(LS_FBON)==="1"&&raw){
-    try{initFB(JSON.parse(raw)).then(function(){$("#fbToggle").classList.add("on")}).catch(function(){setDot("err")})}catch(e){}
+  var raw=localStorage.getItem(LS_FB), on=localStorage.getItem(LS_FBON);
+  var cfg=null;
+  if(raw){try{cfg=JSON.parse(raw)}catch(e){}}
+  if(!cfg&&DEFAULT_FB&&DEFAULT_FB.databaseURL){cfg=DEFAULT_FB;}
+  if(cfg){try{$("#fbConfig").value=JSON.stringify(cfg,null,2)}catch(e){}}
+  if(cfg&&(on==="1"||(!raw&&on!=="0"))){
+    try{initFB(cfg).then(function(){$("#fbToggle").classList.add("on");localStorage.setItem(LS_FB,JSON.stringify(cfg));localStorage.setItem(LS_FBON,"1")}).catch(function(){setDot("err")})}catch(e){}
   }
 }
 
