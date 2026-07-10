@@ -1,0 +1,2918 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v27</title>
+<style>
+/* ============ المتغيرات والثيم ============ */
+:root{
+  /* ===== ثيم فاتح مستوحى من نظام مزارع الدواجن ===== */
+  --bg:#f6f7fb; --bg2:#eef0f7; --card:#ffffff; --card2:#f5f6fc;
+  --border:#e7e9f2; --border2:#d4d8ea;
+  --primary:#635bff; --primary-d:#5147e6; --primary-l:#8b85ff;
+  --primary-soft:#eef0ff;
+  --text:#1a1c2e; --text2:#566073; --text3:#8a93a8;
+  --green:#0f9d58; --green-bg:rgba(15,157,88,.12);
+  --red:#e23048; --red-bg:rgba(226,48,72,.12);
+  --amber:#d68310; --amber-bg:rgba(214,131,16,.14);
+  --cyan:#0e9bbd; --purple:#8b3ff0; --pink:#d6457f;
+  --radius:14px; --radius-s:10px;
+  --shadow:0 18px 48px rgba(26,28,46,.14),0 6px 16px rgba(26,28,46,.08);
+  --grad:linear-gradient(135deg,#635bff,#8b85ff 55%,#a855f7);
+  --font:'Segoe UI',Tahoma,'Cairo',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;overflow:hidden}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:var(--primary)}
+
+/* ============ التخطيط العام ============ */
+#app{display:none;height:100vh;width:100vw}
+#app.ready{display:flex}
+#sidebar{width:248px;background:var(--card);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;transition:.25s}
+.brand{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px}
+.brand .logo{width:42px;height:42px;border-radius:11px;background:var(--grad);
+  display:grid;place-items:center;font-size:22px;box-shadow:0 4px 14px rgba(59,130,246,.4)}
+.brand h1{font-size:15px;font-weight:700}
+.brand p{font-size:11px;color:var(--text3)}
+.nav{flex:1;overflow-y:auto;padding:10px 9px}
+.nav-group{font-size:10.5px;color:var(--text3);font-weight:700;padding:13px 12px 5px;letter-spacing:.5px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-s);cursor:pointer;
+  color:var(--text2);font-size:13.5px;font-weight:500;transition:.15s;margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--card2);color:var(--text)}
+.nav-item.active{background:var(--primary-soft);color:var(--primary-d);font-weight:700}
+.nav-item.active::before{content:"";position:absolute;right:0;top:18%;height:64%;width:3px;background:var(--primary);border-radius:3px}
+.nav-item .ico{font-size:17px;width:22px;text-align:center}
+.nav-item .badge{margin-inline-start:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700}
+
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:60px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;
+  padding:0 18px;gap:14px;flex-shrink:0}
+.topbar .menu-btn{display:none;background:var(--card2);border:1px solid var(--border);color:var(--text);
+  width:38px;height:38px;border-radius:9px;font-size:18px;cursor:pointer}
+.topbar h2{font-size:17px;font-weight:700}
+.topbar .sub{font-size:11.5px;color:var(--text3)}
+.topbar .right{margin-inline-start:auto;display:flex;align-items:center;gap:10px}
+.chip{background:var(--card2);border:1px solid var(--border);padding:7px 13px;border-radius:9px;font-size:12px;
+  display:flex;align-items:center;gap:7px;color:var(--text2)}
+.chip b{color:var(--text)}
+.content{flex:1;overflow-y:auto;padding:20px}
+.page{display:none;animation:fade .3s}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ============ مكونات ============ */
+.btn{background:var(--grad);color:#fff;border:none;padding:9px 16px;border-radius:10px;font-size:13px;
+  font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:var(--font);transition:.15s}
+.btn:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 8px 24px rgba(99,91,255,.32)}
+.btn.ghost{background:var(--card2);border:1px solid var(--border);color:var(--text2)}
+.btn.ghost:hover{border-color:var(--primary);color:var(--text)}
+.btn.green{background:var(--green)}.btn.green:hover{background:#16a34a}
+.btn.red{background:var(--red)}.btn.red:hover{background:#dc2626}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btn.xs{padding:4px 9px;font-size:11px;border-radius:7px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:17px;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;inset-inline-start:0;top:0;width:4px;height:100%;background:var(--accent,var(--primary))}
+.stat .ico{font-size:26px;margin-bottom:9px;display:block}
+.stat .lbl{font-size:12px;color:var(--text2);margin-bottom:5px}
+.stat .val{font-size:23px;font-weight:800;letter-spacing:-.5px}
+.stat .meta{font-size:11px;color:var(--text3);margin-top:5px}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;overflow:hidden}
+.panel-h{padding:14px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.panel-h h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.panel-h .tools{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.panel-b{padding:16px}
+.panel-b.flush{padding:0}
+
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;color:var(--text2);font-weight:600}
+input,select,textarea{background:var(--card);border:1.5px solid var(--border);color:var(--text);
+  padding:9px 11px;border-radius:9px;font-size:13px;font-family:var(--font);width:100%;transition:.15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(99,91,255,.18)}
+.search{position:relative;min-width:200px}
+.search input{padding-inline-start:34px}
+.search::before{content:"🔍";position:absolute;inset-inline-start:11px;top:9px;font-size:13px;opacity:.6}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--bg2);color:var(--text2);font-weight:700;text-align:right;padding:11px 12px;
+  border-bottom:2px solid var(--border2);white-space:nowrap;position:sticky;top:0;font-size:12px;z-index:2}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{transition:.1s}
+tbody tr:hover{background:var(--card2)}
+.tbl-wrap{overflow:auto;max-height:calc(100vh - 280px)}
+td.editable{cursor:pointer;position:relative}
+td.editable:hover{background:rgba(99,91,255,.10);box-shadow:inset 0 0 0 1px var(--primary)}
+td.editable:hover::after{content:"✎";position:absolute;inset-inline-start:4px;top:8px;font-size:10px;opacity:.5}
+td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
+
+.tag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+.tag.blue{background:var(--primary-soft);color:var(--primary-d)}
+.tag.green{background:var(--green-bg);color:#4ade80}
+.tag.red{background:var(--red-bg);color:#f87171}
+.tag.amber{background:var(--amber-bg);color:#fbbf24}
+.tag.cyan{background:rgba(6,182,212,.16);color:#22d3ee}
+.tag.purple{background:rgba(168,85,247,.16);color:#c084fc}
+.tag.gray{background:var(--card2);color:var(--text2)}
+
+.empty{text-align:center;padding:50px 20px;color:var(--text3)}
+.empty .ico{font-size:46px;opacity:.4;display:block;margin-bottom:10px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;
+  place-items:center;z-index:100;padding:20px}
+.modal-bg.show{display:grid}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:560px;
+  max-height:90vh;overflow:auto;box-shadow:var(--shadow);animation:pop .25s}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.modal-h{padding:16px 19px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.modal-h h3{font-size:16px;font-weight:700}
+.modal-h .x{margin-inline-start:auto;background:var(--card2);border:none;color:var(--text2);width:30px;height:30px;
+  border-radius:8px;cursor:pointer;font-size:16px}
+.modal-h .x:hover{background:var(--red);color:#fff}
+.modal-b{padding:19px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid .full{grid-column:1/-1}
+.modal-f{padding:15px 19px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start}
+
+/* toast */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--card2);border:1px solid var(--border2);border-inline-start:4px solid var(--primary);
+  padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:var(--shadow);animation:slideup .3s;min-width:240px}
+.toast.green{border-inline-start-color:var(--green)}
+.toast.red{border-inline-start-color:var(--red)}
+.toast.amber{border-inline-start-color:var(--amber)}
+@keyframes slideup{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:15px}
+.filters .field{min-width:140px}
+.row-actions{display:flex;gap:5px}
+.mini{font-size:11px;color:var(--text3)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:15px}
+.tab{padding:8px 15px;border-radius:9px;background:var(--card2);border:1px solid var(--border);cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--text2)}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+@media(max-width:860px){
+  #sidebar{position:fixed;inset-inline-start:-260px;height:100%;z-index:90}
+  #sidebar.open{inset-inline-start:0;box-shadow:var(--shadow)}
+  .topbar .menu-btn{display:grid;place-items:center}
+  .form-grid{grid-template-columns:1fr}
+  .topbar .sub{display:none}
+/* ===== شاشة الدخول والتزامن ===== */
+#loginScreen{position:fixed;inset:0;z-index:500;padding:20px;
+  display:none;
+  background:radial-gradient(800px 500px at 75% -10%,#e4e1ff,transparent 60%),radial-gradient(700px 500px at 10% 110%,#dff3ff,transparent 55%),var(--bg)}
+#loginScreen.show{display:flex!important;align-items:center;justify-content:center}
+.login-box{background:linear-gradient(180deg,#ffffff,#fbfbfe);border:1px solid var(--border);border-radius:24px;padding:44px 38px;width:100%;max-width:430px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.login-box::before{content:'';position:absolute;inset:0 0 auto 0;height:5px;background:var(--grad)}
+.login-box .logo{width:64px;height:64px;border-radius:18px;background:var(--grad);display:grid;place-items:center;font-size:32px;margin:0 auto 14px;box-shadow:0 6px 14px rgba(99,91,255,.3)}
+.login-box h2{text-align:center;font-size:22px;margin-bottom:4px;font-weight:800;letter-spacing:-.5px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.login-box p{text-align:center;color:var(--text2);font-size:12.5px;margin-bottom:26px}
+.login-box .field{margin-bottom:14px}
+.login-box .btn{width:100%;justify-content:center;padding:12px;font-size:15px}
+.login-msg{font-size:12px;text-align:center;margin-top:12px;min-height:16px}
+.sync-pill{display:flex;align-items:center;gap:6px;font-size:11px;padding:5px 10px;border-radius:9px;background:var(--card2);border:1px solid var(--border)}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3)}
+.sync-dot.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+.sync-dot.off{background:var(--red)}
+.sync-dot.local{background:var(--amber)}
+</style>
+<!-- ===== Firebase SDK (compat) ===== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</head>
+<body>
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">💊</div>
+    <h2>مخازن الأدوية البيطرية</h2>
+    <p>نظام ERP — تسجيل الدخول</p>
+    <div class="field"><label>البريد الإلكتروني</label><input id="lg_email" type="email" placeholder="you@example.com" autocomplete="username"></div>
+    <div class="field"><label>كلمة المرور</label><input id="lg_pass" type="password" placeholder="********" autocomplete="current-password"></div>
+    <button class="btn" id="lg_btn">دخول</button>
+    <div class="login-msg" id="lg_msg"></div>
+  </div>
+</div>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="logo">💊</div>
+      <div><h1>مخازن الأدوية البيطرية</h1><p>نظام ERP متكامل</p></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+  <div id="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div><h2 id="pageTitle">لوحة التحكم</h2><div class="sub" id="pageSub">نظرة عامة على المخزون والأداء</div></div>
+      <div class="right">
+        <span class="sync-pill"><span class="sync-dot" id="syncDot"></span><span id="syncTxt">...</span></span>
+        <span class="chip" style="font-size:10px;color:var(--text3)" id="verChip"></span>
+        <span class="chip">👤 <b id="curRole">مدير عام</b></span>
+        <span class="chip">📅 <b id="curDate"></b></span>
+        <button class="btn sm green" onclick="printCurrentPage()" title="طباعة الصفحة الحالية">🖨️ طباعة</button>
+        <button class="btn ghost sm" id="logoutBtn" onclick="doLogout()" style="display:none">خروج</button>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+<script>
+const SEED_PRODUCTS=[{id:1,cat:"أدوية بيطرية وسوائل",name:"فيتامين ك A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"فيتامينات",dose:500,price:1550},
+{id:2,cat:"أدوية بيطرية وسوائل",name:"نفرول A1",supplier:"وايز",unit:"جالون",pkg:3785,ther:"غسيل كلى",dose:1000,price:1250},
+{id:3,cat:"أدوية بيطرية وسوائل",name:"ام تي ترون A1",supplier:"اورجانك",unit:"جالون",pkg:3785,ther:"مضاد سموم",dose:1000,price:7000},
+{id:4,cat:"أدوية بيطرية وسوائل",name:"اور جستيم سائل A11",supplier:"الدقهليه",unit:"لتر",pkg:1000,ther:"مطهر معوي",dose:500,price:890},
+{id:5,cat:"أدوية بيطرية وسوائل",name:"فالزنتال جرام A1٢٥٠",supplier:"كيوفيت",unit:"250 جرام",pkg:250,ther:"مضاد طفيليات",dose:250,price:1850},
+{id:6,cat:"أدوية بيطرية وسوائل",name:"الكوسير ٤٠ في السنه A11",supplier:"اورجانك",unit:"150 جرام",pkg:150,ther:"مضاد حيوي",dose:500,price:500},
+{id:7,cat:"أدوية بيطرية وسوائل",name:"ماك باور A1",supplier:"زوتيكس",unit:"لتر",pkg:1000,ther:"فيتامينات",dose:1000,price:1100},
+{id:8,cat:"أدوية بيطرية وسوائل",name:"البراق حكت سولف A1",supplier:"تروفيكو",unit:"100 مل",pkg:100,ther:"موسع شعب",dose:500,price:550},
+{id:9,cat:"أدوية بيطرية وسوائل",name:"ان فلوراكس A1",supplier:"زوتيكس",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:500,price:830},
+{id:10,cat:"أدوية بيطرية وسوائل",name:"اليزونير | A1",supplier:"ام ان تريد",unit:"250 مل",pkg:250,ther:"مضاد حيوي",dose:500,price:650},
+{id:11,cat:"أدوية بيطرية وسوائل",name:"دياكسئول A1",supplier:"فارما فاك",unit:"عدد",pkg:1000,ther:"مطهر معوي",dose:1000,price:7},
+{id:12,cat:"أدوية بيطرية وسوائل",name:"ابرا مايسين A1",supplier:"وايز",unit:"100 جرام",pkg:100,ther:"مضاد حيوي",dose:500,price:500},
+{id:13,cat:"أدوية بيطرية وسوائل",name:"جرو ماس A1",supplier:"فلورنس تريد",unit:"500 مل",pkg:500,ther:"منشط نمو",dose:1000,price:500},
+{id:14,cat:"أدوية بيطرية وسوائل",name:"ليزوفيت A1",supplier:"الدقهلية",unit:"لتر",pkg:1000,ther:"فيتامينات",dose:1000,price:700},
+{id:15,cat:"أدوية بيطرية وسوائل",name:"ف د سيلنيوم A1",supplier:"الدقهليه",unit:"لتر",pkg:1000,ther:"هـ سيلينيوم",dose:500,price:1000},
+{id:16,cat:"أدوية بيطرية وسوائل",name:"جاسترو جارد A1",supplier:"بايوكيور فارما",unit:"500 مل",pkg:500,ther:"وقاية معوية",dose:1000,price:580},
+{id:17,cat:"أدوية بيطرية وسوائل",name:"ليفاك بي اس A1",supplier:"بايوكيور فارما",unit:"250 جرام",pkg:250,ther:"مضاد إجهاد",dose:500,price:1300},
+{id:18,cat:"أدوية بيطرية وسوائل",name:"روفان بلص A1",supplier:"د صفوت",unit:"لتر",pkg:1000,ther:"مضاد حيوي",dose:1000,price:900},
+{id:19,cat:"أدوية بيطرية وسوائل",name:"ميترو جيت A1",supplier:"نوفو انيمال هيلت",unit:"500 مل",pkg:500,ther:"مضاد بكتيريا",dose:1000,price:450},
+{id:20,cat:"أدوية بيطرية وسوائل",name:"توفيرا اكس A1",supplier:"نوفو انيمال هيلت",unit:"500 مل",pkg:500,ther:"مضاد سموم",dose:1000,price:850},
+{id:21,cat:"أدوية بيطرية وسوائل",name:"بيو فيكس A1",supplier:"نوفو انيمال هيلت",unit:"500 مل",pkg:500,ther:"مضاد سموم",dose:500,price:500},
+{id:22,cat:"أدوية بيطرية وسوائل",name:"انابوليك A1",supplier:"فيتورا",unit:"لتر",pkg:1000,ther:"منشط نمو",dose:1000,price:550},
+{id:23,cat:"أدوية بيطرية وسوائل",name:"هيو فيتو A1",supplier:"انتر ميديكا",unit:"لتر",pkg:1000,ther:"رافع مناعة",dose:1000,price:1750},
+{id:24,cat:"أدوية بيطرية وسوائل",name:"تابلو ميديكا A11",supplier:"انتر ميديكا",unit:"500 جرام",pkg:500,ther:"مضاد حيوي",dose:500,price:3500},
+{id:25,cat:"أدوية بيطرية وسوائل",name:"كلازونيور A1",supplier:"بايوكيور فارما",unit:"لتر",pkg:1000,ther:"مضاد كوكسيديا",dose:500,price:470},
+{id:26,cat:"أدوية بيطرية وسوائل",name:"رايدو اسبكتين A1",supplier:"بوسطن",unit:"150 جرام",pkg:150,ther:"مضاد حيوي",dose:500,price:1000},
+{id:27,cat:"أدوية بيطرية وسوائل",name:"تایل اسبرايسول A1",supplier:"بوسطن",unit:"100 جرام",pkg:100,ther:"مضاد حيوي",dose:500,price:850},
+{id:28,cat:"أدوية بيطرية وسوائل",name:"ديل استریت A1",supplier:"بوسطن",unit:"200 جرام",pkg:200,ther:"مضاد حيوي",dose:500,price:550},
+{id:29,cat:"أدوية بيطرية وسوائل",name:"تيلمي تريت A1",supplier:"بوسطن",unit:"لتر",pkg:1000,ther:"مضاد حيوي",dose:1000,price:1750},
+{id:30,cat:"أدوية بيطرية وسوائل",name:"ريرو موند A1",supplier:"بوسطن",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:1000,price:1200},
+{id:31,cat:"أدوية بيطرية وسوائل",name:"دای کلازوريل A1",supplier:"بوسطن",unit:"لتر",pkg:1000,ther:"مضاد كوكسيديا",dose:1000,price:580},
+{id:32,cat:"أدوية بيطرية وسوائل",name:"نوفو بوست A11",supplier:"نوفو اشتمال هيلت",unit:"لتر",pkg:1000,ther:"منشط مناعة",dose:1000,price:550},
+{id:33,cat:"أدوية بيطرية وسوائل",name:"فينيكس بلص A1",supplier:"فلورنس تريد",unit:"100 مل",pkg:100,ther:"مضاد حيوي",dose:500,price:350},
+{id:34,cat:"أدوية بيطرية وسوائل",name:"فارما فلور A1",supplier:"بوسطن",unit:"لتر",pkg:1000,ther:"مضاد حيوي",dose:1000,price:950},
+{id:35,cat:"أدوية بيطرية وسوائل",name:"دى تابلو A1",supplier:"ابو النجا",unit:"250 جرام",pkg:250,ther:"مضاد حيوي",dose:500,price:800},
+{id:36,cat:"أدوية بيطرية وسوائل",name:"بروماك A1",supplier:"كابيتال",unit:"500 مل",pkg:500,ther:"منشط عام",dose:1000,price:1250},
+{id:37,cat:"أدوية بيطرية وسوائل",name:"اتوتيا كول A1",supplier:"ابو النجا",unit:"250 جرام",pkg:250,ther:"مضاد حيوي",dose:500,price:400},
+{id:38,cat:"أدوية بيطرية وسوائل",name:"ميكو بيت A1",supplier:"فيرتيكس فارما",unit:"500 مل",pkg:500,ther:"مضاد سموم",dose:1000,price:500},
+{id:39,cat:"أدوية بيطرية وسوائل",name:"لايف بلص A1",supplier:"ترافيكو",unit:"لتر",pkg:1000,ther:"فيتامينات",dose:1000,price:990},
+{id:40,cat:"أدوية بيطرية وسوائل",name:"سويس بيوبيور A1",supplier:"ترافيكو",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:650},
+{id:41,cat:"أدوية بيطرية وسوائل",name:"ميكوزين A1",supplier:"م صفوت",unit:"500 مل",pkg:500,ther:"مضاد حيوي",dose:1000,price:1750},
+{id:42,cat:"أدوية بيطرية وسوائل",name:"بلوتوكس A1",supplier:"د صفوت",unit:"لتر",pkg:1000,ther:"مضاد سموم",dose:1000,price:650},
+{id:43,cat:"أدوية بيطرية وسوائل",name:"پوست زينهاتس A1",supplier:"بوسطن",unit:"لتر",pkg:1000,ther:"رافع مناعة",dose:1000,price:430},
+{id:44,cat:"أدوية بيطرية وسوائل",name:"ما كسيفنت ! A1",supplier:"بايوكيور فارما",unit:"500 مل",pkg:500,ther:"إضافات",dose:1000,price:500},
+{id:45,cat:"أدوية بيطرية وسوائل",name:"جلاسين بلص A1",supplier:"اتكو فارما",unit:"لتر",pkg:1000,ther:"مضاد حيوي",dose:1000,price:550},
+{id:46,cat:"أدوية بيطرية وسوائل",name:"ديفترو ! A1",supplier:"المؤسسة الزهبيه",unit:"500 مل",pkg:500,ther:"مضاد حيوي",dose:1000,price:780},
+{id:47,cat:"أدوية بيطرية وسوائل",name:"ری کالم A1",supplier:"فيرتيكس فارما",unit:"500 مل",pkg:500,ther:"مضاد حيوي",dose:1000,price:680},
+{id:48,cat:"أدوية بيطرية وسوائل",name:"بيرساكبور A1",supplier:"فيرتيكس فارما",unit:"500 مل",pkg:500,ther:"مضاد حيوي",dose:1000,price:710},
+{id:49,cat:"أدوية بيطرية وسوائل",name:"نوفو كوكس A1",supplier:"نوفو انيمال هيلت",unit:"500 مل",pkg:500,ther:"مضاد كوكسيديا",dose:1000,price:250},
+{id:50,cat:"أدوية بيطرية وسوائل",name:"ريفيل A11",supplier:"نوفو انيمال هيلث",unit:"لتر",pkg:1000,ther:"مضاد حيوي",dose:1000,price:450},
+{id:51,cat:"أدوية بيطرية وسوائل",name:"بروكير A11",supplier:"نوفو انيمال هيلث",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:650},
+{id:52,cat:"أدوية بيطرية وسوائل",name:"ريماريل ! A1",supplier:"المصريه",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:1000,price:600},
+{id:53,cat:"أدوية بيطرية وسوائل",name:"جانا بكت A11",supplier:"المصرية",unit:"500 جرام",pkg:500,ther:"مضاد حيوي",dose:500,price:875},
+{id:54,cat:"أدوية بيطرية وسوائل",name:"روفی تون A1",supplier:"المصرية",unit:"لتر",pkg:1000,ther:"فيتامينات",dose:1000,price:1300},
+{id:55,cat:"أدوية بيطرية وسوائل",name:"روفي روفينيل A1",supplier:"المصرية",unit:"لتر",pkg:1000,ther:"إضافات",dose:1000,price:1500},
+{id:56,cat:"أدوية بيطرية وسوائل",name:"بينا كتام A1",supplier:"فيرتيكس فارسا",unit:"100 مل",pkg:100,ther:"مضاد حيوي",dose:500,price:400},
+{id:57,cat:"أدوية بيطرية وسوائل",name:"امياس : A1151",supplier:"بيوكير فارما",unit:"لتر",pkg:1000,ther:"مضاد حيوي",dose:1000,price:300},
+{id:58,cat:"أدوية بيطرية وسوائل",name:"جارليك اسياس A1",supplier:"بيوكير فارما",unit:"لتر",pkg:1000,ther:"إضافات",dose:1000,price:300},
+{id:59,cat:"أدوية بيطرية وسوائل",name:"| افير A1",supplier:"فيرتكس فارما",unit:"500 مل",pkg:500,ther:"مضاد حيوي",dose:1000,price:770},
+{id:60,cat:"أدوية بيطرية وسوائل",name:"جننا واير A1",supplier:"وايز",unit:"500 مل",pkg:500,ther:"إضافات",dose:1000,price:320},
+{id:61,cat:"أدوية بيطرية وسوائل",name:"كابي زيم سوبر A1",supplier:"كابيتال انترنشنال",unit:"كيلو",pkg:1000,ther:"إنزيمات",dose:1000,price:450},
+{id:62,cat:"أدوية بيطرية وسوائل",name:"اتوبرول بلص A1",supplier:"انكو فارما",unit:"500 جرام",pkg:500,ther:"مضاد حيوي",dose:500,price:600},
+{id:63,cat:"أدوية بيطرية وسوائل",name:"تراي سين A1",supplier:"اتكو فارما",unit:"500 جرام",pkg:500,ther:"مضاد حيوي",dose:500,price:600},
+{id:64,cat:"أدوية بيطرية وسوائل",name:"ريسبيون ! A1",supplier:"نوفو انيمال هیئت",unit:"500 مل",pkg:500,ther:"مضاد تنفسي",dose:1000,price:500},
+{id:65,cat:"أدوية بيطرية وسوائل",name:"جرين دوكس A1",supplier:"بوسطن",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:500,price:3000},
+{id:66,cat:"أدوية بيطرية وسوائل",name:"امبيهدراو ! A1",supplier:"بوسطن",unit:"500 جرام",pkg:500,ther:"إضافات",dose:500,price:1000},
+{id:67,cat:"أدوية بيطرية وسوائل",name:"ليباتون A1",supplier:"ام ان تريد",unit:"لتر",pkg:1000,ther:"إضافات",dose:1000,price:850},
+{id:68,cat:"أدوية بيطرية وسوائل",name:"لتر نوفاكيور A1",supplier:"ام ان تريد",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:350},
+{id:69,cat:"أدوية بيطرية وسوائل",name:"ريتاتول ! A1",supplier:"اسلام بدوی",unit:"لتر",pkg:1000,ther:"إضافات",dose:1000,price:400},
+{id:70,cat:"أدوية بيطرية وسوائل",name:"الترا جروث A1",supplier:"بيوكير فارما",unit:"جالون",pkg:3785,ther:"منشط نمو",dose:1000,price:700},
+{id:71,cat:"أدوية بيطرية وسوائل",name:"بای نیکسر A1",supplier:"اسلام بدوی",unit:"لتر",pkg:1000,ther:"مضاد سموم",dose:1000,price:700},
+{id:72,cat:"أدوية بيطرية وسوائل",name:"كالسيوفورت A1",supplier:"بيوكير فارما",unit:"لتر",pkg:1000,ther:"كالسيوم",dose:1000,price:175},
+{id:73,cat:"أدوية بيطرية وسوائل",name:"سيفوتاكس A1",supplier:"مشتريات",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:500,price:3500},
+{id:74,cat:"أدوية بيطرية وسوائل",name:"استیل سستابين A1",supplier:"مشتريات",unit:"كيلو",pkg:1000,ther:"مذيب بلغم",dose:500,price:3500},
+{id:75,cat:"أدوية بيطرية وسوائل",name:"مايكروفير جالون A1",supplier:"وايز",unit:"جالون",pkg:3785,ther:"إضافات",dose:1000,price:3500},
+{id:76,cat:"أدوية بيطرية وسوائل",name:"اتوسيف فورت A1",supplier:"اتكو فارما",unit:"250 جرام",pkg:250,ther:"مضاد حيوي",dose:500,price:580},
+{id:77,cat:"أدوية بيطرية وسوائل",name:"اميجاسين ! A1",supplier:"كابيتال",unit:"100 مل",pkg:100,ther:"مضاد حيوي",dose:500,price:580},
+{id:78,cat:"أدوية بيطرية وسوائل",name:"سمارت ايه بي A1",supplier:"جينوفيت",unit:"500 جرام",pkg:500,ther:"إضافات",dose:500,price:580},
+{id:79,cat:"أدوية بيطرية وسوائل",name:"اميو ستيم A1",supplier:"هايبر كير",unit:"لتر",pkg:1000,ther:"رافع مناعة",dose:1000,price:580},
+{id:80,cat:"أدوية بيطرية وسوائل",name:"فاكس لينكو A1",supplier:"ميديكس",unit:"150 جرام",pkg:150,ther:"مضاد حيوي",dose:500,price:40},
+{id:81,cat:"أدوية بيطرية وسوائل",name:"جروس اموکسی A1",supplier:"بوسطن",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:500,price:22},
+{id:82,cat:"أدوية بيطرية وسوائل",name:"اور جانو فيت A1",supplier:"بيوكير فارما",unit:"500 مل",pkg:500,ther:"فيتامينات",dose:1000,price:500},
+{id:83,cat:"أدوية بيطرية وسوائل",name:"تراكيا فيت A1",supplier:"بيوكير فارما",unit:"250 مل",pkg:250,ther:"فيتامينات",dose:500,price:500},
+{id:84,cat:"أدوية بيطرية وسوائل",name:"دا پیاد! A1",supplier:"بيوكير فارما",unit:"500 جرام",pkg:500,ther:"إضافات",dose:500,price:500},
+{id:85,cat:"أدوية بيطرية وسوائل",name:"توفيت بروبايوتك A11",supplier:"بيوكير فارما",unit:"كيلو",pkg:1000,ther:"بروبايوتك",dose:500,price:500},
+{id:86,cat:"أدوية بيطرية وسوائل",name:"الوفيت امینو پلاس A1",supplier:"بيوكير فارما",unit:"لتر",pkg:1000,ther:"أحماض أمينية",dose:1000,price:500},
+{id:87,cat:"أدوية بيطرية وسوائل",name:"توفيت بروجانو A11",supplier:"بيوكير فارما",unit:"لتر",pkg:1000,ther:"إضافات",dose:1000,price:500},
+{id:88,cat:"أدوية بيطرية وسوائل",name:"وادى ماك A11",supplier:"ام ان تريد",unit:"500 مل",pkg:500,ther:"إضافات",dose:1000,price:500},
+{id:89,cat:"خامات وإضافات أعلاف",name:"بيكربونات صوديوم A1٢",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"منظم حموضة",dose:2000,price:20},
+{id:90,cat:"خامات وإضافات أعلاف",name:"فيتامينات تسمين A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"فيتامينات",dose:1000,price:850},
+{id:91,cat:"خامات وإضافات أعلاف",name:"املاح تسمين A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"أملاح",dose:1000,price:100},
+{id:92,cat:"خامات وإضافات أعلاف",name:"ميسونين A11",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"أحماض أمينية",dose:1500,price:145},
+{id:93,cat:"خامات وإضافات أعلاف",name:"ليسين !A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"أحماض أمينية",dose:1000,price:60},
+{id:94,cat:"خامات وإضافات أعلاف",name:"بريمكسات مواشي A1",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"بريمكس",dose:1000,price:152},
+{id:95,cat:"خامات وإضافات أعلاف",name:"تی بیو A1",supplier:"وايز",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:135},
+{id:96,cat:"خامات وإضافات أعلاف",name:"كولين ٦٠ A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"فيتامينات",dose:1000,price:40},
+{id:97,cat:"خامات وإضافات أعلاف",name:"کی ماكس بلص A1",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:26},
+{id:98,cat:"خامات وإضافات أعلاف",name:"امتی برای A1",supplier:"اورجانيك",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:295},
+{id:99,cat:"خامات وإضافات أعلاف",name:"کیو اس تی درای A1",supplier:"اورجانيك",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:285},
+{id:100,cat:"خامات وإضافات أعلاف",name:"اوكسيد ماغنيسيوم A1",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"أملاح",dose:500,price:13},
+{id:101,cat:"خامات وإضافات أعلاف",name:"الترا يست بلص A1",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"خمائر",dose:1000,price:450},
+{id:102,cat:"خامات وإضافات أعلاف",name:"ثيرونين A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"أحماض أمينية",dose:1000,price:80},
+{id:103,cat:"خامات وإضافات أعلاف",name:"فورمات صوديوم A1",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:80},
+{id:104,cat:"خامات وإضافات أعلاف",name:"بيتامنانيز !A1",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"إنزيمات",dose:500,price:400},
+{id:105,cat:"خامات وإضافات أعلاف",name:"انزيم فايتيز",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"إنزيمات",dose:500,price:600},
+{id:106,cat:"خامات وإضافات أعلاف",name:"فيزا يست !A1",supplier:"كي فيت",unit:"كيلو",pkg:1000,ther:"خمائر",dose:1000,price:140},
+{id:107,cat:"خامات وإضافات أعلاف",name:"رونزایم بروتيز",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"إنزيمات",dose:500,price:700},
+{id:108,cat:"خامات وإضافات أعلاف",name:"بريميكس های دی A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"بريمكس",dose:1000,price:320},
+{id:109,cat:"خامات وإضافات أعلاف",name:"ديكلا شمس A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:200},
+{id:110,cat:"خامات وإضافات أعلاف",name:"ليجنوبوند A1",supplier:"نيوتريفت",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:75},
+{id:111,cat:"خامات وإضافات أعلاف",name:"كيمو تيكس بلس A1",supplier:"بوسطن",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:150},
+{id:112,cat:"خامات وإضافات أعلاف",name:"انزيم طاقه A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"إنزيمات",dose:500,price:1350},
+{id:113,cat:"خامات وإضافات أعلاف",name:"لينكو مايسين A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:500,price:450},
+{id:114,cat:"خامات وإضافات أعلاف",name:"بولتری استار A1",supplier:"الدقهلية",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:550},
+{id:115,cat:"خامات وإضافات أعلاف",name:"برولاكت ! A1",supplier:"بيوكير فارما",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:600},
+{id:116,cat:"خامات وإضافات أعلاف",name:"تايلوزين ! A1",supplier:"بيوكير فارما",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:500,price:1500},
+{id:117,cat:"خامات وإضافات أعلاف",name:"بيوترال A1",supplier:"وايز",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:100},
+{id:118,cat:"خامات وإضافات أعلاف",name:"فوسفيبكو تايلوزين A11",supplier:"بوسطن",unit:"كيلو",pkg:1000,ther:"مضاد حيوي",dose:500,price:40},
+{id:119,cat:"خامات وإضافات أعلاف",name:"انسبيرا انزيم طاقة A1",supplier:"بوسطن",unit:"كيلو",pkg:1000,ther:"إنزيمات",dose:500,price:21},
+{id:120,cat:"خامات وإضافات أعلاف",name:"داسال برای A1",supplier:"مورد غير محدد",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:90},
+{id:121,cat:"خامات وإضافات أعلاف",name:"بير جابيور A1",supplier:"مورد غير محدد",unit:"كيلو",pkg:1000,ther:"إضافات",dose:1000,price:100},
+{id:122,cat:"خامات وإضافات أعلاف",name:"مولينجاميك",supplier:"كابيتال",unit:"علبة",pkg:1000,ther:"إضافات",dose:1000,price:2000},
+{id:123,cat:"تحصينات ولقاحات",name:"مزبون جانبمون AT۲۰۰",supplier:"الشركة الدولية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:100},
+{id:124,cat:"تحصينات ولقاحات",name:"مياه معدنيه A11",supplier:"العهدة",unit:"لتر",pkg:1000,ther:"مياه للتحصين",dose:1000,price:50},
+{id:125,cat:"تحصينات ولقاحات",name:"بينتابرو A1",supplier:"الشركة الدولية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:3500},
+{id:126,cat:"تحصينات ولقاحات",name:"بريسيز A11",supplier:"العهدة",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:4000},
+{id:127,cat:"تحصينات ولقاحات",name:"فاكسيل فالي",supplier:"ناجي عوض",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:128,cat:"تحصينات ولقاحات",name:"فردی استرفیت A11",supplier:"الترفيت",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:375},
+{id:129,cat:"تحصينات ولقاحات",name:"جمبورو حي A1",supplier:"انتر ميديكا فيت",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:2850},
+{id:130,cat:"تحصينات ولقاحات",name:"فاكميون نيوكاسل A11",supplier:"ميدكس",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:350},
+{id:131,cat:"تحصينات ولقاحات",name:"نیوکاسل فردی ابقا A11",supplier:"ام ان تريد",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:720},
+{id:132,cat:"تحصينات ولقاحات",name:"شار مركز A1",supplier:"الشركة الأوربية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:116},
+{id:133,cat:"تحصينات ولقاحات",name:"أوكسيد A1",supplier:"الشركة المصرية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:4400},
+{id:134,cat:"تحصينات ولقاحات",name:"پر A1",supplier:"الشركة الدولية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:2850},
+{id:135,cat:"تحصينات ولقاحات",name:"فاكسيمون nd A1",supplier:"الشركة الدوليه",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:2400},
+{id:136,cat:"تحصينات ولقاحات",name:"فاكسيمون جامبورو A11",supplier:"الشركة الدولية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:2600},
+{id:137,cat:"تحصينات ولقاحات",name:"نيوكاسل بريميقات hand A1",supplier:"فيت تراست",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:540},
+{id:138,cat:"تحصينات ولقاحات",name:"ايجي فلو A11",supplier:"بيو فارما",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:800},
+{id:139,cat:"تحصينات ولقاحات",name:"يوني فاكس A11",supplier:"ناجي عوض",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:140,cat:"تحصينات ولقاحات",name:"ثنای جمبورو hand IA1",supplier:"فيت تراست",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:380},
+{id:141,cat:"تحصينات ولقاحات",name:"رينو فاك البت سفن A11",supplier:"ميفاك",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:142,cat:"تحصينات ولقاحات",name:"ثلاثي سيفاك A11",supplier:"ميفاك",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:143,cat:"تحصينات ولقاحات",name:"نيوكاسل ثلاثي 1951A1",supplier:"ناجي عوض",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:144,cat:"تحصينات ولقاحات",name:"اولستر ای بی A11",supplier:"ميديكس",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:145,cat:"تحصينات ولقاحات",name:"فاكسينوفا لاسونا A1",supplier:"الشركة الدولية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:146,cat:"تحصينات ولقاحات",name:"ميد فاك جمبورو A1",supplier:"ميد فاك",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:147,cat:"تحصينات ولقاحات",name:"في جول A1",supplier:"جينوفيت",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:148,cat:"مطهرات وأمن حيوي",name:"كلور A11",supplier:"العهدة",unit:"برميل",pkg:200000,ther:"مطهر",dose:5000,price:500},
+{id:149,cat:"مطهرات وأمن حيوي",name:"فنيك A11",supplier:"العهدة",unit:"لتر",pkg:1000,ther:"مطهر",dose:2000,price:40},
+{id:150,cat:"مطهرات وأمن حيوي",name:"فيركون A1",supplier:"الدولية",unit:"كيلو",pkg:1000,ther:"مطهر",dose:1000,price:750},
+{id:151,cat:"مطهرات وأمن حيوي",name:"بروكلين",supplier:"وايز",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:300},
+{id:152,cat:"مطهرات وأمن حيوي",name:"فورمالين سائل A1",supplier:"العهدة",unit:"لتر",pkg:1000,ther:"مطهر",dose:10000,price:160},
+{id:153,cat:"مطهرات وأمن حيوي",name:"ساتغير بلص A11",supplier:"مالتي ميديكا",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:1000},
+{id:154,cat:"مطهرات وأمن حيوي",name:"اکواسیبت بی بی A1",supplier:"مالتي ميديكا",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:300},
+{id:155,cat:"مطهرات وأمن حيوي",name:"دوراسبيت ابقا 551 ga",supplier:"ام ان تريد",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:384},
+{id:156,cat:"مطهرات وأمن حيوي",name:"فيروسيد ! A1",supplier:"الدقهلية",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:905},
+{id:157,cat:"مطهرات وأمن حيوي",name:"كينو ايه A1",supplier:"الدقهلية",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:300},
+{id:158,cat:"مطهرات وأمن حيوي",name:"الفاتشينو A11",supplier:"كابيتال محمد الراعي",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:500},
+{id:159,cat:"مطهرات وأمن حيوي",name:"كوكس كيل A1",supplier:"بوسطن",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:550},
+{id:160,cat:"مطهرات وأمن حيوي",name:"ديازينون A11",supplier:"العهدة",unit:"لتر",pkg:1000,ther:"مبيد حشري",dose:1000,price:575},
+{id:161,cat:"مطهرات وأمن حيوي",name:"كوسان فيركون A1",supplier:"اورجانيك",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:700},
+{id:162,cat:"مطهرات وأمن حيوي",name:"اجينا A11",supplier:"الشركة المصرية",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:750},
+{id:163,cat:"مطهرات وأمن حيوي",name:"اتوس بديل الاجيتا A1",supplier:"نقدي",unit:"لتر",pkg:1000,ther:"مبيد حشري",dose:1000,price:500},
+{id:164,cat:"مطهرات وأمن حيوي",name:"المبادا ! A1",supplier:"العهدة",unit:"لتر",pkg:1000,ther:"مبيد حشري",dose:1000,price:500},
+{id:165,cat:"مطهرات وأمن حيوي",name:"سكيل اوف A1",supplier:"وايز",unit:"لتر",pkg:1000,ther:"مطهر",dose:1000,price:500},
+{id:166,cat:"مطهرات وأمن حيوي",name:"فورمالين تبخير قوالب",supplier:"العهده",unit:"كيلو",pkg:1000,ther:"مطهر",dose:1000,price:400}];
+/* ====================================================================
+   نظام إدارة مخازن الأدوية البيطرية - النواة الأساسية (أوف لاين)
+   التخزين: LocalStorage | بدون أي مكتبات خارجية
+==================================================================== */
+
+/* ---------- أدوات مساعدة ---------- */
+const $=(s,p=document)=>p.querySelector(s);
+const $$=(s,p=document)=>[...p.querySelectorAll(s)];
+const fmt=n=>{n=Number(n)||0;return n.toLocaleString('en-US',{maximumFractionDigits:2})};
+const money=n=>fmt(n)+' ج.م';
+const today=()=>new Date().toISOString().slice(0,10);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function toast(msg,type=''){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;
+  $('#toast').appendChild(t);setTimeout(()=>t.remove(),2800);}
+
+/* ---------- إدارة الحالة والتخزين ---------- */
+const DB_KEY='vetpharm_erp_v1';
+const APP_VERSION='v26 — 2026-06-22';
+let DB={};
+
+/* ====================================================================
+   إعدادات Firebase — ضع هنا بيانات مشروعك
+   انسخ كائن firebaseConfig من Firebase Console:
+   Project settings -> General -> Your apps -> SDK setup and configuration
+==================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCjK1SZ-ny91SJhPm-VD193O3cpBuNIEjU",
+  authDomain: "vetpharma-erp.firebaseapp.com",
+  databaseURL: "https://vetpharma-erp-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "vetpharma-erp",
+  storageBucket: "vetpharma-erp.firebasestorage.app",
+  messagingSenderId: "927976475498",
+  appId: "1:927976475498:web:236313166c3df7018c7313"
+};
+/* ==================== لا تعدّل تحت هذا السطر ==================== */
+
+let fbApp=null,fbAuth=null,fbDB=null,fbReady=false,fbUser=null;
+let syncMode='local';
+let dbRef=null, suppressPush=false, pushTimer=null;
+
+function fbConfigured(){return firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('ضع');}
+function setSync(mode){
+  syncMode=mode;
+  const dot=$('#syncDot'),txt=$('#syncTxt');if(!dot)return;
+  dot.className='sync-dot '+(mode==='online'?'on':mode==='offline'?'off':'local');
+  txt.textContent=mode==='online'?'متزامن':mode==='offline'?'غير متصل':'محلي';
+}
+function initFirebase(){
+  if(!fbConfigured())return false;
+  try{
+    fbApp=firebase.initializeApp(firebaseConfig);
+    fbAuth=firebase.auth();
+    fbDB=firebase.database();
+    fbReady=true;
+    return true;
+  }catch(e){console.error('Firebase init error',e);return false;}
+}
+let lastCloudJSON='';
+function attachRealtime(){
+  if(!fbReady)return;
+  dbRef=fbDB.ref('erp_data');
+  dbRef.on('value',snap=>{
+    const val=snap.val();
+    if(val&&val.products){
+      const incoming=JSON.stringify(val);
+      setSync('online');
+      // تجاهل لو البيانات نفسها (صدى الكتابة بتاعتنا) — يمنع الوميض
+      if(incoming===JSON.stringify(DB)||incoming===lastCloudJSON){lastCloudJSON=incoming;return;}
+      lastCloudJSON=incoming;
+      // لا تقاطع المستخدم أثناء فتح نافذة أو الكتابة في حقل
+      const modalOpen=document.querySelector('.modal-bg[style*="flex"],.modal-bg.open');
+      const typing=document.activeElement&&['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
+      suppressPush=true;
+      DB=val;
+      localStorage.setItem(DB_KEY,JSON.stringify(DB));
+      ensureTables();
+      if(fbUser&&!modalOpen&&!typing){buildNav&&buildNav();if(currentPage)renderPage(currentPage);}
+      suppressPush=false;
+    }
+  },err=>{console.error(err);setSync('offline');});
+}
+function pushToCloud(){
+  if(!fbReady||suppressPush||!fbUser)return;
+  clearTimeout(pushTimer);
+  pushTimer=setTimeout(()=>{
+    fbDB.ref('erp_data').set(DB).then(()=>setSync('online')).catch(e=>{console.error(e);setSync('offline');});
+  },600);
+}
+
+function loadDB(){
+  const raw=localStorage.getItem(DB_KEY);
+  if(raw){try{DB=JSON.parse(raw);}catch(e){DB={};}}
+  if(!DB.products||!DB.products.length) seedAll();
+  ensureTables();
+  saveDB();
+}
+function ensureTables(){
+  ['products','suppliers','customers','purchases','sales','vaccines','treasury',
+   'storeDocs','returns','stockAdjust','users','farmInvoices','farmTransfers'].forEach(k=>{if(!DB[k])DB[k]=[];});
+  if(!DB.settings)DB.settings={company:'الشركة المصرية لتوزيع الأدوية البيطرية',currency:'ج.م',reorderDefault:5};
+  DB.products.forEach(p=>{
+    if(p.cost===undefined)p.cost=0;
+    if(p.doseMeat===undefined)p.doseMeat=p.dose||0;
+    if(p.doseWater===undefined)p.doseWater=0;
+    if(p.maker===undefined)p.maker='';
+    if(p.wdMeat===undefined)p.wdMeat=0;   /* فترة سحب اللحم بالأيام */
+    if(p.wdEgg===undefined)p.wdEgg=0;     /* فترة سحب البيض بالأيام */
+  });
+  (DB.vaccines||[]).forEach(v=>{if(v.maker===undefined)v.maker='';});
+  if(!DB.payments)DB.payments=[];
+  migrateCycleCodes();
+}
+function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(DB));pushToCloud();}
+function seedAll(){
+  DB.products=SEED_PRODUCTS.map(p=>({...p,cost:0,stock:0,reorder:5,expiry:'',doseMeat:p.dose||0,doseWater:0,maker:''}));
+  DB.suppliers=seedSuppliers();
+  DB.customers=SEED_CUSTOMERS.slice();
+  DB.vaccines=SEED_VACCINES.slice();
+  DB.purchases=[];DB.sales=[];DB.treasury=[];DB.storeDocs=[];DB.returns=[];DB.stockAdjust=[];
+  DB.users=SEED_USERS.slice();
+}
+function seedSuppliers(){
+  const names=[...new Set(SEED_PRODUCTS.map(p=>p.supplier).filter(Boolean))];
+  return names.map((n,i)=>({id:'S'+(i+1),name:n,phone:'',gov:'',balance:0,note:''}));
+}
+
+/* ---------- بيانات افتراضية إضافية ---------- */
+const SEED_CUSTOMERS=[
+  {id:'C1',name:'مزرعة الجديدة',phone:'01000000001',gov:'الشرقية',type:'مزرعة',balance:0,note:''},
+  {id:'C2',name:'مزرعة الكوثر',phone:'01000000002',gov:'الشرقية',type:'مزرعة',balance:0,note:''},
+  {id:'C3',name:'تاجر أدوية - أحمد',phone:'01000000003',gov:'الدقهلية',type:'تاجر',balance:0,note:''},
+  {id:'C4',name:'صيدلية بيطرية المركز',phone:'01000000004',gov:'القاهرة',type:'صيدلية',balance:0,note:''},
+  {id:'C5',name:'مزرعة الحاج وفيق',phone:'01000000005',gov:'الغربية',type:'مزرعة',balance:0,note:''}
+];
+// لقاحات الصورة كبيانات افتراضية (مورد، اسم، عدد، سعر، إجمالي)
+const SEED_VACCINES=[
+  {id:uid(),date:today(),supplier:'الدوليه',name:'فاكسميون لاسوتا',maker:'الدوليه',qty:20,price:350},
+  {id:uid(),date:today(),supplier:'انترفيت',name:'انترفيت h9nd',maker:'انترفيت',qty:15,price:2500},
+  {id:uid(),date:today(),supplier:'الدوليه',name:'فاكسميون جمبورو',maker:'الدوليه',qty:30,price:600},
+  {id:uid(),date:today(),supplier:'انترفيت',name:'كولون',maker:'انترفيت',qty:60,price:170},
+  {id:uid(),date:today(),supplier:'ناجي عوض',name:'ناجي عوض h5nd h9',maker:'ناجي عوض',qty:60,price:2200},
+  {id:uid(),date:today(),supplier:'سيفا',name:'أي بيرد سيفا 5000',maker:'سيفا',qty:7,price:3500},
+  {id:uid(),date:today(),supplier:'سيفا',name:'أي بيرد سيفا 2500',maker:'سيفا',qty:1,price:2150},
+  {id:uid(),date:today(),supplier:'انترفيت',name:'كولون أي بي',maker:'انترفيت',qty:42,price:270}
+];
+const SEED_USERS=[
+  {id:'U1',name:'المدير العام',username:'admin',role:'مدير عام'},
+  {id:'U2',name:'المحاسب',username:'accountant',role:'محاسب'},
+  {id:'U3',name:'أمين المخزن',username:'store',role:'أمين مخزن'}
+];
+
+/* ---------- القائمة الجانبية والموديولات ---------- */
+const MODULES=[
+  {grp:'الرئيسية'},
+  {id:'dashboard',name:'لوحة التحكم',ico:'📊',sub:'نظرة عامة على المخزون والأداء'},
+  {grp:'المخزون'},
+  {id:'products',name:'قاعدة المنتجات',ico:'📦',sub:'الأصناف والأدوية والتصنيفات'},
+  {id:'inventory',name:'المخزون والأرصدة',ico:'🏬',sub:'الرصيد الحالي وحدود الطلب'},
+  {id:'storeDocs',name:'إذونات المخزن',ico:'📑',sub:'استلام وصرف وتحويل'},
+  {id:'stockAdjust',name:'الجرد والصلاحيات',ico:'🗓️',sub:'الجرد الدوري وتواريخ الصلاحية'},
+  {grp:'الحركة التجارية'},
+  {id:'purchases',name:'المشتريات',ico:'🛒',sub:'فواتير الشراء من الموردين'},
+  {id:'sales',name:'المبيعات',ico:'💰',sub:'فواتير البيع للعملاء'},
+  {id:'returns',name:'المرتجعات',ico:'↩️',sub:'مرتجع مبيعات ومشتريات'},
+  {id:'vaccines',name:'التحصينات واللقاحات',ico:'💉',sub:'حركة شراء اللقاحات'},
+  {id:'farmInvoices',name:'فواتير المزارع',ico:'🏠',sub:'فواتير تحصينات وأدوية لكل مزرعة + برنامج الجرعات'},
+  {grp:'العلاقات'},
+  {id:'suppliers',name:'الموردين',ico:'🏭',sub:'بيانات الموردين وأرصدتهم'},
+  {id:'customers',name:'العملاء',ico:'👥',sub:'بيانات العملاء ومتابعة التحصيل'},
+  {id:'treasury',name:'الخزينة والنقدية',ico:'🏦',sub:'حركة الدخل والمصروفات'},
+  {grp:'أدوات'},
+  {id:'doseCalc',name:'حاسبة الجرعات',ico:'🧮',sub:'حاسبة جرعات وتكاليف القطيع'},
+  {id:'invoiceCalc',name:'حاسبة الفواتير',ico:'🧾',sub:'تجهيز فاتورة سريعة بالتكلفة'},
+  {grp:'التقارير'},
+  {id:'reports',name:'التقارير',ico:'📈',sub:'تقارير زمنية وتحليلية'},
+  {id:'alerts',name:'التنبيهات',ico:'🚨',sub:'نواقص وصلاحيات وذمم'},
+  {grp:'النظام'},
+  {id:'backups',name:'النسخ الاحتياطية',ico:'💾',sub:'نسخ تلقائية يومية واسترجاع'},
+  {id:'users',name:'إدارة المستخدمين',ico:'👤',sub:'المستخدمون والصلاحيات',adminOnly:true},
+];
+/* صلاحيات الأدوار: أي موديولات يراها كل دور */
+const ROLE_ACCESS={
+  'مدير عام':'*',
+  'محاسب':['dashboard','purchases','sales','returns','farmInvoices','suppliers','customers','treasury','reports','alerts','invoiceCalc','backups'],
+  'أمين مخزن':['dashboard','products','inventory','storeDocs','stockAdjust','vaccines','returns','alerts','doseCalc'],
+  'مندوب مبيعات':['dashboard','sales','farmInvoices','customers','invoiceCalc','doseCalc'],
+  'مشاهد':['dashboard','products','inventory','reports','alerts']
+};
+function canAccess(id){
+  const acc=ROLE_ACCESS[currentUserRole];
+  if(acc==='*'||!acc)return true;
+  return acc.includes(id);
+}
+function applyRolePermissions(){/* تُطبّق عبر buildNav الذي يفلتر حسب canAccess */}
+let currentPage='dashboard';
+function buildNav(){
+  const nav=$('#nav');nav.innerHTML='';
+  let pendingGroup=null,groupHasItems=false;
+  MODULES.forEach(m=>{
+    if(m.grp){
+      // علّق المجموعة حتى نتأكد أن تحتها عناصر مرئية
+      pendingGroup=m.grp;groupHasItems=false;return;
+    }
+    if(m.adminOnly&&currentUserRole!=='مدير عام')return;
+    if(!canAccess(m.id))return;
+    if(pendingGroup&&!groupHasItems){
+      const g=document.createElement('div');g.className='nav-group';g.textContent=pendingGroup;nav.appendChild(g);
+      groupHasItems=true;
+    }
+    const it=document.createElement('div');it.className='nav-item'+(m.id===currentPage?' active':'');
+    it.dataset.id=m.id;
+    let badge='';
+    if(m.id==='alerts'){const c=countAlerts();if(c)badge=`<span class="badge">${c}</span>`;}
+    it.innerHTML=`<span class="ico">${m.ico}</span><span>${m.name}</span>${badge}`;
+    it.onclick=()=>go(m.id);
+    nav.appendChild(it);
+  });
+}
+function go(id){
+  // ضمان إخفاء شاشة الدخول طالما هناك جلسة أو في الوضع المحلي
+  if(fbUser||!fbConfigured()){showApp();}
+  currentPage=id;
+  const m=MODULES.find(x=>x.id===id);
+  $('#pageTitle').textContent=m.name;$('#pageSub').textContent=m.sub;
+  $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.id===id));
+  $('#sidebar').classList.remove('open');
+  renderPage(id);
+}
+function renderPage(id){
+  const c=$('#content');c.innerHTML='';
+  const page=document.createElement('div');page.className='page active';c.appendChild(page);
+  ({dashboard:renderDashboard,products:renderProducts,inventory:renderInventory,
+    storeDocs:renderStoreDocs,stockAdjust:renderStockAdjust,purchases:renderPurchases,
+    sales:renderSales,returns:renderReturns,vaccines:renderVaccines,suppliers:renderSuppliers,
+    customers:renderCustomers,treasury:renderTreasury,doseCalc:renderDoseCalc,
+    invoiceCalc:renderInvoiceCalc,reports:renderReports,alerts:renderAlerts,
+    farmInvoices:renderFarmInvoices,backups:renderBackups,users:renderUsers}[id]||(()=>{
+      page.innerHTML='<div class="empty"><span class="ico">🚧</span>قيد الإنشاء</div>';
+    }))(page);
+}
+
+/* ====================================================================
+   لوحة التحكم
+==================================================================== */
+function stockValue(){return DB.products.reduce((s,p)=>s+(p.stock||0)*(p.price||0),0);}
+function lowStockList(){return DB.products.filter(p=>(p.stock||0)<=(p.reorder||0));}
+function monthSum(arr){const m=today().slice(0,7);return arr.filter(x=>(x.date||'').slice(0,7)===m).reduce((s,x)=>s+(x.total||0),0);}
+function farmMonthSum(){const m=today().slice(0,7);return (DB.farmInvoices||[]).filter(f=>(f.entryDate||f.createdAt||'').slice(0,7)===m)
+  .reduce((s,f)=>s+f.items.reduce((a,i)=>a+i.qty*i.price,0),0);}
+function monthSumSales(){const m=today().slice(0,7);return DB.sales.filter(x=>!x.fromFarm&&(x.date||'').slice(0,7)===m).reduce((s,x)=>s+(x.total||0),0);}
+function renderDashboard(page){
+  const lowCount=lowStockList().length;
+  const expSoon=DB.products.filter(p=>p.expiry&&daysTo(p.expiry)<=60&&daysTo(p.expiry)>=0).length;
+  const cards=[
+    {ico:'💵',lbl:'قيمة المخزون',val:money(stockValue()),meta:DB.products.length+' صنف',c:'var(--primary)'},
+    {ico:'📦',lbl:'إجمالي الأصناف',val:fmt(DB.products.length),meta:'4 تصنيفات',c:'var(--cyan)'},
+    {ico:'⚠️',lbl:'أصناف ناقصة',val:fmt(lowCount),meta:'تحت حد الطلب',c:'var(--amber)'},
+    {ico:'🛒',lbl:'مشتريات الشهر',val:money(monthSum(DB.purchases)),meta:'الشهر الحالي',c:'var(--purple)'},
+    {ico:'💰',lbl:'مبيعات الشهر',val:money(monthSumSales()+farmMonthSum()),meta:'شامل فواتير المزارع',c:'var(--green)'},
+    {ico:'⏰',lbl:'قرب الصلاحية',val:fmt(expSoon),meta:'خلال 60 يوم',c:'var(--red)'},
+  ];
+  page.innerHTML=`<div class="cards">${cards.map(c=>`
+    <div class="stat" style="--accent:${c.c}">
+      <span class="ico">${c.ico}</span>
+      <div class="lbl">${c.lbl}</div><div class="val">${c.val}</div><div class="meta">${c.meta}</div>
+    </div>`).join('')}</div>`;
+
+  // قيمة المخزون حسب التصنيف
+  const cats={};DB.products.forEach(p=>{cats[p.cat]=(cats[p.cat]||0)+(p.stock||0)*(p.price||0);});
+  const catRows=Object.entries(cats).map(([k,v])=>{
+    const cnt=DB.products.filter(p=>p.cat===k).length;
+    return `<tr><td>${k}</td><td>${cnt}</td><td><b>${money(v)}</b></td></tr>`;}).join('');
+
+  // أعلى الموردين بعدد الأصناف
+  const sup={};DB.products.forEach(p=>{if(p.supplier)sup[p.supplier]=(sup[p.supplier]||0)+1;});
+  const topSup=Object.entries(sup).sort((a,b)=>b[1]-a[1]).slice(0,6)
+    .map(([k,v])=>`<tr><td>${k}</td><td><span class="tag blue">${v} صنف</span></td></tr>`).join('');
+
+  const div=document.createElement('div');
+  div.innerHTML=`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div class="panel">
+      <div class="panel-h"><h3>🏷️ قيمة المخزون حسب التصنيف</h3></div>
+      <div class="panel-b flush"><table><thead><tr><th>التصنيف</th><th>عدد الأصناف</th><th>القيمة</th></tr></thead>
+        <tbody>${catRows}</tbody></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h3>🏭 أعلى الموردين</h3></div>
+      <div class="panel-b flush"><table><thead><tr><th>المورد</th><th>الأصناف</th></tr></thead>
+        <tbody>${topSup}</tbody></table></div>
+    </div>
+  </div>`;
+  page.appendChild(div);
+
+  if(lowCount){
+    const al=document.createElement('div');al.className='panel';al.style.borderColor='var(--amber)';
+    al.innerHTML=`<div class="panel-h"><h3>⚠️ أصناف تحتاج إعادة طلب (${lowCount})</h3>
+      <div class="tools"><button class="btn sm ghost" onclick="go('inventory')">إدارة المخزون</button></div></div>
+      <div class="panel-b flush"><table><thead><tr><th>الصنف</th><th>التصنيف</th><th>الرصيد</th><th>حد الطلب</th></tr></thead>
+      <tbody>${lowStockList().slice(0,8).map(p=>`<tr><td>${p.name}</td><td>${p.cat}</td>
+        <td><span class="tag red">${fmt(p.stock||0)}</span></td><td>${fmt(p.reorder||0)}</td></tr>`).join('')}</tbody></table></div>`;
+    page.appendChild(al);
+  }
+}
+function daysTo(d){return Math.ceil((new Date(d)-new Date())/86400000);}
+
+/* ====================================================================
+   قاعدة المنتجات  (تعديل مباشر + فلاتر + بحث + إضافة/حذف)
+==================================================================== */
+let prodFilter={cat:'',supplier:'',q:''};
+function renderProducts(page){
+  const cats=[...new Set(DB.products.map(p=>p.cat))];
+  const sups=[...new Set(DB.products.map(p=>p.supplier).filter(Boolean))].sort();
+  page.innerHTML=`
+  <div class="panel">
+    <div class="panel-h">
+      <h3>📦 قاعدة المنتجات</h3>
+      <div class="tools"><button class="btn sm ghost" onclick="openWdCalc()">🧮 فترة السحب</button>
+        <div class="search"><input id="pq" placeholder="بحث بالاسم..." value="${prodFilter.q}"></div>
+        <select id="pcat"><option value="">كل التصنيفات</option>${cats.map(c=>`<option ${prodFilter.cat===c?'selected':''}>${c}</option>`).join('')}</select>
+        <select id="psup"><option value="">كل الموردين</option>${sups.map(s=>`<option ${prodFilter.supplier===s?'selected':''}>${s}</option>`).join('')}</select>
+        <button class="btn" onclick="productModal()">➕ صنف جديد</button>
+      </div>
+    </div>
+    <div class="panel-b flush">
+      <div class="tbl-wrap">
+        <table id="ptbl"><thead><tr>
+          <th>#</th><th>اسم المنتج</th><th>التصنيف</th><th>المورد</th><th>الوحدة</th>
+          <th>حجم العبوة</th><th>التصنيف العلاجي</th><th>الشركة المنتجة</th><th>جرعة/طن لحم</th><th>جرعة/لتر ماء</th><th>سعر الشراء</th><th>سعر البيع</th><th>الرصيد</th><th></th>
+        </tr></thead><tbody id="pbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="mini" id="pcount" style="padding:4px 6px"></div>`;
+  const draw=()=>{
+    const f=DB.products.filter(p=>
+      (!prodFilter.cat||p.cat===prodFilter.cat)&&
+      (!prodFilter.supplier||p.supplier===prodFilter.supplier)&&
+      (!prodFilter.q||(p.name||'').includes(prodFilter.q)));
+    $('#pbody').innerHTML=f.map(p=>`<tr data-id="${p.id}">
+      <td>${p.id}</td>
+      <td class="editable" data-f="name">${p.name||''}</td>
+      <td class="editable" data-f="cat">${catTag(p.cat)}</td>
+      <td class="editable" data-f="supplier">${p.supplier||'-'}</td>
+      <td class="editable" data-f="unit">${p.unit||'-'}</td>
+      <td class="editable" data-f="pkg">${fmt(p.pkg)}</td>
+      <td class="editable" data-f="ther">${p.ther||'-'}</td>
+      <td class="editable" data-f="maker">${p.maker||'<span class="mini">—</span>'}</td>
+      <td class="editable" data-f="doseMeat">${(p.doseMeat||0)>0?fmt(p.doseMeat):'<span class="mini">—</span>'}</td>
+      <td class="editable" data-f="doseWater">${(p.doseWater||0)>0?fmt(p.doseWater):'<span class="mini">—</span>'}</td>
+      <td class="editable" data-f="cost">${(p.cost||0)>0?money(p.cost):'<span class="mini">—</span>'}</td>
+      <td class="editable" data-f="price"><b>${money(p.price)}</b></td>
+      <td class="editable" data-f="stock">${stockTag(p)}</td>
+      <td class="row-actions"><button class="btn xs red" onclick="delProduct(${p.id})">🗑</button></td>
+    </tr>`).join('')||`<tr><td colspan="14"><div class="empty"><span class="ico">🔍</span>لا توجد نتائج</div></td></tr>`;
+    $('#pcount').textContent=`عرض ${f.length} من ${DB.products.length} صنف`;
+    bindEdit('#pbody','products');
+  };
+  $('#pq').oninput=e=>{prodFilter.q=e.target.value;draw();};
+  $('#pcat').onchange=e=>{prodFilter.cat=e.target.value;draw();};
+  $('#psup').onchange=e=>{prodFilter.supplier=e.target.value;draw();};
+  draw();
+}
+function catTag(c){const m={'أدوية بيطرية وسوائل':'blue','خامات وإضافات أعلاف':'amber','تحصينات ولقاحات':'green','مطهرات وأمن حيوي':'cyan'};
+  return `<span class="tag ${m[c]||'gray'}">${c||'-'}</span>`;}
+function stockTag(p){const s=p.stock||0;const cls=s<=0?'red':s<=(p.reorder||0)?'amber':'green';return `<span class="tag ${cls}">${fmt(s)}</span>`;}
+
+/* تعديل مباشر بالضغط على الخانة */
+function bindEdit(sel,table){
+  $$(sel+' td.editable').forEach(td=>{
+    td.onclick=()=>{
+      if(td.querySelector('input,select'))return;
+      const id=td.closest('tr').dataset.id;const f=td.dataset.f;
+      const rec=DB[table].find(r=>String(r.id)===String(id));if(!rec)return;
+      const numeric=['pkg','dose','doseMeat','doseWater','price','cost','stock','reorder','qty','wdMeat','wdEgg'].includes(f);
+      const old=td.innerHTML;
+      let inp;
+      if(f==='cat'){inp=document.createElement('select');
+        ['أدوية بيطرية وسوائل','خامات وإضافات أعلاف','تحصينات ولقاحات','مطهرات وأمن حيوي']
+          .forEach(o=>{const op=new Option(o,o,false,o===rec[f]);inp.add(op);});}
+      else{inp=document.createElement('input');inp.type=numeric?'number':'text';inp.value=rec[f]??'';}
+      td.innerHTML='';td.appendChild(inp);inp.focus();
+      const save=()=>{let v=inp.value;if(numeric)v=Number(v)||0;rec[f]=v;saveDB();renderPage(currentPage);
+        toast('تم الحفظ ✓','green');};
+      inp.onblur=save;
+      inp.onkeydown=e=>{if(e.key==='Enter')save();if(e.key==='Escape'){td.innerHTML=old;}};
+    };
+  });
+}
+function delProduct(id){confirmBox('حذف الصنف؟','سيتم حذف الصنف نهائياً.',()=>{
+  DB.products=DB.products.filter(p=>p.id!==id);saveDB();renderPage('products');toast('تم الحذف','red');});}
+function productModal(){
+  const nextId=Math.max(0,...DB.products.map(p=>p.id))+1;
+  openModal('➕ إضافة صنف جديد',`
+    <div class="form-grid">
+      <div class="field full"><label>اسم المنتج</label><input id="m_name"></div>
+      <div class="field"><label>التصنيف الأساسي</label><select id="m_cat">
+        <option>أدوية بيطرية وسوائل</option><option>خامات وإضافات أعلاف</option>
+        <option>تحصينات ولقاحات</option><option>مطهرات وأمن حيوي</option></select></div>
+      <div class="field"><label>المورد</label><input id="m_supplier"></div>
+      <div class="field"><label>الوحدة</label><input id="m_unit" value="كيلو"></div>
+      <div class="field"><label>حجم/وزن العبوة</label><input id="m_pkg" type="number" value="1000"></div>
+      <div class="field"><label>التصنيف العلاجي</label><input id="m_ther"></div>
+      <div class="field"><label>الشركة المنتجة</label><input id="m_maker"></div>
+      <div class="field"><label>جرعة/طن لحم</label><input id="m_doseMeat" type="number" value="0"></div>
+      <div class="field"><label>جرعة/لتر ماء</label><input id="m_doseWater" type="number" value="0"></div>
+      <div class="field"><label>فترة سحب اللحم (يوم)</label><input id="m_wdMeat" type="number" value="0"></div>
+      <div class="field"><label>فترة سحب البيض (يوم)</label><input id="m_wdEgg" type="number" value="0"></div>
+      <div class="field"><label>سعر الشراء (التكلفة)</label><input id="m_cost" type="number" value="0"></div>
+      <div class="field"><label>سعر البيع</label><input id="m_price" type="number" value="0"></div>
+      <div class="field"><label>الرصيد الافتتاحي</label><input id="m_stock" type="number" value="0"></div>
+    </div>`,
+    ()=>{
+      const p={id:nextId,name:$('#m_name').value.trim(),cat:$('#m_cat').value,
+        supplier:$('#m_supplier').value.trim(),unit:$('#m_unit').value.trim(),
+        pkg:+$('#m_pkg').value||0,ther:$('#m_ther').value.trim(),maker:$('#m_maker').value.trim(),
+        dose:+$('#m_doseMeat').value||0,doseMeat:+$('#m_doseMeat').value||0,doseWater:+$('#m_doseWater').value||0,
+        price:+$('#m_price').value||0,cost:+$('#m_cost').value||0,stock:+$('#m_stock').value||0,reorder:5,expiry:'',
+        wdMeat:+$('#m_wdMeat').value||0,wdEgg:+$('#m_wdEgg').value||0};
+      if(!p.name){toast('اكتب اسم المنتج','red');return false;}
+      DB.products.push(p);saveDB();renderPage('products');toast('تمت الإضافة ✓','green');
+    });
+}
+
+/* ---------- نوافذ منبثقة عامة ---------- */
+function openModal(title,bodyHTML,onSave,saveLabel='حفظ'){
+  $('#modal').innerHTML=`
+    <div class="modal-h"><h3>${title}</h3><button class="x" onclick="closeModal()">✕</button></div>
+    <div class="modal-b">${bodyHTML}</div>
+    <div class="modal-f">
+      <button class="btn green" id="mSave">${saveLabel}</button>
+      <button class="btn ghost" onclick="closeModal()">إلغاء</button>
+    </div>`;
+  $('#modalBg').classList.add('show');
+  $('#mSave').onclick=()=>{if(onSave()!==false)closeModal();};
+}
+function closeModal(){$('#modalBg').classList.remove('show');}
+function confirmBox(title,msg,onYes){
+  openModal(title,`<p style="color:var(--text2)">${msg}</p>`,()=>{onYes();},'تأكيد');
+  $('#mSave').classList.remove('green');$('#mSave').classList.add('red');
+}
+$('#modalBg')&&($('#modalBg').onclick=e=>{if(e.target.id==='modalBg')closeModal();});
+
+/* ---------- تنبيهات (عدّاد) ---------- */
+function countAlerts(){
+  let c=lowStockList().length;
+  c+=DB.products.filter(p=>p.expiry&&daysTo(p.expiry)<=60&&daysTo(p.expiry)>=0).length;
+  c+=DB.customers.filter(x=>(x.balance||0)>0).length;
+  c+=(DB.vaccines||[]).filter(v=>(v.qty||0)<0).length;
+  return c;
+}
+
+/* ---------- إقلاع ---------- */
+/* ====================================================================
+   إدارة المستخدمين (للمدير العام فقط) — عبر Firebase
+==================================================================== */
+const ALL_ROLES=['مدير عام','محاسب','أمين مخزن','مندوب مبيعات','مشاهد'];
+function renderUsers(page){
+  if(currentUserRole!=='مدير عام'){page.innerHTML='<div class="empty"><span class="ico">🔒</span>هذه الصفحة للمدير العام فقط</div>';return;}
+  if(!fbReady){page.innerHTML='<div class="empty"><span class="ico">⚠️</span>إدارة المستخدمين تتطلب تفعيل Firebase</div>';return;}
+  page.innerHTML=`<div class="panel"><div class="panel-h"><h3>👤 إدارة المستخدمين والصلاحيات</h3>
+    <div class="tools"><button class="btn" onclick="addUserModal()">➕ مستخدم جديد</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>البريد الإلكتروني</th><th>الاسم</th><th>الدور</th><th>الصلاحيات</th><th></th>
+    </tr></thead><tbody id="usersBody"><tr><td colspan="5"><div class="empty"><span class="ico">⏳</span>جارٍ التحميل...</div></td></tr></tbody></table></div></div>
+    <p class="mini" style="padding:6px">ملاحظة: إنشاء المستخدم يتم عبر صفحة Authentication في Firebase Console، وهنا تُحدّد الأدوار. الدور يحدّد الموديولات التي يراها المستخدم.</p></div>`;
+  fbDB.ref('users').once('value').then(snap=>{
+    const users=snap.val()||{};
+    const rows=Object.entries(users).map(([uid,u])=>`<tr>
+      <td>${u.email||'-'}</td><td>${u.name||'-'}</td>
+      <td><select onchange="changeUserRole('${uid}',this.value)" ${uid===fbUser.uid?'disabled':''}>
+        ${ALL_ROLES.map(r=>`<option ${u.role===r?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td><span class="mini">${ROLE_ACCESS[u.role]==='*'?'كل الصلاحيات':((ROLE_ACCESS[u.role]||[]).length+' موديول')}</span></td>
+      <td>${uid===fbUser.uid?'<span class="tag blue">أنت</span>':`<button class="btn xs red" onclick="removeUser('${uid}')">🗑</button>`}</td></tr>`).join('');
+    $('#usersBody').innerHTML=rows||'<tr><td colspan="5"><div class="empty"><span class="ico">👤</span>لا يوجد مستخدمون</div></td></tr>';
+  });
+}
+function changeUserRole(uid,role){
+  fbDB.ref('users/'+uid+'/role').set(role).then(()=>toast('تم تحديث الدور ✓','green'));
+}
+function removeUser(uid){
+  confirmBox('حذف المستخدم؟','سيُحذف من جدول الصلاحيات (لكن يبقى في Authentication حتى تحذفه من Console).',()=>{
+    fbDB.ref('users/'+uid).remove().then(()=>{renderPage('users');toast('تم الحذف','red');});});
+}
+function addUserModal(){
+  openModal('➕ ربط مستخدم بدور',`
+    <p class="mini" style="margin-bottom:12px">أولاً أنشئ المستخدم في Firebase Console (Authentication → Add user) بالبريد وكلمة المرور، ثم أدخل بياناته هنا لتحديد دوره. تحتاج UID الخاص به من Console.</p>
+    <div class="form-grid">
+      <div class="field full"><label>UID (من Firebase Authentication)</label><input id="u_uid"></div>
+      <div class="field"><label>البريد الإلكتروني</label><input id="u_email"></div>
+      <div class="field"><label>الاسم</label><input id="u_name"></div>
+      <div class="field full"><label>الدور</label><select id="u_role">${ALL_ROLES.map(r=>`<option>${r}</option>`).join('')}</select></div>
+    </div>`,()=>{
+    const uid=$('#u_uid').value.trim();if(!uid){toast('أدخل UID','red');return false;}
+    fbDB.ref('users/'+uid).set({email:$('#u_email').value.trim(),name:$('#u_name').value.trim()||$('#u_email').value.trim(),role:$('#u_role').value})
+      .then(()=>{renderPage('users');toast('تم ربط المستخدم ✓','green');});
+  });
+}
+
+let currentUserRole='مدير عام';
+/* ====== تبديل قاطع بين شاشة الدخول والتطبيق (inline style) ====== */
+function showLogin(){
+  const ls=$('#loginScreen'),ap=$('#app');
+  if(ls){ls.style.display='flex';ls.style.alignItems='center';ls.style.justifyContent='center';}
+  if(ap){ap.style.display='none';}
+}
+function showApp(){
+  const ls=$('#loginScreen'),ap=$('#app');
+  if(ls){ls.style.display='none';}
+  if(ap){ap.style.display='flex';}
+}
+let authWatch=null, authResolved=false;
+function startAuthWatchdog(){
+  if(authWatch)return;
+  authWatch=setInterval(()=>{
+    if(fbUser){showApp();}
+    else if(authResolved&&fbConfigured()){showLogin();}
+  },400);
+}
+function boot(){
+  // ابدأ بإخفاء الاثنين لتفادي أي وميض قبل تحديد الحالة
+  const ls=$('#loginScreen'),ap=$('#app');
+  if(ls)ls.style.display='none';
+  if(ap)ap.style.display='none';
+  loadDB();
+  autoDailyBackup();
+  $('#curDate').textContent=new Date().toLocaleDateString('ar-EG');
+  if($('#verChip'))$('#verChip').textContent=APP_VERSION;
+  if(fbConfigured()&&initFirebase()){
+    setSync('offline');
+    startAuthWatchdog();
+    fbAuth.onAuthStateChanged(user=>{
+      authResolved=true;
+      if(user){
+        fbUser=user;
+        showApp();
+        onLoggedIn();
+      }else{
+        fbUser=null;
+        showLogin();
+      }
+    });
+    $('#lg_btn').onclick=doLogin;
+    $('#lg_pass').onkeydown=e=>{if(e.key==='Enter')doLogin();};
+  }else{
+    // وضع محلي (file://) — بدون دخول
+    setSync('local');
+    showApp();
+    $('#logoutBtn').style.display='none';
+    buildNav();go('dashboard');
+  }
+}
+function doLogin(){
+  const email=$('#lg_email').value.trim(),pass=$('#lg_pass').value;
+  if(!email||!pass){$('#lg_msg').textContent='أدخل البريد وكلمة المرور';return;}
+  $('#lg_msg').style.color='var(--text3)';$('#lg_msg').textContent='جارٍ الدخول...';
+  fbAuth.signInWithEmailAndPassword(email,pass)
+    .catch(err=>{
+      $('#lg_msg').style.color='var(--red)';
+      $('#lg_msg').textContent=
+        err.code==='auth/invalid-credential'||err.code==='auth/wrong-password'||err.code==='auth/user-not-found'
+        ?'بيانات الدخول غير صحيحة':'تعذّر الدخول: '+err.code;
+    });
+}
+function doLogout(){if(fbAuth)fbAuth.signOut();}
+async function onLoggedIn(){
+  showApp();
+  $('#lg_msg').textContent='';if($('#lg_pass'))$('#lg_pass').value='';
+  $('#logoutBtn').style.display='inline-flex';
+  // حدد دور المستخدم من جدول المستخدمين في السحابة
+  try{
+    const snap=await fbDB.ref('users/'+fbUser.uid).once('value');
+    const u=snap.val();
+    if(u&&u.role){currentUserRole=u.role;}
+    else{
+      // أول مستخدم = مدير عام تلقائياً
+      currentUserRole='مدير عام';
+      await fbDB.ref('users/'+fbUser.uid).set({email:fbUser.email,role:'مدير عام',name:fbUser.email});
+    }
+  }catch(e){currentUserRole='مشاهد';}
+  $('#curRole').textContent=currentUserRole;
+
+  // حمّل بيانات السحابة، ولو فاضية ارفع البيانات المحلية تلقائياً
+  const snap=await fbDB.ref('erp_data').once('value');
+  const cloud=snap.val();
+  if(cloud&&cloud.products&&cloud.products.length){
+    suppressPush=true;DB=cloud;localStorage.setItem(DB_KEY,JSON.stringify(DB));ensureTables();suppressPush=false;
+    setSync('online');
+  }else{
+    // السحابة فاضية: ارفع بياناتك المحلية الحالية تلقائياً
+    ensureTables();
+    await fbDB.ref('erp_data').set(DB);
+    setSync('online');
+    toast&&toast('تم رفع بياناتك المحلية إلى Firebase ✓','green');
+  }
+  attachRealtime();
+  applyRolePermissions();
+  buildNav();go('dashboard');
+}
+
+/* ===== Stubs مؤقتة للموديولات اللي هتتبني في الدفعات الجاية ===== */
+
+/* الموديولات الجاهزة جزئياً في الدفعة الأولى */
+function renderVaccines(page){
+  page.innerHTML=`<div class="panel">
+    <div class="panel-h"><h3>💉 التحصينات واللقاحات</h3>
+      <div class="tools"><button class="btn" onclick="vaccineModal()">➕ إضافة لقاح</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table>
+      <thead><tr><th>التاريخ</th><th>المورد</th><th>الشركة المنتجة</th><th>اسم اللقاح</th><th>العدد</th><th>سعر الوحدة</th><th>الإجمالي</th><th></th></tr></thead>
+      <tbody id="vbody"></tbody>
+      <tfoot><tr style="font-weight:800"><td colspan="6" style="text-align:left">الإجمالي العام</td>
+        <td id="vtotal" style="color:var(--red)"></td><td></td></tr></tfoot>
+    </table></div></div></div>`;
+  const draw=()=>{
+    $('#vbody').innerHTML=DB.vaccines.map(v=>`<tr data-id="${v.id}">
+      <td class="editable" data-f="date">${v.date}</td>
+      <td class="editable" data-f="supplier"><span class="tag red" style="background:var(--red-bg)">${v.supplier}</span></td>
+      <td class="editable" data-f="maker">${v.maker||'<span class="mini">—</span>'}</td>
+      <td class="editable" data-f="name">${v.name}</td>
+      <td class="editable" data-f="qty">${(v.qty||0)<0?`<span class="tag red" style="font-weight:800">${fmt(v.qty)}</span>`:fmt(v.qty)}</td>
+      <td class="editable" data-f="price">${money(v.price)}</td>
+      <td><b>${money((v.qty||0)*(v.price||0))}</b></td>
+      <td><button class="btn xs red" onclick="delVaccine('${v.id}')">🗑</button></td></tr>`).join('')
+      ||`<tr><td colspan="8"><div class="empty"><span class="ico">💉</span>لا توجد لقاحات</div></td></tr>`;
+    $('#vtotal').textContent=money(DB.vaccines.reduce((s,v)=>s+(v.qty||0)*(v.price||0),0));
+    bindEdit('#vbody','vaccines');
+  };
+  draw();
+}
+function delVaccine(id){DB.vaccines=DB.vaccines.filter(v=>v.id!==id);saveDB();renderPage('vaccines');toast('تم الحذف','red');}
+function vaccineModal(){
+  openModal('➕ إضافة لقاح',`<div class="form-grid">
+    <div class="field"><label>التاريخ</label><input id="v_date" type="date" value="${today()}"></div>
+    <div class="field"><label>المورد</label><input id="v_supplier"></div>
+    <div class="field"><label>الشركة المنتجة</label><input id="v_maker"></div>
+    <div class="field full"><label>اسم اللقاح</label><input id="v_name"></div>
+    <div class="field"><label>العدد</label><input id="v_qty" type="number" value="1"></div>
+    <div class="field"><label>سعر الوحدة</label><input id="v_price" type="number" value="0"></div>
+  </div>`,()=>{
+    const v={id:uid(),date:$('#v_date').value,supplier:$('#v_supplier').value.trim(),
+      maker:$('#v_maker').value.trim(),
+      name:$('#v_name').value.trim(),qty:+$('#v_qty').value||0,price:+$('#v_price').value||0};
+    if(!v.name){toast('اكتب اسم اللقاح','red');return false;}
+    DB.vaccines.push(v);saveDB();renderPage('vaccines');toast('تمت الإضافة ✓','green');});
+}
+function renderSuppliers(page){
+  page.innerHTML=`<div class="panel"><div class="panel-h"><h3>🏭 الموردين</h3>
+    <div class="tools"><div class="search"><input id="sq" placeholder="بحث..."></div></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table>
+    <thead><tr><th>المورد</th><th>عدد الأصناف</th><th>الهاتف</th><th>المحافظة</th><th>ملاحظات</th></tr></thead>
+    <tbody id="sbody"></tbody></table></div></div></div>`;
+  const draw=(q='')=>{
+    const list=DB.suppliers.filter(s=>!q||s.name.includes(q));
+    $('#sbody').innerHTML=list.map(s=>{
+      const cnt=DB.products.filter(p=>p.supplier===s.name).length;
+      return `<tr data-id="${s.id}"><td><b>${s.name}</b></td><td><span class="tag blue">${cnt}</span></td>
+      <td class="editable" data-f="phone">${s.phone||'-'}</td>
+      <td class="editable" data-f="gov">${s.gov||'-'}</td>
+      <td class="editable" data-f="note">${s.note||'-'}</td></tr>`;}).join('');
+    bindEdit('#sbody','suppliers');
+  };
+  $('#sq').oninput=e=>draw(e.target.value);draw();
+}
+function renderCustomers(page){
+  page.innerHTML=`<div class="panel"><div class="panel-h"><h3>👥 العملاء</h3>
+    <div class="tools"><button class="btn" onclick="customerModal()">➕ عميل جديد</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table>
+    <thead><tr><th>العميل</th><th>النوع</th><th>الهاتف</th><th>المحافظة</th><th>الرصيد</th><th>الفواتير</th><th></th></tr></thead>
+    <tbody id="cbody"></tbody></table></div></div></div>`;
+  const draw=()=>{
+    $('#cbody').innerHTML=DB.customers.map(c=>{
+      const invs=(DB.farmInvoices||[]).filter(f=>String(f.customerId)===String(c.id));
+      const main=`<tr data-id="${c.id}">
+        <td class="editable" data-f="name"><b>${c.name}</b></td>
+        <td class="editable" data-f="type">${c.type||'-'}</td>
+        <td class="editable" data-f="phone">${c.phone||'-'}</td>
+        <td class="editable" data-f="gov">${c.gov||'-'}</td>
+        <td class="editable" data-f="balance">${(c.balance||0)>0?`<span class="tag red">${money(c.balance)}</span>`:'<span class="tag green">0</span>'}</td>
+        <td>${invs.length?`<button class="btn xs ghost" onclick="toggleCustInv('${c.id}')">📋 ${invs.length} فاتورة</button>`:'<span class="mini">—</span>'}</td>
+        <td class="row-actions">
+          ${(c.balance||0)>0?`<button class="btn xs green" onclick="collectPayment('${c.id}')">💵 تحصيل</button>`:''}
+          <button class="btn xs red" onclick="delCustomer('${c.id}')">🗑</button></td></tr>`;
+      const sub=invs.length?`<tr class="cust-inv" data-cust="${c.id}" style="display:none"><td colspan="7" style="background:var(--bg2);padding:0">
+        <table style="margin:0"><thead><tr><th>كود الدورة</th><th>النوع</th><th>تاريخ الدخول</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead>
+        <tbody>${invs.map(f=>{const t=f.items.reduce((s,i)=>s+i.qty*i.price,0);
+          return `<tr><td><b>${f.cycleCode}</b></td>
+          <td>${f.type==='vaccine'?'<span class="tag green">تحصينات</span>':'<span class="tag cyan">أدوية</span>'}</td>
+          <td>${f.entryDate}</td><td>${money(t)}</td><td>${money(f.paid||0)}</td>
+          <td>${money(t-(f.paid||0))}</td>
+          <td>${f.posted?'<span class="tag green">مُرحّلة</span>':'<span class="tag amber">معلّقة</span>'}</td></tr>`;}).join('')}
+        </tbody></table></td></tr>`:'';
+      return main+sub;
+    }).join('');
+    bindEdit('#cbody','customers');
+  };draw();
+}
+function toggleCustInv(id){const row=document.querySelector(`.cust-inv[data-cust="${id}"]`);
+  if(row)row.style.display=row.style.display==='none'?'table-row':'none';}
+function collectPayment(custId){
+  const c=DB.customers.find(x=>String(x.id)===String(custId));if(!c)return;
+  openModal('💵 تحصيل دفعة من '+c.name,`<div class="form-grid">
+    <div class="field full"><label>المديونية الحالية</label><input value="${money(c.balance||0)}" disabled></div>
+    <div class="field"><label>المبلغ المُحصّل</label><input id="pay_amt" type="number" value="${c.balance||0}"></div>
+    <div class="field"><label>التاريخ</label><input id="pay_date" type="date" value="${today()}"></div>
+    <div class="field full"><label>ملاحظات</label><input id="pay_note" placeholder="تحصيل دفعة"></div>
+  </div>`,()=>{
+    const amt=+$('#pay_amt').value||0;
+    if(amt<=0){toast('أدخل مبلغاً صحيحاً','red');return false;}
+    if(amt>(c.balance||0)+0.001){toast('المبلغ أكبر من المديونية','amber');return false;}
+    c.balance=(c.balance||0)-amt;
+    const date=$('#pay_date').value;
+    DB.payments.push({id:uid(),date,customerId:c.id,customerName:c.name,amount:amt,note:$('#pay_note').value||'تحصيل دفعة'});
+    cashMove('in',amt,'تحصيل دفعة — '+c.name,date);
+    saveDB();renderPage('customers');buildNav();toast('تم تحصيل '+money(amt)+' ✓','green');});
+}
+function delCustomer(id){DB.customers=DB.customers.filter(c=>c.id!==id);saveDB();renderPage('customers');toast('تم الحذف','red');}
+function customerModal(){
+  openModal('➕ عميل جديد',`<div class="form-grid">
+    <div class="field full"><label>اسم العميل</label><input id="c_name"></div>
+    <div class="field"><label>النوع</label><select id="c_type"><option>مزرعة</option><option>تاجر</option><option>صيدلية</option></select></div>
+    <div class="field"><label>الهاتف</label><input id="c_phone"></div>
+    <div class="field"><label>المحافظة</label><input id="c_gov"></div>
+    <div class="field"><label>الرصيد الافتتاحي</label><input id="c_bal" type="number" value="0"></div>
+  </div>`,()=>{
+    const name=$('#c_name').value.trim();if(!name){toast('اكتب اسم العميل','red');return false;}
+    DB.customers.push({id:uid(),name,type:$('#c_type').value,phone:$('#c_phone').value,
+      gov:$('#c_gov').value,balance:+$('#c_bal').value||0,note:''});
+    saveDB();renderPage('customers');toast('تمت الإضافة ✓','green');});
+}
+
+/* حاسبة الجرعات (جاهزة) */
+function renderDoseCalc(page){
+  const prods=DB.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  page.innerHTML=`<div class="panel" style="max-width:680px">
+    <div class="panel-h"><h3>🧮 حاسبة جرعات وتكاليف القطيع</h3></div>
+    <div class="panel-b"><div class="form-grid">
+      <div class="field"><label>عدد الفراخ بالمزرعة (طائر)</label><input id="d_birds" type="number" value="5000"></div>
+      <div class="field"><label>متوسط وزن الطائر (كجم)</label><input id="d_wt" type="number" step="0.1" value="1.5"></div>
+      <div class="field full"><label>اختر المنتج العلاجي</label><select id="d_prod">
+        ${prods.map(p=>`<option value="${p.id}">${p.name} — ${p.ther||''}</option>`).join('')}</select></div>
+      <div class="field"><label>الجرعة الفعلية المستخدمة (لكل طن)</label><input id="d_dose" type="number"></div>
+    </div></div>
+    <div class="panel-b" style="border-top:1px solid var(--border)"><div id="d_out" class="cards" style="margin:0"></div></div>
+  </div>`;
+  const calc=()=>{
+    const p=DB.products.find(x=>String(x.id)===$('#d_prod').value);if(!p)return;
+    const birds=+$('#d_birds').value||0,wt=+$('#d_wt').value||0;
+    const tons=birds*wt/1000;
+    const dose=$('#d_dose').value!==''?+$('#d_dose').value:(p.dose||0);
+    const totalDose=tons*dose;
+    const pkgs=p.pkg?Math.ceil(totalDose/p.pkg):0;
+    const cost=pkgs*(p.price||0);
+    const out=[
+      {ico:'⚖️',lbl:'إجمالي الوزن الحي',val:fmt(birds*wt)+' كجم',c:'var(--cyan)'},
+      {ico:'🏋️',lbl:'إجمالي الأطنان',val:fmt(tons)+' طن',c:'var(--primary)'},
+      {ico:'💧',lbl:'إجمالي الجرعة المطلوبة',val:fmt(totalDose)+' '+(p.unit==='كيلو'||p.unit==='جرام'?'جم':'مل'),c:'var(--purple)'},
+      {ico:'📦',lbl:'عدد العبوات المطلوبة',val:fmt(pkgs)+' عبوة',c:'var(--amber)'},
+      {ico:'💵',lbl:'التكلفة الإجمالية',val:money(cost),c:'var(--green)'},
+      {ico:'🏷️',lbl:'التصنيف العلاجي',val:p.ther||'-',c:'var(--pink)'},
+    ];
+    $('#d_out').innerHTML=out.map(c=>`<div class="stat" style="--accent:${c.c}"><span class="ico">${c.ico}</span>
+      <div class="lbl">${c.lbl}</div><div class="val" style="font-size:18px">${c.val}</div></div>`).join('');
+  };
+  $('#d_prod').onchange=()=>{const p=DB.products.find(x=>String(x.id)===$('#d_prod').value);$('#d_dose').value=p?p.dose:'';calc();};
+  ['d_birds','d_wt','d_dose'].forEach(id=>$('#'+id).oninput=calc);
+  $('#d_prod').dispatchEvent(new Event('change'));
+}
+
+/* ====================================================================
+   الدفعة 2: المشتريات + المبيعات + المرتجعات + المخزون
+   كل فاتورة تحرّك رصيد المخزون تلقائياً
+==================================================================== */
+
+/* ---------- محرّك حركة المخزون ---------- */
+function adjustStock(productId,delta){
+  const p=DB.products.find(x=>String(x.id)===String(productId));
+  if(p){p.stock=(p.stock||0)+delta;}
+}
+function applyInvoiceStock(inv,sign){
+  // sign=+1 شراء(يزيد) / -1 بيع(ينقص) ... المرتجعات بالعكس
+  inv.items.forEach(it=>adjustStock(it.productId,sign*it.qty));
+}
+function productOptions(selId){
+  return DB.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar'))
+    .map(p=>`<option value="${p.id}">${p.name} — ${p.cat}</option>`).join('');
+}
+
+/* ---------- باني الفاتورة (مشترك للمشتريات/المبيعات/المرتجعات) ---------- */
+let invDraft=[]; // الأصناف الجاري إضافتها
+function invoiceBuilder(cfg){
+  // cfg:{title,partyLabel,partyList,priceField,onSave,kind}
+  invDraft=[];
+  const partyOpts=cfg.partyList.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
+  openModal(cfg.title,`
+    <div class="form-grid">
+      <div class="field"><label>التاريخ</label><input id="iv_date" type="date" value="${today()}"></div>
+      <div class="field"><label>${cfg.partyLabel}</label><select id="iv_party">${partyOpts}</select></div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:9px;padding:11px;margin-top:14px">
+      <div style="display:grid;grid-template-columns:2fr .8fr 1fr auto;gap:8px;align-items:end">
+        <div class="field"><label>الصنف</label><select id="iv_prod">${productOptions()}</select></div>
+        <div class="field"><label>الكمية</label><input id="iv_qty" type="number" value="1" min="0"></div>
+        <div class="field"><label>السعر</label><input id="iv_price" type="number" value="0"></div>
+        <button class="btn sm" id="iv_add">➕ أضف</button>
+      </div>
+      <div class="tbl-wrap" style="max-height:230px;margin-top:11px">
+        <table><thead><tr><th>الصنف</th><th>كمية</th><th>سعر</th><th>إجمالي</th><th></th></tr></thead>
+        <tbody id="iv_body"></tbody>
+        <tfoot><tr style="font-weight:800"><td colspan="3" style="text-align:left">الإجمالي</td>
+          <td id="iv_total" style="color:var(--primary-l)">0</td><td></td></tr></tfoot></table>
+      </div>
+    </div>
+    <div class="form-grid" style="margin-top:12px">
+      <div class="field"><label>المدفوع (${DB.settings.currency})</label><input id="iv_paid" type="number" value="0"></div>
+      <div class="field"><label>ملاحظات</label><input id="iv_note"></div>
+    </div>`,
+    ()=>{
+      if(!invDraft.length){toast('أضف صنف واحد على الأقل','red');return false;}
+      const total=invDraft.reduce((s,i)=>s+i.qty*i.price,0);
+      const partyId=$('#iv_party').value;
+      const party=cfg.partyList.find(x=>String(x.id)===String(partyId));
+      const inv={id:uid(),date:$('#iv_date').value,partyId,partyName:party?party.name:'',
+        items:invDraft.map(i=>({...i})),total,paid:+$('#iv_paid').value||0,note:$('#iv_note').value,
+        kind:cfg.kind};
+      cfg.onSave(inv);
+    },'حفظ الفاتورة');
+  // ملء سعر افتراضي عند اختيار صنف
+  const setPrice=()=>{const p=DB.products.find(x=>String(x.id)===$('#iv_prod').value);if(p)$('#iv_price').value=p.price||0;};
+  $('#iv_prod').onchange=setPrice;setPrice();
+  $('#iv_add').onclick=()=>{
+    const p=DB.products.find(x=>String(x.id)===$('#iv_prod').value);if(!p)return;
+    const qty=+$('#iv_qty').value||0,price=+$('#iv_price').value||0;
+    if(qty<=0){toast('الكمية لازم أكبر من صفر','red');return;}
+    const ex=invDraft.find(i=>i.productId===p.id);
+    if(ex){ex.qty+=qty;ex.price=price;}else invDraft.push({productId:p.id,name:p.name,qty,price});
+    drawDraft();
+  };
+  function drawDraft(){
+    $('#iv_body').innerHTML=invDraft.map((i,ix)=>`<tr><td>${i.name}</td><td>${fmt(i.qty)}</td>
+      <td>${fmt(i.price)}</td><td><b>${money(i.qty*i.price)}</b></td>
+      <td><button class="btn xs red" onclick="rmDraft(${ix})">✕</button></td></tr>`).join('')
+      ||`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:14px">لم تضف أصناف بعد</td></tr>`;
+    $('#iv_total').textContent=money(invDraft.reduce((s,i)=>s+i.qty*i.price,0));
+  }
+  window.rmDraft=ix=>{invDraft.splice(ix,1);drawDraft();};
+  drawDraft();
+}
+
+/* ---------- جدول الفواتير العام ---------- */
+function invoiceTable(arr,cfg){
+  // cfg:{partyHead, kind, onView}
+  return `<div class="tbl-wrap"><table><thead><tr>
+    <th>رقم</th><th>التاريخ</th><th>${cfg.partyHead}</th><th>عدد الأصناف</th>
+    <th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th><th></th>
+  </tr></thead><tbody>${arr.slice().reverse().map(inv=>{
+    const rem=(inv.total||0)-(inv.paid||0);
+    const st=rem<=0?'<span class="tag green">مسدد</span>':inv.paid>0?'<span class="tag amber">جزئي</span>':'<span class="tag red">آجل</span>';
+    return `<tr><td>#${String(inv.id).slice(-5)}</td><td>${inv.date}</td><td>${inv.partyName||'-'}</td>
+      <td>${inv.items.length}</td><td><b>${money(inv.total)}</b></td><td>${money(inv.paid)}</td>
+      <td>${money(rem)}</td><td>${st}</td>
+      <td class="row-actions">
+        <button class="btn xs ghost" onclick="viewInvoice('${cfg.kind}','${inv.id}')">👁</button>
+        <button class="btn xs red" onclick="delInvoice('${cfg.kind}','${inv.id}')">🗑</button></td></tr>`;
+  }).join('')||`<tr><td colspan="9"><div class="empty"><span class="ico">🧾</span>لا توجد فواتير</div></td></tr>`}
+  </tbody></table></div>`;
+}
+function viewInvoice(kind,id){
+  const arr=invArr(kind);const inv=arr.find(x=>x.id===id);if(!inv)return;
+  openModal('🧾 تفاصيل الفاتورة #'+String(id).slice(-5),`
+    <p style="color:var(--text2);margin-bottom:10px">التاريخ: <b>${inv.date}</b> &nbsp;|&nbsp; الطرف: <b>${inv.partyName}</b></p>
+    <div class="tbl-wrap"><table><thead><tr><th>الصنف</th><th>كمية</th><th>سعر</th><th>إجمالي</th></tr></thead>
+    <tbody>${inv.items.map(i=>`<tr><td>${i.name}</td><td>${fmt(i.qty)}</td><td>${fmt(i.price)}</td>
+      <td>${money(i.qty*i.price)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr style="font-weight:800"><td colspan="3" style="text-align:left">الإجمالي</td><td>${money(inv.total)}</td></tr></tfoot>
+    </table></div>
+    <p style="margin-top:10px;color:var(--text2)">المدفوع: <b>${money(inv.paid)}</b> | المتبقي: <b>${money(inv.total-inv.paid)}</b></p>
+    ${inv.note?`<p class="mini" style="margin-top:6px">📝 ${inv.note}</p>`:''}`,
+    ()=>{},'إغلاق');
+  $('#mSave').classList.remove('green');
+}
+function invArr(kind){return {purchase:DB.purchases,sale:DB.sales,returnSale:DB.returns,returnPurchase:DB.returns}[kind];}
+function delInvoice(kind,id){
+  confirmBox('حذف الفاتورة؟','سيتم عكس تأثيرها على المخزون.',()=>{
+    let arr,sign;
+    if(kind==='purchase'){arr=DB.purchases;sign=-1;}
+    else if(kind==='sale'){arr=DB.sales;sign=+1;}
+    else{arr=DB.returns;}
+    const inv=arr.find(x=>x.id===id);if(!inv)return;
+    if(kind==='purchase')applyInvoiceStock(inv,-1);
+    else if(kind==='sale')applyInvoiceStock(inv,+1);
+    else applyInvoiceStock(inv, inv.kind==='returnSale'?-1:+1);
+    const idx=arr.indexOf(inv);arr.splice(idx,1);
+    saveDB();renderPage(currentPage);toast('تم الحذف وعكس المخزون','red');
+  });
+}
+
+/* ---------- المشتريات ---------- */
+function renderPurchases(page){
+  page.innerHTML=`<div class="panel"><div class="panel-h"><h3>🛒 المشتريات</h3>
+    <div class="tools">
+      <span class="chip">الإجمالي: <b>${money(DB.purchases.reduce((s,i)=>s+i.total,0))}</b></span>
+      <button class="btn" onclick="newPurchase()">➕ فاتورة شراء</button></div></div>
+    <div class="panel-b flush">${invoiceTable(DB.purchases,{partyHead:'المورد',kind:'purchase'})}</div></div>`;
+}
+function newPurchase(){
+  invoiceBuilder({title:'🛒 فاتورة شراء جديدة',partyLabel:'المورد',partyList:DB.suppliers,kind:'purchase',
+    onSave:inv=>{applyInvoiceStock(inv,+1);DB.purchases.push(inv);
+      // تحديث سعر الشراء (التكلفة) للأصناف تلقائياً من الفاتورة
+      inv.items.forEach(it=>{const p=DB.products.find(x=>x.id===it.productId);if(p)p.cost=it.price;});
+      const sup=DB.suppliers.find(s=>String(s.id)===String(inv.partyId));
+      if(sup)sup.balance=(sup.balance||0)+(inv.total-inv.paid);
+      cashMove('out',inv.paid,'دفعة شراء — '+inv.partyName,inv.date);
+      saveDB();renderPage('purchases');buildNav();toast('تمت إضافة فاتورة الشراء وتحديث أسعار الشراء ✓','green');}});
+}
+
+/* ---------- المبيعات ---------- */
+function renderSales(page){
+  const profit=DB.sales.reduce((s,inv)=>s+inv.items.reduce((a,it)=>{
+    const p=DB.products.find(x=>x.id===it.productId);return a+(it.price-(p?(p.cost||0):0))*it.qty;},0),0);
+  page.innerHTML=`<div class="panel"><div class="panel-h"><h3>💰 المبيعات</h3>
+    <div class="tools">
+      <span class="chip">المبيعات: <b>${money(DB.sales.reduce((s,i)=>s+i.total,0))}</b></span>
+      <span class="chip">الربح التقديري: <b style="color:var(--green)">${money(profit)}</b></span>
+      <button class="btn" onclick="newSale()">➕ فاتورة بيع</button></div></div>
+    <div class="panel-b flush">${invoiceTable(DB.sales,{partyHead:'العميل',kind:'sale'})}</div></div>`;
+}
+function newSale(){
+  if(!DB.customers.length){toast('أضف عميل أولاً','red');return;}
+  invoiceBuilder({title:'💰 فاتورة بيع جديدة',partyLabel:'العميل',partyList:DB.customers,kind:'sale',
+    onSave:inv=>{
+      // تحقق من توفر المخزون
+      const short=inv.items.find(it=>{const p=DB.products.find(x=>x.id===it.productId);return p&&(p.stock||0)<it.qty;});
+      if(short){const p=DB.products.find(x=>x.id===short.productId);
+        toast(`المخزون غير كافٍ: ${p.name} (المتاح ${fmt(p.stock||0)})`,'amber');}
+      applyInvoiceStock(inv,-1);DB.sales.push(inv);
+      const c=DB.customers.find(x=>String(x.id)===String(inv.partyId));
+      if(c)c.balance=(c.balance||0)+(inv.total-inv.paid);
+      cashMove('in',inv.paid,'تحصيل بيع — '+inv.partyName,inv.date);
+      saveDB();renderPage('sales');buildNav();toast('تمت إضافة فاتورة البيع ✓','green');}});
+}
+
+/* ---------- المرتجعات ---------- */
+let returnsTab='returns'; // returns | transfers
+function renderReturns(page){
+  page.innerHTML=`
+  <div class="tabs">
+    <div class="tab ${returnsTab==='returns'?'active':''}" onclick="returnsTab='returns';renderPage('returns')">↩️ المرتجعات</div>
+    <div class="tab ${returnsTab==='transfers'?'active':''}" onclick="returnsTab='transfers';renderPage('returns')">🔄 التحويل بين المزارع</div>
+  </div><div id="retArea"></div>`;
+  if(returnsTab==='returns')drawReturnsTab();else drawTransfersTab();
+}
+function drawReturnsTab(){
+  $('#retArea').innerHTML=`<div class="panel" style="margin:0"><div class="panel-h"><h3>↩️ المرتجعات</h3>
+    <div class="tools">
+      <button class="btn green" onclick="newReturn('returnSale')">↩️ مرتجع مبيعات</button>
+      <button class="btn ghost" onclick="newReturn('returnPurchase')">↪️ مرتجع مشتريات</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>رقم</th><th>التاريخ</th><th>النوع</th><th>الطرف</th><th>الأصناف</th><th>القيمة</th><th>إجراءات</th>
+    </tr></thead><tbody>${DB.returns.slice().reverse().map(r=>`<tr>
+      <td>#${String(r.id).slice(-5)}</td><td>${r.date}</td>
+      <td>${r.kind==='returnSale'?'<span class="tag green">مرتجع بيع</span>':'<span class="tag amber">مرتجع شراء</span>'}</td>
+      <td>${r.partyName}</td><td>${r.items.length}</td><td><b>${money(r.total)}</b></td>
+      <td class="row-actions">
+        <button class="btn xs ghost" onclick="editReturn('${r.id}')">✏️ تعديل</button>
+        <button class="btn xs green" onclick="printReturn('${r.id}')">🖨️</button>
+        <button class="btn xs red" onclick="delInvoice('${r.kind}','${r.id}')">🗑</button></td></tr>`).join('')
+      ||`<tr><td colspan="7"><div class="empty"><span class="ico">↩️</span>لا توجد مرتجعات</div></td></tr>`}
+    </tbody></table></div></div></div>`;
+}
+function newReturn(kind){
+  const isSale=kind==='returnSale';
+  invoiceBuilder({title:isSale?'↩️ مرتجع مبيعات':'↪️ مرتجع مشتريات',
+    partyLabel:isSale?'العميل':'المورد',partyList:isSale?DB.customers:DB.suppliers,kind,
+    onSave:inv=>{
+      applyInvoiceStock(inv,isSale?+1:-1);
+      DB.returns.push(inv);
+      cashMove(isSale?'out':'in',inv.total,(isSale?'رد قيمة مرتجع بيع — ':'استرداد مرتجع شراء — ')+inv.partyName,inv.date);
+      saveDB();renderPage('returns');toast('تم تسجيل المرتجع ✓','green');}});
+}
+/* تعديل مرتجع: نعكس أثره القديم ثم نعيد بناءه */
+function editReturn(id){
+  const r=DB.returns.find(x=>x.id===id);if(!r)return;
+  const isSale=r.kind==='returnSale';
+  // اعرض نافذة تعديل مبسطة: عدّل الكميات والأسعار والتاريخ
+  const rowsHtml=()=>r.items.map((it,ix)=>`<tr>
+    <td>${it.name}</td>
+    <td><input type="number" class="er-qty" data-ix="${ix}" value="${it.qty}" style="width:80px"></td>
+    <td><input type="number" class="er-price" data-ix="${ix}" value="${it.price}" style="width:90px"></td>
+    <td><button class="btn xs red" onclick="erDelItem('${id}',${ix})">✕</button></td></tr>`).join('');
+  openModal('✏️ تعديل مرتجع #'+String(id).slice(-5),`
+    <div class="form-grid"><div class="field"><label>التاريخ</label><input id="er_date" type="date" value="${r.date}"></div>
+    <div class="field"><label>الطرف</label><input value="${r.partyName}" disabled></div></div>
+    <div class="tbl-wrap" style="margin-top:12px;max-height:240px"><table><thead><tr>
+      <th>الصنف</th><th>الكمية</th><th>السعر</th><th></th></tr></thead><tbody>${rowsHtml()}</tbody></table></div>
+    <p class="mini" style="margin-top:8px">سيُعاد حساب أثر المخزون والخزينة تلقائياً بعد الحفظ.</p>`,
+    ()=>{
+      // 1) اعكس الأثر القديم بالقيم القديمة أولاً (قبل أي تعديل)
+      reverseReturnEffect(r);
+      // 2) اقرأ القيم الجديدة وطبّقها على r
+      document.querySelectorAll('.er-qty').forEach(inp=>{r.items[+inp.dataset.ix].qty=+inp.value||0;});
+      document.querySelectorAll('.er-price').forEach(inp=>{r.items[+inp.dataset.ix].price=+inp.value||0;});
+      r.items=r.items.filter(it=>it.qty>0);
+      r.date=$('#er_date').value;
+      r.total=r.items.reduce((s,i)=>s+i.qty*i.price,0);
+      // 3) طبّق الأثر الجديد
+      applyReturnEffect(r);
+      saveDB();renderPage('returns');toast('تم تعديل المرتجع ✓','green');});
+}
+window.erDelItem=(id,ix)=>{const r=DB.returns.find(x=>x.id===id);if(r){r.items.splice(ix,1);editReturn(id);}};
+/* أثر المرتجع على المخزون والخزينة (للتعديل النظيف) */
+function applyReturnEffect(r){
+  const isSale=r.kind==='returnSale';
+  applyInvoiceStock(r,isSale?+1:-1);
+  cashMove(isSale?'out':'in',r.total,(isSale?'تعديل مرتجع بيع — ':'تعديل مرتجع شراء — ')+r.partyName,r.date);
+}
+function reverseReturnEffect(r){
+  const isSale=r.kind==='returnSale';
+  applyInvoiceStock(r,isSale?-1:+1);
+  // نعكس الخزينة بقيمة المرتجع القديمة
+  cashMove(isSale?'in':'out',r.total||0,'عكس مرتجع (تعديل) — '+r.partyName,today());
+}
+function printReturn(id){
+  const r=DB.returns.find(x=>x.id===id);if(!r)return;
+  const isSale=r.kind==='returnSale';
+  const rows=r.items.map((it,i)=>`<tr><td>${i+1}</td><td>${it.name}</td><td>${fmt(it.qty)}</td>
+    <td>${fmt(it.price)}</td><td>${fmt(it.qty*it.price)}</td></tr>`).join('');
+  printDoc(isSale?'إشعار مرتجع مبيعات':'إشعار مرتجع مشتريات',
+    [['التاريخ',r.date],[isSale?'العميل':'المورد',r.partyName],['رقم','#'+String(r.id).slice(-5)]],
+    ['#','الصنف','الكمية','السعر','الإجمالي'],rows,r.total);
+}
+
+/* ============ التحويل بين المزارع (مخزني بحت) ============ */
+function drawTransfersTab(){
+  $('#retArea').innerHTML=`<div class="panel" style="margin:0"><div class="panel-h"><h3>🔄 التحويل بين المزارع</h3>
+    <div class="tools"><button class="btn" onclick="newTransfer()">➕ تحويل جديد</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>رقم</th><th>التاريخ</th><th>من مزرعة</th><th>إلى مزرعة</th><th>الأصناف</th><th>إجراءات</th>
+    </tr></thead><tbody>${(DB.farmTransfers||[]).slice().reverse().map(t=>`<tr>
+      <td>#${String(t.id).slice(-5)}</td><td>${t.date}</td>
+      <td><span class="tag amber">${t.fromFarm}</span></td>
+      <td><span class="tag green">${t.toFarm}</span></td>
+      <td>${t.items.length}</td>
+      <td class="row-actions">
+        <button class="btn xs ghost" onclick="editTransfer('${t.id}')">✏️ تعديل</button>
+        <button class="btn xs green" onclick="printTransfer('${t.id}')">🖨️</button>
+        <button class="btn xs red" onclick="delTransfer('${t.id}')">🗑</button></td></tr>`).join('')
+      ||`<tr><td colspan="6"><div class="empty"><span class="ico">🔄</span>لا توجد تحويلات</div></td></tr>`}
+    </tbody></table></div></div>
+    <p class="mini" style="padding:6px">التحويل سجل مخزني للتوثيق فقط — لا يؤثر على المخزون الرئيسي أو الخزينة.</p></div>`;
+}
+let transferDraft=[];
+function newTransfer(){transferDraft=[];transferModal(null);}
+function editTransfer(id){const t=DB.farmTransfers.find(x=>x.id===id);if(!t)return;
+  transferDraft=t.items.map(i=>({...i}));transferModal(t);}
+function transferModal(existing){
+  const farmNames=[...new Set((DB.farmInvoices||[]).map(f=>f.customerName))];
+  const farmOpts=n=>farmNames.map(x=>`<option ${x===n?'selected':''}>${x}</option>`).join('');
+  // مصدر الأصناف: كل الأدوية واللقاحات
+  const prodOpts=DB.products.map(p=>`<option value="p-${p.id}" data-name="${p.name}">${p.name}</option>`).join('')
+    +DB.vaccines.map(v=>`<option value="v-${v.id}" data-name="${v.name}">${v.name} (لقاح)</option>`).join('');
+  openModal(existing?'✏️ تعديل تحويل':'➕ تحويل بين مزرعتين',`
+    <div class="form-grid">
+      <div class="field"><label>التاريخ</label><input id="tr_date" type="date" value="${existing?existing.date:today()}"></div>
+      <div class="field"><label>السبب/ملاحظة</label><input id="tr_note" value="${existing?existing.note||'':''}"></div>
+      <div class="field"><label>من مزرعة</label><select id="tr_from">${farmOpts(existing?existing.fromFarm:'')}</select></div>
+      <div class="field"><label>إلى مزرعة</label><select id="tr_to">${farmOpts(existing?existing.toFarm:'')}</select></div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:9px;padding:11px;margin-top:13px">
+      <div style="display:grid;grid-template-columns:2fr .8fr auto;gap:8px;align-items:end">
+        <div class="field"><label>الصنف المحوّل</label><select id="tr_prod">${prodOpts}</select></div>
+        <div class="field"><label>الكمية</label><input id="tr_qty" type="number" value="1"></div>
+        <button class="btn sm" id="tr_add">➕</button>
+      </div>
+      <div class="tbl-wrap" style="max-height:200px;margin-top:11px"><table><thead><tr><th>الصنف</th><th>الكمية</th><th></th></tr></thead>
+        <tbody id="tr_body"></tbody></table></div>
+    </div>`,
+    ()=>{
+      const from=$('#tr_from').value,to=$('#tr_to').value;
+      if(!from||!to){toast('اختر المزرعتين','red');return false;}
+      if(from===to){toast('لا يمكن التحويل لنفس المزرعة','red');return false;}
+      if(!transferDraft.length){toast('أضف صنفاً واحداً على الأقل','red');return false;}
+      if(existing){existing.date=$('#tr_date').value;existing.note=$('#tr_note').value;
+        existing.fromFarm=from;existing.toFarm=to;existing.items=transferDraft.map(i=>({...i}));}
+      else DB.farmTransfers.push({id:uid(),date:$('#tr_date').value,note:$('#tr_note').value,
+        fromFarm:from,toFarm:to,items:transferDraft.map(i=>({...i}))});
+      saveDB();renderPage('returns');toast('تم حفظ التحويل ✓','green');});
+  const draw=()=>{$('#tr_body').innerHTML=transferDraft.map((i,ix)=>`<tr><td>${i.name}</td><td>${fmt(i.qty)}</td>
+    <td><button class="btn xs red" onclick="trRm(${ix})">✕</button></td></tr>`).join('')
+    ||`<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:12px">لم تضف أصناف</td></tr>`;};
+  $('#tr_add').onclick=()=>{const sel=$('#tr_prod'),o=sel.options[sel.selectedIndex];
+    const qty=+$('#tr_qty').value||0;if(qty<=0){toast('أدخل كمية','red');return;}
+    transferDraft.push({name:o.dataset.name,qty});draw();};
+  window.trRm=ix=>{transferDraft.splice(ix,1);draw();};
+  draw();
+}
+function delTransfer(id){confirmBox('حذف التحويل؟','سيُحذف سجل التحويل نهائياً.',()=>{
+  DB.farmTransfers=DB.farmTransfers.filter(t=>t.id!==id);saveDB();renderPage('returns');toast('تم الحذف','red');});}
+function printTransfer(id){
+  const t=DB.farmTransfers.find(x=>x.id===id);if(!t)return;
+  const rows=t.items.map((it,i)=>`<tr><td>${i+1}</td><td>${it.name}</td><td>${fmt(it.qty)}</td></tr>`).join('');
+  printDoc('إذن تحويل بين المزارع',
+    [['التاريخ',t.date],['من مزرعة',t.fromFarm],['إلى مزرعة',t.toFarm],['ملاحظة',t.note||'—']],
+    ['#','الصنف','الكمية'],rows,null);
+}
+
+/* ============ دالة طباعة عامة للمستندات ============ */
+function printDoc(title,meta,cols,rowsHtml,total){
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${title}</title>
+  <style>*{font-family:'Segoe UI',Tahoma,sans-serif;box-sizing:border-box}body{padding:26px;color:#111;max-width:760px;margin:auto}
+  .head{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #2563eb;padding-bottom:12px;margin-bottom:16px}
+  .head h1{color:#1e3a8a;font-size:20px;margin:0}.co{font-size:12px;color:#555}
+  .meta{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:14px;font-size:14px}.meta b{color:#1e3a8a}
+  table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px}
+  th,td{border:1px solid #d1d5db;padding:8px;text-align:center}thead th{background:#eff6ff;color:#1e3a8a}
+  tfoot td{font-weight:800;background:#f1f5f9}
+  .foot{margin-top:34px;display:flex;justify-content:space-between;font-size:13px}
+  .sign{border-top:1px solid #999;padding-top:6px;width:180px;text-align:center}
+  @media print{.noprint{display:none}}.noprint{margin-top:20px;text-align:center}
+  .pbtn{background:#2563eb;color:#fff;border:none;padding:11px 26px;border-radius:8px;font-size:15px;cursor:pointer}</style>
+  </head><body>
+  <div class="head"><div><h1>${title}</h1><div class="co">${DB.settings.company||'الشركة المصرية لتوزيع الأدوية البيطرية'}</div></div>
+    <div style="background:#2563eb;color:#fff;padding:8px 14px;border-radius:8px">📄</div></div>
+  <div class="meta">${meta.map(m=>`<div>${m[0]}: <b>${m[1]}</b></div>`).join('')}</div>
+  <table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+  <tbody>${rowsHtml||`<tr><td colspan="${cols.length}">لا توجد بنود</td></tr>`}</tbody>
+  ${total!=null?`<tfoot><tr><td colspan="${cols.length-1}" style="text-align:left">الإجمالي</td><td>${fmt(total)} ج.م</td></tr></tfoot>`:''}
+  </table>
+  <div class="foot"><div class="sign">توقيع المُستلم</div><div class="sign">توقيع المسؤول</div></div>
+  <div class="noprint"><button class="pbtn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button></div>
+  </body></html>`);
+  w.document.close();
+}
+
+/* ---------- حركة الخزينة المساعدة ---------- */
+function cashMove(dir,amount,desc,date){
+  if(!amount)return;
+  DB.treasury.push({id:uid(),date:date||today(),dir,amount:Math.abs(amount),desc});
+}
+
+/* ---------- المخزون والأرصدة ---------- */
+let invFilter={cat:'',status:'',q:''};
+function renderInventory(page){
+  const cats=[...new Set(DB.products.map(p=>p.cat))];
+  page.innerHTML=`<div class="panel"><div class="panel-h"><h3>🏬 المخزون والأرصدة</h3>
+    <div class="tools">
+      <div class="search"><input id="iq" placeholder="بحث..." value="${invFilter.q}"></div>
+      <select id="icat"><option value="">كل التصنيفات</option>${cats.map(c=>`<option ${invFilter.cat===c?'selected':''}>${c}</option>`).join('')}</select>
+      <select id="istat"><option value="">كل الحالات</option>
+        <option value="out" ${invFilter.status==='out'?'selected':''}>نفد</option>
+        <option value="low" ${invFilter.status==='low'?'selected':''}>تحت حد الطلب</option>
+        <option value="ok" ${invFilter.status==='ok'?'selected':''}>متوفر</option></select>
+    </div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>الصنف</th><th>التصنيف</th><th>الرصيد</th><th>حد الطلب</th><th>سعر الشراء</th><th>سعر البيع</th><th>هامش الربح</th>
+      <th>قيمة المخزون</th><th>الحالة</th>
+    </tr></thead><tbody id="ibody"></tbody>
+    <tfoot><tr style="font-weight:800"><td colspan="7" style="text-align:left">إجمالي قيمة المخزون</td>
+      <td id="ivaltot" style="color:var(--primary-l)"></td><td></td></tr></tfoot></table></div></div></div>
+    <div class="mini" id="icount" style="padding:4px 6px"></div>`;
+  const draw=()=>{
+    const f=DB.products.filter(p=>{
+      const s=p.stock||0,st=s<=0?'out':s<=(p.reorder||0)?'low':'ok';
+      return (!invFilter.cat||p.cat===invFilter.cat)&&(!invFilter.status||invFilter.status===st)&&
+        (!invFilter.q||(p.name||'').includes(invFilter.q));});
+    $('#ibody').innerHTML=f.map(p=>{
+      const s=p.stock||0,st=s<=0?['نفد','red']:s<=(p.reorder||0)?['تحت الحد','amber']:['متوفر','green'];
+      const margin=(p.price||0)-(p.cost||0);
+      const marginPct=p.cost>0?Math.round(margin/p.cost*100):null;
+      return `<tr data-id="${p.id}"><td><b>${p.name}</b></td><td>${catTag(p.cat)}</td>
+        <td class="editable" data-f="stock">${fmt(s)}</td>
+        <td class="editable" data-f="reorder">${fmt(p.reorder||0)}</td>
+        <td class="editable" data-f="cost">${(p.cost||0)>0?money(p.cost):'<span class="mini">—</span>'}</td>
+        <td class="editable" data-f="price">${money(p.price)}</td>
+        <td>${p.cost>0?`<span class="tag ${margin>=0?'green':'red'}">${money(margin)}${marginPct!==null?` (${marginPct}%)`:''}</span>`:'<span class="mini">—</span>'}</td>
+        <td><b>${money(s*(p.cost||p.price||0))}</b></td>
+        <td><span class="tag ${st[1]}">${st[0]}</span></td></tr>`;}).join('')
+      ||`<tr><td colspan="7"><div class="empty"><span class="ico">🔍</span>لا توجد نتائج</div></td></tr>`;
+    $('#ivaltot').textContent=money(f.reduce((s,p)=>s+(p.stock||0)*(p.cost||p.price||0),0));
+    $('#icount').textContent=`عرض ${f.length} صنف`;
+    bindEdit('#ibody','products');
+  };
+  $('#iq').oninput=e=>{invFilter.q=e.target.value;draw();};
+  $('#icat').onchange=e=>{invFilter.cat=e.target.value;draw();};
+  $('#istat').onchange=e=>{invFilter.status=e.target.value;draw();};
+  draw();
+}
+
+/* ---------- الخزينة والنقدية ---------- */
+function renderTreasury(page){
+  const income=DB.treasury.filter(t=>t.dir==='in').reduce((s,t)=>s+t.amount,0);
+  const expense=DB.treasury.filter(t=>t.dir==='out').reduce((s,t)=>s+t.amount,0);
+  page.innerHTML=`
+  <div class="cards">
+    <div class="stat" style="--accent:var(--green)"><span class="ico">⬆️</span><div class="lbl">إجمالي الداخل</div><div class="val">${money(income)}</div></div>
+    <div class="stat" style="--accent:var(--red)"><span class="ico">⬇️</span><div class="lbl">إجمالي الخارج</div><div class="val">${money(expense)}</div></div>
+    <div class="stat" style="--accent:var(--primary)"><span class="ico">🏦</span><div class="lbl">الرصيد الحالي</div><div class="val">${money(income-expense)}</div></div>
+  </div>
+  <div class="panel"><div class="panel-h"><h3>🏦 حركة الخزينة</h3>
+    <div class="tools">
+      <button class="btn green" onclick="cashModal('in')">⬆️ سند قبض</button>
+      <button class="btn red" onclick="cashModal('out')">⬇️ سند صرف</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th><th></th></tr></thead>
+    <tbody>${DB.treasury.slice().reverse().map(t=>`<tr>
+      <td>${t.date}</td><td>${t.dir==='in'?'<span class="tag green">قبض</span>':'<span class="tag red">صرف</span>'}</td>
+      <td>${t.desc}</td><td><b style="color:${t.dir==='in'?'var(--green)':'var(--red)'}">${money(t.amount)}</b></td>
+      <td><button class="btn xs red" onclick="delCash('${t.id}')">🗑</button></td></tr>`).join('')
+      ||`<tr><td colspan="5"><div class="empty"><span class="ico">🏦</span>لا توجد حركات</div></td></tr>`}
+    </tbody></table></div></div></div>`;
+}
+function delCash(id){DB.treasury=DB.treasury.filter(t=>t.id!==id);saveDB();renderPage('treasury');toast('تم الحذف','red');}
+function cashModal(dir){
+  openModal(dir==='in'?'⬆️ سند قبض':'⬇️ سند صرف',`<div class="form-grid">
+    <div class="field"><label>التاريخ</label><input id="ca_date" type="date" value="${today()}"></div>
+    <div class="field"><label>المبلغ</label><input id="ca_amount" type="number" value="0"></div>
+    <div class="field full"><label>البيان</label><input id="ca_desc"></div></div>`,
+    ()=>{const a=+$('#ca_amount').value||0;if(a<=0){toast('أدخل مبلغاً صحيحاً','red');return false;}
+      DB.treasury.push({id:uid(),date:$('#ca_date').value,dir,amount:a,desc:$('#ca_desc').value||'حركة يدوية'});
+      saveDB();renderPage('treasury');toast('تم التسجيل ✓','green');});
+}
+
+/* ====================================================================
+   الدفعة 3 (الأخيرة): إذونات المخزن + الجرد/الصلاحيات + حاسبة الفواتير
+                      + التقارير + التنبيهات
+==================================================================== */
+
+/* ---------- إذونات المخزن (استلام / صرف / تحويل) ---------- */
+function renderStoreDocs(page){
+  page.innerHTML=`<div class="panel"><div class="panel-h"><h3>📑 إذونات المخزن</h3>
+    <div class="tools">
+      <button class="btn green" onclick="storeDocModal('in')">📥 إذن استلام</button>
+      <button class="btn red" onclick="storeDocModal('out')">📤 إذن صرف</button>
+      <button class="btn ghost" onclick="storeDocModal('adjust')">⚖️ تسوية</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>رقم</th><th>التاريخ</th><th>النوع</th><th>الصنف</th><th>الكمية</th><th>السبب</th><th></th>
+    </tr></thead><tbody>${DB.storeDocs.slice().reverse().map(d=>{
+      const t={in:['استلام','green','+'],out:['صرف','red','−'],adjust:['تسوية','amber','±']}[d.type];
+      const p=DB.products.find(x=>x.id===d.productId);
+      return `<tr><td>#${String(d.id).slice(-5)}</td><td>${d.date}</td>
+        <td><span class="tag ${t[1]}">${t[0]}</span></td><td>${p?p.name:'-'}</td>
+        <td><b>${t[2]} ${fmt(d.qty)}</b></td><td>${d.reason||'-'}</td>
+        <td><button class="btn xs red" onclick="delStoreDoc('${d.id}')">🗑</button></td></tr>`;
+    }).join('')||`<tr><td colspan="7"><div class="empty"><span class="ico">📑</span>لا توجد إذونات</div></td></tr>`}
+    </tbody></table></div></div></div>`;
+}
+function storeDocModal(type){
+  const titles={in:'📥 إذن استلام',out:'📤 إذن صرف',adjust:'⚖️ تسوية مخزنية'};
+  openModal(titles[type],`<div class="form-grid">
+    <div class="field"><label>التاريخ</label><input id="sd_date" type="date" value="${today()}"></div>
+    <div class="field"><label>الكمية</label><input id="sd_qty" type="number" value="1"></div>
+    <div class="field full"><label>الصنف</label><select id="sd_prod">${productOptions()}</select></div>
+    <div class="field full"><label>السبب / البيان</label><input id="sd_reason"
+      placeholder="${type==='out'?'صرف للاستخدام / تالف / هالك':type==='in'?'استلام بضاعة':'تصحيح رصيد بعد الجرد'}"></div>
+    ${type==='adjust'?'<p class="mini full">التسوية: موجب يزيد الرصيد، سالب ينقصه.</p>':''}
+  </div>`,()=>{
+    const pid=$('#sd_prod').value;let qty=+$('#sd_qty').value||0;
+    if(type==='out'&&qty<=0||type==='in'&&qty<=0){toast('أدخل كمية صحيحة','red');return false;}
+    const delta=type==='in'?qty:type==='out'?-qty:qty; // adjust يقبل سالب
+    adjustStock(pid,delta);
+    DB.storeDocs.push({id:uid(),date:$('#sd_date').value,type,productId:+pid,qty:Math.abs(qty),reason:$('#sd_reason').value});
+    saveDB();renderPage('storeDocs');buildNav();toast('تم تسجيل الإذن وتحديث المخزون ✓','green');});
+}
+function delStoreDoc(id){
+  confirmBox('حذف الإذن؟','سيتم عكس تأثيره على المخزون.',()=>{
+    const d=DB.storeDocs.find(x=>x.id===id);if(!d)return;
+    const delta=d.type==='in'?-d.qty:d.type==='out'?+d.qty:-d.qty;
+    adjustStock(d.productId,delta);
+    DB.storeDocs=DB.storeDocs.filter(x=>x.id!==id);saveDB();renderPage('storeDocs');buildNav();toast('تم الحذف','red');});
+}
+
+/* ---------- الجرد والصلاحيات ---------- */
+let auditTab='expiry';
+function renderStockAdjust(page){
+  page.innerHTML=`<div class="tabs">
+    <div class="tab ${auditTab==='expiry'?'active':''}" onclick="auditTab='expiry';renderPage('stockAdjust')">📅 تواريخ الصلاحية</div>
+    <div class="tab ${auditTab==='audit'?'active':''}" onclick="auditTab='audit';renderPage('stockAdjust')">📋 الجرد الدوري</div>
+    <div class="tab ${auditTab==='stale'?'active':''}" onclick="auditTab='stale';renderPage('stockAdjust')">🐌 الأصناف الراكدة</div>
+  </div><div id="auditArea"></div>`;
+  if(auditTab==='expiry')drawExpiry();
+  else if(auditTab==='audit')drawAudit();
+  else drawStale();
+}
+function drawExpiry(){
+  const list=DB.products.filter(p=>p.expiry).sort((a,b)=>new Date(a.expiry)-new Date(b.expiry));
+  $('#auditArea').innerHTML=`<div class="panel"><div class="panel-h"><h3>📅 تواريخ الصلاحية</h3>
+    <span class="mini" style="margin-int-start:auto">اضغط على خانة التاريخ لتعديلها</span></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>الصنف</th><th>الرصيد</th><th>تاريخ الصلاحية</th><th>المتبقي</th><th>الحالة</th></tr></thead>
+    <tbody id="exbody">${(list.length?list:DB.products.slice(0,15)).map(p=>{
+      const d=p.expiry?daysTo(p.expiry):null;
+      const st=d===null?['—','gray']:d<0?['منتهي','red']:d<=60?['قرب الانتهاء','amber']:['سليم','green'];
+      return `<tr data-id="${p.id}"><td><b>${p.name}</b></td><td>${fmt(p.stock||0)}</td>
+        <td class="editable" data-f="expiry">${p.expiry||'—'}</td>
+        <td>${d===null?'—':d+' يوم'}</td><td><span class="tag ${st[1]}">${st[0]}</span></td></tr>`;}).join('')}
+    </tbody></table></div></div></div>`;
+  bindEditDate('#exbody');
+}
+function bindEditDate(sel){
+  $$(sel+' td.editable').forEach(td=>{td.onclick=()=>{
+    if(td.querySelector('input'))return;
+    const id=td.closest('tr').dataset.id,rec=DB.products.find(r=>String(r.id)===String(id));
+    const inp=document.createElement('input');inp.type='date';inp.value=rec.expiry||'';
+    td.innerHTML='';td.appendChild(inp);inp.focus();
+    const save=()=>{rec.expiry=inp.value;saveDB();renderPage('stockAdjust');toast('تم الحفظ ✓','green');};
+    inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();};
+  };});
+}
+function drawAudit(){
+  $('#auditArea').innerHTML=`<div class="panel"><div class="panel-h"><h3>📋 الجرد الدوري</h3>
+    <div class="tools"><span class="mini">سجّل الرصيد الفعلي، والفرق يظهر تلقائياً ويمكن ترحيله</span></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>الصنف</th><th>رصيد دفتري</th><th>رصيد فعلي</th><th>الفرق</th><th></th></tr></thead>
+    <tbody id="aubody">${DB.products.slice(0,40).map(p=>`<tr data-id="${p.id}">
+      <td>${p.name}</td><td>${fmt(p.stock||0)}</td>
+      <td><input type="number" class="au-actual" data-id="${p.id}" value="${p.stock||0}" style="width:90px"></td>
+      <td class="au-diff" data-id="${p.id}">0</td>
+      <td><button class="btn xs green" onclick="postAudit(${p.id})">ترحيل</button></td></tr>`).join('')}
+    </tbody></table></div></div></div>`;
+  $$('.au-actual').forEach(inp=>inp.oninput=()=>{
+    const p=DB.products.find(x=>String(x.id)===inp.dataset.id);
+    const diff=(+inp.value||0)-(p.stock||0);
+    const cell=$(`.au-diff[data-id="${inp.dataset.id}"]`);
+    cell.innerHTML=`<span class="tag ${diff===0?'gray':diff>0?'green':'red'}">${diff>0?'+':''}${fmt(diff)}</span>`;
+  });
+}
+function postAudit(id){
+  const inp=$(`.au-actual[data-id="${id}"]`);const p=DB.products.find(x=>x.id===id);
+  const actual=+inp.value||0;const diff=actual-(p.stock||0);
+  if(diff===0){toast('لا يوجد فرق','amber');return;}
+  p.stock=actual;
+  DB.storeDocs.push({id:uid(),date:today(),type:'adjust',productId:id,qty:Math.abs(diff),reason:'تسوية جرد'});
+  saveDB();renderPage('stockAdjust');buildNav();toast('تم ترحيل فرق الجرد ✓','green');
+}
+function drawStale(){
+  // صنف راكد = له رصيد ولم يُبع في آخر 90 يوم
+  const soldIds=new Set();const cut=new Date(Date.now()-90*86400000);
+  DB.sales.forEach(s=>{if(new Date(s.date)>=cut)s.items.forEach(i=>soldIds.add(i.productId));});
+  const stale=DB.products.filter(p=>(p.stock||0)>0&&!soldIds.has(p.id));
+  $('#auditArea').innerHTML=`<div class="panel"><div class="panel-h"><h3>🐌 الأصناف الراكدة (رصيد بدون بيع خلال 90 يوم)</h3></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>الصنف</th><th>التصنيف</th><th>الرصيد</th><th>قيمة الركود</th></tr></thead>
+    <tbody>${stale.map(p=>`<tr><td>${p.name}</td><td>${catTag(p.cat)}</td>
+      <td><span class="tag amber">${fmt(p.stock)}</span></td><td><b>${money((p.stock||0)*(p.price||0))}</b></td></tr>`).join('')
+      ||`<tr><td colspan="4"><div class="empty"><span class="ico">✅</span>لا توجد أصناف راكدة</div></td></tr>`}
+    </tbody></table></div></div></div>`;
+}
+
+/* ---------- حاسبة الفواتير السريعة ---------- */
+let quickItems=[];
+function renderInvoiceCalc(page){
+  quickItems=[];
+  page.innerHTML=`<div class="panel" style="max-width:760px"><div class="panel-h"><h3>🧾 حاسبة الفواتير السريعة</h3></div>
+    <div class="panel-b">
+      <div style="display:grid;grid-template-columns:2fr .7fr 1fr auto;gap:9px;align-items:end">
+        <div class="field"><label>الصنف</label><select id="q_prod">${productOptions()}</select></div>
+        <div class="field"><label>الكمية</label><input id="q_qty" type="number" value="1"></div>
+        <div class="field"><label>السعر</label><input id="q_price" type="number"></div>
+        <button class="btn" id="q_add">➕</button>
+      </div>
+      <div class="tbl-wrap" style="margin-top:13px"><table><thead><tr>
+        <th>الصنف</th><th>كمية</th><th>سعر</th><th>إجمالي</th><th></th></tr></thead>
+        <tbody id="q_body"></tbody></table></div>
+      <div class="form-grid" style="margin-top:13px">
+        <div class="field"><label>نسبة خصم %</label><input id="q_disc" type="number" value="0"></div>
+        <div class="field"><label>نسبة ضريبة %</label><input id="q_tax" type="number" value="0"></div>
+      </div>
+      <div id="q_summary" style="margin-top:14px"></div>
+    </div></div>`;
+  const setP=()=>{const p=DB.products.find(x=>String(x.id)===$('#q_prod').value);if(p)$('#q_price').value=p.price||0;};
+  $('#q_prod').onchange=setP;setP();
+  $('#q_add').onclick=()=>{
+    const p=DB.products.find(x=>String(x.id)===$('#q_prod').value);if(!p)return;
+    quickItems.push({name:p.name,qty:+$('#q_qty').value||0,price:+$('#q_price').value||0});draw();};
+  ['q_disc','q_tax'].forEach(id=>$('#'+id).oninput=draw);
+  function draw(){
+    $('#q_body').innerHTML=quickItems.map((i,ix)=>`<tr><td>${i.name}</td><td>${fmt(i.qty)}</td>
+      <td>${fmt(i.price)}</td><td><b>${money(i.qty*i.price)}</b></td>
+      <td><button class="btn xs red" onclick="rmQuick(${ix})">✕</button></td></tr>`).join('')
+      ||`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:14px">أضف أصناف للفاتورة</td></tr>`;
+    const sub=quickItems.reduce((s,i)=>s+i.qty*i.price,0);
+    const disc=sub*(+$('#q_disc').value||0)/100;
+    const tax=(sub-disc)*(+$('#q_tax').value||0)/100;
+    const total=sub-disc+tax;
+    $('#q_summary').innerHTML=`<div class="cards" style="margin:0">
+      <div class="stat" style="--accent:var(--cyan)"><div class="lbl">الإجمالي قبل الخصم</div><div class="val" style="font-size:18px">${money(sub)}</div></div>
+      <div class="stat" style="--accent:var(--amber)"><div class="lbl">الخصم</div><div class="val" style="font-size:18px">${money(disc)}</div></div>
+      <div class="stat" style="--accent:var(--purple)"><div class="lbl">الضريبة</div><div class="val" style="font-size:18px">${money(tax)}</div></div>
+      <div class="stat" style="--accent:var(--green)"><div class="lbl">الصافي المطلوب</div><div class="val" style="font-size:18px">${money(total)}</div></div>
+    </div>`;
+  }
+  window.rmQuick=ix=>{quickItems.splice(ix,1);draw();};draw();
+}
+
+/* ---------- التقارير ---------- */
+let repRange='month',repFrom='',repTo='',repType='summary';
+function renderReports(page){
+  page.innerHTML=`
+  <div class="panel"><div class="panel-h"><h3>📈 مركز التقارير</h3>
+    <div class="tools">
+      <select id="rep_type">
+        <option value="summary">📊 ملخص عام للفترة</option>
+        <option value="customer">👤 كشف حساب عميل</option>
+        <option value="cycle">🏠 تقرير بكود الدورة</option>
+        <option value="receivables">💳 الذمم والمديونيات (أعمار الديون)</option>
+        <option value="profit">💰 تقرير الأرباح بالصنف</option>
+        <option value="itemmove">📦 حركة صنف في المخزون</option>
+        <option value="suppliers">🏭 الموردين والمستحقات</option>
+        <option value="cashflow">🏦 التدفق النقدي للخزينة</option>
+        <option value="sales_detail">🧾 تفصيل فواتير البيع</option>
+        <option value="compare">⚖️ مقارنة أصناف نفس التصنيف العلاجي</option>
+      </select>
+      <select id="rep_range">
+        <option value="day">اليوم</option><option value="week">الأسبوع</option>
+        <option value="month" selected>الشهر</option><option value="quarter">الربع</option>
+        <option value="year">السنة</option><option value="all">كل الفترات</option>
+        <option value="custom">مخصص</option></select>
+      <input type="date" id="rep_from" style="display:none">
+      <input type="date" id="rep_to" style="display:none">
+      <select id="rep_entity" style="display:none;min-width:170px"></select>
+      <button class="btn sm green" onclick="printReport()">🖨️ طباعة</button>
+    </div></div>
+    <div class="panel-b" id="rep_body"></div></div>`;
+  $('#rep_type').value=repType;$('#rep_range').value=repRange;
+  const toggleEntity=()=>{
+    const t=$('#rep_type').value;
+    const needCust=t==='customer';const needCycle=t==='cycle';const needItem=t==='itemmove'||t==='compare';
+    const sel=$('#rep_entity');
+    if(needCust||needCycle||needItem){
+      sel.style.display='block';
+      if(needCust)sel.innerHTML=DB.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      else if(needCycle)sel.innerHTML=(DB.farmInvoices||[]).map(f=>`<option value="${f.id}">${f.cycleCode} — ${f.customerName}</option>`).join('');
+      else sel.innerHTML=DB.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    }else sel.style.display='none';
+  };
+  $('#rep_type').onchange=()=>{repType=$('#rep_type').value;toggleEntity();drawReport();};
+  $('#rep_range').onchange=e=>{repRange=e.target.value;
+    const cu=repRange==='custom';$('#rep_from').style.display=cu?'block':'none';$('#rep_to').style.display=cu?'block':'none';drawReport();};
+  $('#rep_from').onchange=e=>{repFrom=e.target.value;drawReport();};
+  $('#rep_to').onchange=e=>{repTo=e.target.value;drawReport();};
+  $('#rep_entity').onchange=drawReport;
+  toggleEntity();drawReport();
+}
+function inRange(d){
+  if(!d)return false;if(repRange==='all')return true;
+  if(repRange==='custom'){return (!repFrom||d>=repFrom)&&(!repTo||d<=repTo);}
+  const date=new Date(d),now=new Date();const diff=(now-date)/86400000;
+  return {day:1,week:7,month:31,quarter:92,year:366}[repRange]>=diff && diff>=0;
+}
+function rangeLabel(){
+  return {day:'اليوم',week:'آخر أسبوع',month:'الشهر',quarter:'الربع',year:'السنة',all:'كل الفترات',
+    custom:`من ${repFrom||'...'} إلى ${repTo||'...'}`}[repRange];
+}
+/* إجمالي فاتورة مزرعة */
+function farmTotalOf(f){return f.items.reduce((a,i)=>a+i.qty*i.price,0);}
+
+function drawReport(){
+  ensureFarmInvoices&&ensureFarmInvoices();
+  const t=repType;
+  const fn={summary:repSummary,customer:repCustomer,cycle:repCycle,receivables:repReceivables,
+    compare:repCompare,
+    profit:repProfit,itemmove:repItemMove,suppliers:repSuppliers,cashflow:repCashflow,
+    sales_detail:repSalesDetail}[t]||repSummary;
+  $('#rep_body').innerHTML=fn();
+}
+
+/* ============ 1) ملخص عام ============ */
+function repSummary(){
+  const farmInvs=(DB.farmInvoices||[]).filter(f=>inRange(f.entryDate||f.createdAt));
+  const farmTotal=farmInvs.reduce((s,f)=>s+farmTotalOf(f),0);
+  const vaxTotal=farmInvs.filter(f=>f.type==='vaccine').reduce((s,f)=>s+farmTotalOf(f),0);
+  const drugTotal=farmTotal-vaxTotal;
+  const directSales=DB.sales.filter(s=>inRange(s.date)&&!s.fromFarm);
+  const purch=DB.purchases.filter(p=>inRange(p.date));
+  const directSalesTot=directSales.reduce((s,i)=>s+i.total,0);
+  const salesTot=directSalesTot+farmTotal;
+  const purchTot=purch.reduce((s,i)=>s+i.total,0);
+  const profit=directSales.reduce((s,inv)=>s+inv.items.reduce((a,it)=>{
+    const p=DB.products.find(x=>x.id===it.productId);return a+(it.price-(p?(p.cost||0):0))*it.qty;},0),0);
+  const payIn=(DB.payments||[]).filter(p=>inRange(p.date)).reduce((s,p)=>s+p.amount,0);
+  const prodSold={};
+  directSales.forEach(s=>s.items.forEach(i=>{prodSold[i.name]=(prodSold[i.name]||0)+i.qty;}));
+  farmInvs.forEach(f=>f.items.forEach(i=>{prodSold[i.name]=(prodSold[i.name]||0)+i.qty;}));
+  const top=Object.entries(prodSold).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  return repHead('ملخص عام للفترة')+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('💰','إجمالي المبيعات',money(salesTot),(directSales.length+farmInvs.length)+' فاتورة','var(--green)')}
+      ${statCard('🛒','المشتريات',money(purchTot),purch.length+' فاتورة','var(--purple)')}
+      ${statCard('📊','الربح التقديري',money(profit),'مبيعات مباشرة','var(--primary)')}
+      ${statCard('🏬','قيمة المخزون الحالي',money(stockValue()),'بسعر التكلفة','var(--cyan)')}
+    </div>
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('🏠','مبيعات فواتير المزارع',money(farmTotal),farmInvs.length+' فاتورة','var(--amber)')}
+      ${statCard('💉','منها تحصينات',money(vaxTotal),'','var(--pink)')}
+      ${statCard('💊','منها أدوية',money(drugTotal),'','var(--purple)')}
+      ${statCard('💵','تحصيلات الفترة',money(payIn),'دفعات من العملاء','var(--green)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>🔝 أكثر الأصناف مبيعاً</h3></div>
+    <div class="panel-b flush"><table><thead><tr><th>الصنف</th><th>الكمية المباعة</th></tr></thead>
+    <tbody>${top.map(([n,q])=>`<tr><td>${n}</td><td><span class="tag blue">${fmt(q)}</span></td></tr>`).join('')
+      ||emptyRow(2)}</tbody></table></div></div>`;
+}
+
+/* ============ 2) كشف حساب عميل ============ */
+function repCustomer(){
+  const cid=$('#rep_entity')?$('#rep_entity').value:null;
+  const c=DB.customers.find(x=>String(x.id)===String(cid));
+  if(!c)return repHead('كشف حساب عميل')+emptyBox('اختر عميلاً');
+  // كل الحركات: فواتير المزارع (مع تمييز غير المرحّلة) + فواتير بيع مباشرة + دفعات
+  let rows=[];
+  (DB.farmInvoices||[]).filter(f=>String(f.customerId)===String(c.id)&&inRange(f.entryDate)).forEach(f=>{
+    const tot=farmTotalOf(f);
+    rows.push({date:f.entryDate,type:'فاتورة '+(f.type==='vaccine'?'تحصينات':'أدوية'),ref:f.cycleCode,
+      debit:tot,credit:f.paid||0,posted:f.posted});
+  });
+  DB.sales.filter(s=>String(s.partyId)===String(c.id)&&!s.fromFarm&&inRange(s.date)).forEach(s=>{
+    rows.push({date:s.date,type:'فاتورة بيع',ref:'#'+String(s.id).slice(-5),debit:s.total,credit:s.paid||0,posted:true});
+  });
+  (DB.payments||[]).filter(p=>String(p.customerId)===String(c.id)&&inRange(p.date)).forEach(p=>{
+    rows.push({date:p.date,type:'تحصيل دفعة',ref:p.note||'',debit:0,credit:p.amount,posted:true});
+  });
+  rows.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  let bal=0;
+  const body=rows.map(r=>{
+    const counts=r.posted!==false;            // غير المرحّلة لا تدخل الرصيد
+    if(counts)bal+=r.debit-r.credit;
+    const dim=r.posted===false?'opacity:.6':'';
+    const tag=r.posted===false?' <span class="tag amber" style="font-size:9px">غير مُرحّلة</span>':'';
+    return `<tr style="${dim}"><td>${r.date}</td><td>${r.type}${tag}</td><td>${r.ref}</td>
+      <td>${r.debit?money(r.debit):'-'}</td><td>${r.credit?money(r.credit):'-'}</td>
+      <td>${counts?`<b style="color:${bal>0?'var(--red)':'var(--green)'}">${money(bal)}</b>`:'<span class="mini">—</span>'}</td></tr>`;}).join('');
+  const postedRows=rows.filter(r=>r.posted!==false);
+  const totDebit=postedRows.reduce((s,r)=>s+r.debit,0),totCredit=postedRows.reduce((s,r)=>s+r.credit,0);
+  const unpostedCount=rows.filter(r=>r.posted===false).length;
+  return repHead('كشف حساب: '+c.name)+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('🧾','إجمالي الفواتير',money(totDebit),'مدين','var(--primary)')}
+      ${statCard('💵','إجمالي المدفوع',money(totCredit),'دائن','var(--green)')}
+      ${statCard('📌','الرصيد المستحق',money(c.balance||0),(c.balance||0)>0?'دين على العميل':'مسدد','var(--red)')}
+      ${statCard('📞','بيانات','—',(c.phone||'')+' '+(c.gov||''),'var(--cyan)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 حركة الحساب</h3>
+      ${unpostedCount?`<span class="tag amber" style="margin-inline-start:auto">⚠️ ${unpostedCount} فاتورة غير مُرحّلة (لا تدخل في الرصيد)</span>`:''}</div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>التاريخ</th><th>نوع الحركة</th><th>المرجع</th><th>مدين (فاتورة)</th><th>دائن (دفع)</th><th>الرصيد الجاري</th>
+    </tr></thead><tbody>${body||emptyRow(6)}</tbody></table></div></div></div>`;
+}
+
+/* ============ 3) تقرير بكود الدورة ============ */
+function repCycle(){
+  const fid=$('#rep_entity')?$('#rep_entity').value:null;
+  const f=(DB.farmInvoices||[]).find(x=>x.id===fid);
+  if(!f)return repHead('تقرير بكود الدورة')+emptyBox('اختر دورة');
+  const tot=farmTotalOf(f);const perBird=f.birds>0?tot/f.birds:0;
+  const itemRows=f.items.map((it,i)=>`<tr><td>${i+1}</td><td>${it.name}</td><td>${fmt(it.qty)}</td>
+    <td>${money(it.price)}</td><td><b>${money(it.qty*it.price)}</b></td></tr>`).join('');
+  const progRows=(f.program||[]).map(p=>`<tr><td>${p.age}</td><td>${p.name}</td><td>${p.route}</td><td>${p.dose}</td></tr>`).join('');
+  return repHead('تقرير الدورة: '+f.cycleCode)+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('🏠','العميل',f.customerName,f.cycleCode,'var(--primary)')}
+      ${statCard('📅','تاريخ الدخول',f.entryDate,fmt(f.birds)+' طائر','var(--cyan)')}
+      ${statCard('💵','إجمالي الفاتورة',money(tot),f.posted?'مُرحّلة':'غير مُرحّلة','var(--green)')}
+      ${statCard('🐤','تكلفة الطائر',perBird.toLocaleString('en-US',{maximumFractionDigits:3})+' ج.م','','var(--amber)')}
+    </div>
+    <div class="panel"><div class="panel-h"><h3>🧾 أصناف الفاتورة</h3></div>
+    <div class="panel-b flush"><table><thead><tr><th>#</th><th>الصنف</th><th>العدد</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+    <tbody>${itemRows||emptyRow(5)}</tbody>
+    <tfoot><tr style="font-weight:800"><td colspan="4" style="text-align:left">الإجمالي</td><td>${money(tot)}</td></tr></tfoot></table></div></div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 برنامج ${f.type==='vaccine'?'التحصين':'العلاج'} والجرعات</h3></div>
+    <div class="panel-b flush"><table><thead><tr><th>العمر/اليوم</th><th>الصنف</th><th>طريقة الإعطاء</th><th>الجرعة</th></tr></thead>
+    <tbody>${progRows||emptyRow(4)}</tbody></table></div></div>`;
+}
+
+/* ============ 4) الذمم وأعمار الديون ============ */
+function repReceivables(){
+  const debtors=DB.customers.filter(c=>(c.balance||0)>0).sort((a,b)=>b.balance-a.balance);
+  // أعمار الدين: نحسب أقدم فاتورة غير مسددة بالكامل لكل عميل
+  const aged=debtors.map(c=>{
+    const invs=(DB.farmInvoices||[]).filter(f=>String(f.customerId)===String(c.id)&&f.posted);
+    let oldest=null;invs.forEach(f=>{if(!oldest||new Date(f.entryDate)<new Date(oldest))oldest=f.entryDate;});
+    const age=oldest?Math.max(0,Math.ceil((new Date()-new Date(oldest))/86400000)):0;
+    let bucket=age<=30?'0-30':age<=60?'31-60':age<=90?'61-90':'+90';
+    return {c,age,bucket};
+  });
+  const total=debtors.reduce((s,c)=>s+c.balance,0);
+  const buckets={'0-30':0,'31-60':0,'61-90':0,'+90':0};
+  aged.forEach(a=>buckets[a.bucket]+=a.c.balance);
+  const body=aged.map(a=>`<tr><td><b>${a.c.name}</b></td><td>${a.c.type||'-'}</td><td>${a.c.phone||'-'}</td>
+    <td><span class="tag red">${money(a.c.balance)}</span></td>
+    <td>${a.age} يوم</td>
+    <td><span class="tag ${a.bucket==='0-30'?'green':a.bucket==='31-60'?'amber':'red'}">${a.bucket} يوم</span></td></tr>`).join('');
+  return repHead('الذمم والمديونيات')+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('💳','إجمالي الذمم',money(total),debtors.length+' عميل','var(--red)')}
+      ${statCard('🟢','حديثة (0-30)',money(buckets['0-30']),'','var(--green)')}
+      ${statCard('🟡','متوسطة (31-60)',money(buckets['31-60']),'','var(--amber)')}
+      ${statCard('🔴','متأخرة (+60)',money(buckets['61-90']+buckets['+90']),'تحتاج متابعة','var(--red)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 تفصيل ذمم العملاء</h3></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>العميل</th><th>النوع</th><th>الهاتف</th><th>المديونية</th><th>عمر أقدم دين</th><th>الفئة</th>
+    </tr></thead><tbody>${body||emptyRow(6)}</tbody></table></div></div></div>`;
+}
+
+/* ============ 5) تقرير الأرباح بالصنف ============ */
+function repProfit(){
+  const directSales=DB.sales.filter(s=>inRange(s.date)&&!s.fromFarm);
+  const farmInvs=(DB.farmInvoices||[]).filter(f=>f.posted&&inRange(f.entryDate));
+  const map={}; // name -> {qty,revenue,cost}
+  const add=(name,qty,price,prodId)=>{
+    const p=DB.products.find(x=>x.id===prodId)||DB.products.find(x=>x.name===name);
+    const cost=p?(p.cost||0):0;
+    if(!map[name])map[name]={qty:0,revenue:0,cost:0};
+    map[name].qty+=qty;map[name].revenue+=qty*price;map[name].cost+=qty*cost;
+  };
+  directSales.forEach(s=>s.items.forEach(i=>add(i.name,i.qty,i.price,i.productId)));
+  farmInvs.forEach(f=>f.items.forEach(i=>add(i.name,i.qty,i.price,null)));
+  const rows=Object.entries(map).map(([n,v])=>({n,...v,profit:v.revenue-v.cost}))
+    .sort((a,b)=>b.profit-a.profit);
+  const totRev=rows.reduce((s,r)=>s+r.revenue,0),totCost=rows.reduce((s,r)=>s+r.cost,0),totProf=totRev-totCost;
+  const body=rows.map(r=>`<tr><td>${r.n}</td><td>${fmt(r.qty)}</td><td>${money(r.revenue)}</td>
+    <td>${money(r.cost)}</td><td><b style="color:${r.profit>=0?'var(--green)':'var(--red)'}">${money(r.profit)}</b></td>
+    <td>${r.revenue>0?Math.round(r.profit/r.revenue*100):0}%</td></tr>`).join('');
+  return repHead('تقرير الأرباح بالصنف')+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('💰','إجمالي الإيراد',money(totRev),'','var(--green)')}
+      ${statCard('🛒','إجمالي التكلفة',money(totCost),'','var(--purple)')}
+      ${statCard('📊','صافي الربح',money(totProf),totRev>0?Math.round(totProf/totRev*100)+'% هامش':'','var(--primary)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 الربحية لكل صنف</h3>
+      <span class="mini" style="margin-inline-start:auto">التكلفة من سعر الشراء المسجّل</span></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>الصنف</th><th>الكمية</th><th>الإيراد</th><th>التكلفة</th><th>الربح</th><th>الهامش</th>
+    </tr></thead><tbody>${body||emptyRow(6)}</tbody></table></div></div></div>`;
+}
+
+/* ============ 6) حركة صنف ============ */
+function repItemMove(){
+  const pid=$('#rep_entity')?$('#rep_entity').value:null;
+  const p=DB.products.find(x=>String(x.id)===String(pid));
+  if(!p)return repHead('حركة صنف')+emptyBox('اختر صنفاً');
+  let moves=[];
+  DB.purchases.filter(x=>inRange(x.date)).forEach(inv=>inv.items.filter(i=>i.productId===p.id).forEach(i=>
+    moves.push({date:inv.date,type:'شراء',in:i.qty,out:0,ref:inv.partyName})));
+  DB.sales.filter(x=>inRange(x.date)).forEach(inv=>inv.items.filter(i=>i.productId===p.id).forEach(i=>
+    moves.push({date:inv.date,type:inv.fromFarm?'بيع (مزرعة)':'بيع',in:0,out:i.qty,ref:inv.partyName})));
+  (DB.storeDocs||[]).filter(d=>d.productId===p.id&&inRange(d.date)).forEach(d=>
+    moves.push({date:d.date,type:d.type==='in'?'استلام':d.type==='out'?'صرف':'تسوية',
+      in:d.type==='in'?d.qty:0,out:d.type==='out'?d.qty:0,ref:d.reason||''}));
+  moves.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  let run=0;const body=moves.map(m=>{run+=m.in-m.out;
+    return `<tr><td>${m.date}</td><td>${m.type}</td><td>${m.ref||'-'}</td>
+      <td>${m.in?'<span class="tag green">+'+fmt(m.in)+'</span>':'-'}</td>
+      <td>${m.out?'<span class="tag red">-'+fmt(m.out)+'</span>':'-'}</td>
+      <td><b>${fmt(run)}</b></td></tr>`;}).join('');
+  return repHead('حركة صنف: '+p.name)+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('📦','الرصيد الحالي',fmt(p.stock||0),p.cat,(p.stock||0)<0?'var(--red)':'var(--primary)')}
+      ${statCard('🛒','سعر الشراء',money(p.cost||0),'','var(--purple)')}
+      ${statCard('🏷️','سعر البيع',money(p.price||0),'','var(--green)')}
+      ${statCard('💵','قيمة الرصيد',money((p.stock||0)*(p.cost||p.price||0)),'بالتكلفة','var(--cyan)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 سجل الحركة</h3></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>التاريخ</th><th>الحركة</th><th>الطرف/السبب</th><th>وارد</th><th>منصرف</th><th>الرصيد الجاري</th>
+    </tr></thead><tbody>${body||emptyRow(6)}</tbody></table></div></div></div>`;
+}
+
+/* ============ 7) الموردين والمستحقات ============ */
+function repSuppliers(){
+  const rows=DB.suppliers.map(s=>{
+    const purch=DB.purchases.filter(p=>String(p.partyId)===String(s.id)&&inRange(p.date));
+    const tot=purch.reduce((a,p)=>a+p.total,0);
+    const itemCount=DB.products.filter(p=>p.supplier===s.name).length;
+    return {s,tot,count:purch.length,itemCount};
+  }).filter(r=>r.tot>0||r.s.balance>0||r.itemCount>0).sort((a,b)=>b.tot-a.tot);
+  const totPurch=rows.reduce((s,r)=>s+r.tot,0);
+  const totPayable=DB.suppliers.reduce((s,x)=>s+(x.balance||0),0);
+  const body=rows.map(r=>`<tr><td><b>${r.s.name}</b></td><td>${r.itemCount}</td><td>${r.count}</td>
+    <td>${money(r.tot)}</td><td>${(r.s.balance||0)>0?`<span class="tag red">${money(r.s.balance)}</span>`:'<span class="tag green">0</span>'}</td></tr>`).join('');
+  return repHead('الموردين والمستحقات')+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('🏭','عدد الموردين',fmt(DB.suppliers.length),'','var(--primary)')}
+      ${statCard('🛒','مشتريات الفترة',money(totPurch),'','var(--purple)')}
+      ${statCard('💳','إجمالي المستحقات',money(totPayable),'مستحق للموردين','var(--red)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 تفصيل الموردين</h3></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>المورد</th><th>عدد أصنافه</th><th>فواتير الفترة</th><th>قيمة المشتريات</th><th>المستحق له</th>
+    </tr></thead><tbody>${body||emptyRow(5)}</tbody></table></div></div></div>`;
+}
+
+/* ============ 8) التدفق النقدي ============ */
+function repCashflow(){
+  const tr=(DB.treasury||[]).filter(t=>inRange(t.date));
+  const income=tr.filter(t=>t.dir==='in').reduce((s,t)=>s+t.amount,0);
+  const expense=tr.filter(t=>t.dir==='out').reduce((s,t)=>s+t.amount,0);
+  const body=tr.slice().reverse().map(t=>`<tr><td>${t.date}</td>
+    <td>${t.dir==='in'?'<span class="tag green">قبض</span>':'<span class="tag red">صرف</span>'}</td>
+    <td>${t.desc}</td><td><b style="color:${t.dir==='in'?'var(--green)':'var(--red)'}">${money(t.amount)}</b></td></tr>`).join('');
+  return repHead('التدفق النقدي')+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('⬆️','إجمالي الداخل',money(income),'','var(--green)')}
+      ${statCard('⬇️','إجمالي الخارج',money(expense),'','var(--red)')}
+      ${statCard('🏦','صافي التدفق',money(income-expense),'الفترة المحددة','var(--primary)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 حركات الخزينة</h3></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th>
+    </tr></thead><tbody>${body||emptyRow(4)}</tbody></table></div></div></div>`;
+}
+
+/* ============ 9) تفصيل فواتير البيع ============ */
+function repSalesDetail(){
+  const sales=DB.sales.filter(s=>inRange(s.date));
+  const body=sales.slice().reverse().map(s=>{const rem=(s.total||0)-(s.paid||0);
+    return `<tr><td>#${String(s.id).slice(-6)}</td><td>${s.date}</td><td>${s.partyName||'-'}</td>
+    <td>${s.fromFarm?'<span class="tag amber">مزرعة</span>':'<span class="tag blue">مباشرة</span>'}</td>
+    <td>${s.items.length}</td><td>${money(s.total)}</td><td>${money(s.paid||0)}</td>
+    <td>${rem<=0?'<span class="tag green">مسدد</span>':`<span class="tag red">${money(rem)}</span>`}</td></tr>`;}).join('');
+  const tot=sales.reduce((s,i)=>s+i.total,0);
+  return repHead('تفصيل فواتير البيع')+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('🧾','عدد الفواتير',fmt(sales.length),'','var(--primary)')}
+      ${statCard('💰','إجمالي القيمة',money(tot),'','var(--green)')}
+      ${statCard('💵','المحصّل',money(sales.reduce((s,i)=>s+(i.paid||0),0)),'','var(--cyan)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>📋 الفواتير</h3></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>رقم</th><th>التاريخ</th><th>العميل</th><th>النوع</th><th>أصناف</th><th>الإجمالي</th><th>المدفوع</th><th>الحالة</th>
+    </tr></thead><tbody>${body||emptyRow(8)}</tbody></table></div></div></div>`;
+}
+
+/* ---------- أدوات مساعدة للتقارير ---------- */
+/* ============ مقارنة أصناف نفس التصنيف العلاجي ============ */
+function repCompare(){
+  const pid=$('#rep_entity')?$('#rep_entity').value:null;
+  const p=DB.products.find(x=>String(x.id)===String(pid));
+  if(!p)return repHead('مقارنة الأصناف')+emptyBox('اختر صنفاً للمقارنة');
+  const ther=(p.ther||'').trim();
+  if(!ther)return repHead('مقارنة الأصناف')+emptyBox('هذا الصنف ليس له تصنيف علاجي محدّد. أضف "التصنيف العلاجي" له أولاً من قائمة المنتجات.');
+  // كل الأصناف في نفس التصنيف العلاجي
+  const peers=DB.products.filter(x=>(x.ther||'').trim()===ther);
+  const rows=peers.map(x=>{
+    const isSel=x.id===p.id;
+    return `<tr style="${isSel?'background:rgba(59,130,246,.12)':''}">
+      <td>${isSel?'⭐ ':''}<b>${x.name}</b></td>
+      <td>${x.maker||'—'}</td>
+      <td>${x.supplier||'—'}</td>
+      <td>${(x.doseMeat||0)>0?fmt(x.doseMeat):'—'}</td>
+      <td>${(x.doseWater||0)>0?fmt(x.doseWater):'—'}</td>
+      <td>${x.unit||'—'} / ${fmt(x.pkg)}</td>
+      <td><b>${money(x.price)}</b></td>
+      <td>${fmt(x.stock||0)}</td></tr>`;}).join('');
+  // متوسط السعر للمقارنة
+  const avg=peers.reduce((s,x)=>s+(x.price||0),0)/peers.length;
+  const cheapest=peers.slice().sort((a,b)=>a.price-b.price)[0];
+  return repHead('مقارنة أصناف: '+ther)+`
+    <div class="cards" style="margin-bottom:16px">
+      ${statCard('🏷️','التصنيف العلاجي',ther,peers.length+' صنف','var(--primary)')}
+      ${statCard('⭐','الصنف المختار',p.name,money(p.price),'var(--cyan)')}
+      ${statCard('💰','متوسط السعر',money(Math.round(avg)),'لكل الأصناف','var(--amber)')}
+      ${statCard('✅','الأرخص',cheapest?cheapest.name:'—',cheapest?money(cheapest.price):'','var(--green)')}
+    </div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>⚖️ المقارنة التفصيلية</h3>
+      <span class="mini" style="margin-inline-start:auto">⭐ = الصنف المختار</span></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>المنتج</th><th>الشركة المنتجة</th><th>المورد</th><th>جرعة/طن لحم</th><th>جرعة/لتر ماء</th>
+      <th>الوحدة/العبوة</th><th>السعر</th><th>الرصيد</th>
+    </tr></thead><tbody>${rows||emptyRow(8)}</tbody></table></div></div></div>`;
+}
+function statCard(ico,lbl,val,meta,color){return `<div class="stat" style="--accent:${color}">
+  <span class="ico">${ico}</span><div class="lbl">${lbl}</div>
+  <div class="val" style="font-size:18px">${val}</div>${meta?`<div class="meta">${meta}</div>`:''}</div>`;}
+function repHead(title){return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px" id="repTitle">
+  <h3 style="font-size:16px">${title}</h3><span class="tag gray">${rangeLabel()}</span></div>`;}
+function emptyRow(cols){return `<tr><td colspan="${cols}"><div class="empty"><span class="ico">📄</span>لا توجد بيانات في هذه الفترة</div></td></tr>`;}
+function emptyBox(msg){return `<div class="empty"><span class="ico">👆</span>${msg}</div>`;}
+
+/* ---------- طباعة التقرير الحالي ---------- */
+/* طباعة الصفحة/الموديول الحالي بشكل نظيف */
+function printCurrentPage(){
+  const content=$('#content');
+  if(!content){return;}
+  const title=($('#pageTitle')?$('#pageTitle').textContent:'تقرير');
+  // انسخ المحتوى وأزل عناصر التحكم
+  const clone=content.cloneNode(true);
+  clone.querySelectorAll('button,.row-actions,.tools,input,select,textarea,.menu-btn').forEach(el=>el.remove());
+  // أزل التبويبات الفارغة
+  clone.querySelectorAll('.tabs').forEach(el=>el.remove());
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${title}</title>
+  <style>*{font-family:'Segoe UI',Tahoma,sans-serif;box-sizing:border-box}
+  body{padding:24px;color:#111}
+  h1{color:#1e3a8a;border-bottom:3px solid #635bff;padding-bottom:10px;font-size:20px;margin-bottom:6px}
+  .co{font-size:12px;color:#555;margin-bottom:16px}
+  .panel{margin-bottom:18px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+  .panel-h{background:#f5f6fc;padding:9px 13px;font-weight:800;color:#1e3a8a;border-bottom:1px solid #e5e7eb}
+  .panel-h h3{margin:0;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{border:1px solid #d1d5db;padding:7px;text-align:center}
+  thead th{background:#eef0ff;color:#3a32a8}
+  tfoot td{font-weight:800;background:#f1f5f9}
+  .cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+  .stat{border:1px solid #e5e7eb;border-radius:10px;padding:11px;min-width:140px;flex:1}
+  .stat .ico{font-size:18px}.stat .lbl{font-size:11px;color:#666}.stat .val{font-size:16px;font-weight:800;color:#3a32a8}
+  .stat .meta{font-size:10px;color:#888}
+  .tag{padding:2px 8px;border-radius:9px;font-size:11px;background:#eef0ff;color:#3a32a8}
+  .empty{text-align:center;padding:18px;color:#999}
+  .mini{font-size:11px;color:#777}
+  @media print{.noprint{display:none}}
+  .noprint{margin-top:20px;text-align:center}
+  .pbtn{background:#635bff;color:#fff;border:none;padding:11px 26px;border-radius:8px;font-size:15px;cursor:pointer}
+  </style></head><body>
+  <h1>${title}</h1>
+  <div class="co">${DB.settings.company||'الشركة المصرية لتوزيع الأدوية البيطرية'} — ${new Date().toLocaleDateString('ar-EG')}</div>
+  ${clone.innerHTML}
+  <div class="noprint"><button class="pbtn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button></div>
+  </body></html>`);
+  w.document.close();
+}
+function printReport(){
+  const body=$('#rep_body').innerHTML;
+  const title=($('#repTitle')?$('#repTitle').innerText:'تقرير');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${title}</title>
+  <style>*{font-family:'Segoe UI',Tahoma,sans-serif;box-sizing:border-box}body{padding:24px;color:#111}
+  h1{color:#1e3a8a;border-bottom:3px solid #2563eb;padding-bottom:10px;font-size:20px}
+  .cards{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+  .stat{border:1px solid #d1d5db;border-radius:10px;padding:12px;min-width:150px;flex:1}
+  .stat .ico{font-size:20px}.stat .lbl{font-size:12px;color:#555}.stat .val{font-size:17px;font-weight:800;color:#1e3a8a}
+  .stat .meta{font-size:11px;color:#777}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+  th,td{border:1px solid #d1d5db;padding:7px;text-align:center}thead th{background:#eff6ff;color:#1e3a8a}
+  tfoot td{font-weight:800;background:#f1f5f9}.panel-h h3{color:#1e3a8a;margin:14px 0 6px}
+  .tag{padding:2px 8px;border-radius:10px;font-size:11px;background:#eee}
+  .empty{text-align:center;padding:20px;color:#999}.ico,.meta{}
+  .company{font-size:13px;color:#555;margin-bottom:14px}
+  @media print{.noprint{display:none}}.noprint{margin-top:20px;text-align:center}
+  .pbtn{background:#2563eb;color:#fff;border:none;padding:11px 26px;border-radius:8px;font-size:15px;cursor:pointer}
+  </style></head><body>
+  <h1>${title}</h1>
+  <div class="company">${DB.settings.company||''} — تاريخ الطباعة: ${today()}</div>
+  ${body}
+  <div class="noprint"><button class="pbtn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button></div>
+  </body></html>`);
+  w.document.close();
+}
+
+
+/* ---------- التنبيهات ---------- */
+function renderAlerts(page){
+  const negProd=DB.products.filter(p=>(p.stock||0)<0);
+  const negVax=(DB.vaccines||[]).filter(v=>(v.qty||0)<0);
+  const low=DB.products.filter(p=>(p.stock||0)>=0&&(p.stock||0)<=(p.reorder||0));
+  const expired=DB.products.filter(p=>p.expiry&&daysTo(p.expiry)<0);
+  const expSoon=DB.products.filter(p=>p.expiry&&daysTo(p.expiry)>=0&&daysTo(p.expiry)<=60);
+  const debtors=DB.customers.filter(c=>(c.balance||0)>0);
+  const sec=(title,ico,color,rows,cols)=>rows.length?`
+    <div class="panel" style="border-color:${color}"><div class="panel-h"><h3>${ico} ${title} (${rows.length})</h3></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+    <tbody>${rows.join('')}</tbody></table></div></div></div>`:'';
+  let html='';
+  // الأخطر أولاً: أصناف بالسالب (انصرف أكثر من المتاح)
+  html+=sec('🔴 أصناف بالسالب — صُرف أكثر من الرصيد المتاح','🔴','var(--red)',
+    negProd.map(p=>`<tr><td>${p.name}</td><td>${catTag(p.cat)}</td>
+      <td><span class="tag red" style="font-weight:800">${fmt(p.stock||0)}</span></td>
+      <td>${money((p.stock||0)*(p.cost||p.price||0))}</td></tr>`),
+    ['الصنف','التصنيف','الرصيد (سالب)','قيمة العجز']);
+  html+=sec('🔴 لقاحات بالسالب — صُرفت أكثر من المتاح','🔴','var(--red)',
+    negVax.map(v=>`<tr><td>${v.name}</td><td>${v.supplier||'-'}</td>
+      <td><span class="tag red" style="font-weight:800">${fmt(v.qty||0)}</span></td></tr>`),
+    ['اللقاح','المورد','الرصيد (سالب)']);
+  html+=sec('أصناف ناقصة (تحت حد الطلب)','⚠️','var(--amber)',low.map(p=>`<tr><td>${p.name}</td><td>${catTag(p.cat)}</td>
+    <td><span class="tag amber">${fmt(p.stock||0)}</span></td><td>${fmt(p.reorder||0)}</td></tr>`),['الصنف','التصنيف','الرصيد','حد الطلب']);
+  html+=sec('أصناف منتهية الصلاحية','💀','var(--red)',expired.map(p=>`<tr><td>${p.name}</td>
+    <td>${p.expiry}</td><td><span class="tag red">${daysTo(p.expiry)} يوم</span></td></tr>`),['الصنف','تاريخ الانتهاء','منذ']);
+  html+=sec('قرب انتهاء الصلاحية','⏰','var(--amber)',expSoon.map(p=>`<tr><td>${p.name}</td>
+    <td>${p.expiry}</td><td><span class="tag amber">${daysTo(p.expiry)} يوم</span></td></tr>`),['الصنف','تاريخ الانتهاء','المتبقي']);
+  html+=sec('عملاء عليهم مديونية','💳','var(--red)',debtors.map(c=>`<tr><td>${c.name}</td>
+    <td>${c.type||'-'}</td><td><span class="tag red">${money(c.balance)}</span></td></tr>`),['العميل','النوع','المديونية']);
+  page.innerHTML=html||`<div class="empty"><span class="ico">✅</span>لا توجد تنبيهات — كل شيء على ما يرام</div>`;
+}
+
+/* ====================================================================
+   الدفعة 4: فواتير المزارع (تحصينات + أدوية)
+   - نسخة محفوظة لكل مزرعة (اسم + تاريخ دخول القطيع)
+   - طباعة كفاتورة بيع
+   - نسخ فاتورة لمزرعة تانية
+   - برنامج تحصين/علاج وجرعات ملحق (افتراضي قابل للتعديل)
+==================================================================== */
+
+/* ---------- برنامج التحصين الافتراضي لبداري التسمين ---------- */
+const DEFAULT_VAX_PROGRAM=[
+  {age:'يوم 1',name:'نيوكاسل + التهاب شعبي (B1+H120)',route:'تقطير عين/أنف',dose:'جرعة/طائر'},
+  {age:'يوم 7',name:'نيوكاسل لاسوتا (Lasota)',route:'مياه الشرب',dose:'جرعة/طائر'},
+  {age:'يوم 10',name:'جمبورو (Gumboro) متوسط',route:'مياه الشرب',dose:'جرعة/طائر'},
+  {age:'يوم 14',name:'إنفلونزا الطيور H9 / H5',route:'حقن تحت الجلد',dose:'0.3 مل/طائر'},
+  {age:'يوم 18',name:'جمبورو (Gumboro) معزز',route:'مياه الشرب',dose:'جرعة/طائر'},
+  {age:'يوم 21',name:'نيوكاسل (Clone 30)',route:'مياه الشرب',dose:'جرعة/طائر'},
+];
+/* ---------- برنامج العلاج/الأدوية الافتراضي ---------- */
+const DEFAULT_MED_PROGRAM=[
+  {age:'يوم 1-3',name:'مضاد حيوي وقائي + فيتامينات',route:'مياه الشرب',dose:'حسب النشرة'},
+  {age:'يوم 4-6',name:'محسّن مناعة / بروبيوتيك',route:'مياه الشرب',dose:'1 جم/لتر'},
+  {age:'يوم 12-14',name:'مضاد كوكسيديا',route:'مياه الشرب',dose:'حسب النشرة'},
+  {age:'يوم 20-22',name:'علاج جهاز تنفسي',route:'مياه الشرب',dose:'حسب النشرة'},
+  {age:'يوم 28-30',name:'غسيل كلى + أحماض عضوية',route:'مياه الشرب',dose:'1 مل/لتر'},
+];
+
+/* تهيئة جدول فواتير المزارع في قاعدة البيانات */
+function ensureFarmInvoices(){
+  if(!DB.farmInvoices)DB.farmInvoices=[];
+}
+
+/* ---------- الموديول الرئيسي ---------- */
+let farmInvType='vaccine'; // vaccine | drug
+let currentFarmInv=null;
+function renderFarmInvoices(page){
+  ensureFarmInvoices();
+  const list=DB.farmInvoices.filter(f=>f.type===farmInvType);
+  page.innerHTML=`
+  <div class="tabs">
+    <div class="tab ${farmInvType==='vaccine'?'active':''}" onclick="farmInvType='vaccine';currentFarmInv=null;renderPage('farmInvoices')">💉 فواتير التحصينات</div>
+    <div class="tab ${farmInvType==='drug'?'active':''}" onclick="farmInvType='drug';currentFarmInv=null;renderPage('farmInvoices')">💊 فواتير الأدوية</div>
+  </div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:16px" id="fiLayout">
+    <div class="panel" style="margin:0">
+      <div class="panel-h"><h3>🏠 المزارع</h3>
+        <div class="tools"><button class="btn sm" onclick="newFarmInvoice()">➕ جديدة</button></div></div>
+      <div class="panel-b flush"><div id="farmList"></div></div>
+    </div>
+    <div id="fiDetail"></div>
+  </div>`;
+  drawFarmList(list);
+  if(currentFarmInv)drawFarmInvoiceDetail();
+  else $('#fiDetail').innerHTML=`<div class="panel" style="margin:0;height:100%"><div class="empty" style="padding:80px 20px">
+    <span class="ico">${farmInvType==='vaccine'?'💉':'💊'}</span>اختر مزرعة من القائمة لعرض فاتورتها<br>أو أنشئ فاتورة جديدة</div></div>`;
+}
+function drawFarmList(list){
+  $('#farmList').innerHTML=list.length?list.map(f=>{
+    const total=f.items.reduce((s,i)=>s+i.qty*i.price,0);
+    const active=currentFarmInv&&currentFarmInv.id===f.id;
+    return `<div class="nav-item ${active?'active':''}" style="border-radius:0;border-bottom:1px solid var(--border)"
+      onclick="openFarmInv('${f.id}')">
+      <span class="ico">🏠</span>
+      <div style="flex:1;min-width:0"><div style="font-weight:600">${f.customerName||f.farm}
+        <span class="tag blue" style="font-size:9px;padding:1px 6px">${f.cycleCode||''}</span></div>
+        <div class="mini">${f.entryDate} • ${money(total)} ${f.posted?'• ✓':''}</div></div></div>`;
+  }).join(''):`<div class="empty" style="padding:30px 14px"><span class="ico">🏠</span>لا توجد فواتير بعد</div>`;
+}
+function openFarmInv(id){currentFarmInv=DB.farmInvoices.find(f=>f.id===id);renderPage('farmInvoices');}
+
+/* توليد كود دورة تلقائي للعميل */
+function migrateCycleCodes(){
+  if(!DB.farmInvoices||DB.migratedCycles)return;
+  // أعِد ترقيم الأكواد لكل عميل+نوع بالترتيب الزمني لإزالة التكرارات القديمة
+  const groups={};
+  DB.farmInvoices.slice().sort((a,b)=>new Date(a.entryDate||a.createdAt||0)-new Date(b.entryDate||b.createdAt||0))
+    .forEach(f=>{
+      const key=(f.customerName||'')+'|'+(f.type||'');
+      groups[key]=(groups[key]||0)+1;
+      const base=(f.customerName||'مزرعة').trim().split(/\s+/).slice(0,2).join(' ');
+      const prefix=f.type==='vaccine'?'V':'M';
+      f.cycleCode=`${base}-${prefix}D${groups[key]}`;
+    });
+  DB.migratedCycles=true;
+}
+function nextCycleCode(customerName,type){
+  const base=(customerName||'مزرعة').trim().split(/\s+/).slice(0,2).join(' ');
+  // الترقيم لكل عميل ولكل نوع (تحصينات/أدوية) على حدة، بالاعتماد على أكبر رقم موجود
+  const prefix=type==='vaccine'?'V':'M';
+  let maxN=0;
+  (DB.farmInvoices||[]).forEach(f=>{
+    if(f.customerName===customerName&&f.type===type){
+      const m=(f.cycleCode||'').match(/D(\d+)$/);
+      if(m)maxN=Math.max(maxN,+m[1]);
+    }
+  });
+  return `${base}-${prefix}D${maxN+1}`;
+}
+/* ---------- إنشاء فاتورة مزرعة جديدة ---------- */
+function newFarmInvoice(){
+  const isVax=farmInvType==='vaccine';
+  if(!DB.customers.length){toast('أضف عميلاً (مزرعة) أولاً من صفحة العملاء','amber');}
+  openModal(isVax?'➕ فاتورة تحصينات جديدة':'➕ فاتورة أدوية جديدة',`<div class="form-grid">
+    <div class="field full"><label>العميل / المزرعة</label>
+      <div style="display:flex;gap:7px">
+        <select id="fi_cust" style="flex:1">
+          ${DB.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||'<option value="">لا يوجد عملاء</option>'}
+        </select>
+        <button class="btn sm ghost" type="button" onclick="quickAddCustomer()">➕ جديد</button>
+      </div></div>
+    <div class="field"><label>تاريخ دخول القطيع</label><input id="fi_entry" type="date" value="${today()}"></div>
+    <div class="field"><label>عدد الطيور</label><input id="fi_birds" type="number" value="5000"></div>
+    <div class="field full"><label>نسخ من فاتورة موجودة؟</label><select id="fi_copy">
+      <option value="">— فاتورة جديدة فارغة —</option>
+      ${DB.farmInvoices.filter(f=>f.type===farmInvType).map(f=>`<option value="${f.id}">${f.cycleCode} — ${f.customerName} (${f.entryDate})</option>`).join('')}
+    </select></div>
+  </div>
+  <p class="mini" style="margin-top:8px">سيتم توليد كود دورة تلقائي، وإرفاق برنامج ${isVax?'تحصين':'علاج'} افتراضي قابل للتعديل.</p>`,
+  ()=>{
+    const custId=$('#fi_cust').value;
+    const cust=DB.customers.find(c=>String(c.id)===String(custId));
+    if(!cust){toast('اختر العميل','red');return false;}
+    const copyId=$('#fi_copy').value;
+    let items=[],program;
+    if(copyId){const src=DB.farmInvoices.find(f=>f.id===copyId);
+      items=src.items.map(i=>({...i}));program=src.program.map(p=>({...p}));}
+    else{program=(isVax?DEFAULT_VAX_PROGRAM:DEFAULT_MED_PROGRAM).map(p=>({...p}));}
+    const inv={id:uid(),type:farmInvType,customerId:cust.id,customerName:cust.name,farm:cust.name,
+      cycleCode:nextCycleCode(cust.name,farmInvType),entryDate:$('#fi_entry').value,
+      birds:+$('#fi_birds').value||0,items,program,paid:0,posted:false,createdAt:today()};
+    DB.farmInvoices.push(inv);saveDB();currentFarmInv=inv;renderPage('farmInvoices');
+    toast('تم إنشاء الفاتورة ('+inv.cycleCode+') ✓','green');});
+}
+function quickAddCustomer(){
+  const name=prompt('اسم العميل / المزرعة:');if(!name)return;
+  const c={id:uid(),name:name.trim(),type:'مزرعة',phone:'',gov:'',balance:0,note:''};
+  DB.customers.push(c);saveDB();
+  const sel=$('#fi_cust');if(sel){sel.add(new Option(c.name,c.id,true,true));}
+  toast('تمت إضافة العميل ✓','green');
+}
+
+/* ---------- تفاصيل فاتورة المزرعة ---------- */
+function drawFarmInvoiceDetail(){
+  const f=currentFarmInv;const isVax=f.type==='vaccine';
+  const total=f.items.reduce((s,i)=>s+i.qty*i.price,0);
+  const perBird=f.birds>0?total/f.birds:0;
+  const remaining=total-(f.paid||0);
+  $('#fiDetail').innerHTML=`
+  <div class="panel" style="margin:0 0 16px">
+    <div class="panel-h">
+      <h3>🏠 ${f.customerName||f.farm} <span class="tag blue" style="margin-inline-start:8px">${f.cycleCode||'—'}</span></h3>
+      <div class="tools">
+        <span class="chip">📅 دخول: <b>${f.entryDate}</b></span>
+        <span class="chip">🐔 <b>${fmt(f.birds)}</b> طائر</span>
+        ${f.posted?'<span class="tag green">✓ مُرحّلة</span>':'<span class="tag amber">غير مُرحّلة</span>'}
+        <button class="btn sm green" onclick="printFarmInvoiceChoose('${f.id}')">🖨️ طباعة</button>
+        <button class="btn sm" style="background:#25d366;color:#04310f" onclick="shareFarmInvoiceWA('${f.id}')">📱 واتساب</button>
+        <button class="btn sm ghost" onclick="copyFarmInvoice('${f.id}')">📋 نسخ</button>
+        <button class="btn sm red" onclick="delFarmInvoice('${f.id}')">🗑</button>
+      </div>
+    </div>
+    <div class="panel-b" style="border-bottom:1px solid var(--border)">
+      <div class="cards" style="margin:0 0 14px">
+        <div class="stat" style="--accent:var(--primary)"><span class="ico">💵</span>
+          <div class="lbl">الإجمالي العام</div><div class="val" style="font-size:19px">${money(total)}</div></div>
+        <div class="stat" style="--accent:var(--green)"><span class="ico">🐤</span>
+          <div class="lbl">تكلفة الطائر (للشاشة فقط)</div>
+          <div class="val" style="font-size:19px">${perBird.toLocaleString('en-US',{maximumFractionDigits:3})} ج.م</div>
+          <div class="meta">لا تظهر في الطباعة</div></div>
+        <div class="stat" style="--accent:var(--cyan)"><span class="ico">💰</span>
+          <div class="lbl">المدفوع</div><div class="val" style="font-size:19px">${money(f.paid||0)}</div></div>
+        <div class="stat" style="--accent:${remaining>0?'var(--red)':'var(--green)'}"><span class="ico">📌</span>
+          <div class="lbl">المتبقي (دين)</div><div class="val" style="font-size:19px">${money(remaining)}</div></div>
+      </div>
+      ${f.posted?`<p class="mini">✓ تم ترحيل الفاتورة: مسجّلة في المبيعات، ${isVax?'مخصومة من سجل اللقاحات':'مخصومة من المخزون'}، والمدفوع في الخزينة، والمتبقي دين على العميل.</p>`:`
+      <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+        <div class="field" style="max-width:200px"><label>المبلغ المدفوع الآن</label><input id="fi_paid" type="number" value="${f.paid||0}"></div>
+        <button class="btn green" onclick="postFarmInvoice('${f.id}')">✅ حفظ وترحيل الفاتورة</button>
+        <span class="mini">الترحيل يسجّل البيع ويخصم المخزون ويُدخل المدفوع للخزينة.</span>
+      </div>`}
+    </div>
+    <div class="panel-b flush">
+      <div style="display:grid;grid-template-columns:2fr .7fr 1fr auto;gap:8px;align-items:end;padding:12px;border-bottom:1px solid var(--border)">
+        <div class="field"><label>${isVax?'اللقاح (من سجل التحصينات)':'الدواء (من المخزون)'}</label><select id="fi_prod">${invProductOptions(isVax)}</select></div>
+        <div class="field"><label>العدد</label><input id="fi_qty" type="number" value="1"></div>
+        <div class="field"><label>السعر (تلقائي)</label><input id="fi_price" type="number" value="0"></div>
+        <button class="btn sm" id="fi_additem">➕ أضف</button>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr>
+        <th>${isVax?'اسم اللقاح':'اسم الدواء'}</th><th>الشركة المنتجة</th><th>العدد</th><th>سعر الوحدة</th><th>الإجمالي</th><th>تكلفة الطائر</th><th></th>
+      </tr></thead><tbody id="fiItems"></tbody>
+      <tfoot><tr style="font-weight:800"><td colspan="4" style="text-align:left">الإجمالي العام</td>
+        <td style="color:var(--primary-l)">${money(total)}</td>
+        <td style="color:var(--green)">${f.birds>0?(total/f.birds).toLocaleString('en-US',{maximumFractionDigits:3}):'—'} ج.م</td><td></td></tr></tfoot></table></div>
+    </div>
+  </div>
+  <div class="panel" style="margin:0">
+    <div class="panel-h"><h3>📋 برنامج ${isVax?'التحصين':'العلاج'} والجرعات</h3>
+      <div class="tools"><button class="btn sm" onclick="addProgramRow('${f.id}')">➕ إضافة سطر</button></div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>العمر/اليوم</th><th>${isVax?'اللقاح':'الدواء'}</th><th>طريقة الإعطاء</th><th>الجرعة</th><th></th>
+    </tr></thead><tbody id="fiProgram"></tbody></table></div></div>
+  </div>`;
+  drawFarmItems();drawFarmProgram();
+  // ربط إضافة صنف — السعر يأتي من المصدر (سجل التحصينات أو المخزون) عبر data-price
+  const setP=()=>{const o=$('#fi_prod').options[$('#fi_prod').selectedIndex];
+    if(o&&o.dataset.price!==undefined)$('#fi_price').value=o.dataset.price;};
+  $('#fi_prod').onchange=setP;setP();
+  $('#fi_additem').onclick=()=>{
+    const sel=$('#fi_prod'),o=sel.options[sel.selectedIndex];
+    if(!o||!o.dataset.name){toast('لا يوجد صنف للاختيار','red');return;}
+    const name=o.dataset.name;
+    const qty=+$('#fi_qty').value||0,price=+$('#fi_price').value||0;
+    if(qty<=0){toast('أدخل عدداً صحيحاً','red');return;}
+    f.items.push({name,qty,price,src:o.value,maker:o.dataset.maker||''});saveDB();drawFarmInvoiceDetail();toast('تمت الإضافة ✓','green');};
+}
+function invProductOptions(isVax){
+  if(isVax){
+    if(!DB.vaccines.length)return '<option value="">لا توجد لقاحات في السجل</option>';
+    return DB.vaccines.map(v=>`<option value="V-${v.id}" data-name="${v.name}" data-price="${v.price}" data-maker="${v.maker||''}">${v.name}${v.maker?' — '+v.maker:''} — ${money(v.price)}</option>`).join('');
+  }else{
+    const prods=DB.products.filter(p=>p.cat!=='تحصينات ولقاحات')
+      .sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+    if(!prods.length)return '<option value="">لا توجد أدوية في المخزون</option>';
+    return prods.map(p=>`<option value="${p.id}" data-name="${p.name}" data-price="${p.price}" data-maker="${p.maker||''}" data-stock="${p.stock||0}">${p.name}${p.maker?' — '+p.maker:''} — ${money(p.price)} (رصيد: ${fmt(p.stock||0)})</option>`).join('');
+  }
+}
+function drawFarmItems(){
+  const f=currentFarmInv;
+  const birds=f.birds||0;
+  $('#fiItems').innerHTML=f.items.map((it,ix)=>{
+    const line=it.qty*it.price;
+    const perBird=birds>0?line/birds:0;
+    return `<tr>
+    <td>${it.name}</td>
+    <td>${it.maker||'<span class="mini">—</span>'}</td>
+    <td class="fi-edit" data-ix="${ix}" data-f="qty">${fmt(it.qty)}</td>
+    <td class="fi-edit" data-ix="${ix}" data-f="price">${fmt(it.price)}</td>
+    <td><b>${money(line)}</b></td>
+    <td><span class="tag green">${perBird.toLocaleString('en-US',{maximumFractionDigits:3})} ج.م</span></td>
+    <td><button class="btn xs red" onclick="rmFarmItem(${ix})">✕</button></td></tr>`;}).join('')
+    ||`<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:16px">لم تضف أصناف بعد</td></tr>`;
+  bindFarmEdit();
+}
+function bindFarmEdit(){
+  $$('#fiItems .fi-edit').forEach(td=>td.onclick=()=>{
+    if(td.querySelector('input'))return;
+    const ix=+td.dataset.ix,fld=td.dataset.f,it=currentFarmInv.items[ix];
+    const inp=document.createElement('input');inp.type='number';inp.value=it[fld];
+    td.innerHTML='';td.appendChild(inp);inp.focus();
+    const save=()=>{it[fld]=+inp.value||0;saveDB();drawFarmInvoiceDetail();};
+    inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();};
+  });
+}
+function rmFarmItem(ix){currentFarmInv.items.splice(ix,1);saveDB();drawFarmInvoiceDetail();toast('تم الحذف','red');}
+
+function drawFarmProgram(){
+  const f=currentFarmInv;
+  $('#fiProgram').innerHTML=f.program.map((p,ix)=>`<tr>
+    <td class="fp-edit" data-ix="${ix}" data-f="age">${p.age}</td>
+    <td class="fp-edit" data-ix="${ix}" data-f="name">${p.name}</td>
+    <td class="fp-edit" data-ix="${ix}" data-f="route">${p.route}</td>
+    <td class="fp-edit" data-ix="${ix}" data-f="dose">${p.dose}</td>
+    <td><button class="btn xs red" onclick="rmProgramRow(${ix})">✕</button></td></tr>`).join('')
+    ||`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">لا يوجد برنامج</td></tr>`;
+  $$('#fiProgram .fp-edit').forEach(td=>td.onclick=()=>{
+    if(td.querySelector('input'))return;
+    const ix=+td.dataset.ix,fld=td.dataset.f,row=currentFarmInv.program[ix];
+    const inp=document.createElement('input');inp.value=row[fld];
+    td.innerHTML='';td.appendChild(inp);inp.focus();
+    const save=()=>{row[fld]=inp.value;saveDB();drawFarmProgram();};
+    inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();};
+  });
+}
+function addProgramRow(id){currentFarmInv.program.push({age:'',name:'',route:'مياه الشرب',dose:''});saveDB();drawFarmProgram();}
+function rmProgramRow(ix){currentFarmInv.program.splice(ix,1);saveDB();drawFarmProgram();}
+
+/* ---------- نسخ لمزرعة تانية ---------- */
+function copyFarmInvoice(id){
+  const src=DB.farmInvoices.find(f=>f.id===id);
+  openModal('📋 نسخ الفاتورة لعميل/دورة جديدة',`<div class="form-grid">
+    <div class="field full"><label>العميل / المزرعة</label><select id="cp_cust">
+      ${DB.customers.map(c=>`<option value="${c.id}" ${String(c.id)===String(src.customerId)?'selected':''}>${c.name}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>تاريخ دخول القطيع</label><input id="cp_entry" type="date" value="${today()}"></div>
+    <div class="field"><label>عدد الطيور</label><input id="cp_birds" type="number" value="${src.birds}"></div>
+  </div><p class="mini" style="margin-top:8px">سيتم نسخ الأصناف والأسعار والبرنامج، بكود دورة جديد، كفاتورة غير مُرحّلة.</p>`,
+  ()=>{
+    const cust=DB.customers.find(c=>String(c.id)===$('#cp_cust').value);if(!cust){toast('اختر العميل','red');return false;}
+    const inv={id:uid(),type:src.type,customerId:cust.id,customerName:cust.name,farm:cust.name,
+      cycleCode:nextCycleCode(cust.name,src.type),entryDate:$('#cp_entry').value,birds:+$('#cp_birds').value||0,
+      items:src.items.map(i=>({...i})),program:src.program.map(p=>({...p})),paid:0,posted:false,createdAt:today()};
+    DB.farmInvoices.push(inv);saveDB();currentFarmInv=inv;renderPage('farmInvoices');
+    toast('تم النسخ ('+inv.cycleCode+') ✓','green');});
+}
+function delFarmInvoice(id){
+  const f=DB.farmInvoices.find(x=>x.id===id);if(!f)return;
+  confirmBox('حذف فاتورة المزرعة؟',f.posted?'الفاتورة مُرحّلة — سيتم عكس أثرها على المبيعات والمخزون والخزينة ورصيد العميل.':'سيتم حذف الفاتورة وبرنامجها نهائياً.',()=>{
+    if(f.posted)reverseFarmPosting(f);
+    DB.farmInvoices=DB.farmInvoices.filter(x=>x.id!==id);
+    if(currentFarmInv&&currentFarmInv.id===id)currentFarmInv=null;
+    saveDB();buildNav();renderPage('farmInvoices');toast('تم الحذف','red');});
+}
+
+/* ---------- ترحيل الفاتورة: بيع + خصم مخزون/لقاحات + خزينة + دين عميل ---------- */
+function postFarmInvoice(id){
+  const f=DB.farmInvoices.find(x=>x.id===id);if(!f||f.posted)return;
+  if(!f.items.length){toast('أضف أصنافاً أولاً','red');return;}
+  const isVax=f.type==='vaccine';
+  f.paid=+($('#fi_paid')?$('#fi_paid').value:f.paid)||0;
+  const total=f.items.reduce((s,i)=>s+i.qty*i.price,0);
+
+  // 1) خصم المخزون / سجل اللقاحات
+  f.items.forEach(it=>{
+    if(isVax){
+      // التحصينات من سجل اللقاحات: ابحث بالكود المصدر V-id أو بالاسم
+      const vid=(it.src||'').startsWith('V-')?it.src.slice(2):null;
+      const v=vid?DB.vaccines.find(x=>x.id===vid):DB.vaccines.find(x=>x.name===it.name);
+      if(v)v.qty=(v.qty||0)-it.qty;
+    }else{
+      const p=DB.products.find(x=>String(x.id)===String(it.src))||DB.products.find(x=>x.name===it.name);
+      if(p)p.stock=(p.stock||0)-it.qty;
+    }
+  });
+
+  // 2) تسجيل كفاتورة بيع مرتبطة
+  const saleItems=f.items.map(it=>{
+    const p=DB.products.find(x=>String(x.id)===String(it.src))||DB.products.find(x=>x.name===it.name);
+    return {productId:p?p.id:('FARM-'+(it.src||it.name)),name:it.name,qty:it.qty,price:it.price};
+  });
+  DB.sales.push({id:'FS-'+f.id,date:f.entryDate||today(),partyId:f.customerId,partyName:f.customerName,
+    items:saleItems,total,paid:f.paid,note:'فاتورة مزرعة '+(f.cycleCode||'')+(isVax?' (تحصينات)':' (أدوية)'),
+    kind:'sale',fromFarm:f.id});
+
+  // 3) الخزينة (المدفوع)
+  cashMove('in',f.paid,'تحصيل فاتورة مزرعة — '+f.customerName+' '+(f.cycleCode||''),f.entryDate);
+
+  // 4) دين العميل (المتبقي)
+  const cust=DB.customers.find(c=>String(c.id)===String(f.customerId));
+  if(cust)cust.balance=(cust.balance||0)+(total-f.paid);
+
+  f.posted=true;f.total=total;
+  saveDB();buildNav();renderPage('farmInvoices');
+  toast('تم ترحيل الفاتورة بالكامل ✓','green');
+}
+function reverseFarmPosting(f){
+  const isVax=f.type==='vaccine';
+  // عكس المخزون
+  f.items.forEach(it=>{
+    if(isVax){
+      const vid=(it.src||'').startsWith('V-')?it.src.slice(2):null;
+      const v=vid?DB.vaccines.find(x=>x.id===vid):DB.vaccines.find(x=>x.name===it.name);
+      if(v)v.qty=(v.qty||0)+it.qty;
+    }else{
+      const p=DB.products.find(x=>String(x.id)===String(it.src))||DB.products.find(x=>x.name===it.name);
+      if(p)p.stock=(p.stock||0)+it.qty;
+    }
+  });
+  // حذف فاتورة البيع المرتبطة
+  DB.sales=DB.sales.filter(s=>s.id!=='FS-'+f.id);
+  // عكس الخزينة
+  cashMove('out',f.paid||0,'عكس تحصيل فاتورة مزرعة — '+f.customerName,today());
+  // عكس دين العميل
+  const cust=DB.customers.find(c=>String(c.id)===String(f.customerId));
+  if(cust)cust.balance=(cust.balance||0)-((f.total||0)-(f.paid||0));
+  f.posted=false;
+}
+
+/* ---------- طباعة الفاتورة (نافذة طباعة منسّقة) ---------- */
+/* طباعة فاتورة المزرعة بخيارين: كاملة (داخلية) أو مبسطة (للعميل) */
+function printFarmInvoiceChoose(id){
+  openModal('🖨️ اختر نوع الطباعة','<div style="display:flex;flex-direction:column;gap:11px">'+
+    '<button class="btn" onclick="closeModal();printFarmInvoice(\''+id+'\',\'full\')" style="justify-content:flex-start;padding:14px">'+
+      '📋 نسخة كاملة (داخلية)<br><span class="mini" style="color:#fff;opacity:.85">تشمل تكلفة الكتكوت + الشركة المنتجة + الشركة الموردة</span></button>'+
+    '<button class="btn ghost" onclick="closeModal();printFarmInvoice(\''+id+'\',\'simple\')" style="justify-content:flex-start;padding:14px">'+
+      '🧾 نسخة مبسطة (للعميل)<br><span class="mini">الصنف + العدد + سعر الوحدة + الإجمالي فقط</span></button>'+
+    '</div>',()=>false);
+  // إخفاء زر الحفظ لأن الاختيار عبر الأزرار
+  const ok=$('#mSave');if(ok)ok.style.display='none';
+}
+/* استخرج بيانات المورد للصنف من مصدره */
+function itemSupplier(it){
+  if((it.src||'').startsWith('V-')){
+    const v=DB.vaccines.find(x=>x.id===it.src.slice(2));return v?(v.supplier||'—'):'—';
+  }
+  const p=DB.products.find(x=>String(x.id)===String(it.src))||DB.products.find(x=>x.name===it.name);
+  return p?(p.supplier||'—'):'—';
+}
+function printFarmInvoice(id,mode){
+  mode=mode||'full';
+  const f=DB.farmInvoices.find(x=>x.id===id);if(!f)return;
+  const isVax=f.type==='vaccine';
+  const total=f.items.reduce((s,i)=>s+i.qty*i.price,0);
+  const birds=f.birds||0;
+  const full=(mode==='full');
+
+  let itemRows,colHead,colCount;
+  if(full){
+    // نسخة كاملة: # / الصنف / الشركة المنتجة / الشركة الموردة / العدد / سعر الوحدة / الإجمالي / تكلفة الكتكوت
+    colHead='<th>#</th><th>الصنف</th><th>الشركة المنتجة</th><th>الشركة الموردة</th><th>العدد</th><th>سعر الوحدة</th><th>الإجمالي</th><th>تكلفة الكتكوت</th>';
+    colCount=8;
+    itemRows=f.items.map((it,i)=>{
+      const line=it.qty*it.price;const perBird=birds>0?line/birds:0;
+      return `<tr><td>${i+1}</td><td style="text-align:right">${it.name}</td>
+        <td>${it.maker||'—'}</td><td>${itemSupplier(it)}</td>
+        <td>${fmt(it.qty)}</td><td>${fmt(it.price)}</td><td>${fmt(line)}</td>
+        <td>${perBird.toLocaleString('en-US',{maximumFractionDigits:3})}</td></tr>`;}).join('');
+  }else{
+    // نسخة مبسطة للعميل: الصنف / العدد / سعر الوحدة / الإجمالي
+    colHead='<th>#</th><th>الصنف</th><th>العدد</th><th>سعر الوحدة</th><th>الإجمالي</th>';
+    colCount=5;
+    itemRows=f.items.map((it,i)=>`<tr><td>${i+1}</td><td style="text-align:right">${it.name}</td>
+      <td>${fmt(it.qty)}</td><td>${fmt(it.price)}</td><td>${fmt(it.qty*it.price)}</td></tr>`).join('');
+  }
+  const perBirdTotal=birds>0?(total/birds):0;
+  const progRows=f.program.map(p=>`<tr><td>${p.age}</td><td style="text-align:right">${p.name}</td>
+    <td>${p.route}</td><td>${p.dose}</td></tr>`).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+  <title>فاتورة ${f.customerName||f.farm} ${f.cycleCode||''}${full?' (كاملة)':''}</title><style>
+    *{font-family:'Segoe UI',Tahoma,sans-serif;box-sizing:border-box}
+    body{padding:28px;color:#111;max-width:850px;margin:auto}
+    .head{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #635bff;padding-bottom:14px;margin-bottom:18px}
+    .head h1{color:#3a32a8;font-size:21px;margin:0}.head .co{font-size:13px;color:#555;margin-top:4px}
+    .badge{background:#635bff;color:#fff;padding:8px 16px;border-radius:10px;font-weight:700}
+    .tagmode{display:inline-block;font-size:11px;padding:2px 9px;border-radius:8px;margin-inline-start:8px;
+      background:${full?'#fde8c8;color:#9a5b00':'#dff3ff;color:#0e6b85'}}
+    .meta{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:16px;font-size:14px}
+    .meta b{color:#3a32a8}
+    table{width:100%;border-collapse:collapse;margin-bottom:22px;font-size:13px}
+    th,td{border:1px solid #d1d5db;padding:8px;text-align:center}
+    thead th{background:#eef0ff;color:#3a32a8}
+    tfoot td{font-weight:800;background:#f1f5f9;font-size:15px}
+    h3{color:#3a32a8;border-right:4px solid #635bff;padding-right:9px;margin:18px 0 9px}
+    .foot{margin-top:30px;display:flex;justify-content:space-between;font-size:13px;color:#444}
+    .sign{border-top:1px solid #999;padding-top:6px;width:180px;text-align:center}
+    @media print{.noprint{display:none}}
+    .noprint{margin-top:20px;text-align:center}
+    .pbtn{background:#635bff;color:#fff;border:none;padding:11px 26px;border-radius:9px;font-size:15px;cursor:pointer}
+  </style></head><body>
+  <div class="head"><div><h1>${isVax?'فاتورة تحصينات':'فاتورة أدوية'}<span class="tagmode">${full?'نسخة داخلية':'نسخة العميل'}</span></h1>
+    <div class="co">${DB.settings.company||'الشركة المصرية لتوزيع الأدوية البيطرية'}</div></div>
+    <div class="badge">${isVax?'💉':'💊'} فاتورة بيع</div></div>
+  <div class="meta"><div>العميل / المزرعة: <b>${f.customerName||f.farm}</b></div><div>كود الدورة: <b>${f.cycleCode||'—'}</b></div><div>تاريخ دخول القطيع: <b>${f.entryDate}</b></div>
+    <div>عدد الطيور: <b>${fmt(f.birds)}</b></div><div>تاريخ الإصدار: <b>${today()}</b></div></div>
+  <h3>أصناف الفاتورة</h3>
+  <table><thead><tr>${colHead}</tr></thead>
+  <tbody>${itemRows||'<tr><td colspan="'+colCount+'">لا توجد أصناف</td></tr>'}</tbody>
+  <tfoot>
+    <tr><td colspan="${colCount-1}">الإجمالي العام</td><td>${fmt(total)} ج.م</td></tr>
+    ${full?`<tr><td colspan="${colCount-1}">إجمالي تكلفة الكتكوت</td><td>${perBirdTotal.toLocaleString('en-US',{maximumFractionDigits:3})} ج.م</td></tr>`:''}
+  </tfoot></table>
+  ${full?`<h3>برنامج ${isVax?'التحصين':'العلاج'} والجرعات</h3>
+  <table><thead><tr><th>العمر/اليوم</th><th>${isVax?'اللقاح':'الدواء'}</th><th>طريقة الإعطاء</th><th>الجرعة</th></tr></thead>
+  <tbody>${progRows||'<tr><td colspan=4>لا يوجد برنامج</td></tr>'}</tbody></table>`:''}
+  ${(function(){
+    const wds=(f.items||[]).map(i=>{const p=DB.products.find(x=>x.name===i.name);return p&&((p.wdMeat||0)>0||(p.wdEgg||0)>0)?('<li><b>'+p.name+'</b>: '+((p.wdMeat||0)>0?('لحم '+p.wdMeat+' يوم'):'')+(((p.wdMeat||0)>0&&(p.wdEgg||0)>0)?' · ':'')+((p.wdEgg||0)>0?('بيض '+p.wdEgg+' يوم'):'')+'</li>'):''}).filter(Boolean).join('');
+    return wds?('<h3>⚠️ فترات السحب (تُحسب من آخر جرعة)</h3><ul style="font-size:13px;line-height:1.9;color:#7a1f1f;margin:0 0 10px;padding-inline-start:20px">'+wds+'</ul>'):'';
+  })()}
+  <div class="foot"><div class="sign">توقيع المستلم</div><div class="sign">د. محمد — استشاري الدواجن</div></div>
+  <div class="noprint"><button class="pbtn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button></div>
+  </body></html>`);
+  w.document.close();
+}
+
+/* ====================================================================
+   v27: حاسبة فترة السحب + مشاركة واتساب
+==================================================================== */
+function addDays(dateStr,days){
+  const d=new Date(dateStr); d.setDate(d.getDate()+(+days||0));
+  return d.toISOString().slice(0,10);
+}
+function openWdCalc(){
+  const opts=DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  openModal('🧮 حاسبة فترة السحب',`
+    <div class="grid2">
+      <div class="field full"><label>الدواء</label><select id="wd_prod">${opts}</select></div>
+      <div class="field"><label>تاريخ آخر جرعة</label><input id="wd_date" type="date" value="${today()}"></div>
+      <div class="field"><label>سحب اللحم (يوم)</label><input id="wd_meat" type="number" value="0"></div>
+      <div class="field"><label>سحب البيض (يوم)</label><input id="wd_egg" type="number" value="0"></div>
+    </div>
+    <div id="wd_result" style="margin-top:12px"></div>
+    <p class="mini" style="margin-top:8px">لو عدّلت الأيام هنا، "احسب واحفظ" بيحفظها على الصنف للمرات الجاية.</p>
+  `,()=>{
+    const p=DB.products.find(x=>x.id==$('#wd_prod').value);
+    if(!p){toast('اختار الدواء','red');return false;}
+    const dt=$('#wd_date').value||today();
+    const wm=+$('#wd_meat').value||0, we=+$('#wd_egg').value||0;
+    p.wdMeat=wm; p.wdEgg=we; saveDB();
+    let html='';
+    if(wm>0)html+=`<div class="tag red" style="display:block;margin-bottom:8px;padding:10px;font-size:14px">🥩 أقرب ذبح آمن: <b>${addDays(dt,wm)}</b> (بعد ${wm} يوم)</div>`;
+    if(we>0)html+=`<div class="tag amber" style="display:block;margin-bottom:8px;padding:10px;font-size:14px">🥚 أقرب جمع بيض آمن: <b>${addDays(dt,we)}</b> (بعد ${we} يوم)</div>`;
+    if(!html)html='<p class="mini">الصنف ده من غير فترة سحب مسجلة (صفر يوم) — اتحفظ كده.</p>';
+    $('#wd_result').innerHTML=html;
+    toast('اتحسبت واتحفظت على الصنف ✓','green');
+    return false; /* سيب المودال مفتوح عشان يشوف النتيجة */
+  },'احسب واحفظ');
+  /* املأ الأيام تلقائيًا عند اختيار الدواء */
+  const fill=()=>{const p=DB.products.find(x=>x.id==$('#wd_prod').value);if(p){$('#wd_meat').value=p.wdMeat||0;$('#wd_egg').value=p.wdEgg||0;}};
+  $('#wd_prod').addEventListener('change',fill); fill();
+}
+function farmInvWhatsText(id){
+  const f=DB.farmInvoices.find(x=>x.id===id); if(!f)return'';
+  const isVax=f.type==='vax';
+  const items=(f.items||[]);
+  const total=items.reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+  const paid=+f.paid||0, remaining=total-paid;
+  let t='🧾 *'+(isVax?'فاتورة تحصينات':'فاتورة أدوية بيطرية')+'*\n';
+  t+=(DB.settings.company||'')+'\n';
+  t+='المزرعة: '+(f.customerName||f.farm||'')+'\n';
+  t+='كود الدورة: '+(f.cycleCode||'—')+' · دخول: '+(f.entryDate||'')+' · '+fmt(f.birds||0)+' طائر\n';
+  t+='------------------\n';
+  items.forEach(i=>{
+    t+='• '+i.name+' — '+fmt(i.qty)+' × '+fmt(i.price)+' = '+fmt((i.qty||0)*(i.price||0))+' ج\n';
+    const p=DB.products.find(x=>x.name===i.name);
+    if(p&&((p.wdMeat||0)>0||(p.wdEgg||0)>0)){
+      t+='   ⚠️ فترة السحب: '+((p.wdMeat||0)>0?('لحم '+p.wdMeat+' يوم'):'')+(((p.wdMeat||0)>0&&(p.wdEgg||0)>0)?' · ':'')+((p.wdEgg||0)>0?('بيض '+p.wdEgg+' يوم'):'')+'\n';
+    }
+  });
+  t+='------------------\n';
+  t+='الإجمالي: *'+fmt(total)+' ج.م*\n';
+  t+='المدفوع: '+fmt(paid)+' ج.م\n';
+  t+='المتبقي: *'+fmt(remaining)+' ج.م*\n';
+  t+='د. محمد — استشاري الدواجن';
+  return t;
+}
+function shareFarmInvoiceWA(id){
+  const t=farmInvWhatsText(id); if(!t)return;
+  const u='https://wa.me/?text='+encodeURIComponent(t);
+  const w=window.open(u,'_blank'); if(!w)location.href=u;
+}
+
+/* ====================================================================
+   الدفعة 5: النسخ الاحتياطي اليومي التلقائي
+   - نسخة تلقائية عند فتح البرنامج (مرة واحدة يومياً)
+   - الاحتفاظ بآخر 30 يوم
+   - نسخ يدوية + استرجاع + تصدير/استيراد ملف
+==================================================================== */
+const BK_KEY='vetpharm_backups_v1';
+const BK_MAX_DAYS=30;
+
+function loadBackups(){
+  try{return JSON.parse(localStorage.getItem(BK_KEY))||[];}catch(e){return [];}
+}
+function saveBackups(list){localStorage.setItem(BK_KEY,JSON.stringify(list));}
+
+/* نسخة احتياطية تلقائية يومية: تتأكد إن في نسخة لتاريخ اليوم، وإلا تنشئها */
+function autoDailyBackup(){
+  const list=loadBackups();
+  const todayStr=today();
+  const hasToday=list.some(b=>b.date===todayStr&&b.type==='auto');
+  if(!hasToday){
+    list.push({id:uid(),date:todayStr,time:new Date().toLocaleTimeString('ar-EG'),
+      type:'auto',data:JSON.stringify(DB)});
+  }
+  // الاحتفاظ بآخر 30 يوم فقط (النسخ التلقائية)، مع إبقاء النسخ اليدوية كما هي
+  const cutoff=new Date(Date.now()-BK_MAX_DAYS*86400000);
+  const pruned=list.filter(b=>b.type==='manual'||new Date(b.date)>=cutoff);
+  saveBackups(pruned);
+}
+function manualBackup(){
+  const list=loadBackups();
+  list.push({id:uid(),date:today(),time:new Date().toLocaleTimeString('ar-EG'),
+    type:'manual',data:JSON.stringify(DB)});
+  saveBackups(list);toast('تم إنشاء نسخة احتياطية يدوية ✓','green');
+  if(currentPage==='backups')renderPage('backups');
+}
+function restoreBackup(id){
+  const list=loadBackups();const b=list.find(x=>x.id===id);if(!b)return;
+  confirmBox('استرجاع هذه النسخة؟','سيتم أخذ نسخة أمان من البيانات الحالية أولاً، ثم استبدالها ببيانات النسخة المختارة.',()=>{
+    // نسخة ما قبل الاسترجاع
+    list.push({id:uid(),date:today(),time:new Date().toLocaleTimeString('ar-EG'),
+      type:'manual',label:'ما قبل الاسترجاع',data:JSON.stringify(DB)});
+    saveBackups(list);
+    DB=JSON.parse(b.data);saveDB();
+    buildNav();go('dashboard');toast('تم استرجاع النسخة ✓','green');
+  });
+}
+function delBackup(id){
+  let list=loadBackups();list=list.filter(b=>b.id!==id);saveBackups(list);
+  renderPage('backups');toast('تم حذف النسخة','red');
+}
+function exportBackupFile(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=`backup_${today()}.json`;a.click();URL.revokeObjectURL(url);
+  toast('تم تنزيل ملف النسخة ✓','green');
+}
+function importBackupFile(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=e=>{const file=e.target.files[0];if(!file)return;
+    const r=new FileReader();r.onload=()=>{
+      try{const data=JSON.parse(r.result);
+        confirmBox('استيراد هذا الملف؟','سيتم استبدال كل البيانات الحالية ببيانات الملف.',()=>{
+          DB=data;saveDB();buildNav();go('dashboard');toast('تم الاستيراد ✓','green');});
+      }catch(err){toast('الملف غير صالح','red');}};
+    r.readAsText(file);};
+  inp.click();
+}
+
+/* ---------- موديول النسخ الاحتياطية ---------- */
+function renderBackups(page){
+  const list=loadBackups().slice().reverse();
+  const sizeKB=Math.round((localStorage.getItem(BK_KEY)||'').length/1024);
+  page.innerHTML=`
+  <div class="cards">
+    <div class="stat" style="--accent:var(--primary)"><span class="ico">💾</span><div class="lbl">عدد النسخ المحفوظة</div><div class="val">${fmt(list.length)}</div><div class="meta">آخر ${BK_MAX_DAYS} يوم تلقائياً</div></div>
+    <div class="stat" style="--accent:var(--cyan)"><span class="ico">📅</span><div class="lbl">آخر نسخة</div><div class="val" style="font-size:18px">${list[0]?list[0].date:'—'}</div><div class="meta">${list[0]?list[0].time:''}</div></div>
+    <div class="stat" style="--accent:var(--amber)"><span class="ico">🗄️</span><div class="lbl">حجم النسخ</div><div class="val" style="font-size:18px">${fmt(sizeKB)} KB</div></div>
+  </div>
+  <div class="panel"><div class="panel-h"><h3>💾 النسخ الاحتياطية</h3>
+    <div class="tools">
+      <button class="btn" onclick="manualBackup()">➕ نسخة الآن</button>
+      <button class="btn ghost" onclick="exportBackupFile()">⬇️ تصدير ملف</button>
+      <button class="btn ghost" onclick="importBackupFile()">⬆️ استيراد ملف</button>
+    </div></div>
+    <div class="panel-b flush"><div class="tbl-wrap"><table><thead><tr>
+      <th>التاريخ</th><th>الوقت</th><th>النوع</th><th>ملاحظة</th><th>الحجم</th><th>إجراءات</th>
+    </tr></thead><tbody>${list.map(b=>`<tr>
+      <td>${b.date}</td><td>${b.time}</td>
+      <td>${b.type==='auto'?'<span class="tag cyan">تلقائية</span>':'<span class="tag purple">يدوية</span>'}</td>
+      <td>${b.label||'—'}</td><td>${Math.round((b.data||'').length/1024)} KB</td>
+      <td class="row-actions">
+        <button class="btn xs green" onclick="restoreBackup('${b.id}')">♻️ استرجاع</button>
+        <button class="btn xs red" onclick="delBackup('${b.id}')">🗑</button></td></tr>`).join('')
+      ||`<tr><td colspan="6"><div class="empty"><span class="ico">💾</span>لا توجد نسخ بعد</div></td></tr>`}
+    </tbody></table></div></div></div>
+  <p class="mini" style="padding:4px 6px">يتم إنشاء نسخة تلقائية واحدة عند أول فتح للبرنامج كل يوم، والاحتفاظ بآخر ${BK_MAX_DAYS} يوم. النسخ اليدوية لا تُحذف تلقائياً.</p>`;
+}
+
+boot();
+</script>
+</body>
+</html>
