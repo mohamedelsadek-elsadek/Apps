@@ -421,7 +421,37 @@ function alive(a){return a.filter(function(x){return !x.deleted})}
 
 function load(){try{var d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.lists)S.lists=d.lists}catch(e){}}
 function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){toast("مساحة التخزين ممتلئة")}}
-function save(push){persist();if(push&&fbRef&&!fbApplying){try{fbRef.set(S)}catch(e){}}renderAll()}
+/* حمولة السحابة: القوايم + ذاكرة الأسعار (كمصفوفة لتفادي قيود مفاتيح RTDB) */
+function cloudPayload(){
+  var P=loadPrices();
+  var arr=Object.keys(P).map(function(k){var o=P[k];return {k:k,name:o.name,price:o.price,date:o.date,history:o.history||[]};});
+  return {lists:S.lists,prices:arr};
+}
+/* دمج أسعار السحابة مع المحلي: اتحاد التواريخ، والأحدث يكسب */
+function mergePricesCloud(arr){
+  if(!arr)return false;
+  if(!Array.isArray(arr))arr=Object.keys(arr).map(function(k){return arr[k]});
+  var mine=loadPrices(),changed=false;
+  arr.forEach(function(rec){
+    if(!rec||!rec.k)return;
+    var k=rec.k,m=mine[k];
+    if(!m){mine[k]={name:rec.name,price:rec.price,date:rec.date,history:rec.history||[]};changed=true;return;}
+    var seen={},hist=[];
+    (m.history||[]).concat(rec.history||[]).forEach(function(h){
+      if(h&&h.d!=null&&!seen[h.d]){seen[h.d]=1;hist.push(h);}
+    });
+    hist.sort(function(a,b){return a.d-b.d});
+    if(hist.length>20)hist=hist.slice(-20);
+    var last=hist[hist.length-1];
+    var merged={name:m.name||rec.name,history:hist,
+      price:last?last.p:(rec.price!=null?rec.price:m.price),
+      date:last?last.d:(rec.date||m.date)};
+    if(JSON.stringify(merged)!==JSON.stringify(m)){mine[k]=merged;changed=true;}
+  });
+  if(changed){try{localStorage.setItem(LS_PRICES,JSON.stringify(mine))}catch(e){}}
+  return changed;
+}
+function save(push){persist();if(push&&fbRef&&!fbApplying){try{fbRef.set(cloudPayload())}catch(e){}}renderAll()}
 
 function frequentItems(){
   var f={};
@@ -590,6 +620,7 @@ function rememberPrice(name,price){
   all[k].history.push({p:price,d:Date.now()});
   if(all[k].history.length>20)all[k].history=all[k].history.slice(-20);
   try{localStorage.setItem(LS_PRICES,JSON.stringify(all))}catch(e){}
+  if(fbRef&&!fbApplying){try{fbRef.set(cloudPayload())}catch(e){}}
 }
 function listTotal(l){
   return (l.items||[]).reduce(function(a,x){return a+((x.price||0)*(x.qty||1))},0);
@@ -823,6 +854,7 @@ $("#chForget").addEventListener("click",function(){
   if(!confirm("مسح كل تاريخ أسعار الصنف ده؟"))return;
   var all=loadPrices();delete all[chartKey];
   try{localStorage.setItem(LS_PRICES,JSON.stringify(all))}catch(e){}
+  if(fbRef&&!fbApplying){try{fbRef.set(cloudPayload())}catch(e){}}
   closeOv("#ovChart");renderPrices();toast("اتمسح التتبع");
 });
 
@@ -957,10 +989,16 @@ function initFB(cfg){
     fbRef=firebase.database().ref("market");
     fbRef.on("value",function(snap){
       var cloud=snap.val();
-      if(!cloud){if(S.lists.length)fbRef.set(S);return}
+      if(!cloud){
+        if(S.lists.length||Object.keys(loadPrices()).length)fbRef.set(cloudPayload());
+        return;
+      }
       fbApplying=true;
       S.lists=mergeColl(S.lists,cloud.lists||[]);
+      var pChanged=mergePricesCloud(cloud.prices);
       persist();renderAll();fbApplying=false;
+      /* لو الدمج ضاف تواريخ محلية جديدة، ادفعها للسحابة مرة واحدة */
+      if(pChanged){try{fbRef.set(cloudPayload())}catch(e){}}
     },function(err){setDot("err");$("#fbStatus").textContent="خطأ اتصال: "+(err.code||"")});
     setDot("on");$("#fbStatus").textContent="مفعّلة ومتصلة ✓";
   });
