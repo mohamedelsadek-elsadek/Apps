@@ -216,6 +216,25 @@ body{
 .chart-box svg{width:100%;height:auto;display:block}
 .hist-row{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);padding:7px 4px;border-bottom:1px dashed var(--line)}
 .hist-row b{color:var(--txt)}
+/* مطاعم وكافيهات */
+.rest-cat{font-size:14px;font-weight:900;color:var(--green2);margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.rest-item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 13px;margin-bottom:6px}
+.rest-item b{flex:1;font-size:13.5px;font-weight:700;min-width:0}
+.rest-item .rprice{font-size:14px;font-weight:900;color:var(--lemon);flex:0 0 auto;cursor:pointer}
+.rest-item .del{width:28px;height:28px;border-radius:8px;border:0;background:transparent;color:var(--muted2);font-size:13px;cursor:pointer;flex:0 0 auto}
+.rest-item .oqty{font-size:11px;font-weight:900;color:var(--ink);background:var(--green);border-radius:99px;padding:2px 8px;flex:0 0 auto}
+.rest-item.inorder{border-color:rgba(123,200,108,.45)}
+.callbtn{display:inline-flex;align-items:center;gap:5px;background:rgba(123,200,108,.14);border:1px solid rgba(123,200,108,.35);color:var(--green2);border-radius:99px;padding:4px 12px;font-size:12px;font-weight:800;text-decoration:none}
+.wabtn{display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.4);color:#5fe08a;border-radius:99px;padding:4px 12px;font-size:12px;font-weight:800;text-decoration:none;cursor:pointer;font-family:inherit}
+.ord-rest{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:12px}
+.ord-rest-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.ord-rest-h b{flex:1;font-size:15px;font-weight:900;min-width:120px}
+.ord-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.ord-row:last-of-type{border-bottom:0}
+.ord-row .on{flex:1;font-size:13px;font-weight:700;min-width:0}
+.ord-row .ot{font-size:13px;font-weight:900;color:var(--lemon);flex:0 0 auto;min-width:64px;text-align:left}
+.ord-sub{display:flex;justify-content:space-between;font-size:13px;font-weight:900;margin-top:9px;padding-top:8px;border-top:1px solid var(--line)}
+.grand{background:linear-gradient(135deg,rgba(232,201,79,.12),transparent);border:1px solid rgba(232,201,79,.3);border-radius:14px;padding:14px;display:flex;justify-content:space-between;font-size:16px;font-weight:900;margin-top:4px}
 /* لصق الأسعار */
 .paste-ta{min-height:130px;direction:rtl;font-size:14.5px;line-height:1.9}
 .match-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:10px 13px;margin-bottom:8px}
@@ -253,7 +272,7 @@ body{
 
 <div class="wrap">
   <section id="vLists">
-    <div class="sechead"><h2>قوايم الشرا</h2><button class="mini-add" id="btnPrices" style="background:var(--surface);border:1px solid var(--line);color:var(--lemon)">📈 أسعاري</button><button class="mini-add" id="btnNew">＋ قايمة جديدة</button></div>
+    <div class="sechead"><h2>قوايم الشرا</h2><button class="mini-add" id="btnRests" style="background:var(--surface);border:1px solid var(--line);color:var(--tomato)">🍽️ مطاعم</button><button class="mini-add" id="btnPrices" style="background:var(--surface);border:1px solid var(--line);color:var(--lemon)">📈 أسعاري</button><button class="mini-add" id="btnNew">＋ قايمة جديدة</button></div>
     <div id="listsEl"></div>
   </section>
 
@@ -284,6 +303,39 @@ body{
     <div id="catList"></div>
 
     <button class="bigbtn ghost" id="lDelete" style="color:var(--danger);margin-top:18px">حذف القايمة</button>
+  </section>
+
+  <section id="vRests" style="display:none">
+    <div class="dethead">
+      <button class="back" id="rsBack">→</button>
+      <div style="flex:1;min-width:0"><h2>🍽️ مطاعم وكافيهات</h2><div class="dsub" id="rsSub"></div></div>
+      <button class="rbtn" id="rsOrder" title="أوردري">🛒</button>
+      <button class="rbtn" id="rsAdd" title="مطعم جديد">＋</button>
+    </div>
+    <div class="chipbar" id="rsPlaces" style="margin-top:6px"></div>
+    <div id="restsEl"></div>
+  </section>
+
+  <section id="vRest" style="display:none">
+    <div class="dethead">
+      <button class="back" id="rBack">→</button>
+      <div style="flex:1;min-width:0"><h2 id="rName"></h2><div class="dsub" id="rSub"></div></div>
+      <button class="rbtn" id="rPrint" title="طباعة">🖨️</button>
+      <button class="rbtn" id="rPaste" title="لصق منيو">🤖</button>
+      <button class="rbtn" id="rEdit" title="تعديل">✏️</button>
+    </div>
+    <input class="tpl-search" id="rSearch" placeholder="🔍 دوّر في المنيو…" autocomplete="off" style="margin-top:8px">
+    <div id="rItems"></div>
+    <button class="bigbtn ghost" id="rDelete" style="color:var(--danger);margin-top:16px">حذف المطعم</button>
+  </section>
+
+  <section id="vOrder" style="display:none">
+    <div class="dethead">
+      <button class="back" id="oBack">→</button>
+      <div style="flex:1;min-width:0"><h2>🛒 My Order — أوردري</h2><div class="dsub" id="oSub"></div></div>
+    </div>
+    <div id="orderEl" style="margin-top:10px"></div>
+    <button class="bigbtn ghost" id="oClear" style="color:var(--danger);margin-top:14px">🗑️ مسح الأوردر كله</button>
   </section>
 
   <section id="vPrices" style="display:none">
@@ -321,6 +373,30 @@ body{
     <div class="stat-row" id="chStats"></div>
     <div id="chHist"></div>
     <button class="bigbtn ghost" id="chForget" style="color:var(--danger)">🗑️ امسح تتبع الصنف ده</button>
+  </div>
+</div></div>
+
+<!-- مطعم -->
+<div class="overlay" id="ovRest"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2 id="ovRestTitle">مطعم جديد</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <div class="field"><label>اسم المطعم / الكافيه</label><input class="input" id="rfName" placeholder="مثلاً: فوكاتشيا بيتزا"></div>
+    <div class="field"><label>التليفون (اختياري)</label><input class="input" id="rfPhone" inputmode="tel" placeholder="01xxxxxxxxx"></div>
+    <div class="field"><label>المكان / الكوليكشن</label><input class="input" id="rfPlace" list="placesDL" placeholder="مثلاً: الساحل · المنصورة · القاهرة"><datalist id="placesDL"></datalist></div>
+    <div class="field"><label>ملاحظة (اختياري)</label><input class="input" id="rfNote" placeholder="مثلاً: الأسعار غير شاملة الضريبة"></div>
+    <button class="bigbtn" id="rfSave">حفظ</button>
+  </div>
+</div></div>
+
+<!-- لصق منيو -->
+<div class="overlay" id="ovRestPaste"><div class="sheet">
+  <div class="grip"></div>
+  <div class="shead"><h2>🤖 لصق منيو</h2><button class="x" data-close>✕</button></div>
+  <div class="sbody">
+    <p style="font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 12px;line-height:1.8">صوّر المنيو وابعته لكلود، والصق الناتج هنا. اسم القسم في سطر لوحده وينتهي بنقطتين <b style="color:var(--txt)">بيتزا:</b> — وتحته الأصناف <b style="color:var(--txt)">مارجريتا = 200</b>. الصنف الموجود بنفس الاسم بيتحدث سعره (ينفع تحديث أسعار المنيو كله بلصقة).</p>
+    <div class="field"><textarea class="textarea paste-ta" id="rPasteText" placeholder="بيتزا:&#10;مارجريتا = 200&#10;خضار = 220&#10;مشروبات:&#10;كولا = 60"></textarea></div>
+    <button class="bigbtn" id="rPasteApply">اقرا واعتمد</button>
   </div>
 </div></div>
 
@@ -373,6 +449,11 @@ body{
 
 <div class="photo-view" id="photoView"><img id="photoViewImg" alt=""></div>
 
+<button class="cartbar" id="orderBar" style="background:linear-gradient(135deg,var(--tomato),#b8432f);color:#fff">
+  <span class="cb-count" id="obCount">0</span>
+  <span class="cb-last" id="obLast">أوردري</span>
+  <span class="cb-up">🛒 اعرض</span>
+</button>
 <button class="cartbar" id="cartBar">
   <span class="cb-count" id="cbCount">0</span>
   <span class="cb-last" id="cbLast">القايمة</span>
@@ -405,7 +486,7 @@ var CATALOG=[
   {n:"للشاليه والرحلات",e:"🏖️",items:["فحم","ولاعة","أطباق ورق","كبايات بلاستيك","شوك ومعالق بلاستيك","تلج","مناديل كتير","شنطة تلج"]}
 ];
 
-var S={lists:[]};
+var S={lists:[],rests:[],order:[]};
 var cur=null, editing=null;
 var fbRef=null, fbApplying=false;
 var openGroups={};
@@ -419,13 +500,13 @@ function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clea
 function norm(s){return String(s||"").replace(/[\u064B-\u0652]/g,"").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim().toLowerCase()}
 function alive(a){return a.filter(function(x){return !x.deleted})}
 
-function load(){try{var d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.lists)S.lists=d.lists}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.lists)S.lists=d.lists;if(d&&d.rests)S.rests=d.rests;if(d&&d.order)S.order=d.order}catch(e){}}
 function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){toast("مساحة التخزين ممتلئة")}}
 /* حمولة السحابة: القوايم + ذاكرة الأسعار (كمصفوفة لتفادي قيود مفاتيح RTDB) */
 function cloudPayload(){
   var P=loadPrices();
   var arr=Object.keys(P).map(function(k){var o=P[k];return {k:k,name:o.name,price:o.price,date:o.date,history:o.history||[]};});
-  return {lists:S.lists,prices:arr};
+  return {lists:S.lists,rests:S.rests||[],order:S.order||[],prices:arr};
 }
 /* دمج أسعار السحابة مع المحلي: اتحاد التواريخ، والأحدث يكسب */
 function mergePricesCloud(arr){
@@ -467,6 +548,10 @@ function show(v){
   $("#vLists").style.display=v==="lists"?"":"none";
   $("#vList").style.display=v==="list"?"":"none";
   $("#vPrices").style.display="none";
+  $("#vRests").style.display=v==="rests"?"":"none";
+  $("#vRest").style.display=v==="rest"?"":"none";
+  $("#vOrder").style.display=v==="order"?"":"none";
+  if(typeof updateOrderBar==="function")updateOrderBar(v);
   if(v==="list")updateCartBar();else $("#cartBar").classList.remove("show");
   window.scrollTo(0,0);
 }
@@ -942,6 +1027,311 @@ $("#btnPaste").addEventListener("click",function(){
 $("#pasteParse").addEventListener("click",matchPaste);
 $("#pasteApply").addEventListener("click",applyPaste);
 
+
+/* ============ مطاعم وكافيهات ============ */
+var curRest=null, editingRest=null;
+function aliveRests(){return (S.rests||[]).filter(function(r){return !r.deleted})}
+function renderRests(){
+  renderPlaceChips();
+  var list=aliveRests().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});
+  if(placeFilter)list=list.filter(function(r){return (r.place||"").trim()===placeFilter});
+  $("#rsSub").textContent=list.length+" مطعم/كافيه"+(placeFilter?(" · 📍 "+placeFilter):"");
+  var el=$("#restsEl");
+  if(!list.length){el.innerHTML='<div class="empty"><div class="em">🍽️</div><h3>لسه مفيش مطاعم</h3><p>دوس ＋ وضيف مطعم، وابعتلي صورة المنيو أطلعهولك جاهز للصق.</p></div>';return}
+  el.innerHTML=list.map(function(r){
+    var n=(r.items||[]).length;
+    var tel=telHref(r.phone);
+    return '<div class="lcard" data-rest="'+r.id+'"><div class="lcard-top">'+
+      '<div class="lcard-emo">🍽️</div>'+
+      '<div class="lcard-tt"><b>'+esc(r.name)+(r.place?' <span style="font-size:10.5px;color:var(--muted2);font-weight:700">📍'+esc(r.place)+'</span>':'')+'</b><span>'+n+' صنف'+(tel?(' · <a href="'+tel+'" onclick="event.stopPropagation()" style="color:var(--green2);font-weight:800;text-decoration:none">📞 '+esc(r.phone)+'</a>'):'')+'</span></div>'+
+      '<div class="lcard-pct" style="color:var(--tomato)">›</div></div></div>';
+  }).join("");
+}
+function restCats(r){
+  var cats=[],seen={};
+  (r.items||[]).forEach(function(i){var c=i.cat||"أصناف";if(!seen[c]){seen[c]=1;cats.push(c)}});
+  return cats;
+}
+function renderRest(){
+  var r=curRest;if(!r)return;
+  $("#rName").textContent=r.name;
+  $("#rSub").innerHTML=((r.items||[]).length+" صنف ")+phoneBtns(r.phone)+(r.note?(' · <span style="color:var(--muted2)">'+esc(r.note)+'</span>'):"");
+  var q=norm($("#rSearch").value||"");
+  var el=$("#rItems"),html="";
+  restCats(r).forEach(function(cat){
+    var items=(r.items||[]).filter(function(i){return (i.cat||"أصناف")===cat&&(!q||norm(i.name).indexOf(q)>-1)});
+    if(!items.length)return;
+    html+='<div class="rest-cat">'+esc(cat)+'</div>';
+    items.forEach(function(i){
+      var oq=orderQtyOf(r.id,i.id);
+      html+='<div class="rest-item'+(oq?' inorder':'')+'" ><b data-oadd="'+i.id+'" style="cursor:pointer">'+esc(i.name)+'</b>'+
+        (oq?'<span class="oqty">🛒 ×'+oq+'</span>':'')+
+        '<span class="rprice" data-rp="'+i.id+'">'+fmtMoney(i.price)+'</span>'+
+        '<button class="del" data-rdel="'+i.id+'">✕</button></div>';
+    });
+  });
+  el.innerHTML=html||'<div class="empty" style="padding:26px"><div class="em">🤖</div><h3>المنيو فاضي</h3><p>دوس 🤖 فوق والصق المنيو — أو ابعتلي صورته أطلعهولك جاهز. ودوسة على اسم أي صنف بتضيفه للأوردر 🛒</p></div>';
+}
+function openRestSheet(r){
+  editingRest=r||null;
+  $("#ovRestTitle").textContent=r?"تعديل المطعم":"مطعم جديد";
+  $("#rfName").value=r?r.name:"";$("#rfPhone").value=r?(r.phone||""):"";$("#rfNote").value=r?(r.note||""):"";$("#rfPlace").value=r?(r.place||""):"";
+  $("#placesDL").innerHTML=allPlaces().map(function(p){return '<option value="'+esc(p)+'">'}).join("");
+  openOv("#ovRest");
+}
+function saveRest(){
+  var name=$("#rfName").value.trim();if(!name){toast("اكتب اسم المطعم");return}
+  if(editingRest){editingRest.name=name;editingRest.phone=$("#rfPhone").value.trim();editingRest.note=$("#rfNote").value.trim();editingRest.place=$("#rfPlace").value.trim();editingRest.updatedAt=now();toast("اتحفظ")}
+  else{var r={id:uid(),name:name,phone:$("#rfPhone").value.trim(),note:$("#rfNote").value.trim(),place:$("#rfPlace").value.trim(),items:[],updatedAt:now(),deleted:false};S.rests.push(r);curRest=r;show("rest");renderRest();toast("اتضاف 🍽️")}
+  save(true);closeOv("#ovRest");renderRests();if(curRest)renderRest();
+}
+/* لصق منيو: قسم ينتهي بنقطتين + أصناف اسم = سعر */
+function parseMenuPaste(text){
+  var cat="أصناف",out=[];
+  String(text||"").split(/\r?\n/).forEach(function(line){
+    var t=arDigits(line).trim();
+    if(!t)return;
+    var h=t.match(/^#*\s*(.+?)\s*[:：]$/);
+    if(h){cat=h[1].trim();return}
+    var p=parsePasteLine(line);
+    if(p&&!p.unit)out.push({name:p.name,price:p.price,cat:cat});
+  });
+  return out;
+}
+function applyRestPaste(){
+  var r=curRest;if(!r)return;
+  var parsed=parseMenuPaste($("#rPasteText").value);
+  if(!parsed.length){toast("مقدرتش أقرا أي صنف");return}
+  var added=0,updated=0;
+  parsed.forEach(function(p){
+    var ex=(r.items||[]).find(function(x){return norm(x.name)===norm(p.name)});
+    if(ex){if(ex.price!==p.price){ex.price=p.price;updated++;}if(p.cat&&p.cat!=="أصناف")ex.cat=p.cat;}
+    else{r.items.push({id:uid(),name:p.name,price:p.price,cat:p.cat});added++;}
+  });
+  r.updatedAt=now();save(true);closeOv("#ovRestPaste");renderRest();
+  toast("اتضاف "+added+(updated?(" واتحدث سعر "+updated):"")+" ✓");
+}
+function printRest(){
+  var r=curRest;if(!r||!(r.items||[]).length){toast("المنيو فاضي");return}
+  var html='<h1>🍽️ '+esc(r.name)+'</h1><p class="psub">'+(r.phone?('📞 '+esc(r.phone)+' · '):'')+(r.items||[]).length+' صنف — مشترياتي</p>';
+  restCats(r).forEach(function(cat){
+    html+='<div class="pgroup">'+esc(cat)+'</div>';
+    (r.items||[]).filter(function(i){return (i.cat||"أصناف")===cat}).forEach(function(i){
+      html+='<div class="prow"><span>'+esc(i.name)+'</span><span class="pqty">'+fmtMoney(i.price)+'</span></div>';
+    });
+  });
+  html+='<div class="pfoot">اتطبعت من «مشترياتي»</div>';
+  $("#printArea").innerHTML=html;window.print();
+}
+/* ============ اتصال وواتساب ============ */
+function phoneDigits(p){return String(p||"").replace(/[^0-9]/g,"")}
+function telHref(p){var d=phoneDigits(p);return d?("tel:"+d):null}
+function waHref(p,text){
+  var d=phoneDigits(p);
+  if(!/^01[0-9]{9}$/.test(d))return null; /* الواتس للمحمول المصري بس — الخطوط الساخنة اتصال فقط */
+  return "https://wa.me/2"+d+(text?("?text="+encodeURIComponent(text)):"");
+}
+function phoneBtns(p,waText){
+  var t=telHref(p);if(!t)return "";
+  var h='<a class="callbtn" href="'+t+'">📞 '+esc(p)+'</a>';
+  var w=waHref(p,waText);
+  if(w)h+=' <a class="wabtn" href="'+w+'" target="_blank" rel="noopener">🟢 واتساب</a>';
+  return h;
+}
+/* ============ الأوردر (My Order) ============ */
+function aliveOrder(){return (S.order||[]).filter(function(x){return !x.deleted})}
+function orderQtyOf(restId,itemId){
+  var e=aliveOrder().find(function(x){return x.restId===restId&&x.itemId===itemId});
+  return e?(e.qty||1):0;
+}
+function addToOrder(rest,item){
+  var e=(S.order||[]).find(function(x){return x.restId===rest.id&&x.itemId===item.id&&!x.deleted});
+  if(e){e.qty=(e.qty||1)+1;e.updatedAt=now();}
+  else S.order.push({id:uid(),restId:rest.id,restName:rest.name,restPhone:rest.phone||"",itemId:item.id,name:item.name,price:item.price,qty:1,updatedAt:now(),deleted:false});
+  save(true);renderRest();updateOrderBar("rest",item.name);
+}
+function orderTotal(){return aliveOrder().reduce(function(a,x){return a+(x.price||0)*(x.qty||1)},0)}
+function updateOrderBar(view,lastName){
+  var bar=$("#orderBar");if(!bar)return;
+  var n=aliveOrder().reduce(function(a,x){return a+(x.qty||1)},0);
+  var showViews={rests:1,rest:1};
+  if(!n||!showViews[view||""]){bar.classList.remove("show");return}
+  $("#obCount").textContent=n+" صنف";
+  $("#obLast").textContent=lastName?("اتضاف: "+lastName):("الإجمالي: "+fmtMoney(orderTotal()));
+  bar.classList.add("show");
+  if(lastName){bar.classList.remove("pulse");void bar.offsetWidth;bar.classList.add("pulse");}
+}
+function renderOrder(){
+  var entries=aliveOrder();
+  $("#oSub").textContent=entries.reduce(function(a,x){return a+(x.qty||1)},0)+" صنف · "+fmtMoney(orderTotal());
+  var el=$("#orderEl");
+  if(!entries.length){el.innerHTML='<div class="empty"><div class="em">🛒</div><h3>الأوردر فاضي</h3><p>ادخل على أي مطعم ودوس على الأصناف — بتتجمع هنا مرتبة بالمطعم.</p></div>';return}
+  /* جمّع بالمطعم */
+  var byRest={},order=[];
+  entries.forEach(function(x){
+    if(!byRest[x.restId]){byRest[x.restId]=[];order.push(x.restId);}
+    byRest[x.restId].push(x);
+  });
+  var html="";
+  order.forEach(function(rid){
+    var items=byRest[rid];
+    var live=S.rests.find(function(r){return r.id===rid&&!r.deleted});
+    var name=live?live.name:items[0].restName;
+    var phone=live?(live.phone||items[0].restPhone):items[0].restPhone;
+    var sub=items.reduce(function(a,x){return a+(x.price||0)*(x.qty||1)},0);
+    /* نص الأوردر للواتساب */
+    var waText="أوردر:%0A".replace("%0A","\n");
+    waText="أوردر:\n"+items.map(function(x){return "• "+(x.qty>1?("×"+x.qty+" "):"")+x.name+" — "+fmtMoney((x.price||0)*(x.qty||1))}).join("\n")+"\nالإجمالي: "+fmtMoney(sub);
+    html+='<div class="ord-rest"><div class="ord-rest-h"><b>🍽️ '+esc(name)+'</b>'+phoneBtns(phone,waText)+'</div>';
+    items.forEach(function(x){
+      html+='<div class="ord-row"><span class="on">'+esc(x.name)+'</span>'+
+        '<div class="stepper"><button data-om="'+x.id+'">−</button><span>'+(x.qty||1)+'</span><button data-op="'+x.id+'">＋</button></div>'+
+        '<span class="ot">'+fmtMoney((x.price||0)*(x.qty||1))+'</span>'+
+        '<button class="del" data-od="'+x.id+'" style="border:0;background:transparent;color:var(--muted2);font-size:14px;cursor:pointer">✕</button></div>';
+    });
+    html+='<div class="ord-sub"><span>إجمالي '+esc(name)+'</span><span style="color:var(--lemon)">'+fmtMoney(sub)+'</span></div></div>';
+  });
+  html+='<div class="grand"><span>💰 إجمالي الأوردر كله</span><span style="color:var(--lemon)">'+fmtMoney(orderTotal())+'</span></div>';
+  el.innerHTML=html;
+}
+/* ============ الأماكن (Collections) ============ */
+var placeFilter="";
+function allPlaces(){
+  var set={},out=[];
+  aliveRests().forEach(function(r){var p=(r.place||"").trim();if(p&&!set[p]){set[p]=1;out.push(p)}});
+  return out;
+}
+function renderPlaceChips(){
+  var el=$("#rsPlaces");if(!el)return;
+  var places=allPlaces();
+  if(!places.length){el.innerHTML="";return}
+  var html='<button class="qchip" data-pl="" style="'+(placeFilter===""?'border-color:var(--tomato);color:var(--tomato)':'')+'">الكل</button>';
+  places.forEach(function(p){
+    html+='<button class="qchip" data-pl="'+esc(p)+'" style="'+(placeFilter===p?'border-color:var(--tomato);color:var(--tomato)':'')+'">📍 '+esc(p)+'</button>';
+  });
+  el.innerHTML=html;
+}
+
+/* بذور: منيوهات جاهزة (تتضاف مرة واحدة بالاسم) */
+var REST_SEEDS=[
+ {name:"فوكاتشيا بيتزا",phone:"01055566142",note:"",place:"الساحل",menu:{
+  "بيتزا":[["مارجريتا",200],["خضار",220],["فراخ",275],["تشكن رانش/باربيكيو",295],["سوبر سوبريم",320],["سجق",275],["مشكل جبن",285],["مشكل لحوم",330],["بيبروني",320],["بسطرمة",275],["مشروم",250],["سوسيس",275],["تونة",240],["جمبري",350],["سي فود",385],["خير البحر",450]],
+  "مناقيش":[["منقوشة زعتر",205],["منقوشة زعتر مشكل جبن",285],["منقوشة زعتر سجق",290],["منقوشة زعتر بسطرمة",300],["منقوشة زعتر لحمة",340],["منقوشة زعتر كيري",275],["منقوشة زعتر جبنة",275]],
+  "كالزوني":[["مارجريتا",200],["خضار",220],["فراخ",275],["تشكن رانش/باربيكيو",295],["سوبر سوبريم",320],["سجق",275],["مشكل جبن",285],["مشكل لحوم",330],["بيبروني",320],["بسطرمة",275],["مشروم",250],["سوسيس",275],["تونة",240],["جمبري",350],["سي فود",385]],
+  "رول بيتزا إيطالي":[["مارجريتا",170],["خضار",190],["فراخ",245],["تشكن رانش/باربيكيو",265],["سوبر سوبريم",290],["سجق",245],["مشكل جبن",255],["مشكل لحوم",300],["بيبروني",290],["بسطرمة",245],["مشروم",220],["سوسيس",245],["تونة",210],["جمبري",310],["سي فود",355]]}},
+ {name:"كليو كافيه CLIO",phone:"",note:"القهوة: السعر سنجل — الدبل بين الأقواس",place:"الساحل",menu:{
+  "مشروبات ساخنة":[["شاي أحمر",45],["شاي لاتيه",55],["شاي قرنفل",50],["شاي فواكه",55],["شاي أخضر",50],["ينسون",50],["كركديه",50],["نعناع",50],["قرفة",50],["قرفة جنزبيل",60],["مكس أعشاب كليو",60],["هوت شوكليت",80],["هوت سيدر",75]],
+  "قهوة":[["قهوة فاتح سادة (دبل 80)",60],["قهوة غامق سادة (دبل 80)",60],["قهوة فاتح محوج (دبل 80)",60],["قهوة غامق محوج (دبل 80)",60],["إسبريسو (دبل 90)",70],["كورتادو",90],["ميكاتو",90],["لاتيه",95],["كابتشينو",105],["قهوة فرنساوي",95],["أفوكاتو كوفي",100],["أمريكانو",100],["موكا",105],["فلات وايت",105],["قهوة بندق",90],["نسكافيه بلاك",70],["نسكافيه بلاك حليب",95]],
+  "عصائر فريش":[["مانجو",150],["مانجو كاجو",180],["مانجو لاسي",180],["فراولة",120],["خوخ",120],["فراولة لاسي",150],["موز حليب",135],["جوافة حليب",135],["بطيخ",120],["كيوي",170],["ليمون نعناع",135],["برتقال",120],["مانجو فراولة",160],["مانجو جوافة",160],["مانجو كيوي",180]],
+  "ميلك شيك":[["شيكولاته",160],["فانيليا",160],["كراميل",160],["نوتيلا",170],["سنيكرز",180],["لوتس",170],["أوريو",160],["مانجو",160],["بستاشيو",190],["بلوبيري",160],["فراولة",160],["كوتون كاندي",200]],
+  "صودا":[["شيري كولا",90],["موهيتو كلاسيك",110],["موهيتو بلوبيري",120],["بلو بينابول",110],["أيس بلوتي",120]],
+  "مشروبات باردة":[["أيس موكا",130],["أيس لاتيه",130],["أيس خوخ",130],["أيس اسبانش",150],["أيس لاتيه كراميل",140],["أيس لاتيه فانيليا",140],["أيس ستروباري لاتيه",150],["أيس بلوبيري لاتيه",150]],
+  "مشروبات غازية":[["كولا",60],["سبرايت/سفن أب",60],["ميرندا",60],["ريدبول",120],["تويست",60],["شويبس",65],["مياه",20],["بيريل",75],["مونستر",120]],
+  "فرابيه":[["فرابيه كوفي",140],["فرابيه شوكليت",140],["فرابيه وايت",140],["فرابيه ماتشا",140],["فرابيه بلوبيري",140]],
+  "وافل":[["وافل نوتيلا",150],["وافل كراميل",150],["وافل وايت",150],["وافل بستاشيو",180],["وافل لوتس",180],["وافل شيكولاته دارك",150],["وافل كليو شيكولاته قطع",240],["وافل 4 سيزون",115],["وافل فواكه",250]],
+  "سموزي":[["بطيخ",150],["فراولة",150],["مانجو",160],["كيوي",180],["ليمون نعناع",150],["خوخ",150],["بلوبيري",180],["مانجو باشون",180],["هاواي سموزي",180]],
+  "آيس كريم (سكوب)":[["فانيليا",60],["شيكولاته",60],["مانجو",60],["كريمة حلوة",60],["كراميل",65],["بستاشيو",75],["بسكوت",60],["توت",60],["أوريو",60],["باشون فروت",65],["فراولة",60],["كوتون كاندي",60],["ريد فيلفيت",60],["شيكولاته كندر",60],["إضافة بسكوت",25]]}},
+ {name:"رغيف عوف",phone:"16515",note:"الأسعار غير شاملة ضريبة 14%",place:"الساحل",menu:{
+  "سلطات":[["سلطة خضراء",35],["بذنجان بالخل والثوم",28],["بابا غنوج",35],["طماطم متبلة",35],["مخلل خيار",28],["علبة جرجير وليمون وفلفل",20],["طرشي بلدي",28]],
+  "بطاطس":[["بطاطس بالدقة",49],["شيبسي بالشطة والزعتر",56],["بطاطس بالجبنة",98]],
+  "مكرونات":[["مكرونة بالكبدة",139],["مكرونة بالسجق",139]],
+  "صوصات":[["طحينة بالخيار المخلل",20],["ديناميت حراق",28],["طحينة",28]],
+  "حلو":[["بسكوت اللوتس",70],["سكلانس عوف",69]],
+  "ساندوتشات عوف":[["رغيف شيش طاووق مشوي",125],["رغيف كفتة عوف",125],["رغيف فراخ بالزبادي",125],["رغيف حواوشي على الفحم",139],["رغيف سجق بخلطة عوف",125],["رغيف سجق كندوز مشوي وجوسي",125],["رغيف طرب حكاية",185],["رغيف فراخ سايح عليها جبنة شيدر",139],["رغيف كبدة زي بتاع الحجة",111],["رغيف فلتو كندوز طري وجيد",240],["رغيف ريش متشفى لعشاق اللحوم",360],["رغيف لسان بالسمن البلدي",199],["رغيف قلب بالليمون والطعم المجنون",122]],
+  "إضافات":[["إضافة رز",49],["إضافة جبنة",42],["إضافة عيش",14],["إضافة مكرونة",56]],
+  "مشروبات":[["كولا",41],["V7",29],["سبريت",29],["مياه صغيرة",18]]}},
+ {name:"ساحل a — Sahel",phone:"",note:"الأسعار كما وردت بالمنيو",place:"الساحل",menu:{
+  "سندوتشات":[["فول",30],["طعمية",30],["فول اسكندراني",35],["طعمية محشية",35],["فول زيتون",30],["فول حار",30],["فول زبدة",50],["طعمية كيري",45],["طعمية بسطرمة",40],["طعمية كيري وبسطرمة",55],["طعمية صيامي",45],["أومليت فرنساوي",40],["فول سوهاجي",35],["فول صيامي",35],["بطاطس فارم",55],["بطاطس مايونيز",40],["بطاطس كاتشب",40],["بطاطس جبنة رومي",65],["بطاطس كاتشب ومايو",65],["بيض مقلي",60],["بيض مسلوق",55],["بيض بسطرمة",75],["بيض جبنة رومي",65],["بيض فالنتينا",75],["جبنة مقلية",65],["باذنجان مقلي",40]],
+  "توست":[["روست بيف أومليت توست",99],["تركي أومليت توست",99],["هوت دوج توست",95],["بسطرمة توست",99],["ترافل أومليت توست",100]],
+  "رول":[["فلافل رول",60],["طعمية اسكندراني رول",69],["طعمية كيري رول",65],["طعمية بسطرمة رول",69],["كيري بسطرمة رول",75],["بطاطس رول",60],["بطاطس مشكل جبن رول",69],["بطاطس كاتشب ومايو رول",65],["بيض بسطرمة رول",95],["بيض فالنتينا رول",89],["بيض مشكل جبن رول",95]],
+  "بوكسات الساحل":[["قرص طعمية كبير",20],["قرص طعمية محشية",25],["قرص طعمية بسطرمة",35],["قرص طعمية كيري",40],["قرص كيري بسطرمة",55],["طبق بيض مقلي",60],["طبق بيض مسلوق",45],["طبق بيض بسطرمة",75],["طبق بطاطس",65],["طبق فول حار",50],["طبق فول اسكندراني",70],["طبق فول زيت حار",70],["طبق فول زبدة",80],["طبق فول زيت زيتون",70],["طبق باذنجان مقلي",65],["أومليت باك",50],["قرص طعمية صيامي",20],["ميكس طعمية",60],["طبق فول سوهاجي",80],["طبق فول صيامي",80],["طبق جبنة مقلية",100]],
+  "غربي":[["شاورما سوري شيش",200],["كريسبي تشيكن رول",190],["شيش طاووق رول",190],["تشيكن بانيه رول",210],["كفتة برجر",200],["كريسبي سوبريم",165],["شاورما فراخ سوري",200],["وجبة بانيه",240],["وجبة كريسبي",260],["هابي ميل بانيه",200],["هابي ميل كريسبي",190],["دبل كونج برجر",317],["فتة شاورما لحمة كبير",265],["فتة شاورما فراخ كبير",265],["فتة شاورما ميكس كبير",265],["فتة شاورما لحمة صغير",190],["فتة شاورما فراخ صغير",190],["فتة شاورما ميكس صغير",190],["إضافة شاورما",100]],
+  "آيس كريم":[["آيس كريم فانيليا",70],["آيس كريم شيكولاتة",70],["آيس كريم ميكس",70]],
+  "مشروبات":[["V كولا",30],["ريد بول",80],["V7",30],["V ليمون نعناع",30],["مياه معدنية",20],["V أناناس",30]]}},
+ {name:"فطيرة مزارع دينا",phone:"17009",note:"المقاسات بين الأقواس — السعر المعروض للسنجل",place:"الساحل",menu:{
+  "فطار طول اليوم":[["رول جبنة فيتا بالجرجير",180],["رول بيض بالخضراوات",230],["رول بيض بالبسطرمة",285],["رول بيض بالسجق",290]],
+  "مشلتت 6 طبقات":[["مشلتت (سنجل 205 · دويتو 270 · شلة 375)",205],["صينية مشلتت سنجل (2 غموس)",270],["صينية مشلتت وسط (3 غموس)",390],["صينية مشلتت كبير (4 غموس)",555],["إضافة عسل أسود",60],["إضافة عسل أسود بالطحينة",80],["إضافة عسل أبيض",75],["إضافة جبنة فيتا",80],["إضافة فيتا بالطماطم",80],["إضافة مورتة",90],["إضافة قشطة بلدي",115],["إضافة مش",80],["ربع كيلو مش",100]],
+  "الفطير الحادق":[["فطيرة فاير سبايسي (380 دويتو · 515 شلة)",310],["سجق شرقي بالجبنة (رول 285 · 360 · 505)",305],["بيبروني (370 دويتو · 540 شلة)",270],["سجق شرقي بالكيري (رول 305 · 385 · 540)",325],["حواوشي (385 دويتو · 525 شلة)",285],["شرائح لحم بالبصل المكرمل (رول 340 · 440 · 580)",360],["مشكل لحوم بشرائح اللحم (رول 350 · 450 · 595)",370],["فراخ باربكيو بالجبنة (رول 275 · 365 · 500)",300],["فراخ باربكيو وكيري (رول 300 · 390 · 535)",320],["فراخ بالبسطرمة والكيري (رول 310 · 405 · 545)",325],["فراخ بالبسطرمة (رول 290 · 380 · 515)",305],["بسطرمة وكيري (رول 290 · 385 · 525)",305],["فراخ ستربس (رول 290 · 380 · 515)",305],["مشكل جبن (رول 270 · 340 · 505)",285],["مشكل جبن بالكيري (رول 290 · 365 · 540)",305],["مشكل خضراوات (رول 235 · 300 · 425)",250],["تونة (رول 270 · 370 · 595)",285],["فراخ بالرانش (رول 300 · 380 · 515)",310],["لحمة مفرومة بالبصل المكرمل (رول 275 · 370 · 515)",290],["مشكل لحوم باللحمة المفرومة (رول 300 · 390 · 525)",310]],
+  "فطيرجر":[["بيف فطيرجر كلاسيك (دبل 320)",235],["بيف فطيرجر بالجبنة (دبل 365)",270],["إضافة خضار",40],["إضافة جبن",60],["إضافة صوصات",50],["كومبو",115],["برجر إضافي",100],["بطاطس مقلية",75]],
+  "الفطير الحلو":[["فطيرة توتي فروتي (رول 335)",360],["بغاشة باللبن المكثف",255],["بغاشة",215],["بغاشة بالنوتيلا",255],["بغاشة بالفستق",325],["فطيرة الكاسترد (M 170)",100],["بسبوسة وقشطة بلدي (M 265)",175],["بلح وقشطة بلدي (M 275)",190],["تفاح بالقرفة (M 290)",205],["سبريد فستق (رول 370)",360],["شيكولاتة بوينو (رول 370)",360],["نوتيلا بالكاسترد (رول 370)",360],["لوتس بالكاسترد (رول 370)",360],["روشيه بالكاسترد (رول 370)",360]],
+  "قشطيطة":[["قشطيطة سادة",140],["إضافة سبريد حلو",100],["إضافة كاسترد",60]],
+  "نص ونص":[["نص ونص فطيرة (كاسترد + 2 سبريد)",540]],
+  "إضافات الحلو":[["سكر",20],["عجوة",40],["لبن",40],["بسبوسة",40],["كاسترد",40],["صوص كراميل",50],["قشطة",75],["مهلبية",40],["سبريد نوتيلا",110],["سبريد بوينو",110],["سبريد لوتس",110],["سبريد فستق",110],["سبريد روشيه",110],["سبريد توتي فروتي",100]],
+  "الصيامي":[["بطاطس بوريه (290 دويتو · 360 شلة)",205],["تونة صيامي (رول 270 · 370 · 595)",285],["خضراوات موتزاريلا صيامي (رول 175 · 245 · 310)",190],["رول بطاطس مقلية",195],["مشلتت صيامي (175 دويتو · 230 شلة)",120],["صينية مشلتت صيامي (265 دويتو · 360 شلة)",195],["نوتيلا صيامي (M 235)",155]],
+  "مشروبات":[["مشروب غازي كان",55],["مشروب غازي زجاجة",50],["مياه ميني",20],["مياه صغير",30],["مياه كبير",40]]}}
+];
+function ensureSeedRests(){
+  var added=false;
+  REST_SEEDS.forEach(function(sd){
+    var exist=aliveRests().find(function(r){return norm(r.name)===norm(sd.name)});
+    if(exist){if(!exist.place&&sd.place){exist.place=sd.place;added=true;}return;}
+    var items=[];
+    Object.keys(sd.menu).forEach(function(cat){
+      sd.menu[cat].forEach(function(p){items.push({id:uid(),name:p[0],price:p[1],cat:cat})});
+    });
+    S.rests.push({id:uid(),name:sd.name,phone:sd.phone||"",note:sd.note||"",place:sd.place||"",items:items,updatedAt:now(),deleted:false});
+    added=true;
+  });
+  if(added)save(true);
+}
+/* أحداث المطاعم */
+$("#btnRests").addEventListener("click",function(){renderRests();show("rests")});
+$("#rsBack").addEventListener("click",function(){show("lists");renderLists()});
+$("#rsAdd").addEventListener("click",function(){openRestSheet(null)});
+$("#rfSave").addEventListener("click",saveRest);
+$("#restsEl").addEventListener("click",function(e){
+  var c=e.target.closest("[data-rest]");if(!c)return;
+  curRest=S.rests.find(function(r){return r.id===c.getAttribute("data-rest")});
+  if(curRest){$("#rSearch").value="";renderRest();show("rest")}
+});
+$("#rBack").addEventListener("click",function(){curRest=null;show("rests");renderRests()});
+$("#rEdit").addEventListener("click",function(){if(curRest)openRestSheet(curRest)});
+$("#rPrint").addEventListener("click",printRest);
+$("#rPaste").addEventListener("click",function(){$("#rPasteText").value="";openOv("#ovRestPaste")});
+$("#rPasteApply").addEventListener("click",applyRestPaste);
+$("#rSearch").addEventListener("input",renderRest);
+$("#rItems").addEventListener("click",function(e){
+  var a=e.target.closest("[data-oadd]");
+  if(a){
+    var it0=(curRest.items||[]).find(function(x){return x.id===a.getAttribute("data-oadd")});
+    if(it0)addToOrder(curRest,it0);
+    return;
+  }
+  var p=e.target.closest("[data-rp]");
+  if(p){
+    var it=(curRest.items||[]).find(function(x){return x.id===p.getAttribute("data-rp")});
+    if(it){var v=prompt("سعر «"+it.name+"»:",it.price);if(v!=null){var f=parseFloat(arDigits(v));if(!isNaN(f)&&f>0){it.price=f;curRest.updatedAt=now();save(true);renderRest()}}}
+    return;
+  }
+  var d=e.target.closest("[data-rdel]");
+  if(d){curRest.items=curRest.items.filter(function(x){return x.id!==d.getAttribute("data-rdel")});curRest.updatedAt=now();save(true);renderRest()}
+});
+$("#rsPlaces").addEventListener("click",function(e){
+  var b=e.target.closest("[data-pl]");if(!b)return;
+  placeFilter=b.getAttribute("data-pl")||"";renderRests();
+});
+$("#rsOrder").addEventListener("click",function(){renderOrder();show("order")});
+$("#orderBar").addEventListener("click",function(){renderOrder();show("order")});
+$("#oBack").addEventListener("click",function(){show("rests");renderRests()});
+$("#oClear").addEventListener("click",function(){
+  if(!aliveOrder().length)return;
+  if(!confirm("مسح الأوردر كله؟"))return;
+  S.order.forEach(function(x){x.deleted=true;x.updatedAt=now()});
+  save(true);renderOrder();toast("اتمسح الأوردر");
+});
+$("#orderEl").addEventListener("click",function(e){
+  var pl=e.target.closest("[data-op]");
+  if(pl){var x1=S.order.find(function(o){return o.id===pl.getAttribute("data-op")});if(x1){x1.qty=(x1.qty||1)+1;x1.updatedAt=now();save(true);renderOrder()}return}
+  var mn=e.target.closest("[data-om]");
+  if(mn){var x2=S.order.find(function(o){return o.id===mn.getAttribute("data-om")});if(x2){if((x2.qty||1)>1){x2.qty--;}else{x2.deleted=true;}x2.updatedAt=now();save(true);renderOrder()}return}
+  var dl=e.target.closest("[data-od]");
+  if(dl){var x3=S.order.find(function(o){return o.id===dl.getAttribute("data-od")});if(x3){x3.deleted=true;x3.updatedAt=now();save(true);renderOrder()}}
+});
+$("#rDelete").addEventListener("click",function(){
+  if(!curRest)return;if(!confirm("حذف المطعم ده بمنيوه؟"))return;
+  curRest.deleted=true;curRest.updatedAt=now();curRest=null;save(true);show("rests");renderRests();toast("اتمسح");
+});
+
 /* Overlays */
 function openOv(s){$(s).classList.add("open");document.body.style.overflow="hidden"}
 function closeOv(s){$(s).classList.remove("open");document.body.style.overflow=""}
@@ -995,6 +1385,8 @@ function initFB(cfg){
       }
       fbApplying=true;
       S.lists=mergeColl(S.lists,cloud.lists||[]);
+      S.rests=mergeColl(S.rests||[],cloud.rests||[]);
+      S.order=mergeColl(S.order||[],cloud.order||[]);
       var pChanged=mergePricesCloud(cloud.prices);
       persist();renderAll();fbApplying=false;
       /* لو الدمج ضاف تواريخ محلية جديدة، ادفعها للسحابة مرة واحدة */
@@ -1104,7 +1496,7 @@ $("#btnClear").addEventListener("click",clearAll);
 $("#fbToggle").addEventListener("click",function(){if(this.classList.contains("on"))disableFB();else enableFB()});
 document.addEventListener("keydown",function(e){if(e.key==="Escape")$all(".overlay.open").forEach(function(o){closeOv("#"+o.id)})});
 
-load();renderAll();show("lists");restoreFB();
+load();ensureSeedRests();renderAll();show("lists");restoreFB();
 </script>
 </body>
 </html>
