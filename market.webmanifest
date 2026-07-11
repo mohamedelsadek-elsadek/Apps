@@ -1,0 +1,15 @@
+{
+  "name": "مشترياتي — قوائم السوبر ماركت والمطاعم",
+  "short_name": "مشترياتي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./market.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101613",
+  "theme_color": "#101613",
+  "icons": [
+    {"src": "market-icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "market-icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
