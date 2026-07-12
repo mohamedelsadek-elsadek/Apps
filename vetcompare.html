@@ -94,7 +94,7 @@ h1,h2,h3{margin:0}
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v2</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -939,14 +939,15 @@ function saveProd(){
 }
 
 function renderAllNow(){renderProducts();renderActives();fillTherSelects();fillDiseases();renderTreatments()}
-/* renderAll مُجمّع: يمنع إعادة بناء القوائم عشرات المرات مع كل نبضة مزامنة */
+/* renderAll مُجمّع: يمنع إعادة بناء القوائم عشرات المرات مع كل نبضة مزامنة.
+   بيستخدم مؤقّت موثوق (مش rAF) عشان يشتغل في كل المتصفحات وسياق الملف المحلي. */
 var _renderT=null;
 function renderAll(){
-  if(_renderT)return;                 /* في طلب رسم منتظر بالفعل */
-  _renderT=(window.requestAnimationFrame||function(f){return setTimeout(f,16)})(function(){
+  if(_renderT)return;
+  _renderT=setTimeout(function(){
     _renderT=null;
     try{renderAllNow()}catch(e){}
-  });
+  },0);
 }
 
 /* ============ الأحداث ============ */
@@ -1060,7 +1061,7 @@ $("#reseedBtn").addEventListener("click",function(){
   load();
   if(!aliveActives().length)seedActives();
   if(!alive().length)seedProducts(false);
-  renderAll();
+  try{renderAllNow()}catch(e){}
   restoreFB();
 })();
 </script>
