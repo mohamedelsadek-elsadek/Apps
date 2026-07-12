@@ -262,7 +262,8 @@ h1,h2,h3{margin:0}
   <button class="x" data-close>✕</button>
   <h2>☁️ المزامنة والنسخ</h2>
   <div class="warn">البيانات بتتحفظ على جهازك تلقائيًا. المزامنة السحابية بتخلي نفس الأدوية تظهر على كل أجهزتك.</div>
-  <div class="warn" style="background:rgba(123,200,108,.1);border-color:rgba(123,200,108,.3);color:var(--green2)">🔗 <b>الربط مع مخازن الأدوية شغّال:</b> أي تحديث سعر أو مخزون في نظام المخازن بيتحدّث هنا تلقائيًا ومستمر (مش مرة واحدة). المادة الفعالة والتركيز اللي بتدخلهم هنا بيفضلوا محفوظين.<br><span id="whStatus" class="mini"></span></div>
+  <div class="warn" style="background:rgba(123,200,108,.1);border-color:rgba(123,200,108,.3);color:var(--green2)">🔗 <b>الربط مع مخازن الأدوية:</b> لما يبقى شغّال، أي تحديث سعر أو مخزون في نظام المخازن بيتحدّث هنا تلقائيًا. المادة الفعالة والتركيز اللي بتدخلهم بيفضلوا محفوظين زي ما هم.<br><span id="whStatus" class="mini"></span></div>
+  <button class="btn sec" id="whToggle" style="margin-bottom:8px">🔗 تفعيل الربط مع المخازن</button>
   <button class="btn" id="syncToggle">تفعيل المزامنة السحابية</button>
   <div class="divider"></div>
   <button class="btn sec" id="expBtn">⬇️ تصدير نسخة (ملف)</button>
@@ -481,6 +482,8 @@ function initFB(cfg){
       try{
         var whRef=firebase.database().ref("erp_data/products");
         whRef.on("value",function(snap){
+          if(!whLinkEnabled)return;         /* الربط مقفول افتراضيًا — مفيش شغل زيادة */
+          if(fbApplying)return;             /* منع التصادم مع مزامنة vetcompare */
           var whProds=snap.val();
           if(!whProds)return;
           if(!Array.isArray(whProds))whProds=Object.keys(whProds).map(function(k){return whProds[k]});
@@ -632,7 +635,7 @@ function renderVax(){
   el.innerHTML=html;
 }
 /* ============ الربط الحي مع مخازن الأدوية ============ */
-var lastWhSync=0, whLinkEnabled=true;
+var lastWhSync=0, whLinkEnabled=(function(){try{return localStorage.getItem("vetcompare.whlink")==="1"}catch(e){return false}})();
 function syncFromWarehouse(whProds){
   if(!whLinkEnabled)return;
   var changed=0,added=0;
@@ -660,9 +663,15 @@ function syncFromWarehouse(whProds){
   if(changed||added){
     persist();renderAll();
     lastWhSync=now();
+    /* ادفع التحديث مرة واحدة لسحابة vetcompare بأمان بدون إشعال حلقة */
+    if(fbRef&&!fbApplying){
+      fbApplying=true;
+      try{fbRef.set({products:S.products,actives:S.actives,protocols:S.protocols,treatments:S.treatments})}catch(e){}
+      fbApplying=false;
+    }
     var badge=$("#whStatus");
     if(badge)badge.textContent="🔗 آخر تحديث من المخازن: "+(changed+" سعر"+(added?(" · "+added+" صنف جديد"):""));
-    if(changed||added)toast("🔗 اتحدّث من المخازن: "+changed+" سعر"+(added?(" · "+added+" جديد"):""));
+    toast("🔗 اتحدّث من المخازن: "+changed+" سعر"+(added?(" · "+added+" جديد"):""));
   }
 }
 /* ============ التحصينات ============ */
@@ -929,13 +938,22 @@ function saveProd(){
   save(true);$("#ovProd").classList.remove("open");renderAll();toast("اتحفظ ✓");
 }
 
-function renderAll(){renderProducts();renderActives();fillTherSelects();fillDiseases();renderTreatments()}
+function renderAllNow(){renderProducts();renderActives();fillTherSelects();fillDiseases();renderTreatments()}
+/* renderAll مُجمّع: يمنع إعادة بناء القوائم عشرات المرات مع كل نبضة مزامنة */
+var _renderT=null;
+function renderAll(){
+  if(_renderT)return;                 /* في طلب رسم منتظر بالفعل */
+  _renderT=(window.requestAnimationFrame||function(f){return setTimeout(f,16)})(function(){
+    _renderT=null;
+    try{renderAllNow()}catch(e){}
+  });
+}
 
 /* ============ الأحداث ============ */
 $all(".tab").forEach(function(t){t.addEventListener("click",function(){
   $all(".tab").forEach(function(x){x.classList.remove("on")});t.classList.add("on");
   var v=t.getAttribute("data-tab");
-  ["compare","need","products","disease","vax","actives"].forEach(function(n){$("#tab-"+n).style.display=n===v?"":"none"});
+  ["compare","need","products","disease","vaccines","actives"].forEach(function(n){var el=$("#tab-"+n);if(el)el.style.display=n===v?"":"none"});
   if(v==="compare")renderCompare();if(v==="products")renderProducts();if(v==="need"){fillTherSelects();renderTreatments();}if(v==="actives")renderActives();if(v==="disease")renderDisease();if(v==="vaccines")renderVax();
 })});
 $("#cmpActive").addEventListener("change",function(){
@@ -996,6 +1014,32 @@ $("#syncToggle").addEventListener("click",function(){
   localStorage.setItem(LS_FBON,"1");localStorage.setItem(LS_FB,JSON.stringify(DEFAULT_FB));
   initFB(DEFAULT_FB).then(function(){toast("المزامنة اتفعّلت ☁️")}).catch(function(){toast("خطأ في المزامنة")});
 });
+/* زر الربط مع المخازن */
+function updateWhBtn(){
+  var b=$("#whToggle");if(!b)return;
+  if(whLinkEnabled){b.textContent="🔗 الربط مع المخازن: شغّال — اضغط للإيقاف";b.classList.add("green");b.classList.remove("sec")}
+  else{b.textContent="🔗 تفعيل الربط مع المخازن";b.classList.add("sec");b.classList.remove("green")}
+}
+$("#whToggle").addEventListener("click",function(){
+  whLinkEnabled=!whLinkEnabled;
+  try{localStorage.setItem("vetcompare.whlink",whLinkEnabled?"1":"0")}catch(e){}
+  updateWhBtn();
+  if(whLinkEnabled){
+    toast("🔗 الربط اتفعّل — هيسحب الأسعار من المخازن");
+    /* لو المزامنة شغّالة، اقرأ المخازن مرة فورًا */
+    if(fbApp&&window.firebase){try{
+      firebase.database().ref("erp_data/products").once("value",function(snap){
+        var wh=snap.val();if(!wh)return;
+        if(!Array.isArray(wh))wh=Object.keys(wh).map(function(k){return wh[k]});
+        syncFromWarehouse(wh);
+      });
+    }catch(e){}}
+    else{toast("فعّل المزامنة السحابية الأول ☁️")}
+  }else{
+    toast("🔗 الربط اتوقف — الأسعار مش هتتغير من المخازن");
+  }
+});
+updateWhBtn();
 $("#expBtn").addEventListener("click",function(){
   var blob=new Blob([JSON.stringify({app:"vetcompare",products:S.products},null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="vetcompare-backup.json";a.click();
