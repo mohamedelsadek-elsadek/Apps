@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0f1419">
+<title>مقارنة الأدوية البيطرية — محرك التكلفة</title>
+<style>
+:root{
+  --bg:#0f1419;--bg2:#161d26;--surface:#1b232e;--line:#2a3542;--txt:#eef3f8;--muted:#9fb0c0;--muted2:#6b7a8a;
+  --acc:#4a9eff;--acc2:#2d7de0;--green:#7bc86c;--green2:#5fb04f;--lemon:#e8c94f;--tomato:#e8593a;--danger:#e05555;
+  --grad:linear-gradient(135deg,#4a9eff,#2d7de0);--r:14px;--fs:15px;
+}
+:root[data-theme=light]{
+  --bg:#eef2f6;--bg2:#fff;--surface:#fff;--line:#dde5ec;--txt:#1a2530;--muted:#5a6b7a;--muted2:#8595a4;--bg2:#f5f8fb;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Cairo,Tahoma,sans-serif;font-size:var(--fs);line-height:1.6;padding-bottom:80px}
+.wrap{max-width:760px;margin:0 auto;padding:14px}
+h1,h2,h3{margin:0}
+.top{display:flex;align-items:center;gap:10px;padding:6px 0 14px}
+.top .logo{width:42px;height:42px;border-radius:12px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.top h1{font-size:18px;font-weight:900;flex:1;min-width:0}
+.top .sub{font-size:11.5px;color:var(--muted2);font-weight:700}
+.iconbtn{width:38px;height:38px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--txt);font-size:16px;cursor:pointer;flex:0 0 auto}
+.tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--bg2);padding:5px;border-radius:12px;position:sticky;top:6px;z-index:20}
+.tab{flex:1;padding:9px 6px;border-radius:9px;border:0;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--grad);color:#fff;box-shadow:0 3px 10px rgba(74,158,255,.3)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:12px}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:5px}
+.input,select,textarea{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--bg2);color:var(--txt);font-family:inherit;font-size:14px;outline:none}
+.input:focus,select:focus{border-color:var(--acc)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.btn{padding:12px 16px;border-radius:11px;border:0;background:var(--grad);color:#fff;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;width:100%}
+.btn:active{transform:scale(.98)}
+.btn.sec{background:var(--surface);border:1px solid var(--line);color:var(--txt)}
+.btn.sm{padding:8px 12px;font-size:12.5px;width:auto}
+.btn.green{background:linear-gradient(135deg,#7bc86c,#5fb04f);color:#08260a}
+.chip{display:inline-block;padding:4px 11px;border-radius:99px;background:var(--bg2);border:1px solid var(--line);color:var(--muted);font-size:11.5px;font-weight:800;cursor:pointer;margin:0 0 6px}
+.chip.on{border-color:var(--acc);color:var(--acc);background:rgba(74,158,255,.1)}
+.chipbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch}
+.chipbar::-webkit-scrollbar{display:none}
+.chipbar .chip{white-space:nowrap;flex:0 0 auto;margin:0}
+.prod{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.prod-h{display:flex;align-items:flex-start;gap:9px}
+.prod-h b{flex:1;font-size:14px;font-weight:800;min-width:0}
+.badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.b-local{background:rgba(123,200,108,.15);color:var(--green2)}
+.b-import{background:rgba(232,201,79,.15);color:var(--lemon)}
+.b-ther{background:rgba(74,158,255,.12);color:var(--acc)}
+.b-inc{background:rgba(224,85,85,.14);color:var(--danger)}
+.prod-meta{font-size:11.5px;color:var(--muted2);font-weight:700;margin-top:4px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted2)}
+.empty .em{font-size:44px;margin-bottom:10px}
+.empty h3{font-size:16px;margin-bottom:6px;color:var(--muted)}
+.empty p{font-size:12.5px}
+.rank{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;position:relative;overflow:hidden}
+.rank .num{width:30px;height:30px;border-radius:9px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex:0 0 auto}
+.rank.best .num{background:linear-gradient(135deg,#7bc86c,#5fb04f);color:#08260a}
+.rank.best{border-color:rgba(123,200,108,.4)}
+.rank-b{flex:1;min-width:0}
+.rank-b b{font-size:13.5px;font-weight:800;display:block}
+.rank-b span{font-size:11px;color:var(--muted2);font-weight:700}
+.rank-c{text-align:left;flex:0 0 auto}
+.rank-c .cost{font-size:16px;font-weight:900;color:var(--lemon)}
+.rank-c .costsub{font-size:10px;color:var(--muted2);font-weight:700}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--txt);color:var(--bg);padding:12px 20px;border-radius:12px;font-weight:800;font-size:13px;z-index:200;transition:transform .3s;max-width:90%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.result-box{background:linear-gradient(135deg,rgba(74,158,255,.1),transparent);border:1px solid rgba(74,158,255,.25);border-radius:14px;padding:16px;margin-top:12px}
+.result-box .big{font-size:28px;font-weight:900;color:var(--acc)}
+.result-box .lbl{font-size:12px;color:var(--muted);font-weight:700}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.kv:last-child{border-bottom:0}
+.kv b{font-weight:800}
+.mini{font-size:11px;color:var(--muted2);font-weight:700;line-height:1.7}
+.divider{height:1px;background:var(--line);margin:12px 0}
+.fab{position:fixed;bottom:18px;right:18px;width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;border:0;font-size:26px;cursor:pointer;box-shadow:0 6px 20px rgba(74,158,255,.4);z-index:50}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:100}
+.overlay.open{display:flex}
+.sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:760px;max-height:92vh;overflow-y:auto;padding:18px;animation:up .25s}
+@keyframes up{from{transform:translateY(100%)}}
+.sheet h2{font-size:17px;margin-bottom:14px}
+.x{position:absolute;left:16px;top:16px;background:var(--surface);border:1px solid var(--line);color:var(--txt);width:32px;height:32px;border-radius:9px;font-size:14px;cursor:pointer}
+.grip{width:40px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 14px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:99px;background:var(--bg2);border:1px solid var(--line);font-size:11px;font-weight:800;color:var(--muted)}
+.warn{background:rgba(232,201,79,.1);border:1px solid rgba(232,201,79,.3);border-radius:11px;padding:10px 12px;font-size:12px;color:var(--lemon);font-weight:700;margin:8px 0}
+.del{background:transparent;border:0;color:var(--muted2);font-size:15px;cursor:pointer;padding:4px}
+@media print{.tabs,.fab,.top .iconbtn,.chipbar{display:none}body{background:#fff;color:#000}.card,.rank,.prod{border-color:#ccc}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">💊</div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن</div></div>
+    <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="compare">⚖️ مقارنة</button>
+    <button class="tab" data-tab="need">📦 احتياجي</button>
+    <button class="tab" data-tab="products">🗂️ الأدوية</button>
+    <button class="tab" data-tab="disease">🩺 الأمراض</button>
+    <button class="tab" data-tab="vaccines">💉 التحصينات</button>
+    <button class="tab" data-tab="actives">⚗️ المواد</button>
+  </div>
+
+  <!-- تبويب المقارنة -->
+  <section id="tab-compare">
+    <div class="card">
+      <div class="field">
+        <label>🧪 المادة الخام (الفعالة) — بتقارن كل المنتجات اللي فيها</label>
+        <select id="cmpActive"></select>
+      </div>
+      <div class="row2">
+        <div class="field"><label>💉 جرعة المادة الخام (جم/طن وزن)</label><input class="input" id="cmpDose" type="number" step="any" placeholder="25"></div>
+        <div class="field"><label>⏱️ أيام العلاج</label><input class="input" id="cmpDays" type="number" step="any" value="5"></div>
+      </div>
+      <div class="mini" id="cmpHint">💡 اختر المادة الخام، الجرعة المعيارية بتتملّى لوحدها وتقدر تعدّلها. الأداة بتقارن كل منتج فيه المادة دي وترتّبهم بتكلفة علاج الطن.</div>
+      <button class="btn" id="cmpRun" style="margin-top:10px">⚖️ قارن ورتّب حسب الأفضلية</button>
+    </div>
+    <div id="cmpResults"></div>
+  </section>
+
+  <!-- تبويب الاحتياج -->
+  <section id="tab-need" style="display:none">
+    <div class="card">
+      <div class="field"><label>💊 اختر المنتج اللي هتستخدمه</label><select id="ndProd"></select></div>
+      <div class="row2">
+        <div class="field"><label>🐔 عدد الطيور</label><input class="input" id="ndCount" type="number" step="any" placeholder="10000"></div>
+        <div class="field"><label>⚖️ متوسط وزن الطائر (كجم)</label><input class="input" id="ndWeight" type="number" step="any" placeholder="1.5"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>💉 جرعة المادة الخام (جم/طن)</label><input class="input" id="ndDose" type="number" step="any" placeholder="25"></div>
+        <div class="field"><label>⏱️ أيام العلاج</label><input class="input" id="ndDays" type="number" step="any" value="5"></div>
+      </div>
+      <div class="mini" id="ndHint">💡 اختر المنتج، لو مربوط بمادة خام الجرعة بتتملّى تلقائي.</div>
+      <button class="btn green" id="ndRun" style="margin-top:10px">📦 احسب كام عبوة أحتاج</button>
+    </div>
+    <div id="ndResult"></div>
+    <div class="card" style="margin-top:12px">
+      <h3 style="margin-bottom:10px">🧪 حاسبة الخلط في التانك</h3>
+      <div class="row2">
+        <div class="field"><label>حجم التانك (لتر)</label><input class="input" id="mixTank" type="number" step="any" placeholder="1000"></div>
+        <div class="field"><label>جرعة المنتج (جم أو مل / لتر)</label><input class="input" id="mixDose" type="number" step="any" placeholder="1"></div>
+      </div>
+      <button class="btn sec" id="mixRun">احسب الكمية للتانك</button>
+      <div id="mixResult" style="margin-top:10px"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3 style="margin-bottom:10px">📋 سجل العلاجات ونتايجها</h3>
+      <div class="mini" style="margin-bottom:10px">سجّل نتيجة كل علاج (نجح/فشل) عشان تبني سجل «إيه اللي بيشتغل في مزرعتك».</div>
+      <div id="txList"></div>
+    </div>
+  </section>
+
+  <!-- تبويب الأدوية -->
+  <section id="tab-products" style="display:none">
+    <input class="input" id="prodSearch" placeholder="🔍 دوّر باسم المنتج أو المادة الفعالة…" style="margin-bottom:10px">
+    <div class="chipbar" id="prodThers"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="mini" id="prodCount"></span>
+      <button class="btn sm sec" id="prodAdd">➕ منتج جديد</button>
+    </div>
+    <div id="prodList"></div>
+  </section>
+
+  <!-- تبويب الأمراض -->
+  <section id="tab-disease" style="display:none">
+    <div class="card">
+      <div class="field"><label>🩺 اختر المرض / الحالة</label><select id="dxSelect"></select></div>
+      <div class="mini">💡 الأداة بتقترح المواد الفعالة المناسبة مرتبة بالأفضلية، وتوريك المتاح منها في مخزنك بأرخص تكلفة.</div>
+    </div>
+    <div id="dxResult"></div>
+  </section>
+
+  <!-- تبويب التحصينات -->
+  <section id="tab-vaccines" style="display:none">
+    <div class="chipbar" id="vaxTypes"></div>
+    <input class="input" id="vaxSearch" placeholder="🔍 دوّر باسم التحصين أو المرض…" style="margin-bottom:10px">
+    <div class="mini" id="vaxCount" style="margin-bottom:8px"></div>
+    <div id="vaxList"></div>
+  </section>
+
+  <!-- تبويب المواد الخام -->
+  <section id="tab-actives" style="display:none">
+    <div class="card">
+      <div class="mini" style="margin-bottom:10px">📚 كل مادة خام وجرعتها المعيارية (جم/طن وزن حي في اليوم). لما تربط منتج بمادة، الجرعة دي بتتملّى تلقائي في المقارنة والاحتياج.</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="mini" id="actCount"></span>
+        <button class="btn sm sec" id="actAdd">➕ مادة جديدة</button>
+      </div>
+    </div>
+    <div id="actList"></div>
+  </section>
+</div>
+
+<!-- شيت المادة الخام -->
+<div class="overlay" id="ovActive"><div class="sheet">
+  <div class="grip"></div>
+  <button class="x" data-close>✕</button>
+  <h2 id="ovActiveTitle">مادة خام جديدة</h2>
+  <div class="field"><label>اسم المادة الخام *</label><input class="input" id="aName" placeholder="مثلاً: دوكسيسيكلين"></div>
+  <div class="row2">
+    <div class="field"><label>الجرعة المعيارية (جم/طن)</label><input class="input" id="aDose" type="number" step="any" placeholder="25"></div>
+    <div class="field"><label>⏱️ فترة سحب اللحم (يوم)</label><input class="input" id="aWithdrawal" type="number" step="any" placeholder="7"></div>
+  </div>
+  <div class="field"><label>التصنيف</label><input class="input" id="aTher" list="therDL" placeholder="مضاد حيوي"></div>
+  <div class="field"><label>ملاحظة (اختياري)</label><input class="input" id="aNote" placeholder="مثلاً: 20-30 جم/طن حسب الحالة"></div>
+  <button class="btn" id="aSave">حفظ</button>
+  <button class="btn sec" id="aDelete" style="margin-top:8px;color:var(--danger)">حذف</button>
+</div></div>
+
+<button class="fab" id="fabSync" title="مزامنة">☁️</button>
+
+<!-- شيت المنتج -->
+<div class="overlay" id="ovProd"><div class="sheet">
+  <div class="grip"></div>
+  <button class="x" data-close>✕</button>
+  <h2 id="ovProdTitle">منتج جديد</h2>
+  <div class="field"><label>الاسم التجاري *</label><input class="input" id="pName" placeholder="مثلاً: تايلوجيت 20%"></div>
+  <div class="field"><label>🧪 المادة الخام (الفعالة)</label>
+    <select id="pActive"><option value="">— اختر أو سيبها فاضية —</option></select>
+    <div class="mini" style="margin-top:4px">مش لاقي المادة؟ ضيفها من تبويب «⚗️ المواد الخام» بجرعتها المعيارية.</div>
+  </div>
+  <div class="field"><label>التصنيف العلاجي</label><input class="input" id="pTher" list="therDL" placeholder="مضاد حيوي"></div>
+  <div id="concQuick" style="margin-bottom:8px"></div>
+  <div class="row2">
+    <div class="field"><label>التركيز (%)</label><input class="input" id="pConc" type="number" step="any" placeholder="20"></div>
+    <div class="field"><label>وحدة التركيز</label>
+      <select id="pConcUnit">
+        <option value="pct">% (جم/100جم أو 100مل)</option>
+        <option value="mgg">مجم/جم</option>
+        <option value="mgml">مجم/مل</option>
+      </select>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>حجم العبوة</label><input class="input" id="pPkg" type="number" step="any" placeholder="1000"></div>
+    <div class="field"><label>وحدة العبوة</label><input class="input" id="pUnit" placeholder="جم / مل / كيلو"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>سعر العبوة (ج)</label><input class="input" id="pPrice" type="number" step="any" placeholder="850"></div>
+    <div class="field"><label>المورد</label><input class="input" id="pSupplier" placeholder="الاسم"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>المصدر</label>
+      <select id="pOrigin"><option value="local">محلي</option><option value="import">مستورد</option></select>
+    </div>
+    <div class="field"><label>المخزون الحالي</label><input class="input" id="pStock" type="number" step="any" placeholder="0"></div>
+  </div>
+  <button class="btn" id="pSave">حفظ</button>
+  <button class="btn sec" id="pDelete" style="margin-top:8px;color:var(--danger)">حذف المنتج</button>
+  <datalist id="therDL"></datalist>
+</div></div>
+
+<!-- شيت المزامنة -->
+<div class="overlay" id="ovSync"><div class="sheet">
+  <div class="grip"></div>
+  <button class="x" data-close>✕</button>
+  <h2>☁️ المزامنة والنسخ</h2>
+  <div class="warn">البيانات بتتحفظ على جهازك تلقائيًا. المزامنة السحابية بتخلي نفس الأدوية تظهر على كل أجهزتك.</div>
+  <div class="warn" style="background:rgba(123,200,108,.1);border-color:rgba(123,200,108,.3);color:var(--green2)">🔗 <b>الربط مع مخازن الأدوية شغّال:</b> أي تحديث سعر أو مخزون في نظام المخازن بيتحدّث هنا تلقائيًا ومستمر (مش مرة واحدة). المادة الفعالة والتركيز اللي بتدخلهم هنا بيفضلوا محفوظين.<br><span id="whStatus" class="mini"></span></div>
+  <button class="btn" id="syncToggle">تفعيل المزامنة السحابية</button>
+  <div class="divider"></div>
+  <button class="btn sec" id="expBtn">⬇️ تصدير نسخة (ملف)</button>
+  <button class="btn sec" id="impBtn" style="margin-top:8px">⬆️ استيراد نسخة</button>
+  <input type="file" id="impFile" accept=".json" hidden>
+  <div class="divider"></div>
+  <button class="btn sec" id="reseedBtn" style="color:var(--lemon)">🔄 إعادة تحميل أدوية المخزن (189 صنف)</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script id="seeds" type="application/json">[{"name": "فيتامين ك A1", "ther": "فيتامينات", "pkg": 1000, "unit": "كيلو", "price": 1550, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "نفرول A1", "ther": "غسيل كلى", "pkg": 3785, "unit": "جالون", "price": 1250, "supplier": "وايز", "stock": 1, "maker": ""}, {"name": "ام تي ترون A1", "ther": "مضاد سموم", "pkg": 3785, "unit": "جالون", "price": 7000, "supplier": "اورجانك", "stock": 13, "maker": ""}, {"name": "اور جستيم سائل A11", "ther": "مطهر معوي", "pkg": 1000, "unit": "لتر", "price": 890, "supplier": "الدقهليه", "stock": 38, "maker": ""}, {"name": "فالزنتال جرام A1٢٥٠", "ther": "مضاد طفيليات", "pkg": 250, "unit": "250 جرام", "price": 1850, "supplier": "كيوفيت", "stock": 2, "maker": ""}, {"name": "الكوسير ٤٠ في السنه A11", "ther": "مضاد حيوي", "pkg": 150, "unit": "150 جرام", "price": 500, "supplier": "اورجانك", "stock": 0, "maker": ""}, {"name": "ماك باور A1", "ther": "فيتامينات", "pkg": 1000, "unit": "لتر", "price": 1100, "supplier": "زوتيكس", "stock": 0, "maker": ""}, {"name": "البراق حكت سولف A1", "ther": "موسع شعب", "pkg": 100, "unit": "100 مل", "price": 550, "supplier": "تروفيكو", "stock": 0, "maker": ""}, {"name": "ان فلوراكس A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 830, "supplier": "زوتيكس", "stock": -1, "maker": ""}, {"name": "اليزونير | A1", "ther": "مضاد حيوي", "pkg": 250, "unit": "250 مل", "price": 650, "supplier": "ام ان تريد", "stock": 0, "maker": ""}, {"name": "دياكسئول A1", "ther": "مطهر معوي", "pkg": 1000, "unit": "عدد", "price": 7, "supplier": "فارما فاك", "stock": 0, "maker": ""}, {"name": "ابرا مايسين A1", "ther": "مضاد حيوي", "pkg": 100, "unit": "100 جرام", "price": 330, "supplier": "وايز", "stock": -88, "maker": ""}, {"name": "جرو ماس A1", "ther": "منشط نمو", "pkg": 500, "unit": "500 مل", "price": 500, "supplier": "فلورنس تريد", "stock": 0, "maker": ""}, {"name": "ليزوفيت A1", "ther": "فيتامينات", "pkg": 1000, "unit": "لتر", "price": 700, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "ف د سيلنيوم A1", "ther": "هـ سيلينيوم", "pkg": 1000, "unit": "لتر", "price": 1000, "supplier": "الدقهليه", "stock": 0, "maker": ""}, {"name": "جاسترو جارد A1", "ther": "وقاية معوية", "pkg": 500, "unit": "500 مل", "price": 580, "supplier": "بايوكيور فارما", "stock": 0, "maker": ""}, {"name": "ليفاك بي اس A1", "ther": "مضاد إجهاد", "pkg": 250, "unit": "250 جرام", "price": 1300, "supplier": "بايوكيور فارما", "stock": 0, "maker": ""}, {"name": "روفان بلص A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "لتر", "price": 900, "supplier": "د صفوت", "stock": 0, "maker": ""}, {"name": "ميترو جيت A1", "ther": "مضاد بكتيريا", "pkg": 500, "unit": "500 مل", "price": 450, "supplier": "نوفو انيمال هيلت", "stock": 0, "maker": ""}, {"name": "توفيرا اكس A1", "ther": "مضاد سموم", "pkg": 500, "unit": "500 مل", "price": 850, "supplier": "نوفو انيمال هيلت", "stock": 0, "maker": ""}, {"name": "بيو فيكس A1", "ther": "مضاد سموم", "pkg": 500, "unit": "500 مل", "price": 500, "supplier": "نوفو انيمال هيلت", "stock": 0, "maker": ""}, {"name": "انابوليك A1", "ther": "منشط نمو", "pkg": 1000, "unit": "لتر", "price": 550, "supplier": "فيتورا", "stock": -2, "maker": ""}, {"name": "هيو فيتو A1", "ther": "رافع مناعة", "pkg": 1000, "unit": "لتر", "price": 1750, "supplier": "انتر ميديكا", "stock": 0, "maker": ""}, {"name": "تابلو ميديكا A11", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 جرام", "price": 3500, "supplier": "انتر ميديكا", "stock": 0, "maker": ""}, {"name": "كلازونيور A1", "ther": "مضاد كوكسيديا", "pkg": 1000, "unit": "لتر", "price": 470, "supplier": "بايوكيور فارما", "stock": 0, "maker": ""}, {"name": "رايدو اسبكتين A1", "ther": "مضاد حيوي", "pkg": 150, "unit": "150 جرام", "price": 1000, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "تایل اسبرايسول A1", "ther": "مضاد حيوي", "pkg": 100, "unit": "100 جرام", "price": 850, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "ديل استریت A1", "ther": "مضاد حيوي", "pkg": 200, "unit": "200 جرام", "price": 550, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "تيلمي تريت A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "لتر", "price": 1750, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "ريرو موند A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 1200, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "دای کلازوريل A1", "ther": "مضاد كوكسيديا", "pkg": 1000, "unit": "لتر", "price": 580, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "نوفو بوست A11", "ther": "منشط مناعة", "pkg": 1000, "unit": "لتر", "price": 550, "supplier": "نوفو اشتمال هيلت", "stock": 0, "maker": ""}, {"name": "فينيكس بلص A1", "ther": "مضاد حيوي", "pkg": 100, "unit": "100 مل", "price": 350, "supplier": "فلورنس تريد", "stock": 0, "maker": ""}, {"name": "فارما فلور A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "لتر", "price": 950, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "دى تابلو A1", "ther": "مضاد حيوي", "pkg": 250, "unit": "250 جرام", "price": 800, "supplier": "ابو النجا", "stock": 0, "maker": ""}, {"name": "بروماك A1", "ther": "منشط عام", "pkg": 500, "unit": "500 مل", "price": 1250, "supplier": "كابيتال", "stock": 0, "maker": ""}, {"name": "اتوتيا كول A1", "ther": "مضاد حيوي", "pkg": 250, "unit": "250 جرام", "price": 400, "supplier": "ابو النجا", "stock": -17, "maker": ""}, {"name": "ميكو بيت A1", "ther": "مضاد سموم", "pkg": 500, "unit": "500 مل", "price": 500, "supplier": "فيرتيكس فارما", "stock": 0, "maker": ""}, {"name": "لايف بلص A1", "ther": "فيتامينات", "pkg": 1000, "unit": "لتر", "price": 990, "supplier": "ترافيكو", "stock": 0, "maker": ""}, {"name": "سويس بيوبيور A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 650, "supplier": "ترافيكو", "stock": 0, "maker": ""}, {"name": "ميكوزين A1", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 مل", "price": 1750, "supplier": "م صفوت", "stock": 0, "maker": ""}, {"name": "بلوتوكس A1", "ther": "مضاد سموم", "pkg": 1000, "unit": "لتر", "price": 650, "supplier": "د صفوت", "stock": 0, "maker": ""}, {"name": "پوست زينهاتس A1", "ther": "رافع مناعة", "pkg": 1000, "unit": "لتر", "price": 430, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "ما كسيفنت ! A1", "ther": "إضافات", "pkg": 500, "unit": "500 مل", "price": 500, "supplier": "بايوكيور فارما", "stock": 0, "maker": ""}, {"name": "جلاسين بلص A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "لتر", "price": 550, "supplier": "اتكو فارما", "stock": 0, "maker": ""}, {"name": "ديفنزو ! A1", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 مل", "price": 800, "supplier": "المؤسسة الزهبيه", "stock": 0, "maker": ""}, {"name": "ری کالم A1", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 مل", "price": 680, "supplier": "فيرتيكس فارما", "stock": 0, "maker": ""}, {"name": "بيرساكبور A1", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 مل", "price": 710, "supplier": "فيرتيكس فارما", "stock": 0, "maker": ""}, {"name": "نوفو كوكس A1", "ther": "مضاد كوكسيديا", "pkg": 500, "unit": "500 مل", "price": 250, "supplier": "نوفو انيمال هيلت", "stock": 0, "maker": ""}, {"name": "ريفيل A11", "ther": "مضاد حيوي", "pkg": 1000, "unit": "لتر", "price": 450, "supplier": "نوفو انيمال هيلث", "stock": 0, "maker": ""}, {"name": "بروكير A11", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 650, "supplier": "نوفو انيمال هيلث", "stock": 0, "maker": ""}, {"name": "ريماريل ! A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 600, "supplier": "المصريه", "stock": 0, "maker": ""}, {"name": "جانا بكت A11", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 جرام", "price": 875, "supplier": "المصرية", "stock": 0, "maker": ""}, {"name": "روفی تون A1", "ther": "فيتامينات", "pkg": 1000, "unit": "لتر", "price": 1300, "supplier": "المصرية", "stock": 0, "maker": ""}, {"name": "روفي روفينيل A1", "ther": "إضافات", "pkg": 1000, "unit": "لتر", "price": 1500, "supplier": "المصرية", "stock": 0, "maker": ""}, {"name": "بينا كتام A1", "ther": "مضاد حيوي", "pkg": 100, "unit": "100 مل", "price": 400, "supplier": "فيرتيكس فارسا", "stock": 0, "maker": ""}, {"name": "امياس : A1151", "ther": "مضاد حيوي", "pkg": 1000, "unit": "لتر", "price": 300, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "جارليك اسياس A1", "ther": "إضافات", "pkg": 1000, "unit": "لتر", "price": 300, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "| افير A1", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 مل", "price": 770, "supplier": "فيرتكس فارما", "stock": 0, "maker": ""}, {"name": "جننا واير A1", "ther": "إضافات", "pkg": 500, "unit": "500 مل", "price": 320, "supplier": "وايز", "stock": 0, "maker": ""}, {"name": "كابي زيم سوبر A1", "ther": "إنزيمات", "pkg": 1000, "unit": "كيلو", "price": 450, "supplier": "كابيتال انترنشنال", "stock": 0, "maker": ""}, {"name": "اتوبرول بلص A1", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 جرام", "price": 600, "supplier": "انكو فارما", "stock": 0, "maker": ""}, {"name": "تراي سين A1", "ther": "مضاد حيوي", "pkg": 500, "unit": "500 جرام", "price": 600, "supplier": "اتكو فارما", "stock": 0, "maker": ""}, {"name": "ريسبيون ! A1", "ther": "مضاد تنفسي", "pkg": 500, "unit": "500 مل", "price": 500, "supplier": "نوفو انيمال هیئت", "stock": 0, "maker": ""}, {"name": "جرين دوكس A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 3000, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "امبيهدراو ! A1", "ther": "إضافات", "pkg": 500, "unit": "500 جرام", "price": 1000, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "ليباتون A1", "ther": "إضافات", "pkg": 1000, "unit": "لتر", "price": 850, "supplier": "ام ان تريد", "stock": 0, "maker": ""}, {"name": "لتر نوفاكيور A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 350, "supplier": "ام ان تريد", "stock": 0, "maker": ""}, {"name": "ريتاتول ! A1", "ther": "إضافات", "pkg": 1000, "unit": "لتر", "price": 400, "supplier": "اسلام بدوی", "stock": 0, "maker": ""}, {"name": "الترا جروث A1", "ther": "منشط نمو", "pkg": 3785, "unit": "جالون", "price": 700, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "بای نیکسر A1", "ther": "مضاد سموم", "pkg": 1000, "unit": "لتر", "price": 700, "supplier": "اسلام بدوی", "stock": 0, "maker": ""}, {"name": "كالسيوفورت A1", "ther": "كالسيوم", "pkg": 1000, "unit": "لتر", "price": 195, "supplier": "بيوكير فارما", "stock": -60, "maker": ""}, {"name": "سيفوتاكس A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 20, "supplier": "مشتريات", "stock": -240, "maker": ""}, {"name": "استیل سستابين A1", "ther": "مذيب بلغم", "pkg": 1000, "unit": "كيلو", "price": 3500, "supplier": "مشتريات", "stock": 0, "maker": ""}, {"name": "مايكروفير جالون A1", "ther": "إضافات", "pkg": 3785, "unit": "جالون", "price": 3500, "supplier": "وايز", "stock": -1, "maker": ""}, {"name": "اتوسيف فورت A1", "ther": "مضاد حيوي", "pkg": 250, "unit": "250 جرام", "price": 580, "supplier": "اتكو فارما", "stock": 0, "maker": ""}, {"name": "اميكاسين", "ther": "مضاد حيوي", "pkg": 100, "unit": "100 مل", "price": 850, "supplier": "كابيتال", "stock": -17, "maker": ""}, {"name": "سمارت ايه بي A1", "ther": "إضافات", "pkg": 500, "unit": "500 جرام", "price": 2000, "supplier": "جينوفيت", "stock": -39, "maker": ""}, {"name": "اميو ستيم A1", "ther": "رافع مناعة", "pkg": 1000, "unit": "لتر", "price": 3300, "supplier": "هايبر كير", "stock": 0, "maker": ""}, {"name": "فاكس لينكو A1", "ther": "مضاد حيوي", "pkg": 150, "unit": "150 جرام", "price": 1150, "supplier": "ميديكس", "stock": -12, "maker": ""}, {"name": "جروس اموکسی A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 22, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "اور جانو فيت A1", "ther": "فيتامينات", "pkg": 500, "unit": "500 مل", "price": 500, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "تراكيا فيت A1", "ther": "فيتامينات", "pkg": 250, "unit": "250 مل", "price": 500, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "دا پیاد! A1", "ther": "إضافات", "pkg": 500, "unit": "500 جرام", "price": 800, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "توفيت بروبايوتك A11", "ther": "بروبايوتك", "pkg": 1000, "unit": "كيلو", "price": 500, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "الوفيت امینو پلاس A1", "ther": "أحماض أمينية", "pkg": 1000, "unit": "لتر", "price": 500, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "توفيت بروجانو A11", "ther": "إضافات", "pkg": 1000, "unit": "لتر", "price": 500, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "وادى ماك A11", "ther": "إضافات", "pkg": 500, "unit": "500 مل", "price": 500, "supplier": "ام ان تريد", "stock": 0, "maker": ""}, {"name": "بيكربونات صوديوم A1٢", "ther": "منظم حموضة", "pkg": 1000, "unit": "كيلو", "price": 20, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "فيتامينات تسمين A1", "ther": "فيتامينات", "pkg": 1000, "unit": "كيلو", "price": 850, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "املاح تسمين A1", "ther": "أملاح", "pkg": 1000, "unit": "كيلو", "price": 100, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "ميسونين A11", "ther": "أحماض أمينية", "pkg": 1000, "unit": "كيلو", "price": 145, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "ليسين !A1", "ther": "أحماض أمينية", "pkg": 1000, "unit": "كيلو", "price": 60, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "بريمكسات مواشي A1", "ther": "بريمكس", "pkg": 1000, "unit": "كيلو", "price": 152, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "تی بیو A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 135, "supplier": "وايز", "stock": 0, "maker": ""}, {"name": "كولين ٦٠ A1", "ther": "فيتامينات", "pkg": 1000, "unit": "كيلو", "price": 40, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "کی ماكس بلص A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 26, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "امتی برای A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 295, "supplier": "اورجانيك", "stock": 0, "maker": ""}, {"name": "کیو اس تی درای A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 285, "supplier": "اورجانيك", "stock": 0, "maker": ""}, {"name": "اوكسيد ماغنيسيوم A1", "ther": "أملاح", "pkg": 1000, "unit": "كيلو", "price": 13, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "الترا يست بلص A1", "ther": "خمائر", "pkg": 1000, "unit": "كيلو", "price": 450, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "ثيرونين A1", "ther": "أحماض أمينية", "pkg": 1000, "unit": "كيلو", "price": 80, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "فورمات صوديوم A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 80, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "بيتامنانيز !A1", "ther": "إنزيمات", "pkg": 1000, "unit": "كيلو", "price": 400, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "انزيم فايتيز", "ther": "إنزيمات", "pkg": 1000, "unit": "كيلو", "price": 600, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "فيزا يست !A1", "ther": "خمائر", "pkg": 1000, "unit": "كيلو", "price": 140, "supplier": "كي فيت", "stock": 0, "maker": ""}, {"name": "رونزایم بروتيز", "ther": "إنزيمات", "pkg": 1000, "unit": "كيلو", "price": 700, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "بريميكس های دی A1", "ther": "بريمكس", "pkg": 1000, "unit": "كيلو", "price": 320, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "ديكلا شمس A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 200, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "ليجنوبوند A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 75, "supplier": "نيوتريفت", "stock": 0, "maker": ""}, {"name": "كيمو تيكس بلس A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 150, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "انزيم طاقه A1", "ther": "إنزيمات", "pkg": 1000, "unit": "كيلو", "price": 1350, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "لينكو مايسين A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 450, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "بولتری استار A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 550, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "برولاكت ! A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 600, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "تايلوزين ! A1", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 1500, "supplier": "بيوكير فارما", "stock": 0, "maker": ""}, {"name": "بيوترال A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 100, "supplier": "وايز", "stock": 0, "maker": ""}, {"name": "فوسفيبكو تايلوزين A11", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 40, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "انسبيرا انزيم طاقة A1", "ther": "إنزيمات", "pkg": 1000, "unit": "كيلو", "price": 21, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "داسال برای A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 90, "supplier": "مورد غير محدد", "stock": 0, "maker": ""}, {"name": "بير جابيور A1", "ther": "إضافات", "pkg": 1000, "unit": "كيلو", "price": 100, "supplier": "مورد غير محدد", "stock": 0, "maker": ""}, {"name": "مولينجاميك", "ther": "إضافات", "pkg": 1000, "unit": "علبة", "price": 2000, "supplier": "كابيتال", "stock": 0, "maker": ""}, {"name": "مزبون جانبمون AT۲۰۰", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 100, "supplier": "الشركة الدولية", "stock": 0, "maker": ""}, {"name": "مياه معدنيه A11", "ther": "مياه للتحصين", "pkg": 1000, "unit": "لتر", "price": 50, "supplier": "العهدة", "stock": 0, "maker": ""}, {"name": "بينتابرو A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 3500, "supplier": "الشركة الدولية", "stock": 0, "maker": ""}, {"name": "بريسيز A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 4000, "supplier": "العهدة", "stock": 0, "maker": ""}, {"name": "فاكسيل فالي", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "ناجي عوض", "stock": 0, "maker": ""}, {"name": "فردی استرفیت A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 375, "supplier": "الترفيت", "stock": 0, "maker": ""}, {"name": "جمبورو حي A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 2850, "supplier": "انتر ميديكا فيت", "stock": 0, "maker": ""}, {"name": "فاكميون نيوكاسل A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 350, "supplier": "ميدكس", "stock": 0, "maker": ""}, {"name": "نیوکاسل فردی ابقا A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 720, "supplier": "ام ان تريد", "stock": 0, "maker": ""}, {"name": "شار مركز A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 116, "supplier": "الشركة الأوربية", "stock": 0, "maker": ""}, {"name": "أوكسيد A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 4400, "supplier": "الشركة المصرية", "stock": 0, "maker": ""}, {"name": "پر A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 2850, "supplier": "الشركة الدولية", "stock": 0, "maker": ""}, {"name": "فاكسيمون nd A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 2400, "supplier": "الشركة الدوليه", "stock": 0, "maker": ""}, {"name": "فاكسيمون جامبورو A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 2600, "supplier": "الشركة الدولية", "stock": 0, "maker": ""}, {"name": "نيوكاسل بريميقات hand A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 540, "supplier": "فيت تراست", "stock": 0, "maker": ""}, {"name": "ايجي فلو A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 800, "supplier": "بيو فارما", "stock": 0, "maker": ""}, {"name": "يوني فاكس A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "ناجي عوض", "stock": 0, "maker": ""}, {"name": "ثنای جمبورو hand IA1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 380, "supplier": "فيت تراست", "stock": 0, "maker": ""}, {"name": "رينو فاك البت سفن A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "ميفاك", "stock": 0, "maker": ""}, {"name": "ثلاثي سيفاك A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "ميفاك", "stock": 0, "maker": ""}, {"name": "نيوكاسل ثلاثي 1951A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "ناجي عوض", "stock": 0, "maker": ""}, {"name": "اولستر ای بی A11", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "ميديكس", "stock": 0, "maker": ""}, {"name": "فاكسينوفا لاسونا A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "الشركة الدولية", "stock": 0, "maker": ""}, {"name": "ميد فاك جمبورو A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "ميد فاك", "stock": 0, "maker": ""}, {"name": "في جول A1", "ther": "لقاح", "pkg": 1, "unit": "عبوة", "price": 500, "supplier": "جينوفيت", "stock": 0, "maker": ""}, {"name": "كلور A11", "ther": "مطهر", "pkg": 200000, "unit": "برميل", "price": 500, "supplier": "العهدة", "stock": -320, "maker": ""}, {"name": "فنيك A11", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 40, "supplier": "العهدة", "stock": -20, "maker": ""}, {"name": "فيركون A1", "ther": "مطهر", "pkg": 1000, "unit": "كيلو", "price": 750, "supplier": "الدولية", "stock": -1, "maker": ""}, {"name": "بروكلين", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 300, "supplier": "وايز", "stock": -10, "maker": ""}, {"name": "فورمالين سائل A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 40, "supplier": "العهدة", "stock": -120, "maker": ""}, {"name": "ساتغير بلص A11", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 1000, "supplier": "مالتي ميديكا", "stock": 0, "maker": ""}, {"name": "اکواسیبت بی بی A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 300, "supplier": "مالتي ميديكا", "stock": 0, "maker": ""}, {"name": "دوراسبيت ابقا 551 ga", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 384, "supplier": "ام ان تريد", "stock": 0, "maker": ""}, {"name": "فيروسيد ! A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 730, "supplier": "الدقهلية", "stock": -1, "maker": ""}, {"name": "كينو ايه A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 300, "supplier": "الدقهلية", "stock": 0, "maker": ""}, {"name": "الفاتشينو A11", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 500, "supplier": "كابيتال محمد الراعي", "stock": 0, "maker": ""}, {"name": "كوكس كيل A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 550, "supplier": "بوسطن", "stock": 0, "maker": ""}, {"name": "ديازينون A11", "ther": "مبيد حشري", "pkg": 1000, "unit": "لتر", "price": 575, "supplier": "العهدة", "stock": 0, "maker": ""}, {"name": "كوسان فيركون A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 700, "supplier": "اورجانيك", "stock": 0, "maker": ""}, {"name": "اجينا A11", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 900, "supplier": "الشركة المصرية", "stock": -10, "maker": ""}, {"name": "اتوس بديل الاجيتا A1", "ther": "مبيد حشري", "pkg": 1000, "unit": "لتر", "price": 200, "supplier": "نقدي", "stock": -9, "maker": ""}, {"name": "المبادا ! A1", "ther": "مبيد حشري", "pkg": 1000, "unit": "لتر", "price": 500, "supplier": "العهدة", "stock": 0, "maker": ""}, {"name": "سكيل اوف A1", "ther": "مطهر", "pkg": 1000, "unit": "لتر", "price": 275, "supplier": "وايز", "stock": -15, "maker": ""}, {"name": "فورمالين تبخير قوالب", "ther": "مطهر", "pkg": 1000, "unit": "كيلو", "price": 400, "supplier": "العهده", "stock": 1, "maker": ""}, {"name": "امينوبلاس", "ther": "احماض أمينيه", "pkg": 1000, "unit": "لتر", "price": 600, "supplier": "ناجي عوض", "stock": 21, "maker": ""}, {"name": "دانوموند", "ther": "", "pkg": 100, "unit": "sl", "price": 600, "supplier": "mn trade", "stock": 0, "maker": ""}, {"name": "ف ك", "ther": "", "pkg": 1000, "unit": "كيلو", "price": 600, "supplier": "", "stock": -2, "maker": ""}, {"name": "ديوكهم غسيل", "ther": "", "pkg": 1000, "unit": "لتر", "price": 550, "supplier": "", "stock": 0, "maker": ""}, {"name": "تمولين", "ther": "", "pkg": 100, "unit": "جرام", "price": 400, "supplier": "", "stock": 0, "maker": ""}, {"name": "باسيتوب", "ther": "", "pkg": 100, "unit": "جرام", "price": 600, "supplier": "ابو النجا", "stock": -48, "maker": ""}, {"name": "انو 20%", "ther": "", "pkg": 1000, "unit": "لتر", "price": 1250, "supplier": "", "stock": -24, "maker": ""}, {"name": "نوفاكور", "ther": "مضاد سموم", "pkg": 5000, "unit": "جالون", "price": 2000, "supplier": "", "stock": -8, "maker": ""}, {"name": "ف هه", "ther": "فيتامينات", "pkg": 1000, "unit": "كيلو", "price": 5000, "supplier": "", "stock": 10, "maker": ""}, {"name": "كوليستات", "ther": "بروبيوتيك", "pkg": 1000, "unit": "كيلو", "price": 4000, "supplier": "", "stock": 2, "maker": ""}, {"name": "ماكس فيد", "ther": "محفز نمو", "pkg": 500, "unit": "كيلو", "price": 850, "supplier": "جولدن فارما", "stock": 9, "maker": ""}, {"name": "ستربتومايسين", "ther": "ادويه حقن", "pkg": 200, "unit": "جم", "price": 550, "supplier": "", "stock": -4, "maker": ""}, {"name": "محفز ضباب", "ther": "", "pkg": 1000, "unit": "لتر", "price": 250, "supplier": "", "stock": -3, "maker": ""}, {"name": "افيجون", "ther": "رافع مناعه", "pkg": 2, "unit": "امبولات", "price": 850, "supplier": "جينوفيت فارما", "stock": -50, "maker": ""}, {"name": "مايكروسلفا", "ther": "", "pkg": 1000, "unit": "كيلو", "price": 3500, "supplier": "", "stock": -12, "maker": ""}, {"name": "س دي فور", "ther": "", "pkg": 1000, "unit": "لتر", "price": 550, "supplier": "", "stock": 0, "maker": ""}, {"name": "اميوران", "ther": "رافع مناعه", "pkg": 500, "unit": "سم", "price": 600, "supplier": "", "stock": 0, "maker": ""}, {"name": "ميكوليت", "ther": "مضاد سموم", "pkg": 1000, "unit": "لتر", "price": 550, "supplier": "", "stock": 0, "maker": ""}, {"name": "بوست رينهانس", "ther": "رافع مناعه", "pkg": 1000, "unit": "سم", "price": 900, "supplier": "", "stock": 0, "maker": ""}, {"name": "هيبوفيت", "ther": "منشط كبد", "pkg": 1000, "unit": "سم", "price": 900, "supplier": "", "stock": 0, "maker": ""}, {"name": "اموكسي", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 3200, "supplier": "", "stock": 0, "maker": ""}, {"name": "اتولينك", "ther": "مضاد حيوي", "pkg": 1000, "unit": "كيلو", "price": 600, "supplier": "", "stock": 0, "maker": ""}, {"name": "مينتول", "ther": "", "pkg": 100, "unit": "سم", "price": 900, "supplier": "", "stock": 0, "maker": ""}]</script>
+<script>
+"use strict";
+var DEFAULT_FB={"apiKey":"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs","authDomain":"my-app-sync-11ad9.firebaseapp.com","databaseURL":"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app","projectId":"my-app-sync-11ad9","storageBucket":"my-app-sync-11ad9.firebasestorage.app","messagingSenderId":"177039534756","appId":"1:177039534756:web:367ecccc684c2cdfdd1431"};
+var LS_KEY="vetcompare.data.v1", LS_FB="vetcompare.fb.v1", LS_FBON="vetcompare.fbon.v1";
+var S={products:[],actives:[],protocols:[],treatments:[]};
+var $=function(s){return document.querySelector(s)};
+var $all=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+function uid(){return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function now(){return Date.now()}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(n,d){d=d==null?0:d;if(n==null||isNaN(n))return "0";return Number(n).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d})}
+function norm(s){return String(s||"").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim().toLowerCase()}
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show")},2600)}
+
+/* ============ تخزين ============ */
+function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify({products:S.products,actives:S.actives,protocols:S.protocols,treatments:S.treatments}))}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.products)S.products=d.products;if(d&&d.actives)S.actives=d.actives;if(d&&d.protocols)S.protocols=d.protocols;if(d&&d.treatments)S.treatments=d.treatments}catch(e){}}
+function save(push){persist();if(push&&fbRef&&!fbApplying){try{fbRef.set({products:S.products,actives:S.actives,protocols:S.protocols,treatments:S.treatments})}catch(e){}}}
+function alive(){return S.products.filter(function(p){return !p.deleted})}
+
+/* ============ البذور ============ */
+function seedProducts(force){
+  var raw;try{raw=JSON.parse($("#seeds").textContent)}catch(e){raw=[]}
+  var added=0;
+  raw.forEach(function(sd){
+    if(!force&&alive().some(function(p){return norm(p.name)===norm(sd.name)}))return;
+    if(force&&alive().some(function(p){return norm(p.name)===norm(sd.name)}))return;
+    /* استنتاج المصدر من المورد أو الاسم */
+    var origin="local";
+    S.products.push({
+      id:uid(),name:sd.name,active:"",ther:sd.ther||"",
+      conc:null,concUnit:"pct",
+      pkg:sd.pkg||0,unit:sd.unit||"",price:sd.price||0,
+      supplier:sd.supplier||"",origin:origin,stock:sd.stock||0,
+      updatedAt:now(),deleted:false
+    });
+    added++;
+  });
+  if(added){save(true);}
+  return added;
+}
+
+/* ============ المواد الخام وجرعاتها المعيارية (جم مادة خام/طن وزن حي) ============ */
+var ACTIVE_SEEDS=[
+  {name:"إنروفلوكساسين",dosePerTon:10,ther:"مضاد حيوي",note:"10 مجم/كجم — الكوليباسيلوزس والميكوبلازما (EMA)"},
+  {name:"سيبروفلوكساسين",dosePerTon:10,ther:"مضاد حيوي",note:"10 مجم/كجم"},
+  {name:"نورفلوكساسين",dosePerTon:10,ther:"مضاد حيوي",note:"10 مجم/كجم"},
+  {name:"ماربوفلوكساسين",dosePerTon:2,ther:"مضاد حيوي",note:"2 مجم/كجم"},
+  {name:"دانوفلوكساسين",dosePerTon:5,ther:"مضاد حيوي",note:"5 مجم/كجم"},
+  {name:"فلوميكوين",dosePerTon:12,ther:"مضاد حيوي",note:"12 مجم/كجم"},
+  {name:"أوفلوكساسين",dosePerTon:10,ther:"مضاد حيوي",note:"10 مجم/كجم"},
+  {name:"ليفوفلوكساسين",dosePerTon:10,ther:"مضاد حيوي",note:"10 مجم/كجم"},
+  {name:"دوكسيسيكلين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم — تنفسي (تتراسيكلين)"},
+  {name:"أوكسي تتراسيكلين",dosePerTon:40,ther:"مضاد حيوي",note:"40 مجم/كجم"},
+  {name:"كلورتتراسيكلين",dosePerTon:40,ther:"مضاد حيوي",note:"40 مجم/كجم"},
+  {name:"تتراسيكلين",dosePerTon:40,ther:"مضاد حيوي",note:"40 مجم/كجم"},
+  {name:"تايلوزين",dosePerTon:25,ther:"مضاد حيوي",note:"25 مجم/كجم — الميكوبلازما (ماكروليد)"},
+  {name:"تيلمايكوسين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"سبيرامايسين",dosePerTon:25,ther:"مضاد حيوي",note:"25 مجم/كجم"},
+  {name:"إريثرومايسين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"جوساميسين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"تيلفالوزين",dosePerTon:15,ther:"مضاد حيوي",note:"15 مجم/كجم"},
+  {name:"كيتاسامايسين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"أموكسيسيلين",dosePerTon:15,ther:"مضاد حيوي",note:"15-20 مجم/كجم (بنسلين)"},
+  {name:"أمبيسيلين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"أموكسيسيلين+كلافولانيك",dosePerTon:15,ther:"مضاد حيوي",note:"15 مجم/كجم"},
+  {name:"بنسلين جي",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"كلوكساسيلين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"نيومايسين",dosePerTon:22,ther:"مضاد حيوي",note:"22 مجم/كجم — معوي"},
+  {name:"جنتاميسين",dosePerTon:5,ther:"مضاد حيوي",note:"5 مجم/كجم"},
+  {name:"سبكتينومايسين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"أباراميسين",dosePerTon:40,ther:"مضاد حيوي",note:"40 مجم/كجم — كوليباسيلوزس"},
+  {name:"ستربتومايسين",dosePerTon:30,ther:"مضاد حيوي",note:"30 مجم/كجم"},
+  {name:"كاناميسين",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم"},
+  {name:"فلورفينيكول",dosePerTon:20,ther:"مضاد حيوي",note:"20 مجم/كجم — تنفسي"},
+  {name:"ثيامفينيكول",dosePerTon:25,ther:"مضاد حيوي",note:"25 مجم/كجم"},
+  {name:"لينكومايسين",dosePerTon:10,ther:"مضاد حيوي",note:"10 مجم/كجم"},
+  {name:"لينكو-سبكتين",dosePerTon:15,ther:"مضاد حيوي",note:"لينكو+سبكتينومايسين"},
+  {name:"تيامولين",dosePerTon:12.5,ther:"مضاد حيوي",note:"12.5 مجم/كجم — ميكوبلازما (بليوروميوتيلين)"},
+  {name:"فالنيمولين",dosePerTon:4,ther:"مضاد حيوي",note:"4 مجم/كجم"},
+  {name:"سلفاديميدين",dosePerTon:100,ther:"مضاد حيوي",note:"100 مجم/كجم (سلفا)"},
+  {name:"سلفاكينوكسالين",dosePerTon:30,ther:"مضاد حيوي",note:"كوكسيديا + بكتيري"},
+  {name:"سلفاكلوروبيرازين",dosePerTon:30,ther:"مضاد حيوي",note:"30 مجم/كجم"},
+  {name:"سلفاديازين+تريميثوبريم",dosePerTon:30,ther:"مضاد حيوي",note:"30 مجم/كجم (بوتنسيتد سلفا)"},
+  {name:"تريميثوبريم+سلفاميثوكسازول",dosePerTon:30,ther:"مضاد حيوي",note:"30 مجم/كجم"},
+  {name:"سلفاميثوكسازول",dosePerTon:50,ther:"مضاد حيوي",note:"50 مجم/كجم"},
+  {name:"سلفاديميثوكسين",dosePerTon:50,ther:"مضاد حيوي",note:"50 مجم/كجم"},
+  {name:"كولستين",dosePerTon:7.5,ther:"مضاد حيوي",note:"75000 وحدة/كجم ≈ 7.5 مجم/كجم — جرام سالب"},
+  {name:"باستراسين",dosePerTon:50,ther:"مضاد حيوي",note:"معوي/محفز"},
+  {name:"ميترونيدازول",dosePerTon:25,ther:"مضاد حيوي",note:"25 مجم/كجم — الهستومونيازس"},
+  {name:"رونيدازول",dosePerTon:10,ther:"مضاد حيوي",note:"10 مجم/كجم"},
+  {name:"أموبروليوم",dosePerTon:125,ther:"مضاد كوكسيديا",note:"125 مجم/كجم أو 240ppm ماء"},
+  {name:"تولترازوريل",dosePerTon:7,ther:"مضاد كوكسيديا",note:"7 مجم/كجم — يومين (Baycox)"},
+  {name:"ديكلازوريل",dosePerTon:1,ther:"مضاد كوكسيديا",note:"1 ppm علف"},
+  {name:"سلفاكلوزين",dosePerTon:30,ther:"مضاد كوكسيديا",note:"كوكسيديا حاد"},
+  {name:"نيكاربازين",dosePerTon:125,ther:"مضاد كوكسيديا",note:"125 ppm علف — وقاية"},
+  {name:"روبينيدين",dosePerTon:33,ther:"مضاد كوكسيديا",note:"33 ppm علف"},
+  {name:"ديكوكينات",dosePerTon:30,ther:"مضاد كوكسيديا",note:"30 ppm علف"},
+  {name:"كلوبيدول",dosePerTon:125,ther:"مضاد كوكسيديا",note:"125 ppm علف"},
+  {name:"مادورامايسين",dosePerTon:5,ther:"مضاد كوكسيديا",note:"5 ppm علف (أيونوفور)"},
+  {name:"سالينومايسين",dosePerTon:60,ther:"مضاد كوكسيديا",note:"60 ppm علف (أيونوفور)"},
+  {name:"مونينزين",dosePerTon:100,ther:"مضاد كوكسيديا",note:"100 ppm علف (أيونوفور)"},
+  {name:"لازالوسيد",dosePerTon:90,ther:"مضاد كوكسيديا",note:"90 ppm علف (أيونوفور)"},
+  {name:"ناراسين",dosePerTon:70,ther:"مضاد كوكسيديا",note:"70 ppm علف"},
+  {name:"هالوفوجينون",dosePerTon:3,ther:"مضاد كوكسيديا",note:"3 ppm علف"},
+  {name:"ليفاميزول",dosePerTon:20,ther:"مضاد طفيليات",note:"20-30 مجم/كجم — طارد ديدان"},
+  {name:"ألبيندازول",dosePerTon:10,ther:"مضاد طفيليات",note:"10 مجم/كجم"},
+  {name:"فينبيندازول",dosePerTon:10,ther:"مضاد طفيليات",note:"10 مجم/كجم — 3 أيام"},
+  {name:"فلوبيندازول",dosePerTon:30,ther:"مضاد طفيليات",note:"30 ppm علف"},
+  {name:"بايبرازين",dosePerTon:100,ther:"مضاد طفيليات",note:"100 مجم/كجم — الأسكارس"},
+  {name:"إيفرمكتين",dosePerTon:0.2,ther:"مضاد طفيليات",note:"0.2 مجم/كجم — خارجي/داخلي"},
+  {name:"بريزيكوانتيل",dosePerTon:10,ther:"مضاد طفيليات",note:"10 مجم/كجم — الديدان الشريطية"},
+  {name:"نيستاتين",dosePerTon:100,ther:"مضاد فطريات",note:"100 مجم/كجم — الكانديدا"},
+  {name:"كيتوكونازول",dosePerTon:10,ther:"مضاد فطريات",note:"10 مجم/كجم"},
+  {name:"كبريتات النحاس",dosePerTon:250,ther:"مضاد فطريات",note:"250-500 جم/طن ماء — الكانديدا/الأسبرجلس"},
+  {name:"فيتامين أ+د3+هـ",dosePerTon:100,ther:"فيتامينات",note:"تدعيم عام (حسب المنتج)"},
+  {name:"فيتامين هـ+سيلينيوم",dosePerTon:100,ther:"فيتامينات",note:"مضاد إجهاد ومناعة"},
+  {name:"فيتامين سي",dosePerTon:150,ther:"فيتامينات",note:"مضاد إجهاد حراري"},
+  {name:"فيتامين ك3",dosePerTon:50,ther:"فيتامينات",note:"مضاد نزيف"},
+  {name:"فيتامين ب المركب",dosePerTon:100,ther:"فيتامينات",note:"دعم أعصاب ونمو"},
+  {name:"بيوتين",dosePerTon:20,ther:"فيتامينات",note:"صحة الأرجل والريش"},
+  {name:"حمض الفوليك",dosePerTon:10,ther:"فيتامينات",note:"تكوين الدم"},
+  {name:"ميثيونين",dosePerTon:500,ther:"أحماض أمينية",note:"حمض أميني أساسي"},
+  {name:"لايسين",dosePerTon:500,ther:"أحماض أمينية",note:"حمض أميني أساسي"},
+  {name:"ثريونين",dosePerTon:300,ther:"أحماض أمينية",note:"حمض أميني"},
+  {name:"تريبتوفان",dosePerTon:150,ther:"أحماض أمينية",note:"حمض أميني"},
+  {name:"سيليمارين",dosePerTon:100,ther:"منشط كبد",note:"دعم كبد (خرشوف)"},
+  {name:"سوربيتول",dosePerTon:1000,ther:"منشط كبد",note:"غسيل ودعم كبد"},
+  {name:"كلوريد الأمونيوم",dosePerTon:200,ther:"غسيل كلى",note:"غسيل كلى"},
+  {name:"خل التفاح",dosePerTon:1000,ther:"منظم حموضة",note:"تحسين هضم"},
+  {name:"توكسين بايندر",dosePerTon:1000,ther:"مضاد سموم",note:"مازج سموم فطرية علف"},
+  {name:"منثول+أوكاليبتوس",dosePerTon:250,ther:"مضاد تنفسي",note:"طيار — فتح مجاري تنفسية"},
+  {name:"برومهيكسين",dosePerTon:5,ther:"مذيب بلغم",note:"5 مجم/كجم — مذيب مخاط"},
+  {name:"حمض الفورميك",dosePerTon:1000,ther:"منظم حموضة",note:"مُحمّض ماء ومضاد سالمونيلا"},
+  {name:"حمض البروبيونيك",dosePerTon:1000,ther:"منظم حموضة",note:"حافظ ومضاد فطر"},
+  {name:"حمض الستريك",dosePerTon:500,ther:"منظم حموضة",note:"مُحمّض"},
+  {name:"بروبيوتيك (لاكتوباسيلس)",dosePerTon:500,ther:"بروبايوتك",note:"توازن ميكروبي معوي"},
+  {name:"مانان أوليجوساكاريد",dosePerTon:1000,ther:"رافع مناعة",note:"بريبيوتك"},
+  {name:"فيتيز",dosePerTon:100,ther:"إنزيمات",note:"تحرير الفوسفور"},
+  {name:"زيلاناز",dosePerTon:100,ther:"إنزيمات",note:"هضم الألياف"},
+  {name:"مالتي إنزيم",dosePerTon:500,ther:"إنزيمات",note:"خليط هضمي"},
+  {name:"بيتا جلوكان",dosePerTon:500,ther:"رافع مناعة",note:"رافع مناعة"},
+  {name:"ليفاميزول (مناعي)",dosePerTon:2,ther:"رافع مناعة",note:"جرعة منخفضة كمنشط مناعة"},
+  {name:"إل-كارنيتين",dosePerTon:100,ther:"منشط نمو",note:"أيض دهون وطاقة"}
+];
+var VAX_KB={"types": {"live": {"ar": "حي مُضعّف", "icon": "🧬", "desc": "فيروس حي مُضعّف — مناعة سريعة، ماء/رذاذ/تقطير عين. حساس للحرارة والمطهرات.", "color": "#7bc86c"}, "killed": {"ar": "ميت (معطّل)", "icon": "💉", "desc": "فيروس معطّل بزيت — مناعة قوية وطويلة، حقن تحت الجلد/عضل. آمن للأمهات والبياض.", "color": "#e8593a"}, "vector": {"ar": "محمّل (Vector)", "icon": "🔬", "desc": "جين المرض محمّل على فيروس ناقل (HVT غالبًا) — حماية مبكرة من عمر يوم/في البيضة، مقاوم لأجسام مناعة الأم.", "color": "#4a9eff"}, "complex": {"ar": "معقد مناعي (Immune Complex)", "icon": "🛡️", "desc": "فيروس حي + جسم مضاد متزن — يتحرر تدريجيًا مع تراجع مناعة الأم، توقيت ذكي.", "color": "#b57edc"}}, "vaccines": [{"disease": "نيوكاسل (ND)", "strain": "Hitchner B1", "type": "live", "age": "1-7 يوم", "route": "تقطير عين/رذاذ", "note": "الجرعة الأولى — لين"}, {"disease": "نيوكاسل (ND)", "strain": "Clone 30", "type": "live", "age": "7-10 يوم", "route": "ماء/رذاذ", "note": "وسيط — حي مستقر حراريًا"}, {"disease": "نيوكاسل (ND)", "strain": "Lasota", "type": "live", "age": "14-21 يوم", "route": "ماء شرب/رذاذ", "note": "جرعة داعمة"}, {"disease": "نيوكاسل (ND)", "strain": "VG/GA", "type": "live", "age": "يوم 1", "route": "ماء/رذاذ", "note": "حي معوي-تنفسي، لطيف على الأمعاء"}, {"disease": "نيوكاسل (ND)", "strain": "معطّل زيتي (Killed Oil)", "type": "killed", "age": "7-18 يوم", "route": "حقن تحت الجلد/عضل", "note": "يُعطى مع الحي لمناعة قوية وطويلة"}, {"disease": "نيوكاسل (ND)", "strain": "HVT-ND Vector", "type": "vector", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "حماية مبكرة ممتدة، مقاوم لأجسام الأم"}, {"disease": "جمبورو (IBD/Gumboro)", "strain": "Intermediate (D78)", "type": "live", "age": "10-14 يوم", "route": "ماء شرب", "note": "حسب مستوى مناعة الأم"}, {"disease": "جمبورو (IBD/Gumboro)", "strain": "Intermediate Plus (228E)", "type": "live", "age": "14-18 يوم", "route": "ماء شرب", "note": "يخترق أجسام مناعية أعلى"}, {"disease": "جمبورو (IBD/Gumboro)", "strain": "حار (Winterfield/Hot)", "type": "live", "age": "18-21 يوم", "route": "ماء شرب", "note": "للتحدي الميداني العالي جدًا فقط"}, {"disease": "جمبورو (IBD/Gumboro)", "strain": "معطّل زيتي (أمهات)", "type": "killed", "age": "أمهات", "route": "حقن عضل", "note": "لرفع مناعة الأمهات ونقلها للنسل"}, {"disease": "جمبورو (IBD/Gumboro)", "strain": "HVT-IBD Vector (Vaxxitek نمط)", "type": "vector", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "لا يتأثر بمناعة الأم — حماية من يوم 1"}, {"disease": "جمبورو (IBD/Gumboro)", "strain": "Immune Complex (Bursaplex نمط)", "type": "complex", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "يتحرر تلقائيًا مع تراجع مناعة الأم — توقيت ذكي"}, {"disease": "جمبورو (IBD/Gumboro)", "strain": "Immune Complex بلس", "type": "complex", "age": "عمر يوم / في البيضة", "route": "حقن in-ovo", "note": "نسخة معززة من المركب المناعي"}, {"disease": "الالتهاب الشعبي المعدي (IB)", "strain": "H120 (ماساتشوستس)", "type": "live", "age": "1-7 يوم", "route": "تقطير عين/رذاذ", "note": "الجرعة الأولى الكلاسيكية"}, {"disease": "الالتهاب الشعبي المعدي (IB)", "strain": "4/91 (793B)", "type": "live", "age": "10-14 يوم", "route": "ماء/رذاذ", "note": "لتغطية العترات المتغيرة"}, {"disease": "الالتهاب الشعبي المعدي (IB)", "strain": "H52", "type": "live", "age": "14-21 يوم", "route": "ماء/رذاذ", "note": "جرعة داعمة أقوى من H120"}, {"disease": "الالتهاب الشعبي المعدي (IB)", "strain": "معطّل زيتي (متعدد السلالات)", "type": "killed", "age": "أمهات/بياض", "route": "حقن عضل", "note": "للأمهات والبياض قبل الإنتاج"}, {"disease": "إنفلونزا الطيور H9N2", "strain": "معطّل زيتي H9", "type": "killed", "age": "7-14 يوم", "route": "حقن تحت الجلد/عضل", "note": "أساسي وشائع في مصر"}, {"disease": "إنفلونزا الطيور H5", "strain": "معطّل زيتي H5", "type": "killed", "age": "7-10 يوم", "route": "حقن تحت الجلد/عضل", "note": "للمناطق عالية الخطورة/الأمهات"}, {"disease": "إنفلونزا الطيور H5/H9", "strain": "معطّل ثنائي التكافؤ", "type": "killed", "age": "7-10 يوم", "route": "حقن تحت الجلد/عضل", "note": "حماية مزدوجة بحقنة واحدة"}, {"disease": "إنفلونزا الطيور H5", "strain": "HVT-H5 Vector", "type": "vector", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "حماية مبكرة من عمر يوم"}, {"disease": "ماريك (Marek's)", "strain": "HVT (سيروتايب 3)", "type": "vector", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "أساسي — خلال 24 ساعة من الفقس"}, {"disease": "ماريك (Marek's)", "strain": "HVT+SB1 (ثنائي)", "type": "vector", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "حماية أقوى للسلالات الشرسة"}, {"disease": "ماريك (Marek's)", "strain": "Rispens (CVI988)", "type": "live", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "أقوى حماية — للمناطق شديدة الخطورة"}, {"disease": "جدري الطيور (Fowl Pox)", "strain": "لقاح جدري حي", "type": "live", "age": "7-14 يوم", "route": "وخز الجناح (wing web)", "note": "يُتحقق من أخذه بظهور نقطة بعد 7 أيام"}, {"disease": "التهاب الحنجرة والقصبة (ILT)", "strain": "لقاح حي (تقطير عين)", "type": "live", "age": "21+ يوم", "route": "تقطير عين/رذاذ", "note": "للمناطق الموبوءة فقط — حذر من رجوع الفوعة"}, {"disease": "التهاب الحنجرة والقصبة (ILT)", "strain": "HVT-ILT Vector", "type": "vector", "age": "عمر يوم", "route": "حقن s/c", "note": "أأمن من اللقاح الحي التقليدي"}, {"disease": "الكوريزا المعدي (Coryza)", "strain": "معطّل زيتي (A+B+C ثلاثي)", "type": "killed", "age": "أمهات/بياض", "route": "حقن عضل", "note": "جرعتين بفاصل 4 أسابيع"}, {"disease": "كوليرا الطيور (Fowl Cholera)", "strain": "معطّل زيتي", "type": "killed", "age": "8-10 أسبوع", "route": "حقن عضل", "note": "للمناطق الموبوءة"}, {"disease": "السالمونيلا", "strain": "معطّل زيتي", "type": "killed", "age": "بياض/أمهات", "route": "حقن عضل", "note": "لرفع مناعة الأمهات ونقلها للنسل"}, {"disease": "متلازمة هبوط البيض (EDS)", "strain": "معطّل زيتي", "type": "killed", "age": "15-16 أسبوع", "route": "حقن عضل", "note": "قبل بداية الإنتاج للبياض"}, {"disease": "التهاب الدماغ والنخاع الشوكي (AE)", "strain": "لقاح حي", "type": "live", "age": "10-15 أسبوع", "route": "ماء شرب", "note": "للبياض قبل بداية الإنتاج"}, {"disease": "الكوكسيديا (كلقاح بديل)", "strain": "أوسيست مُضعّفة حية", "type": "live", "age": "1-5 يوم", "route": "رذاذ/ماء/علف/سبراي بالفقاسة", "note": "بديل استراتيجي لبرنامج الأدوية"}, {"disease": "مركب (ND+IBD+Marek)", "strain": "HVT-ND-IBD Vector ثلاثي", "type": "vector", "age": "عمر يوم / في البيضة", "route": "حقن s/c أو in-ovo", "note": "حماية 3 أمراض بحقنة واحدة (أحدث الأجيال)"}]};
+var MED_KB={"withdrawal": {"إنروفلوكساسين": 7, "سيبروفلوكساسين": 7, "نورفلوكساسين": 8, "ماربوفلوكساسين": 6, "دانوفلوكساسين": 6, "فلوميكوين": 10, "أوفلوكساسين": 8, "ليفوفلوكساسين": 8, "دوكسيسيكلين": 7, "أوكسي تتراسيكلين": 7, "كلورتتراسيكلين": 7, "تتراسيكلين": 7, "تايلوزين": 5, "تيلمايكوسين": 12, "سبيرامايسين": 8, "إريثرومايسين": 3, "جوساميسين": 5, "تيلفالوزين": 2, "كيتاسامايسين": 5, "أموكسيسيلين": 3, "أمبيسيلين": 3, "أموكسيسيلين+كلافولانيك": 3, "بنسلين جي": 5, "كلوكساسيلين": 4, "نيومايسين": 10, "جنتاميسين": 15, "سبكتينومايسين": 5, "أباراميسين": 14, "ستربتومايسين": 14, "كاناميسين": 10, "فلورفينيكول": 6, "ثيامفينيكول": 6, "لينكومايسين": 5, "لينكو-سبكتين": 5, "تيامولين": 4, "فالنيمولين": 2, "سلفاديميدين": 10, "سلفاكينوكسالين": 10, "سلفاكلوروبيرازين": 10, "سلفاديازين+تريميثوبريم": 8, "تريميثوبريم+سلفاميثوكسازول": 8, "سلفاميثوكسازول": 10, "سلفاديميثوكسين": 10, "كولستين": 1, "باستراسين": 0, "ميترونيدازول": 28, "رونيدازول": 28, "أموبروليوم": 0, "تولترازوريل": 16, "ديكلازوريل": 0, "سلفاكلوزين": 10, "نيكاربازين": 9, "روبينيدين": 5, "ديكوكينات": 0, "كلوبيدول": 5, "مادورامايسين": 5, "سالينومايسين": 0, "مونينزين": 0, "لازالوسيد": 5, "ناراسين": 0, "هالوفوجينون": 7, "ليفاميزول": 7, "ألبيندازول": 14, "فينبيندازول": 14, "فلوبيندازول": 6, "بايبرازين": 7, "إيفرمكتين": 28, "بريزيكوانتيل": 14, "نيستاتين": 0, "كيتوكونازول": 7, "كبريتات النحاس": 0}, "conflicts": {"تايلوزين": [["مونينزين", "سالينومايسين", "ناراسين", "مادورامايسين", "لازالوسيد", "تسمم — لا يُخلط ماكروليد مع الأيونوفورات"]], "تيامولين": [["مونينزين", "سالينومايسين", "ناراسين", "مادورامايسين", "لازالوسيد", "تسمم قاتل — تيامولين يمنع أيض الأيونوفور"]], "إريثرومايسين": [["مونينزين", "سالينومايسين", "ناراسين", "تسمم — ماكروليد مع أيونوفور"]], "جوساميسين": [["مونينزين", "سالينومايسين", "تسمم — ماكروليد مع أيونوفور"]], "سلفاديميدين": [["أموبروليوم", "قد يقلل فاعلية الأموبروليوم"]], "كولستين": [["جنتاميسين", "نيومايسين", "ستربتومايسين", "تجمع سُمية كلوية — أمينوجليكوزيد مع كوليستين"]], "إنروفلوكساسين": [["تتراسيكلين", "دوكسيسيكلين", "أوكسي تتراسيكلين", "تضاد نظري (مبيد مع موقف) — الأفضل تتابع مش خلط"]], "سيبروفلوكساسين": [["تتراسيكلين", "دوكسيسيكلين", "تضاد نظري — الأفضل عدم الخلط"]]}, "synergies": {"تايلوزين": [["دوكسيسيكلين", "كولستين", "توليفة تنفسية شهيرة وآمنة (ماكروليد+تتراسيكلين+ببتيد)"]], "دوكسيسيكلين": [["تايلوزين", "كولستين", "توليفة تنفسية فعّالة"]], "كولستين": [["دوكسيسيكلين", "أموكسيسيلين", "تايلوزين", "توليفة معوية/تنفسية شائعة"]], "أموكسيسيلين": [["كولستين", "توليفة معوية جيدة"]], "تريميثوبريم+سلفاميثوكسازول": [["توليفة متكاملة أصلاً (بوتنسيتد سلفا)"]]}, "diseases": [{"name": "الكوليباسيلوزس (E.coli)", "icon": "🦠", "actives": ["إنروفلوكساسين", "فلورفينيكول", "أموكسيسيلين", "دوكسيسيكلين", "سيبروفلوكساسين", "أباراميسين", "نيومايسين"]}, {"name": "CRD — الرشح المزمن (ميكوبلازما)", "icon": "🌬️", "actives": ["تايلوزين", "تيلمايكوسين", "تيامولين", "دوكسيسيكلين", "سبيرامايسين", "إنروفلوكساسين"]}, {"name": "CCRD — رشح مزمن معقد", "icon": "🫁", "actives": ["فلورفينيكول", "تايلوزين", "دوكسيسيكلين", "إنروفلوكساسين", "تيامولين"]}, {"name": "الكوريزا المعدي (نزلة برد)", "icon": "🤧", "actives": ["سلفاديميدين", "إريثرومايسين", "تايلوزين", "أموكسيسيلين", "إنروفلوكساسين"]}, {"name": "الكوكسيديا", "icon": "🩸", "actives": ["تولترازوريل", "أموبروليوم", "ديكلازوريل", "سلفاكينوكسالين", "سلفاكلوزين", "ديكوكينات"]}, {"name": "الكلوستريديا (التهاب معوي نخري)", "icon": "💥", "actives": ["أموكسيسيلين", "لينكومايسين", "باستراسين", "تايلوزين", "أوكسي تتراسيكلين"]}, {"name": "السالمونيلا", "icon": "⚠️", "actives": ["إنروفلوكساسين", "فلورفينيكول", "أموكسيسيلين", "نيومايسين", "سيبروفلوكساسين"]}, {"name": "الكوليرا (باستوريلا)", "icon": "💀", "actives": ["سلفاديميدين", "إنروفلوكساسين", "أموكسيسيلين", "دوكسيسيكلين", "فلورفينيكول"]}, {"name": "العدوى المعوية العامة", "icon": "💩", "actives": ["نيومايسين", "كولستين", "أموكسيسيلين", "أباراميسين", "سبكتينومايسين"]}, {"name": "الهستومونيازس (رأس أسود)", "icon": "⚫", "actives": ["ميترونيدازول", "رونيدازول"]}, {"name": "الديدان (أسكارس/شريطية)", "icon": "🪱", "actives": ["ليفاميزول", "ألبيندازول", "فينبيندازول", "بايبرازين", "بريزيكوانتيل"]}, {"name": "الكانديدا (فطر الحوصلة)", "icon": "🍄", "actives": ["نيستاتين", "كبريتات النحاس", "كيتوكونازول"]}, {"name": "الإجهاد الحراري", "icon": "🌡️", "actives": ["فيتامين سي", "فيتامين هـ+سيلينيوم", "فيتامين أ+د3+هـ"]}, {"name": "دعم الكبد والكلى", "icon": "🫀", "actives": ["سيليمارين", "سوربيتول", "كلوريد الأمونيوم"]}, {"name": "رفع المناعة والنمو", "icon": "💪", "actives": ["بيتا جلوكان", "فيتامين هـ+سيلينيوم", "بروبيوتيك (لاكتوباسيلس)", "مانان أوليجوساكاريد"]}]};
+var CONC_TEMPLATES={"إنروفلوكساسين": [10, 20], "سيبروفلوكساسين": [10, 20], "نورفلوكساسين": [10, 20], "دوكسيسيكلين": [10, 20, 50], "أوكسي تتراسيكلين": [20, 50], "كلورتتراسيكلين": [15, 20], "تايلوزين": [10, 20, 100], "تيلمايكوسين": [25], "سبيرامايسين": [10, 50], "إريثرومايسين": [20], "أموكسيسيلين": [10, 20, 50, 70], "أموكسيسيلين+كلافولانيك": [50], "أمبيسيلين": [20], "نيومايسين": [20, 50], "جنتاميسين": [5, 10], "سبكتينومايسين": [10], "فلورفينيكول": [10, 20, 50], "ثيامفينيكول": [10], "لينكومايسين": [10, 40], "لينكو-سبكتين": [10], "تيامولين": [10, 45, 80], "كولستين": [12, 120], "سلفاديميدين": [33], "سلفاكينوكسالين": [20], "تريميثوبريم+سلفاميثوكسازول": [48], "أموبروليوم": [20, 25], "تولترازوريل": [2.5, 5], "ديكلازوريل": [0.5, 2.5], "ليفاميزول": [10], "ألبيندازول": [10, 25], "فيتامين سي": [100], "فيتامين هـ+سيلينيوم": [100]};
+function seedActives(){
+  var added=0,updated=0;
+  ACTIVE_SEEDS.forEach(function(sd){
+    var wd=MED_KB.withdrawal[sd.name];
+    var exist=aliveActives().find(function(a){return norm(a.name)===norm(sd.name)});
+    if(exist){ if(exist.withdrawal==null&&wd!=null){exist.withdrawal=wd;updated++;} return; }
+    S.actives.push({id:uid(),name:sd.name,dosePerTon:sd.dosePerTon,ther:sd.ther||"",note:sd.note||"",withdrawal:(wd!=null?wd:null),updatedAt:now(),deleted:false});
+    added++;
+  });
+  if(added||updated)save(true);
+  return added;
+}
+function aliveActives(){return (S.actives||[]).filter(function(a){return !a.deleted})}
+function activeById(id){return S.actives.find(function(a){return a.id===id})}
+function activeByName(nm){return aliveActives().find(function(a){return norm(a.name)===norm(nm)})}
+/* ============ محرك التكلفة ============ */
+/* يرجع: تكلفة علاج طن وزن حي كامل دورة العلاج، وتفاصيلها */
+function concToFraction(p){
+  /* نرجّع: كام جم مادة فعالة في كل جم/مل من المنتج */
+  var c=Number(p.conc)||0;
+  if(!c)return null;
+  if(p.concUnit==="pct")return c/100;      /* 20% => 0.2 جم/جم */
+  if(p.concUnit==="mgg")return c/1000;     /* مجم/جم */
+  if(p.concUnit==="mgml")return c/1000;    /* مجم/مل */
+  return c/100;
+}
+function costPerTon(p,opt){
+  /* opt: {dosePerTon (جم مادة خام/طن/يوم), days} — الطريقة الأساسية الجديدة */
+  var price=Number(p.price)||0, pkg=Number(p.pkg)||0;
+  if(!price||!pkg)return null;
+  var pricePerUnit=price/pkg;   /* ج لكل جم/مل من المنتج */
+  var days=Number(opt.days)||1;
+  var doseRaw=Number(opt.dosePerTon)||0;   /* جم مادة خام مطلوبة للطن في اليوم */
+  if(!doseRaw)return null;
+  var frac=concToFraction(p);
+  if(!frac)return {need:"conc"};
+  /* منتج مطلوب/طن/يوم = جرعة المادة الخام ÷ التركيز */
+  var productPerTonPerDay=doseRaw/frac;
+  var totalProduct=productPerTonPerDay*days;
+  var cost=totalProduct*pricePerUnit;
+  /* كام طن يكفيهم عبوة واحدة (مؤشر جميل) */
+  var tonsPerPkg=(productPerTonPerDay*days)>0?(pkg/(productPerTonPerDay*days)):0;
+  return {cost:cost,productUsed:totalProduct,pricePerUnit:pricePerUnit,tonsPerPkg:tonsPerPkg,note:"جرعة "+doseRaw+"جم خام/طن ÷ تركيز "+Math.round(frac*100)+"%"};
+}
+
+/* ============ فايربيز ============ */
+var fbApp=null,fbRef=null,fbApplying=false;
+function loadScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function initFB(cfg){
+  return loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js")
+    .then(function(){return loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js")})
+    .then(function(){
+      if(!fbApp)fbApp=firebase.initializeApp(cfg);
+      fbRef=firebase.database().ref("vetcompare");
+      /* الربط الحي مع مخازن الأدوية: يسمع erp_data ويحدّث الأسعار لحظيًا */
+      try{
+        var whRef=firebase.database().ref("erp_data/products");
+        whRef.on("value",function(snap){
+          var whProds=snap.val();
+          if(!whProds)return;
+          if(!Array.isArray(whProds))whProds=Object.keys(whProds).map(function(k){return whProds[k]});
+          syncFromWarehouse(whProds);
+        });
+      }catch(e){}
+      fbRef.on("value",function(snap){
+        var cloud=snap.val();
+        if(!cloud){if(alive().length)fbRef.set({products:S.products,actives:S.actives,protocols:S.protocols,treatments:S.treatments});return}
+        fbApplying=true;
+        S.products=mergeColl(S.products,cloud.products||[]);
+        S.actives=mergeColl(S.actives||[],cloud.actives||[]);
+        S.protocols=mergeColl(S.protocols||[],cloud.protocols||[]);
+        S.treatments=mergeColl(S.treatments||[],cloud.treatments||[]);
+        persist();renderAll();fbApplying=false;
+      });
+      $("#syncToggle").textContent="✓ المزامنة مفعّلة";
+    });
+}
+function mergeColl(local,cloud){
+  var map={};
+  local.forEach(function(x){map[x.id]=x});
+  cloud.forEach(function(x){
+    if(!map[x.id]||(x.updatedAt||0)>=(map[x.id].updatedAt||0))map[x.id]=x;
+  });
+  return Object.keys(map).map(function(k){return map[k]});
+}
+function restoreFB(){
+  var raw=localStorage.getItem(LS_FB),on=localStorage.getItem(LS_FBON),cfg=null;
+  if(raw){try{cfg=JSON.parse(raw)}catch(e){}}
+  if(!cfg&&DEFAULT_FB.databaseURL)cfg=DEFAULT_FB;
+  if(cfg&&(on==="1"||(!raw&&on!=="0"))){
+    try{initFB(cfg).then(function(){localStorage.setItem(LS_FB,JSON.stringify(cfg));localStorage.setItem(LS_FBON,"1")}).catch(function(){})}catch(e){}
+  }
+}
+
+/* ============ العرض ============ */
+function allThers(){
+  var set={},out=[];
+  alive().forEach(function(p){var t=(p.ther||"").trim();if(t&&!set[t]){set[t]=1;out.push(t)}});
+  return out.sort();
+}
+function fillTherSelects(){
+  var thers=allThers();
+  $("#therDL").innerHTML=thers.map(function(t){return '<option value="'+esc(t)+'">'}).join("");
+  /* قايمة المواد الخام في المقارنة */
+  var acts=aliveActives().sort(function(a,b){return norm(a.name)<norm(b.name)?-1:1});
+  var actOpts='<option value="">— اختر المادة الخام —</option>'+acts.map(function(a){
+    var n=alive().filter(function(p){return p.activeId===a.id}).length;
+    return '<option value="'+a.id+'">'+esc(a.name)+' ('+n+' منتج · '+fmt(a.dosePerTon,1)+'جم/طن)</option>';
+  }).join("");
+  if($("#cmpActive"))$("#cmpActive").innerHTML=actOpts;
+  /* قايمة المادة الخام في شيت المنتج */
+  if($("#pActive"))$("#pActive").innerHTML='<option value="">— اختر أو سيبها فاضية —</option>'+acts.map(function(a){return '<option value="'+a.id+'">'+esc(a.name)+'</option>'}).join("");
+  /* قايمة المنتجات في الاحتياج */
+  var prodOpts=alive().sort(function(a,b){return norm(a.name)<norm(b.name)?-1:1}).map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+(p.ther?" — "+esc(p.ther):"")+'</option>'}).join("");
+  $("#ndProd").innerHTML='<option value="">— اختر المنتج —</option>'+prodOpts;
+}
+/* ============ PDF وتتبع العلاج (المرحلة 3+4) ============ */
+function printNeed(){
+  var n=window._lastNeed;if(!n){toast("احسب الاحتياج الأول");return}
+  var p=n.prod;var act=p.activeId?activeById(p.activeId):null;
+  var win=window.open("","_blank");
+  var html='<html dir="rtl"><head><meta charset="utf-8"><title>بروتوكول علاج</title>'+
+    '<style>body{font-family:Arial,Tahoma;padding:24px;color:#111}h1{color:#2d7de0}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border:1px solid #ccc;padding:8px;text-align:right}th{background:#eef}.foot{margin-top:20px;font-size:12px;color:#666}</style></head><body>'+
+    '<h1>💊 بروتوكول علاج — '+esc(p.name)+'</h1>'+
+    '<p>التاريخ: '+new Date().toLocaleDateString("ar-EG")+'</p>'+
+    '<table>'+
+    '<tr><th>البند</th><th>القيمة</th></tr>'+
+    '<tr><td>المنتج</td><td>'+esc(p.name)+(Number(p.conc)?" ("+fmt(p.conc,0)+"%)":"")+'</td></tr>'+
+    (act?'<tr><td>المادة الفعالة</td><td>'+esc(act.name)+'</td></tr>':'')+
+    '<tr><td>عدد الطيور</td><td>'+fmt(n.count)+'</td></tr>'+
+    '<tr><td>متوسط الوزن</td><td>'+fmt(n.weight,2)+' كجم</td></tr>'+
+    '<tr><td>الجرعة</td><td>'+fmt(n.dose,1)+' جم/طن</td></tr>'+
+    '<tr><td>مدة العلاج</td><td>'+fmt(n.days)+' أيام</td></tr>'+
+    '<tr><td>الكمية المطلوبة</td><td>'+fmt(n.productGrams,1)+' '+esc(p.unit||"جم")+'</td></tr>'+
+    '<tr><td>عدد العبوات</td><td>'+n.pkgs+' عبوة</td></tr>'+
+    '<tr><td>التكلفة</td><td>'+fmt(n.cost,0)+' ج</td></tr>'+
+    (act&&act.withdrawal!=null?'<tr><td style="color:#c00">⏱️ فترة سحب اللحم</td><td style="color:#c00;font-weight:bold">'+act.withdrawal+' يوم قبل الذبح</td></tr>':'')+
+    '</table>'+
+    '<p class="foot">اتطبع من أداة مقارنة الأدوية البيطرية — للاسترشاد، والقرار النهائي للطبيب المشرف.</p>'+
+    '</body></html>';
+  win.document.write(html);win.document.close();setTimeout(function(){win.print()},300);
+}
+function saveTreatment(){
+  var n=window._lastNeed;if(!n)return;
+  var p=n.prod;
+  S.treatments.push({id:uid(),date:new Date().toISOString().slice(0,10),
+    prodName:p.name,activeName:p.activeId?(activeById(p.activeId)||{}).name:"",
+    count:n.count,weight:n.weight,dose:n.dose,days:n.days,cost:n.cost,pkgs:n.pkgs,
+    result:"",note:"",updatedAt:now(),deleted:false});
+  save(true);renderTreatments();toast("اتسجل العلاج ✓ — سجّل نتيجته بعد ما تخلص");
+}
+function aliveTreatments(){return (S.treatments||[]).filter(function(t){return !t.deleted})}
+function renderTreatments(){
+  var box=$("#txList");if(!box)return;
+  var list=aliveTreatments().sort(function(a,b){return b.updatedAt-a.updatedAt}).slice(0,30);
+  if(!list.length){box.innerHTML='<div class="mini">لسه مفيش علاجات مسجّلة. احسب احتياج واضغط «سجّل العلاج».</div>';return}
+  box.innerHTML=list.map(function(t){
+    var rc=t.result==="نجح"?"var(--green2)":(t.result==="فشل"?"var(--danger)":"var(--muted2)");
+    return '<div class="prod"><div class="prod-h"><b>'+esc(t.prodName)+'</b><span class="badge" style="background:rgba(74,158,255,.1);color:var(--acc)">'+esc(t.date)+'</span></div>'+
+      '<div class="prod-meta">'+esc(t.activeName||"")+' · '+fmt(t.count)+' طائر · '+fmt(t.days)+' أيام · '+fmt(t.cost,0)+' ج</div>'+
+      '<div style="display:flex;gap:6px;margin-top:8px;align-items:center">'+
+        '<button class="chip'+(t.result==="نجح"?" on":"")+'" data-txres="'+t.id+'|نجح" style="color:var(--green2)">✅ نجح</button>'+
+        '<button class="chip'+(t.result==="فشل"?" on":"")+'" data-txres="'+t.id+'|فشل" style="color:var(--danger)">❌ فشل</button>'+
+        '<span style="flex:1"></span>'+
+        '<button class="del" data-txdel="'+t.id+'">🗑️</button>'+
+      '</div></div>';
+  }).join("");
+}
+/* ============ التحصينات (حي/ميت/محمل/معقد مناعي) ============ */
+var vaxTypeFilter="";
+function renderVax(){
+  var types=VAX_KB.types;
+  /* شيبس الأنواع */
+  var chips='<button class="chip'+(vaxTypeFilter===""?" on":"")+'" data-vxt="">الكل</button>';
+  Object.keys(types).forEach(function(k){
+    chips+='<button class="chip'+(vaxTypeFilter===k?" on":"")+'" data-vxt="'+k+'" style="'+(vaxTypeFilter===k?("border-color:"+types[k].color+";color:"+types[k].color):"")+'">'+types[k].icon+' '+esc(types[k].ar.split(" ")[0])+'</button>';
+  });
+  $("#vaxTypes").innerHTML=chips;
+  var q=norm($("#vaxSearch").value||"");
+  var list=VAX_KB.vaccines.slice();
+  if(vaxTypeFilter)list=list.filter(function(v){return v.type===vaxTypeFilter});
+  if(q)list=list.filter(function(v){return norm(v.disease).indexOf(q)>-1||norm(v.strain).indexOf(q)>-1});
+  $("#vaxCount").textContent=list.length+" تحصين"+(vaxTypeFilter?(" · "+types[vaxTypeFilter].ar):"");
+  /* لو نوع محدد: اعرض شرحه */
+  var head="";
+  if(vaxTypeFilter){var t=types[vaxTypeFilter];head='<div class="card" style="border-color:'+t.color+'44"><h3 style="color:'+t.color+'">'+t.icon+' '+esc(t.ar)+'</h3><div class="mini" style="margin-top:6px">'+esc(t.desc)+'</div></div>';}
+  var el=$("#vaxList");
+  if(!list.length){el.innerHTML=head+'<div class="empty"><div class="em">💉</div><h3>مفيش نتائج</h3></div>';return}
+  /* تجميع بالمرض */
+  var byDis={},order=[];
+  list.forEach(function(v){if(!byDis[v.disease]){byDis[v.disease]=[];order.push(v.disease)}byDis[v.disease].push(v)});
+  var html=head;
+  order.forEach(function(dis){
+    html+='<div class="rest-cat" style="font-size:14px;font-weight:900;color:var(--acc);margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)">'+esc(dis)+'</div>';
+    byDis[dis].forEach(function(v){
+      var t=types[v.type];
+      /* منتج متاح في المخزن يطابق العترة؟ */
+      var match=alive().filter(function(p){return norm(p.name).indexOf(norm(v.strain.split(" ")[0]))>-1||norm(v.strain).indexOf(norm(p.name))>-1});
+      html+='<div class="prod" style="border-right:3px solid '+t.color+'">'+
+        '<div class="prod-h"><b>'+esc(v.strain)+'</b>'+
+        '<span class="badge" style="background:'+t.color+'22;color:'+t.color+'">'+t.icon+' '+esc(t.ar.split(" ")[0])+'</span></div>'+
+        '<div class="prod-meta">📅 '+esc(v.age)+' · 💧 '+esc(v.route)+'</div>'+
+        '<div class="prod-meta">💡 '+esc(v.note)+(match.length?(' · <span style="color:var(--green2)">✓ متاح: '+esc(match[0].name)+'</span>'):'')+'</div>'+
+      '</div>';
+    });
+  });
+  el.innerHTML=html;
+}
+/* ============ الربط الحي مع مخازن الأدوية ============ */
+var lastWhSync=0, whLinkEnabled=true;
+function syncFromWarehouse(whProds){
+  if(!whLinkEnabled)return;
+  var changed=0,added=0;
+  whProds.forEach(function(w){
+    if(!w||!w.name)return;
+    var mine=alive().find(function(p){return norm(p.name)===norm(w.name)});
+    if(mine){
+      /* حدّث السعر والمخزون فقط — سيب المادة الفعالة والتركيز اللي انت مدخلهم */
+      var np=Number(w.price)||0, ns=Number(w.stock)||0;
+      var chg=false;
+      if(np&&np!==mine.price){mine.price=np;chg=true;}
+      if(ns!==mine.stock){mine.stock=ns;chg=true;}
+      if(w.pkg&&Number(w.pkg)!==mine.pkg){mine.pkg=Number(w.pkg);chg=true;}
+      if(w.supplier&&w.supplier!==mine.supplier){mine.supplier=w.supplier;chg=true;}
+      if(chg){mine.updatedAt=now();mine.fromWarehouse=true;changed++;}
+    }else{
+      /* منتج جديد من المخازن — يتضاف بدون مادة فعالة (تكمّلها انت) */
+      S.products.push({id:uid(),name:w.name,activeId:"",active:"",ther:w.ther||"",
+        conc:null,concUnit:"pct",pkg:Number(w.pkg)||0,unit:w.unit||"",price:Number(w.price)||0,
+        supplier:w.supplier||"",origin:"local",stock:Number(w.stock)||0,fromWarehouse:true,
+        updatedAt:now(),deleted:false});
+      added++;
+    }
+  });
+  if(changed||added){
+    persist();renderAll();
+    lastWhSync=now();
+    var badge=$("#whStatus");
+    if(badge)badge.textContent="🔗 آخر تحديث من المخازن: "+(changed+" سعر"+(added?(" · "+added+" صنف جديد"):""));
+    if(changed||added)toast("🔗 اتحدّث من المخازن: "+changed+" سعر"+(added?(" · "+added+" جديد"):""));
+  }
+}
+/* ============ التحصينات ============ */
+/* ============ الأمراض ============ */
+function fillDiseases(){
+  var sel=$("#dxSelect");if(!sel)return;
+  sel.innerHTML='<option value="">— اختر المرض —</option>'+MED_KB.diseases.map(function(d,i){return '<option value="'+i+'">'+d.icon+' '+esc(d.name)+'</option>'}).join("");
+}
+function renderDisease(){
+  var idx=$("#dxSelect").value;
+  var el=$("#dxResult");
+  if(idx===""){el.innerHTML="";return}
+  var d=MED_KB.diseases[Number(idx)];
+  var html='<div class="card"><h3 style="margin-bottom:4px">'+d.icon+' '+esc(d.name)+'</h3>'+
+    '<div class="mini" style="margin-bottom:12px">المواد الفعالة المناسبة — مرتبة بالأفضلية العلاجية، ومعلّم المتاح في مخزنك</div>';
+  d.actives.forEach(function(anm,i){
+    var act=activeByName(anm);
+    /* أرخص منتج متاح للمادة دي */
+    var prods=act?alive().filter(function(p){return p.activeId===act.id&&Number(p.price)&&Number(p.pkg)&&Number(p.conc)}):[];
+    var cheapest=null;
+    if(prods.length&&act){
+      prods.forEach(function(p){
+        var r=costPerTon(p,{dosePerTon:act.dosePerTon,days:5});
+        if(r&&r.cost!=null&&(!cheapest||r.cost<cheapest.cost))cheapest={p:p,cost:r.cost};
+      });
+    }
+    var wd=act?act.withdrawal:null;
+    html+='<div class="rank'+(i===0?" best":"")+'">'+
+      '<div class="num">'+(i===0?"⭐":(i+1))+'</div>'+
+      '<div class="rank-b"><b>'+esc(anm)+'</b>'+
+        '<span>'+(act?("جرعة "+fmt(act.dosePerTon,1)+"جم/طن"+(wd!=null?(" · سحب "+wd+"ي"):"")):"مش في المكتبة")+
+        (cheapest?(' · <span style="color:var(--green2)">متاح: '+esc(cheapest.p.name)+'</span>'):(prods.length===0&&act?' · <span style="color:var(--muted2)">مفيش منتج مكتمل</span>':''))+'</span></div>'+
+      (cheapest?('<div class="rank-c"><div class="cost">'+fmt(cheapest.cost,0)+'</div><div class="costsub">ج/طن×5ي</div></div>'):'')+
+    '</div>';
+  });
+  html+='</div>';
+  /* تحذير التوليفات */
+  el.innerHTML=html;
+}
+/* فحص التعارض بين مادتين — يُستخدم عند اختيار منتجات */
+function checkConflict(name1,name2){
+  var c=MED_KB.conflicts[name1];
+  if(c){for(var i=0;i<c.length;i++){var arr=c[i];var reason=arr[arr.length-1];for(var j=0;j<arr.length-1;j++){if(norm(arr[j])===norm(name2))return reason}}}
+  var c2=MED_KB.conflicts[name2];
+  if(c2){for(var k=0;k<c2.length;k++){var arr2=c2[k];var reason2=arr2[arr2.length-1];for(var m=0;m<arr2.length-1;m++){if(norm(arr2[m])===norm(name1))return reason2}}}
+  return null;
+}
+/* عرض المواد الخام */
+function renderActives(){
+  var list=aliveActives().sort(function(a,b){return norm(a.name)<norm(b.name)?-1:1});
+  $("#actCount").textContent=list.length+" مادة خام";
+  var el=$("#actList");
+  if(!list.length){el.innerHTML='<div class="empty"><div class="em">⚗️</div><h3>مفيش مواد خام</h3><p>ضيف مادة بجرعتها المعيارية</p></div>';return}
+  el.innerHTML=list.map(function(a){
+    var nprod=alive().filter(function(p){return p.activeId===a.id}).length;
+    return '<div class="prod" data-aedit="'+a.id+'"><div class="prod-h">'+
+      '<b>🧪 '+esc(a.name)+'</b>'+
+      '<span class="badge b-ther">'+fmt(a.dosePerTon,1)+' جم/طن</span></div>'+
+      '<div class="prod-meta">'+(a.ther?esc(a.ther)+' · ':'')+(a.withdrawal!=null?('⏱️ سحب '+a.withdrawal+' يوم · '):'')+nprod+' منتج مربوط'+(a.note?(' · '+esc(a.note)):'')+'</div>'+
+    '</div>';
+  }).join("");
+}
+var editActId=null;
+function openActive(a){
+  editActId=a?a.id:null;
+  $("#ovActiveTitle").textContent=a?"تعديل المادة":"مادة خام جديدة";
+  $("#aName").value=a?a.name:"";
+  $("#aDose").value=a?(a.dosePerTon||""):"";
+  $("#aWithdrawal").value=a&&a.withdrawal!=null?a.withdrawal:"";
+  $("#aTher").value=a?(a.ther||""):"";
+  $("#aNote").value=a?(a.note||""):"";
+  $("#aDelete").style.display=a?"":"none";
+  $("#ovActive").classList.add("open");
+}
+function saveActive(){
+  var name=$("#aName").value.trim();if(!name){toast("اكتب اسم المادة");return}
+  var data={name:name,dosePerTon:Number($("#aDose").value)||0,withdrawal:$("#aWithdrawal").value!==""?Number($("#aWithdrawal").value):null,ther:$("#aTher").value.trim(),note:$("#aNote").value.trim(),updatedAt:now(),deleted:false};
+  if(editActId){var a=activeById(editActId);Object.keys(data).forEach(function(k){a[k]=data[k]})}
+  else{data.id=uid();S.actives.push(data)}
+  save(true);$("#ovActive").classList.remove("open");renderAll();toast("اتحفظت ✓");
+}
+
+var prodTherFilter="";
+function renderProducts(){
+  var q=norm($("#prodSearch").value||"");
+  var list=alive();
+  if(prodTherFilter)list=list.filter(function(p){return (p.ther||"")===prodTherFilter});
+  if(q)list=list.filter(function(p){return norm(p.name).indexOf(q)>-1||norm(p.active).indexOf(q)>-1||norm(p.supplier).indexOf(q)>-1});
+  list.sort(function(a,b){return norm(a.name)<norm(b.name)?-1:1});
+  $("#prodCount").textContent=list.length+" منتج"+(prodTherFilter?(" · "+prodTherFilter):"");
+  /* شيبس التصنيفات */
+  var thers=allThers();
+  $("#prodThers").innerHTML='<button class="chip'+(prodTherFilter===""?" on":"")+'" data-pt="">الكل</button>'+
+    thers.map(function(t){return '<button class="chip'+(prodTherFilter===t?" on":"")+'" data-pt="'+esc(t)+'">'+esc(t)+'</button>'}).join("");
+  var el=$("#prodList");
+  if(!list.length){el.innerHTML='<div class="empty"><div class="em">💊</div><h3>مفيش منتجات</h3><p>ضيف منتج أو أعد تحميل أدوية المخزن من ☁️</p></div>';return}
+  el.innerHTML=list.map(function(p){
+    var hasConc=Number(p.conc)>0;
+    var priceUnit=(Number(p.price)&&Number(p.pkg))?(" · "+fmt(p.price/p.pkg,2)+" ج/"+esc(p.unit||"وحدة")):"";
+    return '<div class="prod" data-pedit="'+p.id+'"><div class="prod-h">'+
+      '<b>'+esc(p.name)+'</b>'+
+      (p.origin==="import"?'<span class="badge b-import">مستورد</span>':'<span class="badge b-local">محلي</span>')+
+      (p.fromWarehouse?'<span class="badge" style="background:rgba(74,158,255,.1);color:var(--acc)">🔗 مخزن</span>':'')+
+      '</div>'+
+      '<div class="prod-meta">'+
+        (p.active?('🧪 '+esc(p.active)+(hasConc?(" "+fmt(p.conc,1)+(p.concUnit==="pct"?"%":p.concUnit)):"")):(hasConc?"":'<span style="color:var(--danger)">⚠️ ناقص المادة الفعالة والتركيز</span>'))+
+        (p.ther?(' · '+esc(p.ther)):"")+
+      '</div>'+
+      '<div class="prod-meta">📦 '+fmt(p.pkg)+' '+esc(p.unit||"")+' · 💰 '+fmt(p.price)+' ج'+priceUnit+(p.supplier?(' · 🏪 '+esc(p.supplier)):"")+'</div>'+
+    '</div>';
+  }).join("");
+}
+
+function renderCompare(){
+  fillTherSelects();
+}
+
+function doCompare(){
+  var actId=$("#cmpActive").value;
+  if(!actId){toast("اختر المادة الخام الأول");return}
+  var act=activeById(actId);
+  var dose=Number($("#cmpDose").value)||Number(act.dosePerTon)||0;
+  var days=$("#cmpDays").value;
+  if(!dose){toast("اكتب جرعة المادة الخام");return}
+  var opt={dosePerTon:dose,days:days};
+  var cands=alive().filter(function(p){return p.activeId===actId});
+  if(!cands.length){toast("مفيش منتجات مربوطة بالمادة دي — اربطها من الأدوية");return}
+  var results=[],missing=[];
+  cands.forEach(function(p){
+    var r=costPerTon(p,opt);
+    if(!r){missing.push({p:p,why:"ناقص السعر أو العبوة"});return}
+    if(r.need==="conc"){missing.push({p:p,why:"ناقص التركيز %"});return}
+    results.push({p:p,cost:r.cost,used:r.productUsed,tons:r.tonsPerPkg,note:r.note});
+  });
+  results.sort(function(a,b){return a.cost-b.cost});
+  var el=$("#cmpResults");
+  var html="";
+  if(results.length){
+    var best=results[0].cost;
+    html+='<div class="card"><h3 style="margin-bottom:4px">🏆 الترتيب حسب تكلفة علاج طن اللحم</h3>'+
+      '<div class="mini" style="margin-bottom:12px">🧪 '+esc(act.name)+' · جرعة '+fmt(dose,1)+'جم/طن · '+esc(days)+' أيام · الأرخص أفضل</div>';
+    results.forEach(function(r,i){
+      var pct=best>0?Math.round((r.cost-best)/best*100):0;
+      html+='<div class="rank'+(i===0?" best":"")+'">'+
+        '<div class="num">'+(i===0?"🥇":(i+1))+'</div>'+
+        '<div class="rank-b"><b>'+esc(r.p.name)+(Number(r.p.conc)?' <span style="color:var(--muted2)">'+fmt(r.p.conc,0)+'%</span>':'')+'</b>'+
+          '<span>'+(r.p.origin==="import"?"🌍 مستورد":"🏭 محلي")+(r.p.supplier?(" · "+esc(r.p.supplier)):"")+
+          (i>0?(' · <span style="color:var(--tomato)">أغلى '+pct+'%</span>'):' · <span style="color:var(--green2)">✓ الأوفر</span>')+
+          ' · عبوة تكفي '+fmt(r.tons,1)+' طن</span></div>'+
+        '<div class="rank-c"><div class="cost">'+fmt(r.cost,0)+'</div><div class="costsub">ج/طن لحم</div></div>'+
+      '</div>';
+    });
+    html+='</div>';
+    /* مقارنة مستورد ضد محلي */
+    var loc=results.filter(function(r){return r.p.origin==="local"});
+    var imp=results.filter(function(r){return r.p.origin==="import"});
+    if(loc.length&&imp.length){
+      var bestLoc=Math.min.apply(null,loc.map(function(r){return r.cost}));
+      var bestImp=Math.min.apply(null,imp.map(function(r){return r.cost}));
+      var saving=bestImp-bestLoc;
+      var savePct=bestImp>0?Math.round(saving/bestImp*100):0;
+      html+='<div class="card"><h3 style="margin-bottom:10px">🏭 محلي ضد مستورد 🌍</h3>'+
+        '<div class="kv"><span>🏭 أرخص محلي</span><b style="color:var(--green2)">'+fmt(bestLoc,0)+' ج/طن</b></div>'+
+        '<div class="kv"><span>🌍 أرخص مستورد</span><b>'+fmt(bestImp,0)+' ج/طن</b></div>'+
+        (saving>0?('<div class="kv"><span>💰 التوفير مع المحلي</span><b style="color:var(--green2)">'+fmt(saving,0)+' ج/طن ('+savePct+'%)</b></div>'):
+         (saving<0?('<div class="kv"><span>المستورد أوفر بـ</span><b>'+fmt(-saving,0)+' ج/طن</b></div>'):''))+
+      '</div>';
+    }
+  }
+  if(missing.length){
+    html+='<div class="card"><h3 style="margin-bottom:8px;color:var(--lemon)">⚠️ منتجات محتاجة استكمال</h3>';
+    missing.forEach(function(m){
+      html+='<div class="prod" data-pedit="'+m.p.id+'"><div class="prod-h"><b>'+esc(m.p.name)+'</b><span class="badge b-inc">'+esc(m.why)+'</span></div></div>';
+    });
+    html+='</div>';
+  }
+  if(!results.length&&!missing.length)html='<div class="empty"><div class="em">🤷</div><h3>مفيش نتائج</h3></div>';
+  el.innerHTML=html;
+}
+
+function doNeed(){
+  var p=alive().find(function(x){return x.id===$("#ndProd").value});
+  if(!p){toast("اختر المنتج");return}
+  var count=Number($("#ndCount").value)||0, weight=Number($("#ndWeight").value)||0;
+  var dose=Number($("#ndDose").value)||0, days=Number($("#ndDays").value)||1;
+  if(!count||!weight){toast("اكتب العدد والوزن");return}
+  if(!dose){toast("اكتب جرعة المادة الخام");return}
+  var frac=concToFraction(p);
+  if(!frac){toast("المنتج ده ناقص التركيز % — كمّله الأول");return}
+  var act=p.activeId?activeById(p.activeId):null;
+  var totalKg=count*weight;
+  var tons=totalKg/1000;
+  /* منتج مطلوب = (جرعة خام/طن ÷ تركيز) × عدد الأطنان × الأيام */
+  var productGrams=(dose/frac)*tons*days;
+  var detail="جرعة "+dose+"جم خام/طن ÷ تركيز "+Math.round(frac*100)+"%";
+  var pkg=Number(p.pkg)||0;
+  var pkgs=pkg?productGrams/pkg:0;
+  var pkgsUp=Math.ceil(pkgs);
+  var cost=pkgsUp*(Number(p.price)||0);
+  var costExact=(Number(p.price)&&pkg)?(productGrams/pkg*p.price):0;
+  window._lastNeed={prod:p,count:count,weight:weight,dose:dose,days:days,productGrams:productGrams,cost:(Number(p.price)&&pkg?(productGrams/pkg*p.price):0),pkgs:Math.ceil(pkg?productGrams/pkg:0)};
+  $("#ndResult").innerHTML='<div class="result-box">'+
+    '<div class="lbl">💊 '+esc(p.name)+' — محسوب '+detail+'</div>'+
+    '<div class="big">'+pkgsUp+' عبوة</div>'+
+    '<div class="lbl">('+fmt(pkgs,2)+' عبوة فعلية — بنقرّب للأعلى)</div>'+
+    '<div class="divider"></div>'+
+    '<div class="kv"><span>إجمالي الوزن الحي</span><b>'+fmt(totalKg)+' كجم ('+fmt(tons,2)+' طن)</b></div>'+
+    '<div class="kv"><span>كمية المنتج المطلوبة</span><b>'+fmt(productGrams,1)+' '+esc(p.unit||"جم")+'</b></div>'+
+    '<div class="kv"><span>حجم العبوة</span><b>'+fmt(pkg)+' '+esc(p.unit||"")+'</b></div>'+
+    '<div class="kv"><span>التكلفة (عبوات كاملة)</span><b style="color:var(--lemon)">'+fmt(cost)+' ج</b></div>'+
+    '<div class="kv"><span>التكلفة الفعلية (بالمستهلك)</span><b>'+fmt(costExact,0)+' ج</b></div>'+
+    '<div class="kv"><span>تكلفة علاج الطن</span><b>'+fmt(tons?costExact/tons:0,0)+' ج/طن</b></div>'+
+    (p.stock?('<div class="kv"><span>مخزونك الحالي</span><b>'+fmt(p.stock)+' عبوة'+(p.stock>=pkgsUp?' ✅ يكفي':' ⚠️ ناقص '+(pkgsUp-p.stock)+' عبوة')+'</b></div>'):'')+
+    (act&&act.withdrawal!=null?('<div class="kv"><span>⏱️ فترة سحب اللحم</span><b style="color:var(--lemon)">'+act.withdrawal+' يوم قبل الذبح</b></div>'):'')+
+    '<div style="display:flex;gap:8px;margin-top:12px">'+
+      '<button class="btn sec sm" onclick="printNeed()">🖨️ PDF</button>'+
+      '<button class="btn green sm" onclick="saveTreatment()">💾 سجّل العلاج</button>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ============ شيت المنتج ============ */
+var editId=null;
+function showConcQuick(activeName){
+  var box=$("#concQuick");if(!box)return;
+  var act=activeByName(activeName);
+  var tmpl=act?CONC_TEMPLATES[act.name]:null;
+  if(!tmpl||!tmpl.length){box.innerHTML="";return}
+  box.innerHTML='<div class="mini" style="margin-bottom:5px">تركيزات شائعة لـ'+esc(act.name)+' (دوس للاختيار):</div>'+
+    tmpl.map(function(c){return '<button type="button" class="chip" data-conc="'+c+'">'+c+'%</button>'}).join(" ");
+}
+function openProd(p){
+  editId=p?p.id:null;
+  $("#concQuick").innerHTML="";
+  $("#ovProdTitle").textContent=p?"تعديل المنتج":"منتج جديد";
+  $("#pName").value=p?p.name:"";
+  $("#pActive").value=p?(p.activeId||""):"";
+  if(p&&p.activeId){var pa=activeById(p.activeId);showConcQuick(pa?pa.name:"")}
+  $("#pTher").value=p?(p.ther||""):"";
+  $("#pConc").value=p&&p.conc!=null?p.conc:"";
+  $("#pConcUnit").value=p?(p.concUnit||"pct"):"pct";
+  $("#pPkg").value=p?(p.pkg||""):"";
+  $("#pUnit").value=p?(p.unit||""):"";
+  $("#pPrice").value=p?(p.price||""):"";
+  $("#pSupplier").value=p?(p.supplier||""):"";
+  $("#pOrigin").value=p?(p.origin||"local"):"local";
+  $("#pStock").value=p?(p.stock||""):"";
+  $("#pDelete").style.display=p?"":"none";
+  $("#ovProd").classList.add("open");
+}
+function saveProd(){
+  var name=$("#pName").value.trim();if(!name){toast("اكتب الاسم");return}
+  var actId=$("#pActive").value;
+  var actObj=actId?activeById(actId):null;
+  var data={
+    name:name,activeId:actId,active:actObj?actObj.name:"",ther:$("#pTher").value.trim(),
+    conc:$("#pConc").value!==""?Number($("#pConc").value):null,concUnit:$("#pConcUnit").value,
+    pkg:Number($("#pPkg").value)||0,unit:$("#pUnit").value.trim(),
+    price:Number($("#pPrice").value)||0,supplier:$("#pSupplier").value.trim(),
+    origin:$("#pOrigin").value,stock:Number($("#pStock").value)||0,updatedAt:now(),deleted:false
+  };
+  if(editId){var p=S.products.find(function(x){return x.id===editId});Object.keys(data).forEach(function(k){p[k]=data[k]})}
+  else{data.id=uid();S.products.push(data)}
+  save(true);$("#ovProd").classList.remove("open");renderAll();toast("اتحفظ ✓");
+}
+
+function renderAll(){renderProducts();renderActives();fillTherSelects();fillDiseases();renderTreatments()}
+
+/* ============ الأحداث ============ */
+$all(".tab").forEach(function(t){t.addEventListener("click",function(){
+  $all(".tab").forEach(function(x){x.classList.remove("on")});t.classList.add("on");
+  var v=t.getAttribute("data-tab");
+  ["compare","need","products","disease","vax","actives"].forEach(function(n){$("#tab-"+n).style.display=n===v?"":"none"});
+  if(v==="compare")renderCompare();if(v==="products")renderProducts();if(v==="need"){fillTherSelects();renderTreatments();}if(v==="actives")renderActives();if(v==="disease")renderDisease();if(v==="vaccines")renderVax();
+})});
+$("#cmpActive").addEventListener("change",function(){
+  var a=activeById(this.value);
+  if(a){$("#cmpDose").value=a.dosePerTon||"";$("#cmpHint").textContent="💡 "+esc(a.name)+" — الجرعة المعيارية "+fmt(a.dosePerTon,1)+"جم/طن"+(a.note?(" ("+esc(a.note)+")"):"")+". تقدر تعدّلها.";}
+});
+$("#cmpRun").addEventListener("click",doCompare);
+$("#ndProd").addEventListener("change",function(){
+  var p=alive().find(function(x){return x.id===this.value});
+  if(p&&p.activeId){var a=activeById(p.activeId);if(a){$("#ndDose").value=a.dosePerTon||"";$("#ndHint").textContent="💡 "+esc(p.name)+" ← "+esc(a.name)+" (جرعة "+fmt(a.dosePerTon,1)+"جم/طن). تقدر تعدّلها.";}}
+  else $("#ndHint").textContent="⚠️ المنتج ده مش مربوط بمادة خام — اكتب الجرعة يدوي أو اربطه من الأدوية.";
+});
+$("#ndRun").addEventListener("click",doNeed);
+$("#txList").addEventListener("click",function(e){
+  var r=e.target.closest("[data-txres]");
+  if(r){var parts=r.getAttribute("data-txres").split("|");var t=S.treatments.find(function(x){return x.id===parts[0]});if(t){t.result=t.result===parts[1]?"":parts[1];t.updatedAt=now();save(true);renderTreatments()}return}
+  var d=e.target.closest("[data-txdel]");
+  if(d){var t2=S.treatments.find(function(x){return x.id===d.getAttribute("data-txdel")});if(t2){t2.deleted=true;t2.updatedAt=now();save(true);renderTreatments()}}
+});
+$("#mixRun").addEventListener("click",function(){
+  var tank=Number($("#mixTank").value)||0, dose=Number($("#mixDose").value)||0;
+  if(!tank||!dose){toast("اكتب حجم التانك والجرعة");return}
+  var total=tank*dose;
+  $("#mixResult").innerHTML='<div class="result-box"><div class="lbl">تحط في التانك</div><div class="big">'+fmt(total,1)+' <span style="font-size:16px">جم/مل</span></div><div class="lbl">'+fmt(tank)+' لتر × '+fmt(dose,2)+' = '+fmt(total,1)+'</div></div>';
+});
+$("#prodSearch").addEventListener("input",renderProducts);
+$("#prodThers").addEventListener("click",function(e){var c=e.target.closest("[data-pt]");if(c){prodTherFilter=c.getAttribute("data-pt");renderProducts()}});
+$("#prodList").addEventListener("click",function(e){var c=e.target.closest("[data-pedit]");if(c){var p=S.products.find(function(x){return x.id===c.getAttribute("data-pedit")});if(p)openProd(p)}});
+$("#cmpResults").addEventListener("click",function(e){var c=e.target.closest("[data-pedit]");if(c){var p=S.products.find(function(x){return x.id===c.getAttribute("data-pedit")});if(p)openProd(p)}});
+$("#prodAdd").addEventListener("click",function(){openProd(null)});
+$("#dxSelect").addEventListener("change",renderDisease);
+$("#vaxSearch").addEventListener("input",renderVax);
+$("#vaxTypes").addEventListener("click",function(e){var b=e.target.closest("[data-vxt]");if(b){vaxTypeFilter=b.getAttribute("data-vxt");renderVax()}});
+$("#vaxTypes").addEventListener("click",function(e){var b=e.target.closest("[data-vxt]");if(b){vaxTypeFilter=b.getAttribute("data-vxt");renderVax()}});
+$("#vaxSearch").addEventListener("input",renderVax);
+$("#actAdd").addEventListener("click",function(){openActive(null)});
+$("#aSave").addEventListener("click",saveActive);
+$("#aDelete").addEventListener("click",function(){if(!editActId)return;if(!confirm("حذف المادة؟"))return;var a=activeById(editActId);if(a){a.deleted=true;a.updatedAt=now()}save(true);$("#ovActive").classList.remove("open");renderAll();toast("اتمسحت")});
+$("#actList").addEventListener("click",function(e){var c=e.target.closest("[data-aedit]");if(c){var a=activeById(c.getAttribute("data-aedit"));if(a)openActive(a)}});
+$("#pActive").addEventListener("change",function(){
+  var a=activeById(this.value);showConcQuick(a?a.name:"");
+  if(a&&!$("#pTher").value)$("#pTher").value=a.ther||"";
+});
+$("#concQuick").addEventListener("click",function(e){
+  var b=e.target.closest("[data-conc]");if(b){$("#pConc").value=b.getAttribute("data-conc");$("#pConcUnit").value="pct"}
+});
+$("#pSave").addEventListener("click",saveProd);
+$("#pDelete").addEventListener("click",function(){if(!editId)return;if(!confirm("حذف المنتج؟"))return;var p=S.products.find(function(x){return x.id===editId});if(p){p.deleted=true;p.updatedAt=now()}save(true);$("#ovProd").classList.remove("open");renderAll();toast("اتمسح")});
+$all("[data-close]").forEach(function(x){x.addEventListener("click",function(){this.closest(".overlay").classList.remove("open")})});
+$all(".overlay").forEach(function(o){o.addEventListener("click",function(e){if(e.target===o)o.classList.remove("open")})});
+$("#fabSync").addEventListener("click",function(){$("#ovSync").classList.add("open")});
+$("#themeBtn").addEventListener("click",function(){
+  var d=document.documentElement;var l=d.getAttribute("data-theme")==="light";
+  d.setAttribute("data-theme",l?"dark":"light");this.textContent=l?"🌙":"☀️";
+  try{localStorage.setItem("vetcompare.theme",l?"dark":"light")}catch(e){}
+});
+$("#syncToggle").addEventListener("click",function(){
+  localStorage.setItem(LS_FBON,"1");localStorage.setItem(LS_FB,JSON.stringify(DEFAULT_FB));
+  initFB(DEFAULT_FB).then(function(){toast("المزامنة اتفعّلت ☁️")}).catch(function(){toast("خطأ في المزامنة")});
+});
+$("#expBtn").addEventListener("click",function(){
+  var blob=new Blob([JSON.stringify({app:"vetcompare",products:S.products},null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="vetcompare-backup.json";a.click();
+});
+$("#impBtn").addEventListener("click",function(){$("#impFile").click()});
+$("#impFile").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var d=JSON.parse(r.result);if(d.products){S.products=mergeColl(S.products,d.products);save(true);renderAll();toast("اتستوردت ✓")}}catch(err){toast("ملف غلط")}};
+  r.readAsText(f);e.target.value="";
+});
+$("#reseedBtn").addEventListener("click",function(){
+  var n=seedProducts(false);renderAll();toast(n?("اتضاف "+n+" صنف"):"كل الأصناف موجودة بالفعل");
+});
+
+/* ============ الإقلاع ============ */
+(function(){
+  try{var th=localStorage.getItem("vetcompare.theme");if(th==="light"){document.documentElement.setAttribute("data-theme","light");$("#themeBtn").textContent="☀️"}}catch(e){}
+  load();
+  if(!aliveActives().length)seedActives();
+  if(!alive().length)seedProducts(false);
+  renderAll();
+  restoreFB();
+})();
+</script>
+</body>
+</html>
