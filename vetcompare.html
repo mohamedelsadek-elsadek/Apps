@@ -23,8 +23,9 @@ h1,h2,h3{margin:0}
 .top h1{font-size:18px;font-weight:900;flex:1;min-width:0}
 .top .sub{font-size:11.5px;color:var(--muted2);font-weight:700}
 .iconbtn{width:38px;height:38px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--txt);font-size:16px;cursor:pointer;flex:0 0 auto}
-.tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--bg2);padding:5px;border-radius:12px;position:sticky;top:6px;z-index:20}
-.tab{flex:1;padding:9px 6px;border-radius:9px;border:0;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--bg2);padding:5px;border-radius:12px;position:sticky;top:6px;z-index:20;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:9px 12px;border-radius:9px;border:0;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;font-size:12.5px;cursor:pointer;white-space:nowrap}
 .tab.on{background:var(--grad);color:#fff;box-shadow:0 3px 10px rgba(74,158,255,.3)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:12px}
 .field{margin-bottom:11px}
@@ -94,7 +95,7 @@ h1,h2,h3{margin:0}
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v2</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v3</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -306,7 +307,7 @@ function seedProducts(force){
     /* استنتاج المصدر من المورد أو الاسم */
     var origin="local";
     S.products.push({
-      id:uid(),name:sd.name,active:"",ther:sd.ther||"",
+      id:"prd:"+norm(sd.name),name:sd.name,active:"",ther:sd.ther||"",
       conc:null,concUnit:"pct",
       pkg:sd.pkg||0,unit:sd.unit||"",price:sd.price||0,
       supplier:sd.supplier||"",origin:origin,stock:sd.stock||0,
@@ -430,7 +431,7 @@ function seedActives(){
     var wd=MED_KB.withdrawal[sd.name];
     var exist=aliveActives().find(function(a){return norm(a.name)===norm(sd.name)});
     if(exist){ if(exist.withdrawal==null&&wd!=null){exist.withdrawal=wd;updated++;} return; }
-    S.actives.push({id:uid(),name:sd.name,dosePerTon:sd.dosePerTon,ther:sd.ther||"",note:sd.note||"",withdrawal:(wd!=null?wd:null),updatedAt:now(),deleted:false});
+    S.actives.push({id:"act:"+norm(sd.name),name:sd.name,dosePerTon:sd.dosePerTon,ther:sd.ther||"",note:sd.note||"",withdrawal:(wd!=null?wd:null),updatedAt:now(),deleted:false});
     added++;
   });
   if(added||updated)save(true);
@@ -498,7 +499,11 @@ function initFB(cfg){
         S.actives=mergeColl(S.actives||[],cloud.actives||[]);
         S.protocols=mergeColl(S.protocols||[],cloud.protocols||[]);
         S.treatments=mergeColl(S.treatments||[],cloud.treatments||[]);
-        persist();renderAll();fbApplying=false;
+        var removed=dedupeAll();
+        persist();renderAll();
+        /* لو لقينا مكرر واتشال، ادفع النسخة المنضّفة للسحابة مرة واحدة */
+        if(removed>0){try{fbRef.set({products:S.products,actives:S.actives,protocols:S.protocols,treatments:S.treatments})}catch(e){}}
+        fbApplying=false;
       });
       $("#syncToggle").textContent="✓ المزامنة مفعّلة";
     });
@@ -510,6 +515,28 @@ function mergeColl(local,cloud){
     if(!map[x.id]||(x.updatedAt||0)>=(map[x.id].updatedAt||0))map[x.id]=x;
   });
   return Object.keys(map).map(function(k){return map[k]});
+}
+/* يشيل المكرر بالاسم (يفضّل النسخة الحية والأحدث) — يمنع ظهور نفس المادة/المنتج مرتين */
+function dedupeByName(list){
+  var arr=(list||[]).slice().sort(function(a,b){
+    var ad=a.deleted?1:0,bd=b.deleted?1:0;
+    if(ad!==bd)return ad-bd;                        /* الحيّة الأول */
+    return (b.updatedAt||0)-(a.updatedAt||0);        /* الأحدث الأول */
+  });
+  var seen={},out=[];
+  arr.forEach(function(x){
+    var k=norm(x&&x.name);
+    if(!k){out.push(x);return}
+    if(seen[k])return;                               /* اتجاهل المكرر */
+    seen[k]=1;out.push(x);
+  });
+  return out;
+}
+function dedupeAll(){
+  var before=(S.products||[]).length+(S.actives||[]).length;
+  S.products=dedupeByName(S.products);
+  S.actives=dedupeByName(S.actives);
+  return before-((S.products||[]).length+(S.actives||[]).length);
 }
 function restoreFB(){
   var raw=localStorage.getItem(LS_FB),on=localStorage.getItem(LS_FBON),cfg=null;
@@ -953,6 +980,7 @@ function renderAll(){
 /* ============ الأحداث ============ */
 $all(".tab").forEach(function(t){t.addEventListener("click",function(){
   $all(".tab").forEach(function(x){x.classList.remove("on")});t.classList.add("on");
+  try{t.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"})}catch(e){}
   var v=t.getAttribute("data-tab");
   ["compare","need","products","disease","vaccines","actives"].forEach(function(n){var el=$("#tab-"+n);if(el)el.style.display=n===v?"":"none"});
   if(v==="compare")renderCompare();if(v==="products")renderProducts();if(v==="need"){fillTherSelects();renderTreatments();}if(v==="actives")renderActives();if(v==="disease")renderDisease();if(v==="vaccines")renderVax();
@@ -1059,6 +1087,7 @@ $("#reseedBtn").addEventListener("click",function(){
 (function(){
   try{var th=localStorage.getItem("vetcompare.theme");if(th==="light"){document.documentElement.setAttribute("data-theme","light");$("#themeBtn").textContent="☀️"}}catch(e){}
   load();
+  if(dedupeAll()>0)persist();
   if(!aliveActives().length)seedActives();
   if(!alive().length)seedProducts(false);
   try{renderAllNow()}catch(e){}
