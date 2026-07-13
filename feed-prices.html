@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>أسعار الخامات العلفية العالمية</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#1c2330; --border:#2d3646;
+  --txt:#e6edf3; --muted:#8b98a9; --gold:#e3b341; --green:#3fb950; --red:#f85149;
+  --blue:#58a6ff;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+body{margin:0; background:var(--bg); color:var(--txt); font-family:-apple-system,'Segoe UI',Tahoma,Arial,sans-serif; padding:12px; padding-bottom:60px;}
+h1{font-size:1.15rem; margin:0; display:flex; align-items:center; gap:8px;}
+.header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;}
+.badge{font-size:.7rem; color:var(--muted); background:var(--card); border:1px solid var(--border); padding:3px 8px; border-radius:12px;}
+button{font-family:inherit; cursor:pointer; border:none; border-radius:8px;}
+.btn{background:var(--gold); color:#000; font-weight:700; padding:10px 18px; font-size:.95rem;}
+.btn:active{opacity:.7;}
+.btn-sm{background:var(--card2); color:var(--txt); border:1px solid var(--border); padding:6px 12px; font-size:.8rem;}
+.card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px;}
+.rate-row{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+.rate-big{font-size:2rem; font-weight:800; color:var(--gold);}
+.rate-big small{font-size:.85rem; color:var(--muted); font-weight:400;}
+.lbl{font-size:.75rem; color:var(--muted); margin-bottom:4px;}
+input{background:var(--bg); border:1px solid var(--border); color:var(--txt); border-radius:8px; padding:9px; font-size:1rem; width:100%; font-family:inherit;}
+input:focus{outline:none; border-color:var(--gold);}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+table{width:100%; border-collapse:collapse; font-size:.85rem;}
+th{color:var(--muted); font-weight:600; font-size:.72rem; padding:8px 6px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap;}
+td{padding:10px 6px; border-bottom:1px solid #21293a; white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+.cname{font-weight:700;}
+.csym{font-size:.68rem; color:var(--muted);}
+.egp{color:var(--gold); font-weight:800; font-size:.95rem;}
+.usd{color:var(--blue);}
+.kg{color:var(--muted); font-size:.78rem;}
+.chg-up{color:var(--green); font-size:.72rem;}
+.chg-dn{color:var(--red); font-size:.72rem;}
+.status{font-size:.75rem; padding:8px 12px; border-radius:8px; margin-bottom:12px; display:none;}
+.status.show{display:block;}
+.status.ok{background:#12261a; color:var(--green); border:1px solid #1f4a2e;}
+.status.err{background:#2a1517; color:var(--red); border:1px solid #5a2226;}
+.status.load{background:#1a2233; color:var(--blue); border:1px solid #2b3b5a;}
+.sec-title{font-size:.85rem; font-weight:700; color:var(--gold); margin:0 0 10px;}
+.hint{font-size:.7rem; color:var(--muted); margin-top:8px; line-height:1.6;}
+.manual-row{display:grid; grid-template-columns:1fr 110px; gap:8px; align-items:center; margin-bottom:8px;}
+.manual-row .mlbl{font-size:.82rem;}
+.footer{text-align:center; color:var(--muted); font-size:.68rem; margin-top:16px;}
+.tblwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+details summary{cursor:pointer; font-size:.85rem; font-weight:700; color:var(--blue); padding:4px 0;}
+@media(max-width:420px){ .grid3{grid-template-columns:1fr 1fr;} .rate-big{font-size:1.6rem;} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌽 أسعار الخامات العلفية العالمية</h1>
+  <span class="badge" id="lastUpdate">لم يتم التحديث</span>
+  <button class="badge" id="syncBtn" style="cursor:pointer;border:none;background:var(--card2);color:var(--blue)">☁️ مزامنة</button>
+</div>
+
+<div id="status" class="status"></div>
+
+<div class="card">
+  <div class="rate-row">
+    <div>
+      <div class="lbl">سعر صرف الدولار (تلقائي)</div>
+      <div class="rate-big" id="rateDisplay">—<small> ج/م</small></div>
+    </div>
+    <div style="min-width:140px;">
+      <div class="lbl">تعديل يدوي (سعر البنك عندك)</div>
+      <input type="number" id="manualRate" inputmode="decimal" placeholder="مثال: 50.5">
+    </div>
+  </div>
+  <button class="btn" id="refreshBtn" style="width:100%; margin-top:12px;">🔄 تحديث الأسعار من البورصة</button>
+</div>
+
+<div class="card">
+  <div class="sec-title">💰 أسعار البورصة (شيكاغو CBOT)</div>
+  <div class="tblwrap">
+  <table>
+    <thead><tr>
+      <th>الخام</th><th>سعر العقد</th><th>دولار/طن</th><th>جنيه/طن</th><th>جنيه/كجم</th>
+    </tr></thead>
+    <tbody id="priceBody"></tbody>
+  </table>
+  </div>
+  <div class="hint">الأسعار = العقد القريب (فوب بورصة) قبل الشحن والجمارك. التحويل: ذرة 39.368 بوشل/طن • قمح وصويا 36.744 بوشل/طن • كسب صويا ×1.1023 (طن قصير→متري) • زيت صويا ×22.046 (سنت/رطل→دولار/طن).</div>
+</div>
+
+<div class="card">
+  <div class="sec-title">🚢 تكلفة الوصول لمصر (تقديري)</div>
+  <div class="grid3">
+    <div><div class="lbl">شحن $/طن</div><input type="number" id="freight" inputmode="decimal" value="35"></div>
+    <div><div class="lbl">جمارك %</div><input type="number" id="customs" inputmode="decimal" value="0"></div>
+    <div><div class="lbl">مصاريف أخرى %</div><input type="number" id="other" inputmode="decimal" value="3"></div>
+  </div>
+  <div class="tblwrap" style="margin-top:12px;">
+  <table>
+    <thead><tr><th>الخام</th><th>تكلفة واصل $/طن</th><th>واصل جنيه/طن</th><th>جنيه/كجم</th></tr></thead>
+    <tbody id="landedBody"></tbody>
+  </table>
+  </div>
+  <div class="hint">واصل = (سعر البورصة + الشحن) × (1 + الجمارك% + المصاريف%). ده تقدير استرشادي — السعر المحلي الفعلي بيتأثر بتوافر الدولار والمخزون المحلي.</div>
+</div>
+
+<div class="card">
+  <details>
+    <summary>✍️ إدخال يدوي (لو التحديث التلقائي وقع)</summary>
+    <div style="margin-top:10px;" id="manualInputs"></div>
+    <button class="btn-sm" id="applyManual" style="width:100%; margin-top:6px;">تطبيق الأسعار اليدوية</button>
+    <div class="hint">دخّل سعر العقد بنفس وحدة البورصة (سنت/بوشل أو دولار/طن قصير أو سنت/رطل) والبرنامج يحوّل.</div>
+  </details>
+</div>
+
+<div class="footer">المصدر: Stooq (عقود CBOT) + open.er-api.com لسعر الصرف — البيانات استرشادية وقد تتأخر عن اللحظي</div>
+
+<script>
+"use strict";
+/* ---------- تخزين آمن (سفاري الوضع الخاص) ---------- */
+var mem = {};
+var store = {
+  get: function(k){ try{ return localStorage.getItem(k); }catch(e){ return mem[k] !== undefined ? mem[k] : null; } },
+  set: function(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
+};
+
+/* ---------- تعريف الخامات ---------- */
+/* toUSDton: تحويل سعر العقد إلى دولار/طن متري */
+var COMMODITIES = [
+  { id:"corn", name:"ذرة صفراء",  sym:"ZC", stooq:"zc.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*39.3680; } },
+  { id:"sbm",  name:"كسب صويا",   sym:"ZM", stooq:"zm.f", unit:"$/طن قصير",     toUSDton:function(p){ return p*1.10231; } },
+  { id:"soy",  name:"فول صويا",   sym:"ZS", stooq:"zs.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"wheat",name:"قمح",        sym:"ZW", stooq:"zw.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"soyoil",name:"زيت صويا",  sym:"ZL", stooq:"zl.f", unit:"سنت/رطل",       toUSDton:function(p){ return p/100*2204.62; } }
+];
+
+var state = {
+  rate: null,          // USD -> EGP
+  prices: {},          // id -> { raw: contract price, chg: % change }
+  updated: null
+};
+
+/* ---------- Firebase sync ---------- */
+var DEFAULT_FB={"apiKey":"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs","authDomain":"my-app-sync-11ad9.firebaseapp.com","databaseURL":"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app","projectId":"my-app-sync-11ad9","storageBucket":"my-app-sync-11ad9.firebasestorage.app","messagingSenderId":"177039534756","appId":"1:177039534756:web:367ecccc684c2cdfdd1431"};
+var fbDb=null, fbRef=null, fbApplying=false;
+function snapshot(){
+  return {rate:state.rate, prices:state.prices, updated:state.updated,
+    manualRate:$("manualRate").value, freight:$("freight").value, customs:$("customs").value, other:$("other").value};
+}
+function applyCloud(d){
+  if(!d) return;
+  fbApplying=true;
+  try{
+    if(d.rate!=null) state.rate=d.rate;
+    if(d.prices) state.prices=d.prices;
+    if(d.updated) state.updated=d.updated;
+    if(d.manualRate!=null && d.manualRate!=="") $("manualRate").value=d.manualRate;
+    if(d.freight!=null && d.freight!=="") $("freight").value=d.freight;
+    if(d.customs!=null && d.customs!=="") $("customs").value=d.customs;
+    if(d.other!=null && d.other!=="") $("other").value=d.other;
+    save();
+    buildManualInputs(); render();
+  }catch(e){}
+  fbApplying=false;
+}
+function loadFbScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+function initFB(cfg){
+  return loadFbScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js")
+    .then(function(){return loadFbScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js")})
+    .then(function(){
+      if(!window.firebase) throw new Error("firebase غير محمّل");
+      if(firebase.apps.length) firebase.app().delete().catch(function(){});
+      firebase.initializeApp(cfg);
+      fbDb=firebase.database();
+      fbRef=fbDb.ref("appHub/feedPrices");
+      fbRef.on("value",function(snap){
+        var cloud=snap.val();
+        if(!cloud){ if(state.rate!=null||Object.keys(state.prices).length){ fbRef.set(snapshot()); } return; }
+        applyCloud(cloud);
+      });
+    });
+}
+function enableSync(){
+  try{ localStorage.setItem("feedPrices_sync","1"); }catch(e){}
+  initFB(DEFAULT_FB).then(function(){ showStatus("✅ المزامنة اتفعّلت","ok"); }).catch(function(e){ showStatus("❌ فشل تفعيل المزامنة","err"); });
+}
+function restoreSync(){
+  var on=null; try{ on=localStorage.getItem("feedPrices_sync"); }catch(e){}
+  if(on==="1"){ initFB(DEFAULT_FB).catch(function(){}); }
+}
+
+/* ---------- أدوات ---------- */
+function $(id){ return document.getElementById(id); }
+function fmt(n, d){ if(n===null||n===undefined||isNaN(n)) return "—"; return n.toLocaleString("en-US",{minimumFractionDigits:d===undefined?0:d, maximumFractionDigits:d===undefined?0:d}); }
+function showStatus(msg, cls){
+  var el = $("status");
+  el.textContent = msg;
+  el.className = "status show " + cls;
+  if(cls==="ok"){ setTimeout(function(){ el.className="status"; }, 4000); }
+}
+
+/* ---------- جلب البيانات ---------- */
+function fetchWithTimeout(url, ms){
+  return new Promise(function(resolve, reject){
+    var t = setTimeout(function(){ reject(new Error("timeout")); }, ms);
+    fetch(url).then(function(r){ clearTimeout(t); resolve(r); }).catch(function(e){ clearTimeout(t); reject(e); });
+  });
+}
+
+function fetchRate(){
+  return fetchWithTimeout("https://open.er-api.com/v6/latest/USD", 12000)
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(j && j.rates && j.rates.EGP){ return j.rates.EGP; }
+      throw new Error("no EGP");
+    });
+}
+
+/* Stooq CSV عبر بروكسي لتخطي CORS، مع بديلين */
+function fetchStooq(){
+  var symbols = COMMODITIES.map(function(c){ return c.stooq; }).join(" ");
+  var stooqUrl = "https://stooq.com/q/l/?s=" + encodeURIComponent(symbols) + "&f=sd2t2ohlcv&h&e=csv";
+  var proxies = [
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent(stooqUrl),
+    "https://corsproxy.io/?url=" + encodeURIComponent(stooqUrl)
+  ];
+  function tryProxy(i){
+    if(i >= proxies.length) return Promise.reject(new Error("all proxies failed"));
+    return fetchWithTimeout(proxies[i], 15000)
+      .then(function(r){ if(!r.ok) throw new Error("http " + r.status); return r.text(); })
+      .then(function(csv){
+        var parsed = parseStooqCSV(csv);
+        if(Object.keys(parsed).length === 0) throw new Error("empty csv");
+        return parsed;
+      })
+      .catch(function(){ return tryProxy(i+1); });
+  }
+  return tryProxy(0);
+}
+
+function parseStooqCSV(csv){
+  var out = {};
+  var lines = csv.trim().split(/\r?\n/);
+  for(var i=1; i<lines.length; i++){
+    var cols = lines[i].split(",");
+    if(cols.length < 7) continue;
+    var sym = (cols[0]||"").toLowerCase();
+    var open = parseFloat(cols[3]);
+    var close = parseFloat(cols[6]);
+    if(isNaN(close)) continue;
+    for(var k=0; k<COMMODITIES.length; k++){
+      if(COMMODITIES[k].stooq === sym){
+        var chg = (!isNaN(open) && open>0) ? ((close-open)/open*100) : null;
+        out[COMMODITIES[k].id] = { raw: close, chg: chg };
+      }
+    }
+  }
+  return out;
+}
+
+/* ---------- تحديث كامل ---------- */
+function refreshAll(){
+  showStatus("⏳ جاري التحديث...", "load");
+  $("refreshBtn").disabled = true;
+  Promise.allSettled([fetchRate(), fetchStooq()]).then(function(results){
+    var okParts = [];
+    var errParts = [];
+    if(results[0].status === "fulfilled"){ state.rate = results[0].value; okParts.push("سعر الصرف"); }
+    else { errParts.push("سعر الصرف"); }
+    if(results[1].status === "fulfilled"){
+      var p = results[1].value;
+      for(var id in p){ state.prices[id] = p[id]; }
+      okParts.push("أسعار البورصة");
+    } else { errParts.push("أسعار البورصة"); }
+
+    if(okParts.length){
+      state.updated = new Date().toISOString();
+      save(true);
+    }
+    render();
+    if(errParts.length === 0){ showStatus("✅ تم التحديث بنجاح", "ok"); }
+    else if(okParts.length){ showStatus("⚠️ اتحدث: " + okParts.join(" و ") + " — فشل: " + errParts.join(" و ") + ". استخدم الإدخال اليدوي.", "err"); }
+    else { showStatus("❌ فشل التحديث — تأكد من الإنترنت أو استخدم الإدخال اليدوي (آخر أسعار محفوظة معروضة)", "err"); }
+    $("refreshBtn").disabled = false;
+  });
+}
+
+/* ---------- حفظ/تحميل ---------- */
+function save(pushCloud){
+  store.set("feedPrices_v1", JSON.stringify({
+    rate: state.rate, prices: state.prices, updated: state.updated,
+    manualRate: $("manualRate").value,
+    freight: $("freight").value, customs: $("customs").value, other: $("other").value
+  }));
+  if(pushCloud && fbRef && !fbApplying){ try{ fbRef.set(snapshot()); }catch(e){} }
+}
+function load(){
+  var raw = store.get("feedPrices_v1");
+  if(!raw) return;
+  try{
+    var d = JSON.parse(raw);
+    state.rate = d.rate; state.prices = d.prices || {}; state.updated = d.updated;
+    if(d.manualRate) $("manualRate").value = d.manualRate;
+    if(d.freight !== undefined && d.freight !== "") $("freight").value = d.freight;
+    if(d.customs !== undefined && d.customs !== "") $("customs").value = d.customs;
+    if(d.other !== undefined && d.other !== "") $("other").value = d.other;
+  }catch(e){}
+}
+
+/* ---------- العرض ---------- */
+function effectiveRate(){
+  var m = parseFloat($("manualRate").value);
+  if(!isNaN(m) && m > 0) return m;
+  return state.rate;
+}
+
+function render(){
+  var rate = effectiveRate();
+  var manualUsed = !isNaN(parseFloat($("manualRate").value)) && parseFloat($("manualRate").value) > 0;
+  $("rateDisplay").innerHTML = (rate ? fmt(rate,2) : "—") + "<small> ج/م" + (manualUsed ? " (يدوي)" : "") + "</small>";
+  $("lastUpdate").textContent = state.updated ? ("آخر تحديث: " + new Date(state.updated).toLocaleString("ar-EG",{dateStyle:"short",timeStyle:"short"})) : "لم يتم التحديث";
+
+  var freight = parseFloat($("freight").value) || 0;
+  var customs = (parseFloat($("customs").value) || 0)/100;
+  var other = (parseFloat($("other").value) || 0)/100;
+
+  var rows = "", landed = "";
+  for(var i=0; i<COMMODITIES.length; i++){
+    var c = COMMODITIES[i];
+    var p = state.prices[c.id];
+    var usdTon = p ? c.toUSDton(p.raw) : null;
+    var egpTon = (usdTon !== null && rate) ? usdTon*rate : null;
+    var chgHtml = "";
+    if(p && p.chg !== null && p.chg !== undefined && !isNaN(p.chg)){
+      chgHtml = p.chg >= 0 ? '<span class="chg-up">▲' + fmt(Math.abs(p.chg),1) + '%</span>' : '<span class="chg-dn">▼' + fmt(Math.abs(p.chg),1) + '%</span>';
+    }
+    rows += "<tr><td><div class='cname'>" + c.name + "</div><div class='csym'>" + c.sym + " · " + c.unit + "</div></td>"
+      + "<td>" + (p ? fmt(p.raw,2) : "—") + " " + chgHtml + "</td>"
+      + "<td class='usd'>" + (usdTon !== null ? "$" + fmt(usdTon,1) : "—") + "</td>"
+      + "<td class='egp'>" + (egpTon !== null ? fmt(egpTon) : "—") + "</td>"
+      + "<td class='kg'>" + (egpTon !== null ? fmt(egpTon/1000,2) : "—") + "</td></tr>";
+
+    var landedUSD = usdTon !== null ? (usdTon + freight)*(1 + customs + other) : null;
+    var landedEGP = (landedUSD !== null && rate) ? landedUSD*rate : null;
+    landed += "<tr><td class='cname'>" + c.name + "</td>"
+      + "<td class='usd'>" + (landedUSD !== null ? "$" + fmt(landedUSD,1) : "—") + "</td>"
+      + "<td class='egp'>" + (landedEGP !== null ? fmt(landedEGP) : "—") + "</td>"
+      + "<td class='kg'>" + (landedEGP !== null ? fmt(landedEGP/1000,2) : "—") + "</td></tr>";
+  }
+  $("priceBody").innerHTML = rows;
+  $("landedBody").innerHTML = landed;
+}
+
+/* ---------- الإدخال اليدوي ---------- */
+function buildManualInputs(){
+  var html = "";
+  for(var i=0; i<COMMODITIES.length; i++){
+    var c = COMMODITIES[i];
+    var cur = state.prices[c.id] ? state.prices[c.id].raw : "";
+    html += "<div class='manual-row'><div class='mlbl'>" + c.name + " <span class='csym'>(" + c.unit + ")</span></div>"
+      + "<input type='number' inputmode='decimal' id='m_" + c.id + "' value='" + cur + "' placeholder='السعر'></div>";
+  }
+  $("manualInputs").innerHTML = html;
+}
+
+function applyManual(){
+  var changed = false;
+  for(var i=0; i<COMMODITIES.length; i++){
+    var c = COMMODITIES[i];
+    var v = parseFloat($("m_" + c.id).value);
+    if(!isNaN(v) && v > 0){ state.prices[c.id] = { raw: v, chg: null }; changed = true; }
+  }
+  if(changed){
+    state.updated = new Date().toISOString();
+    save(true); render();
+    showStatus("✅ تم تطبيق الأسعار اليدوية", "ok");
+  }
+}
+
+/* ---------- الأحداث ---------- */
+$("refreshBtn").addEventListener("click", refreshAll);
+$("applyManual").addEventListener("click", function(){ applyManual(); buildManualInputs(); });
+["manualRate","freight","customs","other"].forEach(function(id){
+  $(id).addEventListener("input", function(){ render(); save(true); });
+});
+
+/* ---------- زر المزامنة ---------- */
+$("syncBtn").addEventListener("click", function(){
+  var on=null; try{ on=localStorage.getItem("feedPrices_sync"); }catch(e){}
+  if(on==="1"){
+    try{ localStorage.setItem("feedPrices_sync","0"); }catch(e){}
+    if(fbRef){ try{ fbRef.off(); }catch(e){} fbRef=null; }
+    showStatus("⏹️ المزامنة اتوقفت","load");
+  }else{
+    enableSync();
+  }
+});
+
+/* ---------- تشغيل ---------- */
+load();
+buildManualInputs();
+render();
+restoreSync();
+if(navigator.onLine){ refreshAll(); }
+</script>
+</body>
+</html>
