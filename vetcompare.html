@@ -102,7 +102,7 @@ h1,h2,h3{margin:0}
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v16</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v17</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -1066,19 +1066,26 @@ function renderCoccidia(){
 
 
 
-/* ============ الأخبار اللايف (RSS عبر وسيط CORS) ============ */
+/* ============ الأخبار اللايف (نسخة محسّنة v2) ============ */
 var NEWS_SOURCES=[
-  {id:"gnews_en",ar:"أخبار عالمية",q:"poultry avian influenza disease vaccine",hl:"en",color:"#4a9eff"},
-  {id:"gnews_ar",ar:"أخبار عربية",q:"إنفلونزا الطيور أمراض الدواجن لقاح",hl:"ar",color:"#7bc86c"},
-  {id:"gnews_amr",ar:"مقاومة المضادات",q:"poultry antibiotic resistance colistin",hl:"en",color:"#e8c94f"}
+  {id:"gnews_en",ar:"أخبار عالمية",q:"poultry avian influenza disease vaccine",hl:"en-US",gl:"US",ceid:"US:en",color:"#4a9eff"},
+  {id:"gnews_ar",ar:"أخبار عربية",q:"إنفلونزا الطيور أمراض الدواجن",hl:"ar",gl:"EG",ceid:"EG:ar",color:"#7bc86c"},
+  {id:"gnews_amr",ar:"مقاومة المضادات",q:"poultry antibiotic resistance colistin",hl:"en-US",gl:"US",ceid:"US:en",color:"#e8c94f"}
 ];
 var newsCache={};
 var newsSourceActive="gnews_en";
 var newsLoading=false;
 
-function rssUrl(src){
-  var g="https://news.google.com/rss/search?q="+encodeURIComponent(src.q)+"&hl="+src.hl+"&gl="+(src.hl==="ar"?"EG":"US")+"&ceid="+(src.hl==="ar"?"EG:ar":"US:en");
-  return "https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(g)+"&count=15";
+function gnewsFeedUrl(src){
+  return "https://news.google.com/rss/search?q="+encodeURIComponent(src.q)+"&hl="+src.hl+"&gl="+src.gl+"&ceid="+encodeURIComponent(src.ceid);
+}
+/* عدة وسطاء CORS احتياطيين — نجرّبهم بالترتيب */
+function proxyUrls(feedUrl){
+  return [
+    "https://api.allorigins.win/raw?url="+encodeURIComponent(feedUrl),
+    "https://corsproxy.io/?url="+encodeURIComponent(feedUrl),
+    "https://api.codetabs.com/v1/proxy/?quest="+encodeURIComponent(feedUrl)
+  ];
 }
 
 function loadNews(srcId,force){
@@ -1086,83 +1093,90 @@ function loadNews(srcId,force){
   if(!src)return;
   newsSourceActive=srcId;
   renderNewsTabs();
-  /* استخدام الكاش لو موجود ومش force */
   if(newsCache[srcId]&&!force){renderNewsList(newsCache[srcId]);return}
   newsLoading=true;
-  $("#newsList").innerHTML='<div class="empty"><div class="em">⏳</div><h3>بحمّل آخر الأخبار…</h3><p>محتاج اتصال إنترنت</p></div>';
-  
+  $("#newsList").innerHTML='<div class="empty"><div class="em">⏳</div><h3>بحمّل آخر الأخبار…</h3><p>ثانية واحدة</p></div>';
+
+  var feed=gnewsFeedUrl(src);
+  var proxies=proxyUrls(feed);
+  tryProxy(proxies,0,srcId);
+}
+
+function tryProxy(proxies,idx,srcId){
+  if(idx>=proxies.length){newsLoading=false;showNewsError("تعذّر الوصول لكل المصادر — جرّب تاني بعد شوية");return}
   var done=false;
-  var timer=setTimeout(function(){if(!done){done=true;newsLoading=false;showNewsError("انتهت المهلة — تأكد من الاتصال")}},15000);
-  
-  fetch(rssUrl(src)).then(function(r){return r.json()}).then(function(data){
-    if(done)return;done=true;clearTimeout(timer);newsLoading=false;
-    if(data&&data.status==="ok"&&data.items&&data.items.length){
-      var items=data.items.map(function(it){
-        return {title:it.title||"",link:it.link||"",date:it.pubDate||"",desc:stripHtml(it.description||""),source:extractSource(it.title||"")};
-      });
+  var timer=setTimeout(function(){if(!done){done=true;tryProxy(proxies,idx+1,srcId)}},12000);
+  fetch(proxies[idx]).then(function(r){
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    return r.text();
+  }).then(function(xml){
+    if(done)return;done=true;clearTimeout(timer);
+    var items=parseRssXml(xml);
+    if(items&&items.length){
+      newsLoading=false;
       newsCache[srcId]=items;
-      renderNewsList(items);
+      if(srcId===newsSourceActive)renderNewsList(items);
     }else{
-      showNewsError("مفيش نتائج من المصدر");
+      tryProxy(proxies,idx+1,srcId);
     }
   }).catch(function(e){
-    if(done)return;done=true;clearTimeout(timer);newsLoading=false;
-    showNewsError("تعذّر التحميل — راجع الاتصال أو جرّب لاحقاً");
+    if(done)return;done=true;clearTimeout(timer);
+    tryProxy(proxies,idx+1,srcId);
   });
 }
 
-function stripHtml(s){
-  var tmp=s.replace(/<[^>]*>/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#39;/g,"'").replace(/&quot;/g,'"');
-  return tmp.trim().slice(0,200);
-}
-function extractSource(title){
-  /* Google News بيحط اسم المصدر بعد آخر " - " */
-  var idx=title.lastIndexOf(" - ");
-  return idx>-1?title.slice(idx+3):"";
-}
-function fmtNewsDate(d){
+function parseRssXml(xml){
   try{
-    var dt=new Date(d);
-    var now=new Date();
-    var diffH=Math.floor((now-dt)/3600000);
-    if(diffH<1)return "منذ دقائق";
-    if(diffH<24)return "منذ "+diffH+" ساعة";
-    var diffD=Math.floor(diffH/24);
-    if(diffD<30)return "منذ "+diffD+" يوم";
-    return dt.toLocaleDateString("ar-EG");
-  }catch(e){return ""}
+    var doc=new DOMParser().parseFromString(xml,"text/xml");
+    var nodes=doc.querySelectorAll("item");
+    var out=[];
+    for(var i=0;i<nodes.length&&i<15;i++){
+      var it=nodes[i];
+      var g=function(tag){var e=it.querySelector(tag);return e?e.textContent:""};
+      var title=g("title");
+      var link=g("link");
+      var pub=g("pubDate");
+      var desc=stripHtml(g("description"));
+      var source=g("source")||extractSource(title);
+      out.push({title:title,link:link,date:pub,desc:desc,source:source});
+    }
+    return out;
+  }catch(e){return []}
+}
+
+function stripHtml(s){
+  var t=(s||"").replace(/<[^>]*>/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&#\d+;/g,"");
+  return t.trim().slice(0,180);
+}
+function extractSource(title){var idx=title.lastIndexOf(" - ");return idx>-1?title.slice(idx+3):""}
+function cleanTitle(t){var idx=t.lastIndexOf(" - ");return idx>-1?t.slice(0,idx):t}
+function fmtNewsDate(d){
+  try{var dt=new Date(d);var now=new Date();var diffH=Math.floor((now-dt)/3600000);
+    if(isNaN(diffH))return "";
+    if(diffH<1)return "منذ دقائق";if(diffH<24)return "منذ "+diffH+" ساعة";
+    var diffD=Math.floor(diffH/24);if(diffD<30)return "منذ "+diffD+" يوم";
+    return dt.toLocaleDateString("ar-EG")}catch(e){return ""}
 }
 
 function showNewsError(msg){
   $("#newsList").innerHTML='<div class="empty"><div class="em">📡</div><h3>'+esc(msg)+'</h3>'+
-    '<p style="margin-top:10px">الأخبار اللايف محتاجة إنترنت. تقدر تشوف المستجدات المحققة علمياً في الأسفل ⬇️</p>'+
-    '<button class="btn" style="margin-top:14px;max-width:200px" onclick="loadNews(newsSourceActive,true)">🔄 حاول تاني</button>'+
-    '</div>';
-  /* عرض المستجدات الثابتة كـ fallback */
+    '<p style="margin-top:10px">جرّب مصدر تاني من فوق، أو شوف المستجدات المحققة تحت ⬇️</p>'+
+    '<button class="btn" style="margin-top:14px;max-width:200px" onclick="loadNews(newsSourceActive,true)">🔄 حاول تاني</button></div>';
   renderStaticFallback();
 }
-
 function renderStaticFallback(){
-  var el=$("#newsFallback");
-  if(!el)return;
+  var el=$("#newsFallback");if(!el)return;
   var top=UPDATES_KB.items.slice(0,5);
-  el.innerHTML='<div class="divider"></div><div class="mini" style="margin-bottom:8px">📚 مستجدات محققة علمياً (تعمل أوفلاين):</div>'+
-    top.map(function(u){
-      var c=UPDATES_KB.categories[u.cat];
-      return '<div class="prod" style="border-right:3px solid '+c.color+'">'+
-        '<div class="prod-h"><b style="font-size:13px">'+esc(u.title)+'</b></div>'+
-        '<div class="prod-meta" style="line-height:1.7">'+esc(u.body.slice(0,140))+'…</div>'+
-      '</div>';
+  el.innerHTML='<div class="divider" style="margin:16px 0;border-top:1px solid var(--line)"></div><div class="mini" style="margin-bottom:8px">📚 مستجدات محققة علمياً (تعمل أوفلاين):</div>'+
+    top.map(function(u){var c=UPDATES_KB.categories[u.cat];
+      return '<div class="prod" style="border-right:3px solid '+c.color+'"><div class="prod-h"><b style="font-size:13px">'+esc(u.title)+'</b></div><div class="prod-meta" style="line-height:1.7">'+esc(u.body.slice(0,140))+'…</div></div>';
     }).join("");
 }
-
 function renderNewsTabs(){
-  var chips=NEWS_SOURCES.map(function(s){
+  $("#newsSources").innerHTML=NEWS_SOURCES.map(function(s){
     return '<button class="chip'+(newsSourceActive===s.id?" on":"")+'" data-nsrc="'+s.id+'" style="'+(newsSourceActive===s.id?("border-color:"+s.color+";color:"+s.color):"")+'">'+esc(s.ar)+'</button>';
   }).join("");
-  $("#newsSources").innerHTML=chips;
 }
-
 function renderNewsList(items){
   var el=$("#newsList");
   if(!items||!items.length){showNewsError("مفيش أخبار");return}
@@ -1171,23 +1185,12 @@ function renderNewsList(items){
       '<div class="prod" style="border-right:3px solid #4a9eff">'+
         '<div class="prod-h"><b style="font-size:13.5px;line-height:1.6">'+esc(cleanTitle(it.title))+'</b></div>'+
         (it.desc?'<div class="prod-meta" style="line-height:1.7;margin-top:6px">'+esc(it.desc)+'…</div>':'')+
-        '<div class="prod-meta" style="display:flex;justify-content:space-between;margin-top:8px">'+
-          '<span style="color:var(--acc)">📰 '+esc(it.source||"مصدر")+'</span>'+
-          '<span>🕐 '+esc(fmtNewsDate(it.date))+'</span>'+
-        '</div>'+
+        '<div class="prod-meta" style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:var(--acc)">📰 '+esc(it.source||"مصدر")+'</span><span>🕐 '+esc(fmtNewsDate(it.date))+'</span></div>'+
         '<div class="prod-meta" style="color:var(--acc);font-size:11px;margin-top:4px">اضغط للقراءة الكاملة ↗</div>'+
-      '</div>'+
-    '</a>';
+      '</div></a>';
   }).join("");
-  /* برضه اعرض الـ fallback الثابت تحت الأخبار اللايف */
   renderStaticFallback();
 }
-function cleanTitle(t){
-  var idx=t.lastIndexOf(" - ");
-  return idx>-1?t.slice(0,idx):t;
-}
-
-
 
 /* تبديل وضع المستجدات: لايف / محقق */
 var updMode="live";
