@@ -132,11 +132,11 @@ var store = {
 /* ---------- تعريف الخامات ---------- */
 /* toUSDton: تحويل سعر العقد إلى دولار/طن متري */
 var COMMODITIES = [
-  { id:"corn", name:"ذرة صفراء",  sym:"ZC", stooq:"zc.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*39.3680; } },
-  { id:"sbm",  name:"كسب صويا",   sym:"ZM", stooq:"zm.f", unit:"$/طن قصير",     toUSDton:function(p){ return p*1.10231; } },
-  { id:"soy",  name:"فول صويا",   sym:"ZS", stooq:"zs.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*36.7437; } },
-  { id:"wheat",name:"قمح",        sym:"ZW", stooq:"zw.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*36.7437; } },
-  { id:"soyoil",name:"زيت صويا",  sym:"ZL", stooq:"zl.f", unit:"سنت/رطل",       toUSDton:function(p){ return p/100*2204.62; } }
+  { id:"corn", name:"ذرة صفراء",  sym:"ZC", stooq:"zc.f", unit:"سنت/بوشل",      ref:"https://www.barchart.com/futures/quotes/ZCY00", toUSDton:function(p){ return p/100*39.3680; } },
+  { id:"sbm",  name:"كسب صويا",   sym:"ZM", stooq:"zm.f", unit:"$/طن قصير",     ref:"https://www.barchart.com/futures/quotes/ZMY00", toUSDton:function(p){ return p*1.10231; } },
+  { id:"soy",  name:"فول صويا",   sym:"ZS", stooq:"zs.f", unit:"سنت/بوشل",      ref:"https://www.barchart.com/futures/quotes/ZSY00", toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"wheat",name:"قمح",        sym:"ZW", stooq:"zw.f", unit:"سنت/بوشل",      ref:"https://www.barchart.com/futures/quotes/ZWY00", toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"soyoil",name:"زيت صويا",  sym:"ZL", stooq:"zl.f", unit:"سنت/رطل",       ref:"https://www.barchart.com/futures/quotes/ZLY00", toUSDton:function(p){ return p/100*2204.62; } }
 ];
 
 var state = {
@@ -376,11 +376,12 @@ function render(){
 
 /* ---------- الإدخال اليدوي ---------- */
 function buildManualInputs(){
-  var html = "";
+  var html = "<div style='font-size:.8rem;color:var(--muted);margin-bottom:10px;line-height:1.7'>اكتب سعر العقد من الموقع (اضغط 🔗 يفتحلك السعر)، والبرنامج يحوّله تلقائياً لدولار/طن وجنيه/طن.</div>";
   for(var i=0; i<COMMODITIES.length; i++){
     var c = COMMODITIES[i];
     var cur = state.prices[c.id] ? state.prices[c.id].raw : "";
-    html += "<div class='manual-row'><div class='mlbl'>" + c.name + " <span class='csym'>(" + c.unit + ")</span></div>"
+    var reflink = c.ref ? "<a href='"+c.ref+"' target='_blank' rel='noopener' style='color:var(--blue);text-decoration:none;font-size:.9rem' title='افتح السعر'>🔗</a>" : "";
+    html += "<div class='manual-row'><div class='mlbl'>" + reflink + " " + c.name + " <span class='csym'>(" + c.unit + ")</span></div>"
       + "<input type='number' inputmode='decimal' id='m_" + c.id + "' value='" + cur + "' placeholder='السعر'></div>";
   }
   $("manualInputs").innerHTML = html;
