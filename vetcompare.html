@@ -102,7 +102,7 @@ h1,h2,h3{margin:0}
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v17</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v19</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -1068,9 +1068,9 @@ function renderCoccidia(){
 
 /* ============ الأخبار اللايف (نسخة محسّنة v2) ============ */
 var NEWS_SOURCES=[
-  {id:"gnews_en",ar:"أخبار عالمية",q:"poultry avian influenza disease vaccine",hl:"en-US",gl:"US",ceid:"US:en",color:"#4a9eff"},
-  {id:"gnews_ar",ar:"أخبار عربية",q:"إنفلونزا الطيور أمراض الدواجن",hl:"ar",gl:"EG",ceid:"EG:ar",color:"#7bc86c"},
-  {id:"gnews_amr",ar:"مقاومة المضادات",q:"poultry antibiotic resistance colistin",hl:"en-US",gl:"US",ceid:"US:en",color:"#e8c94f"}
+  {id:"gnews_en",ar:"أخبار عالمية",q:"poultry avian influenza",hl:"en-US",gl:"US",ceid:"US:en",color:"#4a9eff"},
+  {id:"gnews_ar",ar:"أخبار عربية",q:"إنفلونزا الطيور الدواجن",hl:"ar",gl:"EG",ceid:"EG:ar",color:"#7bc86c"},
+  {id:"gnews_amr",ar:"مقاومة المضادات",q:"poultry antibiotic resistance",hl:"en-US",gl:"US",ceid:"US:en",color:"#e8c94f"}
 ];
 var newsCache={};
 var newsSourceActive="gnews_en";
@@ -1083,8 +1083,10 @@ function gnewsFeedUrl(src){
 function proxyUrls(feedUrl){
   return [
     "https://api.allorigins.win/raw?url="+encodeURIComponent(feedUrl),
+    "https://api.codetabs.com/v1/proxy/?quest="+encodeURIComponent(feedUrl),
     "https://corsproxy.io/?url="+encodeURIComponent(feedUrl),
-    "https://api.codetabs.com/v1/proxy/?quest="+encodeURIComponent(feedUrl)
+    "https://thingproxy.freeboard.io/fetch/"+feedUrl,
+    "https://api.allorigins.win/get?url="+encodeURIComponent(feedUrl)
   ];
 }
 
@@ -1093,6 +1095,15 @@ function loadNews(srcId,force){
   if(!src)return;
   newsSourceActive=srcId;
   renderNewsTabs();
+  /* كشف التشغيل المحلي: الأخبار اللايف تحتاج https (GitHub Pages) */
+  var proto=(location.protocol||"");
+  if(proto==="file:"||proto.indexOf("edge")>-1||proto.indexOf("content")>-1){
+    newsLoading=false;
+    $("#newsList").innerHTML='<div class="empty"><div class="em">🌐</div><h3>الأخبار اللايف تحتاج فتح البرنامج أونلاين</h3>'+
+      '<p style="margin-top:10px;line-height:1.9">إنت فاتح الملف <b>محلياً</b> من جهازك، والمتصفح بيمنع جلب الأخبار في الوضع ده لأسباب أمنية.<br><br>عشان تشوف الأخبار اللايف، افتح البرنامج من الرابط الأونلاين:<br><b style="color:var(--acc);direction:ltr;display:inline-block;margin-top:6px">mohamedelsadek-elsadek.github.io</b></p></div>';
+    renderStaticFallback();
+    return;
+  }
   if(newsCache[srcId]&&!force){renderNewsList(newsCache[srcId]);return}
   newsLoading=true;
   $("#newsList").innerHTML='<div class="empty"><div class="em">⏳</div><h3>بحمّل آخر الأخبار…</h3><p>ثانية واحدة</p></div>';
@@ -1105,12 +1116,17 @@ function loadNews(srcId,force){
 function tryProxy(proxies,idx,srcId){
   if(idx>=proxies.length){newsLoading=false;showNewsError("تعذّر الوصول لكل المصادر — جرّب تاني بعد شوية");return}
   var done=false;
-  var timer=setTimeout(function(){if(!done){done=true;tryProxy(proxies,idx+1,srcId)}},12000);
+  var timer=setTimeout(function(){if(!done){done=true;tryProxy(proxies,idx+1,srcId)}},15000);
   fetch(proxies[idx]).then(function(r){
     if(!r.ok)throw new Error("HTTP "+r.status);
     return r.text();
-  }).then(function(xml){
+  }).then(function(raw){
     if(done)return;done=true;clearTimeout(timer);
+    var xml=raw;
+    /* بعض الوسطاء بيرجّعوا JSON مغلّف {contents:"...xml..."} */
+    if(raw&&raw.charAt(0)==="{"){
+      try{var j=JSON.parse(raw);if(j&&j.contents)xml=j.contents}catch(e){}
+    }
     var items=parseRssXml(xml);
     if(items&&items.length){
       newsLoading=false;
