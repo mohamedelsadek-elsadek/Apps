@@ -110,8 +110,8 @@ details summary{cursor:pointer; font-size:.85rem; font-weight:700; color:var(--b
 </div>
 
 <div class="card">
-  <details>
-    <summary>✍️ إدخال يدوي (لو التحديث التلقائي وقع)</summary>
+  <details id="manualDetails">
+    <summary>✍️ إدخال يدوي (اكتب سعر البوشل من أي موقع أسعار)</summary>
     <div style="margin-top:10px;" id="manualInputs"></div>
     <button class="btn-sm" id="applyManual" style="width:100%; margin-top:6px;">تطبيق الأسعار اليدوية</button>
     <div class="hint">دخّل سعر العقد بنفس وحدة البورصة (سنت/بوشل أو دولار/طن قصير أو سنت/رطل) والبرنامج يحوّل.</div>
@@ -223,32 +223,40 @@ function fetchRate(){
 
 /* Stooq CSV عبر بروكسي لتخطي CORS، مع بديلين */
 function fetchStooq(){
-  var symbols = COMMODITIES.map(function(c){ return c.stooq; }).join(" ");
-  var stooqUrl = "https://stooq.com/q/l/?s=" + encodeURIComponent(symbols) + "&f=sd2t2ohlcv&h&e=csv";
-  var proxies = [
-    "https://api.allorigins.win/raw?url=" + encodeURIComponent(stooqUrl),
-    "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(stooqUrl),
-    "https://corsproxy.io/?url=" + encodeURIComponent(stooqUrl),
-    "https://thingproxy.freeboard.io/fetch/" + stooqUrl,
-    "https://api.allorigins.win/get?url=" + encodeURIComponent(stooqUrl)
+  /* Stooq بيرفض العقود الآجلة (.f) للتحميل — نجرّب الفورية (.c/.us) أول، وبعدها الآجلة */
+  var symVariants = COMMODITIES.map(function(c){ return c.stooq; });
+  var altVariants = COMMODITIES.map(function(c){ return c.stooq.replace(/\.f$/,".c"); });
+  function buildUrl(syms){
+    return "https://stooq.com/q/l/?s=" + encodeURIComponent(syms.join(" ")) + "&f=sd2t2ohlcv&h&e=csv";
+  }
+  var attempts = [buildUrl(altVariants), buildUrl(symVariants)];
+  var proxyTemplates = [
+    function(u){ return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+    function(u){ return "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u); },
+    function(u){ return "https://corsproxy.io/?url=" + encodeURIComponent(u); },
+    function(u){ return "https://thingproxy.freeboard.io/fetch/" + u; },
+    function(u){ return "https://api.allorigins.win/get?url=" + encodeURIComponent(u); }
   ];
-  function tryProxy(i){
-    if(i >= proxies.length) return Promise.reject(new Error("all proxies failed"));
-    return fetchWithTimeout(proxies[i], 15000)
+  /* اصنع قائمة كل التركيبات: كل رابط × كل وسيط */
+  var jobs = [];
+  attempts.forEach(function(url){ proxyTemplates.forEach(function(t){ jobs.push(t(url)); }); });
+
+  function tryJob(i){
+    if(i >= jobs.length) return Promise.reject(new Error("all failed"));
+    return fetchWithTimeout(jobs[i], 15000)
       .then(function(r){ if(!r.ok) throw new Error("http " + r.status); return r.text(); })
       .then(function(raw){
         var csv = raw;
-        /* بعض الوسطاء بيرجّعوا JSON مغلّف {contents:"...csv..."} */
         if(raw && raw.charAt(0) === "{"){
           try{ var j = JSON.parse(raw); if(j && j.contents) csv = j.contents; }catch(e){}
         }
         var parsed = parseStooqCSV(csv);
-        if(Object.keys(parsed).length === 0) throw new Error("empty csv");
+        if(Object.keys(parsed).length === 0) throw new Error("empty");
         return parsed;
       })
-      .catch(function(){ return tryProxy(i+1); });
+      .catch(function(){ return tryJob(i+1); });
   }
-  return tryProxy(0);
+  return tryJob(0);
 }
 
 function parseStooqCSV(csv){
@@ -258,11 +266,13 @@ function parseStooqCSV(csv){
     var cols = lines[i].split(",");
     if(cols.length < 7) continue;
     var sym = (cols[0]||"").toLowerCase();
+    var base = sym.replace(/\.[a-z]+$/,"");  /* zc.c أو zc.f → zc */
     var open = parseFloat(cols[3]);
     var close = parseFloat(cols[6]);
     if(isNaN(close)) continue;
     for(var k=0; k<COMMODITIES.length; k++){
-      if(COMMODITIES[k].stooq === sym){
+      var cbase = COMMODITIES[k].stooq.replace(/\.[a-z]+$/,"");
+      if(cbase === base){
         var chg = (!isNaN(open) && open>0) ? ((close-open)/open*100) : null;
         out[COMMODITIES[k].id] = { raw: close, chg: chg };
       }
@@ -292,8 +302,8 @@ function refreshAll(){
     }
     render();
     if(errParts.length === 0){ showStatus("✅ تم التحديث بنجاح", "ok"); }
-    else if(okParts.length){ showStatus("⚠️ اتحدث: " + okParts.join(" و ") + " — فشل: " + errParts.join(" و ") + ". استخدم الإدخال اليدوي.", "err"); }
-    else { showStatus("❌ فشل التحديث — تأكد من الإنترنت أو استخدم الإدخال اليدوي (آخر أسعار محفوظة معروضة)", "err"); }
+    else if(okParts.length){ showStatus("⚠️ اتحدث: " + okParts.join(" و ") + " — فشل: " + errParts.join(" و ") + ". استخدم الإدخال اليدوي.", "err"); if($("manualDetails")) $("manualDetails").open=true; }
+    else { showStatus("❌ فشل جلب أسعار البورصة — البورصة بتمنع التحميل التلقائي أحياناً. اكتب سعر البوشل يدوياً من موقع أسعار (مثل barchart.com) وهنحسبلك الباقي.", "err"); if($("manualDetails")) $("manualDetails").open=true; }
     $("refreshBtn").disabled = false;
   });
 }
