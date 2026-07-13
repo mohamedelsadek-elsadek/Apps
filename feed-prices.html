@@ -227,13 +227,21 @@ function fetchStooq(){
   var stooqUrl = "https://stooq.com/q/l/?s=" + encodeURIComponent(symbols) + "&f=sd2t2ohlcv&h&e=csv";
   var proxies = [
     "https://api.allorigins.win/raw?url=" + encodeURIComponent(stooqUrl),
-    "https://corsproxy.io/?url=" + encodeURIComponent(stooqUrl)
+    "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(stooqUrl),
+    "https://corsproxy.io/?url=" + encodeURIComponent(stooqUrl),
+    "https://thingproxy.freeboard.io/fetch/" + stooqUrl,
+    "https://api.allorigins.win/get?url=" + encodeURIComponent(stooqUrl)
   ];
   function tryProxy(i){
     if(i >= proxies.length) return Promise.reject(new Error("all proxies failed"));
     return fetchWithTimeout(proxies[i], 15000)
       .then(function(r){ if(!r.ok) throw new Error("http " + r.status); return r.text(); })
-      .then(function(csv){
+      .then(function(raw){
+        var csv = raw;
+        /* بعض الوسطاء بيرجّعوا JSON مغلّف {contents:"...csv..."} */
+        if(raw && raw.charAt(0) === "{"){
+          try{ var j = JSON.parse(raw); if(j && j.contents) csv = j.contents; }catch(e){}
+        }
         var parsed = parseStooqCSV(csv);
         if(Object.keys(parsed).length === 0) throw new Error("empty csv");
         return parsed;
