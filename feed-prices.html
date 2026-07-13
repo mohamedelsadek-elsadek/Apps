@@ -112,6 +112,7 @@ details summary{cursor:pointer; font-size:.85rem; font-weight:700; color:var(--b
 <div class="card">
   <details id="manualDetails">
     <summary>✍️ إدخال يدوي (اكتب سعر البوشل من أي موقع أسعار)</summary>
+    <a href="https://sa.investing.com/commodities/grains" target="_blank" rel="noopener" class="btn" style="display:block;text-align:center;text-decoration:none;margin:10px 0;background:#1a7f37;border-color:#1a7f37;">🌐 افتح كل الأسعار بالعربي (Investing) ↗</a>
     <div style="margin-top:10px;" id="manualInputs"></div>
     <button class="btn-sm" id="applyManual" style="width:100%; margin-top:6px;">تطبيق الأسعار اليدوية</button>
     <div class="hint">دخّل سعر العقد بنفس وحدة البورصة (سنت/بوشل أو دولار/طن قصير أو سنت/رطل) والبرنامج يحوّل.</div>
@@ -132,11 +133,11 @@ var store = {
 /* ---------- تعريف الخامات ---------- */
 /* toUSDton: تحويل سعر العقد إلى دولار/طن متري */
 var COMMODITIES = [
-  { id:"corn", name:"ذرة صفراء",  sym:"ZC", stooq:"zc.f", unit:"سنت/بوشل",      ref:"https://www.barchart.com/futures/quotes/ZCY00", toUSDton:function(p){ return p/100*39.3680; } },
-  { id:"sbm",  name:"كسب صويا",   sym:"ZM", stooq:"zm.f", unit:"$/طن قصير",     ref:"https://www.barchart.com/futures/quotes/ZMY00", toUSDton:function(p){ return p*1.10231; } },
-  { id:"soy",  name:"فول صويا",   sym:"ZS", stooq:"zs.f", unit:"سنت/بوشل",      ref:"https://www.barchart.com/futures/quotes/ZSY00", toUSDton:function(p){ return p/100*36.7437; } },
-  { id:"wheat",name:"قمح",        sym:"ZW", stooq:"zw.f", unit:"سنت/بوشل",      ref:"https://www.barchart.com/futures/quotes/ZWY00", toUSDton:function(p){ return p/100*36.7437; } },
-  { id:"soyoil",name:"زيت صويا",  sym:"ZL", stooq:"zl.f", unit:"سنت/رطل",       ref:"https://www.barchart.com/futures/quotes/ZLY00", toUSDton:function(p){ return p/100*2204.62; } }
+  { id:"corn", name:"ذرة صفراء",  sym:"ZC", stooq:"zc.f", unit:"سنت/بوشل",      ref:"https://sa.investing.com/commodities/us-corn", toUSDton:function(p){ return p/100*39.3680; } },
+  { id:"sbm",  name:"كسب صويا",   sym:"ZM", stooq:"zm.f", unit:"$/طن قصير",     ref:"https://sa.investing.com/commodities/us-soybean-meal", toUSDton:function(p){ return p*1.10231; } },
+  { id:"soy",  name:"فول صويا",   sym:"ZS", stooq:"zs.f", unit:"سنت/بوشل",      ref:"https://sa.investing.com/commodities/us-soybeans", toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"wheat",name:"قمح",        sym:"ZW", stooq:"zw.f", unit:"سنت/بوشل",      ref:"https://sa.investing.com/commodities/us-wheat", toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"soyoil",name:"زيت صويا",  sym:"ZL", stooq:"zl.f", unit:"سنت/رطل",       ref:"https://sa.investing.com/commodities/us-soybean-oil", toUSDton:function(p){ return p/100*2204.62; } }
 ];
 
 var state = {
@@ -376,13 +377,15 @@ function render(){
 
 /* ---------- الإدخال اليدوي ---------- */
 function buildManualInputs(){
-  var html = "<div style='font-size:.8rem;color:var(--muted);margin-bottom:10px;line-height:1.7'>اكتب سعر العقد من الموقع (اضغط 🔗 يفتحلك السعر)، والبرنامج يحوّله تلقائياً لدولار/طن وجنيه/طن.</div>";
+  var examples = {corn:"مثلاً 467", wheat:"مثلاً 640", soy:"مثلاً 1197", sbm:"مثلاً 330", soyoil:"مثلاً 54"};
+  var html = "<div style='font-size:.8rem;color:var(--muted);margin-bottom:10px;line-height:1.7'>اضغط 🔗 جنب السلعة يفتحلك سعرها، اكتب الرقم زي ما هو، والبرنامج يحوّله لدولار/طن وجنيه/طن.</div>";
   for(var i=0; i<COMMODITIES.length; i++){
     var c = COMMODITIES[i];
     var cur = state.prices[c.id] ? state.prices[c.id].raw : "";
-    var reflink = c.ref ? "<a href='"+c.ref+"' target='_blank' rel='noopener' style='color:var(--blue);text-decoration:none;font-size:.9rem' title='افتح السعر'>🔗</a>" : "";
+    var ph = examples[c.id] || "السعر";
+    var reflink = c.ref ? "<a href='"+c.ref+"' target='_blank' rel='noopener' style='color:var(--blue);text-decoration:none;font-size:.95rem' title='افتح سعر "+c.name+"'>🔗</a>" : "";
     html += "<div class='manual-row'><div class='mlbl'>" + reflink + " " + c.name + " <span class='csym'>(" + c.unit + ")</span></div>"
-      + "<input type='number' inputmode='decimal' id='m_" + c.id + "' value='" + cur + "' placeholder='السعر'></div>";
+      + "<input type='number' inputmode='decimal' id='m_" + c.id + "' value='" + cur + "' placeholder='" + ph + "'></div>";
   }
   $("manualInputs").innerHTML = html;
 }
