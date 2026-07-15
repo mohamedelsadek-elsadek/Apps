@@ -284,9 +284,10 @@ var SS={
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000)}
 
 /* ---------- state ---------- */
+var DEFAULT_FB_URL='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
 var DB={companies:[],items:[],invoices:[],counter:0,fbUrl:''};
 var editInvId=null;
-function load(){var r=SS.get('grdb');if(r){try{DB=JSON.parse(r)}catch(e){}}if(!DB.companies)DB.companies=[];if(!DB.items)DB.items=[];if(!DB.invoices)DB.invoices=[];if(!DB.counter)DB.counter=0;if(!DB.fbUrl)DB.fbUrl=''}
+function load(){var r=SS.get('grdb');if(r){try{DB=JSON.parse(r)}catch(e){}}if(!DB.companies)DB.companies=[];if(!DB.items)DB.items=[];if(!DB.invoices)DB.invoices=[];if(!DB.counter)DB.counter=0;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL}
 function save(){SS.set('grdb',JSON.stringify(DB));autoBackup();pushFb()}
 
 /* ---------- auto backup: 30 copies / 30 days ---------- */
@@ -668,7 +669,17 @@ function importData(e){
 /* ---------- init ---------- */
 function renderAll(){renderComps();renderItems();refreshDropdowns();renderBackups();document.getElementById('fbUrl').value=DB.fbUrl||'';setSync(true)}
 load();renderAll();resetInvoice();
-if(DB.fbUrl){setSync(true);pullFb()}
+if(DB.fbUrl){
+  setSync(true);
+  /* أول اتصال: لو السحابة فيها بيانات اسحبها، لو فاضية ادفع المحلي */
+  fetch(DB.fbUrl+'/receipt_app.json').then(function(r){return r.json()}).then(function(d){
+    if(d && (( d.companies&&d.companies.length) || (d.invoices&&d.invoices.length) || (d.items&&d.items.length))){
+      DB=d; SS.set('grdb',JSON.stringify(DB)); renderAll(); setSync(true);
+    } else {
+      pushFb();
+    }
+  }).catch(function(){setSync(false)});
+}
 </script>
 </body>
 </html>
