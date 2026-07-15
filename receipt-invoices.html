@@ -3,6 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- OG: شكل المشاركة في واتساب/تليجرام -->
+<meta name="description" content="فواتير مرقّمة بشعار كل شركة، سجل كامل، تصدير PDF، ومزامنة سحابية.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="مركز التطبيقات">
+<meta property="og:locale" content="ar_EG">
+<meta property="og:title" content="فواتير استلام بضاعة">
+<meta property="og:description" content="فواتير مرقّمة بشعار كل شركة، سجل كامل، تصدير PDF، ومزامنة سحابية.">
+<meta property="og:url" content="https://mohamedelsadek-elsadek.github.io/Apps/receipt-invoices.html">
+<meta property="og:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/receipt-invoices.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="فواتير استلام بضاعة">
+<meta name="twitter:description" content="فواتير مرقّمة بشعار كل شركة، سجل كامل، تصدير PDF، ومزامنة سحابية.">
+<meta name="twitter:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/receipt-invoices.png">
 <title>فواتير استلام بضاعة</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
@@ -605,29 +621,70 @@ function buildInvoiceHTML(inv){
     '<div class="inv-sign"><div class="s">المدير المالي</div><div class="s">ختم الشركة</div><div class="s">توقيع المستلم</div></div>'+
   '</div>';
 }
+/* CSS مستقل للفاتورة (بدون متغيرات) — للطباعة في إطار منفصل */
+var INV_CSS='.inv{background:#fff;color:#222;font-family:-apple-system,Tahoma,sans-serif}.inv-head{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:3px solid #1e3a5f}.inv-logo{width:120px;height:120px;border:1px solid #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}.inv-logo img{max-width:100%;max-height:100%}.inv-co{text-align:left}.inv-co h1{color:#1e3a5f;font-size:26px}.inv-co .tag{color:#5a9b5e;font-weight:700;font-size:14px;margin-bottom:8px}.inv-co p{font-size:13px;color:#444}.inv-meta{display:flex;gap:14px;margin:16px 0}.inv-meta .blk{flex:1;border:1px solid #ddd;border-radius:10px;padding:12px}.inv-meta .blk h3{color:#1e3a5f;font-size:13px;border-bottom:2px solid #5a9b5e;padding-bottom:5px;margin-bottom:8px;display:inline-block}.inv-meta .blk .r{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px dotted #ccc}.inv-meta .blk .r b{color:#333}table.inv-tbl{width:100%;border-collapse:collapse;margin-top:6px}table.inv-tbl th{background:#1e3a5f;color:#fff;padding:10px;font-size:13px}table.inv-tbl td{border:1px solid #e0e0e0;padding:9px;font-size:13px;text-align:center}table.inv-tbl td.desc{text-align:right}.inv-foot{display:flex;justify-content:space-between;margin-top:16px;gap:20px}.inv-terms{flex:1;font-size:12px;color:#555}.inv-terms h4{color:#1e3a5f;margin-bottom:6px}.inv-totals{width:260px}.inv-totals .r{display:flex;justify-content:space-between;padding:7px 10px;border-bottom:1px solid #eee;font-size:13px}.inv-totals .grand{background:#5a9b5e;color:#fff;font-weight:700;border-radius:8px;font-size:15px;padding:11px}.inv-sign{display:flex;justify-content:space-between;margin-top:40px;text-align:center;font-size:12px;color:#666}.inv-sign .s{flex:1;border-top:1px solid #333;margin:0 14px;padding-top:6px}';
+function invDocHTML(inv){
+  return '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">'
+    +'<meta name="viewport" content="width=794">'
+    +'<title>'+esc(inv.no||'فاتورة')+'</title><style>'
+    +'*{box-sizing:border-box}'
+    +'body{margin:0;padding:10px;background:#fff;color:#222;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'@page{margin:12mm}'
+    +INV_CSS
+    +'</style></head><body>'+buildInvoiceHTML(inv)+'</body></html>';
+}
 function printInvoice(inv){
-  document.getElementById('printArea').innerHTML=buildInvoiceHTML(inv);
-  setTimeout(function(){window.print()},120);
+  var old=document.getElementById('printFrame');
+  if(old&&old.parentNode)old.parentNode.removeChild(old);
+  var f=document.createElement('iframe');
+  f.id='printFrame';
+  f.style.cssText='position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;';
+  document.body.appendChild(f);
+  var d=f.contentWindow.document;
+  d.open(); d.write(invDocHTML(inv)); d.close();
+  setTimeout(function(){
+    try{
+      f.contentWindow.focus();
+      f.contentWindow.print();
+    }catch(e){
+      openInvWindow(inv);
+    }
+  },500);
+}
+/* بديل: يفتح الفاتورة في صفحة مستقلة (لو الطباعة ممنوعة في المتصفح الجوّاني) */
+function openInvWindow(inv){
+  var w=window.open('','_blank');
+  if(!w){toast('المتصفح منع فتح النافذة — افتح الصفحة في Safari');return}
+  w.document.open(); w.document.write(invDocHTML(inv)); w.document.close();
+  setTimeout(function(){try{w.focus();w.print()}catch(e){}},400);
 }
 function pdfInv(id){
-  var inv=DB.invoices.find(function(x){return x.id===id})||id;
-  if(typeof inv==='string')return;
+  var inv=DB.invoices.find(function(x){return x.id===id});
+  if(!inv){toast('الفاتورة مش موجودة');return}
   exportPdf(inv);
 }
 function exportPdf(inv){
-  if(typeof html2pdf==='undefined'){toast('مكتبة PDF لم تُحمّل — تأكد من الاتصال');return}
+  if(typeof html2pdf==='undefined'){toast('مكتبة PDF مش محمّلة — هفتحها للطباعة');printInvoice(inv);return}
+  /* لازم العنصر يكون ظاهر فعلاً على الشاشة عشان html2canvas يقدر يصوّره (خصوصًا على iPhone) */
+  var wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;inset:0;background:#fff;z-index:99999;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:8px';
   var holder=document.createElement('div');
-  holder.style.cssText='position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:24px';
+  holder.style.cssText='width:794px;max-width:100%;background:#fff;padding:20px;flex:0 0 auto';
   holder.innerHTML=buildInvoiceHTML(inv);
-  document.body.appendChild(holder);
+  wrap.appendChild(holder);
+  document.body.appendChild(wrap);
   toast('جاري إنشاء PDF...');
-  html2pdf().set({
-    margin:6,
-    filename:inv.no+'.pdf',
-    image:{type:'jpeg',quality:0.97},
-    html2canvas:{scale:2,useCORS:true},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).from(holder).save().then(function(){document.body.removeChild(holder)}).catch(function(){document.body.removeChild(holder);toast('فشل إنشاء PDF')});
+  function cleanup(){ if(wrap.parentNode) wrap.parentNode.removeChild(wrap); }
+  setTimeout(function(){
+    html2pdf().set({
+      margin:6,
+      filename:(inv.no||'invoice')+'.pdf',
+      image:{type:'jpeg',quality:0.97},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    }).from(holder).save().then(function(){cleanup();toast('تم حفظ PDF')})
+      .catch(function(){cleanup();toast('فشل PDF — جرّب زر الطباعة');});
+  },250);
 }
 
 /* ---------- firebase ---------- */
