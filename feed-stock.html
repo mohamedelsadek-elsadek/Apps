@@ -189,7 +189,7 @@
       <h2>📊 Excel — الأرصدة</h2>
       <button class="btn blue" onclick="expBal()">⬇️ نزّل قالب الأرصدة</button>
       <button class="btn-sm" style="width:100%;margin-top:8px" id="impBalBtn" onclick="document.getElementById('fBal').click()">⬆️ ارفع الأرصدة المعدّلة</button>
-      <input type="file" id="fBal" accept=".xlsx,.xls,.csv" style="display:none" onchange="impBal(this)">
+      <input type="file" id="fBal" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="impBal(this)">
       <div class="hint">نزّل الملف → عدّل عمود <b>الرصيد</b> → ارفعه تاني. الأصناف الجديدة بتتضاف، والموجودة بيتحدّث رصيدها <b>مع الحفاظ على المورد والمعدلات</b>.</div>
     </div>
   </div>
@@ -230,7 +230,7 @@
       <h2>📊 Excel — الحركات</h2>
       <button class="btn blue" onclick="expMov()">⬇️ صدّر الحركات (حسب الفترة)</button>
       <button class="btn-sm" style="width:100%;margin-top:8px" id="impMovBtn" onclick="document.getElementById('fMov').click()">⬆️ استورد حركات</button>
-      <input type="file" id="fMov" accept=".xlsx,.xls,.csv" style="display:none" onchange="impMov(this)">
+      <input type="file" id="fMov" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="impMov(this)">
       <div class="hint">الاستيراد بيطبّق كل حركة على الرصيد فوراً. الأعمدة: التاريخ · الصنف · النوع (وارد/منصرف) · الكمية · ملاحظة.</div>
     </div>
   </div>
@@ -903,36 +903,58 @@ function sheetOut(rows,sheet,fname){
     askOut(toCsv(rows),fname+'.csv');
   });
 }
+function parseCsvText(txt){
+  txt=String(txt).replace(/^\ufeff/,'');
+  return txt.split(/\r?\n/).filter(function(l){return l.trim()}).map(function(l){
+    var out=[],cur='',q=false;
+    for(var i=0;i<l.length;i++){
+      var ch=l[i];
+      if(q){ if(ch==='"'&&l[i+1]==='"'){cur+='"';i++} else if(ch==='"'){q=false} else cur+=ch; }
+      else { if(ch==='"')q=true; else if(ch===','||ch===';'){out.push(cur);cur=''} else cur+=ch; }
+    }
+    out.push(cur);return out;
+  });
+}
 function readSheet(file){
   return new Promise(function(res,rej){
-    var isCsv=/\.csv$/i.test(file.name);
+    var done=false;
+    var ok=function(v){if(done)return;done=true;res(v)};
+    var bad=function(e){if(done)return;done=true;rej(e||new Error('read'))};
+    /* مهلة أمان: لو القارئ علّق (بيحصل على iOS) منستناش للأبد */
+    setTimeout(function(){bad(new Error('timeout'))},20000);
+
+    var isCsv=/\.(csv|txt)$/i.test(file.name||'');
     var rd=new FileReader();
-    rd.onerror=rej;
+    rd.onerror=function(){bad(new Error('filereader'))};
+
     if(isCsv){
-      rd.onload=function(){
-        var txt=String(rd.result).replace(/^\ufeff/,'');
-        var rows=txt.split(/\r?\n/).filter(function(l){return l.trim()}).map(function(l){
-          var out=[],cur='',q=false;
-          for(var i=0;i<l.length;i++){
-            var ch=l[i];
-            if(q){ if(ch==='"'&&l[i+1]==='"'){cur+='"';i++} else if(ch==='"'){q=false} else cur+=ch; }
-            else { if(ch==='"')q=true; else if(ch===','){out.push(cur);cur=''} else cur+=ch; }
-          }
-          out.push(cur);return out;
-        });
-        res(rows);
-      };
-      rd.readAsText(file,'utf-8');
-    }else{
-      rd.onload=function(){
-        ensureXLSX().then(function(X){
-          var wb=X.read(new Uint8Array(rd.result),{type:'array'});
-          var ws=wb.Sheets[wb.SheetNames[0]];
-          res(X.utils.sheet_to_json(ws,{header:1,defval:''}));
-        }).catch(rej);
-      };
-      rd.readAsArrayBuffer(file);
+      rd.onload=function(){ try{ ok(parseCsvText(rd.result)) }catch(e){ bad(e) } };
+      try{ rd.readAsText(file,'utf-8') }catch(e){ bad(e) }
+      return;
     }
+    rd.onload=function(){
+      var buf=rd.result;
+      ensureXLSX().then(function(X){
+        try{
+          var wb=X.read(new Uint8Array(buf),{type:'array'});
+          var ws=wb.Sheets[wb.SheetNames[0]];
+          ok(X.utils.sheet_to_json(ws,{header:1,defval:''}));
+        }catch(e){ bad(e) }
+      }).catch(function(){
+        /* المكتبة مش متاحة — يمكن الملف أصلاً CSV باسم غلط، نجرّب نقراه نص */
+        var r2=new FileReader();
+        r2.onload=function(){
+          try{
+            var rows=parseCsvText(r2.result);
+            if(rows.length>1&&rows[0].length>1)ok(rows);
+            else bad(new Error('no-xlsx'));
+          }catch(e){ bad(new Error('no-xlsx')) }
+        };
+        r2.onerror=function(){bad(new Error('no-xlsx'))};
+        try{ r2.readAsText(file,'utf-8') }catch(e){ bad(new Error('no-xlsx')) }
+      });
+    };
+    try{ rd.readAsArrayBuffer(file) }catch(e){ bad(e) }
   });
 }
 
@@ -971,16 +993,19 @@ function expBal(){
 }
 /* --- استيراد الأرصدة: يضيف الجديد ويحافظ على المورد --- */
 function impBal(inp){
-  var f=inp.files[0];if(!f)return;
+  var f=inp.files&&inp.files[0];
+  if(!f){toast('ماتحددش ملف');return}
   if(!can('imp')){toast('مالكش صلاحية');inp.value='';return}
+  toast('⏳ بقرا '+f.name+'…');
+  var clr=function(){try{inp.value=''}catch(e){}};
   readSheet(f).then(function(rows){
-    if(!rows||rows.length<2){toast('الملف فاضي');return}
+    if(!rows||rows.length<2){clr();toast('❌ الملف فاضي أو فيه سطر واحد بس');return}
     var hdr=rows[0].map(function(h){return norm(h)});
     function col(){for(var i=0;i<arguments.length;i++){var k=norm(arguments[i]);for(var j=0;j<hdr.length;j++){if(hdr[j].indexOf(k)>-1)return j}}return -1}
     var cN=col('الصنف','الاسم'), cS=col('الرصيد','الكميه','الكمية'),
         cU=col('الوحده','الوحدة'), cP=col('السعر'), cSup=col('المورد'),
         cB=col('معدل الفراخ','فراخ'), cC=col('معدل العجول','عجول');
-    if(cN<0){toast('مفيش عمود "الصنف"');return}
+    if(cN<0){clr();toast('❌ مفيش عمود "الصنف" — استخدم القالب المنزّل');return}
     var upd=0,add=0;
     for(var r=1;r<rows.length;r++){
       var nm=String(rows[r][cN]||'').trim();
@@ -1007,10 +1032,16 @@ function impBal(inp){
     }
     save();renderAll();
     var dups=findDups();
+    clr();
     toast('✅ اتحدّث '+upd+' · اتضاف '+add+(dups.length?' · ⚠️ '+dups.length+' اسم متشابه':''));
     if(dups.length)setTimeout(function(){warnDups(dups)},900);
-  }).catch(function(){toast('فشل قراءة الملف')});
-  inp.value='';
+  }).catch(function(e){
+    clr();
+    var m=(e&&e.message)||'';
+    if(m==='timeout')toast('⌛ القراءة اتأخرت — جرّب تاني أو صدّر CSV');
+    else if(m==='no-xlsx')toast('❌ مقدرش أقرا xlsx (النت مقطوع؟) — نزّل CSV واستخدمه');
+    else toast('❌ فشل قراءة الملف — اتأكد إنه نفس القالب');
+  });
 }
 /* --- تصدير الحركات --- */
 function expMov(){
@@ -1024,14 +1055,17 @@ function expMov(){
 }
 /* --- استيراد الحركات: بتطبّق على الرصيد --- */
 function impMov(inp){
-  var f=inp.files[0];if(!f)return;
+  var f=inp.files&&inp.files[0];
+  if(!f){toast('ماتحددش ملف');return}
   if(!can('imp')||!can('mov')){toast('مالكش صلاحية');inp.value='';return}
+  toast('⏳ بقرا '+f.name+'…');
+  var clr=function(){try{inp.value=''}catch(e){}};
   readSheet(f).then(function(rows){
-    if(!rows||rows.length<2){toast('الملف فاضي');return}
+    if(!rows||rows.length<2){clr();toast('❌ الملف فاضي');return}
     var hdr=rows[0].map(function(h){return norm(h)});
     function col(){for(var i=0;i<arguments.length;i++){var k=norm(arguments[i]);for(var j=0;j<hdr.length;j++){if(hdr[j].indexOf(k)>-1)return j}}return -1}
     var cD=col('التاريخ'), cN=col('الصنف'), cT=col('النوع'), cQ=col('الكميه','الكمية'), cNo=col('ملاحظه','ملاحظة');
-    if(cN<0||cQ<0){toast('لازم أعمدة: الصنف + الكمية');return}
+    if(cN<0||cQ<0){clr();toast('❌ لازم أعمدة: الصنف + الكمية');return}
     var ok=0,skip=0;
     for(var r=1;r<rows.length;r++){
       var nm=String(rows[r][cN]||'').trim();
@@ -1049,9 +1083,15 @@ function impMov(inp){
       ok++;
     }
     save();renderAll();
+    clr();
     toast('✅ اتطبّق '+ok+' حركة'+(skip?' · اتخطّى '+skip:''));
-  }).catch(function(){toast('فشل قراءة الملف')});
-  inp.value='';
+  }).catch(function(e){
+    clr();
+    var m=(e&&e.message)||'';
+    if(m==='timeout')toast('⌛ القراءة اتأخرت — جرّب تاني');
+    else if(m==='no-xlsx')toast('❌ مقدرش أقرا xlsx — استخدم CSV');
+    else toast('❌ فشل قراءة الملف');
+  });
 }
 function expPO(){
   var groups=buildPO();
@@ -1095,18 +1135,23 @@ function exportJson(){
   askOut(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),'feed-stock-'+today()+'.json');
 }
 function importJson(inp){
-  var f=inp.files[0];if(!f)return;
+  var f=inp.files&&inp.files[0];
+  if(!f){toast('ماتحددش ملف');return}
   if(!can('reset')){toast('مالكش صلاحية');inp.value='';return}
+  toast('⏳ بقرا الملف…');
+  var clr=function(){try{inp.value=''}catch(e){}};
   var rd=new FileReader();
+  rd.onerror=function(){clr();toast('❌ فشل قراءة الملف')};
   rd.onload=function(){
     try{
       var d=JSON.parse(rd.result);
-      if(!d.items){toast('ملف غير صالح');return}
+      if(!d.items){clr();toast('❌ ملف غير صالح');return}
       DB=d;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;if(!DB.movs)DB.movs=[];
-      save();renderAll();toast('اتستورد ✅');
-    }catch(e){toast('ملف تالف')}
+      if(!DB.users||!DB.users.length)DB.users=[{id:uid(),name:'المدير',pin:'1234',role:'admin'}];
+      save();renderAll();clr();toast('✅ اتستورد');
+    }catch(e){clr();toast('❌ ملف تالف')}
   };
-  rd.readAsText(f);inp.value='';
+  rd.readAsText(f);
 }
 function resetSeed(){
   if(!can('reset')){toast('مالكش صلاحية');return}
