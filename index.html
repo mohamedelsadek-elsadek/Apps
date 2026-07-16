@@ -6,6 +6,22 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b1220">
+<!-- OG: شكل المشاركة في واتساب/تليجرام -->
+<meta name="description" content="كل تطبيقاتك في مكان واحد — بحث، تصنيفات، ومزامنة بين الأجهزة.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="مركز التطبيقات">
+<meta property="og:locale" content="ar_EG">
+<meta property="og:title" content="مركز الروابط">
+<meta property="og:description" content="كل تطبيقاتك في مكان واحد — بحث، تصنيفات، ومزامنة بين الأجهزة.">
+<meta property="og:url" content="https://mohamedelsadek-elsadek.github.io/Apps/index.html">
+<meta property="og:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/index.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="مركز الروابط">
+<meta name="twitter:description" content="كل تطبيقاتك في مكان واحد — بحث، تصنيفات، ومزامنة بين الأجهزة.">
+<meta name="twitter:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/index.png">
 <title>مركز الروابط</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,6 +117,28 @@ body{
 .chip.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);border-color:transparent}
 .chip.active .c{opacity:.85}
 .chip:active{transform:scale(.95)}
+
+/* شريط الترتيب */
+.sortbar{display:flex;gap:7px;overflow-x:auto;padding:4px 0 2px;scrollbar-width:none;-ms-overflow-style:none;align-items:center}
+.sortbar::-webkit-scrollbar{display:none}
+.sortbar .lbl{flex:0 0 auto;font-size:12px;color:var(--muted2);font-weight:700;margin-inline-end:2px}
+.sbchip{
+  flex:0 0 auto;padding:6px 12px;border-radius:999px;cursor:pointer;
+  background:transparent;border:1px solid var(--line);color:var(--muted);
+  font-family:inherit;font-weight:700;font-size:12.5px;white-space:nowrap;transition:.15s;
+}
+.sbchip.active{background:var(--surface2);border-color:var(--accent);color:var(--accent)}
+.sbchip:active{transform:scale(.95)}
+/* أزرار الترتيب اليدوي */
+.ordbtns{display:flex;gap:5px;margin-inline-end:auto}
+.ordbtn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--line);
+  background:var(--surface2);color:var(--txt);cursor:pointer;font-size:14px;
+  font-family:inherit;font-weight:800;line-height:1;
+}
+.ordbtn:disabled{opacity:.3}
+.ordbtn:active:not(:disabled){border-color:var(--accent)}
+.usetag{font-size:11px;color:var(--muted2);font-weight:700;margin-inline-start:6px}
 
 /* ===== Grid ===== */
 .grid{
@@ -299,6 +337,7 @@ body{
       <span class="clr" id="searchClr">✕</span>
     </div>
     <nav class="chips" id="chips"></nav>
+    <div class="sortbar" id="sortbar"></div>
   </div>
 
   <main id="grid" class="grid"></main>
@@ -566,11 +605,72 @@ function matches(l){
   }
   return true;
 }
+/* ================= الترتيب ================= */
+var SORT_KEY="appHub.sort.v1";
+var SORTS=[
+  {id:"manual", ar:"✋ يدوي"},
+  {id:"uses",   ar:"🔥 الأكتر استخداماً"},
+  {id:"recent", ar:"🕐 الأحدث"},
+  {id:"alpha",  ar:"🔤 أبجدي"}
+];
+var sortMode="recent";
+try{ sortMode=localStorage.getItem(SORT_KEY)||"recent"; }catch(e){}
+
+function setSort(m){
+  sortMode=m;
+  try{ localStorage.setItem(SORT_KEY,m); }catch(e){}
+  if(m==="manual") ensureOrd();
+  render();
+}
+/* يدّي ترتيب رقمي لأي رابط لسه مالوش، حسب الترتيب الظاهر حالياً */
+function ensureOrd(){
+  var list=visibleLinks();
+  if(!list.some(function(l){return typeof l.ord!=="number"})) return;
+  var seq=list.slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});
+  seq.forEach(function(l,i){ if(typeof l.ord!=="number") l.ord=i; });
+  persist();
+}
+function sortList(a){
+  var x=a.slice();
+  if(sortMode==="manual")
+    return x.sort(function(p,q){return (p.ord==null?9e9:p.ord)-(q.ord==null?9e9:q.ord)});
+  if(sortMode==="uses")
+    return x.sort(function(p,q){return ((q.uses||0)-(p.uses||0)) || ((q.updatedAt||0)-(p.updatedAt||0))});
+  if(sortMode==="alpha")
+    return x.sort(function(p,q){return String(p.title||"").localeCompare(String(q.title||""),"ar")});
+  return x.sort(function(p,q){return (q.updatedAt||0)-(p.updatedAt||0)});
+}
+function renderSortbar(){
+  var html='<span class="lbl">ترتيب:</span>';
+  SORTS.forEach(function(s){
+    html+='<button class="sbchip'+(sortMode===s.id?" active":"")+'" data-sort="'+s.id+'">'+s.ar+'</button>';
+  });
+  $("#sortbar").innerHTML=html;
+}
+/* تحريك رابط لفوق/لتحت في الوضع اليدوي */
+window.moveLink=function(id,dir){
+  ensureOrd();
+  var seq=visibleLinks().slice().sort(function(p,q){return (p.ord==null?9e9:p.ord)-(q.ord==null?9e9:q.ord)});
+  var i=-1;
+  for(var k=0;k<seq.length;k++){ if(seq[k].id===id){ i=k; break; } }
+  var j=i+dir;
+  if(i<0||j<0||j>=seq.length) return;
+  var t=now();
+  var a=seq[i], b=seq[j];
+  var tmp=a.ord; a.ord=b.ord; b.ord=tmp;
+  /* لازم نرفع updatedAt عشان التغيير يترحّل للأجهزة التانية */
+  a.updatedAt=t; b.updatedAt=t+1;
+  persist();
+  if(fbRef && !fbApplying){ try{ fbRef.set(links); }catch(e){} }
+  render();
+};
+
 function render(){
-  var list=visibleLinks().filter(matches).sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});
+  var list=sortList(visibleLinks().filter(matches));
   var total=visibleLinks().length;
-  $("#subCount").textContent = total? (total+" رابط محفوظ") : "لسه مفيش روابط";
+  $("#subCount").textContent = total? (total+" رابط محفوظ · v2") : "لسه مفيش روابط · v2";
   renderChips();
+  renderSortbar();
 
   var grid=$("#grid"), empty=$("#empty");
   if(!list.length){
@@ -583,7 +683,7 @@ function render(){
     return;
   }
   empty.style.display="none";
-  grid.innerHTML=list.map(function(l){
+  grid.innerHTML=list.map(function(l,idx){
     var c=esc(l.color||"#22d3ee");
     var hasUrl=!!(l.url && l.url.trim());
     return ''+
@@ -598,9 +698,16 @@ function render(){
       '</div>'+
       (l.desc?'<p class="card-desc">'+esc(l.desc)+'</p>':'')+
       (hasUrl?'<div class="card-url">'+esc(absUrl(l.url))+'</div>':'')+
+      (sortMode==="manual"
+        ? '<div class="ordbtns" style="margin-bottom:8px">'+
+            '<button class="ordbtn" title="فوق" onclick="moveLink(\''+l.id+'\',-1)"'+(idx===0?' disabled':'')+'>▲</button>'+
+            '<button class="ordbtn" title="تحت" onclick="moveLink(\''+l.id+'\',1)"'+(idx===list.length-1?' disabled':'')+'>▼</button>'+
+            '<span class="usetag" style="align-self:center">مكانه '+(idx+1)+' من '+list.length+'</span>'+
+          '</div>'
+        : '')+
       '<div class="card-foot">'+
         (hasUrl
-          ? '<button class="openbtn" onclick="openLink(\''+l.id+'\')">↗ فتح</button>'
+          ? '<button class="openbtn" onclick="openLink(\''+l.id+'\')">↗ فتح'+((l.uses||0)>0&&sortMode==="uses"?' <span class="usetag">('+l.uses+')</span>':'')+'</button>'
           : '<button class="openbtn addurl" onclick="openLinkModal(\''+l.id+'\')">＋ أضف الرابط</button>')+
         '<button class="sbtn" title="مشاركة" onclick="openShare(\''+l.id+'\')">📤</button>'+
         '<button class="sbtn" title="تعديل" onclick="openLinkModal(\''+l.id+'\')">✏️</button>'+
@@ -613,6 +720,12 @@ function render(){
 window.openLink=function(id){
   var l=links.find(function(x){return x.id===id}); if(!l) return;
   if(!l.url || !l.url.trim()){ openLinkModal(id); return; }
+  /* عدّاد الاستخدام — يغذّي ترتيب "الأكتر استخداماً" */
+  l.uses=(l.uses||0)+1;
+  l.lastUsed=now();
+  l.updatedAt=now();  /* لازم عشان العدّاد يترحّل لباقي الأجهزة */
+  persist();
+  if(fbRef && !fbApplying){ try{ fbRef.set(links); }catch(e){} }
   /* فتح في نفس الصفحة: الرجوع للمركز بسحبة/زرار رجوع عادي */
   location.href=absUrl(l.url);
 };
@@ -872,12 +985,18 @@ function initFirebase(cfg){
 function mergeCloud(cloud){
   fbApplying=true;
   var map={}; links.forEach(function(l){map[l.id]=l});
+  var localNewer=false, cloudIds={};
   cloud.forEach(function(l){
     if(!l||!l.id) return;
+    cloudIds[l.id]=1;
     if(!map[l.id] || (l.updatedAt||0) > (map[l.id].updatedAt||0)) map[l.id]=l;
+    else if((map[l.id].updatedAt||0) > (l.updatedAt||0)) localNewer=true;
   });
+  links.forEach(function(l){ if(l&&l.id&&!cloudIds[l.id]) localNewer=true; });
   links=Object.keys(map).map(function(k){return map[k]});
   persist(); render(); fbApplying=false;
+  /* لو المحلي أحدث (ترتيب يدوي أو عدّاد استخدام اتغيّر وإحنا أوفلاين) ادفعه للسحابة */
+  if(localNewer && fbRef){ try{ fbRef.set(links); }catch(e){} }
 }
 function enableSync(){
   var raw=$("#fbConfig").value.trim(); if(!raw){ toast("الصق إعدادات Firebase الأول","err"); return; }
@@ -932,6 +1051,10 @@ $("#searchClr").addEventListener("click",function(){ $("#search").value=""; sear
 $("#chips").addEventListener("click",function(e){
   var b=e.target.closest(".chip"); if(!b) return;
   activeCat=b.getAttribute("data-cat"); render();
+});
+$("#sortbar").addEventListener("click",function(e){
+  var b=e.target.closest(".sbchip"); if(!b) return;
+  setSort(b.getAttribute("data-sort"));
 });
 $("#emojiQuick").addEventListener("click",function(e){
   var b=e.target.closest(".eq"); if(!b) return; $("#fEmoji").value=b.getAttribute("data-e");
@@ -1101,7 +1224,8 @@ seedIfEmpty();
     {title:"مشترياتي",url:"market.html",desc:"قوايم السوبر ماركت بأقسام جاهزة، أسعار بمقارنة، وطباعة PDF.",cat:"شخصي",emoji:"🛒",color:"#7ec97e"},
     {title:"مخازن الأدوية البيطرية",url:"vet-warehouse.html",desc:"ERP v26: مخزون الأدوية واللقاحات، فواتير المزارع، التحصيل، ومركز التقارير.",cat:"أدوية/صيدلية",emoji:"💊",color:"#a557ff"},
     {title:"مقارنة الأدوية البيطرية",url:"vetcompare.html",desc:"محرك تكلفة علاج طن اللحم: مقارنة أدوية، أمراض، تحصينات (حي/ميت/محمّل/معقد مناعي)، وربط حي بالمخازن.",cat:"أدوية/صيدلية",emoji:"⚖️",color:"#4a9eff"},
-    {title:"أسعار الخامات العلفية",url:"feed-prices.html",desc:"أسعار الذرة وكسب الصويا والقمح والزيت من بورصة شيكاغو CBOT + حاسبة تكلفة الوصول لمصر بالدولار والجمارك.",cat:"دواجن",emoji:"🌽",color:"#e3b341"}
+    {title:"أسعار الخامات العلفية",url:"feed-prices.html",desc:"أسعار الذرة وكسب الصويا والقمح والزيت من بورصة شيكاغو CBOT + حاسبة تكلفة الوصول لمصر بالدولار والجمارك.",cat:"دواجن",emoji:"🌽",color:"#e3b341"},
+    {title:"مخزون ومشتريات العلف",url:"feed-stock.html",desc:"رصيد الخامات، حساب المطلوب حسب هدف الفراخ والعجول، النقص للشراء، وأمر شراء مجمّع لكل مورد.",cat:"دواجن",emoji:"🌾",color:"#5a9b5e"}
   ];
   var added=false;
   newApps.forEach(function(a){
