@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- OG: شكل المشاركة في واتساب/تليجرام -->
+<meta name="description" content="مخزون الخامات العلفية: يحسب المطلوب حسب هدف الفراخ والعجول، النقص للشراء، وأمر شراء مجمّع لكل مورد.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="مركز التطبيقات">
+<meta property="og:locale" content="ar_EG">
+<meta property="og:title" content="مخزون ومشتريات العلف">
+<meta property="og:description" content="مخزون الخامات العلفية: يحسب المطلوب حسب هدف الفراخ والعجول، النقص للشراء، وأمر شراء مجمّع لكل مورد.">
+<meta property="og:url" content="https://mohamedelsadek-elsadek.github.io/Apps/feed-stock.html">
+<meta property="og:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/feed-stock.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="مخزون ومشتريات العلف">
+<meta name="twitter:description" content="مخزون الخامات العلفية: يحسب المطلوب حسب هدف الفراخ والعجول، النقص للشراء، وأمر شراء مجمّع لكل مورد.">
+<meta name="twitter:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/feed-stock.png">
+<title>مخزون ومشتريات العلف</title>
+<style>
+  :root{
+    --navy:#1e3a5f; --navy-d:#16294a; --green:#5a9b5e; --green-d:#4a8550;
+    --bg:#0f1620; --panel:#18222f; --panel-2:#1f2c3c; --line:#2c3d52;
+    --txt:#e8edf3; --mut:#9fb0c4; --acc:#6fb574;
+    --danger:#d65a5a; --gold:#e3b341;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;font-size:15px}
+  .warn{display:none;background:#7a2d2d;color:#fff;padding:10px 14px;text-align:center;font-size:13px}
+
+  header.app{background:var(--navy-d);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50;border-bottom:2px solid var(--navy)}
+  header.app h1{font-size:18px;font-weight:700}
+  .sync{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#666}
+  .dot.on{background:var(--acc)} .dot.off{background:var(--danger)}
+
+  nav.tabs{display:flex;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto;position:sticky;top:57px;z-index:49}
+  nav.tabs button{flex:1;min-width:105px;background:none;border:none;color:var(--mut);padding:13px 10px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;white-space:nowrap}
+  nav.tabs button.active{color:var(--txt);border-bottom-color:var(--green)}
+
+  main{max-width:920px;margin:0 auto;padding:18px}
+  .page{display:none} .page.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:16px;margin-bottom:14px;color:var(--acc);font-weight:700}
+  label{display:block;font-size:13px;color:var(--mut);margin:10px 0 5px}
+  input,select{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--txt);font-size:15px;font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--green)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .btn{background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
+  .btn:active{background:var(--green-d)}
+  .btn.nav{background:var(--navy)}
+  .btn.dgr{background:var(--danger)}
+  .btn.gold{background:var(--gold);color:#2b2200}
+  .btn-sm{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+
+  /* ملخص */
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .kpi{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:13px;text-align:center}
+  .kpi .n{font-size:22px;font-weight:800;line-height:1.25}
+  .kpi .l{font-size:11.5px;color:var(--mut);margin-top:2px}
+  .kpi.warn-k .n{color:var(--gold)}
+  .kpi.ok .n{color:var(--acc)}
+
+  /* صف خامة */
+  .it{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:9px;cursor:pointer}
+  .it:active{border-color:var(--green)}
+  .it .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .it .nm{font-weight:700;font-size:14.5px}
+  .it .sup{font-size:11.5px;color:var(--mut);margin-top:1px}
+  .it .badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .b-need{background:#e3b34122;color:var(--gold);border:1px solid #e3b34140}
+  .b-ok{background:#6fb57422;color:var(--acc);border:1px solid #6fb57440}
+  .it .mini{display:flex;flex-wrap:wrap;gap:10px;margin-top:7px;font-size:11.5px;color:var(--mut)}
+  .it .mini b{color:var(--txt);font-weight:700}
+
+  /* أمر الشراء */
+  .po{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;border-right:4px solid var(--green)}
+  .po h3{font-size:15px;color:var(--acc);margin-bottom:2px}
+  .po .tot{font-size:12px;color:var(--mut);margin-bottom:9px}
+  .po table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .po th{color:var(--mut);font-weight:600;text-align:right;padding:5px 4px;border-bottom:1px solid var(--line);font-size:11.5px}
+  .po td{padding:6px 4px;border-bottom:1px solid #ffffff0d}
+  .po td.num{font-weight:700}
+  .po .sum{display:flex;justify-content:space-between;margin-top:9px;padding-top:9px;border-top:2px solid var(--line);font-weight:800;font-size:14px}
+  .po .sum span:last-child{color:var(--gold)}
+
+  .empty{text-align:center;padding:34px 16px;color:var(--mut)}
+  .empty .em{font-size:42px;margin-bottom:8px}
+  .empty h3{font-size:15px;color:var(--txt);margin-bottom:5px}
+  .hint{font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.75}
+
+  /* الموردين */
+  .sup-row{display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-bottom:8px}
+  .sup-row span{flex:1;font-weight:600;font-size:14px}
+
+  /* overlay */
+  .ov{position:fixed;inset:0;background:#000c;z-index:100;display:none;overflow-y:auto;padding:16px}
+  .ov.on{display:block}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:520px;margin:20px auto}
+  .sheet h2{font-size:17px;color:var(--acc);margin-bottom:4px}
+  .calc{background:var(--navy-d);border:1px solid var(--navy);border-radius:11px;padding:12px;margin:13px 0;font-size:13px}
+  .calc .r{display:flex;justify-content:space-between;padding:3px 0}
+  .calc .r b{font-weight:700}
+  .calc .r.big{border-top:1px solid var(--line);margin-top:5px;padding-top:7px;font-size:14.5px}
+  .calc .r.big b{color:var(--gold)}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy-d);border:1px solid var(--green);color:#fff;padding:11px 20px;border-radius:30px;font-size:13.5px;font-weight:600;z-index:200;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+<div class="warn" id="warnBanner">⚠️ التخزين المحلي غير متاح — البيانات مؤقتة.</div>
+
+<header class="app">
+  <h1>🌾 مخزون ومشتريات العلف</h1>
+  <div class="sync"><span class="dot" id="syncDot"></span><span id="syncTxt">محلي</span></div>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-page="stock">الخامات</button>
+  <button data-page="po">أمر الشراء</button>
+  <button data-page="sups">الموردين</button>
+  <button data-page="set">الضبط</button>
+</nav>
+
+<main>
+
+  <!-- ============ الخامات ============ -->
+  <div class="page active" id="page-stock">
+    <div class="card">
+      <h2>🎯 أهداف الإنتاج</h2>
+      <div class="row">
+        <div>
+          <label>هدف الفراخ (طن)</label>
+          <input type="number" id="tB" inputmode="decimal" oninput="onTarget()">
+        </div>
+        <div>
+          <label>هدف العجول (طن)</label>
+          <input type="number" id="tC" inputmode="decimal" oninput="onTarget()">
+        </div>
+      </div>
+      <div class="hint">المطلوب = (هدف الفراخ × معدل الفراخ) + (هدف العجول × معدل العجول) · النقص = المطلوب − الرصيد</div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi warn-k"><div class="n" id="kNeed">—</div><div class="l">صنف ناقص</div></div>
+      <div class="kpi ok"><div class="n" id="kCost">—</div><div class="l">تكلفة الشراء (ج.م)</div></div>
+    </div>
+
+    <div class="card">
+      <h2>📦 الخامات (<span id="cnt">0</span>)</h2>
+      <input id="q" placeholder="🔍 ابحث باسم الصنف أو المورد…" oninput="renderStock()" style="margin-bottom:12px">
+      <div id="list"></div>
+      <button class="btn nav" style="margin-top:12px" onclick="openItem(null)">+ إضافة صنف</button>
+    </div>
+  </div>
+
+  <!-- ============ أمر الشراء ============ -->
+  <div class="page" id="page-po">
+    <div class="kpis">
+      <div class="kpi"><div class="n" id="pKn">—</div><div class="l">عدد الموردين</div></div>
+      <div class="kpi warn-k"><div class="n" id="pKc">—</div><div class="l">الإجمالي (ج.م)</div></div>
+    </div>
+    <div class="card">
+      <h2>🧾 أمر الشراء — مجمّع حسب المورد</h2>
+      <div id="poList"></div>
+      <div class="hint">بيظهر الأصناف اللي فيها نقص ومحدّد ليها مورد. حدّد المورد من صفحة الخامات.</div>
+    </div>
+  </div>
+
+  <!-- ============ الموردين ============ -->
+  <div class="page" id="page-sups">
+    <div class="card">
+      <h2>🏢 الموردين (<span id="scnt">0</span>)</h2>
+      <div id="supList"></div>
+      <label>إضافة مورد جديد</label>
+      <div style="display:flex;gap:9px">
+        <input id="newSup" placeholder="اسم المورد">
+        <button class="btn nav" style="width:auto;padding:11px 18px" onclick="addSup()">+</button>
+      </div>
+      <div class="hint">أي مورد تضيفه هنا بيظهر في القائمة المنسدلة عند تعديل الصنف.</div>
+    </div>
+  </div>
+
+  <!-- ============ الضبط ============ -->
+  <div class="page" id="page-set">
+    <div class="card">
+      <h2>☁️ مزامنة Firebase</h2>
+      <label>Firebase Database URL</label>
+      <input id="fbUrl" placeholder="https://...firebasedatabase.app">
+      <div style="display:flex;gap:9px;margin-top:12px">
+        <button class="btn" onclick="saveFb()">حفظ وتفعيل</button>
+        <button class="btn nav" onclick="pullFb()">سحب من السحابة</button>
+      </div>
+      <div class="hint">الرابط متملّي تلقائياً — البيانات بتتزامن بين كل أجهزتك.</div>
+    </div>
+    <div class="card">
+      <h2>💾 نسخة احتياطية</h2>
+      <button class="btn nav" onclick="exportJson()">⬇️ تنزيل نسخة (JSON)</button>
+      <button class="btn-sm" style="width:100%;margin-top:9px" onclick="document.getElementById('impFile').click()">⬆️ استيراد نسخة</button>
+      <input type="file" id="impFile" accept=".json" style="display:none" onchange="importJson(this)">
+    </div>
+    <div class="card">
+      <h2>♻️ إعادة ضبط</h2>
+      <button class="btn dgr" onclick="resetSeed()">استرجاع بيانات الإكسل الأصلية</button>
+      <div class="hint">بيرجّع الـ ٢٩ خامة و٧ موردين الأصليين. بياناتك الحالية هتتمسح.</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ====== تعديل صنف ====== -->
+<div class="ov" id="ovItem">
+  <div class="sheet">
+    <h2 id="ovTtl">تعديل صنف</h2>
+    <label>اسم الصنف</label>
+    <input id="fName">
+    <div class="row">
+      <div><label>الرصيد الحالي (كجم)</label><input type="number" id="fStock" inputmode="decimal" oninput="preview()"></div>
+      <div><label>السعر/كجم (ج.م)</label><input type="number" id="fPrice" inputmode="decimal" oninput="preview()"></div>
+    </div>
+    <div class="row">
+      <div><label>معدل الفراخ (كجم/طن)</label><input type="number" id="fRB" inputmode="decimal" oninput="preview()"></div>
+      <div><label>معدل العجول (كجم/طن)</label><input type="number" id="fRC" inputmode="decimal" oninput="preview()"></div>
+    </div>
+    <label>المورد</label>
+    <select id="fSup"></select>
+
+    <div class="calc" id="prev"></div>
+
+    <button class="btn" onclick="saveItem()">حفظ</button>
+    <div style="display:flex;gap:9px;margin-top:9px">
+      <button class="btn-sm" style="flex:1" onclick="closeItem()">إلغاء</button>
+      <button class="btn-sm" style="flex:1;color:var(--danger);border-color:var(--danger)" id="delBtn" onclick="delItem()">حذف</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script id="seed" type="application/json">{"targets":{"b":300,"c":300},"items":[{"name":"فيتامينات تسمين","stock":180,"rB":1,"rC":0,"sup":"بوسطن","price":null},{"name":"املاح تسمين","stock":250,"rB":1.5,"rC":0,"sup":"بوسطن","price":null},{"name":"بيكربونات صوديوم","stock":9755,"rB":2.5,"rC":5,"sup":"","price":null},{"name":"ميثونين","stock":584,"rB":3,"rC":0,"sup":"","price":null},{"name":"ليسين","stock":600,"rB":2.5,"rC":0,"sup":"","price":null},{"name":"كولين","stock":260,"rB":1.25,"rC":0,"sup":"","price":null},{"name":"انزيم طاقه","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null},{"name":"ام تي دراي","stock":0,"rB":0.25,"rC":0,"sup":"اورجانيك","price":null},{"name":"ض اس تي دراي","stock":0,"rB":0.25,"rC":0,"sup":"اورجانيك","price":null},{"name":"فايتيز","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null},{"name":"هاي دي","stock":0,"rB":0.25,"rC":0,"sup":"الدقهليه للدواجن","price":null},{"name":"ثيرونين","stock":185,"rB":1.2,"rC":0,"sup":"","price":null},{"name":"فورمات صوديوم","stock":0,"rB":0,"rC":0,"sup":"د احمد الجندي kvc","price":null},{"name":"بيتامناننيز","stock":0,"rB":0.1,"rC":0,"sup":"د احمد الجندي kvc","price":null},{"name":"بروتييز","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null},{"name":"تي بيو","stock":0.25,"rB":0.5,"rC":0,"sup":"وايز","price":null},{"name":"برولاكت","stock":0,"rB":0.5,"rC":0,"sup":"بيوكيور فارم","price":null},{"name":"كيموتكس بلص","stock":0,"rB":0.5,"rC":0,"sup":"بوسطن","price":null},{"name":"لينكو علف","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null},{"name":"برجابيور","stock":0,"rB":0.25,"rC":0,"sup":"الدوليه","price":null},{"name":"ليجنوبوند","stock":775,"rB":2.5,"rC":0,"sup":"","price":null},{"name":"اورجستيم","stock":0,"rB":0.25,"rC":0,"sup":"الدقهليه للدواجن","price":null},{"name":"ديكلاشمس","stock":0,"rB":0.2,"rC":0,"sup":"د احمد الجندي kvc","price":null},{"name":"بولتري ستار","stock":0,"rB":0.2,"rC":0,"sup":"الدقهليه للدواجن","price":null},{"name":"بريمكس مواشي","stock":997,"rB":0,"rC":3,"sup":"د احمد الجندي kvc","price":null},{"name":"أوكسيد ماغنسيوم","stock":96,"rB":0,"rC":1.5,"sup":"د احمد الجندي kvc","price":null},{"name":"الترايست بلص","stock":41,"rB":0,"rC":0.25,"sup":"د احمد الجندي kvc","price":null},{"name":"فيزايست","stock":80,"rB":0,"rC":1,"sup":"د احمد الجندي kvc","price":null},{"name":"تي ماكس بلص","stock":0,"rB":1,"rC":3,"sup":"د احمد الجندي kvc","price":null}],"sups":["بوسطن","الدقهليه للدواجن","د احمد الجندي kvc","بيوكيور فارم","الدوليه","وايز","اورجانيك"]}</script>
+<script>
+/* ================= أدوات ================= */
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function norm(s){return String(s==null?'':s).trim().toLowerCase().replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,' ')}
+function uid(){return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function n2(v){var x=parseFloat(v);return isNaN(x)?0:x}
+function fmt(v,d){if(v==null||isNaN(v))return '—';return Number(v).toLocaleString('en-US',{minimumFractionDigits:d==null?0:d,maximumFractionDigits:d==null?0:d})}
+function toast(m){var t=$('toast');t.textContent=m;t.className='toast show';clearTimeout(t._t);t._t=setTimeout(function(){t.className='toast'},2100)}
+
+var SS={
+  ok:true,
+  get:function(k){try{return localStorage.getItem(k)}catch(e){this.ok=false;return null}},
+  set:function(k,v){try{localStorage.setItem(k,v)}catch(e){this.ok=false}}
+};
+
+/* ================= الحالة ================= */
+var DEFAULT_FB_URL='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
+var DB={targets:{b:300,c:300},items:[],sups:[],fbUrl:''};
+var editId=null;
+
+function seedDB(){
+  var s;try{s=JSON.parse($('seed').textContent)}catch(e){s={targets:{b:300,c:300},items:[],sups:[]}}
+  DB.targets={b:n2(s.targets&&s.targets.b)||300,c:n2(s.targets&&s.targets.c)||300};
+  DB.items=(s.items||[]).map(function(x){
+    return {id:uid(),name:x.name,stock:n2(x.stock),rB:n2(x.rB),rC:n2(x.rC),sup:x.sup||'',price:(x.price==null?null:n2(x.price))};
+  });
+  DB.sups=(s.sups||[]).slice();
+}
+function load(){
+  var r=SS.get('feedstock');
+  if(r){try{DB=JSON.parse(r)}catch(e){}}
+  if(!DB.items||!DB.items.length)seedDB();
+  if(!DB.targets)DB.targets={b:300,c:300};
+  if(!DB.sups)DB.sups=[];
+  if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;
+}
+function save(push){
+  SS.set('feedstock',JSON.stringify(DB));
+  if(push!==false)pushFb();
+}
+
+/* ================= الحسابات ================= */
+function calc(it){
+  var reqB=n2(DB.targets.b)*n2(it.rB);
+  var reqC=n2(DB.targets.c)*n2(it.rC);
+  var total=reqB+reqC;
+  var short=Math.max(0,total-n2(it.stock));
+  var cost=(it.price!=null&&short>0)?short*n2(it.price):null;
+  return {reqB:reqB,reqC:reqC,total:total,short:short,cost:cost};
+}
+
+/* ================= الخامات ================= */
+function onTarget(){
+  DB.targets.b=n2($('tB').value);
+  DB.targets.c=n2($('tC').value);
+  save();renderStock();renderPO();
+}
+function renderStock(){
+  $('tB').value=DB.targets.b;
+  $('tC').value=DB.targets.c;
+  var q=norm($('q')?$('q').value:'');
+  var list=DB.items.filter(function(it){
+    if(!q)return true;
+    return norm(it.name).indexOf(q)>-1||norm(it.sup).indexOf(q)>-1;
+  });
+  $('cnt').textContent=DB.items.length;
+
+  var need=0,cost=0;
+  DB.items.forEach(function(it){var c=calc(it);if(c.short>0)need++;if(c.cost)cost+=c.cost});
+  $('kNeed').textContent=need;
+  $('kCost').textContent=fmt(cost);
+
+  if(!list.length){$('list').innerHTML='<div class="empty"><div class="em">🌾</div><h3>مفيش أصناف</h3></div>';return}
+  $('list').innerHTML=list.map(function(it){
+    var c=calc(it);
+    var badge=c.short>0?'<span class="badge b-need">ناقص '+fmt(c.short,1)+'</span>':'<span class="badge b-ok">مكتفي</span>';
+    return '<div class="it" onclick="openItem(\''+it.id+'\')">'+
+      '<div class="top"><div><div class="nm">'+esc(it.name)+'</div>'+
+      '<div class="sup">'+(it.sup?'🏢 '+esc(it.sup):'<span style="color:var(--danger)">⚠️ مفيش مورد</span>')+'</div></div>'+
+      badge+'</div>'+
+      '<div class="mini">'+
+        '<span>رصيد: <b>'+fmt(it.stock,0)+'</b></span>'+
+        '<span>مطلوب: <b>'+fmt(c.total,0)+'</b></span>'+
+        (it.price!=null?'<span>سعر: <b>'+fmt(it.price,2)+'</b></span>':'')+
+        (c.cost?'<span style="color:var(--gold)">تكلفة: <b style="color:var(--gold)">'+fmt(c.cost,0)+'</b></span>':'')+
+      '</div></div>';
+  }).join('');
+}
+
+/* ================= نافذة الصنف ================= */
+function fillSups(sel){
+  var o='<option value="">— بدون مورد —</option>';
+  DB.sups.forEach(function(s){o+='<option value="'+esc(s)+'"'+(norm(s)===norm(sel)?' selected':'')+'>'+esc(s)+'</option>'});
+  $('fSup').innerHTML=o;
+}
+function openItem(id){
+  editId=id;
+  var it=id?DB.items.find(function(x){return x.id===id}):null;
+  $('ovTtl').textContent=it?'تعديل صنف':'صنف جديد';
+  $('fName').value=it?it.name:'';
+  $('fStock').value=it?it.stock:'';
+  $('fPrice').value=(it&&it.price!=null)?it.price:'';
+  $('fRB').value=it?it.rB:'';
+  $('fRC').value=it?it.rC:'';
+  fillSups(it?it.sup:'');
+  $('delBtn').style.display=it?'block':'none';
+  preview();
+  $('ovItem').classList.add('on');
+}
+function closeItem(){$('ovItem').classList.remove('on')}
+function preview(){
+  var tmp={stock:n2($('fStock').value),rB:n2($('fRB').value),rC:n2($('fRC').value),price:$('fPrice').value===''?null:n2($('fPrice').value)};
+  var c=calc(tmp);
+  $('prev').innerHTML=
+    '<div class="r"><span>مطلوب فراخ ('+fmt(DB.targets.b)+' طن)</span><b>'+fmt(c.reqB,1)+' كجم</b></div>'+
+    '<div class="r"><span>مطلوب عجول ('+fmt(DB.targets.c)+' طن)</span><b>'+fmt(c.reqC,1)+' كجم</b></div>'+
+    '<div class="r"><span>إجمالي المطلوب</span><b>'+fmt(c.total,1)+' كجم</b></div>'+
+    '<div class="r"><span>الرصيد</span><b>'+fmt(tmp.stock,1)+' كجم</b></div>'+
+    '<div class="r big"><span>النقص للشراء</span><b>'+fmt(c.short,1)+' كجم</b></div>'+
+    (c.cost?'<div class="r big"><span>التكلفة</span><b>'+fmt(c.cost,2)+' ج.م</b></div>':'');
+}
+function saveItem(){
+  var nm=$('fName').value.trim();
+  if(!nm){toast('اكتب اسم الصنف');return}
+  var o={name:nm,stock:n2($('fStock').value),rB:n2($('fRB').value),rC:n2($('fRC').value),
+         sup:$('fSup').value,price:$('fPrice').value===''?null:n2($('fPrice').value)};
+  if(editId){
+    var it=DB.items.find(function(x){return x.id===editId});
+    if(it){it.name=o.name;it.stock=o.stock;it.rB=o.rB;it.rC=o.rC;it.sup=o.sup;it.price=o.price}
+  }else{
+    o.id=uid();DB.items.push(o);
+  }
+  save();closeItem();renderStock();renderPO();toast('اتحفظ ✅');
+}
+function delItem(){
+  if(!editId)return;
+  if(!confirm('تحذف الصنف ده؟'))return;
+  DB.items=DB.items.filter(function(x){return x.id!==editId});
+  save();closeItem();renderStock();renderPO();toast('اتحذف');
+}
+
+/* ================= أمر الشراء ================= */
+function buildPO(){
+  var map={};
+  DB.items.forEach(function(it){
+    var c=calc(it);
+    if(c.short<=0||!it.sup)return;
+    if(!map[it.sup])map[it.sup]={sup:it.sup,rows:[],total:0};
+    map[it.sup].rows.push({name:it.name,qty:c.short,price:it.price,cost:c.cost});
+    if(c.cost)map[it.sup].total+=c.cost;
+  });
+  return Object.keys(map).map(function(k){return map[k]});
+}
+function renderPO(){
+  var groups=buildPO();
+  var grand=0;groups.forEach(function(g){grand+=g.total});
+  $('pKn').textContent=groups.length;
+  $('pKc').textContent=fmt(grand);
+  if(!groups.length){$('poList').innerHTML='<div class="empty"><div class="em">✅</div><h3>مفيش نواقص</h3><p>كل الأصناف مكتفية، أو مفيش موردين محدّدين.</p></div>';return}
+  $('poList').innerHTML=groups.map(function(g){
+    var rows=g.rows.map(function(r){
+      return '<tr><td>'+esc(r.name)+'</td><td class="num">'+fmt(r.qty,1)+'</td>'+
+        '<td>'+(r.price!=null?fmt(r.price,2):'—')+'</td>'+
+        '<td class="num">'+(r.cost?fmt(r.cost,0):'—')+'</td></tr>';
+    }).join('');
+    return '<div class="po">'+
+      '<h3>🏢 '+esc(g.sup)+'</h3>'+
+      '<div class="tot">'+g.rows.length+' صنف</div>'+
+      '<table><thead><tr><th>الصنف</th><th>الكمية (كجم)</th><th>السعر</th><th>التكلفة</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div class="sum"><span>إجمالي المورد</span><span>'+fmt(g.total,2)+' ج.م</span></div>'+
+      '<button class="btn-sm" style="width:100%;margin-top:10px" onclick="sharePO(\''+esc(g.sup).replace(/'/g,"\\'")+'\')">📤 مشاركة الأمر</button>'+
+      '</div>';
+  }).join('');
+}
+function sharePO(sup){
+  var g=buildPO().filter(function(x){return x.sup===sup})[0];
+  if(!g)return;
+  var t='🧾 أمر شراء — '+g.sup+'\n';
+  t+='التاريخ: '+new Date().toLocaleDateString('ar-EG')+'\n\n';
+  g.rows.forEach(function(r,i){
+    t+=(i+1)+'. '+r.name+' — '+fmt(r.qty,1)+' كجم';
+    if(r.price!=null)t+=' × '+fmt(r.price,2)+' = '+fmt(r.cost,2)+' ج.م';
+    t+='\n';
+  });
+  if(g.total)t+='\nالإجمالي: '+fmt(g.total,2)+' ج.م';
+  if(navigator.share){navigator.share({text:t}).catch(function(){})}
+  else{window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}
+}
+
+/* ================= الموردين ================= */
+function renderSups(){
+  $('scnt').textContent=DB.sups.length;
+  if(!DB.sups.length){$('supList').innerHTML='<div class="empty"><div class="em">🏢</div><h3>مفيش موردين</h3></div>';return}
+  $('supList').innerHTML=DB.sups.map(function(s,i){
+    var used=DB.items.filter(function(it){return norm(it.sup)===norm(s)}).length;
+    return '<div class="sup-row"><span>'+esc(s)+'</span>'+
+      '<small style="color:var(--mut);font-size:11.5px">'+used+' صنف</small>'+
+      '<button class="btn-sm" style="color:var(--danger)" onclick="delSup('+i+')">حذف</button></div>';
+  }).join('');
+}
+function addSup(){
+  var v=$('newSup').value.trim();
+  if(!v){toast('اكتب اسم المورد');return}
+  if(DB.sups.some(function(s){return norm(s)===norm(v)})){toast('المورد موجود');return}
+  DB.sups.push(v);$('newSup').value='';save();renderSups();toast('اتضاف ✅');
+}
+function delSup(i){
+  var s=DB.sups[i];
+  var used=DB.items.filter(function(it){return norm(it.sup)===norm(s)}).length;
+  if(used&&!confirm('المورد ده مرتبط بـ '+used+' صنف. تحذفه؟'))return;
+  DB.sups.splice(i,1);
+  DB.items.forEach(function(it){if(norm(it.sup)===norm(s))it.sup=''});
+  save();renderSups();renderStock();renderPO();toast('اتحذف');
+}
+
+/* ================= Firebase ================= */
+function setSync(on){
+  var d=$('syncDot'),t=$('syncTxt');
+  if(DB.fbUrl){d.className='dot '+(on?'on':'off');t.textContent=on?'متزامن':'خطأ مزامنة'}
+  else{d.className='dot';t.textContent='محلي'}
+}
+function pushFb(){
+  if(!DB.fbUrl)return;
+  fetch(DB.fbUrl+'/feed_stock.json',{method:'PUT',body:JSON.stringify(DB)})
+    .then(function(r){setSync(r.ok)}).catch(function(){setSync(false)});
+}
+function pullFb(){
+  if(!DB.fbUrl){toast('أدخل رابط Firebase');return}
+  fetch(DB.fbUrl+'/feed_stock.json').then(function(r){return r.json()}).then(function(d){
+    if(d&&d.items){DB=d;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;save(false);renderAll();setSync(true);toast('تم السحب ✅')}
+    else toast('مفيش بيانات سحابية');
+  }).catch(function(){setSync(false);toast('فشل الاتصال')});
+}
+function saveFb(){
+  DB.fbUrl=$('fbUrl').value.trim();
+  save(false);
+  if(DB.fbUrl){pushFb();toast('اتفعّلت ✅')}else{setSync(false);toast('اتوقفت')}
+  setSync(!!DB.fbUrl);
+}
+
+/* ================= نسخ احتياطية ================= */
+function exportJson(){
+  var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='feed-stock-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('اتنزّلت ✅');
+}
+function importJson(inp){
+  var f=inp.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var d=JSON.parse(rd.result);
+      if(!d.items){toast('ملف غير صالح');return}
+      DB=d;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;
+      save();renderAll();toast('اتستورد ✅');
+    }catch(e){toast('ملف تالف')}
+  };
+  rd.readAsText(f);inp.value='';
+}
+function resetSeed(){
+  if(!confirm('هيرجّع بيانات الإكسل الأصلية ويمسح اللي عندك. متأكد؟'))return;
+  var url=DB.fbUrl;
+  DB={targets:{b:300,c:300},items:[],sups:[],fbUrl:url};
+  seedDB();save();renderAll();toast('اترجّعت ✅');
+}
+
+/* ================= تشغيل ================= */
+function renderAll(){
+  renderStock();renderPO();renderSups();
+  $('fbUrl').value=DB.fbUrl||'';
+  setSync(!!DB.fbUrl);
+}
+var tabs=document.querySelectorAll('nav.tabs button');
+for(var i=0;i<tabs.length;i++){
+  tabs[i].addEventListener('click',function(){
+    for(var j=0;j<tabs.length;j++)tabs[j].classList.remove('active');
+    this.classList.add('active');
+    var p=this.getAttribute('data-page');
+    var pages=document.querySelectorAll('.page');
+    for(var k=0;k<pages.length;k++)pages[k].classList.remove('active');
+    $('page-'+p).classList.add('active');
+    if(p==='po')renderPO();
+    if(p==='sups')renderSups();
+    window.scrollTo(0,0);
+  });
+}
+$('ovItem').addEventListener('click',function(e){if(e.target===this)closeItem()});
+
+load();
+renderAll();
+if(!SS.ok)$('warnBanner').style.display='block';
+
+/* أول اتصال: لو السحابة فيها بيانات اسحبها، لو فاضية ادفع المحلي */
+if(DB.fbUrl){
+  setSync(true);
+  fetch(DB.fbUrl+'/feed_stock.json').then(function(r){return r.json()}).then(function(d){
+    if(d&&d.items&&d.items.length){
+      DB=d;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;
+      save(false);renderAll();setSync(true);
+    }else{pushFb()}
+  }).catch(function(){setSync(false)});
+}
+</script>
+</body>
+</html>
