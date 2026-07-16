@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- OG: شكل المشاركة في واتساب/تليجرام -->
+<meta name="description" content="بلاغات الأعطال من الحقل للصيانة: تصنيف بالخطورة، تتبّع الحالة، إشعارات تليجرام، وتقارير أداء.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="مركز التطبيقات">
+<meta property="og:locale" content="ar_EG">
+<meta property="og:title" content="نظام أعطال المزارع">
+<meta property="og:description" content="بلاغات الأعطال من الحقل للصيانة: تصنيف بالخطورة، تتبّع الحالة، إشعارات تليجرام، وتقارير أداء.">
+<meta property="og:url" content="https://mohamedelsadek-elsadek.github.io/Apps/fault-system.html">
+<meta property="og:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/fault-system.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="نظام أعطال المزارع">
+<meta name="twitter:description" content="بلاغات الأعطال من الحقل للصيانة: تصنيف بالخطورة، تتبّع الحالة، إشعارات تليجرام، وتقارير أداء.">
+<meta name="twitter:image" content="https://mohamedelsadek-elsadek.github.io/Apps/og/fault-system.png">
+<title>نظام أعطال المزارع</title>
+<style>
+:root{
+  --bg:#111417; --panel:#1a1f24; --panel2:#21272e; --line:#2e363f;
+  --text:#e8eaed; --muted:#9aa5b1;
+  --amber:#f5a623; --amber-dim:#3a2f14;
+  --red:#e5484d; --blue:#4c9aff; --green:#3dd68c; --purple:#b78bf7;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;font-size:15px;padding-bottom:90px}
+header{position:sticky;top:0;z-index:50;background:rgba(17,20,23,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+header h1{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
+header h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.userchip{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.userchip b{color:var(--text)}
+main{max-width:760px;margin:0 auto;padding:14px}
+.tabs{position:fixed;bottom:0;right:0;left:0;z-index:50;display:flex;background:rgba(17,20,23,.95);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;text-align:center;padding:10px 4px 8px;color:var(--muted);font-size:11px;cursor:pointer;border-top:2px solid transparent}
+.tab .ic{font-size:20px;display:block;margin-bottom:2px}
+.tab.active{color:var(--amber);border-top-color:var(--amber)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.card h3{font-size:14px;margin-bottom:10px;color:var(--muted);font-weight:700}
+label{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 5px}
+select,input,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px 12px;font-size:15px;font-family:inherit;-webkit-appearance:none;appearance:none}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--amber)}
+textarea{min-height:70px;resize:vertical}
+.btn{display:inline-block;width:100%;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;text-align:center;margin-top:12px}
+.btn-amber{background:var(--amber);color:#1a1408}
+.btn-blue{background:var(--blue);color:#06121f}
+.btn-green{background:var(--green);color:#062015}
+.btn-ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.btn-red{background:transparent;color:var(--red);border:1px solid var(--red)}
+.btn-sm{width:auto;padding:8px 14px;font-size:13px;margin-top:8px;margin-inline-end:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sev{display:flex;gap:8px;margin-top:5px}
+.sev span{flex:1;text-align:center;padding:9px 4px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-size:13px;cursor:pointer;color:var(--muted)}
+.sev span.on-critical{background:#3a1214;border-color:var(--red);color:var(--red);font-weight:800}
+.sev span.on-high{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);font-weight:800}
+.sev span.on-med{background:#122a3f;border-color:var(--blue);color:var(--blue);font-weight:800}
+.sev span.on-low{background:#12301f;border-color:var(--green);color:var(--green);font-weight:800}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.fchip{white-space:nowrap;padding:7px 13px;border-radius:18px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:13px;cursor:pointer}
+.fchip.active{background:var(--amber);border-color:var(--amber);color:#1a1408;font-weight:800}
+.fchip .n{opacity:.75;font-size:12px}
+.rep{border-radius:var(--radius);border:1px solid var(--line);background:var(--panel);margin-bottom:12px;overflow:hidden}
+.rep .top{padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.rep .title{font-weight:800;font-size:15px}
+.rep .sub{color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.6}
+.badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:12px;white-space:nowrap}
+.b-new{background:#3a1214;color:var(--red)}
+.b-prog{background:#122a3f;color:var(--blue)}
+.b-fixed{background:var(--amber-dim);color:var(--amber)}
+.b-conf{background:#12301f;color:var(--green)}
+.rep .stripe{height:3px}
+.s-critical{background:var(--red)}.s-high{background:var(--amber)}.s-med{background:var(--blue)}.s-low{background:var(--green)}
+.rep .body{padding:0 14px 12px;border-top:1px dashed var(--line)}
+.timeline{margin-top:10px}
+.tstep{display:flex;gap:10px;font-size:12.5px;color:var(--muted);padding:4px 0}
+.tstep .mark{width:8px;height:8px;border-radius:50%;background:var(--line);margin-top:5px;flex-shrink:0}
+.tstep.done .mark{background:var(--green)}
+.tstep b{color:var(--text)}
+.empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px;line-height:2}
+.empty .big{font-size:44px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;text-align:center}
+.stat .v{font-size:26px;font-weight:900}
+.stat .l{font-size:12px;color:var(--muted);margin-top:3px}
+.bar-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px}
+.bar-row .nm{width:110px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-row .tr{flex:1;background:var(--panel2);border-radius:6px;height:18px;overflow:hidden}
+.bar-row .fl{height:100%;background:var(--amber);border-radius:6px;min-width:2px}
+.bar-row .ct{width:28px;text-align:left;font-weight:800}
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.list-item:last-child{border-bottom:none}
+.list-item .del{color:var(--red);cursor:pointer;font-size:18px;padding:0 6px}
+.list-item .meta{color:var(--muted);font-size:12px}
+.hint{font-size:12px;color:var(--muted);line-height:1.8;margin-top:8px}
+.hint a{color:var(--blue)}
+.ok-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-start:6px}
+.toast{position:fixed;bottom:100px;right:50%;transform:translateX(50%);background:#0c0e10;border:1px solid var(--amber);color:var(--text);padding:11px 20px;border-radius:24px;font-size:13.5px;z-index:200;box-shadow:0 6px 24px rgba(0,0,0,.5);display:none;max-width:90%;text-align:center}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:760px;max-height:85vh;overflow-y:auto;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+.modal h3{margin-bottom:6px;font-size:16px}
+.rep-num{font-family:ui-monospace,Menlo,monospace;color:var(--muted);font-size:11px}
+.section-title{font-size:13px;font-weight:800;color:var(--amber);margin:18px 0 8px;letter-spacing:.5px}
+@media(min-width:600px){.tabs{position:sticky;bottom:auto;top:57px;border-top:none;border-bottom:1px solid var(--line)}body{padding-bottom:20px}.toast{bottom:40px}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="dot"></span>أعطال المزارع</h1>
+  <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
+</header>
+
+<main id="main"></main>
+
+<div class="tabs">
+  <div class="tab active" data-tab="reports" onclick="go('reports')"><span class="ic">📋</span>البلاغات</div>
+  <div class="tab" data-tab="new" onclick="go('new')"><span class="ic">🚨</span>بلاغ جديد</div>
+  <div class="tab" data-tab="stats" onclick="go('stats')"><span class="ic">📊</span>التقارير</div>
+  <div class="tab" data-tab="settings" onclick="go('settings')"><span class="ic">⚙️</span>الإعدادات</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBox"></div></div>
+
+<script>
+/* ================= الحالة والتخزين ================= */
+var LS_KEY='faultsys_v1';
+var S=null;
+
+function defaultCatalog(){
+  return {
+    "كهرباء":["انقطاع تيار كهربائي","عطل لوحة كهرباء","ماس كهربائي / سلك مقطوع","عطل تايمر","انخفاض / ارتفاع الجهد","عطل مفتاح أوتوماتيك"],
+    "مولد":["المولد لا يعمل","عطل سلف / بطارية","تسريب وقود أو زيت","سخونة زائدة","عطل لوحة التحويل ATS","نقص وقود"],
+    "تهوية":["عطل شفاط","عطل موتور شفاط","سير مقطوع / مرتخي","عطل دمبر / فتحات هواء","عطل ستائر","عطل حساس حرارة","عطل كنترول التهوية"],
+    "تبريد":["عطل خلايا تبريد","عطل طلمبة مياه الخلايا","انسداد / تكلس الخلايا","تسريب مياه من الخلايا","عطل فوجر / رشاشات"],
+    "تدفئة":["دفاية لا تعمل","انسداد نوزل الدفاية","عطل ترموستات","مشكلة غاز / سولار","تسريب غاز","لهب غير منتظم"],
+    "سقايات":["انسداد نبل / حلمات","تسريب خط مياه","عطل منظم ضغط","عطل طلمبة مياه","مشكلة تانك المياه","عطل فلتر مياه","عطل جهاز جرعات الدواء"],
+    "علافات":["عطل موتور تغذية","انسداد خط علف","عطل حساس علف","كسر أطباق علافات","عطل صومعة / سوست","عطل قلاب / ونش علف"],
+    "إضاءة":["لمبات محروقة","عطل دايمر إضاءة","عطل خط إضاءة كامل"],
+    "مباني":["تسريب سقف","كسر شباك / ستارة","مشكلة أرضيات / فرشة","عطل أبواب","شروخ / مشاكل إنشائية"],
+    "معدات أخرى":["عطل ميزان","عطل جهاز إنذار","عطل كاميرات","عطل مضخة غسيل","عطل سخان مياه","أخرى"]
+  };
+}
+function defaultState(){
+  return {
+    users:[
+      {id:uid(),name:"د. محمد الصادق",role:"owner"},
+      {id:uid(),name:"مدير الإنتاج",role:"prod"},
+      {id:uid(),name:"مدير الصيانة",role:"maint"},
+      {id:uid(),name:"فني الصيانة",role:"tech"},
+      {id:uid(),name:"مدير مزرعة العمدة",role:"farm"}
+    ],
+    farms:[{id:uid(),name:"مزرعة العمدة",houses:5}],
+    catalog:defaultCatalog(),
+    reports:[],
+    curUserId:null,
+    tg:{token:"",chatId:"",onNew:true,onStart:true,onFixed:true,onConfirm:true},
+    fb:{url:""},
+    catalogUpdatedAt:0
+  };
+}
+function load(){ try{var r=localStorage.getItem(LS_KEY); S=r?JSON.parse(r):defaultState();}catch(e){S=defaultState();} if(!S.catalog)S.catalog=defaultCatalog(); if(!S.fb)S.fb={}; if(!S.fb.url)S.fb.url=DEFAULT_FB_URL; }
+function save(){ try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){} fbPush(); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function now(){ return Date.now(); }
+
+var ROLES={owner:"صاحب الشركة",prod:"مدير الإنتاج",maint:"مدير الصيانة",tech:"فني صيانة",farm:"مدير مزرعة"};
+var SEVS={critical:"حرجة 🔴",high:"عالية 🟠",med:"متوسطة 🔵",low:"منخفضة 🟢"};
+var STATUS={new:"بلاغ جديد",prog:"جاري الإصلاح",fixed:"تم الإصلاح",conf:"مؤكد ✔"};
+
+function curUser(){ for(var i=0;i<S.users.length;i++){if(S.users[i].id===S.curUserId)return S.users[i];} return null; }
+function fmtDT(ts){ if(!ts)return"—"; var d=new Date(ts); return d.toLocaleDateString('ar-EG',{day:'numeric',month:'short'})+" "+d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}); }
+function hoursBetween(a,b){ return Math.round((b-a)/36e5*10)/10; }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+/* ================= التنقل ================= */
+var TAB='reports', FILTER='open';
+function go(t){ TAB=t; var tabs=document.querySelectorAll('.tab'); for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('active',tabs[i].getAttribute('data-tab')===t);} render(); window.scrollTo(0,0); }
+
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(function(){t.style.display='none';},2600); }
+function openModal(html){ document.getElementById('modalBox').innerHTML=html; document.getElementById('modalBg').classList.add('show'); }
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+
+/* ================= اختيار المستخدم ================= */
+function openUserPicker(){
+  var h='<h3>مين اللي بيستخدم السيستم دلوقتي؟</h3><div class="hint">اختيارك بيتسجل على الجهاز ده، وكل بلاغ أو إصلاح هيتكتب باسمك.</div>';
+  for(var i=0;i<S.users.length;i++){var u=S.users[i];
+    h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="setUser(\''+u.id+'\')">'+esc(u.name)+' <span style="color:var(--muted);font-size:12px">— '+ROLES[u.role]+'</span></button>';}
+  openModal(h);
+}
+function setUser(id){ S.curUserId=id; save(); closeModal(); refreshUserChip(); render(); }
+function refreshUserChip(){ var u=curUser(); document.getElementById('curUserName').textContent=u?u.name:"اختر المستخدم"; }
+
+/* ================= تليجرام ================= */
+function tgReady(){ return S.tg.token && S.tg.chatId; }
+function tgSend(text,cb){
+  if(!tgReady()){ if(cb)cb(false,"التليجرام مش متظبط"); return; }
+  fetch("https://api.telegram.org/bot"+S.tg.token+"/sendMessage",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({chat_id:S.tg.chatId,text:text})
+  }).then(function(r){return r.json();}).then(function(j){
+    if(cb)cb(!!j.ok, j.ok?"":(j.description||"خطأ"));
+  }).catch(function(e){ if(cb)cb(false,"مفيش نت أو خطأ اتصال"); });
+}
+function sevPlain(s){ return SEVS[s]||s; }
+function msgNew(r){
+  return "🚨 بلاغ عطل جديد #"+r.num+"\n"+
+  "🏠 "+r.farmName+" — عنبر "+r.house+"\n"+
+  "⚙️ العطل: "+r.category+" › "+r.fault+"\n"+
+  "⚠️ الخطورة: "+sevPlain(r.severity)+"\n"+
+  (r.desc?("📝 "+r.desc+"\n"):"")+
+  "👤 المبلّغ: "+r.reporterName+"\n"+
+  "🕐 "+fmtDT(r.ts);
+}
+function msgStart(r,by){ return "🔵 تم استلام البلاغ #"+r.num+"\n🏠 "+r.farmName+" — عنبر "+r.house+"\n⚙️ "+r.fault+"\n🔧 الفني: "+by+"\n🕐 "+fmtDT(now()); }
+function msgFixed(r){
+  return "✅ تم الإصلاح — بلاغ #"+r.num+"\n"+
+  "🏠 "+r.farmName+" — عنبر "+r.house+"\n"+
+  "⚙️ "+r.category+" › "+r.fault+"\n"+
+  "🔧 الفني: "+r.fixedBy+"\n"+
+  (r.fixDesc?("🛠 الإصلاح: "+r.fixDesc+"\n"):"")+
+  "⏱ مدة العطل: "+hoursBetween(r.ts,r.fixTs)+" ساعة\n"+
+  "⏳ مطلوب تأكيد من: "+r.reporterName;
+}
+function msgConf(r){ return "🟢 تأكيد الإصلاح — بلاغ #"+r.num+"\n🏠 "+r.farmName+" — عنبر "+r.house+"\n⚙️ "+r.fault+"\n👤 أكد المبلّغ: "+r.reporterName+"\n📌 البلاغ اتقفل نهائيًا."; }
+
+/* ================= بلاغ جديد ================= */
+function renderNew(){
+  var u=curUser();
+  var h='<div class="card"><h3>🚨 تسجيل بلاغ عطل</h3>';
+  if(!u){ h+='<div class="hint">⚠️ لازم تختار المستخدم الأول من فوق.</div></div>'; return h; }
+  h+='<label>المزرعة</label><select id="nFarm" onchange="fillHouses()">';
+  for(var i=0;i<S.farms.length;i++){h+='<option value="'+S.farms[i].id+'">'+esc(S.farms[i].name)+'</option>';}
+  h+='</select>';
+  h+='<div class="row2"><div><label>العنبر</label><select id="nHouse"></select></div>';
+  h+='<div><label>نوع العطل</label><select id="nCat" onchange="fillFaults()">';
+  for(var c in S.catalog){h+='<option>'+esc(c)+'</option>';}
+  h+='</select></div></div>';
+  h+='<label>العطل بالتحديد</label><select id="nFault"></select>';
+  h+='<label>درجة الخطورة</label><div class="sev" id="nSev">'+
+     '<span data-v="critical" onclick="pickSev(this)">حرجة</span>'+
+     '<span data-v="high" onclick="pickSev(this)">عالية</span>'+
+     '<span data-v="med" class="on-med" onclick="pickSev(this)">متوسطة</span>'+
+     '<span data-v="low" onclick="pickSev(this)">منخفضة</span></div>';
+  h+='<label>تفاصيل إضافية (اختياري)</label><textarea id="nDesc" placeholder="مثال: الشفاط رقم 3 واقف والحرارة بتعلى"></textarea>';
+  h+='<button class="btn btn-amber" onclick="submitReport()">🚨 إرسال البلاغ + تنبيه تليجرام</button>';
+  if(!tgReady()) h+='<div class="hint">⚠️ التليجرام لسه متظبطش — البلاغ هيتسجل جوه السيستم بس من غير إشعار. ظبطه من الإعدادات.</div>';
+  h+='</div>';
+  return h;
+}
+var pickedSev='med';
+function pickSev(el){
+  pickedSev=el.getAttribute('data-v');
+  var sp=document.getElementById('nSev').children;
+  var map={critical:'on-critical',high:'on-high',med:'on-med',low:'on-low'};
+  for(var i=0;i<sp.length;i++){ sp[i].className=''; if(sp[i]===el)sp[i].className=map[pickedSev]; }
+}
+function fillHouses(){
+  var fid=document.getElementById('nFarm').value, f=null;
+  for(var i=0;i<S.farms.length;i++){if(S.farms[i].id===fid)f=S.farms[i];}
+  var n=f?f.houses:1, h='';
+  for(var j=1;j<=n;j++)h+='<option>'+j+'</option>';
+  document.getElementById('nHouse').innerHTML=h;
+}
+function fillFaults(){
+  var c=document.getElementById('nCat').value, arr=S.catalog[c]||[], h='';
+  for(var i=0;i<arr.length;i++)h+='<option>'+esc(arr[i])+'</option>';
+  document.getElementById('nFault').innerHTML=h;
+}
+function submitReport(){
+  var u=curUser(); if(!u){openUserPicker();return;}
+  var fid=document.getElementById('nFarm').value, fName="";
+  for(var i=0;i<S.farms.length;i++){if(S.farms[i].id===fid)fName=S.farms[i].name;}
+  var maxNum=0; for(var k=0;k<S.reports.length;k++){if(S.reports[k].num>maxNum)maxNum=S.reports[k].num;}
+  var r={
+    id:uid(), num:maxNum+1, ts:now(), updatedAt:now(),
+    farmId:fid, farmName:fName,
+    house:document.getElementById('nHouse').value,
+    category:document.getElementById('nCat').value,
+    fault:document.getElementById('nFault').value,
+    severity:pickedSev,
+    desc:(document.getElementById('nDesc').value||"").trim(),
+    reporterId:u.id, reporterName:u.name,
+    status:'new', startTs:0, startedBy:"", fixTs:0, fixDesc:"", fixedBy:"", confTs:0
+  };
+  S.reports.unshift(r); save();
+  if(S.tg.onNew && tgReady()){
+    tgSend(msgNew(r),function(ok,err){ toast(ok?"✅ البلاغ اتسجل والتنبيه اتبعت على تليجرام":"البلاغ اتسجل ✅ لكن التليجرام فشل: "+err); });
+  } else toast("✅ البلاغ اتسجل");
+  go('reports');
+}
+
+/* ================= قائمة البلاغات ================= */
+function renderReports(){
+  var counts={open:0,new:0,prog:0,fixed:0,conf:0};
+  for(var i=0;i<S.reports.length;i++){var st=S.reports[i].status; counts[st]++; if(st!=='conf')counts.open++;}
+  var h='<div class="filters">';
+  var fl=[['open','مفتوحة',counts.open],['new','جديدة',counts.new],['prog','جاري الإصلاح',counts.prog],['fixed','منتظرة تأكيد',counts.fixed],['conf','مقفولة',counts.conf],['all','الكل',S.reports.length]];
+  for(var j=0;j<fl.length;j++){h+='<span class="fchip'+(FILTER===fl[j][0]?' active':'')+'" onclick="FILTER=\''+fl[j][0]+'\';render()">'+fl[j][1]+' <span class="n">'+fl[j][2]+'</span></span>';}
+  h+='</div>';
+  var list=[];
+  for(var k=0;k<S.reports.length;k++){var r=S.reports[k];
+    if(FILTER==='all'||(FILTER==='open'&&r.status!=='conf')||r.status===FILTER)list.push(r);}
+  if(!list.length){ h+='<div class="empty"><div class="big">🛠️</div>مفيش بلاغات هنا<br>لو فيه عطل، سجّله من تبويب «بلاغ جديد»</div>'; return h; }
+  for(var m=0;m<list.length;m++)h+=repCard(list[m]);
+  return h;
+}
+function repCard(r){
+  var bmap={new:'b-new',prog:'b-prog',fixed:'b-fixed',conf:'b-conf'};
+  var smap={critical:'s-critical',high:'s-high',med:'s-med',low:'s-low'};
+  var u=curUser();
+  var h='<div class="rep"><div class="stripe '+smap[r.severity]+'"></div><div class="top"><div>';
+  h+='<div class="rep-num">بلاغ #'+r.num+' · '+fmtDT(r.ts)+'</div>';
+  h+='<div class="title">'+esc(r.category)+' › '+esc(r.fault)+'</div>';
+  h+='<div class="sub">🏠 '+esc(r.farmName)+' — عنبر '+esc(r.house)+' · '+sevPlain(r.severity)+'<br>👤 المبلّغ: '+esc(r.reporterName)+(r.desc?'<br>📝 '+esc(r.desc):'')+'</div>';
+  h+='</div><span class="badge '+bmap[r.status]+'">'+STATUS[r.status]+'</span></div>';
+  h+='<div class="body"><div class="timeline">';
+  h+=tstep(true,'تم الإبلاغ — '+esc(r.reporterName)+' · '+fmtDT(r.ts));
+  h+=tstep(!!r.startTs,'استلام الفني'+(r.startTs?' — '+esc(r.startedBy)+' · '+fmtDT(r.startTs):''));
+  h+=tstep(!!r.fixTs,'الإصلاح'+(r.fixTs?' — '+esc(r.fixedBy)+' · '+fmtDT(r.fixTs)+(r.fixDesc?' · <b>'+esc(r.fixDesc)+'</b>':''):''));
+  h+=tstep(!!r.confTs,'تأكيد المبلّغ'+(r.confTs?' · '+fmtDT(r.confTs):''));
+  h+='</div>';
+  if(r.status==='new' && u && (u.role==='tech'||u.role==='maint')) h+='<button class="btn btn-blue btn-sm" onclick="startFix(\''+r.id+'\')">🔧 استلام البلاغ</button>';
+  if((r.status==='new'||r.status==='prog') && u && (u.role==='tech'||u.role==='maint')) h+='<button class="btn btn-green btn-sm" onclick="openFixModal(\''+r.id+'\')">✅ تم الإصلاح</button>';
+  if(r.status==='fixed' && u && u.id===r.reporterId) h+='<button class="btn btn-green btn-sm" onclick="confirmFix(\''+r.id+'\')">🟢 أنا المبلّغ وأؤكد الإصلاح</button>';
+  if(r.status==='fixed' && u && u.id!==r.reporterId) h+='<div class="hint">⏳ مستني تأكيد '+esc(r.reporterName)+'</div>';
+  if(u && (u.role==='owner'||u.role==='maint')) h+='<button class="btn btn-red btn-sm" onclick="delReport(\''+r.id+'\')">حذف</button>';
+  h+='</div></div>';
+  return h;
+}
+function tstep(done,txt){ return '<div class="tstep'+(done?' done':'')+'"><span class="mark"></span><span>'+txt+'</span></div>'; }
+function findRep(id){ for(var i=0;i<S.reports.length;i++)if(S.reports[i].id===id)return S.reports[i]; return null; }
+
+function startFix(id){
+  var r=findRep(id), u=curUser(); if(!r||!u)return;
+  r.status='prog'; r.startTs=now(); r.startedBy=u.name; r.updatedAt=now(); save(); render();
+  if(S.tg.onStart&&tgReady())tgSend(msgStart(r,u.name),function(ok){toast(ok?"🔵 تم الاستلام والتنبيه اتبعت":"تم الاستلام (التليجرام فشل)");});
+  else toast("🔵 تم استلام البلاغ");
+}
+function openFixModal(id){
+  var r=findRep(id); if(!r)return;
+  openModal('<h3>✅ إقفال الإصلاح — بلاغ #'+r.num+'</h3>'+
+  '<div class="hint">'+esc(r.farmName)+' — عنبر '+esc(r.house)+' · '+esc(r.fault)+'</div>'+
+  '<label>إيه اللي اتعمل بالظبط؟</label><textarea id="fixDesc" placeholder="مثال: تم تغيير سير الشفاط رقم 3 وتشغيله"></textarea>'+
+  '<button class="btn btn-green" onclick="doFix(\''+id+'\')">تسجيل الإصلاح + تنبيه الكل</button>');
+}
+function doFix(id){
+  var r=findRep(id), u=curUser(); if(!r||!u)return;
+  if(!r.startTs){r.startTs=now();r.startedBy=u.name;}
+  r.status='fixed'; r.fixTs=now(); r.fixedBy=u.name;
+  r.fixDesc=(document.getElementById('fixDesc').value||"").trim();
+  r.updatedAt=now(); save(); closeModal(); render();
+  if(S.tg.onFixed&&tgReady())tgSend(msgFixed(r),function(ok){toast(ok?"✅ اتسجل الإصلاح والتنبيه اتبعت — مستنيين تأكيد المبلّغ":"اتسجل الإصلاح (التليجرام فشل)");});
+  else toast("✅ اتسجل الإصلاح — مستنيين تأكيد المبلّغ");
+}
+function confirmFix(id){
+  var r=findRep(id), u=curUser(); if(!r||!u)return;
+  if(u.id!==r.reporterId){toast("التأكيد لازم يكون من اللي بلّغ عن العطل نفسه");return;}
+  r.status='conf'; r.confTs=now(); r.updatedAt=now(); save(); render();
+  if(S.tg.onConfirm&&tgReady())tgSend(msgConf(r),function(ok){toast(ok?"🟢 اتأكد الإصلاح والبلاغ اتقفل":"اتأكد الإصلاح (التليجرام فشل)");});
+  else toast("🟢 اتأكد الإصلاح والبلاغ اتقفل");
+}
+function delReport(id){
+  if(!confirm("متأكد من حذف البلاغ نهائيًا؟"))return;
+  for(var i=0;i<S.reports.length;i++)if(S.reports[i].id===id){S.reports.splice(i,1);break;}
+  save(); render(); toast("اتحذف");
+}
+
+/* ================= التقارير والإحصائيات ================= */
+function renderStats(){
+  var open=0,critOpen=0,fixedCount=0,totalHrs=0;
+  var byCat={},byFarm={},repeat={};
+  for(var i=0;i<S.reports.length;i++){var r=S.reports[i];
+    if(r.status!=='conf')open++;
+    if(r.status!=='conf'&&r.severity==='critical')critOpen++;
+    if(r.fixTs){fixedCount++;totalHrs+=hoursBetween(r.ts,r.fixTs);}
+    byCat[r.category]=(byCat[r.category]||0)+1;
+    byFarm[r.farmName]=(byFarm[r.farmName]||0)+1;
+    var key=r.farmName+" ع"+r.house+" — "+r.fault;
+    repeat[key]=(repeat[key]||0)+1;
+  }
+  var avg=fixedCount?Math.round(totalHrs/fixedCount*10)/10:0;
+  var h='<div class="stat-grid">'+
+  '<div class="stat"><div class="v" style="color:var(--red)">'+open+'</div><div class="l">بلاغات مفتوحة</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--amber)">'+critOpen+'</div><div class="l">حرجة مفتوحة</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--blue)">'+avg+'</div><div class="l">متوسط ساعات الإصلاح</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--green)">'+S.reports.length+'</div><div class="l">إجمالي البلاغات</div></div></div>';
+  h+='<div class="card"><h3>الأعطال حسب النوع</h3>'+bars(byCat)+'</div>';
+  h+='<div class="card"><h3>البلاغات حسب المزرعة</h3>'+bars(byFarm)+'</div>';
+  var reps=[]; for(var k in repeat)if(repeat[k]>=2)reps.push([k,repeat[k]]);
+  reps.sort(function(a,b){return b[1]-a[1];});
+  h+='<div class="card"><h3>🔁 أعطال متكررة (نفس العنبر ونفس العطل)</h3>';
+  if(!reps.length)h+='<div class="hint">مفيش تكرار لحد دلوقتي — كويس 👌</div>';
+  else for(var j=0;j<Math.min(reps.length,10);j++)h+='<div class="list-item"><span>'+esc(reps[j][0])+'</span><b style="color:var(--red)">'+reps[j][1]+' مرات</b></div>';
+  h+='</div>';
+  return h;
+}
+function bars(obj){
+  var arr=[]; for(var k in obj)arr.push([k,obj[k]]);
+  if(!arr.length)return '<div class="hint">مفيش بيانات لسه</div>';
+  arr.sort(function(a,b){return b[1]-a[1];});
+  var max=arr[0][1],h='';
+  for(var i=0;i<arr.length;i++){h+='<div class="bar-row"><span class="nm">'+esc(arr[i][0])+'</span><span class="tr"><span class="fl" style="width:'+Math.round(arr[i][1]/max*100)+'%"></span></span><span class="ct">'+arr[i][1]+'</span></div>';}
+  return h;
+}
+
+/* ================= الإعدادات ================= */
+function renderSettings(){
+  var h='';
+  /* Firebase */
+  var _u=fbUrl();
+  h+='<div class="card"><h3>☁️ مزامنة Firebase '+(_u?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
+  h+='<label>Firebase Database URL</label><input id="fbUrl" dir="ltr" placeholder="https://...firebasedatabase.app" value="'+esc(_u)+'">';
+  h+='<div class="row2"><button class="btn btn-ghost" onclick="saveFb()">حفظ وتفعيل</button><button class="btn btn-blue" onclick="fbPull()">⬇️ سحب من السحابة</button></div>';
+  h+='<div class="hint">الرابط متملّي تلقائيًا — نفس قاعدة بيانات باقي أنظمتك بمسار خاص (<b>fault_system.json</b>).<br>البلاغات والمستخدمين والمزارع بيتزامنوا بين كل الأجهزة.<br><b>ملاحظة:</b> «المستخدم الحالي» بيفضل محلي لكل جهاز — كل واحد يختار نفسه.</div></div>';
+  /* تليجرام */
+  h+='<div class="card"><h3>📨 ربط التليجرام '+(tgReady()?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
+  h+='<label>Bot Token</label><input id="tgToken" dir="ltr" placeholder="123456:ABC-xxxx" value="'+esc(S.tg.token)+'">';
+  h+='<label>Chat ID (بتاع الجروب)</label><input id="tgChat" dir="ltr" placeholder="-100xxxxxxxxxx" value="'+esc(S.tg.chatId)+'">';
+  h+='<div class="row2"><button class="btn btn-ghost" onclick="saveTg()">حفظ</button><button class="btn btn-blue" onclick="testTg()">🧪 اختبار الإرسال</button></div>';
+  h+='<div class="hint"><b>خطوات التفعيل (5 دقايق):</b><br>'+
+  '1️⃣ افتح تليجرام وكلّم <b>@BotFather</b> واكتب /newbot وسمّي البوت — هيديك الـ Token.<br>'+
+  '2️⃣ اعمل جروب اسمه «صيانة المزارع» وضيف فيه البوت + كل المعنيين (الفني، مدير الصيانة، مدير الإنتاج، حضرتك).<br>'+
+  '3️⃣ ابعت أي رسالة في الجروب، بعدين افتح في المتصفح:<br><span dir="ltr" style="font-family:monospace;font-size:11px">api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</span><br>وهتلاقي "chat":{"id":-100... — ده الـ Chat ID.<br>4️⃣ الصقهم فوق ودوس اختبار.</div></div>';
+  /* المستخدمين */
+  h+='<div class="card"><h3>👥 المستخدمين</h3><div id="usersList">';
+  for(var i=0;i<S.users.length;i++){var u=S.users[i];
+    h+='<div class="list-item"><span>'+esc(u.name)+'<div class="meta">'+ROLES[u.role]+'</div></span><span class="del" onclick="delUser(\''+u.id+'\')">✕</span></div>';}
+  h+='</div><label>اسم مستخدم جديد</label><input id="newUserName" placeholder="الاسم"><label>الدور</label><select id="newUserRole">';
+  for(var r in ROLES)h+='<option value="'+r+'">'+ROLES[r]+'</option>';
+  h+='</select><button class="btn btn-ghost" onclick="addUser()">➕ إضافة مستخدم</button></div>';
+  /* المزارع */
+  h+='<div class="card"><h3>🏠 المزارع</h3>';
+  for(var j=0;j<S.farms.length;j++){var f=S.farms[j];
+    h+='<div class="list-item"><span>'+esc(f.name)+'<div class="meta">'+f.houses+' عنابر</div></span><span class="del" onclick="delFarm(\''+f.id+'\')">✕</span></div>';}
+  h+='<div class="row2"><div><label>اسم المزرعة</label><input id="newFarmName" placeholder="مثال: مزرعة 5"></div><div><label>عدد العنابر</label><input id="newFarmHouses" type="number" value="4" min="1"></div></div>';
+  h+='<button class="btn btn-ghost" onclick="addFarm()">➕ إضافة مزرعة</button></div>';
+  /* قائمة الأعطال */
+  h+='<div class="card"><h3>🧰 قائمة الأعطال</h3><div class="hint">تقدر تضيف عطل جديد تحت أي تصنيف — هيظهر فورًا في القوايم المنسدلة.</div>';
+  h+='<label>التصنيف</label><select id="catSel">';
+  for(var c in S.catalog)h+='<option>'+esc(c)+'</option>';
+  h+='</select><label>اسم العطل الجديد</label><input id="newFault" placeholder="مثال: عطل انفرتر"><button class="btn btn-ghost" onclick="addFault()">➕ إضافة للعطل للقائمة</button></div>';
+  /* نسخة احتياطية */
+  h+='<div class="card"><h3>💾 نسخة احتياطية</h3><div class="row2"><button class="btn btn-ghost" onclick="exportJSON()">⬇️ تصدير البيانات</button><button class="btn btn-ghost" onclick="document.getElementById(\'impFile\').click()">⬆️ استيراد</button></div><input type="file" id="impFile" accept=".json" style="display:none" onchange="importJSON(this)"></div>';
+  return h;
+}
+function saveTg(){ S.tg.token=document.getElementById('tgToken').value.trim(); S.tg.chatId=document.getElementById('tgChat').value.trim(); save(); toast("اتحفظ ✅"); render(); }
+function testTg(){ saveTg(); if(!tgReady()){toast("اكتب التوكن والـ Chat ID الأول");return;}
+  tgSend("🔔 رسالة اختبار من نظام أعطال المزارع — الربط شغال تمام ✅",function(ok,err){toast(ok?"✅ وصلت الرسالة للجروب — الربط شغال":"❌ فشل: "+err);}); }
+function addUser(){ var n=document.getElementById('newUserName').value.trim(); if(!n)return;
+  S.users.push({id:uid(),name:n,role:document.getElementById('newUserRole').value}); save(); render(); }
+function delUser(id){ if(S.users.length<=1){toast("لازم يفضل مستخدم واحد على الأقل");return;} if(!confirm("حذف المستخدم؟"))return;
+  for(var i=0;i<S.users.length;i++)if(S.users[i].id===id)S.users.splice(i,1); if(S.curUserId===id)S.curUserId=null; save(); refreshUserChip(); render(); }
+function addFarm(){ var n=document.getElementById('newFarmName').value.trim(); if(!n)return;
+  var hn=parseInt(document.getElementById('newFarmHouses').value)||1;
+  S.farms.push({id:uid(),name:n,houses:hn}); save(); render(); }
+function delFarm(id){ if(!confirm("حذف المزرعة؟ (البلاغات القديمة هتفضل موجودة)"))return;
+  for(var i=0;i<S.farms.length;i++)if(S.farms[i].id===id)S.farms.splice(i,1); save(); render(); }
+function addFault(){ var c=document.getElementById('catSel').value, f=document.getElementById('newFault').value.trim(); if(!f)return;
+  if(!S.catalog[c])S.catalog[c]=[]; S.catalog[c].push(f); S.catalogUpdatedAt=now(); save(); toast("اتضاف ✅"); render(); }
+function exportJSON(){
+  var data=JSON.stringify(S,null,1);
+  var blob=new Blob([data],{type:"application/json"});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download="fault-system-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click();
+}
+function importJSON(inp){
+  var f=inp.files[0]; if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){ try{ var d=JSON.parse(rd.result); if(!d.reports)throw 0; S=d; save(); refreshUserChip(); render(); toast("✅ تم الاستيراد"); }catch(e){toast("❌ الملف مش صالح");} };
+  rd.readAsText(f);
+}
+
+/* ================= Firebase — مزامنة بين الأجهزة =================
+   نفس قاعدة بيانات باقي أنظمتك، بمسار خاص: fault_system.json
+   ملاحظة: المستخدم الحالي (curUserId) بيفضل محلي لكل جهاز ومابيتزامنش. */
+var DEFAULT_FB_URL='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
+var fbBusy=false;
+
+function fbUrl(){ return (S.fb && S.fb.url) ? S.fb.url : ''; }
+function setSync(state){
+  var d=document.querySelector('header h1 .dot');
+  if(!d)return;
+  var c = !fbUrl() ? 'var(--muted)' : (state==='ok'?'var(--green)':(state==='err'?'var(--red)':'var(--amber)'));
+  d.style.background=c; d.style.boxShadow='0 0 10px '+c;
+  d.title = !fbUrl() ? 'محلي' : (state==='ok'?'متزامن':(state==='err'?'خطأ مزامنة':'جاري…'));
+}
+/* اللي بيتزامن: كل حاجة ما عدا المستخدم الحالي */
+function fbPush(){
+  var u=fbUrl(); if(!u||fbBusy)return;
+  var body={}; for(var k in S){ if(k!=='curUserId') body[k]=S[k]; }
+  fetch(u+'/fault_system.json',{method:'PUT',body:JSON.stringify(body)})
+    .then(function(r){setSync(r.ok?'ok':'err')})
+    .catch(function(){setSync('err')});
+}
+function applyCloud(d){
+  if(!d||!d.users)return false;
+  fbBusy=true;
+  var mine=S.curUserId;              /* اتمسك بالمستخدم بتاع الجهاز ده */
+  for(var k in d){ if(k!=='curUserId') S[k]=d[k]; }
+  S.curUserId=mine;
+  if(!S.catalog)S.catalog=defaultCatalog();
+  if(!S.fb)S.fb={url:DEFAULT_FB_URL};
+  try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){}
+  fbBusy=false;
+  return true;
+}
+function fbPull(){
+  var u=fbUrl(); if(!u){toast('مفيش رابط Firebase');return}
+  setSync('busy');
+  fetch(u+'/fault_system.json').then(function(r){return r.json()}).then(function(d){
+    if(applyCloud(d)){ refreshUserChip(); render(); setSync('ok'); toast('✅ تم السحب من السحابة'); }
+    else { setSync('ok'); toast('مفيش بيانات سحابية'); }
+  }).catch(function(){setSync('err');toast('❌ فشل الاتصال')});
+}
+function saveFb(){
+  S.fb=S.fb||{}; S.fb.url=document.getElementById('fbUrl').value.trim();
+  try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){}
+  if(fbUrl()){ setSync('busy'); fbPush(); toast('✅ المزامنة اتفعّلت'); }
+  else { setSync(''); toast('⏹️ المزامنة اتوقفت'); }
+  render();
+}
+/* أول اتصال: لو السحابة فيها بيانات اسحبها، لو فاضية ادفع اللي عندك */
+function fbBoot(){
+  var u=fbUrl(); if(!u){setSync('');return}
+  setSync('busy');
+  fetch(u+'/fault_system.json').then(function(r){return r.json()}).then(function(d){
+    if(d&&d.users&&d.users.length){ applyCloud(d); refreshUserChip(); render(); setSync('ok'); }
+    else fbPush();
+  }).catch(function(){setSync('err')});
+}
+
+/* ================= الرسم ================= */
+function render(){
+  var m=document.getElementById('main');
+  if(TAB==='reports')m.innerHTML=renderReports();
+  else if(TAB==='new'){m.innerHTML=renderNew(); if(curUser()){fillHouses();fillFaults();pickedSev='med';}}
+  else if(TAB==='stats')m.innerHTML=renderStats();
+  else m.innerHTML=renderSettings();
+}
+load(); refreshUserChip(); render(); setSync(fbUrl()?'busy':''); fbBoot();
+if(!S.curUserId)setTimeout(openUserPicker,400);
+</script>
+</body>
+</html>
