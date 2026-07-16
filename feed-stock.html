@@ -372,6 +372,18 @@
   </div>
 </div>
 
+<!-- ====== اختيار طريقة التصدير ====== -->
+<div class="ov" id="ovOut">
+  <div class="sheet" style="max-width:400px">
+    <h2>📊 الملف جاهز</h2>
+    <div style="font-size:12.5px;color:var(--mut);margin-bottom:14px" id="outName"></div>
+    <button class="btn" id="outShare" onclick="doShare()">📤 مشاركة (واتساب / تليجرام / ملفات)</button>
+    <button class="btn nav" style="margin-top:9px" onclick="doDl()">⬇️ تحميل على الجهاز</button>
+    <div class="hint" id="outHint"></div>
+    <button class="btn-sm" style="width:100%;margin-top:10px" onclick="closeOut()">إلغاء</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script id="seed" type="application/json">{"targets":{"b":300,"c":300},"items":[{"name":"فيتامينات تسمين","stock":180,"rB":1,"rC":0,"sup":"بوسطن","price":null,"unit":"كيلو"},{"name":"املاح تسمين","stock":250,"rB":1.5,"rC":0,"sup":"بوسطن","price":null,"unit":"كيلو"},{"name":"بيكربونات صوديوم","stock":9755,"rB":2.5,"rC":5,"sup":"","price":null,"unit":"كيلو"},{"name":"ميثونين","stock":584,"rB":3,"rC":0,"sup":"","price":null,"unit":"كيلو"},{"name":"ليسين","stock":600,"rB":2.5,"rC":0,"sup":"","price":null,"unit":"كيلو"},{"name":"كولين","stock":260,"rB":1.25,"rC":0,"sup":"","price":null,"unit":"كيلو"},{"name":"انزيم طاقه","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null,"unit":"كيلو"},{"name":"ام تي دراي","stock":0,"rB":0.25,"rC":0,"sup":"اورجانيك","price":null,"unit":"كيلو"},{"name":"ض اس تي دراي","stock":0,"rB":0.25,"rC":0,"sup":"اورجانيك","price":null,"unit":"كيلو"},{"name":"فايتيز","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null,"unit":"كيلو"},{"name":"هاي دي","stock":0,"rB":0.25,"rC":0,"sup":"الدقهليه للدواجن","price":null,"unit":"كيلو"},{"name":"ثيرونين","stock":185,"rB":1.2,"rC":0,"sup":"","price":null,"unit":"كيلو"},{"name":"فورمات صوديوم","stock":0,"rB":0,"rC":0,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"},{"name":"بيتامناننيز","stock":0,"rB":0.1,"rC":0,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"},{"name":"بروتييز","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null,"unit":"كيلو"},{"name":"تي بيو","stock":0.25,"rB":0.5,"rC":0,"sup":"وايز","price":null,"unit":"كيلو"},{"name":"برولاكت","stock":0,"rB":0.5,"rC":0,"sup":"بيوكيور فارم","price":null,"unit":"كيلو"},{"name":"كيموتكس بلص","stock":0,"rB":0.5,"rC":0,"sup":"بوسطن","price":null,"unit":"كيلو"},{"name":"لينكو علف","stock":0,"rB":0.1,"rC":0,"sup":"بوسطن","price":null,"unit":"كيلو"},{"name":"برجابيور","stock":0,"rB":0.25,"rC":0,"sup":"الدوليه","price":null,"unit":"كيلو"},{"name":"ليجنوبوند","stock":775,"rB":2.5,"rC":0,"sup":"","price":null,"unit":"كيلو"},{"name":"اورجستيم","stock":0,"rB":0.25,"rC":0,"sup":"الدقهليه للدواجن","price":null,"unit":"كيلو"},{"name":"ديكلاشمس","stock":0,"rB":0.2,"rC":0,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"},{"name":"بولتري ستار","stock":0,"rB":0.2,"rC":0,"sup":"الدقهليه للدواجن","price":null,"unit":"كيلو"},{"name":"بريمكس مواشي","stock":997,"rB":0,"rC":3,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"},{"name":"أوكسيد ماغنسيوم","stock":96,"rB":0,"rC":1.5,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"},{"name":"الترايست بلص","stock":41,"rB":0,"rC":0.25,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"},{"name":"فيزايست","stock":80,"rB":0,"rC":1,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"},{"name":"تي ماكس بلص","stock":0,"rB":1,"rC":3,"sup":"د احمد الجندي kvc","price":null,"unit":"كيلو"}],"sups":["بوسطن","الدقهليه للدواجن","د احمد الجندي kvc","بيوكيور فارم","الدوليه","وايز","اورجانيك"]}</script>
 <script>
@@ -827,16 +839,49 @@ function delUser(){
 function ensureXLSX(){
   return new Promise(function(res,rej){
     if(window.XLSX)return res(window.XLSX);
+    var done=false;
+    var fin=function(ok){if(done)return;done=true;ok&&window.XLSX?res(window.XLSX):rej()};
     var s=document.createElement('script');
     s.src='https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
-    s.onload=function(){window.XLSX?res(window.XLSX):rej()};
-    s.onerror=function(){rej()};
+    s.onload=function(){fin(true)};
+    s.onerror=function(){fin(false)};
     document.head.appendChild(s);
+    /* لو المكتبة علّقت (نت بطيء) — منستناش أكتر من ٨ ثواني ونروح على CSV */
+    setTimeout(function(){fin(!!window.XLSX)},8000);
   });
 }
 function dl(blob,name){
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+/* ---- اختيار: مشاركة ولا تحميل ---- */
+var _out=null;
+function askOut(blob,name){
+  _out={blob:blob,name:name};
+  $('outName').textContent=name;
+  var f=null;
+  try{f=new File([blob],name,{type:blob.type||'application/octet-stream'})}catch(e){}
+  var ok=!!(f&&navigator.canShare&&navigator.canShare({files:[f]}));
+  $('outShare').style.display=ok?'block':'none';
+  $('outHint').innerHTML=ok
+    ? 'المشاركة بتفتحلك قايمة الآيفون — تختار منها واتساب أو تليجرام أو حفظ في الملفات.<br>التحميل بيروح لـ <b>الملفات ← التنزيلات</b>.'
+    : '⚠️ المشاركة مش متاحة في المتصفح ده. لو فاتح من تليجرام، اضغط ••• ← "فتح في Safari" عشان تقدر تشارك.';
+  $('ovOut').classList.add('on');
+}
+function closeOut(){$('ovOut').classList.remove('on');_out=null}
+function doDl(){
+  if(!_out)return;
+  dl(_out.blob,_out.name);
+  closeOut();toast('اتنزّل — شوفه في الملفات ← التنزيلات ✅');
+}
+function doShare(){
+  if(!_out)return;
+  var f;
+  try{f=new File([_out.blob],_out.name,{type:_out.blob.type||'application/octet-stream'})}
+  catch(e){toast('المتصفح مش داعم المشاركة');return}
+  navigator.share({files:[f],title:_out.name})
+    .then(function(){closeOut()})
+    .catch(function(err){ if(err&&err.name==='AbortError'){return} toast('فشلت المشاركة — جرّب التحميل') });
 }
 function toCsv(rows){
   var s=rows.map(function(r){
@@ -852,11 +897,10 @@ function sheetOut(rows,sheet,fname){
     var ws=X.utils.aoa_to_sheet(rows);
     var wb=X.utils.book_new();
     X.utils.book_append_sheet(wb,ws,sheet);
-    X.writeFile(wb,fname+'.xlsx');
-    toast('اتنزّل ✅');
+    var buf=X.write(wb,{bookType:'xlsx',type:'array'});
+    askOut(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),fname+'.xlsx');
   }).catch(function(){
-    dl(toCsv(rows),fname+'.csv');
-    toast('اتنزّل CSV (يفتح في Excel) ✅');
+    askOut(toCsv(rows),fname+'.csv');
   });
 }
 function readSheet(file){
@@ -1048,8 +1092,7 @@ function saveFb(){
 
 /* ================= نسخ/استرجاع ================= */
 function exportJson(){
-  dl(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),'feed-stock-'+today()+'.json');
-  toast('اتنزّلت ✅');
+  askOut(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),'feed-stock-'+today()+'.json');
 }
 function importJson(inp){
   var f=inp.files[0];if(!f)return;
@@ -1099,6 +1142,7 @@ for(var i=0;i<tabs.length;i++){
 }
 $('ovItem').addEventListener('click',function(e){if(e.target===this)closeItem()});
 $('ovUser').addEventListener('click',function(e){if(e.target===this)closeUser()});
+$('ovOut').addEventListener('click',function(e){if(e.target===this)closeOut()});
 $('mType').addEventListener('change',mvHint);
 
 load();
