@@ -293,12 +293,17 @@ input[type=checkbox]:active{transform:scale(.9)}
 .hpb{height:6px;background:var(--panel2);border-radius:4px;overflow:hidden}
 .hpb div{height:100%;border-radius:4px}
 .hpn{font-size:10px;color:var(--muted);margin-top:1px}
+
+.warow{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px}
+.wachips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.wachip{font-size:10.5px;padding:4px 9px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wachip.on{background:rgba(46,160,67,.16);border-color:rgba(46,160,67,.5);color:var(--green);font-weight:700}
 </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v16</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v17</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -424,6 +429,7 @@ function load(){
   if(!S.remind)S.remind=d.remind;
   if(!S.ej)S.ej={service:'',template:'',pub:''};
   if(!S.emails)S.emails=[];
+  if(!S.wa)S.wa=[];
   /* هجرة: الإيميل القديم المفرد يدخل الدفتر */
   if(S.mailTo&&!S.emails.some(function(x){return x.email===S.mailTo}))
     S.emails.push({id:uid(),name:S.mailTo.split('@')[0],email:S.mailTo});
@@ -794,7 +800,7 @@ function queueMsg(text){
 /* بيتنادى لما الشبكة ترجع + كل دقيقتين */
 var _flushing=false;
 function flushOutbox(cb){
-  if(_flushing||!isOnline()||!tgReady()){cb&&cb(0);return}
+  if(_flushing||!isOnline()){cb&&cb(0);return}
   var a=outbox();
   if(!a.length){cb&&cb(0);return}
   _flushing=true;
@@ -806,10 +812,24 @@ function flushOutbox(cb){
       cb&&cb(sent); return;
     }
     var m=a[0];
-    tgSendRaw(m.t,function(ok){
-      if(ok){ a.shift(); sent++; setOutbox(a); next(); }
-      else { _flushing=false; paintNet(); cb&&cb(sent); }   /* لسه مش راضي — سيبه للمرة الجاية */
-    });
+    if(m.wa){
+      /* رسالة واتساب مؤجلة */
+      waSendRaw(m.wa.phone,m.wa.key,m.t,function(ok){
+        if(ok){ a.shift(); sent++; setOutbox(a); setTimeout(next,1600); }
+        else { _flushing=false; paintNet(); cb&&cb(sent); }
+      });
+    } else if(tgReady()){
+      tgSendRaw(m.t,function(ok){
+        if(ok){ a.shift(); sent++; setOutbox(a); next(); }
+        else { _flushing=false; paintNet(); cb&&cb(sent); }
+      });
+    } else {
+      /* تليجرام مش متظبط — رجّع الرسالة لآخر الطابور وكمّل */
+      a.push(a.shift()); setOutbox(a);
+      var allTg=a.every(function(z){return !z.wa});
+      if(allTg){ _flushing=false; cb&&cb(sent); return; }
+      next();
+    }
   })();
 }
 /* مؤشر الشبكة في الهيدر */
@@ -827,6 +847,43 @@ function paintNet(){
     el.textContent='📤 '+q;
     el.title=q+' تنبيه مستني الإرسال';
   } else el.style.display='none';
+}
+
+
+/* ================= واتساب أوتوماتيك (CallMeBot) =================
+   واتساب مقفولة رسميًا — CallMeBot وسيط مجاني للأرقام الشخصية.
+   كل رقم بيفعّل مرة واحدة من موبايله وياخد apikey.
+   الإرسال fire-and-forget (no-cors): بيوصل بس مانقدرش نتأكد برمجيًا. */
+function waBook(){ if(!S.wa)S.wa=[]; return S.wa; }
+function waReady(){ return waBook().some(function(x){return x.phone&&x.key}); }
+function waSendRaw(phone,key,text,cb){
+  var url='https://api.callmebot.com/whatsapp.php?phone=%2B'+waNum(phone)+
+          '&apikey='+encodeURIComponent(key)+
+          '&text='+encodeURIComponent(text.slice(0,1800));
+  fetch(url,{mode:'no-cors'}).then(function(){cb&&cb(true)}).catch(function(){cb&&cb(false)});
+}
+/* الإرسال العادي — أوفلاين؟ للطابور */
+function waSend(entry,text,cb){
+  if(!entry||!entry.phone||!entry.key){cb&&cb(false);return}
+  if(!isOnline()){ queueWa(entry,text); cb&&cb(true,'queued'); return; }
+  waSendRaw(entry.phone,entry.key,text,function(ok){
+    if(!ok){ queueWa(entry,text); cb&&cb(true,'queued'); return; }
+    cb&&cb(true);
+  });
+}
+function queueWa(entry,text){
+  var a=outbox();
+  a.push({t:text,at:now(),wa:{phone:entry.phone,key:entry.key}});
+  if(a.length>60)a=a.slice(-60);
+  setOutbox(a); paintNet();
+}
+/* بث لكل الأرقام المشتركة في حدث معيّن — بفاصل ثانيتين عشان حدود CallMeBot */
+function waBroadcast(kind,text){
+  var list=waBook().filter(function(x){return x.phone&&x.key&&x.on&&x.on[kind]});
+  list.forEach(function(e,i){
+    setTimeout(function(){ waSend(e,text,function(){}); }, i*2000);
+  });
+  return list.length;
 }
 
 /* ================= تليجرام ================= */
@@ -1328,6 +1385,13 @@ function submitReport(){
   if(!isOnline())setTimeout(function(){toast("📴 اتسجّل محليًا — التنبيه هيتبعت أول ما النت يرجع")},1200);
   if(S.tg.onNew && tgReady()){
     tgSend(msgNew(r),function(ok,err){ toast(ok?"✅ البلاغ اتسجل والتنبيه اتبعت على تليجرام":"البلاغ اتسجل ✅ لكن التليجرام فشل: "+err); });
+  /* واتساب: البلاغات الحرجة والعالية بس — مانزعجش الناس باللمبات */
+  if(r.severity==='critical'||r.severity==='high'){
+    var _wn=waBroadcast('crit','🚨 بلاغ '+(r.severity==='critical'?'حرج':'عالي')+' #'+r.num+'\n'+
+      '🏠 '+r.farmName+' — وحدة '+r.house+'\n⚙️ '+r.fault+'\n👤 '+r.reporterName+
+      '\n\n(من نظام الأعطال)');
+    if(_wn)setTimeout(function(){toast('💬 اتبعت واتساب لـ '+_wn)},1800);
+  }
   } else toast("✅ البلاغ اتسجل");
   go('reports');
 }
@@ -1530,6 +1594,7 @@ function confirmFix(id){
       (r.rootCause?('🎯 السبب الجذري: '+r.rootCause+'\n'):'')+
       '👤 أكّد: '+u.name;
     tgSend(_t,function(ok){toast(ok?"🟢 اتقفل واتبعت الملخص":"🟢 اتقفل (التليجرام فشل)");});
+    waBroadcast('close',_t+'\n\n📄 الـ PDF:\n'+pdfLink(r));
   } else toast("🟢 اتأكد الإصلاح والبلاغ اتقفل");
   /* ===== PDF أوتوماتيك للجروب — من غير أي تدخل ===== */
   if(S.closePdf!==false&&tgReady()&&isOnline()){
@@ -2809,13 +2874,48 @@ function weeklyDigest(){
     setTimeout(function(){ dashPdfToTg(function(){ DASH.p=sv.p; DASH.farmId=sv.farmId; }); },2500);
   }
   if(S.mailTo)sendMail(S.mailTo,'التقرير الأسبوعي — نظام الأعطال',t+'\n\n📊 الداش بورد الكامل:\n'+APP_URL,true);
-  if(sentAny||S.mailTo){ try{localStorage.setItem('faultsys_wk',k)}catch(e){} }
+  var _ww=waBroadcast('week',t+'\n\n📊 الداش بورد:\n'+APP_URL);
+  if(sentAny||S.mailTo||_ww){ try{localStorage.setItem('faultsys_wk',k)}catch(e){} }
 }
 /* الإيميل: mailto بيفتح تطبيق البريد بالنص جاهز — من غير سيرفر دي أنضف طريقة */
 
 /* ================= دفتر الإيميلات =================
    سجّل الإيميلات مرة واحدة، وبعدين أي تقرير → اختار من القايمة → إرسال.
    بيدعم اختيار أكتر من إيميل مع بعض. */
+function addWa(){
+  var n=(document.getElementById('waName').value||'').trim();
+  var p=(document.getElementById('waPhone').value||'').trim();
+  var k=(document.getElementById('waKey').value||'').trim();
+  if(!p){toast('اكتب الرقم');return}
+  if(waNum(p).length<11){toast('❌ الرقم مش صحيح');return}
+  if(!k){toast('اكتب الـ apikey من رسالة CallMeBot');return}
+  var b=waBook();
+  for(var i=0;i<b.length;i++)if(waNum(b[i].phone)===waNum(p)){toast('الرقم ده موجود');return}
+  b.push({id:uid(),name:n||('رقم '+(b.length+1)),phone:p,key:k,on:{crit:1,close:1,week:0,esc:1}});
+  save(); render(); toast('✅ اتضاف — دوس 🧪 للتجربة');
+}
+function delWa(id){
+  if(!confirm('حذف الرقم ده؟'))return;
+  S.wa=waBook().filter(function(x){return x.id!==id});
+  save(); render();
+}
+function waToggle(id,k){
+  var b=waBook();
+  for(var i=0;i<b.length;i++)if(b[i].id===id){
+    if(!b[i].on)b[i].on={};
+    b[i].on[k]=b[i].on[k]?0:1;
+  }
+  save(); render();
+}
+function waTest(id){
+  var e=null, b=waBook();
+  for(var i=0;i<b.length;i++)if(b[i].id===id)e=b[i];
+  if(!e)return;
+  toast('⏳ ببعت رسالة تجريبية…');
+  waSend(e,'🧪 اختبار — نظام أعطال المزارع\nلو الرسالة دي وصلتك، الواتساب الأوتوماتيك شغّال ✅',function(ok,q){
+    toast(q==='queued'?'📴 اتحطت في الطابور':'📤 اتبعت — بُصّ على واتسابك خلال دقيقة');
+  });
+}
 function emailBook(){ if(!S.emails)S.emails=[]; return S.emails; }
 function addEmail(){
   var n=(document.getElementById('ebName').value||'').trim();
@@ -3004,6 +3104,32 @@ function renderSettings(){
   h+='<button class="btn btn-ghost" onclick="saveEsc()">حفظ التصعيد</button>';
   h+='<div class="hint">⚠️ <b>مهم تعرفه:</b> ده تطبيق ويب — التصعيد بيتفحص لما البرنامج يكون <b>مفتوح على أي جهاز</b> (بيتشيّك كل دقيقة). عشان تصعيد ٢٤/٧ مضمون لازم سيرفر.<br><b>الحل العملي:</b> سيب البرنامج مفتوح على تابلت/موبايل في مكتب الصيانة، أو افتحه أول ما تصحى. التنبيه الأساسي بيوصل تليجرام فورًا في كل الأحوال.</div></div>';
 
+  /* واتساب */
+  var _wb=waBook();
+  h+='<div class="card"><h3>💬 واتساب أوتوماتيك '+(waReady()?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
+  var _ev={crit:'🚨 حرج/عالي جديد',close:'📁 إقفال بلاغ',week:'🗓️ الأسبوعي',esc:'⏫ التصعيدات'};
+  for(var _i=0;_i<_wb.length;_i++){
+    var _w=_wb[_i];
+    h+='<div class="warow"><div class="urow" style="border:0;padding:0;margin:0"><div class="ui"><b>'+esc(_w.name)+'</b>'+
+       '<div class="meta" dir="ltr" style="text-align:left">+'+waNum(_w.phone)+(_w.key?'':' · <span style="color:var(--red)">⚠️ مفيش apikey</span>')+'</div></div>'+
+       '<div class="ub"><button class="btn btn-ghost btn-sm" onclick="waTest(\''+_w.id+'\')">🧪</button><span class="del" onclick="delWa(\''+_w.id+'\')">✕</span></div></div>';
+    h+='<div class="wachips">';
+    for(var _k in _ev){
+      var _on=_w.on&&_w.on[_k];
+      h+='<span class="wachip'+(_on?' on':'')+'" onclick="waToggle(\''+_w.id+'\',\''+_k+'\')">'+_ev[_k]+'</span>';
+    }
+    h+='</div></div>';
+  }
+  h+='<div class="row2"><div><label>الاسم</label><input id="waName" placeholder="مدير الصيانة"></div>'+
+     '<div><label>رقم الواتساب</label><input id="waPhone" dir="ltr" inputmode="tel" placeholder="01012345678"></div></div>';
+  h+='<label>API Key (من رسالة CallMeBot)</label><input id="waKey" dir="ltr" inputmode="numeric" placeholder="123456">';
+  h+='<button class="btn btn-ghost" onclick="addWa()">➕ إضافة رقم</button>';
+  h+='<div class="hint"><b>تفعيل كل رقم (مرة واحدة، من موبايله هو):</b><br>'+
+     '1️⃣ احفظ الرقم <b dir="ltr">+34 644 51 95 23</b> باسم CallMeBot.<br>'+
+     '2️⃣ ابعتله واتساب: <b dir="ltr">I allow callmebot to send me messages</b><br>'+
+     '3️⃣ هيرد في دقايق برسالة فيها <b>apikey</b> — اكتبه هنا مع الرقم.<br>'+
+     '4️⃣ دوس 🧪 — المفروض توصلك رسالة تجريبية.<br>'+
+     '⚠️ الخدمة للأرقام المفعّلة بس (مش جروبات) — والـ PDF بيوصل كلينك.</div></div>';
   /* دفتر الإيميلات */
   var _eb=emailBook();
   h+='<div class="card"><h3>📇 دفتر الإيميلات ('+_eb.length+')</h3>';
