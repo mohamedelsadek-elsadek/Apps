@@ -180,12 +180,50 @@ textarea{min-height:70px;resize:vertical}
 .fc input{width:auto;margin:0}
 .permbox{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px;margin:10px 0}
 .scope{background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);border-radius:8px;padding:8px 11px;font-size:12px;margin-bottom:10px}
+
+/* ===== إصلاح خانات الاختيار =====
+   السطر العام فيه appearance:none — بيلغي رسم الـ checkbox الأصلي.
+   فبنرسمها بنفسنا عشان تبان ✓ واضحة. */
+input[type=checkbox]{
+  -webkit-appearance:none;appearance:none;
+  width:24px !important;height:24px;min-width:24px;flex:0 0 auto;
+  padding:0 !important;margin:0;
+  border:2px solid #4a5568;border-radius:6px;
+  background:var(--bg);
+  position:relative;cursor:pointer;
+  transition:.12s;
+}
+input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}
+input[type=checkbox]:checked::after{
+  content:"";position:absolute;
+  right:7px;top:2.5px;width:6px;height:12px;
+  border:solid #fff;border-width:0 0 2.6px 2.6px;
+  transform:rotate(-45deg);
+}
+input[type=checkbox]:active{transform:scale(.9)}
+/* الصف كله يبقى قابل للضغط */
+.fc{
+  display:flex;align-items:center;gap:10px;font-size:14px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:9px;
+  padding:11px 12px;cursor:pointer;margin:0 0 6px;
+  -webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  transition:.12s;
+}
+.fc:active{background:var(--panel);border-color:var(--green)}
+.fc:has(input:checked){background:rgba(46,160,67,.12);border-color:rgba(46,160,67,.5)}
+.fc input{width:24px !important;margin:0}
+/* خانات الإعدادات */
+.permbox label,.card>label:has(input[type=checkbox]){
+  display:flex;align-items:center;gap:9px;cursor:pointer;
+  -webkit-user-select:none;user-select:none;
+}
 </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v3</span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v4</span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -374,7 +412,7 @@ function openUserEdit(id){
   if(!S.farms.length)h+='<div class="hint">مفيش مزارع — ضيف مزرعة الأول.</div>';
   h+='</div></div>';
   /* الصلاحيات */
-  h+='<div class="permbox"><label style="margin:0"><input type="checkbox" id="euCustom" '+(isCustom(u)?'checked':'')+' onchange="euCustomToggle()" style="width:auto;margin-left:6px"> <b>صلاحيات مخصّصة</b></label>';
+  h+='<div class="permbox"><label class="fc"><input type="checkbox" id="euCustom" '+(isCustom(u)?'checked':'')+' onchange="euCustomToggle()"> <b>🔑 صلاحيات مخصّصة</b></label>';
   h+='<div class="hint" style="margin-top:4px">من غيرها بياخد صلاحيات وظيفته الافتراضية.</div>';
   h+='<div id="euPerms" style="display:none;margin-top:8px">';
   for(var a in ACTS){
@@ -1184,11 +1222,11 @@ function renderSettings(){
   /* التصعيد */
   h+='<div class="card"><h3>🚨 التصعيد التلقائي '+(S.esc.on?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
   h+='<div class="hint">لو البلاغ عدّى المدة ومحدش حلّه، النظام بيبعت تنبيه تليجرام ويمنشن المسؤول الأعلى — تلقائيًا.</div>';
-  h+='<label><input type="checkbox" id="escOn" '+(S.esc.on?'checked':'')+' style="width:auto;margin-left:6px"> تفعيل التصعيد</label>';
+  h+='<label class="fc"><input type="checkbox" id="escOn" '+(S.esc.on?'checked':'')+'> <b>تفعيل التصعيد التلقائي</b></label>';
   h+='<div style="margin:10px 0"><label>يشتغل على الدرجات:</label>';
   var _sv=["critical","high","med","low"];
   for(var _j=0;_j<_sv.length;_j++)
-    h+='<label style="display:inline-block;margin-left:12px"><input type="checkbox" class="escSev" value="'+_sv[_j]+'" '+(S.esc.sevs.indexOf(_sv[_j])>=0?'checked':'')+' style="width:auto;margin-left:4px">'+SEVS[_sv[_j]]+'</label>';
+    h+='<label class="fc"><input type="checkbox" class="escSev" value="'+_sv[_j]+'" '+(S.esc.sevs.indexOf(_sv[_j])>=0?'checked':'')+'> '+SEVS[_sv[_j]]+'</label>';
   h+='</div>';
   for(var _k=0;_k<S.esc.steps.length;_k++){
     var _st=S.esc.steps[_k];
@@ -1203,7 +1241,7 @@ function renderSettings(){
 
   /* التكلفة */
   h+='<div class="card"><h3>💸 تكلفة التعطّل</h3>';
-  h+='<label><input type="checkbox" id="costOn" '+(S.cost.on?'checked':'')+' style="width:auto;margin-left:6px"> احسب التكلفة التقديرية</label>';
+  h+='<label class="fc"><input type="checkbox" id="costOn" '+(S.cost.on?'checked':'')+'> <b>احسب التكلفة التقديرية</b></label>';
   h+='<div class="row2"><div><label>متوسط عدد الطيور في العنبر</label><input type="number" id="costBirds" value="'+(S.cost.birds||0)+'"></div>'+
      '<div><label>خسارة الطير في الساعة (ج.م)</label><input type="number" step="0.01" id="costPer" value="'+(S.cost.perBirdHour||0)+'"></div></div>';
   h+='<button class="btn btn-ghost" onclick="saveCost()">حفظ</button>';
