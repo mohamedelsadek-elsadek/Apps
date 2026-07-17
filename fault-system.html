@@ -276,12 +276,17 @@ input[type=checkbox]:active{transform:scale(.9)}
 .netdot{align-items:center;gap:3px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;cursor:pointer;margin-right:4px}
 .netdot.off{background:rgba(139,148,158,.2);color:var(--muted);border:1px solid var(--line)}
 .netdot.pend{background:rgba(210,153,34,.2);color:var(--amber);border:1px solid rgba(210,153,34,.45)}
+
+.sla-rem{background:rgba(88,166,255,.18);color:var(--blue);border:1px solid rgba(88,166,255,.4)}
+.waiting{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;margin-bottom:9px;color:var(--muted)}
+.waiting b{color:var(--text)}
+.w-late{background:rgba(218,54,51,.1);border-color:rgba(218,54,51,.35)}
 </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v10</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v11</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -350,8 +355,15 @@ function defaultState(){
     catalogUpdatedAt:0,
     /* زمن الاستجابة والإصلاح المستهدف — بالدقايق */
     sla:{critical:{resp:15,fix:60}, high:{resp:60,fix:240}, med:{resp:240,fix:1440}, low:{resp:1440,fix:10080}},
-    /* التصعيد التلقائي */
+    /* التصعيد التلقائي — بيروح لفوق للمدير */
     esc:{on:true, sevs:["critical","high"], steps:[{min:15,role:"maint"},{min:30,role:"prod"},{min:45,role:"owner"}]},
+    /* التذكيرات — بتنبّه المسؤول في المرحلة نفسها، على كل الدرجات */
+    remind:{on:true, every:120, max:3, stages:{
+      new:  {on:true, after:20},
+      prog: {on:true, after:120},
+      wait: {on:true, after:1440},
+      fixed:{on:true, after:240}
+    }},
     /* الصيانة الوقائية */
     pm:[],
     /* تكلفة التعطّل */
@@ -396,6 +408,8 @@ function load(){
   var d=defaultState();
   if(!S.sla)S.sla=d.sla;
   if(!S.esc)S.esc=d.esc;
+  if(!S.remind)S.remind=d.remind;
+  if(!S.remind.stages)S.remind.stages=d.remind.stages;
   if(!S.pm)S.pm=[];
   if(!S.cost)S.cost=d.cost;
   for(var i=0;i<S.users.length;i++){
@@ -418,6 +432,8 @@ function load(){
     if(x.waitTotal==null)x.waitTotal=0;
     if(!x.escLog)x.escLog=[];
     if(x.rootCause==null)x.rootCause="";
+    if(!x.remN)x.remN={};
+    if(!x.remAt)x.remAt={};
   }
 }
 function save(){ try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){} fbPush(); }
@@ -943,6 +959,86 @@ function checkEsc(){
   if(changed){ save(); if(TAB==='reports')render(); }
 }
 
+
+/* ================= التذكيرات حسب المرحلة =================
+   الفرق عن التصعيد: التصعيد بيروح لفوق للمدير.
+   التذكير بينبّه *الشخص المسؤول دلوقتي* في المرحلة دي بالاسم.
+   وبيشتغل على كل الدرجات — مش الحرج بس. */
+var STAGE_DEF={
+  new:  {after:20,   lbl:'محدش استلم البلاغ'},
+  prog: {after:120,  lbl:'مستلم ولسه ماقفلش'},
+  wait: {after:1440, lbl:'منتظر قطعة من زمان'},
+  fixed:{after:240,  lbl:'اتصلح ومحدش أكّد'}
+};
+function stageStart(r){
+  if(r.status==='new')return r.ts;
+  if(r.status==='prog')return r.startTs||r.ts;
+  if(r.status==='wait')return r.waitTs||r.ts;
+  if(r.status==='fixed')return r.fixTs||r.ts;
+  return 0;
+}
+function stageMins(r){ var s=stageStart(r); return s?Math.round((now()-s)/60000):0; }
+/* مين المسؤول في المرحلة دي */
+function stageOwner(r){
+  if(r.status==='new')  return {who:'الفنيين', users:roleUsers('tech').concat(roleUsers('maint'))};
+  if(r.status==='prog'){
+    var t=null;
+    for(var i=0;i<S.users.length;i++)if(S.users[i].name===r.startedBy){t=S.users[i];break}
+    return {who:r.startedBy||'الفني', users:t?[t]:roleUsers('maint')};
+  }
+  if(r.status==='wait') return {who:'مدير الصيانة / المخزن', users:roleUsers('maint')};
+  if(r.status==='fixed'){
+    var u=userById(r.reporterId);
+    return {who:r.reporterName||'المبلّغ', users:u?[u]:[]};
+  }
+  return {who:'—', users:[]};
+}
+function msgRemind(r,mins){
+  var st=r.status, o=stageOwner(r);
+  var names=o.users.map(function(u){return u.name+(u.phone?' ('+u.phone+')':'')}).join(' · ')||o.who;
+  var head, ask;
+  if(st==='new'){
+    head='⏰ بلاغ مستني حد يستلمه';
+    ask='محدش استلم البلاغ بقاله '+mmm(mins)+'.\n👉 مين هيستلمه؟';
+  } else if(st==='prog'){
+    head='⏰ بلاغ مفتوح من زمان';
+    ask='مستلم من '+mmm(mins)+' ولسه ماتقفلش.\n👉 '+(r.startedBy||'الفني')+' — إيه الموقف؟ خلص ولا محتاج مساعدة؟\nلو منتظر قطعة، دوس «⏸️ منتظر قطعة».';
+  } else if(st==='wait'){
+    head='📦 قطعة غيار متأخرة';
+    ask='البلاغ موقوف من '+mmm(mins)+' منتظر: '+(r.waitPart||'قطعة')+(r.waitNote?'\n📝 '+r.waitNote:'')+'\n👉 القطعة وصلت ولا لسه؟';
+  } else {
+    head='✅ مستني تأكيدك';
+    ask='الفني قال إنه اتصلح من '+mmm(mins)+' ومحدش أكّد.\n👉 '+(r.reporterName||'يا مبلّغ')+' — اتطمّن على العطل وأكّد.\nلو لسه فيه مشكلة قول عشان نفتحه تاني.';
+  }
+  return head+' — بلاغ #'+r.num+'\n'+
+    '🏠 '+r.farmName+' — وحدة '+r.house+'\n'+
+    '⚙️ '+r.fault+' · '+sevPlain(r.severity)+'\n'+
+    '📌 '+STATUS[r.status]+'\n\n'+
+    ask+'\n\n👤 المطلوب منه: '+names;
+}
+function checkRemind(){
+  if(!S.remind||!S.remind.on||!tgReady())return;
+  var changed=false, t=now();
+  for(var i=0;i<S.reports.length;i++){
+    var r=S.reports[i];
+    if(r.status==='conf')continue;
+    var cfg=(S.remind.stages||{})[r.status];
+    if(!cfg||!cfg.on)continue;
+    var mins=stageMins(r);
+    if(mins<cfg.after)continue;
+    if(!r.remN)r.remN={};
+    if(!r.remAt)r.remAt={};
+    if((r.remN[r.status]||0)>=(S.remind.max||3))continue;
+    var last=r.remAt[r.status]||0;
+    if(last&&(t-last)<(S.remind.every||120)*60000)continue;   /* مانزنّش */
+    tgSend(msgRemind(r,mins),function(){});
+    r.remN[r.status]=(r.remN[r.status]||0)+1;
+    r.remAt[r.status]=t;
+    changed=true;
+  }
+  if(changed){ save(); if(TAB==='reports')render(); }
+}
+
 /* ================= تكرار العطل والسبب الجذري ================= */
 function repeatCount(r){
   var n=0;
@@ -1199,7 +1295,17 @@ function repCard(r){
   var dc=downtimeCost(r);
   if(dc&&dc>0)h+='<span class="sla sla-cost">💸 ~'+dc.toLocaleString('en-US')+' ج.م</span>';
   if(r.escLog&&r.escLog.length)h+='<span class="sla sla-esc">🚨 تصعيد ×'+r.escLog.length+'</span>';
+  var _rn=(r.remN&&r.remN[r.status])||0;
+  if(_rn)h+='<span class="sla sla-rem">⏰ تذكير ×'+_rn+'</span>';
   h+='</div>';
+  /* مين المطلوب منه دلوقتي */
+  if(r.status!=='conf'){
+    var _o=stageOwner(r), _m=stageMins(r);
+    var _cfg=(S.remind.stages||{})[r.status]||{};
+    var _lateStage=(_cfg.on&&_m>=_cfg.after);
+    h+='<div class="waiting'+(_lateStage?' w-late':'')+'">⏳ <b>'+STATUS[r.status]+'</b> من '+mmm(_m)+
+       ' · المطلوب من: <b>'+esc(_o.who)+'</b>'+(_lateStage?' <span style="color:var(--red)">— اتأخر</span>':'')+'</div>';
+  }
   if(r.status==='wait')h+='<div class="waitbox">📦 منتظر: <b>'+esc(r.waitPart||'—')+'</b>'+(r.waitNote?' · '+esc(r.waitNote):'')+'<br><small>وقت الانتظار: '+mmm(waitMs(r)/60000)+' (مش محسوب على الفني)</small></div>';
   h+='<div class="timeline">';
   h+=tstep(true,'تم الإبلاغ — '+esc(r.reporterName)+' · '+fmtDT(r.ts));
@@ -2041,6 +2147,23 @@ function renderSettings(){
   h+='<button class="btn btn-ghost" onclick="saveSla()">حفظ الأزمنة</button>';
   h+='<div class="hint"><b>مرجع من الميدان:</b> حرجة ١٥د/ساعة (تهوية، مولد، مياه — النفوق بيبدأ خلال ٢٠-٤٠ دقيقة صيفًا) · عالية ساعة/٤س · متوسطة ٤س/يوم · منخفضة يوم/أسبوع.</div></div>';
 
+  /* التذكيرات */
+  h+='<div class="card"><h3>⏰ تذكيرات المتابعة '+(S.remind.on?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
+  h+='<div class="hint">دي بتنبّه <b>الشخص المسؤول في المرحلة نفسها</b> — على كل الدرجات مش الحرج بس.<br>غير التصعيد اللي بيروح لفوق للمدير.</div>';
+  h+='<label class="fc"><input type="checkbox" id="rmOn" '+(S.remind.on?'checked':'')+'> <b>تفعيل التذكيرات</b></label>';
+  var _sl={new:'🆕 محدش استلم البلاغ',prog:'🔧 مستلم ولسه ماقفلش',wait:'📦 منتظر قطعة من زمان',fixed:'✅ اتصلح ومحدش أكّد'};
+  var _sw={new:'الفنيين + مدير الصيانة',prog:'الفني اللي مستلمه بالاسم',wait:'مدير الصيانة / المخزن',fixed:'المبلّغ نفسه بالاسم'};
+  for(var _k in _sl){
+    var _c=(S.remind.stages||{})[_k]||{on:true,after:60};
+    h+='<div class="slaedit"><label class="fc" style="margin-bottom:7px"><input type="checkbox" class="rmSt" data-k="'+_k+'" '+(_c.on?'checked':'')+'> <b>'+_sl[_k]+'</b></label>';
+    h+='<label>يذكّر بعد (دقيقة)</label><input type="number" id="rm_'+_k+'" value="'+_c.after+'" min="1">';
+    h+='<div class="hint" style="margin:5px 0 0">👤 بينبّه: <b>'+_sw[_k]+'</b></div></div>';
+  }
+  h+='<div class="row2"><div><label>يعيد التذكير كل (دقيقة)</label><input type="number" id="rmEvery" value="'+(S.remind.every||120)+'" min="5"></div>'+
+     '<div><label>أقصى عدد تذكيرات</label><input type="number" id="rmMax" value="'+(S.remind.max||3)+'" min="1" max="10"></div></div>';
+  h+='<button class="btn btn-ghost" onclick="saveRemind()">حفظ التذكيرات</button>';
+  h+='<div class="hint"><b>مرجع من الميدان:</b> ٢٠ د للاستلام · ساعتين للإصلاح · يوم للقطعة · ٤ ساعات للتأكيد.<br>'+
+     '⚠️ زي التصعيد — بيتفحص لما البرنامج مفتوح على أي جهاز (كل دقيقة).</div></div>';
   /* التصعيد */
   h+='<div class="card"><h3>🚨 التصعيد التلقائي '+(S.esc.on?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
   h+='<div class="hint">لو البلاغ عدّى المدة ومحدش حلّه، النظام بيبعت تنبيه تليجرام ويمنشن المسؤول الأعلى — تلقائيًا.</div>';
@@ -2156,6 +2279,17 @@ function saveSla(){
     S.sla[so[i]]={resp:r,fix:f};
   }
   save(); toast("✅ الأزمنة اتحفظت"); render();
+}
+function saveRemind(){
+  S.remind.on=document.getElementById('rmOn').checked;
+  S.remind.every=parseInt(document.getElementById('rmEvery').value,10)||120;
+  S.remind.max=parseInt(document.getElementById('rmMax').value,10)||3;
+  var cb=document.querySelectorAll('.rmSt');
+  for(var i=0;i<cb.length;i++){
+    var k=cb[i].getAttribute('data-k');
+    S.remind.stages[k]={on:cb[i].checked, after:parseInt(document.getElementById('rm_'+k).value,10)||60};
+  }
+  save(); toast("✅ التذكيرات اتحفظت"); render();
 }
 function saveEsc(){
   S.esc.on=document.getElementById('escOn').checked;
@@ -2365,8 +2499,8 @@ if(typeof window!=='undefined'&&window.addEventListener){
 setInterval(function(){ paintNet(); flushOutbox(); },120000);
 setTimeout(flushOutbox,4000);
 /* التصعيد + تنبيه الوقائية */
-setTimeout(function(){ checkEsc(); pmNotify(); weeklyDigest(); },3000);
-setInterval(checkEsc,60000);
+setTimeout(function(){ checkEsc(); checkRemind(); pmNotify(); weeklyDigest(); },3000);
+setInterval(function(){ checkEsc(); checkRemind(); },60000);
 setInterval(function(){ if(TAB==='reports')render(); },120000);   /* تحديث ألوان الـ SLA */
 </script>
 </body>
