@@ -298,7 +298,7 @@ input[type=checkbox]:active{transform:scale(.9)}
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v15</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v16</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -1544,13 +1544,7 @@ function confirmFix(id){
   if(S.mailOnClose&&S.mailTo){
     setTimeout(function(){
       var r2=findRep(id); if(!r2)return;
-      var t='تقرير إقفال بلاغ #'+r2.num+'\n'+r2.farmName+' — وحدة '+r2.house+'\n'+r2.fault+' · '+sevPlain(r2.severity)+'\n\n'+
-        'استلام: '+mmm(respMins(r2))+' · إصلاح: '+mmm(fixMins(r2))+((respLate(r2)||fixLate(r2))?' (خارج الوقت)':' (في الوقت)')+'\n'+
-        (r2.fixedBy?('الفني: '+r2.fixedBy+'\n'):'')+
-        (r2.fixDesc?('اللي اتعمل: '+r2.fixDesc+'\n'):'')+
-        (r2.parts&&r2.parts.length?('القطع: '+r2.parts.map(function(p){return p.name+'×'+p.qty}).join('، ')+'\n'):'')+
-        (r2.rootCause?('السبب الجذري: '+r2.rootCause+'\n'):'');
-      sendMail(S.mailTo,'إقفال بلاغ #'+r2.num+' — '+r2.farmName,t,true);
+      sendMail(S.mailTo,'إقفال بلاغ #'+r2.num+' — '+r2.farmName,reportMailBody(r2),true);
       if(emailReady())toast('✉️ الإيميل اتبعت تلقائي');
     },2500);
   }
@@ -2094,10 +2088,13 @@ function renderDash(){
   }
   h+='</select>';
   h+='<div class="drange">'+(DASH.p==='all'?'كل البيانات':fmtD(R.from)+' ← '+fmtD(R.to))+' · <b>'+o.n+'</b> بلاغ</div>';
-  if(o.n)h+='<div class="row2" style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="shareDash()">📤 مشاركة نصية</button>'+
-     '<button class="btn btn-blue btn-sm" onclick="printDash()">🖨️ PDF للطباعة</button></div>'+
-     '<div class="row2" style="margin-top:7px"><button class="btn btn-ghost btn-sm" onclick="tgReport()">📨 للجروب</button>'+
-     '<button class="btn btn-ghost btn-sm" onclick="mailDash()">✉️ بالإيميل</button></div>';
+  if(o.n){
+    h+='<div class="row2" style="margin-top:8px"><button class="btn btn-blue btn-sm" onclick="shareDashPdf()">📄 مشاركة PDF</button>'+
+       (tgReady()?'<button class="btn btn-blue btn-sm" onclick="toast(\'⏳ ببعت الـ PDF…\');dashPdfToTg(function(ok){toast(ok?\'📄 اتبعت للجروب\':\'❌ فشل\')})">📨 PDF للجروب</button>':'<button class="btn btn-ghost btn-sm" onclick="printDash()">🖨️ طباعة</button>')+'</div>';
+    h+='<div class="row2" style="margin-top:7px"><button class="btn btn-ghost btn-sm" onclick="mailDash()">✉️ بالإيميل</button>'+
+       '<button class="btn btn-ghost btn-sm" onclick="shareDash()">📤 نص</button></div>';
+    if(tgReady())h+='<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:7px" onclick="printDash()">🖨️ طباعة ورقية</button>';
+  }
   h+='</div>';
 
   if(!o.n) return h+'<div class="empty"><div class="big">📊</div>مفيش بلاغات في الفترة دي<br>غيّر الفترة أو الموقع</div>';
@@ -2460,15 +2457,19 @@ function autoPdfToTg(id,cb){
   }catch(e){cb&&cb(false)}
 }
 /* مشاركة PDF (واتساب/إيميل من نافذة المشاركة) */
-function mailReport(id){
-  var r=findRep(id); if(!r)return;
-  var t='تقرير إقفال بلاغ #'+r.num+'\n'+r.farmName+' — وحدة '+r.house+'\n'+r.fault+' · '+sevPlain(r.severity)+'\n\n'+
+function reportMailBody(r){
+  return 'تقرير إقفال بلاغ #'+r.num+'\n'+r.farmName+' — وحدة '+r.house+'\n'+r.fault+' · '+sevPlain(r.severity)+'\n\n'+
     'استلام: '+mmm(respMins(r))+' · إصلاح: '+mmm(fixMins(r))+((respLate(r)||fixLate(r))?' (خارج الوقت)':' (في الوقت)')+'\n'+
     (r.fixedBy?('الفني: '+r.fixedBy+'\n'):'')+
     (r.fixDesc?('اللي اتعمل: '+r.fixDesc+'\n'):'')+
     (r.parts&&r.parts.length?('القطع: '+r.parts.map(function(p){return p.name+'×'+p.qty}).join('، ')+'\n'):'')+
-    (r.rootCause?('السبب الجذري: '+r.rootCause+'\n'):'');
-  openMailPicker('إقفال بلاغ #'+r.num+' — '+r.farmName, t);
+    (r.rootCause?('السبب الجذري: '+r.rootCause+'\n'):'')+
+    '\n📄 تقرير الـ PDF الكامل (بالصور والتوقيعات):\n'+pdfLink(r)+'\n'+
+    '(اللينك بيفتح النظام ويطلّعلك الـ PDF على طول)';
+}
+function mailReport(id){
+  var r=findRep(id); if(!r)return;
+  openMailPicker('إقفال بلاغ #'+r.num+' — '+r.farmName, reportMailBody(r));
 }
 function sharePdf(id){
   var r=findRep(id); if(!r)return;
@@ -2604,6 +2605,118 @@ function dashPdfBody(){
 }
 function printDash(){ printHtml('تقرير الصيانة', dashPdfBody()); }
 
+
+/* ===== PDF الداش بورد — مرسوم canvas عشان يتبعت أوتوماتيك ===== */
+var APP_URL='https://mohamedelsadek-elsadek.github.io/Apps/fault-system.html';
+function pdfLink(r){ return APP_URL+'?pdf='+encodeURIComponent(r.num); }
+function drawDashCanvas(cb){
+  var o=dashStats(), R=dashRange(), hs=healthScore(o);
+  var f=DASH.farmId?siteById(DASH.farmId):null;
+  var W=1000, PAD=46, y=0;
+  var c=document.createElement('canvas'); c.width=W; c.height=4000;
+  var x=c.getContext('2d');
+  x.fillStyle='#fff'; x.fillRect(0,0,W,c.height);
+  x.direction='rtl'; x.textAlign='right';
+  var RX=W-PAD;
+  function font(sz,b){ x.font=(b?'800 ':'400 ')+sz+'px -apple-system,"Segoe UI",Tahoma,sans-serif'; }
+  function section(t){ y+=46; x.fillStyle='#f0f0f0'; x.fillRect(PAD,y-27,W-PAD*2,38); font(22,true); x.fillStyle='#222'; x.fillText(t,RX-10,y); y+=24; }
+  function li(t,v,col){ y+=31; font(20,false); x.fillStyle='#111'; x.fillText(t,RX-8,y); font(20,true); x.fillStyle=col||'#111'; x.textAlign='left'; x.fillText(String(v),PAD+8,y); x.textAlign='right'; }
+  /* الرأس */
+  y=62; font(28,true); x.fillStyle='#111';
+  x.fillText('📊 تقرير الصيانة — '+PERIODS[DASH.p].n, RX, y);
+  y+=30; font(17,false); x.fillStyle='#777';
+  x.fillText((DASH.p==='all'?'كل البيانات':fmtD(R.from)+' ← '+fmtD(R.to))+' · '+(f?f.name:'كل المواقع'), RX, y);
+  y+=14; x.strokeStyle='#111'; x.lineWidth=3; x.beginPath(); x.moveTo(PAD,y); x.lineTo(W-PAD,y); x.stroke();
+  /* الوضع العام */
+  section('الوضع العام: '+hs.grade+' ('+hs.score+'/100)');
+  var gcolMap={'ممتاز':'#1e7e34','جيد':'#5a9b5e','مقبول':'#b06000','خطر':'#c0392b'};
+  y+=14; x.fillStyle='#eee'; x.fillRect(PAD,y-6,W-PAD*2,22);
+  x.fillStyle=gcolMap[hs.grade]||'#333'; x.fillRect(W-PAD-(W-PAD*2)*hs.score/100,y-6,(W-PAD*2)*hs.score/100,22);
+  y+=14;
+  hs.parts.forEach(function(p){ li(p.k+' — '+p.note, Math.round(p.v)+'/'+p.max, (p.v/p.max>=0.8?'#1e7e34':(p.v/p.max>=0.5?'#b06000':'#c0392b'))); });
+  /* الملخص */
+  section('الملخص');
+  li('إجمالي البلاغات', o.n);
+  li('مفتوح دلوقتي', o.open, o.open?'#c0392b':'#1e7e34');
+  li('حرج مفتوح', o.crit, o.crit?'#c0392b':'#1e7e34');
+  li('متوسط الحل', o.avgH+' ساعة');
+  li('الالتزام بالـ SLA', o.comply+'٪', o.comply>=90?'#1e7e34':(o.comply>=70?'#b06000':'#c0392b'));
+  li('الحل من أول مرة', (o.ftf.tot?Math.round(o.ftf.ok/o.ftf.tot*100):0)+'٪');
+  li('وقائي / طارئ', o.pmRatio+'٪ / '+(100-o.pmRatio)+'٪');
+  if(o.cost>0)li('تكلفة التعطّل التقديرية', o.cost.toLocaleString('en-US')+' ج.م', '#b06000');
+  /* المواقع */
+  var wf=topList(o.byFarm,5);
+  if(wf.length){ section('أكتر المواقع مشاكل'); wf.forEach(function(z){li(z[0], z[1]+' بلاغ')}); }
+  var wc=topList(o.byCat,6);
+  if(wc.length){ section('أكتر الأعطال'); wc.forEach(function(z){li(z[0], z[1])}); }
+  /* الأنماط */
+  if(o.repSame.length){ section('🔁 تكرار في نفس الوحدة'); o.repSame.slice(0,5).forEach(function(z){li(z.fault+' — '+z.farm+' وحدة '+z.house, z.n+'×', z.n>=3?'#c0392b':'#b06000')}); }
+  if(o.repCross.length){ section('🌐 نفس العطل في مواقع مختلفة'); o.repCross.slice(0,4).forEach(function(z){li(z.fault+' ('+z.farms.join('، ')+')', z.n+'×','#7d3c98')}); }
+  if(o.repMgr.length){ section('🧭 نمط مرتبط بمدير'); o.repMgr.slice(0,4).forEach(function(z){li(z.mgr+' — '+z.fault+' في '+z.nf+' مواقع', z.n+'×','#c0392b')}); }
+  /* الوقائية */
+  var done=[],miss=[];
+  (S.pm||[]).forEach(function(t){ if(t.lastDone&&t.lastDone>=R.from&&t.lastDone<=R.to)done.push(t); if(pmState(t)==='over')miss.push(t); });
+  section('الصيانة الوقائية');
+  if(done.length){ li('✅ اتعمل', done.length,'#1e7e34'); done.slice(0,8).forEach(function(t){ y+=27; font(18,false); x.fillStyle='#333'; x.fillText('   • '+t.name, RX-8, y); }); }
+  if(miss.length){ li('❌ متأخر ومااتعملش', miss.length,'#c0392b'); miss.slice(0,8).forEach(function(t){ y+=27; font(18,false); x.fillStyle='#c0392b'; x.fillText('   • '+t.name+(t.farmName?' — '+t.farmName:'')+' (متأخرة '+Math.abs(pmDaysLeft(t))+' يوم)', RX-8, y); }); }
+  if(!done.length&&!miss.length)li('مفيش نشاط وقائية في الفترة','—');
+  /* ذيل */
+  y+=56; font(15,false); x.fillStyle='#999'; x.textAlign='center';
+  x.fillText('اتولّد تلقائيًا من نظام أعطال المزارع — '+fmtDT(now()), W/2, y);
+  x.textAlign='right'; y+=28;
+  var out=document.createElement('canvas'); out.width=W; out.height=y;
+  var ox=out.getContext('2d'); ox.fillStyle='#fff'; ox.fillRect(0,0,W,y);
+  ox.drawImage(c,0,0,W,y,0,0,W,y);
+  cb(out);
+}
+/* الداش بورد PDF → تليجرام أوتوماتيك */
+function dashPdfToTg(cb){
+  try{
+    drawDashCanvas(function(canvas){
+      canvasToPdfBlob(canvas,function(blob){
+        if(!blob){cb&&cb(false);return}
+        tgSendDoc(blob,'تقرير-الصيانة-'+fmtD(now())+'.pdf','📊 تقرير الصيانة — '+PERIODS[DASH.p].n,function(ok){cb&&cb(ok)});
+      });
+    });
+  }catch(e){cb&&cb(false)}
+}
+/* الداش بورد PDF → مشاركة (واتساب/بريد بالمرفق) */
+function shareDashPdf(){
+  toast('⏳ بجهّز الـ PDF…');
+  drawDashCanvas(function(canvas){
+    canvasToPdfBlob(canvas,function(blob){
+      if(!blob){toast('❌ فشل');return}
+      var file=new File([blob],'تقرير-الصيانة-'+fmtD(now())+'.pdf',{type:'application/pdf'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file]}).catch(function(){});
+      } else {
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob); a.download=file.name;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){document.body.removeChild(a)},1000);
+        toast('⬇️ اتنزّل');
+      }
+    });
+  });
+}
+/* فتح من لينك الإيميل: ?pdf=رقم البلاغ */
+function checkPdfParam(){
+  try{
+    var m=(location.search||'').match(/[?&]pdf=(\d+)/);
+    if(!m)return;
+    var num=parseInt(m[1],10);
+    var tries=0;
+    (function find(){
+      tries++;
+      var r=null;
+      for(var i=0;i<S.reports.length;i++)if(S.reports[i].num===num){r=S.reports[i];break}
+      if(r){ toast('📄 بفتح تقرير بلاغ #'+num+'…'); setTimeout(function(){sharePdf(r.id)},600); }
+      else if(tries<5)setTimeout(find,1600);   /* استنى المزامنة تخلص */
+      else toast('❌ بلاغ #'+num+' مش موجود');
+    })();
+  }catch(e){}
+}
+
 /* ================= تقرير نصّي للمشاركة =================
    صاحب الشركة عايز رقم يبعته في اجتماع — مش يفتح البرنامج ويقرا. */
 function dashText(){
@@ -2649,7 +2762,8 @@ function shareDash(){
   } else tgReport();
 }
 function mailDash(){
-  openMailPicker('تقرير الصيانة — '+PERIODS[DASH.p].n, dashText());
+  openMailPicker('تقرير الصيانة — '+PERIODS[DASH.p].n,
+    dashText()+'\n\n📊 الداش بورد الكامل التفاعلي:\n'+APP_URL);
 }
 function tgReport(){
   if(!tgReady()){toast('ظبّط التليجرام الأول');return}
@@ -2687,8 +2801,14 @@ function weeklyDigest(){
   if(last===k)return;
   var t=weeklyText();
   var sentAny=false;
-  if(tgReady()){ tgSend(t,function(ok){}); sentAny=true; }
-  if(S.mailTo)sendMail(S.mailTo,'التقرير الأسبوعي — نظام الأعطال',t);
+  if(tgReady()){
+    tgSend(t,function(ok){}); sentAny=true;
+    /* والـ PDF الكامل وراه */
+    var sv={p:DASH.p,farmId:DASH.farmId};
+    DASH.p='w'; DASH.farmId='';
+    setTimeout(function(){ dashPdfToTg(function(){ DASH.p=sv.p; DASH.farmId=sv.farmId; }); },2500);
+  }
+  if(S.mailTo)sendMail(S.mailTo,'التقرير الأسبوعي — نظام الأعطال',t+'\n\n📊 الداش بورد الكامل:\n'+APP_URL,true);
   if(sentAny||S.mailTo){ try{localStorage.setItem('faultsys_wk',k)}catch(e){} }
 }
 /* الإيميل: mailto بيفتح تطبيق البريد بالنص جاهز — من غير سيرفر دي أنضف طريقة */
@@ -2730,6 +2850,7 @@ function openMailPicker(subj,bodyText){
   }
   h+='<div class="row2" style="margin-top:10px"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>'+
      '<button class="btn btn-green" onclick="doSendMailPicked()">📨 إرسال</button></div>';
+  h+='<div class="hint">📄 الإيميل فيه <b>لينك يفتح تقرير الـ PDF مباشرة</b> عند المستلم.</div>';
   if(!emailReady())h+='<div class="hint">⚠️ EmailJS مش متظبط — هيفتح تطبيق البريد وإنت تدوس إرسال.</div>';
   openModal(h);
 }
@@ -3239,7 +3360,7 @@ if(typeof window!=='undefined'&&window.addEventListener){
 setInterval(function(){ paintNet(); flushOutbox(); },120000);
 setTimeout(flushOutbox,4000);
 /* التصعيد + تنبيه الوقائية */
-setTimeout(function(){ checkEsc(); checkRemind(); pmNotify(); weeklyDigest(); },3000);
+setTimeout(function(){ checkEsc(); checkRemind(); pmNotify(); weeklyDigest(); checkPdfParam(); },3000);
 setInterval(function(){ checkEsc(); checkRemind(); },60000);
 setInterval(function(){ if(TAB==='reports')render(); },120000);   /* تحديث ألوان الـ SLA */
 </script>
