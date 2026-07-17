@@ -239,12 +239,49 @@ input[type=checkbox]:active{transform:scale(.9)}
 }
 .pinbox::placeholder{letter-spacing:normal;font-size:14px;font-weight:400}
 .keys .k-go{background:rgba(46,160,67,.18);border-color:rgba(46,160,67,.5);color:var(--green)}
+
+/* ===== الداش بورد ===== */
+.dfilt{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px;margin-bottom:13px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.pchip{flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:6px 13px;font-size:12.5px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.pchip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:800}
+.drange{font-size:11.5px;color:var(--muted);margin-top:8px;text-align:center}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 6px;text-align:center}
+.kv{font-size:21px;font-weight:800;line-height:1.2}
+.kv small{font-size:11px;opacity:.75}
+.kl{font-size:10px;color:var(--muted);margin-top:3px}
+.trend{width:100%;height:70px;display:block}
+.dwrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.donut{width:150px;height:150px;flex:0 0 auto}
+.lgnd{flex:1;min-width:150px;display:flex;flex-direction:column;gap:5px}
+.lg{font-size:12px;display:flex;align-items:center;gap:6px}
+.lg small{color:var(--muted)}
+.sw{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.prow2{display:flex;justify-content:space-between;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);border-right:3px solid var(--amber);border-radius:8px;padding:9px 11px;margin-bottom:6px}
+.prow2 .meta{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.65}
+.ratio{height:11px;background:var(--red);border-radius:6px;overflow:hidden;margin:9px 0 7px}
+.rf{height:100%;border-radius:6px}
+.rlbl{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700}
+/* خريطة حرارية */
+.heat{overflow-x:auto;scrollbar-width:none;padding:3px 0}
+.heat::-webkit-scrollbar{display:none}
+.hrow{display:flex;align-items:center;gap:2px;margin-bottom:2px}
+.hl{width:34px;flex:0 0 auto;font-size:9.5px;color:var(--muted);text-align:left}
+.hc{width:11px;height:11px;flex:0 0 auto;border-radius:2px;background:var(--panel2);border:1px solid rgba(255,255,255,.04)}
+.hhdr .hh{width:41px;flex:0 0 auto;font-size:9px;color:var(--muted);text-align:right}
+.hhdr span:first-child{width:34px;flex:0 0 auto}
+
+.netdot{align-items:center;gap:3px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;cursor:pointer;margin-right:4px}
+.netdot.off{background:rgba(139,148,158,.2);color:var(--muted);border:1px solid var(--line)}
+.netdot.pend{background:rgba(210,153,34,.2);color:var(--amber);border:1px solid rgba(210,153,34,.45)}
 </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v8</span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v10</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -254,7 +291,8 @@ input[type=checkbox]:active{transform:scale(.9)}
   <div class="tab active" data-tab="reports" onclick="go('reports')"><span class="ic">📋</span>البلاغات</div>
   <div class="tab" data-tab="new" onclick="go('new')"><span class="ic">🚨</span>بلاغ جديد</div>
   <div class="tab" data-tab="pm" onclick="go('pm')"><span class="ic">🛡️</span>وقائية<span class="tbadge" id="pmBadge"></span></div>
-  <div class="tab" data-tab="stats" onclick="go('stats')"><span class="ic">📊</span>التقارير</div>
+  <div class="tab" data-tab="dash" onclick="go('dash')"><span class="ic">📊</span>داش بورد</div>
+  <div class="tab" data-tab="stats" onclick="go('stats')"><span class="ic">📋</span>التقارير</div>
   <div class="tab" data-tab="settings" onclick="go('settings')"><span class="ic">⚙️</span>الإعدادات</div>
 </div>
 
@@ -289,7 +327,9 @@ function defaultCatalog(){
     "جرارات ومعدات ثقيلة":["مش بتدور","تسريب زيت","بريكات ضعيفة","كاوتش تالف","هيدروليك ضعيف","بطارية فاضية","فلتر مسدود","سخونية","أخرى"],
     "سيارات نقل":["مش بتدور","بريكات","كاوتش","بطارية","تسريب زيت","كهرباء","تكييف","أخرى"],
     "مضخات":["مش بتشفط","تسريب","صوت عالي","الموتور بيسخن","الحشوة تالفة","الضغط ضعيف","أخرى"],
-    "لحام وورشة":["ماكينة اللحام واقفة","كابل تالف","الأسطوانة فاضية","الصاروخ واقف","الكمبروسر واقف","أخرى"]
+    "لحام وورشة":["ماكينة اللحام واقفة","كابل تالف","الأسطوانة فاضية","الصاروخ واقف","الكمبروسر واقف","أخرى"],
+    /* ===== النظافة والتطهير ===== */
+    "نظافة وتطهير":["ماكينة الرش عطلانة","مضخة التطهير ضعيفة","خزان المطهر فاضي","الكارشر واقف","نوزل الرش مسدود","معدات النظافة ناقصة","الصرف مسدود","تراكم زبالة/نافق","أخرى"]
   };
 }
 function defaultState(){
@@ -384,7 +424,10 @@ function save(){ try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){} 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 function now(){ return Date.now(); }
 
-var ROLES={super:"سوبر أدمن",owner:"صاحب الشركة",prod:"مدير الإنتاج",farms:"مدير المزارع",maint:"مدير الصيانة",tech:"فني صيانة",farm:"مدير موقع",view:"مشاهد"};
+var ROLES={super:"سوبر أدمن",owner:"صاحب الشركة",prod:"مدير الإنتاج",farms:"مدير المزارع",maint:"مدير الصيانة",tech:"فني صيانة",farm:"مدير موقع",shift:"رئيس وردية",clean:"مسؤول النظافة والتطهير",view:"مشاهد"};
+/* الأدوار اللي بتترتبط بمواقع */
+var SITE_ROLES=["farm","shift","clean"];
+function needsSite(r){ return SITE_ROLES.indexOf(r)>=0; }
 /* أنواع المواقع */
 var SITE_TYPES={
   farm:    {name:"مزرعة",          icon:"🏠", unit:"عنبر"},
@@ -398,9 +441,9 @@ function siteUnit(f){ return SITE_TYPES[siteType(f)].unit; }
 function siteById(id){ for(var i=0;i<S.farms.length;i++)if(S.farms[i].id===id)return S.farms[i]; return null; }
 /* فئات الأعطال المناسبة لكل نوع موقع */
 var TYPE_CATS={
-  farm:    ["كهرباء","مولد","تهوية","تبريد","تدفئة","سقايات","علافات","إضاءة","مباني","معدات أخرى"],
-  feedmill:["كهرباء","مولد","طاحونة","خلاط","تحبيب وتكوير","نقل وسيور","موازين","سيلوهات","مباني","معدات أخرى"],
-  feedlot: ["كهرباء","مولد","تهوية","سقايات","علافات","إضاءة","مباني","معدات أخرى"],
+  farm:    ["كهرباء","مولد","تهوية","تبريد","تدفئة","سقايات","علافات","إضاءة","مباني","نظافة وتطهير","معدات أخرى"],
+  feedmill:["كهرباء","مولد","طاحونة","خلاط","تحبيب وتكوير","نقل وسيور","موازين","سيلوهات","مباني","نظافة وتطهير","معدات أخرى"],
+  feedlot: ["كهرباء","مولد","تهوية","سقايات","علافات","إضاءة","مباني","نظافة وتطهير","معدات أخرى"],
   equip:   ["جرارات ومعدات ثقيلة","سيارات نقل","مضخات","لحام وورشة","كهرباء","معدات أخرى"]
 };
 /* الصلاحيات التفصيلية — كل وظيفة لها افتراضي، وينفع تخصّص لأي شخص */
@@ -419,6 +462,8 @@ var ROLE_DEF={
   maint:{report:1,fix:1,wait:1,confirm:0,del:1,pm:1,pmDone:1,users:0,grant:0,sites:1,settings:1,allFarms:1,stats:1},
   tech: {report:1,fix:1,wait:1,confirm:0,del:0,pm:0,pmDone:1,users:0,grant:0,sites:0,settings:0,allFarms:1,stats:0},
   farm: {report:1,fix:0,wait:0,confirm:1,del:0,pm:0,pmDone:0,users:0,grant:0,sites:0,settings:0,allFarms:0,stats:1},
+  shift:{report:1,fix:0,wait:0,confirm:1,del:0,pm:0,pmDone:1,users:0,grant:0,sites:0,settings:0,allFarms:0,stats:1},
+  clean:{report:1,fix:0,wait:0,confirm:1,del:0,pm:1,pmDone:1,users:0,grant:0,sites:0,settings:0,allFarms:0,stats:1},
   view: {report:0,fix:0,wait:0,confirm:0,del:0,pm:0,pmDone:0,users:0,grant:0,sites:0,settings:0,allFarms:1,stats:1}
 };
 /* can('del') أو can('del', user) */
@@ -633,13 +678,15 @@ var ROLE_HINT={
   maint:"بيستلم ويصلّح، وبيدير الوقائية والأزمنة.",
   tech:"بيستلم ويصلّح البلاغات بس.",
   farm:"بيشوف مواقعه بس ويبلّغ ويأكّد — لازم تحدّد مواقعه تحت.",
+  shift:"بيبلّغ ويأكّد وينفّذ الوقائية في ورديته — لازم تحدّد مواقعه.",
+  clean:"بيدير جدول النظافة والتطهير وينفّذه — لازم تحدّد مواقعه.",
   view:"👁️ قراية بس — بيشوف البلاغات والتقارير ومش بيعمل أي حاجة."
 };
 function euRoleChanged(){
   var sel=document.getElementById('euRole'); if(!sel)return;
   var r=sel.value;
   var box=document.getElementById('euFarmBox');
-  if(box)box.style.display=(r==='farm')?'block':'none';
+  if(box)box.style.display=needsSite(r)?'block':'none';
   var hint=document.getElementById('roleHint');
   if(hint)hint.textContent=ROLE_HINT[r]||'';
   var cust=document.getElementById('euCustom');
@@ -669,7 +716,7 @@ function saveUserEdit(){
   var fids=[];
   var fc=document.querySelectorAll('.euFarm');
   for(var i=0;i<fc.length;i++)if(fc[i].checked)fids.push(fc[i].value);
-  if(role==='farm' && !fids.length && S.farms.length){toast("اختار المزرعة اللي هو مسؤول عنها");return}
+  if(needsSite(role) && !fids.length && S.farms.length){toast("اختار الموقع/المواقع اللي هو مسؤول عنها");return}
   var perms=_old?_old.perms:null;
   if(mayGrant){
     perms=null;
@@ -696,9 +743,62 @@ function saveUserEdit(){
   save(); closeModal(); refreshUserChip(); render(); toast("✅ اتحفظ");
 }
 
+
+/* ================= وضع الأوفلاين =================
+   الفني جوه العنبر والشبكة ضعيفة. البلاغ بيتسجّل محليًا على طول،
+   وتنبيه التليجرام بيتحط في طابور ويتبعت أول ما الشبكة ترجع. */
+var OQ_KEY='faultsys_outbox';
+function outbox(){ try{return JSON.parse(localStorage.getItem(OQ_KEY)||'[]')}catch(e){return []} }
+function setOutbox(a){ try{localStorage.setItem(OQ_KEY,JSON.stringify(a))}catch(e){} }
+function isOnline(){ return (typeof navigator==='undefined')||navigator.onLine!==false; }
+function queueMsg(text){
+  var a=outbox();
+  a.push({t:text,at:now()});
+  if(a.length>60)a=a.slice(-60);          /* مانكدّسش للأبد */
+  setOutbox(a); paintNet();
+}
+/* بيتنادى لما الشبكة ترجع + كل دقيقتين */
+var _flushing=false;
+function flushOutbox(cb){
+  if(_flushing||!isOnline()||!tgReady()){cb&&cb(0);return}
+  var a=outbox();
+  if(!a.length){cb&&cb(0);return}
+  _flushing=true;
+  var sent=0;
+  (function next(){
+    if(!a.length){
+      setOutbox([]); _flushing=false; paintNet();
+      if(sent)toast('📤 اتبعت '+sent+' تنبيه كان متأخر');
+      cb&&cb(sent); return;
+    }
+    var m=a[0];
+    tgSendRaw(m.t,function(ok){
+      if(ok){ a.shift(); sent++; setOutbox(a); next(); }
+      else { _flushing=false; paintNet(); cb&&cb(sent); }   /* لسه مش راضي — سيبه للمرة الجاية */
+    });
+  })();
+}
+/* مؤشر الشبكة في الهيدر */
+function paintNet(){
+  var el=document.getElementById('netDot'); if(!el)return;
+  var q=outbox().length;
+  if(!isOnline()){
+    el.style.display='inline-flex';
+    el.className='netdot off';
+    el.textContent=q?('📴 '+q):'📴';
+    el.title='مفيش نت — '+(q?q+' تنبيه في الطابور':'الشغل بيتسجّل محليًا');
+  } else if(q){
+    el.style.display='inline-flex';
+    el.className='netdot pend';
+    el.textContent='📤 '+q;
+    el.title=q+' تنبيه مستني الإرسال';
+  } else el.style.display='none';
+}
+
 /* ================= تليجرام ================= */
 function tgReady(){ return S.tg.token && S.tg.chatId; }
-function tgSend(text,cb){
+/* الإرسال الخام — من غير طابور (بيستخدمه الطابور نفسه وزرار الاختبار) */
+function tgSendRaw(text,cb){
   if(!tgReady()){ if(cb)cb(false,"التليجرام مش متظبط"); return; }
   fetch("https://api.telegram.org/bot"+S.tg.token+"/sendMessage",{
     method:"POST",headers:{"Content-Type":"application/json"},
@@ -706,6 +806,18 @@ function tgSend(text,cb){
   }).then(function(r){return r.json();}).then(function(j){
     if(cb)cb(!!j.ok, j.ok?"":(j.description||"خطأ"));
   }).catch(function(e){ if(cb)cb(false,"مفيش نت أو خطأ اتصال"); });
+}
+/* الإرسال العادي — لو مفيش نت بيتحط في الطابور بدل ما يضيع */
+function tgSend(text,cb){
+  if(!tgReady()){ if(cb)cb(false,"التليجرام مش متظبط"); return; }
+  if(!isOnline()){ queueMsg(text); if(cb)cb(true,"queued"); return; }
+  tgSendRaw(text,function(ok,err){
+    if(!ok && /نت|اتصال|Failed|network/i.test(err||'')){
+      queueMsg(text);                 /* فشل شبكة — للطابور */
+      if(cb)cb(true,"queued"); return;
+    }
+    if(cb)cb(ok,err);
+  });
 }
 function sevPlain(s){ return SEVS[s]||s; }
 function msgNew(r){
@@ -1027,6 +1139,7 @@ function submitReport(){
   };
   PHOTO_BUF={before:[],after:[]};
   S.reports.unshift(r); save();
+  if(!isOnline())setTimeout(function(){toast("📴 اتسجّل محليًا — التنبيه هيتبعت أول ما النت يرجع")},1200);
   if(S.tg.onNew && tgReady()){
     tgSend(msgNew(r),function(ok,err){ toast(ok?"✅ البلاغ اتسجل والتنبيه اتبعت على تليجرام":"البلاغ اتسجل ✅ لكن التليجرام فشل: "+err); });
   } else toast("✅ البلاغ اتسجل");
@@ -1321,6 +1434,223 @@ function pmNotify(){
   tgSend(msg,function(){ try{localStorage.setItem(k,t)}catch(e){} });
 }
 
+
+/* ================= محرّك الداش بورد ================= */
+var DASH={p:'m', farmId:'', from:'', to:''};
+var PERIODS={
+  w:{n:'أسبوع',d:7}, m:{n:'شهر',d:30}, q:{n:'٣ شهور',d:90},
+  h:{n:'٦ شهور',d:180}, y:{n:'سنة',d:365},
+  cyc:{n:'الدورة',d:null}, all:{n:'الكل',d:null}, cus:{n:'فترة',d:null}
+};
+function dashRange(){
+  var to=now(), from=0;
+  if(DASH.p==='cus'){
+    from=DASH.from?new Date(DASH.from+'T00:00:00').getTime():0;
+    to=DASH.to?new Date(DASH.to+'T23:59:59').getTime():now();
+  } else if(DASH.p==='all'){ from=0; }
+  else if(DASH.p==='cyc'){ from=now()-((S.cycleDays||42)*864e5); }
+  else { from=now()-(PERIODS[DASH.p].d*864e5); }
+  return {from:from,to:to};
+}
+function dashReports(){
+  var r=dashRange();
+  var src=myReports();
+  return src.filter(function(x){
+    if(x.ts<r.from||x.ts>r.to)return false;
+    if(DASH.farmId&&x.farmId!==DASH.farmId)return false;
+    return true;
+  });
+}
+/* مدير الموقع المسؤول عن مزرعة */
+function siteManager(farmId){
+  for(var i=0;i<S.users.length;i++){
+    var u=S.users[i];
+    if(u.role==='farm'&&(u.farmIds||[]).indexOf(farmId)>=0)return u;
+  }
+  return null;
+}
+function fmtD(ts){ var d=new Date(ts); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+
+/* ================= رسومات SVG ================= */
+function svgTrend(pts,w,h,color){
+  if(!pts.length)return '';
+  var mx=Math.max.apply(null,pts.concat([1]));
+  var step=pts.length>1?w/(pts.length-1):w;
+  var d='',a='';
+  for(var i=0;i<pts.length;i++){
+    var x=i*step, y=h-(pts[i]/mx)*(h-6)-3;
+    d+=(i?' L':'M')+x.toFixed(1)+','+y.toFixed(1);
+  }
+  a=d+' L'+w+','+h+' L0,'+h+' Z';
+  return '<svg class="trend" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+
+    '<defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="'+color+'" stop-opacity=".35"/>'+
+    '<stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>'+
+    '<path d="'+a+'" fill="url(#tg)"/>'+
+    '<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+
+    '</svg>';
+}
+function svgDonut(items,size){
+  var tot=0; items.forEach(function(x){tot+=x[1]});
+  if(!tot)return '';
+  var R=size/2, r=R*0.62, cx=R, cy=R, acc=-Math.PI/2, out='';
+  var COLS=['#58a6ff','#e8a94f','#2ea043','#a371f7','#d29922','#da3633','#3fb950','#f0883e','#8b949e','#6e7681'];
+  items.forEach(function(x,i){
+    var ang=(x[1]/tot)*Math.PI*2, e=acc+ang;
+    var big=ang>Math.PI?1:0;
+    var x1=cx+R*Math.cos(acc), y1=cy+R*Math.sin(acc);
+    var x2=cx+R*Math.cos(e),   y2=cy+R*Math.sin(e);
+    var x3=cx+r*Math.cos(e),   y3=cy+r*Math.sin(e);
+    var x4=cx+r*Math.cos(acc), y4=cy+r*Math.sin(acc);
+    out+='<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+R+','+R+' 0 '+big+' 1 '+x2.toFixed(1)+','+y2.toFixed(1)+
+         ' L'+x3.toFixed(1)+','+y3.toFixed(1)+' A'+r+','+r+' 0 '+big+' 0 '+x4.toFixed(1)+','+y4.toFixed(1)+' Z" fill="'+COLS[i%COLS.length]+'"/>';
+    acc=e;
+  });
+  return '<svg viewBox="0 0 '+size+' '+size+'" class="donut">'+out+
+    '<text x="'+cx+'" y="'+(cy-2)+'" text-anchor="middle" fill="#e6edf3" font-size="'+(size*0.2)+'" font-weight="800">'+tot+'</text>'+
+    '<text x="'+cx+'" y="'+(cy+size*0.14)+'" text-anchor="middle" fill="#8b949e" font-size="'+(size*0.09)+'">بلاغ</text></svg>';
+}
+function donutLegend(items){
+  var COLS=['#58a6ff','#e8a94f','#2ea043','#a371f7','#d29922','#da3633','#3fb950','#f0883e','#8b949e','#6e7681'];
+  var tot=0; items.forEach(function(x){tot+=x[1]});
+  return '<div class="lgnd">'+items.map(function(x,i){
+    return '<div class="lg"><span class="sw" style="background:'+COLS[i%COLS.length]+'"></span>'+
+      esc(x[0])+' <b>'+x[1]+'</b> <small>'+Math.round(x[1]/tot*100)+'%</small></div>';
+  }).join('')+'</div>';
+}
+function heatmap(matrix,labels){
+  var mx=1;
+  for(var i=0;i<matrix.length;i++)for(var j=0;j<matrix[i].length;j++)if(matrix[i][j]>mx)mx=matrix[i][j];
+  var h='<div class="heat"><div class="hrow hhdr"><span></span>';
+  for(var q=0;q<24;q+=3)h+='<span class="hh">'+q+'</span>';
+  h+='</div>';
+  for(var i=0;i<7;i++){
+    h+='<div class="hrow"><span class="hl">'+labels[i]+'</span>';
+    for(var j=0;j<24;j++){
+      var v=matrix[i][j], o=v?(0.18+0.82*(v/mx)):0;
+      h+='<i class="hc" style="background:rgba(218,54,51,'+o.toFixed(2)+')" title="'+labels[i]+' '+j+':00 — '+v+'"></i>';
+    }
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+
+
+/* ================= التحليلات ================= */
+function dashStats(){
+  var L=dashReports();
+  var o={n:L.length, open:0, crit:0, closed:0, late:0, fixH:0, fixN:0, cost:0,
+         byFarm:{}, byCat:{}, byMgr:{}, byTech:{}, bySite:{}, trend:[], heat:[],
+         repSame:[], repCross:[], repMgr:[], mtbf:{}, ftf:{ok:0,tot:0}, downH:{}};
+  /* خريطة حرارية 7×24 */
+  for(var i=0;i<7;i++){ o.heat.push([]); for(var j=0;j<24;j++)o.heat[i].push(0); }
+  var sig={}, mgrSig={}, times={};
+  for(var i=0;i<L.length;i++){
+    var r=L[i];
+    if(OPEN_ST[r.status])o.open++;
+    if(OPEN_ST[r.status]&&r.severity==='critical')o.crit++;
+    if(r.status==='conf'||r.status==='fixed'){
+      o.closed++;
+      if(respLate(r)||fixLate(r))o.late++;
+    }
+    if(r.fixTs){ o.fixH+=hoursBetween(r.ts,r.fixTs); o.fixN++; }
+    o.byFarm[r.farmName]=(o.byFarm[r.farmName]||0)+1;
+    o.byCat[r.category]=(o.byCat[r.category]||0)+1;
+    var f=siteById(r.farmId);
+    if(f){var t=SITE_TYPES[siteType(f)].name; o.bySite[t]=(o.bySite[t]||0)+1;}
+    var mgr=siteManager(r.farmId);
+    if(mgr)o.byMgr[mgr.name]=(o.byMgr[mgr.name]||0)+1;
+    if(r.startedBy)o.byTech[r.startedBy]=(o.byTech[r.startedBy]||0)+1;
+    var c=downtimeCost(r); if(c)o.cost+=c;
+    if(r.fixTs){ var dh=(r.fixTs-r.ts-waitMs(r))/36e5; o.downH[r.farmName]=(o.downH[r.farmName]||0)+dh; }
+    var d=new Date(r.ts);
+    o.heat[d.getDay()][d.getHours()]++;
+    /* بصمات التكرار */
+    var kSame=r.farmId+'|'+r.house+'|'+r.fault;
+    (sig[kSame]=sig[kSame]||[]).push(r);
+    if(mgr){ var kM=mgr.id+'|'+r.fault; (mgrSig[kM]=mgrSig[kM]||[]).push(r); }
+    (times[r.category]=times[r.category]||[]).push(r.ts);
+  }
+  o.avgH=o.fixN?Math.round(o.fixH/o.fixN*10)/10:0;
+  o.comply=o.closed?Math.round((o.closed-o.late)/o.closed*100):100;
+
+  /* ١) نفس العطل نفس العنبر */
+  for(var k in sig){
+    if(sig[k].length<2)continue;
+    var a=sig[k][0];
+    o.repSame.push({farm:a.farmName,house:a.house,fault:a.fault,n:sig[k].length,cat:a.category});
+  }
+  o.repSame.sort(function(x,y){return y.n-x.n});
+
+  /* ٢) نفس العطل في مزارع مختلفة → مشكلة نظامية */
+  var byFault={};
+  for(var i=0;i<L.length;i++){
+    var r=L[i];
+    if(!byFault[r.fault])byFault[r.fault]={farms:{},n:0,cat:r.category};
+    byFault[r.fault].farms[r.farmName]=(byFault[r.fault].farms[r.farmName]||0)+1;
+    byFault[r.fault].n++;
+  }
+  for(var f2 in byFault){
+    var fk=Object.keys(byFault[f2].farms);
+    if(fk.length>=2&&byFault[f2].n>=3)
+      o.repCross.push({fault:f2,farms:fk,nf:fk.length,n:byFault[f2].n,cat:byFault[f2].cat});
+  }
+  o.repCross.sort(function(x,y){return (y.nf-x.nf)||(y.n-x.n)});
+
+  /* ٣) نفس العطل مع نفس المدير في مواقع مختلفة → المدير هو العامل المشترك */
+  for(var k2 in mgrSig){
+    var arr=mgrSig[k2];
+    if(arr.length<3)continue;
+    var fset={}; arr.forEach(function(x){fset[x.farmName]=1});
+    var nf=Object.keys(fset).length;
+    if(nf<2)continue;
+    var mid=k2.split('|')[0], mu=userById(mid);
+    o.repMgr.push({mgr:mu?mu.name:'—',mgrId:mid,fault:arr[0].fault,n:arr.length,farms:Object.keys(fset),nf:nf});
+  }
+  o.repMgr.sort(function(x,y){return (y.nf-x.nf)||(y.n-x.n)});
+
+  /* MTBF لكل تصنيف */
+  for(var c2 in times){
+    var t=times[c2].slice().sort(function(a,b){return a-b});
+    if(t.length<2)continue;
+    var gaps=0;
+    for(var i=1;i<t.length;i++)gaps+=(t[i]-t[i-1]);
+    o.mtbf[c2]=Math.round(gaps/(t.length-1)/864e5*10)/10;
+  }
+  /* الإصلاح من أول مرة: مااترجعش نفس العطل خلال ٧ أيام */
+  for(var i=0;i<L.length;i++){
+    var r=L[i]; if(!r.fixTs)continue;
+    o.ftf.tot++;
+    var again=L.some(function(x){
+      return x.id!==r.id && x.farmId===r.farmId && String(x.house)===String(r.house) &&
+             x.fault===r.fault && x.ts>r.fixTs && x.ts<r.fixTs+7*864e5;
+    });
+    if(!again)o.ftf.ok++;
+  }
+  /* الاتجاه الزمني */
+  var R=dashRange();
+  var span=Math.max(1,(R.to-R.from)/864e5);
+  var buckets=span<=31?Math.ceil(span):(span<=190?Math.ceil(span/7):12);
+  var bw=(R.to-R.from)/buckets;
+  for(var b=0;b<buckets;b++)o.trend.push(0);
+  L.forEach(function(r){
+    var idx=Math.min(buckets-1,Math.floor((r.ts-R.from)/bw));
+    if(idx>=0)o.trend[idx]++;
+  });
+  o.bucketName=span<=31?'يوم':(span<=190?'أسبوع':'شهر');
+  /* الوقائي مقابل الطارئ */
+  var pmDone=0;
+  (S.pm||[]).forEach(function(t){ if(t.lastDone&&t.lastDone>=R.from&&t.lastDone<=R.to)pmDone++; });
+  o.pmDone=pmDone;
+  o.pmRatio=(pmDone+L.length)?Math.round(pmDone/(pmDone+L.length)*100):0;
+  return o;
+}
+function topList(obj,n){
+  var a=[]; for(var k in obj)a.push([k,obj[k]]);
+  a.sort(function(x,y){return y[1]-x[1]});
+  return a.slice(0,n||6);
+}
+
 /* ================= التقارير والإحصائيات ================= */
 function renderStats(){
   var open=0,critOpen=0,fixedCount=0,totalHrs=0,lateCount=0,closedCount=0,cost=0;
@@ -1447,6 +1777,228 @@ function bars(obj){
   return h;
 }
 
+
+/* ================= واجهة الداش بورد ================= */
+function renderDash(){
+  var o=dashStats(), R=dashRange();
+  var h='';
+  /* الفلاتر */
+  h+='<div class="dfilt"><div class="chips">';
+  for(var p in PERIODS)
+    h+='<span class="pchip'+(DASH.p===p?' on':'')+'" onclick="setPeriod(\''+p+'\')">'+PERIODS[p].n+'</span>';
+  h+='</div>';
+  if(DASH.p==='cus'){
+    h+='<div class="row2" style="margin-top:8px"><div><label>من</label><input type="date" id="dFrom" value="'+(DASH.from||fmtD(now()-30*864e5))+'" onchange="DASH.from=this.value;render()"></div>'+
+       '<div><label>لـ</label><input type="date" id="dTo" value="'+(DASH.to||fmtD(now()))+'" onchange="DASH.to=this.value;render()"></div></div>';
+  }
+  if(DASH.p==='cyc')
+    h+='<div class="hint" style="margin-top:6px">الدورة = آخر <b>'+(S.cycleDays||42)+' يوم</b> — عدّلها من الإعدادات.</div>';
+  h+='<select style="margin-top:8px" onchange="DASH.farmId=this.value;render()"><option value="">📍 كل المواقع</option>';
+  for(var i=0;i<S.farms.length;i++){
+    var f=S.farms[i];
+    h+='<option value="'+f.id+'" '+(DASH.farmId===f.id?'selected':'')+'>'+siteIcon(f)+' '+esc(f.name)+'</option>';
+  }
+  h+='</select>';
+  h+='<div class="drange">'+(DASH.p==='all'?'كل البيانات':fmtD(R.from)+' ← '+fmtD(R.to))+' · <b>'+o.n+'</b> بلاغ</div>';
+  if(o.n)h+='<div class="row2" style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="shareDash()">📤 مشاركة التقرير</button>'+
+     '<button class="btn btn-ghost btn-sm" onclick="tgReport()">📨 إرسال للجروب</button></div>';
+  h+='</div>';
+
+  if(!o.n) return h+'<div class="empty"><div class="big">📊</div>مفيش بلاغات في الفترة دي<br>غيّر الفترة أو الموقع</div>';
+
+  /* مؤشرات */
+  var ccol=o.comply>=90?'var(--green)':(o.comply>=70?'var(--amber)':'var(--red)');
+  var fcol=o.ftf.tot?(o.ftf.ok/o.ftf.tot>=0.85?'var(--green)':'var(--amber)'):'var(--muted)';
+  h+='<div class="kpis">';
+  h+=kpi(o.n,'بلاغ','var(--blue)');
+  h+=kpi(o.open,'مفتوح',o.open?'var(--red)':'var(--green)');
+  h+=kpi(o.crit,'حرج مفتوح',o.crit?'var(--red)':'var(--green)');
+  h+=kpi(o.avgH+'<small>س</small>','متوسط الحل','var(--amber)');
+  h+=kpi(o.comply+'<small>%</small>','التزام SLA',ccol);
+  h+=kpi((o.ftf.tot?Math.round(o.ftf.ok/o.ftf.tot*100):0)+'<small>%</small>','حل من أول مرة',fcol);
+  h+='</div>';
+
+  /* الاتجاه */
+  h+='<div class="card"><h3>📈 الاتجاه الزمني <small>(لكل '+o.bucketName+')</small></h3>';
+  h+=svgTrend(o.trend,300,70,'#58a6ff');
+  var tot0=o.trend.slice(0,Math.ceil(o.trend.length/2)).reduce(function(a,b){return a+b},0);
+  var tot1=o.trend.slice(Math.ceil(o.trend.length/2)).reduce(function(a,b){return a+b},0);
+  var dir=tot1>tot0?'📈 بيزيد':(tot1<tot0?'📉 بيقل':'➡️ ثابت');
+  var dcol=tot1>tot0?'var(--red)':(tot1<tot0?'var(--green)':'var(--muted)');
+  h+='<div class="hint">النص التاني من الفترة مقارنة بالأول: <b style="color:'+dcol+'">'+dir+'</b> ('+tot0+' → '+tot1+')</div></div>';
+
+  /* التوزيع */
+  var cats=topList(o.byCat,8);
+  h+='<div class="card"><h3>🧰 توزيع الأعطال</h3><div class="dwrap">'+svgDonut(cats,150)+donutLegend(cats)+'</div></div>';
+
+  /* أكتر مزرعة */
+  h+='<div class="card"><h3>🏆 أكتر المواقع مشاكل</h3>'+bars(o.byFarm);
+  var wf=topList(o.byFarm,1)[0];
+  if(wf){
+    var dh=o.downH[wf[0]]?Math.round(o.downH[wf[0]]*10)/10:0;
+    h+='<div class="hint">⚠️ <b>'+esc(wf[0])+'</b> عندها <b>'+wf[1]+'</b> بلاغ ('+Math.round(wf[1]/o.n*100)+'٪ من الإجمالي)'+(dh?' · ساعات تعطّل: <b>'+dh+'</b>':'')+'</div>';
+  }
+  h+='</div>';
+
+  /* أكتر مدير */
+  var mgrs=topList(o.byMgr,6);
+  h+='<div class="card"><h3>👤 البلاغات حسب مدير الموقع</h3>';
+  if(!mgrs.length)h+='<div class="hint">لازم تربط كل مدير بموقعه من الإعدادات ← المستخدمين.</div>';
+  else{
+    h+=bars(o.byMgr);
+    var wm=mgrs[0];
+    h+='<div class="hint">دي بلاغات <b>مواقعه</b> — مش بالضرورة غلطه. المهم <b>الاتجاه</b> والمقارنة بمواقع مشابهة.</div>';
+  }
+  h+='</div>';
+
+  /* ===== الأنماط الخطيرة ===== */
+  /* ١ */
+  h+='<div class="card"><h3>🔁 نفس العطل يتكرر في نفس الوحدة</h3>';
+  if(!o.repSame.length)h+='<div class="hint">مفيش تكرار — كويس 👌</div>';
+  else{
+    o.repSame.slice(0,8).forEach(function(x){
+      var col=x.n>=3?'var(--red)':'var(--amber)';
+      h+='<div class="prow2" style="border-right-color:'+col+'"><div><b>'+esc(x.fault)+'</b><div class="meta">'+esc(x.farm)+' — وحدة '+esc(x.house)+' · '+esc(x.cat)+'</div></div><b style="color:'+col+'">'+x.n+'×</b></div>';
+    });
+    h+='<div class="hint">⚠️ التكرار ٣ مرات فأكتر = <b>المشكلة مش في القطعة</b>. النظام بيطلب السبب الجذري إجباري.</div>';
+  }
+  h+='</div>';
+  /* ٢ */
+  h+='<div class="card"><h3>🌐 نفس العطل في مواقع مختلفة</h3>';
+  if(!o.repCross.length)h+='<div class="hint">مفيش نمط عابر للمواقع.</div>';
+  else{
+    o.repCross.slice(0,6).forEach(function(x){
+      h+='<div class="prow2" style="border-right-color:var(--purple)"><div><b>'+esc(x.fault)+'</b><div class="meta">📍 '+x.nf+' مواقع: '+esc(x.farms.join(' · '))+'</div></div><b style="color:var(--purple)">'+x.n+'×</b></div>';
+    });
+    h+='<div class="hint">🎯 <b>ده مؤشر مشكلة نظامية</b> — مش صدفة. غالبًا: <b>مورد قطع رديء</b> · <b>موديل معدة ضعيف</b> · <b>خطأ تركيب متكرر</b> · <b>ظروف تشغيل واحدة</b>.<br>راجع المورد والموديل قبل ما تصلّح تاني.</div>';
+  }
+  h+='</div>';
+  /* ٣ — الأهم */
+  h+='<div class="card"><h3>🧭 نفس العطل مع نفس المدير في مواقع مختلفة</h3>';
+  if(!o.repMgr.length)h+='<div class="hint">مفيش نمط مرتبط بمدير معيّن.</div>';
+  else{
+    o.repMgr.slice(0,6).forEach(function(x){
+      var u=userById(x.mgrId);
+      h+='<div class="prow2" style="border-right-color:var(--red)"><div><b>'+esc(x.mgr)+'</b><div class="meta">⚙️ '+esc(x.fault)+'<br>📍 '+x.nf+' مواقع مختلفة: '+esc(x.farms.join(' · '))+'</div></div>'+
+         '<div style="text-align:left"><b style="color:var(--red)">'+x.n+'×</b>'+(u&&u.phone?'<div style="margin-top:5px">'+contactBtns(u,true)+'</div>':'')+'</div></div>';
+    });
+    h+='<div class="hint">🔍 <b>لما نفس العطل يمشي مع الشخص من موقع لموقع، الموقع مش هو السبب.</b><br>'+
+       'الاحتمالات: <b>طريقة تشغيل غلط</b> · <b>محتاج تدريب</b> · <b>مابيعملش الوقائية</b> · <b>بيبلّغ متأخر</b>.<br>'+
+       'اتكلم معاه الأول — ممكن يكون محتاج مساعدة مش محاسبة.</div>';
+  }
+  h+='</div>';
+
+  /* الوقائي/الطارئ */
+  var pcol=o.pmRatio>=50?'var(--green)':(o.pmRatio>=25?'var(--amber)':'var(--red)');
+  h+='<div class="card"><h3>🛡️ وقائي مقابل طارئ</h3>';
+  h+='<div class="ratio"><div class="rf" style="width:'+o.pmRatio+'%;background:var(--green)"></div></div>';
+  h+='<div class="rlbl"><span style="color:var(--green)">🛡️ وقائي '+o.pmDone+' ('+o.pmRatio+'٪)</span><span style="color:var(--red)">🚨 طارئ '+o.n+' ('+(100-o.pmRatio)+'٪)</span></div>';
+  h+='<div class="hint" style="color:'+pcol+'">'+
+     (o.pmRatio>=50?'✅ ممتاز — إنت بتمنع الأعطال مش بتطاردها.':
+      (o.pmRatio>=25?'⚠️ مقبول — الهدف ٥٠٪ فأكتر.':'🔴 كل شغلك إطفاء حرايق. الصيانة المحترمة ٧٠٪ وقائي / ٣٠٪ طارئ.'))+'</div></div>';
+
+  /* الخريطة الحرارية */
+  h+='<div class="card"><h3>🔥 إمتى بتحصل الأعطال؟</h3>';
+  h+=heatmap(o.heat,['أحد','اتنين','تلات','أربع','خميس','جمعة','سبت']);
+  h+='<div class="hint">الساعات الغامقة = أعطال أكتر. <b>لو فيه تركيز في وقت معيّن، ظبّط الورديات عليه</b> — أو دوّر على السبب (حمل الظهيرة؟ تغيير وردية؟).</div></div>';
+
+  /* MTBF */
+  var mt=[]; for(var k in o.mtbf)mt.push([k,o.mtbf[k]]);
+  mt.sort(function(a,b){return a[1]-b[1]});
+  if(mt.length){
+    h+='<div class="card"><h3>⏳ متوسط الزمن بين الأعطال (MTBF)</h3>';
+    mt.slice(0,8).forEach(function(x){
+      var col=x[1]<7?'var(--red)':(x[1]<21?'var(--amber)':'var(--green)');
+      h+='<div class="list-item"><span>'+esc(x[0])+'</span><b style="color:'+col+'">كل '+x[1]+' يوم</b></div>';
+    });
+    h+='<div class="hint">الأقل = الأضعف. <b>أي حاجة بتعطل كل أقل من أسبوع محتاجة قرار: استبدال ولا إعادة تأهيل؟</b></div></div>';
+  }
+
+  /* الفنيين */
+  var tks=topList(o.byTech,6);
+  if(tks.length){
+    h+='<div class="card"><h3>🔧 حِمل الفنيين</h3>'+bars(o.byTech);
+    h+='<div class="hint">توزيع البلاغات على الفنيين — لو واحد شايل كل حاجة، ده خطر (إجازة أو مرض = توقف).</div></div>';
+  }
+
+  /* التكلفة */
+  if(o.cost>0){
+    h+='<div class="card"><h3>💸 تكلفة التعطّل التقديرية</h3><div class="bignum">'+o.cost.toLocaleString('en-US')+' <small>ج.م</small></div>';
+    h+='<div class="hint">في الفترة المختارة. عدّل معايير الحساب من الإعدادات.</div></div>';
+  }
+  return h;
+}
+function kpi(v,l,c){ return '<div class="kpi"><div class="kv" style="color:'+c+'">'+v+'</div><div class="kl">'+l+'</div></div>'; }
+function setPeriod(p){
+  DASH.p=p;
+  if(p==='cus'&&!DASH.from){ DASH.from=fmtD(now()-30*864e5); DASH.to=fmtD(now()); }
+  render();
+}
+
+
+/* ================= تقرير نصّي للمشاركة =================
+   صاحب الشركة عايز رقم يبعته في اجتماع — مش يفتح البرنامج ويقرا. */
+function dashText(){
+  var o=dashStats(), R=dashRange();
+  var f=DASH.farmId?siteById(DASH.farmId):null;
+  var t='📊 تقرير الصيانة — '+PERIODS[DASH.p].n+'\n';
+  t+=(DASH.p==='all'?'كل البيانات':fmtD(R.from)+' ← '+fmtD(R.to))+'\n';
+  t+=(f?('📍 '+f.name):'📍 كل المواقع')+'\n';
+  t+='━━━━━━━━━━━━━━\n\n';
+  t+='📌 الملخص\n';
+  t+='• بلاغات: '+o.n+'  • مفتوح: '+o.open+(o.crit?('  • حرج: '+o.crit):'')+'\n';
+  t+='• متوسط الحل: '+o.avgH+' ساعة\n';
+  t+='• الالتزام بالـ SLA: '+o.comply+'%\n';
+  t+='• الحل من أول مرة: '+(o.ftf.tot?Math.round(o.ftf.ok/o.ftf.tot*100):0)+'%\n';
+  t+='• وقائي/طارئ: '+o.pmRatio+'% / '+(100-o.pmRatio)+'%\n';
+  if(o.cost>0)t+='• تكلفة التعطّل: ~'+o.cost.toLocaleString('en-US')+' ج.م\n';
+  var wf=topList(o.byFarm,3);
+  if(wf.length){ t+='\n🏆 أكتر المواقع مشاكل\n'; wf.forEach(function(x,i){t+=(i+1)+'. '+x[0]+' — '+x[1]+'\n'}); }
+  var wc=topList(o.byCat,3);
+  if(wc.length){ t+='\n🧰 أكتر الأعطال\n'; wc.forEach(function(x,i){t+=(i+1)+'. '+x[0]+' — '+x[1]+'\n'}); }
+  if(o.repSame.length){
+    t+='\n🔁 تكرار في نفس الوحدة\n';
+    o.repSame.slice(0,3).forEach(function(x){t+='• '+x.fault+' — '+x.farm+' وحدة '+x.house+' ('+x.n+'×)\n'});
+  }
+  if(o.repCross.length){
+    t+='\n🌐 نفس العطل في مواقع مختلفة (مشكلة نظامية)\n';
+    o.repCross.slice(0,3).forEach(function(x){t+='• '+x.fault+' — '+x.nf+' مواقع ('+x.n+'×)\n'});
+  }
+  if(o.repMgr.length){
+    t+='\n🧭 نمط مرتبط بمدير معيّن\n';
+    o.repMgr.slice(0,3).forEach(function(x){t+='• '+x.mgr+': '+x.fault+' في '+x.nf+' مواقع ('+x.n+'×)\n'});
+  }
+  var due=(S.pm||[]).filter(function(x){return pmState(x)!=='ok'}).length;
+  if(due)t+='\n🛡️ صيانة وقائية مستحقة: '+due+' مهمة\n';
+  return t;
+}
+function shareDash(){
+  var t=dashText();
+  if(typeof navigator!=='undefined'&&navigator.share){
+    navigator.share({text:t}).catch(function(){});
+  } else if(typeof navigator!=='undefined'&&navigator.clipboard){
+    navigator.clipboard.writeText(t).then(function(){toast('📋 التقرير اتنسخ')},function(){tgReport()});
+  } else tgReport();
+}
+function tgReport(){
+  if(!tgReady()){toast('ظبّط التليجرام الأول');return}
+  tgSend(dashText(),function(ok){ toast(ok?'📨 اتبعت للجروب':'❌ فشل'); });
+}
+/* ================= التقرير الأسبوعي التلقائي ================= */
+function weeklyDigest(){
+  if(!tgReady()||!S.weekly)return;
+  var d=new Date();
+  if(d.getDay()!==(S.weeklyDay==null?6:S.weeklyDay))return;   /* السبت افتراضي */
+  var k='wk_'+d.getFullYear()+'_'+Math.floor((d-new Date(d.getFullYear(),0,1))/6048e5);
+  var last=null; try{last=localStorage.getItem('faultsys_wk')}catch(e){}
+  if(last===k)return;
+  var sv={p:DASH.p,farmId:DASH.farmId};
+  DASH.p='w'; DASH.farmId='';
+  var t='🗓️ التقرير الأسبوعي التلقائي\n\n'+dashText();
+  DASH.p=sv.p; DASH.farmId=sv.farmId;
+  tgSend(t,function(ok){ if(ok){try{localStorage.setItem('faultsys_wk',k)}catch(e){}} });
+}
+
 /* ================= الإعدادات ================= */
 function renderSettings(){
   var h='';
@@ -1460,6 +2012,15 @@ function renderSettings(){
     var _my=Object.keys(ACTS).filter(function(a){return can(a,_me)});
     h+='<div class="hint">صلاحياتك: '+(_my.length?_my.map(function(a){return ACTS[a]}).join(' · '):'قراية بس')+'</div></div>';
   }
+  /* الأوفلاين */
+  var _q=outbox().length;
+  h+='<div class="card"><h3>📶 الشبكة والطابور</h3>';
+  h+='<div class="urow"><div class="ui"><b>'+(isOnline()?'🟢 متصل':'📴 مفيش نت')+'</b>'+
+     '<div class="meta">'+(_q?('📤 '+_q+' تنبيه مستني الإرسال'):'مفيش حاجة في الطابور')+'</div></div>'+
+     '<div class="ub">'+(_q?'<button class="btn btn-blue btn-sm" onclick="flushOutbox()">إرسال دلوقتي</button>':'')+'</div></div>';
+  h+='<div class="hint">البرنامج بيشتغل <b>من غير نت</b> — البلاغات والإصلاحات بتتسجّل على الجهاز على طول.<br>'+
+     'تنبيهات التليجرام بتستنى في طابور وتتبعت أول ما الشبكة ترجع — <b>مفيش بلاغ بيضيع</b>.<br>'+
+     'المزامنة مع باقي الأجهزة بتحصل لما النت يرجع كمان.</div></div>';
   /* Firebase */
   var _u=fbUrl();
   h+='<div class="card"><h3>☁️ مزامنة Firebase '+(_u?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
@@ -1500,6 +2061,19 @@ function renderSettings(){
   h+='<button class="btn btn-ghost" onclick="saveEsc()">حفظ التصعيد</button>';
   h+='<div class="hint">⚠️ <b>مهم تعرفه:</b> ده تطبيق ويب — التصعيد بيتفحص لما البرنامج يكون <b>مفتوح على أي جهاز</b> (بيتشيّك كل دقيقة). عشان تصعيد ٢٤/٧ مضمون لازم سيرفر.<br><b>الحل العملي:</b> سيب البرنامج مفتوح على تابلت/موبايل في مكتب الصيانة، أو افتحه أول ما تصحى. التنبيه الأساسي بيوصل تليجرام فورًا في كل الأحوال.</div></div>';
 
+  /* التقرير الأسبوعي */
+  h+='<div class="card"><h3>🗓️ التقرير الأسبوعي التلقائي</h3>';
+  h+='<label class="fc"><input type="checkbox" id="wkOn" '+(S.weekly?'checked':'')+'> <b>ابعت تقرير أسبوعي على الجروب</b></label>';
+  h+='<label>يوم الإرسال</label><select id="wkDay">';
+  var _dn=["الأحد","الاتنين","التلات","الأربع","الخميس","الجمعة","السبت"];
+  for(var _i=0;_i<7;_i++)h+='<option value="'+_i+'" '+((S.weeklyDay==null?6:S.weeklyDay)===_i?'selected':'')+'>'+_dn[_i]+'</option>';
+  h+='</select><button class="btn btn-ghost" onclick="saveWeekly()">حفظ</button>';
+  h+='<div class="hint">ملخّص الأسبوع بيتبعت تلقائي: البلاغات، الالتزام، أكتر المواقع مشاكل، والأنماط المتكررة.<br>⚠️ بيتبعت لما البرنامج يتفتح في اليوم ده على أي جهاز.</div></div>';
+  /* الدورة */
+  h+='<div class="card"><h3>🔄 طول الدورة</h3>';
+  h+='<label>عدد أيام الدورة</label><input type="number" id="cycD" value="'+(S.cycleDays||42)+'" min="1">';
+  h+='<button class="btn btn-ghost" onclick="saveCycle()">حفظ</button>';
+  h+='<div class="hint">بيستخدمها فلتر «الدورة» في الداش بورد. تسمين عادة ٣٥-٤٢ يوم.</div></div>';
   /* التكلفة */
   h+='<div class="card"><h3>💸 تكلفة التعطّل</h3>';
   h+='<label class="fc"><input type="checkbox" id="costOn" '+(S.cost.on?'checked':'')+'> <b>احسب التكلفة التقديرية</b></label>';
@@ -1529,7 +2103,7 @@ function renderSettings(){
       var fn=farmNames(u);
       h+='<div class="urow"><div class="ui"><b>'+(u.role==='super'?'👑 ':'')+esc(u.name)+(u.id===SUPER_ID?' <small style="color:var(--purple)">(الحساب الأساسي)</small>':'')+'</b>';
       h+='<div class="meta">'+(u.phone?'<span dir="ltr">'+esc(u.phone)+'</span>':'<span style="color:var(--amber)">⚠️ مفيش رقم</span>');
-      if(u.role==='farm')h+=fn?(' · 📍 '+esc(fn)):' · <span style="color:var(--amber)">⚠️ مفيش موقع</span>';
+      if(needsSite(u.role))h+=fn?(' · 📍 '+esc(fn)):' · <span style="color:var(--amber)">⚠️ مفيش موقع</span>';
       if(isCustom(u))h+=' · <span style="color:var(--purple)">🔑 مخصّصة</span>';
       if(String(u.pin||'1234')===defPin(u))h+=' · <span style="color:var(--amber)">🔓 لسه الافتراضي ('+defPin(u)+')</span>';
       h+='</div></div>';
@@ -1542,11 +2116,11 @@ function renderSettings(){
   }
   h+='</div><button class="btn btn-ghost" style="margin-top:9px" onclick="openUserEdit(null)">➕ إضافة مستخدم</button>';
   var _noPhone=S.users.filter(function(x){return !x.phone}).length;
-  var _noFarm=S.users.filter(function(x){return x.role==='farm'&&(!x.farmIds||!x.farmIds.length)}).length;
+  var _noFarm=S.users.filter(function(x){return needsSite(x.role)&&(!x.farmIds||!x.farmIds.length)}).length;
   var _defPin=S.users.filter(function(x){return String(x.pin||'1234')===defPin(x)}).length;
   var _w=[];
   if(_noPhone)_w.push(_noPhone+' من غير رقم تليفون');
-  if(_noFarm)_w.push(_noFarm+' مدير موقع من غير تحديد موقع');
+  if(_noFarm)_w.push(_noFarm+' مرتبطين بمواقع من غير تحديد موقع');
   if(_defPin)_w.push(_defPin+' لسه رقمهم السري افتراضي');
   if(_w.length)h+='<div class="hint" style="color:var(--amber)">⚠️ '+_w.join(' · ')+'</div>';
   if(can('grant'))h+='<div class="hint">👑 <b>إنت سوبر أدمن</b> — من حقك تضيف وتحذف أي حد، تغيّر رقمه السري من غير ما تعرف القديم، وتوزّع الصلاحيات.<br>تقدر تدي صلاحية «🔑 توزيع الصلاحيات» لأي شخص تاني من الصلاحيات المخصّصة.</div>';
@@ -1593,6 +2167,15 @@ function saveEsc(){
     S.esc.steps[j].role=document.getElementById('er_'+j).value;
   }
   save(); toast("✅ التصعيد اتحفظ"); render();
+}
+function saveWeekly(){
+  S.weekly=document.getElementById('wkOn').checked;
+  S.weeklyDay=parseInt(document.getElementById('wkDay').value,10);
+  save(); toast("✅ اتحفظ"); render();
+}
+function saveCycle(){
+  S.cycleDays=parseInt(document.getElementById('cycD').value,10)||42;
+  save(); toast("✅ اتحفظ"); render();
 }
 function saveCost(){
   S.cost.on=document.getElementById('costOn').checked;
@@ -1750,6 +2333,7 @@ function render(){
   if(TAB==='reports')m.innerHTML=renderReports();
   else if(TAB==='new'){m.innerHTML=renderNew(); if(curUser()){fillHouses();fillFaults();pickedSev='med';showSlaHint();}}
   else if(TAB==='pm')m.innerHTML=renderPM();
+  else if(TAB==='dash')m.innerHTML=renderDash();
   else if(TAB==='stats')m.innerHTML=renderStats();
   else m.innerHTML=renderSettings();
   pmBadge(); applyTabs();
@@ -1759,6 +2343,7 @@ function applyTabs(){
   for(var i=0;i<t.length;i++){
     var p=t[i].getAttribute('data-tab'), ok=true;
     if(p==='stats')ok=can('stats');
+    if(p==='dash')ok=can('stats');
     if(p==='pm')ok=can('pm')||can('pmDone');
     if(p==='new')ok=can('report');
     t[i].style.display=ok?'':'none';
@@ -1771,8 +2356,16 @@ function pmBadge(){
 }
 load(); refreshUserChip(); render(); setSync(fbUrl()?'busy':''); fbBoot();
 if(!S.curUserId)setTimeout(openUserPicker,400);
+/* الشبكة والطابور */
+paintNet();
+if(typeof window!=='undefined'&&window.addEventListener){
+  window.addEventListener('online', function(){ paintNet(); toast('📶 النت رجع'); setTimeout(flushOutbox,900); });
+  window.addEventListener('offline', function(){ paintNet(); toast('📴 مفيش نت — الشغل بيتسجّل محليًا'); });
+}
+setInterval(function(){ paintNet(); flushOutbox(); },120000);
+setTimeout(flushOutbox,4000);
 /* التصعيد + تنبيه الوقائية */
-setTimeout(function(){ checkEsc(); pmNotify(); },3000);
+setTimeout(function(){ checkEsc(); pmNotify(); weeklyDigest(); },3000);
 setInterval(checkEsc,60000);
 setInterval(function(){ if(TAB==='reports')render(); },120000);   /* تحديث ألوان الـ SLA */
 </script>
