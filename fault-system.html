@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="أعطال المزارع">
+<!-- أيقونة الشاشة الرئيسية -->
+<link rel="apple-touch-icon" href="icons/fault-system-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/fault-system-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/fault-system-192.png">
 <!-- OG: شكل المشاركة في واتساب/تليجرام -->
 <meta name="description" content="بلاغات الأعطال من الحقل للصيانة: تصنيف بالخطورة، تتبّع الحالة، إشعارات تليجرام، وتقارير أداء.">
 <meta property="og:type" content="website">
@@ -32,7 +37,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;font-size:15px;padding-bottom:90px}
-header{position:sticky;top:0;z-index:50;background:rgba(17,20,23,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+header{position:sticky;top:0;z-index:50;background:rgba(17,20,23,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 12px calc(14px + env(safe-area-inset-left));display:flex;align-items:center;justify-content:space-between;gap:8px}
 header h1{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
 header h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber)}
 .userchip{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
@@ -239,7 +244,7 @@ input[type=checkbox]:active{transform:scale(.9)}
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v7</span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v8</span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
