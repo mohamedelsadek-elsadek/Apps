@@ -668,7 +668,7 @@ window.moveLink=function(id,dir){
 function render(){
   var list=sortList(visibleLinks().filter(matches));
   var total=visibleLinks().length;
-  $("#subCount").textContent = total? (total+" رابط محفوظ · v2") : "لسه مفيش روابط · v2";
+  $("#subCount").textContent = total? (total+" رابط محفوظ · v4") : "لسه مفيش روابط · v4";
   renderChips();
   renderSortbar();
 
@@ -1217,9 +1217,43 @@ load();
   if(changed) persist();
 })();
 seedIfEmpty();
+/* مفتاح الملف: آخر جزء من الرابط — عشان الرابط المطلق والنسبي يتطابقوا
+   "https://x.github.io/Apps/vet-warehouse.html" و "vet-warehouse.html" → نفس المفتاح */
+function fileKey(u){
+  u=(u||"").trim().replace(/^\.\//,"").split("?")[0].split("#")[0].replace(/\/+$/,"");
+  if(!u) return "";
+  var p=u.split("/");
+  return p[p.length-1].toLowerCase();
+}
+/* دمج المكرر: نفس الملف + نفس الاسم = نسخة زيادة. بنسيب واحدة ونجمّع الاستخدام */
+function dedupeLinks(){
+  var groups={}, merged=0, t=now();
+  visibleLinks().forEach(function(l){
+    var k=fileKey(l.url)+"|"+String(l.title||"").trim();
+    if(!k.replace("|","")) return;
+    (groups[k]=groups[k]||[]).push(l);
+  });
+  Object.keys(groups).forEach(function(k){
+    var g=groups[k]; if(g.length<2) return;
+    /* الأفضل = الأكتر استخداماً، وبعدها الأقدم */
+    g.sort(function(a,b){ return ((b.uses||0)-(a.uses||0)) || ((a.updatedAt||0)-(b.updatedAt||0)); });
+    var keep=g[0], uses=0;
+    g.forEach(function(l){ uses+=(l.uses||0) });
+    keep.uses=uses;
+    if(keep.ord==null){ for(var i=1;i<g.length;i++){ if(g[i].ord!=null){ keep.ord=g[i].ord; break; } } }
+    keep.updatedAt=t;
+    for(var i=1;i<g.length;i++){ g[i].deleted=true; g[i].updatedAt=t; merged++; }
+  });
+  if(merged){
+    persist();
+    if(fbRef && !fbApplying){ try{ fbRef.set(links); }catch(e){} }
+  }
+  return merged;
+}
+
 /* برامج جديدة: بتتضاف تلقائيًا لو مش موجودة (بالرابط) — حدّث القايمة دي مع كل برنامج جديد */
 (function(){
-  var newApps=[
+var newApps=[
     {title:"شنطتي",url:"shanta.html",desc:"تجهيز شنطة السفر + مخزن الحاجات المتسابة في الشاليه وكل مكان.",cat:"شخصي",emoji:"🧳",color:"#e8a94f"},
     {title:"مشترياتي",url:"market.html",desc:"قوايم السوبر ماركت بأقسام جاهزة، أسعار بمقارنة، وطباعة PDF.",cat:"شخصي",emoji:"🛒",color:"#7ec97e"},
     {title:"مخازن الأدوية البيطرية",url:"vet-warehouse.html",desc:"ERP v26: مخزون الأدوية واللقاحات، فواتير المزارع، التحصيل، ومركز التقارير.",cat:"أدوية/صيدلية",emoji:"💊",color:"#a557ff"},
@@ -1230,13 +1264,18 @@ seedIfEmpty();
   ];
   var added=false;
   newApps.forEach(function(a){
-    var exists=links.some(function(l){return !l.deleted && (l.url||"").replace(/^\.\//,"")===a.url});
+    /* المقارنة باسم الملف — عشان الروابط المطلقة المحفوظة تتطابق مع النسبية */
+    var k=fileKey(a.url);
+    var exists=links.some(function(l){return !l.deleted && fileKey(l.url)===k});
     if(!exists){
       links.push({id:uid(),title:a.title,url:a.url,desc:a.desc,cat:a.cat,emoji:a.emoji,color:a.color,updatedAt:now(),deleted:false});
       added=true;
     }
   });
   if(added) persist();
+  /* نظّف أي مكرر اتعمل بالباج القديم */
+  var m=dedupeLinks();
+  if(m) setTimeout(function(){ toast("🧹 اتشال "+m+" رابط مكرر","ok"); },700);
 })();
 fillPickers(); render(); restoreSync();
 </script>
