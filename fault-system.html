@@ -281,12 +281,24 @@ input[type=checkbox]:active{transform:scale(.9)}
 .waiting{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;margin-bottom:9px;color:var(--muted)}
 .waiting b{color:var(--text)}
 .w-late{background:rgba(218,54,51,.1);border-color:rgba(218,54,51,.35)}
+
+.sev-lock{opacity:.3;pointer-events:auto;cursor:not-allowed;position:relative}
+
+.hcard{border:1.5px solid var(--line)}
+.hwrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.gauge{width:130px;height:130px;flex:0 0 auto}
+.hparts{flex:1;min-width:170px;display:flex;flex-direction:column;gap:7px}
+.hp{}
+.hpt{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:2px}
+.hpb{height:6px;background:var(--panel2);border-radius:4px;overflow:hidden}
+.hpb div{height:100%;border-radius:4px}
+.hpn{font-size:10px;color:var(--muted);margin-top:1px}
 </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v11</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v13</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -1164,6 +1176,7 @@ function renderNew(){
      '<span data-v="high" onclick="pickSev(this)">عالية</span>'+
      '<span data-v="med" class="on-med" onclick="pickSev(this)">متوسطة</span>'+
      '<span data-v="low" onclick="pickSev(this)">منخفضة</span></div>';
+  h+='<div class="hint" id="sevNote"></div>';
   h+='<label>تفاصيل إضافية (اختياري)</label><textarea id="nDesc" placeholder="مثال: الشفاط رقم 3 واقف والحرارة بتعلى"></textarea>';
   h+=photoBox('before','📷 صورة العطل');
   h+='<div class="hint" id="slaHint"></div>';
@@ -1172,6 +1185,72 @@ function renderNew(){
   h+='</div>';
   return h;
 }
+
+/* ================= الخطورة الثابتة =================
+   المبلّغ مايقدرش يقول على انقطاع التهوية "منخفضة" — دي حياة طيور.
+   FORCED_SEV: عطل → درجة إجبارية مقفولة.
+   MIN_SEV: عطل → حد أدنى (يقدر يعلّي، مايقدرش ينزل). */
+var FORCED_SEV={
+  /* حياة الطيور — دقايق بتفرق */
+  "المولد لا يعمل":"critical",
+  "انقطاع تيار كهربائي":"critical",
+  "عطل لوحة التحويل ATS":"critical",
+  "انقطاع مياه كامل":"critical",
+  "عطل شفاط":"critical",
+  "عطل كنترول التهوية":"critical",
+  "ماس كهربائي / سلك مقطوع":"critical",   /* حريق */
+  "تسريب وقود أو زيت":"critical",          /* حريق */
+  "تسريب غاز":"critical",
+  "حريق / دخان":"critical"
+};
+var MIN_SEV={
+  "عطل موتور شفاط":"high",
+  "سخونة زائدة":"high",
+  "عطل حساس حرارة":"high",
+  "عطل طلمبة مياه":"high",
+  "عطل مضخة خلايا":"high",
+  "انخفاض / ارتفاع الجهد":"high",
+  "عطل سلف / بطارية":"high",
+  "عطل دفاية":"high",
+  "انسداد خط مياه":"high"
+};
+var SEV_ORDER={low:0,med:1,high:2,critical:3};
+function faultSevRule(fault){
+  if(FORCED_SEV[fault])return {kind:'forced',sev:FORCED_SEV[fault]};
+  if(MIN_SEV[fault])return {kind:'min',sev:MIN_SEV[fault]};
+  return null;
+}
+/* بتتنادى لما العطل يتغيّر في النموذج */
+function applySevRule(){
+  var fsel=document.getElementById('nFault');
+  var fault=fsel?fsel.value:'';
+  var rule=faultSevRule(fault);
+  var box=document.getElementById('sevBox'), note=document.getElementById('sevNote');
+  var spans=box?box.querySelectorAll('span'):[];
+  for(var i=0;i<spans.length;i++){ spans[i].classList.remove('sev-lock'); }
+  if(!rule){ if(note)note.innerHTML=''; showSlaHint(); return; }
+  if(rule.kind==='forced'){
+    pickedSev=rule.sev;
+    for(var i=0;i<spans.length;i++){
+      var v=spans[i].getAttribute('data-v');
+      spans[i].classList.toggle('on',v===rule.sev);
+      if(v!==rule.sev)spans[i].classList.add('sev-lock');
+    }
+    if(note)note.innerHTML='🔒 العطل ده درجته <b>'+SEVS[rule.sev]+'</b> ثابتة — لأنه بيهدد حياة الطيور أو خطر حريق. مش قابلة للتغيير.';
+  } else {
+    if(SEV_ORDER[pickedSev]<SEV_ORDER[rule.sev]){
+      pickedSev=rule.sev;
+      for(var i=0;i<spans.length;i++)spans[i].classList.toggle('on',spans[i].getAttribute('data-v')===rule.sev);
+    }
+    for(var i=0;i<spans.length;i++){
+      var v=spans[i].getAttribute('data-v');
+      if(SEV_ORDER[v]<SEV_ORDER[rule.sev])spans[i].classList.add('sev-lock');
+    }
+    if(note)note.innerHTML='⬆️ الحد الأدنى للعطل ده <b>'+SEVS[rule.sev]+'</b> — تقدر تعلّيها، مش تنزّلها.';
+  }
+  showSlaHint();
+}
+
 var pickedSev='med';
 function showSlaHint(){
   var el=document.getElementById('slaHint'); if(!el)return;
@@ -1180,6 +1259,11 @@ function showSlaHint(){
     ((S.esc&&S.esc.on&&S.esc.sevs.indexOf(pickedSev)>=0)?'<br>🚨 التصعيد التلقائي مفعّل للدرجة دي':'');
 }
 function pickSev(el){
+  /* اتقفلت؟ ماينفعش */
+  if(el.classList&&el.classList.contains('sev-lock')){
+    toast("🔒 الدرجة دي مقفولة للعطل ده — سلامة الطيور أولًا");
+    return;
+  }
   setTimeout(showSlaHint,0);
   pickedSev=el.getAttribute('data-v');
   var sp=document.getElementById('nSev').children;
@@ -1210,7 +1294,7 @@ function fillCats(){
   sel.innerHTML=h;
   fillFaults();
 }
-function fillFaults(){
+function fillFaults(){ setTimeout(applySevRule,0);
   var c=document.getElementById('nCat').value, arr=S.catalog[c]||[], h='';
   for(var i=0;i<arr.length;i++)h+='<option>'+esc(arr[i])+'</option>';
   document.getElementById('nFault').innerHTML=h;
@@ -1334,6 +1418,11 @@ function repCard(r){
   if(OPEN_ST[r.status] && can('fix')) h+='<button class="btn btn-green btn-sm" onclick="openFixModal(\''+r.id+'\')">✅ تم الإصلاح</button>';
   if(r.status==='fixed' && u && (u.id===r.reporterId||can('confirm')&&can('del'))) h+='<button class="btn btn-green btn-sm" onclick="confirmFix(\''+r.id+'\')">🟢 تأكيد الإصلاح</button>';
   if(r.status==='fixed' && u && u.id!==r.reporterId) h+='<div class="hint">⏳ مستني تأكيد '+esc(r.reporterName)+'</div>';
+  if(r.status==='conf'||r.status==='fixed'){
+    h+='<button class="btn btn-ghost btn-sm" onclick="sharePdf(\''+r.id+'\')">📤 PDF</button>';
+    h+='<button class="btn btn-ghost btn-sm" onclick="printReport(\''+r.id+'\')">🖨️ طباعة</button>';
+    if(tgReady())h+='<button class="btn btn-ghost btn-sm" onclick="toast(\'⏳ ببعت…\');autoPdfToTg(\''+r.id+'\',function(ok){toast(ok?\'📄 اتبعت للجروب\':\'❌ فشل\')})">📨 PDF للجروب</button>';
+  }
   if(can('del')) h+='<button class="btn btn-red btn-sm" onclick="delReport(\''+r.id+'\')">حذف</button>';
   h+='</div></div>';
   return h;
@@ -1419,10 +1508,42 @@ function doFix(id){
 }
 function confirmFix(id){
   var r=findRep(id), u=curUser(); if(!r||!u)return;
-  if(u.id!==r.reporterId){toast("التأكيد لازم يكون من اللي بلّغ عن العطل نفسه");return;}
+  if(u.id!==r.reporterId&&!can('del')){toast("التأكيد لازم يكون من اللي بلّغ عن العطل نفسه");return;}
   r.status='conf'; r.confTs=now(); r.updatedAt=now(); save(); render();
-  if(S.tg.onConfirm&&tgReady())tgSend(msgConf(r),function(ok){toast(ok?"🟢 اتأكد الإصلاح والبلاغ اتقفل":"اتأكد الإصلاح (التليجرام فشل)");});
-  else toast("🟢 اتأكد الإصلاح والبلاغ اتقفل");
+  /* تقرير الإقفال الغني — تلقائي للجروب */
+  if(S.closeNotify!==false&&tgReady()){
+    var _late=(respLate(r)||fixLate(r));
+    var _t='📁 بلاغ #'+r.num+' اتقفل نهائي\n'+
+      '🏠 '+r.farmName+' — وحدة '+r.house+'\n'+
+      '⚙️ '+r.fault+' · '+sevPlain(r.severity)+'\n'+
+      '⏱️ استلام: '+mmm(respMins(r))+' · إصلاح: '+mmm(fixMins(r))+(_late?' ⚠️ خارج الوقت':' ✅ في الوقت')+'\n'+
+      (r.fixedBy?('🔧 '+r.fixedBy+'\n'):'')+
+      (r.fixDesc?('📝 '+r.fixDesc+'\n'):'')+
+      (r.parts&&r.parts.length?('🔩 '+r.parts.map(function(p){return p.name+'×'+p.qty}).join(' · ')+'\n'):'')+
+      (r.rootCause?('🎯 السبب الجذري: '+r.rootCause+'\n'):'')+
+      '👤 أكّد: '+u.name;
+    tgSend(_t,function(ok){toast(ok?"🟢 اتقفل واتبعت الملخص":"🟢 اتقفل (التليجرام فشل)");});
+  } else toast("🟢 اتأكد الإصلاح والبلاغ اتقفل");
+  /* ===== PDF أوتوماتيك للجروب — من غير أي تدخل ===== */
+  if(S.closePdf!==false&&tgReady()&&isOnline()){
+    setTimeout(function(){
+      toast('⏳ بجهّز الـ PDF وببعته…');
+      autoPdfToTg(id,function(ok){
+        toast(ok?'📄 الـ PDF اتبعت للجروب تلقائي':'⚠️ الـ PDF ماتبعتش — ابعته يدوي من زرار PDF');
+      });
+    },900);
+  }
+  /* إيميل (لو متظبط): بيفتح البريد بنص التقرير */
+  if(S.mailOnClose&&S.mailTo){
+    setTimeout(function(){
+      var r2=findRep(id); if(!r2)return;
+      var t='تقرير إقفال بلاغ #'+r2.num+'\n'+r2.farmName+' — وحدة '+r2.house+'\n'+r2.fault+'\n'+
+        'استلام: '+mmm(respMins(r2))+' · إصلاح: '+mmm(fixMins(r2))+'\n'+
+        (r2.fixDesc?('اللي اتعمل: '+r2.fixDesc+'\n'):'')+
+        (r2.rootCause?('السبب الجذري: '+r2.rootCause+'\n'):'');
+      sendMail(S.mailTo,'إقفال بلاغ #'+r2.num+' — '+r2.farmName,t);
+    },2500);
+  }
 }
 function delReport(id){
   if(!confirm("متأكد من حذف البلاغ نهائيًا؟"))return;
@@ -1884,6 +2005,63 @@ function bars(obj){
 }
 
 
+
+/* ================= الوضع العام (Health Score) =================
+   درجة من ١٠٠ بتتجمع من ٦ عوامل بأوزان من الميدان:
+   - حرج مفتوح (25): أخطر حاجة — كل واحد بيخصم كتير
+   - الالتزام بالـ SLA (20)
+   - الوقائية (20): المستحق المتأخر بيخصم
+   - التكرار (15): نفس العطل ≥3 مرات = مشكلة مش بتتحل
+   - سرعة الحل مقارنة بالمستهدف (10)
+   - الحل من أول مرة (10) */
+function healthScore(o){
+  var parts=[];
+  /* ١) الحرج المفتوح */
+  var pCrit=Math.max(0,25-o.crit*12.5);
+  parts.push({k:'حرج مفتوح',v:pCrit,max:25,note:o.crit?('فيه '+o.crit+' بلاغ حرج مفتوح!'):'مفيش حرج مفتوح'});
+  /* ٢) SLA */
+  var pSla=(o.closed?o.comply:100)/100*20;
+  parts.push({k:'الالتزام بالوقت',v:pSla,max:20,note:o.comply+'٪'});
+  /* ٣) الوقائية */
+  var pmAll=(S.pm||[]).length, pmDue=(S.pm||[]).filter(function(t){return pmState(t)==='over'}).length;
+  var pPm;
+  if(!pmAll){ pPm=8; parts.push({k:'الصيانة الوقائية',v:8,max:20,note:'مفيش جدول وقائية أصلًا — حمّل المهام الجاهزة'}); }
+  else { pPm=Math.max(0,20-pmDue*4); parts.push({k:'الصيانة الوقائية',v:pPm,max:20,note:pmDue?(pmDue+' مهمة متأخرة'):'كله في معاده'}); }
+  /* ٤) التكرار */
+  var rep3=o.repSame.filter(function(x){return x.n>=3}).length;
+  var pRep=Math.max(0,15-rep3*5);
+  parts.push({k:'الأعطال المتكررة',v:pRep,max:15,note:rep3?(rep3+' عطل متكرر ٣+ مرات'):'مفيش تكرار مقلق'});
+  /* ٥) سرعة الحل */
+  var pFix=10;
+  if(o.fixN){
+    var tgt=(S.sla&&S.sla.med&&S.sla.med.fix?S.sla.med.fix:1440)/60;
+    pFix=o.avgH<=tgt?10:Math.max(0,10-((o.avgH-tgt)/tgt)*10);
+  }
+  parts.push({k:'سرعة الحل',v:pFix,max:10,note:o.avgH+' ساعة متوسط'});
+  /* ٦) أول مرة */
+  var pF=o.ftf.tot?(o.ftf.ok/o.ftf.tot)*10:10;
+  parts.push({k:'الحل من أول مرة',v:pF,max:10,note:(o.ftf.tot?Math.round(o.ftf.ok/o.ftf.tot*100):100)+'٪'});
+
+  var score=0; parts.forEach(function(p){score+=p.v});
+  score=Math.round(score);
+  var grade,gcol,gic;
+  if(score>=85){grade='ممتاز';gcol='var(--green)';gic='🟢'}
+  else if(score>=70){grade='جيد';gcol='#7ec97e';gic='🟡'}
+  else if(score>=50){grade='مقبول';gcol='var(--amber)';gic='🟠'}
+  else {grade='خطر';gcol='var(--red)';gic='🔴'}
+  return {score:score,grade:grade,gcol:gcol,gic:gic,parts:parts};
+}
+function healthGauge(hs){
+  var R=52, C=2*Math.PI*R, pct=hs.score/100;
+  return '<svg viewBox="0 0 140 140" class="gauge">'+
+    '<circle cx="70" cy="70" r="'+R+'" fill="none" stroke="var(--panel2)" stroke-width="13"/>'+
+    '<circle cx="70" cy="70" r="'+R+'" fill="none" stroke="'+hs.gcol+'" stroke-width="13" stroke-linecap="round" '+
+    'stroke-dasharray="'+(C*pct).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 70 70)"/>'+
+    '<text x="70" y="64" text-anchor="middle" fill="#e6edf3" font-size="30" font-weight="800">'+hs.score+'</text>'+
+    '<text x="70" y="86" text-anchor="middle" fill="'+hs.gcol+'" font-size="15" font-weight="800">'+hs.grade+'</text>'+
+    '</svg>';
+}
+
 /* ================= واجهة الداش بورد ================= */
 function renderDash(){
   var o=dashStats(), R=dashRange();
@@ -1906,11 +2084,27 @@ function renderDash(){
   }
   h+='</select>';
   h+='<div class="drange">'+(DASH.p==='all'?'كل البيانات':fmtD(R.from)+' ← '+fmtD(R.to))+' · <b>'+o.n+'</b> بلاغ</div>';
-  if(o.n)h+='<div class="row2" style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="shareDash()">📤 مشاركة التقرير</button>'+
-     '<button class="btn btn-ghost btn-sm" onclick="tgReport()">📨 إرسال للجروب</button></div>';
+  if(o.n)h+='<div class="row2" style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="shareDash()">📤 مشاركة نصية</button>'+
+     '<button class="btn btn-blue btn-sm" onclick="printDash()">🖨️ PDF للطباعة</button></div>'+
+     '<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:7px" onclick="tgReport()">📨 إرسال للجروب</button>';
   h+='</div>';
 
   if(!o.n) return h+'<div class="empty"><div class="big">📊</div>مفيش بلاغات في الفترة دي<br>غيّر الفترة أو الموقع</div>';
+
+  /* ===== الوضع العام ===== */
+  var hs=healthScore(o);
+  h+='<div class="card hcard"><h3>🏥 الوضع العام'+(DASH.farmId?' — '+esc((siteById(DASH.farmId)||{}).name||''):'')+'</h3>';
+  h+='<div class="hwrap">'+healthGauge(hs)+'<div class="hparts">';
+  hs.parts.forEach(function(p){
+    var pc=p.v/p.max, col=pc>=0.8?'var(--green)':(pc>=0.5?'var(--amber)':'var(--red)');
+    h+='<div class="hp"><div class="hpt"><span>'+p.k+'</span><b style="color:'+col+'">'+Math.round(p.v)+'/'+p.max+'</b></div>'+
+       '<div class="hpb"><div style="width:'+(pc*100)+'%;background:'+col+'"></div></div>'+
+       '<div class="hpn">'+p.note+'</div></div>';
+  });
+  h+='</div></div>';
+  if(hs.score<50)h+='<div class="hint" style="color:var(--red)">🔴 <b>الوضع خطر.</b> ابدأ بالحرج المفتوح، وبعدها الوقائية المتأخرة — دول أسرع نقط بترفع الدرجة.</div>';
+  else if(hs.score<70)h+='<div class="hint" style="color:var(--amber)">🟠 أكبر خصم عندك: '+hs.parts.slice().sort(function(a,b){return (a.v/a.max)-(b.v/b.max)})[0].k+' — ركّز عليها.</div>';
+  h+='</div>';
 
   /* مؤشرات */
   var ccol=o.comply>=90?'var(--green)':(o.comply>=70?'var(--amber)':'var(--red)');
@@ -2042,6 +2236,353 @@ function setPeriod(p){
 }
 
 
+
+
+/* ================= PDF أوتوماتيك للتليجرام =================
+   المشكلة: حوار الطباعة محتاج إيد إنسان — مايتبعتش لوحده.
+   الحل: نرسم التقرير على canvas (العربي بيترسم مظبوط في المتصفح)،
+   ناخده JPEG، نلفّه في هيكل PDF حقيقي، ونرفعه على تليجرام sendDocument. */
+
+/* ---- رسّام التقرير ---- */
+function drawReportCanvas(r,cb){
+  var W=1000, PAD=46, y=0;
+  var c=document.createElement('canvas');
+  c.width=W; c.height=3200;                     /* طويل مؤقتًا — هنقصّه */
+  var x=c.getContext('2d');
+  x.fillStyle='#ffffff'; x.fillRect(0,0,W,c.height);
+  x.direction='rtl'; x.textAlign='right';
+  var RX=W-PAD;                                  /* حافة اليمين */
+  function font(sz,b){ x.font=(b?'800 ':'400 ')+sz+'px -apple-system, "Segoe UI", Tahoma, sans-serif'; }
+  function line(yy){ x.strokeStyle='#cccccc'; x.lineWidth=1; x.beginPath(); x.moveTo(PAD,yy); x.lineTo(W-PAD,yy); x.stroke(); }
+  function row(label,val,yy){
+    font(21,true); x.fillStyle='#333'; x.fillText(label,RX,yy);
+    font(21,false); x.fillStyle='#111'; x.fillText(String(val),RX-215,yy);
+  }
+  function section(t){
+    y+=44; x.fillStyle='#f0f0f0'; x.fillRect(PAD,y-27,W-PAD*2,38);
+    font(22,true); x.fillStyle='#222'; x.fillText(t,RX-10,y);
+    y+=26;
+  }
+  function wrapText(t,maxW,sz){
+    font(sz,false);
+    var words=String(t).split(' '), lines=[], cur='';
+    for(var i=0;i<words.length;i++){
+      var test=cur?(cur+' '+words[i]):words[i];
+      if(x.measureText(test).width>maxW&&cur){lines.push(cur);cur=words[i];}
+      else cur=test;
+    }
+    if(cur)lines.push(cur);
+    return lines;
+  }
+  /* الرأس */
+  y=64;
+  font(30,true); x.fillStyle='#111';
+  x.fillText('🛠️ تقرير إقفال بلاغ #'+r.num, RX, y);
+  font(17,false); x.fillStyle='#888'; x.textAlign='left';
+  x.fillText(fmtDT(now()), PAD, y);
+  x.textAlign='right';
+  y+=18; x.strokeStyle='#111'; x.lineWidth=3;
+  x.beginPath(); x.moveTo(PAD,y); x.lineTo(W-PAD,y); x.stroke();
+
+  /* البيانات */
+  section('البيانات');
+  y+=26; row('الموقع:', r.farmName+' — وحدة '+r.house, y);
+  y+=34; row('العطل:', r.category+' › '+r.fault, y);
+  y+=34; row('الخطورة:', sevPlain(r.severity).replace(/[🔴🟠🔵🟢]/g,'').trim(), y);
+  y+=34; row('الحالة:', STATUS[r.status], y);
+  if(r.desc){
+    y+=34; font(21,true); x.fillStyle='#333'; x.fillText('الوصف:',RX,y);
+    var dl=wrapText(r.desc, W-PAD*2-230, 20);
+    for(var i=0;i<dl.length;i++){ font(20,false); x.fillStyle='#111'; x.fillText(dl[i],RX-215,y); if(i<dl.length-1)y+=28; }
+  }
+
+  /* الجدول الزمني */
+  section('الجدول الزمني');
+  var steps=[['الإبلاغ',r.reporterName,fmtDT(r.ts),'—']];
+  if(r.startTs)steps.push(['الاستلام',r.startedBy,fmtDT(r.startTs),mmm(respMins(r))]);
+  if(r.fixTs)steps.push(['الإصلاح',r.fixedBy,fmtDT(r.fixTs),mmm(fixMins(r))]);
+  if(r.confTs)steps.push(['التأكيد',r.reporterName,fmtDT(r.confTs),'—']);
+  for(var i=0;i<steps.length;i++){
+    y+=32;
+    font(20,true); x.fillStyle='#333'; x.fillText(steps[i][0],RX,y);
+    font(19,false); x.fillStyle='#111';
+    x.fillText(steps[i][1],RX-150,y);
+    x.fillText(steps[i][3],RX-420,y);
+    font(17,false); x.fillStyle='#777'; x.textAlign='left';
+    x.fillText(steps[i][2],PAD,y); x.textAlign='right';
+    line(y+9);
+  }
+  /* SLA */
+  y+=40;
+  var late=(respLate(r)||fixLate(r));
+  x.fillStyle=late?'#fdecec':'#eaf7ea';
+  x.fillRect(PAD,y-24,W-PAD*2,40);
+  font(20,true); x.fillStyle=late?'#c0392b':'#1e7e34';
+  x.fillText(late?'⚠️ خرج عن زمن الاستجابة المستهدف'+(r.waitTotal?' (منها '+mmm(r.waitTotal/60000)+' انتظار قطع)':''):'✅ اتحل داخل الوقت المستهدف', RX-8, y);
+  y+=8;
+
+  if(r.fixDesc){
+    section('اللي اتعمل');
+    var fl=wrapText(r.fixDesc, W-PAD*2-20, 20);
+    for(var i=0;i<fl.length;i++){ y+=30; font(20,false); x.fillStyle='#111'; x.fillText(fl[i],RX-8,y); }
+  }
+  if(r.parts&&r.parts.length){
+    section('قطع الغيار');
+    for(var i=0;i<r.parts.length;i++){
+      y+=30; font(20,false); x.fillStyle='#111';
+      x.fillText('• '+r.parts[i].name+'  ×'+r.parts[i].qty, RX-8, y);
+    }
+  }
+  if(r.rootCause){
+    section('السبب الجذري');
+    y+=30; font(20,true); x.fillStyle='#c0392b'; x.fillText(r.rootCause,RX-8,y);
+    if(r.rootNote){ var rl=wrapText(r.rootNote,W-PAD*2-20,19); for(var i=0;i<rl.length;i++){ y+=27; font(19,false); x.fillStyle='#333'; x.fillText(rl[i],RX-8,y);} }
+  }
+  var dc=downtimeCost(r);
+  if(dc){ y+=36; font(20,true); x.fillStyle='#b06000'; x.fillText('💸 تكلفة التعطّل التقديرية: '+dc.toLocaleString('en-US')+' ج.م', RX-8, y); }
+
+  /* الصور */
+  var phs=[];
+  if(r.photos){ (r.photos.before||[]).forEach(function(p){phs.push([p,'قبل'])}); (r.photos.after||[]).forEach(function(p){phs.push([p,'بعد'])}); }
+  function drawPhotos(done){
+    if(!phs.length){done();return}
+    section('الصور');
+    var loaded=0, imgs=[];
+    phs.forEach(function(ph,idx){
+      var im=new Image();
+      im.onload=function(){ imgs[idx]=im; if(++loaded===phs.length)paint(); };
+      im.onerror=function(){ imgs[idx]=null; if(++loaded===phs.length)paint(); };
+      im.src=ph[0];
+    });
+    function paint(){
+      var sz=200, gap=16, perRow=Math.floor((W-PAD*2)/(sz+gap));
+      for(var i=0;i<phs.length;i++){
+        var col=i%perRow, rowN=Math.floor(i/perRow);
+        var px=W-PAD-sz-col*(sz+gap), py=y+16+rowN*(sz+38);
+        if(imgs[i]){ x.drawImage(imgs[i],px,py,sz,sz); x.strokeStyle='#ccc'; x.strokeRect(px,py,sz,sz); }
+        font(16,false); x.fillStyle='#666'; x.fillText(phs[i][1], px+sz-4, py+sz+22);
+      }
+      y+= 16 + Math.ceil(phs.length/perRow)*(sz+38);
+      done();
+    }
+  }
+  drawPhotos(function(){
+    /* التوقيعات */
+    y+=64;
+    var wcol=(W-PAD*2)/3;
+    ['مدير الموقع','مدير الصيانة','الفني'].forEach(function(t,i){
+      var cx=PAD+i*wcol+wcol/2;
+      x.strokeStyle='#999'; x.beginPath(); x.moveTo(cx-90,y); x.lineTo(cx+90,y); x.stroke();
+      font(17,false); x.fillStyle='#333'; x.textAlign='center'; x.fillText(t,cx,y+26);
+    });
+    x.textAlign='right';
+    y+=58;
+    font(15,false); x.fillStyle='#999'; x.textAlign='center';
+    x.fillText('اتولّد تلقائيًا من نظام أعطال المزارع — '+fmtDT(now()), W/2, y);
+    x.textAlign='right';
+    y+=30;
+    /* قصّ للطول الفعلي */
+    var out=document.createElement('canvas');
+    out.width=W; out.height=y;
+    var ox=out.getContext('2d');
+    ox.fillStyle='#fff'; ox.fillRect(0,0,W,y);
+    ox.drawImage(c,0,0,W,y,0,0,W,y);
+    cb(out);
+  });
+}
+
+/* ---- JPEG → PDF حقيقي (نفس الهيكل اللي اتبنى واتاختبر) ---- */
+function canvasToPdfBlob(canvas,cb){
+  canvas.toBlob(function(blob){
+    if(!blob){cb(null);return}
+    var fr=new FileReader();
+    fr.onload=function(){
+      var jpg=new Uint8Array(fr.result);
+      var w=canvas.width,h=canvas.height;
+      var W=595, H=Math.round(W*h/w*100)/100;
+      function enc(s){ var a=new Uint8Array(s.length); for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i)&0xff; return a; }
+      var content='q\n'+W+' 0 0 '+H+' 0 0 cm\n/Im1 Do\nQ\n';
+      var chunks=[], offs={}, pos=0;
+      function push(u8){ chunks.push(u8); pos+=u8.length; }
+      push(enc('%PDF-1.4\n'));
+      offs[1]=pos; push(enc('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n'));
+      offs[2]=pos; push(enc('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n'));
+      offs[3]=pos; push(enc('3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n'));
+      offs[4]=pos; push(enc('4 0 obj\n<< /Length '+content.length+' >>\nstream\n'+content+'endstream\nendobj\n'));
+      offs[5]=pos; push(enc('5 0 obj\n<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n'));
+      push(jpg);
+      push(enc('\nendstream\nendobj\n'));
+      var xrefPos=pos;
+      var xr='xref\n0 6\n0000000000 65535 f \n';
+      for(var n=1;n<=5;n++){ var o=String(offs[n]); while(o.length<10)o='0'+o; xr+=o+' 00000 n \n'; }
+      xr+='trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xrefPos+'\n%%EOF';
+      push(enc(xr));
+      cb(new Blob(chunks,{type:'application/pdf'}));
+    };
+    fr.onerror=function(){cb(null)};
+    fr.readAsArrayBuffer(blob);
+  },'image/jpeg',0.82);
+}
+
+/* ---- رفع مستند لتليجرام ---- */
+function tgSendDoc(blob,filename,caption,cb){
+  if(!tgReady()){cb&&cb(false);return}
+  var fd=new FormData();
+  fd.append('chat_id',S.tg.chatId);
+  fd.append('document',blob,filename);
+  if(caption)fd.append('caption',caption.slice(0,1000));
+  fetch('https://api.telegram.org/bot'+S.tg.token+'/sendDocument',{method:'POST',body:fd})
+    .then(function(r){return r.json()}).then(function(j){cb&&cb(!!j.ok)})
+    .catch(function(){cb&&cb(false)});
+}
+
+/* ---- الأوتوماتيك الكامل: بلاغ → صورة → PDF → تليجرام ---- */
+function autoPdfToTg(id,cb){
+  var r=findRep(id); if(!r){cb&&cb(false);return}
+  try{
+    drawReportCanvas(r,function(canvas){
+      canvasToPdfBlob(canvas,function(blob){
+        if(!blob){cb&&cb(false);return}
+        tgSendDoc(blob,'بلاغ-'+r.num+'.pdf','📁 تقرير إقفال بلاغ #'+r.num+' — '+r.farmName,function(ok){cb&&cb(ok)});
+      });
+    });
+  }catch(e){cb&&cb(false)}
+}
+/* مشاركة PDF (واتساب/إيميل من نافذة المشاركة) */
+function sharePdf(id){
+  var r=findRep(id); if(!r)return;
+  toast('⏳ بجهّز الـ PDF…');
+  drawReportCanvas(r,function(canvas){
+    canvasToPdfBlob(canvas,function(blob){
+      if(!blob){toast('❌ فشل');return}
+      var file=new File([blob],'بلاغ-'+r.num+'.pdf',{type:'application/pdf'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file]}).catch(function(){});
+      } else {
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob); a.download='بلاغ-'+r.num+'.pdf';
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){document.body.removeChild(a)},1000);
+        toast('⬇️ اتنزّل — ابعته من الملفات');
+      }
+    });
+  });
+}
+
+/* ================= تقارير PDF =================
+   صفحة طباعة نظيفة (فاتحة، RTL) وحوار الطباعة.
+   على الآيفون: مشاركة ← حفظ PDF ← واتساب. iframe مخفي عشان Safari. */
+function printHtml(title,body){
+  var css='@page{size:A4;margin:14mm}'+
+  'body{font-family:-apple-system,"Segoe UI",Tahoma,sans-serif;direction:rtl;color:#1a1a1a;line-height:1.7;font-size:13px;margin:0}'+
+  '.hd{display:flex;justify-content:space-between;align-items:center;border-bottom:2.5px solid #1a1a1a;padding-bottom:8px;margin-bottom:14px}'+
+  '.hd h1{font-size:19px;margin:0}.hd .m{font-size:11px;color:#666;text-align:left}'+
+  'h2{font-size:14.5px;background:#f2f2f2;padding:6px 10px;border-radius:6px;margin:16px 0 8px}'+
+  'table{width:100%;border-collapse:collapse;margin:6px 0}'+
+  'th,td{border:1px solid #ccc;padding:6px 8px;font-size:12px;text-align:right}'+
+  'th{background:#f7f7f7;font-weight:800}'+
+  '.kv{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}'+
+  '.kb{border:1px solid #ddd;border-radius:8px;padding:8px;text-align:center}'+
+  '.kb b{display:block;font-size:19px}'+
+  '.kb span{font-size:10px;color:#666}'+
+  '.warn{background:#fff3f3;border:1px solid #f0b5b5;border-radius:7px;padding:8px 11px;margin:6px 0}'+
+  '.ok{background:#f0faf0;border:1px solid #b5e0b5;border-radius:7px;padding:8px 11px;margin:6px 0}'+
+  '.sig{margin-top:26px;display:flex;justify-content:space-between;font-size:12px}'+
+  '.sig div{border-top:1px solid #999;padding-top:5px;width:30%;text-align:center}'+
+  '.ft{margin-top:18px;font-size:10px;color:#999;text-align:center}'+
+  'img.ph{width:110px;height:110px;object-fit:cover;border-radius:7px;border:1px solid #ccc;margin:2px}';
+  var doc='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>'+title+'</title><style>'+css+'</style></head><body>'+body+
+  '<div class="ft">اتولّد من نظام أعطال المزارع — '+fmtDT(now())+'</div></body></html>';
+  var fr=document.createElement('iframe');
+  fr.style.cssText='position:fixed;left:-9999px;width:1px;height:1px';
+  document.body.appendChild(fr);
+  fr.contentDocument.open(); fr.contentDocument.write(doc); fr.contentDocument.close();
+  setTimeout(function(){
+    try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){ toast('❌ الطباعة فشلت'); }
+    setTimeout(function(){ try{document.body.removeChild(fr)}catch(e){} },4000);
+  },350);
+}
+function reportPdfBody(r){
+  var b='<div class="hd"><h1>🛠️ تقرير إقفال بلاغ #'+r.num+'</h1><div class="m">'+fmtDT(now())+'</div></div>';
+  b+='<h2>البيانات</h2><table>';
+  b+='<tr><th>الموقع</th><td>'+esc(r.farmName)+' — وحدة '+esc(r.house)+'</td><th>الخطورة</th><td>'+sevPlain(r.severity)+'</td></tr>';
+  b+='<tr><th>العطل</th><td>'+esc(r.category)+' › '+esc(r.fault)+'</td><th>الحالة</th><td>'+STATUS[r.status]+'</td></tr>';
+  if(r.desc)b+='<tr><th>الوصف</th><td colspan="3">'+esc(r.desc)+'</td></tr>';
+  b+='</table>';
+  b+='<h2>الجدول الزمني</h2><table><tr><th>المرحلة</th><th>مين</th><th>إمتى</th><th>المدة</th></tr>';
+  b+='<tr><td>الإبلاغ</td><td>'+esc(r.reporterName)+'</td><td>'+fmtDT(r.ts)+'</td><td>—</td></tr>';
+  if(r.startTs)b+='<tr><td>الاستلام</td><td>'+esc(r.startedBy)+'</td><td>'+fmtDT(r.startTs)+'</td><td>'+mmm(respMins(r))+'</td></tr>';
+  if(r.fixTs)b+='<tr><td>الإصلاح</td><td>'+esc(r.fixedBy)+'</td><td>'+fmtDT(r.fixTs)+'</td><td>'+mmm(fixMins(r))+'</td></tr>';
+  if(r.confTs)b+='<tr><td>التأكيد</td><td>'+esc(r.reporterName)+'</td><td>'+fmtDT(r.confTs)+'</td><td>—</td></tr>';
+  b+='</table>';
+  var late=(respLate(r)||fixLate(r));
+  b+=late?'<div class="warn">⚠️ البلاغ خرج عن زمن الاستجابة المستهدف (SLA)'+(r.waitTotal?' — منها '+mmm(r.waitTotal/60000)+' انتظار قطع (مش محسوبة على الفني)':'')+'</div>'
+        :'<div class="ok">✅ اتحل داخل زمن الاستجابة المستهدف</div>';
+  if(r.fixDesc){b+='<h2>اللي اتعمل</h2><div>'+esc(r.fixDesc)+'</div>';}
+  if(r.parts&&r.parts.length){
+    b+='<h2>قطع الغيار</h2><table><tr><th>القطعة</th><th>العدد</th></tr>';
+    r.parts.forEach(function(p){b+='<tr><td>'+esc(p.name)+'</td><td>'+p.qty+'</td></tr>'});
+    b+='</table>';
+  }
+  if(r.rootCause){b+='<h2>السبب الجذري</h2><div class="warn"><b>'+esc(r.rootCause)+'</b>'+(r.rootNote?'<br>'+esc(r.rootNote):'')+'</div>';}
+  var dc=downtimeCost(r);
+  if(dc)b+='<div class="warn">💸 تكلفة التعطّل التقديرية: <b>'+dc.toLocaleString('en-US')+' ج.م</b></div>';
+  if(r.photos&&(r.photos.before.length||r.photos.after.length)){
+    b+='<h2>الصور</h2>';
+    if(r.photos.before.length){b+='<div><b>قبل:</b><br>'; r.photos.before.forEach(function(p){b+='<img class="ph" src="'+p+'">'}); b+='</div>';}
+    if(r.photos.after.length){b+='<div><b>بعد:</b><br>'; r.photos.after.forEach(function(p){b+='<img class="ph" src="'+p+'">'}); b+='</div>';}
+  }
+  b+='<div class="sig"><div>الفني</div><div>مدير الصيانة</div><div>مدير الموقع</div></div>';
+  return b;
+}
+function printReport(id){
+  var r=findRep(id); if(!r)return;
+  printHtml('بلاغ #'+r.num, reportPdfBody(r));
+}
+function dashPdfBody(){
+  var o=dashStats(), R=dashRange(), hs=healthScore(o);
+  var f=DASH.farmId?siteById(DASH.farmId):null;
+  var b='<div class="hd"><h1>📊 تقرير الصيانة — '+PERIODS[DASH.p].n+'</h1><div class="m">'+
+    (DASH.p==='all'?'كل البيانات':fmtD(R.from)+' ← '+fmtD(R.to))+'<br>'+(f?f.name:'كل المواقع')+'</div></div>';
+  b+='<h2>الوضع العام: '+hs.gic+' '+hs.grade+' ('+hs.score+'/100)</h2><table><tr><th>العامل</th><th>الدرجة</th><th>ملاحظة</th></tr>';
+  hs.parts.forEach(function(p){b+='<tr><td>'+p.k+'</td><td>'+Math.round(p.v)+'/'+p.max+'</td><td>'+p.note+'</td></tr>'});
+  b+='</table>';
+  b+='<h2>الملخص</h2><div class="kv">';
+  b+='<div class="kb"><b>'+o.n+'</b><span>بلاغ</span></div>';
+  b+='<div class="kb"><b>'+o.open+'</b><span>مفتوح</span></div>';
+  b+='<div class="kb"><b>'+o.crit+'</b><span>حرج مفتوح</span></div>';
+  b+='<div class="kb"><b>'+o.avgH+' س</b><span>متوسط الحل</span></div>';
+  b+='<div class="kb"><b>'+o.comply+'٪</b><span>التزام SLA</span></div>';
+  b+='<div class="kb"><b>'+(o.ftf.tot?Math.round(o.ftf.ok/o.ftf.tot*100):0)+'٪</b><span>حل من أول مرة</span></div>';
+  b+='</div>';
+  if(o.cost>0)b+='<div class="warn">💸 تكلفة التعطّل التقديرية: <b>'+o.cost.toLocaleString('en-US')+' ج.م</b></div>';
+  var wf=topList(o.byFarm,5);
+  if(wf.length){b+='<h2>المواقع</h2><table><tr><th>الموقع</th><th>بلاغات</th><th>ساعات تعطّل</th></tr>';
+    wf.forEach(function(x){b+='<tr><td>'+esc(x[0])+'</td><td>'+x[1]+'</td><td>'+(o.downH[x[0]]?Math.round(o.downH[x[0]]*10)/10:'—')+'</td></tr>'});
+    b+='</table>';}
+  var wc=topList(o.byCat,6);
+  if(wc.length){b+='<h2>الأعطال</h2><table><tr><th>النوع</th><th>العدد</th></tr>';
+    wc.forEach(function(x){b+='<tr><td>'+esc(x[0])+'</td><td>'+x[1]+'</td></tr>'}); b+='</table>';}
+  if(o.repSame.length){b+='<h2>تكرار في نفس الوحدة</h2><table><tr><th>العطل</th><th>المكان</th><th>مرات</th></tr>';
+    o.repSame.slice(0,6).forEach(function(x){b+='<tr><td>'+esc(x.fault)+'</td><td>'+esc(x.farm)+' — '+esc(x.house)+'</td><td>'+x.n+'</td></tr>'}); b+='</table>';}
+  if(o.repCross.length){b+='<h2>نفس العطل في مواقع مختلفة (نظامية)</h2><table><tr><th>العطل</th><th>المواقع</th><th>مرات</th></tr>';
+    o.repCross.slice(0,5).forEach(function(x){b+='<tr><td>'+esc(x.fault)+'</td><td>'+esc(x.farms.join(' · '))+'</td><td>'+x.n+'</td></tr>'}); b+='</table>';}
+  if(o.repMgr.length){b+='<h2>نمط مرتبط بمدير</h2><table><tr><th>المدير</th><th>العطل</th><th>المواقع</th><th>مرات</th></tr>';
+    o.repMgr.slice(0,5).forEach(function(x){b+='<tr><td>'+esc(x.mgr)+'</td><td>'+esc(x.fault)+'</td><td>'+x.nf+'</td><td>'+x.n+'</td></tr>'}); b+='</table>';}
+  var pmDone=[],pmMiss=[];
+  (S.pm||[]).forEach(function(t){
+    if(t.lastDone&&t.lastDone>=R.from&&t.lastDone<=R.to)pmDone.push(t);
+    if(pmState(t)==='over')pmMiss.push(t);
+  });
+  b+='<h2>الصيانة الوقائية — اتعمل إيه؟</h2>';
+  if(pmDone.length){b+='<div class="ok"><b>✅ اتعمل ('+pmDone.length+'):</b> '+pmDone.map(function(t){return esc(t.name)}).join(' · ')+'</div>';}
+  if(pmMiss.length){b+='<div class="warn"><b>❌ متأخر ومااتعملش ('+pmMiss.length+'):</b><br>'+pmMiss.map(function(t){return '• '+esc(t.name)+(t.farmName?' — '+esc(t.farmName):'')+' (متأخرة '+Math.abs(pmDaysLeft(t))+' يوم)'}).join('<br>')+'</div>';}
+  if(!pmDone.length&&!pmMiss.length)b+='<div>مفيش نشاط وقائية في الفترة دي.</div>';
+  b+='<div class="sig"><div>مدير الصيانة</div><div>مدير الإنتاج</div><div>الإدارة</div></div>';
+  return b;
+}
+function printDash(){ printHtml('تقرير الصيانة', dashPdfBody()); }
+
 /* ================= تقرير نصّي للمشاركة =================
    صاحب الشركة عايز رقم يبعته في اجتماع — مش يفتح البرنامج ويقرا. */
 function dashText(){
@@ -2091,19 +2632,47 @@ function tgReport(){
   tgSend(dashText(),function(ok){ toast(ok?'📨 اتبعت للجروب':'❌ فشل'); });
 }
 /* ================= التقرير الأسبوعي التلقائي ================= */
+function weeklyText(){
+  var sv={p:DASH.p,farmId:DASH.farmId};
+  DASH.p='w'; DASH.farmId='';
+  var o=dashStats(), R=dashRange(), hs=healthScore(o);
+  var t='🗓️ التقرير الأسبوعي\n'+fmtD(R.from)+' ← '+fmtD(R.to)+'\n';
+  t+='━━━━━━━━━━━━━━\n\n';
+  t+=hs.gic+' الوضع العام: '+hs.grade+' ('+hs.score+'/100)\n\n';
+  t+=dashText().split('━━━━━━━━━━━━━━\n\n')[1]||'';
+  /* اتعمل / مااتعملش */
+  var done=[],miss=[];
+  (S.pm||[]).forEach(function(x){
+    if(x.lastDone&&x.lastDone>=R.from&&x.lastDone<=R.to)done.push(x);
+    if(pmState(x)==='over')miss.push(x);
+  });
+  t+='\n🛡️ الوقائية الأسبوع ده\n';
+  if(done.length){t+='✅ اتعمل ('+done.length+'):\n'; done.slice(0,10).forEach(function(x){t+='  • '+x.name+'\n'});}
+  else t+='✅ اتعمل: ولا مهمة!\n';
+  if(miss.length){t+='❌ متأخر ومااتعملش ('+miss.length+'):\n'; miss.slice(0,10).forEach(function(x){t+='  • '+x.name+(x.farmName?' — '+x.farmName:'')+' (متأخرة '+Math.abs(pmDaysLeft(x))+' يوم)\n'});}
+  else t+='❌ متأخر: مفيش 👌\n';
+  DASH.p=sv.p; DASH.farmId=sv.farmId;
+  return t;
+}
 function weeklyDigest(){
-  if(!tgReady()||!S.weekly)return;
+  if(!S.weekly)return;
   var d=new Date();
-  if(d.getDay()!==(S.weeklyDay==null?6:S.weeklyDay))return;   /* السبت افتراضي */
+  if(d.getDay()!==(S.weeklyDay==null?6:S.weeklyDay))return;
   var k='wk_'+d.getFullYear()+'_'+Math.floor((d-new Date(d.getFullYear(),0,1))/6048e5);
   var last=null; try{last=localStorage.getItem('faultsys_wk')}catch(e){}
   if(last===k)return;
-  var sv={p:DASH.p,farmId:DASH.farmId};
-  DASH.p='w'; DASH.farmId='';
-  var t='🗓️ التقرير الأسبوعي التلقائي\n\n'+dashText();
-  DASH.p=sv.p; DASH.farmId=sv.farmId;
-  tgSend(t,function(ok){ if(ok){try{localStorage.setItem('faultsys_wk',k)}catch(e){}} });
+  var t=weeklyText();
+  var sentAny=false;
+  if(tgReady()){ tgSend(t,function(ok){}); sentAny=true; }
+  if(S.mailTo)sendMail(S.mailTo,'التقرير الأسبوعي — نظام الأعطال',t);
+  if(sentAny||S.mailTo){ try{localStorage.setItem('faultsys_wk',k)}catch(e){} }
 }
+/* الإيميل: mailto بيفتح تطبيق البريد بالنص جاهز — من غير سيرفر دي أنضف طريقة */
+function sendMail(to,subj,bodyText){
+  var url='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(bodyText);
+  try{ window.open(url,'_blank'); }catch(e){}
+}
+
 
 /* ================= الإعدادات ================= */
 function renderSettings(){
@@ -2184,14 +2753,22 @@ function renderSettings(){
   h+='<button class="btn btn-ghost" onclick="saveEsc()">حفظ التصعيد</button>';
   h+='<div class="hint">⚠️ <b>مهم تعرفه:</b> ده تطبيق ويب — التصعيد بيتفحص لما البرنامج يكون <b>مفتوح على أي جهاز</b> (بيتشيّك كل دقيقة). عشان تصعيد ٢٤/٧ مضمون لازم سيرفر.<br><b>الحل العملي:</b> سيب البرنامج مفتوح على تابلت/موبايل في مكتب الصيانة، أو افتحه أول ما تصحى. التنبيه الأساسي بيوصل تليجرام فورًا في كل الأحوال.</div></div>';
 
+  /* عند الإقفال */
+  h+='<div class="card"><h3>📁 عند إقفال أي بلاغ</h3>';
+  h+='<label class="fc"><input type="checkbox" id="cnOn" '+(S.closeNotify!==false?'checked':'')+'> <b>ابعت ملخص نصي للجروب</b></label>';
+  h+='<label class="fc"><input type="checkbox" id="cpOn" '+(S.closePdf!==false?'checked':'')+'> <b>📄 ابعت تقرير PDF للجروب تلقائي</b></label>';
+  h+='<label class="fc"><input type="checkbox" id="cmOn" '+(S.mailOnClose?'checked':'')+'> <b>✉️ افتح إيميل جاهز بالتقرير</b></label>';
+  h+='<button class="btn btn-ghost" onclick="saveClose()">حفظ</button>';
+  h+='<div class="hint">الـ PDF بيتبعت <b>لوحده تمامًا</b> أول ما المبلّغ يأكّد — ملف حقيقي قابل للطباعة والتحويل واتساب.<br>الإيميل بيفتح تطبيق البريد بالنص جاهز (إرفاق الـ PDF بالإيميل تلقائي محتاج سيرفر — بس تقدر تبعته من زرار «📤 PDF» ← بريد).</div></div>';
   /* التقرير الأسبوعي */
   h+='<div class="card"><h3>🗓️ التقرير الأسبوعي التلقائي</h3>';
   h+='<label class="fc"><input type="checkbox" id="wkOn" '+(S.weekly?'checked':'')+'> <b>ابعت تقرير أسبوعي على الجروب</b></label>';
+  h+='<label>إيميل يستلم نسخة (اختياري)</label><input id="wkMail" dir="ltr" inputmode="email" placeholder="name@example.com" value="'+esc(S.mailTo||'')+'">';
   h+='<label>يوم الإرسال</label><select id="wkDay">';
   var _dn=["الأحد","الاتنين","التلات","الأربع","الخميس","الجمعة","السبت"];
   for(var _i=0;_i<7;_i++)h+='<option value="'+_i+'" '+((S.weeklyDay==null?6:S.weeklyDay)===_i?'selected':'')+'>'+_dn[_i]+'</option>';
   h+='</select><button class="btn btn-ghost" onclick="saveWeekly()">حفظ</button>';
-  h+='<div class="hint">ملخّص الأسبوع بيتبعت تلقائي: البلاغات، الالتزام، أكتر المواقع مشاكل، والأنماط المتكررة.<br>⚠️ بيتبعت لما البرنامج يتفتح في اليوم ده على أي جهاز.</div></div>';
+  h+='<div class="hint">التقرير بيشمل: الوضع العام، البلاغات، <b>الوقائية اللي اتعملت واللي اتأخرت</b>، والأنماط.<br>بيتبعت تليجرام تلقائي، ولو حطيت إيميل بيفتح البريد بالنص جاهز.<br>⚠️ بيتبعت لما البرنامج يتفتح في اليوم ده على أي جهاز.</div></div>';
   /* الدورة */
   h+='<div class="card"><h3>🔄 طول الدورة</h3>';
   h+='<label>عدد أيام الدورة</label><input type="number" id="cycD" value="'+(S.cycleDays||42)+'" min="1">';
@@ -2302,9 +2879,16 @@ function saveEsc(){
   }
   save(); toast("✅ التصعيد اتحفظ"); render();
 }
+function saveClose(){
+  S.closeNotify=document.getElementById('cnOn').checked;
+  S.closePdf=document.getElementById('cpOn').checked;
+  S.mailOnClose=document.getElementById('cmOn').checked;
+  save(); toast("✅ اتحفظ"); render();
+}
 function saveWeekly(){
   S.weekly=document.getElementById('wkOn').checked;
   S.weeklyDay=parseInt(document.getElementById('wkDay').value,10);
+  S.mailTo=(document.getElementById('wkMail').value||'').trim();
   save(); toast("✅ اتحفظ"); render();
 }
 function saveCycle(){
