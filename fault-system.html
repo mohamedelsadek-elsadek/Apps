@@ -298,7 +298,7 @@ input[type=checkbox]:active{transform:scale(.9)}
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v13</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v15</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -370,6 +370,7 @@ function defaultState(){
     /* التصعيد التلقائي — بيروح لفوق للمدير */
     esc:{on:true, sevs:["critical","high"], steps:[{min:15,role:"maint"},{min:30,role:"prod"},{min:45,role:"owner"}]},
     /* التذكيرات — بتنبّه المسؤول في المرحلة نفسها، على كل الدرجات */
+    ej:{service:'',template:'',pub:''},
     remind:{on:true, every:120, max:3, stages:{
       new:  {on:true, after:20},
       prog: {on:true, after:120},
@@ -421,6 +422,11 @@ function load(){
   if(!S.sla)S.sla=d.sla;
   if(!S.esc)S.esc=d.esc;
   if(!S.remind)S.remind=d.remind;
+  if(!S.ej)S.ej={service:'',template:'',pub:''};
+  if(!S.emails)S.emails=[];
+  /* هجرة: الإيميل القديم المفرد يدخل الدفتر */
+  if(S.mailTo&&!S.emails.some(function(x){return x.email===S.mailTo}))
+    S.emails.push({id:uid(),name:S.mailTo.split('@')[0],email:S.mailTo});
   if(!S.remind.stages)S.remind.stages=d.remind.stages;
   if(!S.pm)S.pm=[];
   if(!S.cost)S.cost=d.cost;
@@ -1422,6 +1428,7 @@ function repCard(r){
     h+='<button class="btn btn-ghost btn-sm" onclick="sharePdf(\''+r.id+'\')">📤 PDF</button>';
     h+='<button class="btn btn-ghost btn-sm" onclick="printReport(\''+r.id+'\')">🖨️ طباعة</button>';
     if(tgReady())h+='<button class="btn btn-ghost btn-sm" onclick="toast(\'⏳ ببعت…\');autoPdfToTg(\''+r.id+'\',function(ok){toast(ok?\'📄 اتبعت للجروب\':\'❌ فشل\')})">📨 PDF للجروب</button>';
+    h+='<button class="btn btn-ghost btn-sm" onclick="mailReport(\''+r.id+'\')">✉️ بالإيميل</button>';
   }
   if(can('del')) h+='<button class="btn btn-red btn-sm" onclick="delReport(\''+r.id+'\')">حذف</button>';
   h+='</div></div>';
@@ -1533,15 +1540,18 @@ function confirmFix(id){
       });
     },900);
   }
-  /* إيميل (لو متظبط): بيفتح البريد بنص التقرير */
+  /* الإيميل: أوتوماتيك لو EmailJS متظبط، وإلا بيفتح البريد */
   if(S.mailOnClose&&S.mailTo){
     setTimeout(function(){
       var r2=findRep(id); if(!r2)return;
-      var t='تقرير إقفال بلاغ #'+r2.num+'\n'+r2.farmName+' — وحدة '+r2.house+'\n'+r2.fault+'\n'+
-        'استلام: '+mmm(respMins(r2))+' · إصلاح: '+mmm(fixMins(r2))+'\n'+
+      var t='تقرير إقفال بلاغ #'+r2.num+'\n'+r2.farmName+' — وحدة '+r2.house+'\n'+r2.fault+' · '+sevPlain(r2.severity)+'\n\n'+
+        'استلام: '+mmm(respMins(r2))+' · إصلاح: '+mmm(fixMins(r2))+((respLate(r2)||fixLate(r2))?' (خارج الوقت)':' (في الوقت)')+'\n'+
+        (r2.fixedBy?('الفني: '+r2.fixedBy+'\n'):'')+
         (r2.fixDesc?('اللي اتعمل: '+r2.fixDesc+'\n'):'')+
+        (r2.parts&&r2.parts.length?('القطع: '+r2.parts.map(function(p){return p.name+'×'+p.qty}).join('، ')+'\n'):'')+
         (r2.rootCause?('السبب الجذري: '+r2.rootCause+'\n'):'');
-      sendMail(S.mailTo,'إقفال بلاغ #'+r2.num+' — '+r2.farmName,t);
+      sendMail(S.mailTo,'إقفال بلاغ #'+r2.num+' — '+r2.farmName,t,true);
+      if(emailReady())toast('✉️ الإيميل اتبعت تلقائي');
     },2500);
   }
 }
@@ -2086,7 +2096,8 @@ function renderDash(){
   h+='<div class="drange">'+(DASH.p==='all'?'كل البيانات':fmtD(R.from)+' ← '+fmtD(R.to))+' · <b>'+o.n+'</b> بلاغ</div>';
   if(o.n)h+='<div class="row2" style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="shareDash()">📤 مشاركة نصية</button>'+
      '<button class="btn btn-blue btn-sm" onclick="printDash()">🖨️ PDF للطباعة</button></div>'+
-     '<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:7px" onclick="tgReport()">📨 إرسال للجروب</button>';
+     '<div class="row2" style="margin-top:7px"><button class="btn btn-ghost btn-sm" onclick="tgReport()">📨 للجروب</button>'+
+     '<button class="btn btn-ghost btn-sm" onclick="mailDash()">✉️ بالإيميل</button></div>';
   h+='</div>';
 
   if(!o.n) return h+'<div class="empty"><div class="big">📊</div>مفيش بلاغات في الفترة دي<br>غيّر الفترة أو الموقع</div>';
@@ -2449,6 +2460,16 @@ function autoPdfToTg(id,cb){
   }catch(e){cb&&cb(false)}
 }
 /* مشاركة PDF (واتساب/إيميل من نافذة المشاركة) */
+function mailReport(id){
+  var r=findRep(id); if(!r)return;
+  var t='تقرير إقفال بلاغ #'+r.num+'\n'+r.farmName+' — وحدة '+r.house+'\n'+r.fault+' · '+sevPlain(r.severity)+'\n\n'+
+    'استلام: '+mmm(respMins(r))+' · إصلاح: '+mmm(fixMins(r))+((respLate(r)||fixLate(r))?' (خارج الوقت)':' (في الوقت)')+'\n'+
+    (r.fixedBy?('الفني: '+r.fixedBy+'\n'):'')+
+    (r.fixDesc?('اللي اتعمل: '+r.fixDesc+'\n'):'')+
+    (r.parts&&r.parts.length?('القطع: '+r.parts.map(function(p){return p.name+'×'+p.qty}).join('، ')+'\n'):'')+
+    (r.rootCause?('السبب الجذري: '+r.rootCause+'\n'):'');
+  openMailPicker('إقفال بلاغ #'+r.num+' — '+r.farmName, t);
+}
 function sharePdf(id){
   var r=findRep(id); if(!r)return;
   toast('⏳ بجهّز الـ PDF…');
@@ -2627,6 +2648,9 @@ function shareDash(){
     navigator.clipboard.writeText(t).then(function(){toast('📋 التقرير اتنسخ')},function(){tgReport()});
   } else tgReport();
 }
+function mailDash(){
+  openMailPicker('تقرير الصيانة — '+PERIODS[DASH.p].n, dashText());
+}
 function tgReport(){
   if(!tgReady()){toast('ظبّط التليجرام الأول');return}
   tgSend(dashText(),function(ok){ toast(ok?'📨 اتبعت للجروب':'❌ فشل'); });
@@ -2668,9 +2692,115 @@ function weeklyDigest(){
   if(sentAny||S.mailTo){ try{localStorage.setItem('faultsys_wk',k)}catch(e){} }
 }
 /* الإيميل: mailto بيفتح تطبيق البريد بالنص جاهز — من غير سيرفر دي أنضف طريقة */
-function sendMail(to,subj,bodyText){
+
+/* ================= دفتر الإيميلات =================
+   سجّل الإيميلات مرة واحدة، وبعدين أي تقرير → اختار من القايمة → إرسال.
+   بيدعم اختيار أكتر من إيميل مع بعض. */
+function emailBook(){ if(!S.emails)S.emails=[]; return S.emails; }
+function addEmail(){
+  var n=(document.getElementById('ebName').value||'').trim();
+  var e=(document.getElementById('ebMail').value||'').trim();
+  if(!e){toast('اكتب الإيميل');return}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){toast('❌ الإيميل مش صحيح');return}
+  var b=emailBook();
+  for(var i=0;i<b.length;i++)if(b[i].email.toLowerCase()===e.toLowerCase()){toast('الإيميل ده موجود بالفعل');return}
+  b.push({id:uid(),name:n||e.split('@')[0],email:e});
+  save(); render(); toast('✅ اتضاف');
+}
+function delEmail(id){
+  if(!confirm('حذف الإيميل ده من القايمة؟'))return;
+  S.emails=emailBook().filter(function(x){return x.id!==id});
+  save(); render(); toast('اتحذف');
+}
+/* نافذة اختيار المستلمين — لأي تقرير */
+var _mailPayload=null;
+function openMailPicker(subj,bodyText){
+  var b=emailBook();
+  if(!b.length){
+    toast('📇 سجّل الإيميلات الأول من الإعدادات');
+    setTimeout(function(){go('settings')},800);
+    return;
+  }
+  _mailPayload={subj:subj,body:bodyText};
+  var h='<h3 style="margin-bottom:8px">✉️ إرسال التقرير بالإيميل</h3>';
+  h+='<div class="hint">اختار مستلم أو أكتر:</div>';
+  for(var i=0;i<b.length;i++){
+    h+='<label class="fc"><input type="checkbox" class="mpick" value="'+esc(b[i].email)+'" '+(i===0?'checked':'')+'> '+
+       '<span><b>'+esc(b[i].name)+'</b><br><small dir="ltr" style="color:var(--muted)">'+esc(b[i].email)+'</small></span></label>';
+  }
+  h+='<div class="row2" style="margin-top:10px"><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>'+
+     '<button class="btn btn-green" onclick="doSendMailPicked()">📨 إرسال</button></div>';
+  if(!emailReady())h+='<div class="hint">⚠️ EmailJS مش متظبط — هيفتح تطبيق البريد وإنت تدوس إرسال.</div>';
+  openModal(h);
+}
+function doSendMailPicked(){
+  if(!_mailPayload)return;
+  var cb=document.querySelectorAll('.mpick'), to=[];
+  for(var i=0;i<cb.length;i++)if(cb[i].checked)to.push(cb[i].value);
+  if(!to.length){toast('اختار إيميل واحد على الأقل');return}
+  closeModal();
+  if(emailReady()){
+    var sent=0, fail=0, tot=to.length;
+    toast('⏳ ببعت لـ '+tot+'…');
+    to.forEach(function(addr){
+      sendMailAuto(addr,_mailPayload.subj,_mailPayload.body,function(ok){
+        ok?sent++:fail++;
+        if(sent+fail===tot)toast(fail?('✉️ اتبعت '+sent+' · ❌ فشل '+fail):('✅ اتبعت لـ '+sent+(sent>1?' إيميلات':' إيميل')));
+      });
+    });
+  } else {
+    /* mailto بيقبل أكتر من مستلم مفصولين بفاصلة */
+    openMailApp(to.join(','),_mailPayload.subj,_mailPayload.body);
+  }
+  _mailPayload=null;
+}
+
+/* ================= الإيميل =================
+   طريقتين:
+   ١) EmailJS (أوتوماتيك حقيقي): بيتبعت في الخلفية من غير أي تدخل — زي التليجرام.
+      مجاني ٢٠٠ رسالة/شهر. محتاج تسجيل مرة واحدة (الخطوات في الإعدادات).
+   ٢) mailto (احتياطي): بيفتح تطبيق البريد بالنص جاهز وإنت تدوس إرسال. */
+function emailReady(){ return !!(S.ej&&S.ej.service&&S.ej.template&&S.ej.pub); }
+function sendMailAuto(to,subj,bodyText,cb){
+  if(!emailReady()){cb&&cb(false,'مش متظبط');return}
+  fetch('https://api.emailjs.com/api/v1.0/email/send',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      service_id:S.ej.service,
+      template_id:S.ej.template,
+      user_id:S.ej.pub,
+      template_params:{to_email:to,subject:subj,message:bodyText}
+    })
+  }).then(function(r){
+    if(r.ok){cb&&cb(true);return}
+    return r.text().then(function(t){cb&&cb(false,t)});
+  }).catch(function(){cb&&cb(false,'شبكة')});
+}
+/* بيحاول الأوتوماتيك الأول، ولو مش متظبط بيفتح البريد */
+function sendMail(to,subj,bodyText,silent){
+  if(emailReady()){
+    sendMailAuto(to,subj,bodyText,function(ok,err){
+      if(ok){ if(!silent)toast('✉️ الإيميل اتبعت تلقائي'); }
+      else { if(!silent)toast('❌ الإيميل فشل — هفتحلك البريد'); openMailApp(to,subj,bodyText); }
+    });
+  } else openMailApp(to,subj,bodyText);
+}
+function openMailApp(to,subj,bodyText){
   var url='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(bodyText);
   try{ window.open(url,'_blank'); }catch(e){}
+}
+function testEmail(){
+  S.ej={service:(document.getElementById('ejS').value||'').trim(),
+        template:(document.getElementById('ejT').value||'').trim(),
+        pub:(document.getElementById('ejP').value||'').trim()};
+  S.mailTo=(document.getElementById('ejTo').value||'').trim();
+  save();
+  if(!S.mailTo){toast('اكتب الإيميل المستلم الأول');return}
+  if(!emailReady()){toast('املا التلات خانات بتوع EmailJS');return}
+  toast('⏳ ببعت إيميل تجريبي…');
+  sendMailAuto(S.mailTo,'اختبار — نظام أعطال المزارع','لو الرسالة دي وصلتك، الإيميل الأوتوماتيك شغّال ✅',function(ok,err){
+    toast(ok?'✅ وصل! الإيميل الأوتوماتيك شغّال':'❌ فشل: '+String(err||'').slice(0,80));
+  });
 }
 
 
@@ -2753,13 +2883,39 @@ function renderSettings(){
   h+='<button class="btn btn-ghost" onclick="saveEsc()">حفظ التصعيد</button>';
   h+='<div class="hint">⚠️ <b>مهم تعرفه:</b> ده تطبيق ويب — التصعيد بيتفحص لما البرنامج يكون <b>مفتوح على أي جهاز</b> (بيتشيّك كل دقيقة). عشان تصعيد ٢٤/٧ مضمون لازم سيرفر.<br><b>الحل العملي:</b> سيب البرنامج مفتوح على تابلت/موبايل في مكتب الصيانة، أو افتحه أول ما تصحى. التنبيه الأساسي بيوصل تليجرام فورًا في كل الأحوال.</div></div>';
 
+  /* دفتر الإيميلات */
+  var _eb=emailBook();
+  h+='<div class="card"><h3>📇 دفتر الإيميلات ('+_eb.length+')</h3>';
+  for(var _i=0;_i<_eb.length;_i++){
+    h+='<div class="urow"><div class="ui"><b>'+esc(_eb[_i].name)+'</b><div class="meta" dir="ltr" style="text-align:left">'+esc(_eb[_i].email)+'</div></div>'+
+       '<div class="ub"><span class="del" onclick="delEmail(\''+_eb[_i].id+'\')">✕</span></div></div>';
+  }
+  h+='<div class="row2"><div><label>الاسم</label><input id="ebName" placeholder="المحاسب / الحاج اشرف"></div>'+
+     '<div><label>الإيميل</label><input id="ebMail" dir="ltr" inputmode="email" placeholder="name@example.com"></div></div>';
+  h+='<button class="btn btn-ghost" onclick="addEmail()">➕ إضافة إيميل</button>';
+  h+='<div class="hint">سجّلهم مرة واحدة — وبعدين أي تقرير: زرار ✉️ ← اختار ← إرسال.</div></div>';
+  /* الإيميل */
+  var _ejOk=emailReady();
+  h+='<div class="card"><h3>✉️ الإيميل الأوتوماتيك '+(_ejOk?'<span class="ok-dot" style="background:var(--green)"></span>':'<span class="ok-dot" style="background:var(--red)"></span>')+'</h3>';
+  h+='<div class="hint">'+(_ejOk?'✅ متظبط — التقارير بتتبعت في الخلفية من غير أي تدخل.':'من غير الضبط ده، الإيميل بيفتح تطبيق البريد وإنت تدوس إرسال.<br><b>عشان يبقى أوتوماتيك ١٠٠٪ زي التليجرام:</b>')+'</div>';
+  h+='<label>الإيميل المستلم</label><input id="ejTo" dir="ltr" inputmode="email" placeholder="name@example.com" value="'+esc(S.mailTo||'')+'">';
+  h+='<label>Service ID</label><input id="ejS" dir="ltr" placeholder="service_xxxxxxx" value="'+esc((S.ej||{}).service||'')+'">';
+  h+='<label>Template ID</label><input id="ejT" dir="ltr" placeholder="template_xxxxxxx" value="'+esc((S.ej||{}).template||'')+'">';
+  h+='<label>Public Key</label><input id="ejP" dir="ltr" placeholder="XXXXXXXXXXXXXXX" value="'+esc((S.ej||{}).pub||'')+'">';
+  h+='<div class="row2"><button class="btn btn-ghost" onclick="testEmail()">حفظ + 🧪 اختبار</button></div>';
+  h+='<div class="hint"><b>خطوات التفعيل (٥ دقايق، مرة واحدة):</b><br>'+
+     '1️⃣ سجّل مجانًا في <b>emailjs.com</b> (٢٠٠ رسالة/شهر ببلاش).<br>'+
+     '2️⃣ Email Services ← Add New Service ← اربط Gmail بتاعك — هيديك <b>Service ID</b>.<br>'+
+     '3️⃣ Email Templates ← Create New Template — في الـ To حط <span dir="ltr">{{to_email}}</span>، وفي الـ Subject حط <span dir="ltr">{{subject}}</span>، وفي المحتوى حط <span dir="ltr">{{message}}</span> — هيديك <b>Template ID</b>.<br>'+
+     '4️⃣ Account ← General — انسخ <b>Public Key</b>.<br>'+
+     '5️⃣ الصق التلاتة فوق ودوس اختبار.</div></div>';
   /* عند الإقفال */
   h+='<div class="card"><h3>📁 عند إقفال أي بلاغ</h3>';
   h+='<label class="fc"><input type="checkbox" id="cnOn" '+(S.closeNotify!==false?'checked':'')+'> <b>ابعت ملخص نصي للجروب</b></label>';
   h+='<label class="fc"><input type="checkbox" id="cpOn" '+(S.closePdf!==false?'checked':'')+'> <b>📄 ابعت تقرير PDF للجروب تلقائي</b></label>';
-  h+='<label class="fc"><input type="checkbox" id="cmOn" '+(S.mailOnClose?'checked':'')+'> <b>✉️ افتح إيميل جاهز بالتقرير</b></label>';
+  h+='<label class="fc"><input type="checkbox" id="cmOn" '+(S.mailOnClose?'checked':'')+'> <b>✉️ ابعت التقرير بالإيميل</b></label>';
   h+='<button class="btn btn-ghost" onclick="saveClose()">حفظ</button>';
-  h+='<div class="hint">الـ PDF بيتبعت <b>لوحده تمامًا</b> أول ما المبلّغ يأكّد — ملف حقيقي قابل للطباعة والتحويل واتساب.<br>الإيميل بيفتح تطبيق البريد بالنص جاهز (إرفاق الـ PDF بالإيميل تلقائي محتاج سيرفر — بس تقدر تبعته من زرار «📤 PDF» ← بريد).</div></div>';
+  h+='<div class="hint">الـ PDF بيتبعت للتليجرام <b>لوحده تمامًا</b>.<br>الإيميل: لو ظبّطت EmailJS فوق ← بيتبعت <b>أوتوماتيك في الخلفية</b>. لو لأ ← بيفتح البريد وإنت تدوس إرسال.</div></div>';
   /* التقرير الأسبوعي */
   h+='<div class="card"><h3>🗓️ التقرير الأسبوعي التلقائي</h3>';
   h+='<label class="fc"><input type="checkbox" id="wkOn" '+(S.weekly?'checked':'')+'> <b>ابعت تقرير أسبوعي على الجروب</b></label>';
