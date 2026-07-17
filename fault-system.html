@@ -239,7 +239,7 @@ input[type=checkbox]:active{transform:scale(.9)}
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v6</span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v7</span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -314,6 +314,35 @@ function defaultState(){
     partsLog:[]
   };
 }
+
+/* ================= حساب السوبر أدمن الثابت =================
+   ليه ID ثابت: عشان المزامنة ماتعملش نسخة تانية على كل جهاز.
+   وبتتنادى بعد أي سحب من السحابة — عشان السحابة القديمة ماتدهسش عليه. */
+var SUPER_ID='SUPER-ADMIN-1';
+function ensureSuper(){
+  if(!S.users)S.users=[];
+  var u=null;
+  for(var i=0;i<S.users.length;i++){ if(S.users[i].id===SUPER_ID){u=S.users[i];break} }
+  if(!u){
+    /* لو فيه حساب بنفس الاسم اتعمل يدوي، اعتمده بدل ما نكرّر */
+    for(var i=0;i<S.users.length;i++){
+      var n=String(S.users[i].name||'').toLowerCase().replace(/[^a-z]/g,'');
+      if(n==='mohamedelsadek'){ u=S.users[i]; u.id=SUPER_ID; break; }
+    }
+  }
+  if(!u){
+    u={id:SUPER_ID,name:'Mohamed Elsadek',role:'super',pin:'admin',phone:'',farmIds:[],perms:null};
+    S.users.unshift(u);
+  }
+  /* الحساب ده سوبر أدمن دايمًا — مايتغيّرش */
+  u.role='super';
+  if(!u.pin)u.pin='admin';
+  if(u.phone==null)u.phone='';
+  if(!u.farmIds)u.farmIds=[];
+  u.perms=null;
+  return u;
+}
+
 function load(){
   try{var r=localStorage.getItem(LS_KEY); S=r?JSON.parse(r):defaultState();}catch(e){S=defaultState();}
   if(!S.catalog)S.catalog=defaultCatalog();
@@ -336,26 +365,7 @@ function load(){
   for(var c in _dc){ if(!S.catalog[c]) S.catalog[c]=_dc[c].slice(); }
   /* المواقع: النوع الافتراضي مزرعة */
   for(var i=0;i<S.farms.length;i++){ if(!S.farms[i].type)S.farms[i].type='farm'; }
-  /* أول تشغيل بعد التحديث: د. محمد الصادق يبقى سوبر أدمن */
-  if(!S.superSet){
-    var target=null;
-    for(var i=0;i<S.users.length;i++){
-      var n=String(S.users[i].name||"").replace(/[أإآ]/g,'ا').replace(/\s+/g,'');
-      /* بيمسك "محمد الصادق" و "مخمد الصادق" (الغلطة المطبعية) */
-      if(/(محمد|مخمد)الصادق/.test(n)){ target=S.users[i]; break; }
-    }
-    if(!target){ for(var i=0;i<S.users.length;i++){ if(S.users[i].role==='owner'){target=S.users[i];break} } }
-    if(!target && S.users.length) target=S.users[0];
-    if(target){ target.role='super'; target.perms=null; }
-    S.superSet=1;
-  }
-  /* لازم يفضل سوبر أدمن واحد على الأقل */
-  if(S.users.length && !S.users.some(function(x){return x.role==='super'})) S.users[0].role='super';
-  /* باسورد السوبر أدمن = admin (مرة واحدة) */
-  if(!S.superPinSet){
-    for(var i=0;i<S.users.length;i++){ if(S.users[i].role==='super') S.users[i].pin='admin'; }
-    S.superPinSet=1;
-  }
+  ensureSuper();
   for(var i=0;i<S.reports.length;i++){
     var x=S.reports[i];
     if(!x.parts)x.parts=[];
@@ -643,6 +653,8 @@ function saveUserEdit(){
   var mayGrant=can('grant');
   var _old=_eu?userById(_eu):null;
   var role=mayGrant?document.getElementById('euRole').value:(_old?_old.role:'farm');
+  /* الحساب الأساسي سوبر أدمن دايمًا */
+  if(_eu===SUPER_ID&&role!=='super'){toast("🔒 الحساب الأساسي لازم يفضل سوبر أدمن");return}
   /* لازم يفضل سوبر أدمن واحد */
   if(_old&&_old.role==='super'&&role!=='super'){
     var supers=S.users.filter(function(x){return x.role==='super'}).length;
@@ -1510,7 +1522,7 @@ function renderSettings(){
     for(var k=0;k<_byRole[r].length;k++){
       var u=_byRole[r][k];
       var fn=farmNames(u);
-      h+='<div class="urow"><div class="ui"><b>'+(u.role==='super'?'👑 ':'')+esc(u.name)+'</b>';
+      h+='<div class="urow"><div class="ui"><b>'+(u.role==='super'?'👑 ':'')+esc(u.name)+(u.id===SUPER_ID?' <small style="color:var(--purple)">(الحساب الأساسي)</small>':'')+'</b>';
       h+='<div class="meta">'+(u.phone?'<span dir="ltr">'+esc(u.phone)+'</span>':'<span style="color:var(--amber)">⚠️ مفيش رقم</span>');
       if(u.role==='farm')h+=fn?(' · 📍 '+esc(fn)):' · <span style="color:var(--amber)">⚠️ مفيش موقع</span>';
       if(isCustom(u))h+=' · <span style="color:var(--purple)">🔑 مخصّصة</span>';
@@ -1519,8 +1531,8 @@ function renderSettings(){
       h+='<div class="ub">'+contactBtns(u,true);
       if(can('users'))h+='<button class="btn btn-ghost btn-sm" title="الرقم السري" onclick="openChangePin(\''+u.id+'\')">🔐</button>';
       h+='<button class="btn btn-ghost btn-sm" onclick="openUserEdit(\''+u.id+'\')">✏️</button>';
-      if(can('users'))h+='<span class="del" onclick="delUser(\''+u.id+'\')">✕</span></div></div>';
-      else h+='</div></div>';
+      if(can('users')&&u.id!==SUPER_ID)h+='<span class="del" onclick="delUser(\''+u.id+'\')">✕</span>';
+      h+='</div></div>';
     }
   }
   h+='</div><button class="btn btn-ghost" style="margin-top:9px" onclick="openUserEdit(null)">➕ إضافة مستخدم</button>';
@@ -1590,6 +1602,7 @@ function delUser(id){
   if(!can('users')){toast("مالكش صلاحية");return;}
   if(S.users.length<=1){toast("لازم يفضل مستخدم واحد على الأقل");return;}
   var _t=userById(id);
+  if(id===SUPER_ID){toast("🔒 حساب السوبر أدمن الأساسي مايتحذفش");return;}
   /* حماية السوبر أدمن */
   if(_t&&_t.role==='super'){
     if(!can('grant')){toast("🔒 السوبر أدمن مايتحذفش إلا من سوبر أدمن تاني");return;}
@@ -1684,8 +1697,21 @@ function applyCloud(d){
   S.curUserId=mine;
   if(!S.catalog)S.catalog=defaultCatalog();
   if(!S.fb)S.fb={url:DEFAULT_FB_URL};
+  /* مهم: السحابة ممكن تكون بيانات قديمة من غير سوبر أدمن — نتأكد بعد كل سحب */
+  var _hadSuper=(d.users||[]).some(function(x){return x.id===SUPER_ID});
+  ensureSuper();
+  for(var i=0;i<S.users.length;i++){
+    var uu=S.users[i];
+    if(uu.phone==null)uu.phone="";
+    if(!uu.farmIds)uu.farmIds=[];
+    if(!uu.perms)uu.perms=null;
+    if(!uu.pin)uu.pin="1234";
+  }
+  for(var i=0;i<S.farms.length;i++){ if(!S.farms[i].type)S.farms[i].type='farm'; }
   try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){}
   fbBusy=false;
+  /* لو السحابة مكانش فيها السوبر، ادفعه فورًا */
+  if(!_hadSuper)setTimeout(fbPush,300);
   return true;
 }
 function fbPull(){
