@@ -303,7 +303,7 @@ input[type=checkbox]:active{transform:scale(.9)}
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v17</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v18</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -2775,12 +2775,21 @@ function checkPdfParam(){
       tries++;
       var r=null;
       for(var i=0;i<S.reports.length;i++)if(S.reports[i].num===num){r=S.reports[i];break}
-      if(r){ toast('📄 بفتح تقرير بلاغ #'+num+'…'); setTimeout(function(){sharePdf(r.id)},600); }
-      else if(tries<5)setTimeout(find,1600);   /* استنى المزامنة تخلص */
-      else toast('❌ بلاغ #'+num+' مش موجود');
+      if(r){
+        /* iOS بيرفض فتح المشاركة من غير ضغطة إصبع — فبنعرض زرار */
+        var h='<h3 style="text-align:center">📄 تقرير بلاغ #'+num+'</h3>';
+        h+='<div class="hint" style="text-align:center">'+esc(r.farmName)+' — وحدة '+esc(r.house)+'<br>'+esc(r.fault)+'</div>';
+        h+='<button class="btn btn-blue" style="margin-top:12px" onclick="closeModal();sharePdf(\''+r.id+'\')">📤 فتح / حفظ / مشاركة الـ PDF</button>';
+        h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="closeModal();printReport(\''+r.id+'\')">🖨️ طباعة</button>';
+        h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="closeModal()">إغلاق</button>';
+        openModal(h);
+      }
+      else if(tries<8)setTimeout(find,1800);   /* المزامنة ممكن تطوّل على النت الضعيف */
+      else toast('❌ بلاغ #'+num+' مش لاقيه — اتأكد إن المزامنة خلصت وحدّث الصفحة');
     })();
   }catch(e){}
 }
+
 
 /* ================= تقرير نصّي للمشاركة =================
    صاحب الشركة عايز رقم يبعته في اجتماع — مش يفتح البرنامج ويقرا. */
@@ -2906,6 +2915,31 @@ function waToggle(id,k){
     b[i].on[k]=b[i].on[k]?0:1;
   }
   save(); render();
+}
+/* يفتح واتساب الشخص نفسه برسالة جاهزة فيها خطوات التفعيل */
+function waHelp(id){
+  var e=null,b=waBook();
+  for(var i=0;i<b.length;i++)if(b[i].id===id)e=b[i];
+  if(!e)return;
+  var msg='عشان توصلك تنبيهات نظام أعطال المزارع على واتساب، اعمل الخطوات دي من موبايلك (مرة واحدة بس):\n\n'+
+    '1) احفظ الرقم ده عندك: +34 644 51 95 23 باسم CallMeBot\n'+
+    '2) ابعتله رسالة واتساب نصها بالظبط:\n'+
+    'I allow callmebot to send me messages\n\n'+
+    '3) هيرد عليك خلال دقايق برسالة فيها رقم اسمه apikey\n'+
+    '4) ابعتلي الـ apikey ده هنا وأنا أفعّلك ✅';
+  window.open('https://wa.me/'+waNum(e.phone)+'?text='+encodeURIComponent(msg),'_blank');
+}
+/* تعديل مفتاح رقم موجود من غير حذف */
+function waEditKey(id){
+  var e=null,b=waBook();
+  for(var i=0;i<b.length;i++)if(b[i].id===id)e=b[i];
+  if(!e)return;
+  var k=prompt('الـ apikey بتاع '+e.name+'\n(الرقم اللي CallMeBot بعتهوله هو شخصيًا):', e.key||'');
+  if(k==null)return;
+  k=String(k).trim();
+  if(!k){toast('مفيش تغيير');return}
+  e.key=k; save(); render();
+  toast('✅ اتحفظ — دوس 🧪 للتجربة');
 }
 function waTest(id){
   var e=null, b=waBook();
@@ -3129,6 +3163,8 @@ function renderSettings(){
      '2️⃣ ابعتله واتساب: <b dir="ltr">I allow callmebot to send me messages</b><br>'+
      '3️⃣ هيرد في دقايق برسالة فيها <b>apikey</b> — اكتبه هنا مع الرقم.<br>'+
      '4️⃣ دوس 🧪 — المفروض توصلك رسالة تجريبية.<br>'+
+     '<b style="color:var(--amber)">⚠️ أهم نقطة: كل رقم ليه apikey مختلف بيطلع من تفعيله هو شخصيًا من موبايله.</b> مفتاح حد تاني عمره ما هيشتغل.<br>'+
+     'زرار 📩 جنب أي رقم بيبعتله خطوات التفعيل جاهزة على واتسابه — هو ينفّذ ويبعتلك المفتاح، وإنت تحطه بزرار 🔑.<br>'+
      '⚠️ الخدمة للأرقام المفعّلة بس (مش جروبات) — والـ PDF بيوصل كلينك.</div></div>';
   /* دفتر الإيميلات */
   var _eb=emailBook();
