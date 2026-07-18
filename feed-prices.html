@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>أسعار الخامات العلفية العالمية</title>
+<title>أسعار الخامات العلفية العالمية v2</title>
 <style>
 :root{
   --bg:#0d1117; --card:#161b22; --card2:#1c2330; --border:#2d3646;
@@ -59,9 +59,8 @@ details summary{cursor:pointer; font-size:.85rem; font-weight:700; color:var(--b
 <body>
 
 <div class="header">
-  <h1>🌽 أسعار الخامات العلفية العالمية</h1>
+  <h1>🌽 أسعار الخامات العلفية العالمية <span style="font-size:.6em;color:#2ea043">v2</span></h1>
   <span class="badge" id="lastUpdate">لم يتم التحديث</span>
-  <button class="badge" id="syncBtn" style="cursor:pointer;border:none;background:var(--card2);color:var(--blue)">☁️ مزامنة</button>
 </div>
 
 <div id="status" class="status"></div>
@@ -110,13 +109,20 @@ details summary{cursor:pointer; font-size:.85rem; font-weight:700; color:var(--b
 </div>
 
 <div class="card">
-  <details id="manualDetails">
-    <summary>✍️ إدخال يدوي (اكتب سعر البوشل من أي موقع أسعار)</summary>
-    <a href="https://sa.investing.com/commodities/grains" target="_blank" rel="noopener" class="btn" style="display:block;text-align:center;text-decoration:none;margin:10px 0;background:#1a7f37;border-color:#1a7f37;">🌐 افتح كل الأسعار بالعربي (Investing) ↗</a>
+  <details>
+    <summary>✍️ إدخال يدوي (لو التحديث التلقائي وقع)</summary>
     <div style="margin-top:10px;" id="manualInputs"></div>
     <button class="btn-sm" id="applyManual" style="width:100%; margin-top:6px;">تطبيق الأسعار اليدوية</button>
     <div class="hint">دخّل سعر العقد بنفس وحدة البورصة (سنت/بوشل أو دولار/طن قصير أو سنت/رطل) والبرنامج يحوّل.</div>
   </details>
+</div>
+
+
+<div class="card">
+  <div class="sec-title">🧪 الأحماض الأمينية والإضافات (أسعار محلية)</div>
+  <div class="hint" style="margin-bottom:10px">مالهاش بورصة عالمية زي الذرة — دخّل السعر بالجنيه/طن من موردك، وهيتحفظ ويفضل ظاهر بتاريخه. لو السعر اتغير حدّثه.</div>
+  <div id="addInputs"></div>
+  <button class="btn-sm" id="applyAdd" style="width:100%; margin-top:6px;">💾 حفظ أسعار الإضافات</button>
 </div>
 
 <div class="footer">المصدر: Stooq (عقود CBOT) + open.er-api.com لسعر الصرف — البيانات استرشادية وقد تتأخر عن اللحظي</div>
@@ -133,67 +139,53 @@ var store = {
 /* ---------- تعريف الخامات ---------- */
 /* toUSDton: تحويل سعر العقد إلى دولار/طن متري */
 var COMMODITIES = [
-  { id:"corn", name:"ذرة صفراء",  sym:"ZC", stooq:"zc.f", unit:"سنت/بوشل",      ref:"https://sa.investing.com/commodities/us-corn", toUSDton:function(p){ return p/100*39.3680; } },
-  { id:"sbm",  name:"كسب صويا",   sym:"ZM", stooq:"zm.f", unit:"$/طن قصير",     ref:"https://sa.investing.com/commodities/us-soybean-meal", toUSDton:function(p){ return p*1.10231; } },
-  { id:"soy",  name:"فول صويا",   sym:"ZS", stooq:"zs.f", unit:"سنت/بوشل",      ref:"https://sa.investing.com/commodities/us-soybeans", toUSDton:function(p){ return p/100*36.7437; } },
-  { id:"wheat",name:"قمح",        sym:"ZW", stooq:"zw.f", unit:"سنت/بوشل",      ref:"https://sa.investing.com/commodities/us-wheat", toUSDton:function(p){ return p/100*36.7437; } },
-  { id:"soyoil",name:"زيت صويا",  sym:"ZL", stooq:"zl.f", unit:"سنت/رطل",       ref:"https://sa.investing.com/commodities/us-soybean-oil", toUSDton:function(p){ return p/100*2204.62; } }
+  { id:"corn", name:"ذرة صفراء",  sym:"ZC", stooq:"zc.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*39.3680; } },
+  { id:"sbm",  name:"كسب صويا",   sym:"ZM", stooq:"zm.f", unit:"$/طن قصير",     toUSDton:function(p){ return p*1.10231; } },
+  { id:"soy",  name:"فول صويا",   sym:"ZS", stooq:"zs.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"wheat",name:"قمح",        sym:"ZW", stooq:"zw.f", unit:"سنت/بوشل",      toUSDton:function(p){ return p/100*36.7437; } },
+  { id:"soyoil",name:"زيت صويا",  sym:"ZL", stooq:"zl.f", unit:"سنت/رطل",       toUSDton:function(p){ return p/100*2204.62; } }
 ];
+
+
+/* ---------- الأحماض الأمينية والإضافات (أسعار محلية يدوية) ---------- */
+/* مالهاش بورصة عالمية — أسعارها من الموردين. بتتحفظ وتفضل ظاهرة بتاريخها. */
+var ADDITIVES = [
+  { grp:"ميثيونين", items:[
+    { id:"met_cn", origin:"صيني" },
+    { id:"met_ev", origin:"إيفونيك (Evonik)" },
+    { id:"met_fr", origin:"فرنساوي (أديسيو)" }
+  ]},
+  { grp:"ليسين", items:[
+    { id:"lys_cn", origin:"صيني" },
+    { id:"lys_sc", origin:"سيسكم" },
+    { id:"lys_tr", origin:"تركي" }
+  ]},
+  { grp:"ثريونين", items:[
+    { id:"thr_cn", origin:"صيني" },
+    { id:"thr_sc", origin:"سيسكم" }
+  ]},
+  { grp:"كولين كلورايد", items:[
+    { id:"cho_cn", origin:"صيني" }
+  ]},
+  { grp:"بيكربونات صوديوم", items:[
+    { id:"bic_tr", origin:"تركي" },
+    { id:"bic_lo", origin:"محلي / صيني" },
+    { id:"bic_sc", origin:"سيسكم" },
+    { id:"bic_ru", origin:"روسي" }
+  ]},
+  { grp:"مونو فوسفات", items:[
+    { id:"mono_mcp", origin:"MCP صيني" },
+    { id:"mono_mdcp", origin:"MDCP صيني" },
+    { id:"mono_tr", origin:"تركي" }
+  ]}
+];
+var addState = { prices:{}, updated:null };   /* id -> {egpTon, ts} */
 
 var state = {
   rate: null,          // USD -> EGP
   prices: {},          // id -> { raw: contract price, chg: % change }
   updated: null
 };
-
-/* ---------- Firebase sync ---------- */
-var DEFAULT_FB={"apiKey":"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs","authDomain":"my-app-sync-11ad9.firebaseapp.com","databaseURL":"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app","projectId":"my-app-sync-11ad9","storageBucket":"my-app-sync-11ad9.firebasestorage.app","messagingSenderId":"177039534756","appId":"1:177039534756:web:367ecccc684c2cdfdd1431"};
-var fbDb=null, fbRef=null, fbApplying=false;
-function snapshot(){
-  return {rate:state.rate, prices:state.prices, updated:state.updated,
-    manualRate:$("manualRate").value, freight:$("freight").value, customs:$("customs").value, other:$("other").value};
-}
-function applyCloud(d){
-  if(!d) return;
-  fbApplying=true;
-  try{
-    if(d.rate!=null) state.rate=d.rate;
-    if(d.prices) state.prices=d.prices;
-    if(d.updated) state.updated=d.updated;
-    if(d.manualRate!=null && d.manualRate!=="") $("manualRate").value=d.manualRate;
-    if(d.freight!=null && d.freight!=="") $("freight").value=d.freight;
-    if(d.customs!=null && d.customs!=="") $("customs").value=d.customs;
-    if(d.other!=null && d.other!=="") $("other").value=d.other;
-    save();
-    buildManualInputs(); render();
-  }catch(e){}
-  fbApplying=false;
-}
-function loadFbScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
-function initFB(cfg){
-  return loadFbScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js")
-    .then(function(){return loadFbScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js")})
-    .then(function(){
-      if(!window.firebase) throw new Error("firebase غير محمّل");
-      if(firebase.apps.length) firebase.app().delete().catch(function(){});
-      firebase.initializeApp(cfg);
-      fbDb=firebase.database();
-      fbRef=fbDb.ref("appHub/feedPrices");
-      fbRef.on("value",function(snap){
-        var cloud=snap.val();
-        if(!cloud){ if(state.rate!=null||Object.keys(state.prices).length){ fbRef.set(snapshot()); } return; }
-        applyCloud(cloud);
-      });
-    });
-}
-function enableSync(){
-  try{ localStorage.setItem("feedPrices_sync","1"); }catch(e){}
-  initFB(DEFAULT_FB).then(function(){ showStatus("✅ المزامنة اتفعّلت","ok"); }).catch(function(e){ showStatus("❌ فشل تفعيل المزامنة","err"); });
-}
-function restoreSync(){
-  var on=null; try{ on=localStorage.getItem("feedPrices_sync"); }catch(e){}
-  if(on==="1"){ initFB(DEFAULT_FB).catch(function(){}); }
-}
 
 /* ---------- أدوات ---------- */
 function $(id){ return document.getElementById(id); }
@@ -224,40 +216,24 @@ function fetchRate(){
 
 /* Stooq CSV عبر بروكسي لتخطي CORS، مع بديلين */
 function fetchStooq(){
-  /* Stooq بيرفض العقود الآجلة (.f) للتحميل — نجرّب الفورية (.c/.us) أول، وبعدها الآجلة */
-  var symVariants = COMMODITIES.map(function(c){ return c.stooq; });
-  var altVariants = COMMODITIES.map(function(c){ return c.stooq.replace(/\.f$/,".c"); });
-  function buildUrl(syms){
-    return "https://stooq.com/q/l/?s=" + encodeURIComponent(syms.join(" ")) + "&f=sd2t2ohlcv&h&e=csv";
-  }
-  var attempts = [buildUrl(altVariants), buildUrl(symVariants)];
-  var proxyTemplates = [
-    function(u){ return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
-    function(u){ return "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u); },
-    function(u){ return "https://corsproxy.io/?url=" + encodeURIComponent(u); },
-    function(u){ return "https://thingproxy.freeboard.io/fetch/" + u; },
-    function(u){ return "https://api.allorigins.win/get?url=" + encodeURIComponent(u); }
+  var symbols = COMMODITIES.map(function(c){ return c.stooq; }).join(" ");
+  var stooqUrl = "https://stooq.com/q/l/?s=" + encodeURIComponent(symbols) + "&f=sd2t2ohlcv&h&e=csv";
+  var proxies = [
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent(stooqUrl),
+    "https://corsproxy.io/?url=" + encodeURIComponent(stooqUrl)
   ];
-  /* اصنع قائمة كل التركيبات: كل رابط × كل وسيط */
-  var jobs = [];
-  attempts.forEach(function(url){ proxyTemplates.forEach(function(t){ jobs.push(t(url)); }); });
-
-  function tryJob(i){
-    if(i >= jobs.length) return Promise.reject(new Error("all failed"));
-    return fetchWithTimeout(jobs[i], 15000)
+  function tryProxy(i){
+    if(i >= proxies.length) return Promise.reject(new Error("all proxies failed"));
+    return fetchWithTimeout(proxies[i], 15000)
       .then(function(r){ if(!r.ok) throw new Error("http " + r.status); return r.text(); })
-      .then(function(raw){
-        var csv = raw;
-        if(raw && raw.charAt(0) === "{"){
-          try{ var j = JSON.parse(raw); if(j && j.contents) csv = j.contents; }catch(e){}
-        }
+      .then(function(csv){
         var parsed = parseStooqCSV(csv);
-        if(Object.keys(parsed).length === 0) throw new Error("empty");
+        if(Object.keys(parsed).length === 0) throw new Error("empty csv");
         return parsed;
       })
-      .catch(function(){ return tryJob(i+1); });
+      .catch(function(){ return tryProxy(i+1); });
   }
-  return tryJob(0);
+  return tryProxy(0);
 }
 
 function parseStooqCSV(csv){
@@ -267,13 +243,11 @@ function parseStooqCSV(csv){
     var cols = lines[i].split(",");
     if(cols.length < 7) continue;
     var sym = (cols[0]||"").toLowerCase();
-    var base = sym.replace(/\.[a-z]+$/,"");  /* zc.c أو zc.f → zc */
     var open = parseFloat(cols[3]);
     var close = parseFloat(cols[6]);
     if(isNaN(close)) continue;
     for(var k=0; k<COMMODITIES.length; k++){
-      var cbase = COMMODITIES[k].stooq.replace(/\.[a-z]+$/,"");
-      if(cbase === base){
+      if(COMMODITIES[k].stooq === sym){
         var chg = (!isNaN(open) && open>0) ? ((close-open)/open*100) : null;
         out[COMMODITIES[k].id] = { raw: close, chg: chg };
       }
@@ -299,24 +273,23 @@ function refreshAll(){
 
     if(okParts.length){
       state.updated = new Date().toISOString();
-      save(true);
+      save();
     }
     render();
     if(errParts.length === 0){ showStatus("✅ تم التحديث بنجاح", "ok"); }
-    else if(okParts.length){ showStatus("⚠️ اتحدث: " + okParts.join(" و ") + " — فشل: " + errParts.join(" و ") + ". استخدم الإدخال اليدوي.", "err"); if($("manualDetails")) $("manualDetails").open=true; }
-    else { showStatus("❌ فشل جلب أسعار البورصة — البورصة بتمنع التحميل التلقائي أحياناً. اكتب سعر البوشل يدوياً من موقع أسعار (مثل barchart.com) وهنحسبلك الباقي.", "err"); if($("manualDetails")) $("manualDetails").open=true; }
+    else if(okParts.length){ showStatus("⚠️ اتحدث: " + okParts.join(" و ") + " — فشل: " + errParts.join(" و ") + ". استخدم الإدخال اليدوي.", "err"); }
+    else { showStatus("❌ فشل التحديث — تأكد من الإنترنت أو استخدم الإدخال اليدوي (آخر أسعار محفوظة معروضة)", "err"); }
     $("refreshBtn").disabled = false;
   });
 }
 
 /* ---------- حفظ/تحميل ---------- */
-function save(pushCloud){
+function save(){
   store.set("feedPrices_v1", JSON.stringify({
     rate: state.rate, prices: state.prices, updated: state.updated,
     manualRate: $("manualRate").value,
     freight: $("freight").value, customs: $("customs").value, other: $("other").value
   }));
-  if(pushCloud && fbRef && !fbApplying){ try{ fbRef.set(snapshot()); }catch(e){} }
 }
 function load(){
   var raw = store.get("feedPrices_v1");
@@ -377,15 +350,12 @@ function render(){
 
 /* ---------- الإدخال اليدوي ---------- */
 function buildManualInputs(){
-  var examples = {corn:"مثلاً 467", wheat:"مثلاً 640", soy:"مثلاً 1197", sbm:"مثلاً 330", soyoil:"مثلاً 54"};
-  var html = "<div style='font-size:.8rem;color:var(--muted);margin-bottom:10px;line-height:1.7'>اضغط 🔗 جنب السلعة يفتحلك سعرها، اكتب الرقم زي ما هو، والبرنامج يحوّله لدولار/طن وجنيه/طن.</div>";
+  var html = "";
   for(var i=0; i<COMMODITIES.length; i++){
     var c = COMMODITIES[i];
     var cur = state.prices[c.id] ? state.prices[c.id].raw : "";
-    var ph = examples[c.id] || "السعر";
-    var reflink = c.ref ? "<a href='"+c.ref+"' target='_blank' rel='noopener' style='color:var(--blue);text-decoration:none;font-size:.95rem' title='افتح سعر "+c.name+"'>🔗</a>" : "";
-    html += "<div class='manual-row'><div class='mlbl'>" + reflink + " " + c.name + " <span class='csym'>(" + c.unit + ")</span></div>"
-      + "<input type='number' inputmode='decimal' id='m_" + c.id + "' value='" + cur + "' placeholder='" + ph + "'></div>";
+    html += "<div class='manual-row'><div class='mlbl'>" + c.name + " <span class='csym'>(" + c.unit + ")</span></div>"
+      + "<input type='number' inputmode='decimal' id='m_" + c.id + "' value='" + cur + "' placeholder='السعر'></div>";
   }
   $("manualInputs").innerHTML = html;
 }
@@ -399,35 +369,101 @@ function applyManual(){
   }
   if(changed){
     state.updated = new Date().toISOString();
-    save(true); render();
+    save(); render();
     showStatus("✅ تم تطبيق الأسعار اليدوية", "ok");
   }
+}
+
+
+/* ---------- الأحماض الأمينية والإضافات ---------- */
+function egpFmt(n){ if(n===null||n===undefined||isNaN(n)||n==='') return "—"; return (+n).toLocaleString("en-US"); }
+function buildAddInputs(){
+  var html = "";
+  for(var g=0; g<ADDITIVES.length; g++){
+    var grp = ADDITIVES[g];
+    html += "<div style='margin:12px 0 6px; font-weight:700; font-size:.9rem; color:#1a5;'>" + grp.grp + "</div>";
+    for(var i=0; i<grp.items.length; i++){
+      var it = grp.items[i];
+      var rec = addState.prices[it.id] || {};
+      var val = (rec.egpTon!==undefined && rec.egpTon!=='') ? rec.egpTon : "";
+      var when = rec.ts ? new Date(rec.ts).toLocaleDateString("ar-EG") : "";
+      var perKg = (val!=='' && !isNaN(val)) ? (" · " + egpFmt(Math.round(val/1000*100)/100) + " ج/كجم") : "";
+      html += "<div class='manual-row'>"
+        + "<div class='mlbl'>" + it.origin
+        + "<span class='csym'>" + (when ? (" آخر تحديث " + when + perKg) : " — لسه مادخلش") + "</span></div>"
+        + "<input type='number' inputmode='decimal' id='a_" + it.id + "' value='" + val + "' placeholder='ج/طن'></div>";
+    }
+  }
+  $("addInputs").innerHTML = html;
+}
+function applyAdd(){
+  var changed = false, now = new Date().toISOString();
+  for(var g=0; g<ADDITIVES.length; g++){
+    for(var i=0; i<ADDITIVES[g].items.length; i++){
+      var it = ADDITIVES[g].items[i];
+      var el = $("a_" + it.id); if(!el) continue;
+      var v = el.value.trim();
+      if(v==='') continue;
+      var num = parseFloat(v);
+      if(isNaN(num) || num < 0) continue;
+      var old = addState.prices[it.id] || {};
+      /* حدّث التاريخ بس لو السعر اتغير فعلاً */
+      if(old.egpTon !== num){ addState.prices[it.id] = { egpTon:num, ts:now }; changed = true; }
+    }
+  }
+  if(changed){
+    addState.updated = now;
+    saveAdd();
+    buildAddInputs();
+    showStatus("✅ اتحفظت أسعار الإضافات", "ok");
+  } else {
+    showStatus("مفيش تغيير", "ok");
+  }
+}
+function saveAdd(){ store.set("feedAdditives_v1", JSON.stringify(addState)); }
+function loadAdd(){
+  var raw = store.get("feedAdditives_v1");
+  if(!raw){ seedAddPrices(); return; }
+  try{
+    var d = JSON.parse(raw);
+    addState.prices = d.prices || {};
+    addState.updated = d.updated || null;
+    seedAddPrices();   /* يضيف الأسعار الأساسية للأصناف اللي لسه فاضية بس — مايدهسش شغلك */
+  }catch(e){ seedAddPrices(); }
+}
+/* أسعار أساسية اتدخلت 2026-07-18 — بتتحط للأصناف الفاضية بس، وتقدر تعدّلها أي وقت */
+function seedAddPrices(){
+  var _seedTs = "2026-07-18T00:00:00.000Z";
+  var seed = {
+      "met_ev":{egpTon:280000,ts:_seedTs},
+      "lys_cn":{egpTon:63000,ts:_seedTs},
+      "cho_cn":{egpTon:54000,ts:_seedTs},
+      "thr_sc":{egpTon:75000,ts:_seedTs},
+      "bic_sc":{egpTon:28000,ts:_seedTs},
+      "bic_ru":{egpTon:24000,ts:_seedTs},
+      "mono_tr":{egpTon:75000,ts:_seedTs}
+  };
+  var added = false;
+  for(var k in seed){
+    if(!addState.prices[k]){ addState.prices[k] = seed[k]; added = true; }
+  }
+  if(added) saveAdd();
 }
 
 /* ---------- الأحداث ---------- */
 $("refreshBtn").addEventListener("click", refreshAll);
 $("applyManual").addEventListener("click", function(){ applyManual(); buildManualInputs(); });
+$("applyAdd").addEventListener("click", applyAdd);
 ["manualRate","freight","customs","other"].forEach(function(id){
-  $(id).addEventListener("input", function(){ render(); save(true); });
-});
-
-/* ---------- زر المزامنة ---------- */
-$("syncBtn").addEventListener("click", function(){
-  var on=null; try{ on=localStorage.getItem("feedPrices_sync"); }catch(e){}
-  if(on==="1"){
-    try{ localStorage.setItem("feedPrices_sync","0"); }catch(e){}
-    if(fbRef){ try{ fbRef.off(); }catch(e){} fbRef=null; }
-    showStatus("⏹️ المزامنة اتوقفت","load");
-  }else{
-    enableSync();
-  }
+  $(id).addEventListener("input", function(){ render(); save(); });
 });
 
 /* ---------- تشغيل ---------- */
 load();
+loadAdd();
 buildManualInputs();
+buildAddInputs();
 render();
-restoreSync();
 if(navigator.onLine){ refreshAll(); }
 </script>
 </body>
