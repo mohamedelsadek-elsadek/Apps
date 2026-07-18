@@ -380,6 +380,12 @@ const SEED_PRODUCTS=[{id:1,cat:"أدوية بيطرية وسوائل",name:"في
 {id:145,cat:"تحصينات ولقاحات",name:"فاكسينوفا لاسونا A1",supplier:"الشركة الدولية",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
 {id:146,cat:"تحصينات ولقاحات",name:"ميد فاك جمبورو A1",supplier:"ميد فاك",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
 {id:147,cat:"تحصينات ولقاحات",name:"في جول A1",supplier:"جينوفيت",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:500},
+{id:167,cat:"تحصينات ولقاحات",name:"H5re5",supplier:"مزرعة الكوثر",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:750},
+{id:168,cat:"تحصينات ولقاحات",name:"أي بيرد سيفا 5000",supplier:"مزرعة الكوثر",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:3500},
+{id:169,cat:"تحصينات ولقاحات",name:"فاكسيف ٢٥٠٠",supplier:"مزرعة الكوثر",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:2200},
+{id:170,cat:"تحصينات ولقاحات",name:"فالسيف 5000",supplier:"مزرعة الكوثر",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:4100},
+{id:171,cat:"تحصينات ولقاحات",name:"h9nd ثنائى انترفيت",supplier:"مزرعة الكوثر",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:2500},
+{id:172,cat:"تحصينات ولقاحات",name:"فاكسميون جمبورو",supplier:"مزرعة الكوثر",unit:"عبوة",pkg:1,ther:"لقاح",dose:1,price:600},
 {id:148,cat:"مطهرات وأمن حيوي",name:"كلور A11",supplier:"العهدة",unit:"برميل",pkg:200000,ther:"مطهر",dose:5000,price:500},
 {id:149,cat:"مطهرات وأمن حيوي",name:"فنيك A11",supplier:"العهدة",unit:"لتر",pkg:1000,ther:"مطهر",dose:2000,price:40},
 {id:150,cat:"مطهرات وأمن حيوي",name:"فيركون A1",supplier:"الدولية",unit:"كيلو",pkg:1000,ther:"مطهر",dose:1000,price:750},
@@ -1382,6 +1388,10 @@ function newSale(){
 let returnsTab='returns'; // returns | transfers
 function renderReturns(page){
   page.innerHTML=`
+  ${!_hasKawthar&&farmInvType==='vaccine'?`<div style="background:#eef6ff;border:1px solid #b6d4f0;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div><b>📋 فاتورة تحصينات مزرعة الكوثر جاهزة للإضافة</b><br><span style="font-size:12px;color:#555">9 أصناف · إجمالي 567,250 ج.م — دوس عشان تتضاف</span></div>
+    <button class="btn" style="background:var(--grad);color:#fff" onclick="importKawtharVaxInvoice()">➕ أضف فاتورة الكوثر</button>
+  </div>`:''}
   <div class="tabs">
     <div class="tab ${returnsTab==='returns'?'active':''}" onclick="returnsTab='returns';renderPage('returns')">↩️ المرتجعات</div>
     <div class="tab ${returnsTab==='transfers'?'active':''}" onclick="returnsTab='transfers';renderPage('returns')">🔄 التحويل بين المزارع</div>
@@ -2358,6 +2368,7 @@ let currentFarmInv=null;
 function renderFarmInvoices(page){
   ensureFarmInvoices();
   const list=DB.farmInvoices.filter(f=>f.type===farmInvType);
+  const _hasKawthar=DB.farmInvoices.some(f=>f._importTag==='kawthar_vax_567250');
   page.innerHTML=`
   <div class="tabs">
     <div class="tab ${farmInvType==='vaccine'?'active':''}" onclick="farmInvType='vaccine';currentFarmInv=null;renderPage('farmInvoices')">💉 فواتير التحصينات</div>
@@ -2968,6 +2979,25 @@ function renderBackups(page){
 }
 
 boot();
+
+/* ===== حقن فاتورة مزرعة الكوثر (تحصينات) — مرة واحدة ===== */
+function importKawtharVaxInvoice(){
+  ensureFarmInvoices();
+  if(DB.farmInvoices.some(f=>f._importTag==='kawthar_vax_567250')){
+    toast&&toast('الفاتورة دي متضافة قبل كده','red');return;
+  }
+  var cust=DB.customers.find(c=>c.name==='مزرعة الكوثر')||DB.customers.find(c=>c.name.indexOf('الكوثر')>=0);
+  if(!cust){toast&&toast('مزرعة الكوثر مش موجودة كعميل','red');return;}
+  var items=[{name:"h9nd ثنائى انترفيت",qty:81,price:2500,src:"171",maker:""},{name:"H5re5",qty:147,price:750,src:"167",maker:""},{name:"فاكسميون جمبورو",qty:120,price:600,src:"172",maker:""},{name:"أي بيرد سيفا 5000",qty:15,price:3500,src:"168",maker:""},{name:"اولستر اي بي ٢٥٠٠",qty:40,price:850,src:"144",maker:""},{name:"فاكسميون لاسوتا",qty:40,price:350,src:"145",maker:""},{name:"رينوفاك اليت ٢٥٠٠",qty:40,price:475,src:"141",maker:""},{name:"فاكسيف ٢٥٠٠",qty:10,price:2200,src:"169",maker:""},{name:"فالسيف 5000",qty:10,price:4100,src:"170",maker:""}];
+  var inv={id:uid(),type:'vaccine',customerId:cust.id,customerName:cust.name,farm:cust.name,
+    cycleCode:nextCycleCode(cust.name,'vaccine'),entryDate:today(),birds:0,
+    items:items,program:[],paid:0,posted:false,createdAt:today(),
+    _importTag:'kawthar_vax_567250'};
+  DB.farmInvoices.push(inv);
+  saveDB();
+  renderPage&&renderPage('farmInvoices');
+  toast&&toast('✓ اتضافت فاتورة الكوثر — 9 أصناف · 567,250 ج.م','green');
+}
 </script>
 </body>
 </html>
