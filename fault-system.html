@@ -298,12 +298,16 @@ input[type=checkbox]:active{transform:scale(.9)}
 .wachips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .wachip{font-size:10.5px;padding:4px 9px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .wachip.on{background:rgba(46,160,67,.16);border-color:rgba(46,160,67,.5);color:var(--green);font-weight:700}
+
+.sla-chain{background:rgba(218,54,51,.16);color:var(--red);border:1px solid rgba(218,54,51,.45);font-weight:800}
+.simbtn{text-align:right;margin-top:7px;line-height:1.5}
+.simbtn small{color:var(--muted);font-weight:400}
 </style>
 </head>
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v18</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v20</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -457,6 +461,8 @@ function load(){
     if(!x.escLog)x.escLog=[];
     if(x.rootCause==null)x.rootCause="";
     if(!x.remN)x.remN={};
+    if(x.equip==null)x.equip='';
+    if(x.repeatOf===undefined)x.repeatOf=null;
     if(!x.remAt)x.remAt={};
   }
 }
@@ -1114,6 +1120,51 @@ function checkRemind(){
   if(changed){ save(); if(TAB==='reports')render(); }
 }
 
+
+/* ===== سلسلة التكرار الصريحة ===== */
+function chainRoot(r){
+  var seen={}, cur=r;
+  while(cur&&cur.repeatOf&&!seen[cur.id]){
+    seen[cur.id]=1;
+    var p=findRep(cur.repeatOf);
+    if(!p)break;
+    cur=p;
+  }
+  return cur;
+}
+function chainMembers(rootId){
+  var out=[], root=findRep(rootId);
+  if(root)out.push(root);
+  var grew=true, ids={}; ids[rootId]=1;
+  while(grew){
+    grew=false;
+    for(var i=0;i<S.reports.length;i++){
+      var x=S.reports[i];
+      if(x.repeatOf&&ids[x.repeatOf]&&!ids[x.id]){ ids[x.id]=1; out.push(x); grew=true; }
+    }
+  }
+  out.sort(function(a,b){return a.ts-b.ts});
+  return out;
+}
+function chainInfo(r){
+  var root=chainRoot(r);
+  var m=chainMembers(root.id);
+  var idx=0;
+  for(var i=0;i<m.length;i++)if(m[i].id===r.id)idx=i+1;
+  return {root:root, n:m.length, idx:idx, members:m};
+}
+/* ===== كاشف المعدل غير الطبيعي =====
+   لمبة = عادي. تلات لمبات في أسبوع = مشكلة جهد.
+   نفس الموقع+الوحدة+العطل ≥3 مرات في 7 أيام — حتى لو معدات مختلفة. */
+function rateAnomaly(fid,house,fault){
+  var since=now()-7*864e5, n=0;
+  for(var i=0;i<S.reports.length;i++){
+    var x=S.reports[i];
+    if(x.farmId===fid&&String(x.house)===String(house)&&x.fault===fault&&x.ts>=since)n++;
+  }
+  return n>=3?n:0;
+}
+
 /* ================= تكرار العطل والسبب الجذري ================= */
 function repeatCount(r){
   var n=0;
@@ -1123,7 +1174,9 @@ function repeatCount(r){
   }
   return n;
 }
-function needsRoot(r){ return repeatCount(r)>=3; }
+function needsRoot(r){
+  /* سلسلة صريحة: من المرة التانية السبب الجذري إجباري */
+  if(r&&r.repeatOf){ var ci=chainInfo(r); if(ci.n>=2)return true; } return repeatCount(r)>=3; }
 
 /* ================= تكلفة التعطّل ================= */
 function downtimeCost(r){
@@ -1233,7 +1286,9 @@ function renderNew(){
   h+='<div><label>نوع العطل</label><select id="nCat" onchange="fillFaults()">';
   for(var c in S.catalog){h+='<option>'+esc(c)+'</option>';}
   h+='</select></div></div>';
-  h+='<label>العطل بالتحديد</label><select id="nFault"></select>';
+  h+='<label>العطل بالتحديد</label><select id="nFault" onchange="applySevRule()"></select>';
+  h+='<label>المعدة / المكان بالتحديد <small style="color:var(--muted)">(اختياري بس مهم)</small></label><input id="nEquip" placeholder="مثال: مروحة 3 · لمبة الصف التاني · الطلمبة الغربية">';
+  h+='<div class="hint">ليه مهم؟ عشان نفرّق: سير مروحة 1 غير سير مروحة 2 — دول معدتين مش مشكلة مكررة.</div>';
   h+='<label>درجة الخطورة</label><div class="sev" id="nSev">'+
      '<span data-v="critical" onclick="pickSev(this)">حرجة</span>'+
      '<span data-v="high" onclick="pickSev(this)">عالية</span>'+
@@ -1333,6 +1388,11 @@ function pickSev(el){
   var map={critical:'on-critical',high:'on-high',med:'on-med',low:'on-low'};
   for(var i=0;i<sp.length;i++){ sp[i].className=''; if(sp[i]===el)sp[i].className=map[pickedSev]; }
 }
+function pickRepeat(id){
+  _pendRepeat=(id==null)?false:id;
+  closeModal();
+  submitReport();
+}
 function fillHouses(){
   var fid=document.getElementById('nFarm').value, f=siteById(fid);
   var n=f?f.houses:1, h='';
@@ -1362,10 +1422,48 @@ function fillFaults(){ setTimeout(applySevRule,0);
   for(var i=0;i<arr.length;i++)h+='<option>'+esc(arr[i])+'</option>';
   document.getElementById('nFault').innerHTML=h;
 }
+/* المشابهين القريبين: نفس الموقع + الوحدة + العطل خلال آخر أيام */
+var REPEAT_LOOKBACK=14;   /* يوم */
+function findSimilar(fid,house,fault){
+  var since=now()-REPEAT_LOOKBACK*864e5, out=[];
+  for(var i=0;i<S.reports.length;i++){
+    var x=S.reports[i];
+    if(x.farmId===fid&&String(x.house)===String(house)&&x.fault===fault&&x.ts>=since)out.push(x);
+  }
+  out.sort(function(a,b){return b.ts-a.ts});
+  return out;
+}
+var _pendRepeat=null;
 function submitReport(){
   var u=curUser(); if(!u){openUserPicker();return;}
   var fid=document.getElementById('nFarm').value, fName="";
   for(var i=0;i<S.farms.length;i++){if(S.farms[i].id===fid)fName=S.farms[i].name;}
+  /* ===== فيه نفس العطل قريب؟ اسأل الأول ===== */
+  if(_pendRepeat===null){
+    var _house=document.getElementById('nHouse').value;
+    var _fault=document.getElementById('nFault').value;
+    var _sim=findSimilar(fid,_house,_fault);
+    if(_sim.length){
+      var h='<h3>🤔 العطل ده حصل هنا قريب</h3>';
+      h+='<div class="hint">«'+esc(_fault)+'» في نفس الوحدة خلال آخر '+REPEAT_LOOKBACK+' يوم.<br><b>هي نفس المشكلة رجعت، ولا معدة تانية؟</b></div>';
+      for(var i=0;i<Math.min(_sim.length,5);i++){
+        var s=_sim[i];
+        var ago=Math.round((now()-s.ts)/864e5*10)/10;
+        h+='<button class="btn btn-ghost simbtn" onclick="pickRepeat(\''+s.id+'\')">'+
+           '🔁 نفس المشكلة — بلاغ #'+s.num+'<br><small>'+
+           (s.equip?('📍 '+esc(s.equip)+' · '):'')+'من '+(ago<1?'ساعات':(Math.round(ago)+' يوم'))+
+           (s.fixedBy?(' · صلّحها '+esc(s.fixedBy)):' · لسه مفتوح')+'</small></button>';
+      }
+      h+='<button class="btn btn-green" style="margin-top:10px" onclick="pickRepeat(null)">🆕 لأ — معدة تانية / مشكلة جديدة</button>';
+      h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="_pendRepeat=null;closeModal()">إلغاء</button>';
+      _pendRepeat='ask';
+      openModal(h);
+      return;
+    }
+    _pendRepeat=false;   /* مفيش مشابه — كمّل عادي */
+  }
+  var _repOf=(_pendRepeat&&_pendRepeat!=='ask'&&_pendRepeat!==false)?_pendRepeat:null;
+  _pendRepeat=null;
   var maxNum=0; for(var k=0;k<S.reports.length;k++){if(S.reports[k].num>maxNum)maxNum=S.reports[k].num;}
   var r={
     id:uid(), num:maxNum+1, ts:now(), updatedAt:now(),
@@ -1378,10 +1476,36 @@ function submitReport(){
     reporterId:u.id, reporterName:u.name,
     status:'new', startTs:0, startedBy:"", fixTs:0, fixDesc:"", fixedBy:"", confTs:0,
     parts:[], photos:{before:PHOTO_BUF.before.slice(),after:[]},
-    waitTs:0, waitTotal:0, waitPart:"", waitNote:"", escLog:[], rootCause:""
+    waitTs:0, waitTotal:0, waitPart:"", waitNote:"", escLog:[], rootCause:"",
+    equip:(document.getElementById('nEquip')?(document.getElementById('nEquip').value||'').trim():''),
+    repeatOf:_repOf
   };
   PHOTO_BUF={before:[],after:[]};
   S.reports.unshift(r); save();
+  /* سلسلة مرتبطة؟ */
+  if(r.repeatOf){
+    var ci=chainInfo(r);
+    var orig=findRep(r.repeatOf);
+    var chMsg='🔁 المشكلة رجعت — المرة رقم '+ci.n+'\n'+
+      'بلاغ #'+r.num+' مربوط ببلاغ #'+(orig?orig.num:'؟')+'\n'+
+      '🏠 '+r.farmName+' — وحدة '+r.house+(r.equip?(' · '+r.equip):'')+'\n'+
+      '⚙️ '+r.fault+'\n'+
+      (orig&&orig.fixedBy?('🔧 آخر مرة صلّحها: '+orig.fixedBy+'\n'):'')+
+      (ci.n>=3?'\n⛔ التالتة — الإصلاح اللي بيتعمل مش بيحل المشكلة. لازم سبب جذري.':'\n⚠️ التانية — لو رجعت تالت مرة يبقى فيه حاجة غلط في طريقة الإصلاح.');
+    if(tgReady())tgSend(chMsg,function(){});
+    setTimeout(function(){toast('🔁 اتربطت كمشكلة راجعة — المرة رقم '+ci.n)},1600);
+  }
+  /* معدل غير طبيعي؟ (حتى للمعدات المختلفة) */
+  var _anom=rateAnomaly(r.farmId,r.house,r.fault);
+  if(_anom&&!r.repeatOf){
+    var anMsg='📈 معدل غير طبيعي — بلاغ #'+r.num+'\n'+
+      '«'+r.fault+'» حصل '+_anom+' مرات في نفس الوحدة خلال أسبوع\n'+
+      '🏠 '+r.farmName+' — وحدة '+r.house+'\n\n'+
+      'حتى لو معدات مختلفة، المعدل ده مش طبيعي.\n'+
+      '🔍 دوّر على السبب المشترك: جهد كهربا؟ تأريض؟ جودة قطع؟ بيئة تشغيل؟';
+    if(tgReady())tgSend(anMsg,function(){});
+    setTimeout(function(){toast('📈 تنبيه: '+_anom+' مرات في أسبوع — معدل مش طبيعي')},2200);
+  }
   if(!isOnline())setTimeout(function(){toast("📴 اتسجّل محليًا — التنبيه هيتبعت أول ما النت يرجع")},1200);
   if(S.tg.onNew && tgReady()){
     tgSend(msgNew(r),function(ok,err){ toast(ok?"✅ البلاغ اتسجل والتنبيه اتبعت على تليجرام":"البلاغ اتسجل ✅ لكن التليجرام فشل: "+err); });
@@ -1451,6 +1575,14 @@ function repCard(r){
   if(r.escLog&&r.escLog.length)h+='<span class="sla sla-esc">🚨 تصعيد ×'+r.escLog.length+'</span>';
   var _rn=(r.remN&&r.remN[r.status])||0;
   if(_rn)h+='<span class="sla sla-rem">⏰ تذكير ×'+_rn+'</span>';
+  if(r.repeatOf){
+    var _ci=chainInfo(r);
+    h+='<span class="sla sla-chain">🔁 راجعة — المرة '+_ci.idx+' من '+_ci.n+'</span>';
+  } else {
+    var _kids=S.reports.filter(function(x){return x.repeatOf===r.id}).length;
+    if(_kids)h+='<span class="sla sla-chain">🔁 رجعت بعده ×'+_kids+'</span>';
+  }
+  if(r.equip)h+='<span class="sla" style="background:var(--panel2);border:1px solid var(--line);color:var(--muted)">📍 '+esc(r.equip)+'</span>';
   h+='</div>';
   /* مين المطلوب منه دلوقتي */
   if(r.status!=='conf'){
@@ -1869,6 +2001,23 @@ function dashStats(){
   }
   o.avgH=o.fixN?Math.round(o.fixH/o.fixN*10)/10:0;
   o.comply=o.closed?Math.round((o.closed-o.late)/o.closed*100):100;
+  /* السلاسل الصريحة (المربوطة يدوي) */
+  o.chains=[]; o.backToTech={};
+  var roots={};
+  for(var i=0;i<L.length;i++){
+    var r=L[i];
+    if(!r.repeatOf)continue;
+    var ci=chainInfo(r);
+    if(!roots[ci.root.id]){
+      roots[ci.root.id]=1;
+      o.chains.push({fault:ci.root.fault,farm:ci.root.farmName,house:ci.root.house,n:ci.n,
+        equip:ci.root.equip||'',lastTs:ci.members[ci.members.length-1].ts});
+    }
+    /* التقييم الوحش: الإصلاح اللي رجع بعده — بيتحسب على اللي صلّح */
+    var prev=findRep(r.repeatOf);
+    if(prev&&prev.fixedBy)o.backToTech[prev.fixedBy]=(o.backToTech[prev.fixedBy]||0)+1;
+  }
+  o.chains.sort(function(a,b){return b.n-a.n});
 
   /* ١) نفس العطل نفس العنبر */
   for(var k in sig){
@@ -1917,8 +2066,11 @@ function dashStats(){
   for(var i=0;i<L.length;i++){
     var r=L[i]; if(!r.fixTs)continue;
     o.ftf.tot++;
-    var again=L.some(function(x){
-      return x.id!==r.id && x.farmId===r.farmId && String(x.house)===String(r.house) &&
+    /* أولوية للربط الصريح: فيه بلاغ متربط بيه؟ */
+    var again=S.reports.some(function(x){return x.repeatOf===r.id});
+    /* احتياطي: نفس البصمة خلال أسبوع (للبلاغات القديمة قبل الميزة) */
+    if(!again)again=L.some(function(x){
+      return x.id!==r.id && !x.repeatOf && x.farmId===r.farmId && String(x.house)===String(r.house) &&
              x.fault===r.fault && x.ts>r.fixTs && x.ts<r.fixTs+7*864e5;
     });
     if(!again)o.ftf.ok++;
@@ -2096,10 +2248,11 @@ function healthScore(o){
   var pPm;
   if(!pmAll){ pPm=8; parts.push({k:'الصيانة الوقائية',v:8,max:20,note:'مفيش جدول وقائية أصلًا — حمّل المهام الجاهزة'}); }
   else { pPm=Math.max(0,20-pmDue*4); parts.push({k:'الصيانة الوقائية',v:pPm,max:20,note:pmDue?(pmDue+' مهمة متأخرة'):'كله في معاده'}); }
-  /* ٤) التكرار */
+  /* ٤) التكرار — السلاسل الصريحة أثقل من البصمة */
   var rep3=o.repSame.filter(function(x){return x.n>=3}).length;
-  var pRep=Math.max(0,15-rep3*5);
-  parts.push({k:'الأعطال المتكررة',v:pRep,max:15,note:rep3?(rep3+' عطل متكرر ٣+ مرات'):'مفيش تكرار مقلق'});
+  var ch2=(o.chains||[]).filter(function(x){return x.n>=2}).length;
+  var pRep=Math.max(0,15-rep3*3-ch2*5);
+  parts.push({k:'الأعطال المتكررة',v:pRep,max:15,note:(ch2?ch2+' مشكلة راجعة مربوطة':'')+(ch2&&rep3?' · ':'')+(rep3?rep3+' تكرار بصمة':'')||'مفيش تكرار مقلق'});
   /* ٥) سرعة الحل */
   var pFix=10;
   if(o.fixN){
@@ -2224,6 +2377,26 @@ function renderDash(){
   }
   h+='</div>';
 
+  /* ===== المشاكل الراجعة (المربوطة يدوي — الأدق) ===== */
+  h+='<div class="card"><h3>⛔ مشاكل راجعة (مربوطة بالاسم)</h3>';
+  if(!o.chains.length)h+='<div class="hint">مفيش سلاسل مربوطة — لما تسجّل بلاغ وتختار «نفس المشكلة رجعت» بتظهر هنا.</div>';
+  else{
+    o.chains.slice(0,6).forEach(function(c){
+      var col=c.n>=3?'var(--red)':'var(--amber)';
+      h+='<div class="prow2" style="border-right-color:'+col+'"><div><b>'+esc(c.fault)+'</b><div class="meta">'+esc(c.farm)+' — وحدة '+esc(c.house)+(c.equip?' · 📍 '+esc(c.equip):'')+'</div></div><b style="color:'+col+'">'+c.n+' مرات</b></div>';
+    });
+    h+='<div class="hint">⛔ دي أدق مؤشر عندك — <b>مربوطة يدوي</b> يعني مفيش لخبطة معدات. المرة التالتة = الإصلاح مش بيحل، والسبب الجذري بقى إجباري.</div>';
+  }
+  var _bt=[]; for(var _k in o.backToTech)_bt.push([_k,o.backToTech[_k]]);
+  if(_bt.length){
+    _bt.sort(function(a,b){return b[1]-a[1]});
+    h+='<div class="rgrp" style="margin-top:10px">🔧 إصلاحات رجعت تاني — على مين؟</div>';
+    _bt.forEach(function(x){
+      h+='<div class="list-item"><span>'+esc(x[0])+'</span><b style="color:var(--red)">رجعتله '+x[1]+'</b></div>';
+    });
+    h+='<div class="hint">مش بالضرورة تقصير — ممكن قطع رديئة أو مشكلة أعمق. بس لو الرقم بيكبر مع نفس الشخص، راجعوا طريقة الإصلاح سوا.</div>';
+  }
+  h+='</div>';
   /* ===== الأنماط الخطيرة ===== */
   /* ١ */
   h+='<div class="card"><h3>🔁 نفس العطل يتكرر في نفس الوحدة</h3>';
@@ -2291,6 +2464,15 @@ function renderDash(){
   var tks=topList(o.byTech,6);
   if(tks.length){
     h+='<div class="card"><h3>🔧 حِمل الفنيين</h3>'+bars(o.byTech);
+    var _anyBack=false;
+    tks.forEach(function(t){ if(o.backToTech[t[0]])_anyBack=true; });
+    if(_anyBack){
+      h+='<div class="rgrp" style="margin-top:8px">🔁 إصلاحات رجعت تاني</div>';
+      tks.forEach(function(t){
+        var b=o.backToTech[t[0]]||0;
+        if(b)h+='<div class="list-item"><span>'+esc(t[0])+'</span><b style="color:var(--red)">'+b+' من '+t[1]+'</b></div>';
+      });
+    }
     h+='<div class="hint">توزيع البلاغات على الفنيين — لو واحد شايل كل حاجة، ده خطر (إجازة أو مرض = توقف).</div></div>';
   }
 
@@ -2650,6 +2832,9 @@ function dashPdfBody(){
   var wc=topList(o.byCat,6);
   if(wc.length){b+='<h2>الأعطال</h2><table><tr><th>النوع</th><th>العدد</th></tr>';
     wc.forEach(function(x){b+='<tr><td>'+esc(x[0])+'</td><td>'+x[1]+'</td></tr>'}); b+='</table>';}
+  if(o.chains&&o.chains.length){b+='<h2>⛔ مشاكل راجعة (مربوطة)</h2><table><tr><th>العطل</th><th>المكان</th><th>مرات</th></tr>';
+    o.chains.slice(0,6).forEach(function(c){b+='<tr><td>'+esc(c.fault)+(c.equip?' — '+esc(c.equip):'')+'</td><td>'+esc(c.farm)+' وحدة '+esc(c.house)+'</td><td>'+c.n+'</td></tr>'});
+    b+='</table>';}
   if(o.repSame.length){b+='<h2>تكرار في نفس الوحدة</h2><table><tr><th>العطل</th><th>المكان</th><th>مرات</th></tr>';
     o.repSame.slice(0,6).forEach(function(x){b+='<tr><td>'+esc(x.fault)+'</td><td>'+esc(x.farm)+' — '+esc(x.house)+'</td><td>'+x.n+'</td></tr>'}); b+='</table>';}
   if(o.repCross.length){b+='<h2>نفس العطل في مواقع مختلفة (نظامية)</h2><table><tr><th>العطل</th><th>المواقع</th><th>مرات</th></tr>';
@@ -2925,7 +3110,11 @@ function waHelp(id){
     '1) احفظ الرقم ده عندك: +34 644 51 95 23 باسم CallMeBot\n'+
     '2) ابعتله رسالة واتساب نصها بالظبط:\n'+
     'I allow callmebot to send me messages\n\n'+
-    '3) هيرد عليك خلال دقايق برسالة فيها رقم اسمه apikey\n'+
+    '3) هيرد عليك خلال دقايق برسالة فيها رقم اسمه apikey\n\n'+
+    '⚠️ لو رد عليك "This Bot is full" ومعاه رقم جديد:\n'+
+    '- احفظ الرقم الجديد ده (إجباري)\n'+
+    '- ابعتله النص اللي البوت طلبه بالظبط (غالبًا: I allow callmebot to call me)\n'+
+    '- هيديك الـ apikey\n\n'+
     '4) ابعتلي الـ apikey ده هنا وأنا أفعّلك ✅';
   window.open('https://wa.me/'+waNum(e.phone)+'?text='+encodeURIComponent(msg),'_blank');
 }
@@ -3162,6 +3351,7 @@ function renderSettings(){
      '1️⃣ احفظ الرقم <b dir="ltr">+34 644 51 95 23</b> باسم CallMeBot.<br>'+
      '2️⃣ ابعتله واتساب: <b dir="ltr">I allow callmebot to send me messages</b><br>'+
      '3️⃣ هيرد في دقايق برسالة فيها <b>apikey</b> — اكتبه هنا مع الرقم.<br>'+
+     '↩️ <b>لو رد "This Bot is full"</b> بيحوّلك على رقم بوت جديد: احفظ الرقم الجديد (إجباري) وابعتله النص اللي طلبه بالظبط — المفتاح اللي هيطلع بيشتغل عادي.<br>'+
      '4️⃣ دوس 🧪 — المفروض توصلك رسالة تجريبية.<br>'+
      '<b style="color:var(--amber)">⚠️ أهم نقطة: كل رقم ليه apikey مختلف بيطلع من تفعيله هو شخصيًا من موبايله.</b> مفتاح حد تاني عمره ما هيشتغل.<br>'+
      'زرار 📩 جنب أي رقم بيبعتله خطوات التفعيل جاهزة على واتسابه — هو ينفّذ ويبعتلك المفتاح، وإنت تحطه بزرار 🔑.<br>'+
