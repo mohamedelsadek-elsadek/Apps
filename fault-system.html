@@ -307,7 +307,7 @@ input[type=checkbox]:active{transform:scale(.9)}
 <body>
 
 <header>
-  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v20</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
+  <h1><span class="dot"></span>أعطال المزارع <span style="font-size:9px;color:var(--green);font-weight:800;vertical-align:super">v21</span><span class="netdot" id="netDot" style="display:none" onclick="flushOutbox()"></span></h1>
   <div class="userchip" onclick="openUserPicker()">👤 <b id="curUserName">اختر المستخدم</b></div>
 </header>
 
@@ -1621,6 +1621,7 @@ function repCard(r){
   if(r.status==='fixed' && u && (u.id===r.reporterId||can('confirm')&&can('del'))) h+='<button class="btn btn-green btn-sm" onclick="confirmFix(\''+r.id+'\')">🟢 تأكيد الإصلاح</button>';
   if(r.status==='fixed' && u && u.id!==r.reporterId) h+='<div class="hint">⏳ مستني تأكيد '+esc(r.reporterName)+'</div>';
   if(r.status==='conf'||r.status==='fixed'){
+    h+='<button class="btn btn-ghost btn-sm" onclick="shareCloseCard(\''+r.id+'\')">🖼️ كارت للواتس</button>';
     h+='<button class="btn btn-ghost btn-sm" onclick="sharePdf(\''+r.id+'\')">📤 PDF</button>';
     h+='<button class="btn btn-ghost btn-sm" onclick="printReport(\''+r.id+'\')">🖨️ طباعة</button>';
     if(tgReady())h+='<button class="btn btn-ghost btn-sm" onclick="toast(\'⏳ ببعت…\');autoPdfToTg(\''+r.id+'\',function(ok){toast(ok?\'📄 اتبعت للجروب\':\'❌ فشل\')})">📨 PDF للجروب</button>';
@@ -1715,18 +1716,26 @@ function confirmFix(id){
   r.status='conf'; r.confTs=now(); r.updatedAt=now(); save(); render();
   /* تقرير الإقفال الغني — تلقائي للجروب */
   if(S.closeNotify!==false&&tgReady()){
-    var _late=(respLate(r)||fixLate(r));
-    var _t='📁 بلاغ #'+r.num+' اتقفل نهائي\n'+
-      '🏠 '+r.farmName+' — وحدة '+r.house+'\n'+
-      '⚙️ '+r.fault+' · '+sevPlain(r.severity)+'\n'+
-      '⏱️ استلام: '+mmm(respMins(r))+' · إصلاح: '+mmm(fixMins(r))+(_late?' ⚠️ خارج الوقت':' ✅ في الوقت')+'\n'+
-      (r.fixedBy?('🔧 '+r.fixedBy+'\n'):'')+
-      (r.fixDesc?('📝 '+r.fixDesc+'\n'):'')+
-      (r.parts&&r.parts.length?('🔩 '+r.parts.map(function(p){return p.name+'×'+p.qty}).join(' · ')+'\n'):'')+
-      (r.rootCause?('🎯 السبب الجذري: '+r.rootCause+'\n'):'')+
-      '👤 أكّد: '+u.name;
-    tgSend(_t,function(ok){toast(ok?"🟢 اتقفل واتبعت الملخص":"🟢 اتقفل (التليجرام فشل)");});
-    waBroadcast('close',_t+'\n\n📄 الـ PDF:\n'+pdfLink(r));
+    /* الكارت الملون (جدول مرسوم) بدل النص الفقير */
+    if(isOnline()){
+      toast('🟢 اتقفل — ببعت الكارت للجروب…');
+      closeCardToTg(id,function(ok){
+        toast(ok?'🖼️ الكارت الملون اتبعت للجروب':'⚠️ الكارت فشل — ببعت نص بديل');
+        if(!ok){
+          var _late=(respLate(r)||fixLate(r));
+          tgSend('📁 بلاغ #'+r.num+' اتقفل — '+r.farmName+' وحدة '+r.house+'\n'+r.fault+'\n'+
+            (_late?'⚠️ خارج الوقت':'✅ في الوقت')+(r.fixedBy?' · 🔧 '+r.fixedBy:''),function(){});
+        }
+      });
+    } else {
+      /* أوفلاين: نص للطابور (الصور مش بتتخزن في الطابور) */
+      var _late=(respLate(r)||fixLate(r));
+      tgSend('📁 بلاغ #'+r.num+' اتقفل — '+r.farmName+' وحدة '+r.house+'\n'+r.fault+'\n'+
+        (_late?'⚠️ خارج الوقت':'✅ في الوقت')+(r.fixedBy?' · 🔧 '+r.fixedBy:''),function(){});
+      toast('🟢 اتقفل — الإشعار في الطابور');
+    }
+    var _cardR=r;
+    waBroadcast('close','📁 بلاغ #'+r.num+' اتقفل — '+r.farmName+' وحدة '+r.house+'\n'+r.fault+'\n📄 التقرير الملون والـ PDF:\n'+pdfLink(r));
   } else toast("🟢 اتأكد الإصلاح والبلاغ اتقفل");
   /* ===== PDF أوتوماتيك للجروب — من غير أي تدخل ===== */
   if(S.closePdf!==false&&tgReady()&&isOnline()){
@@ -2492,6 +2501,140 @@ function setPeriod(p){
 
 
 
+
+
+/* ================= كارت الإقفال الملون =================
+   واتساب/تليجرام مابيقبلوش جداول ملونة في النص —
+   فبنرسم الكارت صورة: جدول حقيقي بألوان، وبيتبعت sendPhoto. */
+var SEV_CARD={critical:{c:'#da3633',n:'حرجة'},high:{c:'#f0883e',n:'عالية'},med:{c:'#58a6ff',n:'متوسطة'},low:{c:'#2ea043',n:'منخفضة'}};
+function drawCloseCard(r,cb){
+  var W=900, PAD=0, y=0;
+  var c=document.createElement('canvas'); c.width=W; c.height=1600;
+  var x=c.getContext('2d');
+  var sev=SEV_CARD[r.severity]||SEV_CARD.med;
+  var late=(respLate(r)||fixLate(r));
+  function font(sz,w){ x.font=(w||'400')+' '+sz+'px -apple-system,"Segoe UI",Tahoma,sans-serif'; }
+  function rrect(x0,y0,w,h,rad,fill){
+    x.beginPath();
+    x.moveTo(x0+rad,y0); x.arcTo(x0+w,y0,x0+w,y0+h,rad); x.arcTo(x0+w,y0+h,x0,y0+h,rad);
+    x.arcTo(x0,y0+h,x0,y0,rad); x.arcTo(x0,y0,x0+w,y0,rad); x.closePath();
+    x.fillStyle=fill; x.fill();
+  }
+  /* خلفية */
+  x.fillStyle='#f4f6f8'; x.fillRect(0,0,W,c.height);
+  x.direction='rtl';
+  /* ===== الرأس الملون بلون الخطورة ===== */
+  var g=x.createLinearGradient(0,0,W,0);
+  g.addColorStop(0,sev.c); g.addColorStop(1,'#1a2332');
+  x.fillStyle=g; x.fillRect(0,0,W,110);
+  x.textAlign='right';
+  font(34,'800'); x.fillStyle='#fff';
+  x.fillText('📁 بلاغ #'+r.num+' — اتقفل نهائي', W-34, 52);
+  font(21,'400'); x.fillStyle='rgba(255,255,255,.9)';
+  x.fillText(r.farmName+' — وحدة '+r.house+(r.equip?' · '+r.equip:''), W-34, 87);
+  /* شارة الخطورة */
+  x.textAlign='left';
+  rrect(26,32,130,46,23,'rgba(255,255,255,.18)');
+  font(21,'800'); x.fillStyle='#fff'; x.textAlign='center';
+  x.fillText(sev.n, 26+65, 62);
+  x.textAlign='right';
+  y=140;
+  /* ===== جدول البيانات ===== */
+  var rows=[
+    ['العطل', r.category+' › '+r.fault, '#111'],
+    ['بلّغ', r.reporterName+'  ·  '+fmtDT(r.ts), '#111'],
+  ];
+  if(r.startedBy)rows.push(['استلم', r.startedBy+'  ·  بعد '+mmm(respMins(r)), respLate(r)?'#da3633':'#1e7e34']);
+  if(r.fixedBy)rows.push(['صلّح', r.fixedBy+'  ·  في '+mmm(fixMins(r)), fixLate(r)?'#da3633':'#1e7e34']);
+  if(r.waitTotal)rows.push(['انتظار قطع', mmm(Math.round(r.waitTotal/60000))+' (مش محسوبة على الفني)', '#b06000']);
+  if(r.fixDesc)rows.push(['اللي اتعمل', r.fixDesc, '#111']);
+  if(r.parts&&r.parts.length)rows.push(['قطع الغيار', r.parts.map(function(p){return p.name+' ×'+p.qty}).join('  ·  '), '#111']);
+  if(r.rootCause)rows.push(['السبب الجذري', r.rootCause, '#da3633']);
+  var dc=downtimeCost(r);
+  if(dc)rows.push(['تكلفة التعطّل', dc.toLocaleString('en-US')+' ج.م (تقديري)', '#b06000']);
+  var ci=(r.repeatOf?chainInfo(r):null);
+  if(ci&&ci.n>=2)rows.push(['⛔ مشكلة راجعة', 'المرة رقم '+ci.idx+' من '+ci.n, '#da3633']);
+
+  var rowH=64, labW=190;
+  for(var i=0;i<rows.length;i++){
+    var ry=y+i*rowH;
+    /* تظليل متبادل */
+    rrect(24, ry, W-48, rowH-8, 12, i%2? '#ffffff':'#eef2f6');
+    /* عمود التسمية */
+    rrect(W-24-labW, ry, labW, rowH-8, 12, '#1a2332');
+    font(19,'800'); x.fillStyle='#fff'; x.textAlign='center';
+    x.fillText(rows[i][0], W-24-labW/2, ry+38);
+    /* القيمة — مع لف الأسطر */
+    x.textAlign='right';
+    font(20,'700'); x.fillStyle=rows[i][2];
+    var val=String(rows[i][1]);
+    if(x.measureText(val).width > W-48-labW-40){
+      /* قصّ بنقط لو أطول من السطر */
+      while(x.measureText(val+'…').width > W-48-labW-40 && val.length>4) val=val.slice(0,-1);
+      val+='…';
+    }
+    x.fillText(val, W-24-labW-18, ry+38);
+  }
+  y+=rows.length*rowH+14;
+  /* ===== شريط النتيجة ===== */
+  rrect(24, y, W-48, 66, 14, late?'#fdecec':'#e8f7e8');
+  font(24,'800'); x.fillStyle=late?'#c0392b':'#1e7e34'; x.textAlign='center';
+  x.fillText(late?'⚠️ اتحل بس خارج الوقت المستهدف':'✅ اتحل داخل الوقت المستهدف', W/2, y+43);
+  y+=96;
+  /* ذيل */
+  font(16,'400'); x.fillStyle='#8a94a0'; x.textAlign='center';
+  x.fillText('نظام أعطال المزارع · '+fmtDT(now()), W/2, y);
+  x.textAlign='right';
+  y+=30;
+  /* قصّ */
+  var out=document.createElement('canvas'); out.width=W; out.height=y;
+  var ox=out.getContext('2d'); ox.fillStyle='#f4f6f8'; ox.fillRect(0,0,W,y);
+  ox.drawImage(c,0,0,W,y,0,0,W,y);
+  cb(out);
+}
+/* رفع صورة لتليجرام */
+function tgSendPhoto(blob,caption,cb){
+  if(!tgReady()){cb&&cb(false);return}
+  var fd=new FormData();
+  fd.append('chat_id',S.tg.chatId);
+  fd.append('photo',blob,'report.jpg');
+  if(caption)fd.append('caption',caption.slice(0,1000));
+  fetch('https://api.telegram.org/bot'+S.tg.token+'/sendPhoto',{method:'POST',body:fd})
+    .then(function(r){return r.json()}).then(function(j){cb&&cb(!!j.ok)})
+    .catch(function(){cb&&cb(false)});
+}
+/* الكارت الملون → تليجرام */
+function closeCardToTg(id,cb){
+  var r=findRep(id); if(!r){cb&&cb(false);return}
+  try{
+    drawCloseCard(r,function(canvas){
+      canvas.toBlob(function(blob){
+        if(!blob){cb&&cb(false);return}
+        tgSendPhoto(blob,'📁 بلاغ #'+r.num+' اتقفل — '+r.farmName+'\n📄 PDF الكامل: '+pdfLink(r),function(ok){cb&&cb(ok)});
+      },'image/jpeg',0.88);
+    });
+  }catch(e){cb&&cb(false)}
+}
+/* مشاركة الكارت (واتساب بالصورة الملونة) */
+function shareCloseCard(id){
+  var r=findRep(id); if(!r)return;
+  toast('⏳ بجهّز الكارت…');
+  drawCloseCard(r,function(canvas){
+    canvas.toBlob(function(blob){
+      if(!blob){toast('❌ فشل');return}
+      var file=new File([blob],'بلاغ-'+r.num+'.jpg',{type:'image/jpeg'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file]}).catch(function(){});
+      } else {
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob); a.download=file.name;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){document.body.removeChild(a)},1000);
+        toast('⬇️ اتنزّلت');
+      }
+    },'image/jpeg',0.88);
+  });
+}
 
 /* ================= PDF أوتوماتيك للتليجرام =================
    المشكلة: حوار الطباعة محتاج إيد إنسان — مايتبعتش لوحده.
