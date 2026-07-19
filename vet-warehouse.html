@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v29</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v30</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -210,7 +210,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v29</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v30</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +422,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v29 — حماية الإقلاع';
+const APP_VERSION='v30 — إصلاح ذاتي';
 let DB={};
 
 /* ====================================================================
@@ -528,20 +528,35 @@ function loadDB(){
   }
 }
 function ensureTables(){
-  ['products','suppliers','customers','purchases','sales','vaccines','treasury',
-   'storeDocs','returns','stockAdjust','users','farmInvoices','farmTransfers'].forEach(k=>{if(!DB[k])DB[k]=[];});
-  if(!DB.settings)DB.settings={company:'الشركة المصرية لتوزيع الأدوية البيطرية',currency:'ج.م',reorderDefault:5};
-  DB.products.forEach(p=>{
-    if(p.cost===undefined)p.cost=0;
-    if(p.doseMeat===undefined)p.doseMeat=p.dose||0;
-    if(p.doseWater===undefined)p.doseWater=0;
-    if(p.maker===undefined)p.maker='';
-    if(p.wdMeat===undefined)p.wdMeat=0;   /* فترة سحب اللحم بالأيام */
-    if(p.wdEgg===undefined)p.wdEgg=0;     /* فترة سحب البيض بالأيام */
-  });
-  (DB.vaccines||[]).forEach(v=>{if(v.maker===undefined)v.maker='';});
-  if(!DB.payments)DB.payments=[];
-  migrateCycleCodes();
+  try{
+    ['products','suppliers','customers','purchases','sales','vaccines','treasury',
+     'storeDocs','returns','stockAdjust','users','farmInvoices','farmTransfers'].forEach(k=>{
+      if(!Array.isArray(DB[k]))DB[k]=[];                    /* لو مش مصفوفة (معطوب) ابدأها فاضية */
+    });
+    if(!DB.settings||typeof DB.settings!=='object')DB.settings={company:'الشركة المصرية لتوزيع الأدوية البيطرية',currency:'ج.م',reorderDefault:5};
+    /* نضّف أي صنف معطوب (مش كائن) */
+    DB.products=DB.products.filter(p=>p&&typeof p==='object');
+    DB.products.forEach(p=>{
+      if(p.cost===undefined)p.cost=0;
+      if(p.doseMeat===undefined)p.doseMeat=p.dose||0;
+      if(p.doseWater===undefined)p.doseWater=0;
+      if(p.maker===undefined)p.maker='';
+      if(p.wdMeat===undefined)p.wdMeat=0;
+      if(p.wdEgg===undefined)p.wdEgg=0;
+    });
+    DB.vaccines=DB.vaccines.filter(v=>v&&typeof v==='object');
+    DB.vaccines.forEach(v=>{if(v.maker===undefined)v.maker='';});
+    /* نضّف فواتير المزارع المعطوبة قبل الهجرة */
+    DB.farmInvoices=DB.farmInvoices.filter(f=>f&&typeof f==='object'&&Array.isArray(f.items));
+    if(!DB.payments)DB.payments=[];
+    try{ migrateCycleCodes(); }catch(e){ console.error('migrateCycleCodes تخطّت:',e); }
+  }catch(e){
+    console.error('ensureTables:',e);
+    /* الحد الأدنى المضمون */
+    ['products','suppliers','customers','purchases','sales','vaccines','treasury',
+     'storeDocs','returns','stockAdjust','users','farmInvoices','farmTransfers','payments'].forEach(k=>{if(!Array.isArray(DB[k]))DB[k]=[];});
+    if(!DB.settings)DB.settings={company:'',currency:'ج.م',reorderDefault:5};
+  }
 }
 function saveDB(){
   DB.updatedAt=Date.now();                                  /* ختم زمني — أساس كل القرارات */
@@ -688,6 +703,7 @@ function farmMonthSum(){const m=today().slice(0,7);return (DB.farmInvoices||[]).
 function monthSumSales(){const m=today().slice(0,7);return DB.sales.filter(x=>!x.fromFarm&&(x.date||'').slice(0,7)===m).reduce((s,x)=>s+(x.total||0),0);}
 function renderDashboard(page){
   const lowCount=lowStockList().length;
+  const _dataIssues=(typeof dataHealthCheck==='function')?dataHealthCheck():0;
   const expSoon=DB.products.filter(p=>p.expiry&&daysTo(p.expiry)<=60&&daysTo(p.expiry)>=0).length;
   const cards=[
     {ico:'💵',lbl:'قيمة المخزون',val:money(stockValue()),meta:DB.products.length+' صنف',c:'var(--primary)'},
@@ -697,7 +713,10 @@ function renderDashboard(page){
     {ico:'💰',lbl:'مبيعات الشهر',val:money(monthSumSales()+farmMonthSum()),meta:'شامل فواتير المزارع',c:'var(--green)'},
     {ico:'⏰',lbl:'قرب الصلاحية',val:fmt(expSoon),meta:'خلال 60 يوم',c:'var(--red)'},
   ];
-  page.innerHTML=`<div class="cards">${cards.map(c=>`
+  page.innerHTML=`${_dataIssues?`<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div><b style="color:#b91c1c">⚠️ فيه مشكلة في بعض البيانات المحفوظة</b><br><span style="font-size:12px;color:#666">لو البرنامج فتح ناقص أو فاضي، دوس الزرار عشان يجيب النسخة النضيفة من السحابة</span></div>
+    <button class="btn" style="background:#dc2626;color:#fff" onclick="repairData()">🔧 إصلاح البيانات من السحابة</button>
+  </div>`:''}<div class="cards">${cards.map(c=>`
     <div class="stat" style="--accent:${c.c}">
       <span class="ico">${c.ico}</span>
       <div class="lbl">${c.lbl}</div><div class="val">${c.val}</div><div class="meta">${c.meta}</div>
@@ -955,6 +974,30 @@ function startAuthWatchdog(){
     else if(authResolved&&fbConfigured()){showLogin();}
   },400);
 }
+
+/* ===== إصلاح البيانات المعطوبة — يمسح المحلي المعطوب ويجيب من السحابة ===== */
+function repairData(){
+  if(!confirm('ده هيمسح البيانات المحلية المعطوبة ويجيب النسخة النضيفة من السحابة.\n\nمتأكد؟'))return;
+  try{
+    /* احفظ المعطوب للاحتياط */
+    var bad=localStorage.getItem(DB_KEY);
+    if(bad)localStorage.setItem(DB_KEY+'_broken_'+Date.now(), bad);
+  }catch(e){}
+  try{ localStorage.removeItem(DB_KEY); localStorage.removeItem('vw_dirty'); }catch(e){}
+  toast('🔄 اتمسح المعطوب — بيعيد التحميل من السحابة...','green');
+  setTimeout(function(){ location.reload(); }, 1200);
+}
+/* لو البيانات فيها مشاكل، اعرض زرار الإصلاح تلقائي في لوحة التحكم */
+function dataHealthCheck(){
+  var issues=0;
+  try{
+    if(!Array.isArray(DB.products))issues++;
+    if(!Array.isArray(DB.farmInvoices))issues++;
+    (DB.farmInvoices||[]).forEach(function(f){ if(!f||!Array.isArray(f.items))issues++; });
+  }catch(e){ issues++; }
+  return issues;
+}
+
 function boot(){
   try{
   // ابدأ بإخفاء الاثنين لتفادي أي وميض قبل تحديد الحالة
@@ -998,7 +1041,7 @@ function boot(){
       ensureTables&&ensureTables();
       setSync&&setSync('local');
       if(typeof showApp==='function')showApp();
-      if(typeof route==='function')route('dashboard');
+      if(typeof renderPage==='function')renderPage('dashboard');   /* ارسم الصفحة فعلاً */
       if(typeof toast==='function')toast('فيه مشكلة بسيطة وقت التحميل — البرنامج شغّال. راجع بياناتك.','red');
     }catch(_e){
       /* آخر حل: رسالة واضحة بدل البياض */
