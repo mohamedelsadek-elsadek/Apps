@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v28</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v29</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -210,7 +210,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v28</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v29</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +422,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v28 — حماية البيانات';
+const APP_VERSION='v29 — حماية الإقلاع';
 let DB={};
 
 /* ====================================================================
@@ -514,11 +514,18 @@ window.addEventListener('pagehide',function(){
 });
 
 function loadDB(){
+  try{
   const raw=localStorage.getItem(DB_KEY);
   if(raw){try{DB=JSON.parse(raw);}catch(e){DB={};}}
   if(!DB.products||!DB.products.length) seedAll();
   ensureTables();
   saveDB();
+  }catch(e){
+    console.error('loadDB فشل — بيانات معطوبة، هبدأ فاضي:',e);
+    DB={}; ensureTables();
+    /* احفظ نسخة من المعطوب للفحص لو حبينا */
+    try{ localStorage.setItem(DB_KEY+'_corrupt_'+Date.now(), localStorage.getItem(DB_KEY)||''); }catch(_e){}
+  }
 }
 function ensureTables(){
   ['products','suppliers','customers','purchases','sales','vaccines','treasury',
@@ -949,6 +956,7 @@ function startAuthWatchdog(){
   },400);
 }
 function boot(){
+  try{
   // ابدأ بإخفاء الاثنين لتفادي أي وميض قبل تحديد الحالة
   const ls=$('#loginScreen'),ap=$('#app');
   if(ls)ls.style.display='none';
@@ -979,6 +987,29 @@ function boot(){
     showApp();
     $('#logoutBtn').style.display='none';
     buildNav();go('dashboard');
+  }
+  }catch(e){
+    console.error('boot فشل:',e);
+    /* صمام أمان: اعرض التطبيق بأي حال بدل الصفحة البيضا */
+    try{
+      var ls=$('#loginScreen'), ap=$('#app');
+      if(ls)ls.style.display='none';
+      if(ap)ap.style.display='';
+      ensureTables&&ensureTables();
+      setSync&&setSync('local');
+      if(typeof showApp==='function')showApp();
+      if(typeof route==='function')route('dashboard');
+      if(typeof toast==='function')toast('فيه مشكلة بسيطة وقت التحميل — البرنامج شغّال. راجع بياناتك.','red');
+    }catch(_e){
+      /* آخر حل: رسالة واضحة بدل البياض */
+      document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:sans-serif;direction:rtl">'
+        +'<h2>⚠️ حصلت مشكلة وقت التحميل</h2>'
+        +'<p>البيانات المحفوظة ممكن تكون معطوبة. جرّب:</p>'
+        +'<p>١. حدّث الصفحة (اسحب لتحت)</p>'
+        +'<p>٢. لو المشكلة فضلت، البيانات هتيجي من السحابة تلقائي لو Firebase شغّال</p>'
+        +'<button onclick="location.reload()" style="padding:12px 24px;font-size:16px;background:#4f46e5;color:#fff;border:none;border-radius:8px;margin-top:12px">🔄 إعادة تحميل</button>'
+        +'</div>';
+    }
   }
 }
 function doLogin(){
