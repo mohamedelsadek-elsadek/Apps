@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v30</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v31</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -210,7 +210,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v30</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v31</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +422,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v30 — إصلاح ذاتي';
+const APP_VERSION='v31 — اتصال السحابة';
 let DB={};
 
 /* ====================================================================
@@ -975,6 +975,24 @@ function startAuthWatchdog(){
   },400);
 }
 
+
+/* ===== الاتصال بالسحابة يدوي — لو البيانات المحلية تالفة ===== */
+function connectCloud(){
+  if(!fbConfigured()){ toast('السحابة مش مظبوطة في الإعدادات','red'); return; }
+  if(fbUser){
+    /* متصل بالفعل — اسحب النضيف */
+    if(!confirm('هيجيب بياناتك من السحابة. لو المحلي أحدث هيترفع، لو السحابة أحدث هتنزل.\n\nتمام؟'))return;
+    toast('☁️ بسحب من السحابة...','green');
+    onLoggedIn().then(()=>{ renderPage('dashboard'); toast('✓ اتحدّث من السحابة','green'); })
+      .catch(e=>{ toast('السحابة مردّتش — جرّب تاني','red'); });
+  }else{
+    /* مش مسجّل — اعرض شاشة الدخول */
+    if(fbAuth){ showLogin(); toast('سجّل دخولك عشان توصل للسحابة','green'); }
+    else if(initFirebase()){ setTimeout(()=>{ if(!fbUser)showLogin(); },500); }
+    else toast('مقدرش يوصل للسحابة — اتأكد من النت','red');
+  }
+}
+
 /* ===== إصلاح البيانات المعطوبة — يمسح المحلي المعطوب ويجيب من السحابة ===== */
 function repairData(){
   if(!confirm('ده هيمسح البيانات المحلية المعطوبة ويجيب النسخة النضيفة من السحابة.\n\nمتأكد؟'))return;
@@ -1004,8 +1022,8 @@ function boot(){
   const ls=$('#loginScreen'),ap=$('#app');
   if(ls)ls.style.display='none';
   if(ap)ap.style.display='none';
-  loadDB();
-  autoDailyBackup();
+  try{ loadDB(); }catch(e){ console.error('loadDB:',e); DB={}; ensureTables(); }
+  try{ autoDailyBackup(); }catch(e){ console.error('autoBackup:',e); }
   $('#curDate').textContent=new Date().toLocaleDateString('ar-EG');
   if($('#verChip'))$('#verChip').textContent=APP_VERSION;
   if(fbConfigured()&&initFirebase()){
@@ -1646,7 +1664,8 @@ function printDoc(title,meta,cols,rowsHtml,total){
   ${total!=null?`<tfoot><tr><td colspan="${cols.length-1}" style="text-align:left">الإجمالي</td><td>${fmt(total)} ج.م</td></tr></tfoot>`:''}
   </table>
   <div class="foot"><div class="sign">توقيع المُستلم</div><div class="sign">توقيع المسؤول</div></div>
-  <div class="noprint"><button class="pbtn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button></div>
+  <div class="noprint"><button class="btn" style="background:#0ea5e9;color:#fff;margin-inline-start:6px" onclick="connectCloud()" title="اتصل بالسحابة وهات بياناتك">☁️ السحابة</button>
+      <button class="pbtn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button></div>
   </body></html>`);
   w.document.close();
 }
