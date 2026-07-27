@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض</title>
+<title>نظام إدارة مزرعة الدجاج البياض v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -208,6 +208,16 @@ tbody tr:last-child td{border-bottom:none}
 .dev-credit .dc-name{font-family:var(--display);font-size:13px;font-weight:800;color:var(--primary-d);letter-spacing:.2px}
 @media print{ .sidebar,.topbar,.rep-toolbar,.nav-item{display:none!important} }
 
+
+.bulk-houses{display:flex;flex-direction:column;gap:12px}
+.bulk-house{background:var(--panel2,#161d2e);border:1px solid var(--border,#243049);border-radius:12px;padding:14px 16px}
+.bh-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.bh-title{font-size:15px}
+.bh-sub{font-size:12px;color:var(--muted2,#8497b8)}
+.bulk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end}
+.egg-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700;vertical-align:middle}
+.egg-badge.red{background:rgba(220,54,51,.16);color:#e5645f;border:1px solid rgba(220,54,51,.4)}
+.egg-badge.white{background:rgba(148,163,184,.16);color:#cbd5e1;border:1px solid rgba(148,163,184,.35)}
 </style>
 </head>
 <body>
@@ -352,7 +362,16 @@ async function fbInit(onData){
   L.onValue(FB.ref, (snap)=>{
     if(FB.suppress) return;                 // تجاهل صدى كتابتنا
     const val=snap.val();
-    if(val && FB.onData){ FB.onData(val); }
+    if(!val || !FB.onData) return;
+    /* حماية: لو السحابة أقدم من شغلي المحلي، أو عندي شغل لسه ماترفعش → تجاهل وارفع بتاعي */
+    const cloudStamp = val._localStamp || val._updatedAt || 0;
+    const myStamp = _localStamp || 0;
+    const dirty = !!localStorage.getItem('layer_dirty');
+    if(dirty || cloudStamp < myStamp){
+      if(typeof fbPush==='function') fbPush(ORG);   /* شغلي أحدث → ارفعه */
+      return;
+    }
+    FB.onData(val);
   });
   return true;
 }
@@ -365,9 +384,13 @@ function fbPush(dbObj){
   _pushT=setTimeout(async ()=>{
     try{
       FB.suppress=true;
-      await FB._L.set(FB.ref, {...dbObj, _updatedAt:Date.now()});
+      await FB._L.set(FB.ref, {...dbObj, _updatedAt:Date.now(), _localStamp:(dbObj._localStamp||Date.now())});
+      try{ localStorage.removeItem('layer_dirty'); }catch(e){}   /* اترفع بنجاح */
       setTimeout(()=>FB.suppress=false, 400);
-    }catch(e){ FB.suppress=false; toast('تعذّر الرفع للسحابة','err'); }
+    }catch(e){
+      FB.suppress=false; toast('تعذّر الرفع — هيحاول تاني','err');
+      setTimeout(()=>fbPush(dbObj), 5000);   /* إعادة محاولة */
+    }
   }, 250);
 }
 
@@ -626,8 +649,12 @@ function bindDBToActiveFarm(){
 }
 
 /* حفظ ORG كامل في localStorage + السحابة */
+let _localStamp = 0;   /* ختم آخر حفظة محلية */
 function saveORG(){
+  _localStamp = Date.now();
+  ORG._localStamp = _localStamp;
   try{ localStorage.setItem(ORG_KEY,JSON.stringify(ORG)); }catch(e){}
+  try{ localStorage.setItem('layer_dirty','1'); }catch(e){}   /* شغل لسه ماترفعش */
   if(typeof fbPush==='function') fbPush(ORG);
 }
 
@@ -951,8 +978,26 @@ function seedFromExcel(){
   DB.samehOpeningDebit=S.samehOpeningDebit||0; DB.samehOfficialBalance=S.samehOfficialBalance||0;
   save();
 }
+
+/* لقطة أمان محلية قبل تطبيق السحابة — آخر 10، كل دقيقتين بحد أقصى */
+let _lastCloudSnap = 0;
+function snapshotBeforeCloudLayer(){
+  if(Date.now() - _lastCloudSnap < 120000) return;
+  if(!ORG || !ORG.companies) return;
+  _lastCloudSnap = Date.now();
+  try{
+    let snaps = JSON.parse(localStorage.getItem('layer_cloud_snaps')||'[]');
+    snaps.push({ t: Date.now(), date: new Date().toLocaleString('ar-EG'), data: JSON.stringify(ORG) });
+    while(snaps.length > 10) snaps.shift();
+    localStorage.setItem('layer_cloud_snaps', JSON.stringify(snaps));
+  }catch(e){}
+}
+
 function applyCloudData(val){
-  if(!val) return; delete val._updatedAt;
+  if(!val) return;
+  /* لقطة أمان قبل ما السحابة تستبدل المحلي */
+  try{ snapshotBeforeCloudLayer(); }catch(e){}
+  delete val._updatedAt; delete val._localStamp;
   if(val.companies){  // بنية ORG الجديدة
     ORG=val; if(!getActiveCompany()&&ORG.companies[0])ORG.activeCompany=ORG.companies[0].id;
     const c=getActiveCompany(); if(c&&!getActiveFarm()&&(c.farms||[])[0])ORG.activeFarm=c.farms[0].id;
@@ -1150,11 +1195,20 @@ function renderDaily(){
   const tabs=DB.houses.map((h,i)=>`<div class="house-tab ${i===UI.dailyHouse?'active':''}" data-i="${i}">
     <span class="ht-name">${esc(h.name)}</span><span class="ht-sub">${fmtN(houseStats(h).remain)} طائر</span></div>`).join('');
   $('#page-daily').innerHTML=`
-    <div class="house-tabs">${tabs}</div>
     <div class="panel" style="margin-bottom:18px">
-      <div class="panel-head"><h3>📝 إضافة تسجيل يوم جديد</h3></div>
-      <div id="dailyForm"></div>
+      <div class="panel-head"><h3>⚡ تسجيل كل العنابر دفعة واحدة</h3>
+        <span style="font-size:12px;color:var(--muted2)">سجّل كل عنبر في صفه، ودوس «حفظ الكل» — النظام يوزّع كل واحد في صفحته</span>
+      </div>
+      <div id="bulkForm"></div>
     </div>
+    <details style="margin-bottom:14px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:13px;padding:6px 2px">📝 أو سجّل عنبر واحد بالتفصيل (الطريقة القديمة)</summary>
+      <div class="house-tabs" style="margin-top:10px">${tabs}</div>
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-head"><h3>📝 إضافة تسجيل يوم جديد</h3></div>
+        <div id="dailyForm"></div>
+      </div>
+    </details>
     <div class="panel">
       <div class="panel-head"><h3>📋 سجل الأيام</h3>
         <div style="display:flex;gap:8px;align-items:center">
@@ -1164,10 +1218,168 @@ function renderDaily(){
       <div id="daysTbl"></div>
     </div>`;
   $$('#page-daily .house-tab').forEach(t=>t.onclick=()=>{ UI.dailyHouse=+t.dataset.i; renderDaily(); });
-  drawDailyForm(); drawDaysTable();
+  drawBulkForm(); drawDailyForm(); drawDaysTable();
   $('#daySearch').addEventListener('input',drawDaysTable);
   $('#daysOrderBtn').onclick=()=>{ UI.daysOrder=(UI.daysOrder==='asc'?'desc':'asc'); try{localStorage.setItem('omda_days_order',UI.daysOrder);}catch(e){} redrawDaysKeepScroll(); };
 }
+
+/* ===== تسجيل كل العنابر دفعة واحدة ===== */
+function drawBulkForm(){
+  const box=$('#bulkForm'); if(!box) return;
+  // تاريخ افتراضي: اليوم التالي لأحدث آخر يوم عبر كل العنابر
+  let defDate=new Date().toLocaleDateString('en-CA');
+  let latest=null;
+  DB.houses.forEach(h=>{ if(h.days&&h.days.length){ const ld=h.days[h.days.length-1].date; if(!latest||ld>latest)latest=ld; } });
+  if(latest){ const nd=new Date(latest); nd.setDate(nd.getDate()+1); defDate=nd.toLocaleDateString('en-CA'); }
+
+  let rows=DB.houses.map((h,i)=>{
+    const st=houseStats(h);
+    const nextAge=(h.startAge||0)+(h.days?h.days.length:0)+1;
+    const eggBadge=h.eggColor?`<span class="egg-badge ${h.eggColor==='احمر'?'red':(h.eggColor==='ابيض'?'white':'')}">${esc(h.eggColor)}</span>`:'';
+    return `<div class="bulk-house" data-i="${i}">
+      <div class="bh-head">
+        <div class="bh-title"><b>${esc(h.name)}</b> ${eggBadge}</div>
+        <div class="bh-sub">المتبقي <b>${fmtN(st.remain)}</b> • العمر <b>${nextAge}</b> يوم</div>
+      </div>
+      <div class="bulk-grid">
+        <div class="field"><label>💀 نافق</label><input class="input bulk-in" data-f="dead" data-i="${i}" type="text" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label>🌾 علف (شيكارة)</label><input class="input bulk-in" data-f="feed" data-i="${i}" type="text" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label>💧 مياه (لتر)</label><input class="input bulk-in" data-f="water" data-i="${i}" type="text" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label>🥚 بيض (طبق)</label><input class="input bulk-in" data-f="eggs" data-i="${i}" type="text" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label>📝 ملاحظة</label><input class="input bulk-in" data-f="note" data-i="${i}" placeholder="اختياري"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  box.innerHTML=`
+    <div style="padding:16px 18px">
+      <div class="field" style="max-width:220px;margin-bottom:14px">
+        <label>📅 التاريخ (لكل العنابر)</label>
+        <input class="input" type="date" id="bulk_date" value="${defDate}">
+      </div>
+      <div class="bulk-houses">${rows}</div>
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn green" id="bulk_save" style="height:46px;font-size:15px;padding:0 24px">✅ حفظ كل العنابر</button>
+        <button class="btn" id="bulk_clear" style="height:46px">🧹 تفريغ</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.8">
+        💡 العنبر اللي كل خاناته فاضية بيتساب (مش هيتسجّله يوم). البيض بالطبق (×${DB.dishSize})، العلف بالشيكارة (×${DB.feedBagKg}كجم).
+      </div>
+    </div>`;
+
+  $('#bulk_save').onclick=saveBulkDay;
+  $('#bulk_clear').onclick=()=>{ $$('.bulk-in').forEach(el=>el.value=''); $('#bulk_date').focus(); };
+  bindBulkKeys();
+}
+
+/* تنقل بالكيبورد في شبكة الإدخال:
+   - Enter: ينزل لنفس الخانة في العنبر اللي تحت (نافق→نافق→نافق)
+   - Enter في آخر عنبر: يلف لأول عنبر، أو يروح لزر الحفظ لو Ctrl/Cmd
+   - الأسهم ↑↓ نفس العمود، ←→ الصف الحالي
+   - الأسهم بتشتغل عادي جوّه الرقم (نقر بره الرقم) */
+function bindBulkKeys(){
+  const fields=['dead','feed','water','eggs','note'];   // ترتيب الأعمدة يمين←شمال بصرياً
+  const nHouses=DB.houses.length;
+  function getEl(i,f){ return document.querySelector('.bulk-in[data-i="'+i+'"][data-f="'+f+'"]'); }
+  function focusEl(t){ if(t){ t.focus(); if(t.select){ try{t.select()}catch(_){} } } }
+  $$('.bulk-in').forEach(el=>{
+    el.addEventListener('keydown',(e)=>{
+      const i=+el.dataset.i, f=el.dataset.f;
+      const col=fields.indexOf(f);
+
+      // Enter → نفس العمود، العنبر اللي تحت (آخر واحد يلف للأول)
+      if(e.key==='Enter'){
+        e.preventDefault();
+        if(e.ctrlKey||e.metaKey){ saveBulkDay(); return; }
+        let ni=i+1; if(ni>=nHouses) ni=0;
+        focusEl(getEl(ni,f)); return;
+      }
+
+      // ↓ = العنبر اللي تحت (نفس العمود)
+      if(e.key==='ArrowDown'){
+        e.preventDefault();
+        let ni=i+1; if(ni<nHouses) focusEl(getEl(ni,f));
+        return;
+      }
+      // ↑ = العنبر اللي فوق
+      if(e.key==='ArrowUp'){
+        e.preventDefault();
+        let ni=i-1; if(ni>=0) focusEl(getEl(ni,f));
+        return;
+      }
+      // الصفحة RTL: → (يمين) = العمود السابق بصرياً، ← (شمال) = العمود التالي
+      if(e.key==='ArrowRight'){
+        e.preventDefault();
+        if(col>0) focusEl(getEl(i,fields[col-1]));
+        return;
+      }
+      if(e.key==='ArrowLeft'){
+        e.preventDefault();
+        if(col<fields.length-1) focusEl(getEl(i,fields[col+1]));
+        return;
+      }
+    });
+  });
+  const dt=$('#bulk_date');
+  if(dt) dt.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); focusEl(getEl(0,'dead')); } });
+}
+
+function saveBulkDay(){
+  const date=$('#bulk_date').value;
+  if(!date){ toast('اختر التاريخ','err'); return; }
+  // اجمع بيانات كل عنبر
+  const perHouse={};
+  $$('.bulk-in').forEach(el=>{
+    const i=+el.dataset.i, f=el.dataset.f, v=el.value.trim();
+    if(!perHouse[i]) perHouse[i]={};
+    perHouse[i][f]=v;
+  });
+  let saved=0, skipped=0, dupes=[];
+  Object.keys(perHouse).forEach(iStr=>{
+    const i=+iStr, d=perHouse[i], h=DB.houses[i];
+    if(!h) return;
+    // عنبر كل خاناته فاضية → تجاهل
+    const empty=!d.dead && !d.feed && !d.water && !d.eggs && !(d.note&&d.note.length);
+    if(empty){ skipped++; return; }
+    // تكرار نفس التاريخ؟
+    if(h.days.some(x=>x.date===date)){ dupes.push(h.name); return; }
+    const rec={
+      date,
+      dead:n0(d.dead),
+      feedBags:d.feed?Number(d.feed):null,
+      water:d.water?Number(d.water):null,
+      eggs:d.eggs?Number(d.eggs)*(DB.dishSize||30):null,
+      note:d.note||''
+    };
+    h.days.push(rec);
+    h.days.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
+    saved++;
+  });
+
+  if(dupes.length){
+    if(confirm('فيه تسجيل بنفس التاريخ في: '+dupes.join('، ')+'\n\nتضيفهم برضه؟')){
+      Object.keys(perHouse).forEach(iStr=>{
+        const i=+iStr, d=perHouse[i], h=DB.houses[i];
+        if(!h || !dupes.includes(h.name)) return;
+        const empty=!d.dead && !d.feed && !d.water && !d.eggs && !(d.note&&d.note.length);
+        if(empty) return;
+        const rec={date,dead:n0(d.dead),feedBags:d.feed?Number(d.feed):null,
+          water:d.water?Number(d.water):null,eggs:d.eggs?Number(d.eggs)*(DB.dishSize||30):null,note:d.note||''};
+        h.days.push(rec); h.days.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
+        saved++;
+      });
+    }
+  }
+
+  if(saved){
+    save();
+    toast(`✅ اتسجّل اليوم في ${saved} عنبر`+(skipped?` (${skipped} فاضي اتساب)`:''));
+    drawBulkForm(); drawDailyForm(); drawDaysTable(); refreshDailyHeader();
+  } else {
+    toast('مفيش أي عنبر متملّي','err');
+  }
+}
+
 function drawDailyForm(){
   const h=DB.houses[UI.dailyHouse]; const st=houseStats(h);
   const nextAge=(h.startAge||0)+h.days.length+1;
