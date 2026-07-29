@@ -159,7 +159,7 @@
 </div>
 
 <header class="app">
-  <h1>🌾 مخزون العلف <span style="font-size:10px;color:var(--acc);font-weight:800;vertical-align:super">v4</span></h1>
+  <h1>🌾 مخزون العلف <span style="font-size:10px;color:var(--acc);font-weight:800;vertical-align:super">v5</span></h1>
   <div class="hd-r">
     <div class="sync"><span class="dot" id="syncDot"></span><span id="syncTxt">محلي</span></div>
     <div class="who" id="who" onclick="logout()"></div>
@@ -168,6 +168,7 @@
 
 <nav class="tabs" id="tabs">
   <button class="active" data-page="bal">📋 الرصيد الحالي</button>
+  <button data-page="quick">⚡ جرد سريع</button>
   <button data-page="mov">🔄 وارد ومنصرف</button>
   <button data-page="raw">🎯 الخامات</button>
   <button data-page="po">🧾 أمر الشراء</button>
@@ -196,6 +197,21 @@
       <button class="btn-sm" style="width:100%;margin-top:8px" id="impBalBtn" onclick="document.getElementById('fBal').click()">⬆️ ارفع الأرصدة المعدّلة</button>
       <input type="file" id="fBal" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="impBal(this)">
       <div class="hint">نزّل الملف → عدّل عمود <b>الرصيد</b> → ارفعه تاني. الأصناف الجديدة بتتضاف، والموجودة بيتحدّث رصيدها <b>مع الحفاظ على المورد والمعدلات</b>.</div>
+    </div>
+  </div>
+
+
+  <!-- ============ جرد سريع ============ -->
+  <div class="page" id="page-quick">
+    <div class="card">
+      <h2>⚡ جرد سريع — تسجيل الأرصدة</h2>
+      <div class="hint">دخّل رصيد كل صنف ودوس <b>Enter</b> عشان تنزل للصنف اللي بعده. الأسهم ↑↓ بتتنقّل حرة. الاسم والمورد والسعر بتتعدّل من صفحة «الرصيد الحالي» بس.</div>
+      <input id="qq" placeholder="🔍 فلترة بالاسم أو المورد…" oninput="renderQuick()" style="margin:10px 0">
+      <div id="quickList"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn nav" id="quickSaveAll" onclick="saveQuickAll()">✅ حفظ كل التعديلات</button>
+        <span id="quickDirtyN" style="align-self:center;color:var(--gold);font-size:13px"></span>
+      </div>
     </div>
   </div>
 
@@ -1167,8 +1183,68 @@ function resetSeed(){
 }
 
 /* ================= تشغيل ================= */
+
+/* ================= الجرد السريع ================= */
+var quickDirty={};   /* itemId -> القيمة الجديدة (لسه ماتحفظتش) */
+function renderQuick(){
+  var q=norm($('qq')?$('qq').value:'');
+  var list=DB.items.filter(function(it){return !q||norm(it.name).indexOf(q)>-1||norm(it.sup).indexOf(q)>-1});
+  if(!list.length){$('quickList').innerHTML='<div class="empty"><div class="em">📋</div><h3>مفيش أصناف</h3></div>';return}
+  $('quickList').innerHTML=list.map(function(it,idx){
+    var cur=quickDirty.hasOwnProperty(it.id)?quickDirty[it.id]:it.stock;
+    var supTxt=it.sup?('🏢 '+esc(it.sup)):'<span style="color:var(--danger)">⚠️ مفيش مورد</span>';
+    return '<div class="it" style="display:flex;align-items:center;gap:10px;justify-content:space-between">'+
+      '<div style="flex:1;min-width:0"><div class="nm">'+esc(it.name)+'</div><div class="sub">'+supTxt+' • الوحدة: '+esc(it.unit||'')+'</div></div>'+
+      '<input class="qk-in" data-id="'+it.id+'" data-idx="'+idx+'" type="text" inputmode="decimal" '+
+        'value="'+ (cur!=null?fmt(cur,2):'') +'" style="width:120px;text-align:center;font-size:16px;font-weight:800;padding:10px 8px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--text)">'+
+      '</div>';
+  }).join('');
+  var ins=$('quickList').querySelectorAll('.qk-in');
+  for(var i=0;i<ins.length;i++){
+    ins[i].addEventListener('input',onQuickInput);
+    ins[i].addEventListener('keydown',onQuickKey);
+  }
+  updateQuickDirtyBadge();
+}
+function onQuickInput(e){
+  var el=e.target, id=el.dataset.id, v=el.value.trim();
+  var it=DB.items.filter(function(x){return x.id===id})[0]; if(!it) return;
+  var num=v===''?null:n2(v);
+  if(num===it.stock || (num==null && it.stock==null)){ delete quickDirty[id]; }
+  else { quickDirty[id]=num; }
+  updateQuickDirtyBadge();
+}
+function updateQuickDirtyBadge(){
+  var n=Object.keys(quickDirty).length;
+  $('quickDirtyN').textContent = n? (n+' صنف لسه محتاج حفظ') : '';
+}
+function onQuickKey(e){
+  var ins=Array.prototype.slice.call($('quickList').querySelectorAll('.qk-in'));
+  var i=ins.indexOf(e.target);
+  function go(ni){ if(ni>=0&&ni<ins.length){ e.preventDefault(); ins[ni].focus(); ins[ni].select(); } }
+  if(e.key==='Enter'){
+    if(e.ctrlKey||e.metaKey){ e.preventDefault(); saveQuickAll(); return; }
+    go(i+1<ins.length? i+1 : 0);   /* آخر صنف يلف لأول واحد */
+  }
+  else if(e.key==='ArrowDown'){ go(i+1); }
+  else if(e.key==='ArrowUp'){ go(i-1); }
+}
+function saveQuickAll(){
+  var ids=Object.keys(quickDirty);
+  if(!ids.length){ toast('مفيش تعديلات لسه'); return; }
+  if(!can('stock')){ toast('مالكش صلاحية تعديل الرصيد'); return; }
+  var n=0;
+  ids.forEach(function(id){
+    var it=DB.items.filter(function(x){return x.id===id})[0];
+    if(it){ it.stock=quickDirty[id]; n++; }
+  });
+  quickDirty={};
+  save(); renderAll(); renderQuick();
+  toast('✅ اتحفظ رصيد '+n+' صنف');
+}
+
 function renderAll(){
-  renderBal();renderRaw();renderPO();renderSups();renderMov();renderBk();
+  renderBal();renderRaw();renderPO();renderSups();renderMov();renderBk();renderQuick();
   fillMovItems();mvHint();
   if(can('user'))renderUsers();
   $('fbUrl').value=DB.fbUrl||'';
@@ -1187,6 +1263,7 @@ for(var i=0;i<tabs.length;i++){
     if(p==='po')renderPO();
     if(p==='mov'){fillMovItems();renderMov();mvHint()}
     if(p==='set')renderBk();
+    if(p==='quick'){quickDirty={};renderQuick();}
     window.scrollTo(0,0);
   });
 }
