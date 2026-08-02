@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض v2</title>
+<title>نظام إدارة مزرعة الدجاج البياض v3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -218,7 +218,17 @@ tbody tr:last-child td{border-bottom:none}
 .egg-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700;vertical-align:middle}
 .egg-badge.red{background:rgba(220,54,51,.16);color:#e5645f;border:1px solid rgba(220,54,51,.4)}
 .egg-badge.white{background:rgba(148,163,184,.16);color:#cbd5e1;border:1px solid rgba(148,163,184,.35)}
+
+.kpi-box{background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:12px 14px}
+.kpi-box .kl{font-size:11px;color:var(--muted2);margin-bottom:3px}
+.kpi-box .kv{font-size:21px;font-weight:800}
+.kpi-box .ks{font-size:11px;color:var(--muted);margin-top:2px}
 </style>
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D9%86%D8%B8%D8%A7%D9%85%20%D9%85%D8%B2%D8%A7%D8%B1%D8%B9%20%D8%A7%D9%84%D8%A8%D9%8A%D8%A7%D8%B6%22%2C%22short_name%22%3A%22%D8%A7%D9%84%D8%A8%D9%8A%D8%A7%D8%B6%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23e07a3f%22%2C%22dir%22%3A%22rtl%22%2C%22lang%22%3A%22ar%22%7D">
+<meta name="theme-color" content="#e07a3f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="البياض">
 </head>
 <body>
 <div class="app">
@@ -821,7 +831,7 @@ const MONTHS=['يناير','فبراير','مارس','أبريل','مايو','ي
 function save(){
   try{
     if(typeof saveORG==='function'){ saveORG(); }
-    else { localStorage.setItem(LS_KEY,JSON.stringify(DB)); if(typeof fbPush==='function') fbPush(DB); }
+    else { try{ localStorage.setItem(LS_KEY,JSON.stringify(DB)); }catch(e){} if(typeof fbPush==='function') fbPush(DB); }
     checkStorageHealth();
   }catch(e){
     // امتلأ التخزين أو فشل الحفظ — نحذّر بدل ما نفقد بيانات بصمت
@@ -956,7 +966,10 @@ function migrate(){
     DB.samehOfficialBalance=S.samehOfficialBalance||0;
     DB._samehv=1; changed=true;
   }
-  if(changed){ localStorage.setItem(LS_KEY,JSON.stringify(DB)); }
+  if(changed){ try{ localStorage.setItem(LS_KEY,JSON.stringify(DB)); }catch(e){
+    /* التخزين امتلأ — ننضّف تلقائي بدل ما نوقّف الإقلاع */
+    try{ pruneLocalStorage(); localStorage.setItem(LS_KEY,JSON.stringify(DB)); }catch(_e){}
+  } }
 }
 function seedFromExcel(){
   const S=window.FARM_SEED;
@@ -981,16 +994,45 @@ function seedFromExcel(){
 
 /* لقطة أمان محلية قبل تطبيق السحابة — آخر 10، كل دقيقتين بحد أقصى */
 let _lastCloudSnap = 0;
+
+/* ═══ تنظيف تلقائي عند امتلاء التخزين — بيشيل الأقدم والأقل أهمية أول ═══ */
+function pruneLocalStorage(){
+  try{
+    /* ١) لقطات السحابة: سيب آخر 3 بس بدل 10 (كل واحدة ممكن تكون مئات الكيلوبايت) */
+    try{
+      let snaps=JSON.parse(localStorage.getItem('layer_cloud_snaps')||'[]');
+      if(snaps.length>3){ snaps=snaps.slice(-3); localStorage.setItem('layer_cloud_snaps',JSON.stringify(snaps)); }
+    }catch(e){ try{localStorage.removeItem('layer_cloud_snaps')}catch(_){} }
+    /* ٢) النسخ الاحتياطية القديمة: سيب آخر 5 */
+    try{
+      if(typeof BK_KEY!=='undefined'){
+        let bk=JSON.parse(localStorage.getItem(BK_KEY)||'[]');
+        if(bk.length>5){ bk=bk.slice(-5); localStorage.setItem(BK_KEY,JSON.stringify(bk)); }
+      }
+    }catch(e){}
+    /* ٣) سجل العمليات: سيب آخر 100 بدل 500 وقت الضيق */
+    try{
+      if(DB && Array.isArray(DB.audit) && DB.audit.length>100){ DB.audit=DB.audit.slice(-100); }
+    }catch(e){}
+  }catch(e){}
+}
+/* بديل أخف للقطة الأمان — بيسجّل مزرعة نشطة بس مش كل الشركات، وأقل عدد */
+
 function snapshotBeforeCloudLayer(){
   if(Date.now() - _lastCloudSnap < 120000) return;
   if(!ORG || !ORG.companies) return;
   _lastCloudSnap = Date.now();
   try{
     let snaps = JSON.parse(localStorage.getItem('layer_cloud_snaps')||'[]');
-    snaps.push({ t: Date.now(), date: new Date().toLocaleString('ar-EG'), data: JSON.stringify(ORG) });
-    while(snaps.length > 10) snaps.shift();
+    /* المزرعة النشطة بس (مش كل الشركات/المزارع) — أصغر بكتير من ORG كامل */
+    const f=getActiveFarm();
+    snaps.push({ t: Date.now(), date: new Date().toLocaleString('ar-EG'),
+      farmId:f?f.id:null, farmName:f?f.name:'', data: JSON.stringify(f?f.db:ORG) });
+    while(snaps.length > 3) snaps.shift();   /* 3 بدل 10 */
     localStorage.setItem('layer_cloud_snaps', JSON.stringify(snaps));
-  }catch(e){}
+  }catch(e){
+    try{ pruneLocalStorage(); }catch(_e){}   /* لو فشلت، ننضّف ونسيب المحاولة دي */
+  }
 }
 
 function applyCloudData(val){
@@ -1015,12 +1057,19 @@ function applyCloudData(val){
 function houseStats(h){
   const days=h.days||[]; const sales=h.sales||[];
   let totDead=0,totEggs=0,totFeedBags=0,totWater=0,prodDays=0;
+  let totCull=0,totBroken=0,wtSum=0,wtN=0,lastEggWt=0;
   days.forEach(d=>{ totDead+=n0(d.dead); totEggs+=n0(d.eggs); totFeedBags+=n0(d.feedBags); totWater+=n0(d.water);
+    totCull+=n0(d.cull); totBroken+=n0(d.broken);
+    if(n0(d.eggWt)>0){ wtSum+=n0(d.eggWt); wtN++; lastEggWt=n0(d.eggWt); }
     if(n0(d.eggs)>0) prodDays++; });
   let totDishes=0,totMoney=0,totSaleEggs=0;
   sales.forEach(s=>{ totDishes+=n0(s.dishes); totMoney+=n0(s.dishes)*n0(s.dishPrice); totSaleEggs+=n0(s.dishes)*DB.dishSize; });
-  const remain=h.initial-totDead;
+  const remain=h.initial-totDead-totCull;          /* المتبقي = المبدئي − نافق − استبعاد */
   const totFeedKg=totFeedBags*(DB.feedBagKg||50);
+  const avgEggWt = wtN? wtSum/wtN : 0;              /* متوسط وزن البيضة (جم) */
+  const brokenPct = totEggs>0? totBroken/totEggs*100 : 0;
+  const sellableEggs = totEggs - totBroken;         /* البيض القابل للبيع فعلاً */
+  const cullPct = h.initial>0? totCull/h.initial*100 : 0;
   // علف لكل طائر باليوم (جرام): آخر يوم فيه علف
   let feedPerBird=0;
   for(let i=days.length-1;i>=0;i--){ if(n0(days[i].feedBags)>0){ const kg=n0(days[i].feedBags)*(DB.feedBagKg||50); feedPerBird=remain>0?kg*1000/remain:0; break; } }
@@ -1029,9 +1078,14 @@ function houseStats(h){
   for(let i=days.length-1;i>=0;i--){ if(n0(days[i].eggs)>0){ lastEggs=n0(days[i].eggs); lastProd=remain>0?lastEggs/remain*100:0; break; } }
   const inStockEggs=totEggs-totSaleEggs;
   const curAge=(h.startAge||0)+days.length;
+  /* كتلة البيض = %إنتاج × وزن البيضة ÷ 100 (جم/طائر/يوم) — أدق مؤشر إنتاجي */
+  const wtForMass = (lastEggWt||avgEggWt);
+  const eggMassDay = wtForMass? lastProd*wtForMass/100 : 0;
   return {totDead,totEggs,totFeedBags,totFeedKg,totWater,remain,prodDays,lastProd,lastEggs,
           totDishes,totMoney,totSaleEggs,inStockEggs,feedPerBird,curAge,days:days.length,
-          mortality:h.initial>0?totDead/h.initial*100:0};
+          mortality:h.initial>0?totDead/h.initial*100:0,
+          totCull,cullPct,totBroken,brokenPct,sellableEggs,avgEggWt,lastEggWt,eggMassDay,
+          totLoss:totDead+totCull, lossPct:h.initial>0?(totDead+totCull)/h.initial*100:0};
 }
 function farmStats(){
   let birds=0,initial=0,eggs=0,dishes=0,money=0,dead=0,feedKg=0,inStock=0;
@@ -1224,6 +1278,213 @@ function renderDaily(){
 }
 
 /* ===== تسجيل كل العنابر دفعة واحدة ===== */
+
+/* ═══════════ التحقق من منطقية القيم قبل الحفظ ═══════════
+   بيرجّع مصفوفة تحذيرات. مش بيمنع — بيسأل، لأن المربّي أدرى بمزرعته. */
+function validateDayRec(h, rec, prevDay){
+  const W=[];
+  const st=houseStats(h);
+  const birds=st.remain;
+  const loss=n0(rec.dead)+n0(rec.cull);
+  // ١) فاقد أكبر من الموجود
+  if(loss>birds) W.push(`الفاقد (${loss}) أكبر من الطيور الموجودة (${fmtN(birds)})`);
+  // ٢) فاقد يومي شاذ (أكتر من 1% في يوم)
+  else if(birds>0 && loss/birds*100 > 1) W.push(`فاقد اليوم ${(loss/birds*100).toFixed(2)}% — أعلى من 1% (طبيعي 0.02–0.05%)`);
+  // ٣) بيض أكتر من الطيور
+  if(rec.eggs!=null && birds>0 && rec.eggs > birds) W.push(`البيض (${fmtN(rec.eggs)}) أكتر من عدد الطيور (${fmtN(birds)}) — %إنتاج فوق 100`);
+  // ٤) مكسور أكتر من الإنتاج
+  if(rec.broken!=null && rec.eggs!=null && rec.broken > rec.eggs) W.push(`المكسور (${fmtN(rec.broken)}) أكتر من إنتاج اليوم`);
+  // ٥) نسبة كسر عالية
+  if(rec.broken!=null && rec.eggs>0){ const bp=rec.broken/rec.eggs*100;
+    if(bp>=8) W.push(`نسبة الكسر ${bp.toFixed(1)}% — مرتفعة جداً (راجع الكالسيوم/البطاريات/التجميع)`); }
+  // ٦) وزن البيضة خارج المعقول
+  if(rec.eggWt!=null && (rec.eggWt<35 || rec.eggWt>80)) W.push(`وزن البيضة ${rec.eggWt}جم خارج النطاق المنطقي (35–80)`);
+  // ٧) علف/طائر شاذ
+  if(rec.feedBags!=null && birds>0){ const g=n0(rec.feedBags)*(DB.feedBagKg||50)*1000/birds;
+    if(g>200) W.push(`العلف ${g.toFixed(0)} جم/طائر — أعلى بكتير من المعتاد (100–130)`);
+    else if(g>0 && g<50) W.push(`العلف ${g.toFixed(0)} جم/طائر — أقل بكتير من المعتاد (100–130)`); }
+  // ٨) نسبة مياه:علف
+  /* النسبة بترتفع طبيعياً مع الحرارة: 2:1 معتدل، وتوصل 3:1 في صيف مصر.
+     فالحد فوق 3.2 عشان مانصرخش كل يوم في الحر ونفقد مصداقية التنبيه. */
+  if(rec.water!=null && rec.feedBags){ const kg=n0(rec.feedBags)*(DB.feedBagKg||50); const r=n0(rec.water)/kg;
+    if(r>3.2) W.push(`مياه:علف = ${r.toFixed(2)} — مرتفعة حتى بمعيار الحر. تسريب؟ إسهال؟ ملوحة؟`);
+    else if(r<1.3 && r>0) W.push(`مياه:علف = ${r.toFixed(2)} — منخفضة (المتوقع 1.8–3.0). عطل نبل؟ ضغط مياه؟`); }
+  // ٩) إنذار المياه المبكر: تغيّر مفاجئ عن أمس
+  if(prevDay && rec.water!=null && n0(prevDay.water)>0){
+    const ch=(n0(rec.water)-n0(prevDay.water))/n0(prevDay.water)*100;
+    if(Math.abs(ch)>=15) W.push(`💧 إنذار مبكر: المياه ${ch>0?'قفزت':'وقعت'} ${Math.abs(ch).toFixed(0)}% عن أمس — ده أول علامة مرض قبل الأعراض بـ24–48 ساعة`);
+  }
+  return W;
+}
+/* يعرض التحذيرات ويسأل: أكمّل ولا أراجع؟ */
+function confirmWarnings(title, warnsByHouse){
+  const all=Object.keys(warnsByHouse).filter(k=>warnsByHouse[k].length);
+  if(!all.length) return true;
+  let msg=title+'\n\n';
+  all.forEach(k=>{ msg+='🏠 '+k+':\n'; warnsByHouse[k].forEach(w=>msg+='  • '+w+'\n'); msg+='\n'; });
+  msg+='تحب تسجّل برضه؟ (إلغاء = أراجع الأرقام)';
+  return confirm(msg);
+}
+
+
+/* ═══════════ الوزن الحي والتجانس ═══════════
+   عيّنة أسبوعية (30–100 طائر) → متوسط + تجانس + مقارنة بستاندرد لومان براون.
+   التجانس = % الطيور اللي وزنها داخل ±10% من المتوسط. أقل من 80% = مشكلة. */
+const LB_BODYWT = {  /* أسبوع: جرام — لومان براون كلاسيك */
+  6:520, 8:700, 10:860, 12:1010, 14:1160, 16:1330, 18:1500, 20:1630,
+  22:1720, 24:1790, 26:1840, 30:1900, 35:1950, 40:1980, 45:2000,
+  50:2020, 55:2035, 60:2050, 65:2060, 70:2070, 75:2075, 80:2080
+};
+function lbBodyStd(wk){
+  const ks=Object.keys(LB_BODYWT).map(Number).sort((a,b)=>a-b);
+  if(wk<=ks[0]) return LB_BODYWT[ks[0]];
+  if(wk>=ks[ks.length-1]) return LB_BODYWT[ks[ks.length-1]];
+  for(let i=0;i<ks.length-1;i++){
+    if(wk>=ks[i]&&wk<=ks[i+1]){
+      const t=(wk-ks[i])/(ks[i+1]-ks[i]);
+      return Math.round(LB_BODYWT[ks[i]]+t*(LB_BODYWT[ks[i+1]]-LB_BODYWT[ks[i]]));
+    }
+  }
+  return 0;
+}
+function ensureWeights(h){ if(!Array.isArray(h.weights)) h.weights=[]; return h; }
+/* يحسب التجانس من قائمة أوزان خام */
+function calcUniformity(list){
+  const w=list.filter(x=>x>0);
+  if(!w.length) return null;
+  const avg=w.reduce((a,b)=>a+b,0)/w.length;
+  const lo=avg*0.9, hi=avg*1.1;
+  const inRange=w.filter(x=>x>=lo&&x<=hi).length;
+  const sd=Math.sqrt(w.reduce((s,x)=>s+Math.pow(x-avg,2),0)/w.length);
+  return { n:w.length, avg:Math.round(avg), uniformity:+(inRange/w.length*100).toFixed(1),
+           cv:+(sd/avg*100).toFixed(1), min:Math.min(...w), max:Math.max(...w) };
+}
+function weightVerdict(u, wk){
+  const std=lbBodyStd(wk);
+  const dev=std? (u.avg-std)/std*100 : 0;
+  let msgs=[];
+  if(u.uniformity>=85) msgs.push({t:'ok', m:'التجانس ممتاز ('+u.uniformity+'%)'});
+  else if(u.uniformity>=80) msgs.push({t:'warn', m:'التجانس مقبول ('+u.uniformity+'%) — الهدف 85%+'});
+  else msgs.push({t:'bad', m:'التجانس ضعيف ('+u.uniformity+'%) — راجع مساحة المعالف والزحام. القطيع ده مش هيوصل قمة إنتاج موحّدة'});
+  if(std){
+    if(Math.abs(dev)<=3) msgs.push({t:'ok', m:'الوزن مطابق للستاندرد ('+std+'جم)'});
+    else if(dev<-3) msgs.push({t:'bad', m:'أقل من الستاندرد بـ'+Math.abs(dev).toFixed(1)+'% ('+std+'جم) — نقص طاقة أو ازدحام معالف'});
+    else msgs.push({t:'warn', m:'أعلى من الستاندرد بـ'+dev.toFixed(1)+'% ('+std+'جم) — زيادة دهن ممكن تقلل الإنتاج'});
+  }
+  if(u.cv>10) msgs.push({t:'warn', m:'معامل الاختلاف '+u.cv+'% مرتفع (الهدف أقل من 10%)'});
+  return {std, dev, msgs};
+}
+
+
+function drawBodyWeight(){
+  const box=$('#bwBox'); if(!box) return;
+  const h=ensureWeights(DB.houses[UI.healthHouse]);
+  const wkNow=Math.floor(((h.startAge||0)+(h.days||[]).length)/7);
+  const hist=(h.weights||[]).slice().sort((a,b)=>(a.wk||0)-(b.wk||0));
+  const last=hist.length?hist[hist.length-1]:null;
+
+  let cards='';
+  if(last){
+    const v=weightVerdict(last, last.wk);
+    const col = last.uniformity>=85?'#1a8f3c':(last.uniformity>=80?'#b45309':'#dc2626');
+    const devCol = Math.abs(v.dev)<=3?'#1a8f3c':(v.dev<0?'#dc2626':'#b45309');
+    cards=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px">
+      <div class="kpi-box"><div class="kl">متوسط الوزن</div><div class="kv">${fmtN(last.avg)} <span style="font-size:12px">جم</span></div><div class="ks">أسبوع ${last.wk} • عيّنة ${last.n}</div></div>
+      <div class="kpi-box"><div class="kl">الستاندرد</div><div class="kv">${fmtN(v.std)} <span style="font-size:12px">جم</span></div><div class="ks" style="color:${devCol}">${v.dev>0?'+':''}${v.dev.toFixed(1)}%</div></div>
+      <div class="kpi-box"><div class="kl">التجانس</div><div class="kv" style="color:${col}">${last.uniformity}%</div><div class="ks">الهدف 85%+</div></div>
+      <div class="kpi-box"><div class="kl">معامل الاختلاف</div><div class="kv">${last.cv}%</div><div class="ks">${last.min}–${last.max} جم</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px">
+      ${v.msgs.map(m=>`<div style="padding:9px 12px;border-radius:9px;font-size:13px;line-height:1.7;
+        background:${m.t==='ok'?'rgba(26,143,60,.10)':(m.t==='warn'?'rgba(180,83,9,.10)':'rgba(220,38,38,.10)')};
+        color:${m.t==='ok'?'#1a8f3c':(m.t==='warn'?'#b45309':'#dc2626')};
+        border:1px solid ${m.t==='ok'?'rgba(26,143,60,.28)':(m.t==='warn'?'rgba(180,83,9,.28)':'rgba(220,38,38,.28)')}">
+        ${m.t==='ok'?'✓':(m.t==='warn'?'⚠️':'⛔')} ${esc(m.m)}</div>`).join('')}
+    </div>`;
+  } else {
+    cards=`<div style="padding:14px;border-radius:10px;background:var(--panel2);color:var(--muted);font-size:13px;margin-bottom:14px">
+      لسه مفيش وزنات مسجّلة. سجّل أول عيّنة تحت — الوزن الحي والتجانس بيتنبّئوا بأداء القطيع لحد نهاية الدورة.</div>`;
+  }
+
+  const rows=hist.slice().reverse().map((w,ri)=>{
+    const v=weightVerdict(w,w.wk);
+    const col=w.uniformity>=85?'#1a8f3c':(w.uniformity>=80?'#b45309':'#dc2626');
+    return `<tr><td><b>${w.wk}</b></td><td class="num">${fmtN(w.avg)}</td><td class="num" style="color:var(--muted)">${fmtN(v.std)}</td>
+      <td class="num" style="color:${Math.abs(v.dev)<=3?'#1a8f3c':(v.dev<0?'#dc2626':'#b45309')}">${v.dev>0?'+':''}${v.dev.toFixed(1)}%</td>
+      <td class="num" style="color:${col};font-weight:700">${w.uniformity}%</td><td class="num">${w.cv}%</td>
+      <td class="num" style="color:var(--muted)">${w.n}</td><td style="font-size:11px;color:var(--muted)">${esc(w.date||'')}</td>
+      <td><button class="btn sm danger" data-delw="${hist.length-1-ri}">🗑</button></td></tr>`;
+  }).join('');
+
+  box.innerHTML=`<div style="padding:16px 18px">
+    ${cards}
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px">➕ تسجيل عيّنة وزن جديدة</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;align-items:end;margin-bottom:10px">
+        <div class="field"><label>📅 التاريخ</label><input class="input" type="date" id="bw_date" value="${todayISO()}"></div>
+        <div class="field"><label>الأسبوع</label><input class="input" type="number" id="bw_wk" value="${wkNow}" min="1"></div>
+      </div>
+      <div class="field"><label>أوزان الطيور بالجرام — افصلهم بمسافة أو فاصلة أو سطر</label>
+        <textarea class="input" id="bw_list" rows="3" placeholder="مثال: 1850 1920 1780 1990 1830 ..." style="font-family:monospace;direction:ltr;text-align:left"></textarea></div>
+      <div id="bw_preview" style="font-size:12.5px;color:var(--muted);margin:8px 0;min-height:18px"></div>
+      <button class="btn green" id="bw_save" style="height:42px">💾 احفظ العيّنة</button>
+    </div>
+    ${hist.length?`<div class="tbl-wrap"><table>
+      <thead><tr><th>أسبوع</th><th>المتوسط</th><th>الستاندرد</th><th>الفرق</th><th>التجانس</th><th>CV%</th><th>العيّنة</th><th>التاريخ</th><th></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`:''}
+  </div>`;
+
+  const parseList=()=> ($('#bw_list').value||'').split(/[\s,،;]+/).map(x=>parseFloat(x)).filter(x=>!isNaN(x)&&x>0);
+  $('#bw_list').oninput=()=>{
+    const u=calcUniformity(parseList());
+    $('#bw_preview').innerHTML = u
+      ? `عدد ${u.n} طائر • متوسط <b>${u.avg}</b> جم • تجانس <b style="color:${u.uniformity>=85?'#1a8f3c':(u.uniformity>=80?'#b45309':'#dc2626')}">${u.uniformity}%</b> • CV ${u.cv}% • من ${u.min} لـ ${u.max}`
+      : '';
+  };
+  $('#bw_save').onclick=()=>{
+    const list=parseList();
+    if(list.length<10){ toast('محتاج 10 أوزان على الأقل (الأفضل 30–100)','err'); return; }
+    const u=calcUniformity(list); const wk=+$('#bw_wk').value||wkNow;
+    ensureWeights(h);
+    h.weights.push({date:$('#bw_date').value||todayISO(), wk, n:u.n, avg:u.avg,
+      uniformity:u.uniformity, cv:u.cv, min:u.min, max:u.max, raw:list});
+    h.weights.sort((a,b)=>(a.wk||0)-(b.wk||0));
+    auditLog('عيّنة وزن', `${h.name} — أسبوع ${wk} — متوسط ${u.avg}جم — تجانس ${u.uniformity}%`);
+    save(); toast('✅ اتسجّلت عيّنة الوزن'); drawBodyWeight();
+  };
+  box.querySelectorAll('[data-delw]').forEach(b=>b.onclick=()=>{
+    if(confirm('حذف عيّنة الوزن دي؟')){ h.weights.splice(+b.dataset.delw,1); save(); drawBodyWeight(); }
+  });
+}
+
+
+/* ═══════════ تدريج البيض حسب الوزن (المعيار المصري/الأوروبي) ═══════════ */
+const EGG_GRADES=[
+  {k:'XL', ar:'جامبو XL',  min:73, max:999, col:'#7c3aed'},
+  {k:'L',  ar:'كبير L',    min:63, max:73,  col:'#2563eb'},
+  {k:'M',  ar:'وسط M',     min:53, max:63,  col:'#1a8f3c'},
+  {k:'S',  ar:'صغير S',    min:0,  max:53,  col:'#b45309'}
+];
+function gradeOfWeight(g){
+  if(!g||g<=0) return null;
+  return EGG_GRADES.find(x=>g>=x.min&&g<x.max) || EGG_GRADES[EGG_GRADES.length-1];
+}
+
+
+/* ═══════════ سجل مين سجّل إيه — آخر 500 عملية ═══════════ */
+function currentUserName(){
+  try{ return localStorage.getItem('layer_user')|| (DB.currentUser||'') || 'غير محدد'; }catch(e){ return 'غير محدد'; }
+}
+function setCurrentUser(name){ try{ localStorage.setItem('layer_user',name||''); }catch(e){} }
+function auditLog(action, detail){
+  try{
+    if(!Array.isArray(DB.audit)) DB.audit=[];
+    DB.audit.push({ t:Date.now(), when:new Date().toLocaleString('ar-EG'),
+      who:currentUserName(), farm:(getActiveFarm()&&getActiveFarm().name)||'', act:action, det:detail||'' });
+    while(DB.audit.length>500) DB.audit.shift();
+  }catch(e){}
+}
+
 function drawBulkForm(){
   const box=$('#bulkForm'); if(!box) return;
   // تاريخ افتراضي: اليوم التالي لأحدث آخر يوم عبر كل العنابر
@@ -1278,7 +1539,7 @@ function drawBulkForm(){
    - الأسهم ↑↓ نفس العمود، ←→ الصف الحالي
    - الأسهم بتشتغل عادي جوّه الرقم (نقر بره الرقم) */
 function bindBulkKeys(){
-  const fields=['dead','feed','water','eggs','note'];   // ترتيب الأعمدة يمين←شمال بصرياً
+  const fields=['dead','cull','feed','water','eggs','broken','eggWt','note'];   // ترتيب الأعمدة
   const nHouses=DB.houses.length;
   function getEl(i,f){ return document.querySelector('.bulk-in[data-i="'+i+'"][data-f="'+f+'"]'); }
   function focusEl(t){ if(t){ t.focus(); if(t.select){ try{t.select()}catch(_){} } } }
@@ -1334,21 +1595,38 @@ function saveBulkDay(){
     if(!perHouse[i]) perHouse[i]={};
     perHouse[i][f]=v;
   });
+  // ═══ تحقق منطقي قبل أي حفظ ═══
+  const warns={};
+  Object.keys(perHouse).forEach(iStr=>{
+    const i=+iStr, d=perHouse[i], h=DB.houses[i]; if(!h) return;
+    const empty=!d.dead && !d.cull && !d.feed && !d.water && !d.eggs && !d.broken && !d.eggWt && !(d.note&&d.note.length);
+    if(empty) return;
+    const test={dead:n0(d.dead),cull:n0(d.cull),feedBags:d.feed?Number(d.feed):null,
+      water:d.water?Number(d.water):null,eggs:d.eggs?Number(d.eggs)*(DB.dishSize||30):null,
+      broken:d.broken?Number(d.broken):null,eggWt:d.eggWt?Number(d.eggWt):null};
+    const prev=h.days.length?h.days[h.days.length-1]:null;
+    warns[h.name]=validateDayRec(h,test,prev);
+  });
+  if(!confirmWarnings('⚠️ فيه أرقام محتاجة مراجعة:', warns)) return;
+
   let saved=0, skipped=0, dupes=[];
   Object.keys(perHouse).forEach(iStr=>{
     const i=+iStr, d=perHouse[i], h=DB.houses[i];
     if(!h) return;
     // عنبر كل خاناته فاضية → تجاهل
-    const empty=!d.dead && !d.feed && !d.water && !d.eggs && !(d.note&&d.note.length);
+    const empty=!d.dead && !d.cull && !d.feed && !d.water && !d.eggs && !d.broken && !d.eggWt && !(d.note&&d.note.length);
     if(empty){ skipped++; return; }
     // تكرار نفس التاريخ؟
     if(h.days.some(x=>x.date===date)){ dupes.push(h.name); return; }
     const rec={
       date,
       dead:n0(d.dead),
+      cull:n0(d.cull),
       feedBags:d.feed?Number(d.feed):null,
       water:d.water?Number(d.water):null,
       eggs:d.eggs?Number(d.eggs)*(DB.dishSize||30):null,
+      broken:d.broken?Number(d.broken):null,
+      eggWt:d.eggWt?Number(d.eggWt):null,
       note:d.note||''
     };
     h.days.push(rec);
@@ -1361,10 +1639,11 @@ function saveBulkDay(){
       Object.keys(perHouse).forEach(iStr=>{
         const i=+iStr, d=perHouse[i], h=DB.houses[i];
         if(!h || !dupes.includes(h.name)) return;
-        const empty=!d.dead && !d.feed && !d.water && !d.eggs && !(d.note&&d.note.length);
+        const empty=!d.dead && !d.cull && !d.feed && !d.water && !d.eggs && !d.broken && !d.eggWt && !(d.note&&d.note.length);
         if(empty) return;
-        const rec={date,dead:n0(d.dead),feedBags:d.feed?Number(d.feed):null,
-          water:d.water?Number(d.water):null,eggs:d.eggs?Number(d.eggs)*(DB.dishSize||30):null,note:d.note||''};
+        const rec={date,dead:n0(d.dead),cull:n0(d.cull),feedBags:d.feed?Number(d.feed):null,
+          water:d.water?Number(d.water):null,eggs:d.eggs?Number(d.eggs)*(DB.dishSize||30):null,
+          broken:d.broken?Number(d.broken):null,eggWt:d.eggWt?Number(d.eggWt):null,note:d.note||''};
         h.days.push(rec); h.days.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
         saved++;
       });
@@ -1372,6 +1651,7 @@ function saveBulkDay(){
   }
 
   if(saved){
+    auditLog('تسجيل يومي', `${date} — ${saved} عنبر`);
     save();
     toast(`✅ اتسجّل اليوم في ${saved} عنبر`+(skipped?` (${skipped} فاضي اتساب)`:''));
     drawBulkForm(); drawDailyForm(); drawDaysTable(); refreshDailyHeader();
@@ -1390,9 +1670,12 @@ function drawDailyForm(){
     <div style="padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;align-items:end">
       <div class="field"><label>📅 التاريخ</label><input class="input" type="date" id="d_date" value="${defDate}"></div>
       <div class="field"><label>💀 النافق (فرخ)</label><input class="input" type="number" id="d_dead" placeholder="0" min="0"></div>
+      <div class="field"><label>♻️ الاستبعاد (فرخ)</label><input class="input" type="number" id="d_cull" placeholder="0" min="0"></div>
       <div class="field"><label>🌾 العلف (شيكارة ${DB.feedBagKg}كجم)</label><input class="input" type="number" id="d_feed" placeholder="0" step="any"></div>
       <div class="field"><label>💧 المياه (لتر)</label><input class="input" type="number" id="d_water" placeholder="0" step="any"></div>
       <div class="field"><label>🥚 البيض (طبق)</label><input class="input" type="number" id="d_eggs" placeholder="0" step="any"></div>
+      <div class="field"><label>💔 المكسور (بيضة)</label><input class="input" type="number" id="d_broken" placeholder="0" step="any"></div>
+      <div class="field"><label>⚖️ وزن البيضة (جم)</label><input class="input" type="number" id="d_eggwt" placeholder="اختياري" step="any"></div>
       <div class="field"><label>📝 ملاحظة</label><input class="input" id="d_note" placeholder="اختياري"></div>
       <button class="btn green" id="d_save" style="height:42px">➕ إضافة اليوم</button>
       <button class="btn" id="d_paste" style="height:42px">📋 لصق من إكسل</button>
@@ -1405,11 +1688,18 @@ function drawDailyForm(){
   $('#d_save').onclick=()=>{
     const date=$('#d_date').value; if(!date){ toast('اختر التاريخ','err'); return; }
     if(h.days.some(d=>d.date===date)){ if(!confirm('فيه تسجيل بنفس التاريخ. تضيف برضه؟')) return; }
-    const rec={date,dead:n0($('#d_dead').value),feedBags:$('#d_feed').value?Number($('#d_feed').value):null,
+    const rec={date,dead:n0($('#d_dead').value),cull:n0($('#d_cull').value),
+      feedBags:$('#d_feed').value?Number($('#d_feed').value):null,
       water:$('#d_water').value?Number($('#d_water').value):null,
       eggs:$('#d_eggs').value?Number($('#d_eggs').value)*(DB.dishSize||30):null,
+      broken:$('#d_broken').value?Number($('#d_broken').value):null,
+      eggWt:$('#d_eggwt').value?Number($('#d_eggwt').value):null,
       note:$('#d_note').value};
+    const _prev=h.days.length?h.days[h.days.length-1]:null;
+    const _w={}; _w[h.name]=validateDayRec(h,rec,_prev);
+    if(!confirmWarnings('⚠️ فيه أرقام محتاجة مراجعة:',_w)) return;
     h.days.push(rec); h.days.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
+    auditLog('تسجيل يوم', `${h.name} — ${date}`);
     save(); toast('تمت إضافة اليوم'); drawDailyForm(); drawDaysTable(); refreshDailyHeader();
   };
   $('#d_paste').onclick=()=>pasteExcelModal();
@@ -1477,31 +1767,43 @@ function drawDaysTable(){
   if(q) idxList=idxList.filter(i=>h.days[i].date.includes(q));
   if(!idxList.length){ $('#daysTbl').innerHTML=`<div class="empty"><div class="big">📭</div>لا أيام مسجّلة</div>`; return; }
   // حساب إجمالي النافق التراكمي حتى كل يوم
-  let cumDead=0; const cumMap={};
-  h.days.forEach((d,i)=>{ cumDead+=n0(d.dead); cumMap[i]={cumDead, remain:h.initial-cumDead}; });
+  let cumDead=0, cumCull=0; const cumMap={};
+  h.days.forEach((d,i)=>{ cumDead+=n0(d.dead); cumCull+=n0(d.cull);
+    cumMap[i]={cumDead, cumCull, remain:h.initial-cumDead-cumCull}; });
   $('#daysTbl').innerHTML=`<div class="tbl-wrap" id="daysScroll" style="max-height:68vh;overflow:auto"><table>
-    <thead><tr><th>التاريخ</th><th>العمر</th><th>💀 نافق</th><th>إجمالي نافق</th><th>نافق%</th><th>المتبقي</th>
-      <th>🌾 علف(شيكارة)</th><th>علف(كجم)</th><th>علف/طائر(جم)</th><th>💧 مياه(لتر)</th><th>🥚 بيض(طبق)</th><th>بيض(عدد)</th><th>%إنتاج</th><th>📝</th><th></th></tr></thead>
+    <thead><tr><th>التاريخ</th><th>العمر</th><th>💀 نافق</th><th>♻️ استبعاد</th><th>إجمالي فاقد</th><th>فاقد%</th><th>المتبقي</th>
+      <th>🌾 علف(شيكارة)</th><th>علف(كجم)</th><th>علف/طائر(جم)</th><th>💧 مياه(لتر)</th><th>مياه:علف</th><th>🥚 بيض(طبق)</th><th>بيض(عدد)</th><th>%إنتاج</th><th>💔 مكسور</th><th>كسر%</th><th>⚖️ وزن(جم)</th><th>كتلة بيض</th><th>📝</th><th></th></tr></thead>
     <tbody>${idxList.map(i=>{ const d=h.days[i]; const cm=cumMap[i];
       const age=(h.startAge||0)+i+1;
       const feedKg=n0(d.feedBags)*(DB.feedBagKg||50);
       const fpb=cm.remain>0&&d.feedBags?(feedKg*1000/cm.remain).toFixed(1):'';
       const prod=cm.remain>0&&n0(d.eggs)?(n0(d.eggs)/cm.remain*100).toFixed(1):'';
-      const deadPct=(cm.cumDead/h.initial*100).toFixed(2);
+      const lossPct=((cm.cumDead+cm.cumCull)/h.initial*100).toFixed(2);
+      const wf = (d.water!=null&&feedKg>0)? (n0(d.water)/feedKg).toFixed(2) : '';
+      const brPct = (d.broken!=null&&n0(d.eggs)>0)? (n0(d.broken)/n0(d.eggs)*100).toFixed(1) : '';
+      const emass = (d.eggWt&&prod)? (Number(prod)*n0(d.eggWt)/100).toFixed(1) : '';
+      const brCol = brPct? (Number(brPct)>=6?'#dc2626':(Number(brPct)>=4?'#b45309':'#1a8f3c')) : 'var(--muted)';
+      const wfCol = wf? ((Number(wf)>2.4||Number(wf)<1.6)?'#dc2626':'#0891b2') : 'var(--muted)';
       return `<tr data-i="${i}">
         <td><span class="cell-edit" data-f="date"><b>${esc(d.date)}</b></span></td>
         <td class="num c-age">${age}</td>
         <td class="num"><span class="cell-edit" data-f="dead">${d.dead||0}</span></td>
-        <td class="num c-cumdead" style="color:#dc2626">${cm.cumDead}</td>
-        <td class="num c-deadpct" style="color:#dc2626">${deadPct}%</td>
+        <td class="num"><span class="cell-edit" data-f="cull" style="color:#b45309">${d.cull||0}</span></td>
+        <td class="num c-cumdead" style="color:#dc2626">${cm.cumDead+cm.cumCull}</td>
+        <td class="num c-deadpct" style="color:#dc2626">${lossPct}%</td>
         <td class="num c-remain" style="color:#1a8f3c">${fmtN(cm.remain)}</td>
         <td class="num"><span class="cell-edit" data-f="feedBags">${d.feedBags!=null?d.feedBags:'—'}</span></td>
         <td class="num c-feedkg">${d.feedBags!=null?fmtN(feedKg):'—'}</td>
         <td class="num c-fpb" style="color:#2563eb">${fpb||'—'}</td>
         <td class="num"><span class="cell-edit" data-f="water">${d.water!=null?fmtN(d.water):'—'}</span></td>
+        <td class="num" style="color:${wfCol}">${wf||'—'}</td>
         <td class="num"><span class="cell-edit" data-f="eggsDish">${d.eggs!=null?fmtN(d.eggs/(DB.dishSize||30)):'—'}</span></td>
         <td class="num c-eggnum" style="color:var(--muted)">${d.eggs!=null?fmtN(d.eggs):'—'}</td>
         <td class="num c-prod" style="color:#b45309">${prod?prod+'%':'—'}</td>
+        <td class="num"><span class="cell-edit" data-f="broken">${d.broken!=null?fmtN(d.broken):'—'}</span></td>
+        <td class="num" style="color:${brCol};font-weight:700">${brPct?brPct+'%':'—'}</td>
+        <td class="num"><span class="cell-edit" data-f="eggWt">${d.eggWt!=null?d.eggWt:'—'}</span></td>
+        <td class="num" style="color:#7c3aed">${emass||'—'}</td>
         <td style="max-width:110px;white-space:normal;font-size:11px;color:var(--muted)"><span class="cell-edit" data-f="note">${esc(d.note||'')||'—'}</span></td>
         <td><button class="btn sm danger" data-del="${i}">🗑</button></td></tr>`;
     }).join('')}</tbody>
@@ -1553,6 +1855,7 @@ function inlineEditDay(el,idx,field){
     else if(field==='feedBags'){ d.feedBags=v; }
     else if(field==='water'){ d.water=v; }
     else if(field==='dead'){ d.dead=(v==null?0:v); }
+    else if(field==='cull'){ d.cull=(v==null?0:v); }
     else { d[field]=v; }
     scheduleSave();
     // اقفل صندوق الإدخال ورجّع الخانة نص (كانت بتفضل مفتوحة)
@@ -1560,13 +1863,17 @@ function inlineEditDay(el,idx,field){
     else if(field==='feedBags') el.textContent=(d.feedBags!=null?d.feedBags:'—');
     else if(field==='water') el.textContent=(d.water!=null?fmtN(d.water):'—');
     else if(field==='dead') el.textContent=(d.dead||0);
-    // تحديث موضعي انتقائي: النافق بيأثر على الأيام اللي بعده بس، وباقي الحقول على صفها فقط
+    else if(field==='cull') el.textContent=(d.cull||0);
+    else if(field==='broken') el.textContent=(d.broken!=null?fmtN(d.broken):'—');
+    else if(field==='eggWt') el.textContent=(d.eggWt!=null?d.eggWt:'—');
+    // النافق والاستبعاد بيأثروا على المتبقي لكل الأيام اللي بعدهم → إعادة رسم كاملة
+    if(field==='cull'){ scheduleSave(); redrawDaysKeepScroll(); refreshDailyHeader(); return; }
     updateComputedCells(idx, field);
     if(field==='dead') refreshDailyHeader();
   };
   inp.onblur=commit;
   // تنقّل زي الإكسل: Enter ينزل لنفس العمود في الصف التالي، Tab يتحرك للخانة الجنبية
-  const FIELD_ORDER=['dead','feedBags','water','eggsDish'];
+  const FIELD_ORDER=['dead','cull','feedBags','water','eggsDish','broken','eggWt'];
   const openCell=(tr,f)=>{ if(!tr) return; const c=tr.querySelector('.cell-edit[data-f="'+f+'"]'); if(c) setTimeout(()=>c.click(),0); };
   const nav=(e)=>{
     const tr=el.closest('tr'); if(!tr) return;
@@ -1724,23 +2031,41 @@ function renderSales(){
         <div class="field"><label>🥚 نوع البيض</label><select class="input" id="sl_color"><option>احمر</option><option>ابيض</option></select></div>
         <div class="field"><label>🧑‍💼 التاجر (المشتري)</label><select class="input" id="sl_trader">${(DB.traders||[]).map(t=>`<option>${esc(t)}</option>`).join('')||'<option value="">—</option>'}</select></div>
         <div class="field"><label>📦 عدد الأطباق</label><input class="input" type="number" id="sl_dishes" placeholder="0" step="any"></div>
+        <div class="field"><label>📏 الدرجة (الحجم)</label><select class="input" id="sl_grade">
+          <option value="">— غير محدد —</option>
+          ${EGG_GRADES.map(g=>`<option value="${g.k}">${g.ar} (${g.min||''}${g.max<999?'–'+g.max:'+'} جم)</option>`).join('')}
+        </select></div>
         <div class="field"><label>💵 سعر الطبق</label><input class="input" type="number" id="sl_price" placeholder="0" step="any"></div>
         <button class="btn green" id="sl_save" style="height:42px">➕ تسجيل البيع</button>
       </div>
-      <div style="padding:0 18px 16px;font-size:12.5px;color:var(--muted)">💡 الطبق = ${DB.dishSize} بيضة. البيع بيتخصم من مخزون العنبر اللي تختاره.</div>
+      <div style="padding:0 18px 16px;font-size:12.5px;color:var(--muted)">💡 الطبق = ${DB.dishSize} بيضة. البيع بيتخصم من مخزون العنبر اللي تختاره.<span id="sl_gradeHint"></span></div>
     </div>
     <div class="panel"><div class="panel-head"><h3>📋 سجل المبيعات</h3></div>
       ${allSales.length?`<div class="tbl-wrap"><table>
-        <thead><tr><th>التاريخ</th><th>العنبر</th><th>التاجر</th><th>النوع</th><th>الأطباق</th><th>سعر الطبق</th><th>المبلغ</th><th></th></tr></thead>
+        <thead><tr><th>التاريخ</th><th>العنبر</th><th>التاجر</th><th>النوع</th><th>الدرجة</th><th>الأطباق</th><th>سعر الطبق</th><th>المبلغ</th><th></th></tr></thead>
         <tbody>${allSales.map(s=>`<tr data-hi="${s.hi}" data-si="${s.si}">
           <td><span class="cell-edit" data-f="date"><b>${esc(s.date)}</b></span></td><td>${esc(s.house)}</td>
           <td><span class="cell-edit" data-f="trader">${s.trader?esc(s.trader):'<span class="pill gray">غير محدد</span>'}</span></td>
           <td><span class="cell-edit" data-f="eggColor"><span class="pill ${s.eggColor==='ابيض'?'gray':'red'}">${esc(s.eggColor||'احمر')}</span></span></td>
+          <td>${(()=>{const g=EGG_GRADES.find(x=>x.k===s.grade); return g?`<span class="pill" style="background:${g.col}22;color:${g.col};border:1px solid ${g.col}55">${g.ar}</span>`:'<span style="color:var(--muted)">—</span>';})()}</td>
           <td class="num"><span class="cell-edit" data-f="dishes">${fmtN(s.dishes)}</span></td>
           <td class="num"><span class="cell-edit" data-f="dishPrice">${s.dishPrice}</span></td><td class="num" style="color:#1a8f3c;font-weight:700">${fmtMoney(n0(s.dishes)*n0(s.dishPrice))}</td>
           <td><button class="btn sm danger" data-h="${s.hi}" data-s="${s.si}">🗑</button></td></tr>`).join('')}</tbody>
       </table></div>`:`<div class="empty"><div class="big">💰</div>لا مبيعات مسجّلة</div>`}
     </div>`;
+  // اقتراح الدرجة من آخر وزن بيضة مسجّل في العنبر
+  const sugGrade=()=>{
+    const hv=$('#sl_house').value; if(hv==='') return;
+    const hh=DB.houses[+hv]; if(!hh) return;
+    const stg=houseStats(hh); const w=stg.lastEggWt||stg.avgEggWt;
+    const g=gradeOfWeight(w);
+    const hint=$('#sl_gradeHint');
+    if(g&&hint){ hint.innerHTML=` • ⚖️ متوسط وزن البيضة <b>${w.toFixed(1)}</b> جم ← الدرجة المقترحة <b style="color:${g.col}">${g.ar}</b>`;
+      const sel=$('#sl_grade'); if(sel&&!sel.value) sel.value=g.k; }
+    else if(hint) hint.innerHTML='';
+  };
+  if($('#sl_house')) $('#sl_house').addEventListener('change',sugGrade);
+  sugGrade();
   $('#sl_save').onclick=()=>{
     const hi=$('#sl_house').value; if(hi===''){ toast('لا يوجد بيض متاح للبيع','err'); return; }
     const dishes=parseFloat($('#sl_dishes').value), price=parseFloat($('#sl_price').value);
@@ -1750,7 +2075,7 @@ function renderSales(){
     const needEggs=dishes*DB.dishSize;
     if(needEggs>st.inStockEggs){ if(!confirm(`الكمية (${fmtN(needEggs)} بيضة) أكبر من المخزون المتاح (${fmtN(st.inStockEggs)}). تسجّل برضه؟`)) return; }
     h.sales=h.sales||[];
-    h.sales.push({date:$('#sl_date').value,dishes,eggColor:$('#sl_color').value,dishPrice:price,trader:$('#sl_trader').value});
+    h.sales.push({date:$('#sl_date').value,dishes,eggColor:$('#sl_color').value,dishPrice:price,trader:$('#sl_trader').value, grade:($('#sl_grade')?$('#sl_grade').value:'')});
     h.sales.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
     save(); toast('تم تسجيل البيع'); renderSales();
   };
@@ -2367,7 +2692,30 @@ function listBox(title,key){
     </div></div>`;
 }
 function renderSettings(){
+  const _aud=(DB.audit||[]).slice().reverse().slice(0,60);
   $('#page-settings').innerHTML=`
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><h3>👤 اسمك (بيتسجّل مع كل عملية)</h3></div>
+      <div style="padding:16px 18px">
+        <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:180px"><label>الاسم</label>
+            <input class="input" id="st_user" value="${esc(currentUserName()==='غير محدد'?'':currentUserName())}" placeholder="مثال: محمد الصادق"></div>
+          <button class="btn primary" id="st_userSave" style="height:42px">💾 حفظ</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.8">
+          الاسم ده بيتحفظ على الجهاز ده بس، وبيتسجّل مع كل تسجيل يومي أو عيّنة وزن — عشان بعد سنة تعرف مين دخّل أي رقم.</div>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><h3>📜 سجل العمليات (آخر 60)</h3>
+        <button class="btn sm" id="st_audClear">🗑 مسح السجل</button></div>
+      ${_aud.length?`<div class="tbl-wrap" style="max-height:300px;overflow:auto"><table>
+        <thead><tr><th>الوقت</th><th>مين</th><th>المزرعة</th><th>العملية</th><th>التفاصيل</th></tr></thead>
+        <tbody>${_aud.map(a=>`<tr><td style="font-size:11px;white-space:nowrap">${esc(a.when||'')}</td>
+          <td><b>${esc(a.who||'')}</b></td><td style="font-size:11px;color:var(--muted)">${esc(a.farm||'')}</td>
+          <td>${esc(a.act||'')}</td><td style="font-size:11.5px;color:var(--muted)">${esc(a.det||'')}</td></tr>`).join('')}</tbody>
+      </table></div>`:'<div class="empty" style="padding:26px"><div class="big">📜</div>لسه مفيش عمليات مسجّلة</div>'}
+    </div>`+`
     <div class="panel" style="margin-bottom:16px"><div class="panel-head"><h3>🥚 إعدادات عامة</h3></div>
       <div style="padding:16px 18px;display:flex;gap:14px;flex-wrap:wrap;align-items:end">
         <div class="field"><label>حجم الطبق (بيضة)</label><input class="input" type="number" id="s_dish" value="${DB.dishSize}" style="width:130px"></div>
@@ -2396,6 +2744,8 @@ function renderSettings(){
         <button class="btn" id="resetSeed">🔄 إعادة تحميل بيانات الإكسل الأصلية</button>
         <button class="btn danger" id="wipeAll">🗑 مسح كل البيانات</button>
       </div></div>`;
+  if($('#st_userSave')) $('#st_userSave').onclick=()=>{ setCurrentUser($('#st_user').value.trim()); toast('✅ اتحفظ الاسم'); };
+  if($('#st_audClear')) $('#st_audClear').onclick=()=>{ if(confirm('مسح سجل العمليات كله؟')){ DB.audit=[]; save(); renderSettings(); } };
   $('#s_save').onclick=()=>{ DB.dishSize=n0($('#s_dish').value)||30; DB.feedBagKg=n0($('#s_bag').value)||50; DB.feedBagPrice=n0($('#s_bagprice').value)||0; DB.currency=$('#s_curr').value||'ج.م'; save(); toast('تم الحفظ'); renderSettings(); };
   const cfgSt=$('#cfgState'); if(cfgSt) cfgSt.innerHTML=fbIsConfigured()?'<span class="pill green">مضبوط</span>':'<span class="pill gray">غير مضبوط</span>';
   $('#cfgBtn').onclick=fbConfigModal; $('#cloudGuide').onclick=cloudGuideModal;
@@ -3188,6 +3538,12 @@ function renderHealth(){
   $('#page-health').innerHTML=`
     <div class="house-tabs">${tabs}</div>
     ${wdBanner}
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><h3>⚖️ الوزن الحي والتجانس</h3>
+        <span style="font-size:12px;color:var(--muted2)">عيّنة أسبوعية 30–100 طائر — أقوى مؤشر تنبؤي لأداء القطيع</span>
+      </div>
+      <div id="bwBox"></div>
+    </div>
     <div class="grid2">
       <div class="panel"><div class="panel-head"><h3>💊 تسجيل دواء / علاج</h3></div>
         <div style="padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -3221,7 +3577,8 @@ function renderHealth(){
       <div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>التحصين</th><th>الطريقة</th><th>ملاحظة</th><th></th></tr></thead>
         <tbody>${vaxLog}</tbody></table></div></div>
   `;
-  $$('#page-health .house-tab').forEach(t=>t.onclick=()=>{ UI.healthHouse=+t.dataset.i; renderHealth(); });
+  $$('#page-health .house-tab').forEach(t=>t.onclick=()=>{ UI.healthHouse=+t.dataset.i;
+  drawBodyWeight(); renderHealth(); });
   // ربط الدواء بفترة السحب تلقائياً
   $('#m_drug').onchange=e=>{ const v=e.target.value;
     $('#m_otherWrap').style.display=(v==='__other')?'block':'none';
@@ -3390,20 +3747,36 @@ async function boot(){
 function showRecovery(e){
   try{ console.error('BOOT ERROR', e); }catch(_){}
   const msg=(e&&e.message)?e.message:'خطأ غير معروف';
-  const html=`<div style="max-width:520px;margin:40px auto;padding:24px;background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;color:#1f2937;font-family:system-ui,'Segoe UI',Tahoma,sans-serif;direction:rtl;text-align:right">
-    <div style="font-size:20px;font-weight:800;margin-bottom:8px">⚠️ حصلت مشكلة في فتح النظام</div>
-    <div style="font-size:13px;color:#5b6b80;margin-bottom:16px;line-height:1.9">النظام لقى بيانات محفوظة مش متوافقة أو تالفة فمنعت الفتح. جرّب بالترتيب:</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
+  const isQuota = e && (e.name==='QuotaExceededError' || /quota|exceeded/i.test(msg));
+  let title, desc, btns;
+  if(isQuota){
+    /* التخزين امتلأ — ده مش تلف بيانات؛ الحل تنظيف مش مسح */
+    title='⚠️ مساحة التخزين في المتصفح امتلأت';
+    desc='بياناتك سليمة — المشكلة إن كل برامجك على نفس الموقع بتشارك نفس مساحة تخزين المتصفح المحدودة (عادة ٥-١٠ ميجا). جرّب بالترتيب:';
+    btns=`
+      <button id="recClean" style="padding:12px;border-radius:10px;border:1px solid #1a8f3c;background:#1a8f3c22;color:#1a8f3c;font-family:inherit;font-size:14px;cursor:pointer;font-weight:700">🧹 نظّف المساحة تلقائياً وحاول تاني (آمن — من غير مسح بياناتك)</button>
+      <button id="recReload" style="padding:12px;border-radius:10px;border:1px solid #d5dbe3;background:#f1f5f9;color:#1f2937;font-family:inherit;font-size:14px;cursor:pointer">🔄 إعادة المحاولة (تحديث الصفحة)</button>
+      <button id="recBackup" style="padding:12px;border-radius:10px;border:1px solid #1f6feb;background:#1f6feb22;color:#2563eb;font-family:inherit;font-size:14px;cursor:pointer">💾 تنزيل نسخة احتياطية من بياناتي أولاً</button>
+      <div style="font-size:11px;color:#b45309;background:#fef3e2;border:1px solid #fde3b8;border-radius:8px;padding:10px;margin-top:4px;line-height:1.8">⛔ ماتدوسش "مسح البيانات" أو "إعادة تحميل الإكسل" — دي مش هتحل مشكلة التخزين ومعاها هتفقد بيانات حقيقية.</div>`;
+  } else {
+    title='⚠️ حصلت مشكلة في فتح النظام';
+    desc='النظام لقى بيانات محفوظة مش متوافقة أو تالفة فمنعت الفتح. جرّب بالترتيب:';
+    btns=`
       <button id="recReload" style="padding:12px;border-radius:10px;border:1px solid #d5dbe3;background:#f1f5f9;color:#1f2937;font-family:inherit;font-size:14px;cursor:pointer">🔄 إعادة المحاولة (تحديث الصفحة)</button>
       <button id="recBackup" style="padding:12px;border-radius:10px;border:1px solid #1f6feb;background:#1f6feb22;color:#2563eb;font-family:inherit;font-size:14px;cursor:pointer">💾 تنزيل نسخة احتياطية من بياناتي أولاً</button>
       <button id="recSeed" style="padding:12px;border-radius:10px;border:1px solid #d29922;background:#d2992222;color:#b45309;font-family:inherit;font-size:14px;cursor:pointer">📥 إعادة تحميل بيانات الإكسل الأصلية (يمسح التعديلات المحلية)</button>
-      <button id="recWipe" style="padding:12px;border-radius:10px;border:1px solid #da3633;background:#da363322;color:#dc2626;font-family:inherit;font-size:14px;cursor:pointer">🗑️ مسح كل البيانات المحلية والبدء من جديد</button>
-    </div>
+      <button id="recWipe" style="padding:12px;border-radius:10px;border:1px solid #da3633;background:#da363322;color:#dc2626;font-family:inherit;font-size:14px;cursor:pointer">🗑️ مسح كل البيانات المحلية والبدء من جديد</button>`;
+  }
+  const html=`<div style="max-width:520px;margin:40px auto;padding:24px;background:#ffffff;border:1px solid #d5dbe3;border-radius:16px;color:#1f2937;font-family:system-ui,'Segoe UI',Tahoma,sans-serif;direction:rtl;text-align:right">
+    <div style="font-size:20px;font-weight:800;margin-bottom:8px">${title}</div>
+    <div style="font-size:13px;color:#5b6b80;margin-bottom:16px;line-height:1.9">${desc}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">${btns}</div>
     <div style="font-size:11px;color:#8896a8;margin-top:14px;direction:ltr;word-break:break-word">تفاصيل تقنية: ${String(msg).replace(/[<>&]/g,'')}</div>
   </div>`;
   try{ const app=document.getElementById('app')||document.body; app.innerHTML=html; }
   catch(_){ document.body.innerHTML=html; }
   const on=(id,fn)=>{ const b=document.getElementById(id); if(b) b.onclick=fn; };
+  on('recClean',()=>{ try{ pruneLocalStorage(); toast&&toast('✓ اتنضّفت المساحة'); }catch(_e){} setTimeout(()=>location.reload(),500); });
   on('recReload',()=>location.reload());
   on('recBackup',()=>{ try{ const raw=localStorage.getItem(LS_KEY)||localStorage.getItem('omda_org')||'{}';
     const blob=new Blob([raw],{type:'application/json'}); const a=document.createElement('a');
@@ -4166,6 +4539,15 @@ function printReport(farmName){
   w.document.close();
 }
 
+
+/* ═══════════ تسجيل Service Worker (تشغيل أوفلاين) ═══════════ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('layer-sw.js').then(function(r){
+      console.log('SW جاهز — البرنامج هيفتح أوفلاين');
+    }).catch(function(e){ console.log('SW مش متاح (طبيعي لو بتفتح من file://)'); });
+  });
+}
 
 boot();
 
