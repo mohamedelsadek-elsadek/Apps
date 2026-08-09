@@ -439,8 +439,32 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--sky-d)}
 
 <!-- ============ COMPARE ============ -->
 <section id="v-compare" class="hide">
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-h"><h2>طباعة التركيبات جنب بعض</h2>
+      <label class="fld" style="margin:0">التسعير:</label>
+      <div class="seg" id="sidePrice">
+        <button data-p="0" class="on">بدون</button>
+        <button data-p="1">مسعّرة</button>
+      </div>
+    </div>
+    <div class="card-b">
+      <p class="note" style="margin-top:0">عمود لكل تركيبة فى ورقة واحدة — الكميات لكل طن علف.</p>
+      <p class="note" style="margin:12px 0 5px"><b>التركيبات كاملة</b> (خامات + مركز)</p>
+      <div class="row">
+        <button class="btn sm pri" data-side="print:full">طباعة / PDF</button>
+        <button class="btn sm" data-side="wa:full">واتساب</button>
+        <button class="btn sm" data-side="img:full">صورة</button>
+      </div>
+      <p class="note" style="margin:14px 0 5px"><b>الخامات الأساسية بس</b> (ذرة / صويا / زيت)</p>
+      <div class="row">
+        <button class="btn sm pri" data-side="print:raw">طباعة / PDF</button>
+        <button class="btn sm" data-side="wa:raw">واتساب</button>
+        <button class="btn sm" data-side="img:raw">صورة</button>
+      </div>
+    </div>
+  </div>
   <div class="card">
-    <div class="card-h"><h2>مقارنة التركيبات</h2>
+    <div class="card-h"><h2>مقارنة القيم الغذائية</h2>
       <button class="btn sm" id="btnCmpPrint">طباعة / PDF</button></div>
     <div class="tbl-scroll"><table><thead id="cmpHead"></thead><tbody id="cmpBody"></tbody></table></div>
   </div>
@@ -589,7 +613,7 @@ const LSKEY='mathana.v2';
 /* ================= الحالة ================= */
 let S={cur:'starter',season:'normal',view:'ton',
   db:JSON.parse(JSON.stringify(SEED_DB)),fx:{},order:[],
-  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,updatedAt:0};
+  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,sPrice:0,updatedAt:0};
 
 function buildSeedFormulas(){
   const fx={},order=[];
@@ -608,7 +632,7 @@ function persistOnly(){
   try{
     localStorage.setItem(LSKEY,JSON.stringify({cur:S.cur,season:S.season,view:S.view,
       db:S.db,fx:S.fx,order:S.order,matrix:S.matrix,mxOn:S.mxOn,scen:S.scen,
-      tons:S.tons,bScope:S.bScope,bPrice:S.bPrice,updatedAt:S.updatedAt||0}));
+      tons:S.tons,bScope:S.bScope,bPrice:S.bPrice,sPrice:S.sPrice,updatedAt:S.updatedAt||0}));
   }catch(e){}
 }
 function save(){
@@ -646,7 +670,7 @@ function load(){
   S.season=o.season||'normal'; S.view=o.view||'ton';
   S.matrix=Object.assign(JSON.parse(JSON.stringify(MATRIX_DEF)),o.matrix||{});
   S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10;
-  S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.updatedAt=o.updatedAt||0;
+  S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.sPrice=o.sPrice?1:0; S.updatedAt=o.updatedAt||0;
 }
 
 /* ================= مساعدات ================= */
@@ -1582,6 +1606,104 @@ function textConcSide(ids,tons,showPrices){
   return s;
 }
 
+/* ================= التركيبات جنب بعض =================
+   scope: 'full' = خامات + مركز   |   'raw' = الخامات الأساسية بس */
+function buildPrintFxSide(ids,scope,showPrices){
+  const sp=!!showPrices;
+  const A={}; ids.forEach(id=>A[id]=analyze(id));
+  const nCols=ids.length*(sp?2:1);
+
+  const head=['#','المكون'];
+  ids.forEach(id=>{ head.push(esc(S.fx[id].ar)+' (كجم)'); if(sp) head.push('ج'); });
+
+  /* اتحاد أسماء المكونات مع الحفاظ على ترتيب أول ظهور */
+  const collect=key=>{
+    const out=[];
+    ids.forEach(id=>S.fx[id][key].forEach(r=>{ if(+r.qty>0&&out.indexOf(r.name)<0) out.push(r.name); }));
+    return out;
+  };
+  const line=(nm,i,key)=>{
+    const g=findIng(nm), p=g?+g.price||0:0;
+    let h=`<tr><td>${i+1}</td><td>${esc(nm)}</td>`;
+    ids.forEach(id=>{
+      const r=S.fx[id][key].find(x=>x.name===nm);
+      const v=r?(+r.qty||0):0;
+      h+=`<td>${v?n2(v):'—'}</td>`;
+      if(sp) h+=`<td>${v&&p?n2(v*p):'—'}</td>`;
+    });
+    return h+'</tr>';
+  };
+  const totLine=(label,get,costGet)=>{
+    let h=`<tr class="tot"><td></td><td>${label}</td>`;
+    ids.forEach(id=>{
+      h+=`<td>${n2(get(A[id]))}</td>`;
+      if(sp) h+=`<td>${costGet?n2(costGet(A[id])):'—'}</td>`;
+    });
+    return h+'</tr>';
+  };
+
+  let b='';
+  const raws=collect('raw');
+  if(scope==='raw'){
+    raws.forEach((nm,i)=>b+=line(nm,i,'raw'));
+    b+=totLine('إجمالى الخامات',a=>a.rawKg,a=>a.rawCost);
+    b+=`<tr class="tot"><td></td><td>+ مركز جاهز</td>`+
+       ids.map(id=>`<td>${n2(A[id].concKg)}</td>`+(sp?`<td>${n2(A[id].concCost)}</td>`:'')).join('')+`</tr>`;
+    b+=totLine('الإجمالى / طن',a=>a.totalKg,a=>a.cost);
+  }else{
+    b+=`<tr class="sec"><td colspan="${nCols+2}">الخامات الأساسية</td></tr>`;
+    raws.forEach((nm,i)=>b+=line(nm,i,'raw'));
+    b+=totLine('إجمالى الخامات',a=>a.rawKg,a=>a.rawCost);
+    b+=`<tr class="sec conc"><td colspan="${nCols+2}">المركز — 50 كجم لكل طن</td></tr>`;
+    collect('conc').forEach((nm,i)=>b+=line(nm,i,'conc'));
+    b+=totLine('إجمالى المركز',a=>a.concKg,a=>a.concCost);
+    b+=totLine('الإجمالى الكلى',a=>a.totalKg,a=>a.cost);
+  }
+
+  /* سطور التحليل السريع */
+  const anaLine=(label,fmt,unit)=>{
+    let h=`<tr class="tot"><td></td><td>${label}</td>`;
+    ids.forEach(id=>{
+      h+=`<td${sp?' colspan="2"':''}>${fmt(A[id])}</td>`;
+    });
+    return h+'</tr>';
+  };
+  b+=anaLine('بروتين خام %',a=>(a.CP*100).toFixed(2));
+  b+=anaLine('طاقة ممثلة kcal',a=>n0(a.ME));
+  if(sp) b+=anaLine('تكلفة الطن (ج)',a=>n2(a.cost));
+
+  const title=scope==='raw'?'الخامات الأساسية — التركيبات جنب بعض':'التركيبات كاملة جنب بعض';
+  const codes=ids.map(id=>{
+    const f=S.fx[id];
+    return esc(f.ar)+(f.code?' ('+esc(f.code)+')':'');
+  }).join('  •  ');
+
+  return `<div class="pr-h"><h1>${title}</h1>
+    <div class="meta">${codes}</div>
+    <div class="meta">الكميات لكل طن علف (${TON} كجم)  •  طُبع ${today()}${sp?'':'  •  بدون تسعير'}</div></div>
+    ${prTable(head,b)}
+    <div class="pr-foot">${scope==='raw'
+      ? 'الخامات الأساسية بس — المركز بيتضاف جاهز بواقع 50 كجم لكل طن.'
+      : 'المركز مبنى على دفعة 500 كجم تكفى 10 طن — يعنى 50 كجم فى الطن.'}
+      القيم الغذائية من قاعدة الخامات وقابلة للتعديل.</div>`;
+}
+function textFxSide(ids,scope,showPrices){
+  const sp=!!showPrices;
+  let s=(scope==='raw'?'الخامات الأساسية':'التركيبات كاملة')+' — لكل طن علف\n'+'—'.repeat(18)+'\n';
+  ids.forEach(id=>{
+    const f=S.fx[id],a=analyze(id);
+    s+='\n■ '+f.ar+(f.code?' ('+f.code+')':'')+'\n';
+    const list=(scope==='raw')?f.raw:f.raw.concat(f.conc);
+    list.forEach((r,i)=>{ if(!(+r.qty))return;
+      const g=findIng(r.name),p=g?+g.price||0:0;
+      s+=`${i+1}. ${r.name}: ${n2(r.qty)} كجم`+(sp&&p?` — ${n0(r.qty*p)} ج`:'')+'\n'; });
+    if(scope==='raw') s+=`إجمالى الخامات: ${n2(a.rawKg)} كجم  (+ ${n2(a.concKg)} مركز)\n`;
+    else s+=`الإجمالى: ${n2(a.totalKg)} كجم\n`;
+    s+=`بروتين ${(a.CP*100).toFixed(2)}%  |  طاقة ${n0(a.ME)}`+(sp?`  |  تكلفة ${n0(a.cost)} ج`:'')+'\n';
+  });
+  return s;
+}
+
 /* ================= مزامنة Firebase =================
    نفس مشروع my-app-sync — مسار مستقل "mathana/" عشان مايتداخلش
    مع بيانات باقي البرامج. */
@@ -1816,6 +1938,20 @@ function init(){
   };
   $('#btnPrintDb').onclick=()=>doPrint(buildPrintDb());
   $('#btnCmpPrint').onclick=()=>doPrint(buildPrintCmp());
+
+  /* التركيبات جنب بعض */
+  $$('#sidePrice button').forEach(b=>b.onclick=()=>{
+    S.sPrice=+b.dataset.p; save();
+    $$('#sidePrice button').forEach(x=>x.classList.toggle('on',x===b));
+  });
+  $$('[data-side]').forEach(b=>b.onclick=()=>{
+    const [act,scope]=b.dataset.side.split(':');
+    const ids=S.order.slice(), sp=!!S.sPrice;
+    const nm=(scope==='raw'?'الخامات-الأساسية':'التركيبات-كاملة');
+    if(act==='print') doPrint(buildPrintFxSide(ids,scope,sp));
+    if(act==='wa')    shareText(textFxSide(ids,scope,sp));
+    if(act==='img')   toImage(buildPrintFxSide(ids,scope,sp),nm);
+  });
 
   /* تصدير التركيبة */
   $$('[data-out]').forEach(b=>b.onclick=()=>{
