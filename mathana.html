@@ -3,230 +3,228 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0E1620">
-<title>مطحنة — حاسبة تركيبات تسمين الدواجن</title>
+<meta name="theme-color" content="#F4EFE4">
+<title>مَطحنة — حاسبة تركيبات تسمين الدواجن</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0E1620; --panel:#16212E; --panel2:#1C2A3A; --line:#25384F;
-  --amber:#E8A33D; --amber-dim:#8A6220;
-  --spruce:#3FA987; --clay:#D9634E; --slate:#7C93AD;
-  --paper:#E9EFF5; --mute:#93A9C0;
-  --r:10px;
+  --paper:#F4EFE4; --paper2:#FBF8F2; --card:#FFFFFF;
+  --ink:#20293A; --ink2:#4A5768; --mute:#7A8798; --line:#E2D9C8; --line2:#D3C7B0;
+
+  --corn:#E0961A;   --corn-l:#FBEFD6; --corn-d:#A96C08;
+  --soy:#4E8C4A;    --soy-l:#E4F1E2;  --soy-d:#316B2E;
+  --clay:#C9503C;   --clay-l:#FBE5E0; --clay-d:#963325;
+  --sky:#2E6FA8;    --sky-l:#E1EDF8;  --sky-d:#1D4E7A;
+  --plum:#7A4E86;   --plum-l:#F1E6F4;
+
+  --r:12px; --r2:8px;
   --f-disp:"Reem Kufi","Noto Kufi Arabic","Segoe UI",Tahoma,sans-serif;
   --f-body:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;
+  --sh:0 1px 2px rgba(32,41,58,.06),0 4px 14px rgba(32,41,58,.06);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-body{
-  background:var(--ink); color:var(--paper);
-  font-family:var(--f-body); font-size:15px; line-height:1.6;
-  padding-bottom:env(safe-area-inset-bottom);
-  -webkit-text-size-adjust:100%;
-}
-h1,h2,h3,.disp{font-family:var(--f-disp);font-weight:600;letter-spacing:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;
+  line-height:1.6;padding-bottom:env(safe-area-inset-bottom);-webkit-text-size-adjust:100%}
+h1,h2,h3,.disp{font-family:var(--f-disp);font-weight:600}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 
-/* ---------- masthead ---------- */
-.mast{
-  background:linear-gradient(180deg,#101B27,#0E1620);
-  border-bottom:1px solid var(--line);
-  padding:18px 16px 0;
-  position:sticky;top:0;z-index:50;
-  backdrop-filter:saturate(140%) blur(8px);
-}
+.mast{background:linear-gradient(135deg,#FFFDF8 0%,#F6EEDD 100%);
+  border-bottom:2px solid var(--corn);padding:14px 16px 0;position:sticky;top:0;z-index:50;
+  box-shadow:0 2px 12px rgba(32,41,58,.07)}
 .mast-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{display:flex;align-items:baseline;gap:10px;flex:1;min-width:200px}
-.brand h1{font-size:23px;margin:0;color:var(--paper)}
-.brand .kicker{
-  font-family:var(--f-body);font-size:11px;font-weight:700;letter-spacing:.14em;
-  color:var(--amber);text-transform:uppercase
-}
-.mast .cost-live{text-align:left;line-height:1.25}
-.mast .cost-live b{font-size:22px;color:var(--amber);font-family:var(--f-disp)}
-.mast .cost-live span{display:block;font-size:11px;color:var(--mute)}
+.brand{flex:1;min-width:180px}
+.brand h1{font-size:24px;margin:0;color:var(--ink);letter-spacing:-.5px}
+.brand .kicker{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--corn-d)}
+.cost-live{text-align:left;line-height:1.2;background:var(--corn-l);
+  border:1px solid #EBD3A2;border-radius:var(--r2);padding:6px 12px}
+.cost-live b{font-size:21px;color:var(--corn-d);font-family:var(--f-disp);display:block}
+.cost-live span{display:block;font-size:10.5px;color:var(--ink2)}
 
-/* ---------- tabs ---------- */
-.tabs{display:flex;gap:2px;margin-top:14px;overflow-x:auto;scrollbar-width:none}
+.tabs{display:flex;gap:3px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{
-  background:none;border:0;border-bottom:2px solid transparent;
-  color:var(--mute);font-family:var(--f-body);font-size:14px;font-weight:500;
-  padding:9px 14px;cursor:pointer;white-space:nowrap;transition:.15s
-}
-.tab:hover{color:var(--paper)}
-.tab[aria-selected="true"]{color:var(--amber);border-bottom-color:var(--amber);font-weight:700}
-.tab:focus-visible{outline:2px solid var(--amber);outline-offset:-2px;border-radius:4px}
+.tab{background:none;border:0;border-bottom:3px solid transparent;color:var(--mute);
+  font-family:var(--f-body);font-size:14px;font-weight:600;padding:9px 13px;cursor:pointer;
+  white-space:nowrap;transition:.15s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--corn-d);border-bottom-color:var(--corn)}
+.tab:focus-visible{outline:2px solid var(--sky);outline-offset:-2px;border-radius:4px}
 
-/* ---------- layout ---------- */
-.wrap{max-width:1220px;margin:0 auto;padding:18px 14px 60px}
-.grid{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
-@media(max-width:940px){.grid{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.card-h{
-  padding:11px 14px;background:var(--panel2);border-bottom:1px solid var(--line);
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap
-}
-.card-h h2{font-size:15px;margin:0;flex:1}
+.wrap{max-width:1240px;margin:0 auto;padding:18px 14px 60px}
+.grid{display:grid;grid-template-columns:1fr 350px;gap:16px;align-items:start}
+@media(max-width:960px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;box-shadow:var(--sh)}
+.card-h{padding:11px 14px;background:var(--paper2);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.card-h h2{font-size:15px;margin:0;flex:1;color:var(--ink)}
 .card-b{padding:14px}
-.sticky-side{position:sticky;top:118px}
-@media(max-width:940px){.sticky-side{position:static}}
+.sticky-side{position:sticky;top:112px}
+@media(max-width:960px){.sticky-side{position:static}}
 
-/* ---------- stage picker ---------- */
-.stages{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.stage{
-  flex:1;min-width:132px;background:var(--panel);border:1px solid var(--line);
+.stages{display:flex;gap:9px;margin-bottom:13px;flex-wrap:wrap}
+.stage{flex:1;min-width:150px;background:var(--card);border:1.5px solid var(--line);
   border-radius:var(--r);padding:11px 13px;cursor:pointer;text-align:right;
-  color:var(--mute);font-family:var(--f-body);transition:.16s
-}
-.stage:hover{border-color:var(--slate)}
-.stage b{display:block;font-family:var(--f-disp);font-size:16px;color:var(--paper);font-weight:600}
-.stage small{font-size:11.5px}
-.stage[aria-pressed="true"]{
-  border-color:var(--amber);background:linear-gradient(180deg,rgba(232,163,61,.13),transparent);
-  color:var(--amber)
-}
-.stage[aria-pressed="true"] b{color:var(--amber)}
-.stage:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  font-family:var(--f-body);transition:.16s;box-shadow:var(--sh);color:var(--ink2)}
+.stage:hover{border-color:var(--line2);transform:translateY(-1px)}
+.stage b{display:block;font-family:var(--f-disp);font-size:16px;color:var(--ink);font-weight:600}
+.stage small{display:block;font-size:11.5px;color:var(--mute)}
+.stage[aria-pressed="true"]{border-color:var(--corn);background:var(--corn-l)}
+.stage[aria-pressed="true"] b{color:var(--corn-d)}
+.stage[aria-pressed="true"] small{color:var(--corn-d);opacity:.85}
+.stage:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
 
-/* ---------- SIGNATURE: spec bars ---------- */
-.spec{margin-bottom:13px}
-.spec-top{display:flex;align-items:baseline;gap:8px;font-size:12.5px;margin-bottom:5px}
-.spec-name{flex:1;color:var(--mute)}
-.spec-val{font-family:var(--f-disp);font-size:15px;font-weight:600}
-.spec-val.ok{color:var(--spruce)} .spec-val.lo,.spec-val.hi{color:var(--clay)}
-.spec-target{font-size:10.5px;color:var(--slate)}
-.track{
-  position:relative;height:7px;border-radius:4px;
-  background:#0B121B;border:1px solid #1E2E42;overflow:hidden
-}
-.band{position:absolute;top:0;bottom:0;background:rgba(63,169,135,.30);border-left:1px solid rgba(63,169,135,.55);border-right:1px solid rgba(63,169,135,.55)}
-.pin{
-  position:absolute;top:-4px;width:3px;height:13px;border-radius:2px;
-  background:var(--amber);box-shadow:0 0 0 2px var(--panel),0 0 9px rgba(232,163,61,.75);
-  transition:right .4s cubic-bezier(.22,1,.36,1)
-}
-.pin.out{background:var(--clay);box-shadow:0 0 0 2px var(--panel),0 0 9px rgba(217,99,78,.75)}
+.spec{margin-bottom:12px}
+.spec-top{display:flex;align-items:baseline;gap:8px;font-size:12.5px;margin-bottom:4px}
+.spec-name{flex:1;color:var(--ink2);font-weight:500}
+.spec-val{font-family:var(--f-disp);font-size:15px;font-weight:700}
+.spec-val.ok{color:var(--soy-d)} .spec-val.lo,.spec-val.hi{color:var(--clay-d)}
+.spec-target{font-size:10.5px;color:var(--mute);margin-top:2px}
+.track{position:relative;height:8px;border-radius:5px;background:#EDE7DA;
+  border:1px solid var(--line)}
+.band{position:absolute;top:0;bottom:0;background:var(--soy-l);
+  border-left:2px solid var(--soy);border-right:2px solid var(--soy)}
+.pin{position:absolute;top:-4px;width:4px;height:14px;border-radius:2px;background:var(--corn-d);
+  box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.3);
+  transition:right .4s cubic-bezier(.22,1,.36,1)}
+.pin.out{background:var(--clay)}
 @media(prefers-reduced-motion:reduce){.pin{transition:none}}
 
-/* ---------- tables ---------- */
 table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{
-  background:var(--panel2);color:var(--mute);font-weight:700;font-size:11.5px;
-  padding:9px 8px;text-align:right;border-bottom:1px solid var(--line);
-  position:sticky;top:0;z-index:2;white-space:nowrap
-}
-td{padding:6px 8px;border-bottom:1px solid #1B2836;vertical-align:middle}
-tbody tr:hover{background:#1A2736}
-.sect-row td{
-  background:#101B27;color:var(--amber);font-family:var(--f-disp);font-size:12.5px;
-  font-weight:600;letter-spacing:.05em;padding:8px
-}
-.tot-row td{background:#101B27;font-weight:700;border-top:1px solid var(--line)}
-.tbl-scroll{max-height:60vh;overflow:auto}
-.nm{min-width:150px}
+th{background:var(--ink);color:#fff;font-weight:700;font-size:11.5px;padding:9px 8px;
+  text-align:right;white-space:nowrap;position:sticky;top:0;z-index:2}
+td{padding:6px 8px;border-bottom:1px solid #EFE9DC;vertical-align:middle;color:var(--ink)}
+tbody tr:nth-child(even){background:#FCFAF6}
+tbody tr:hover{background:var(--corn-l)}
+.sect-row td{background:var(--sky-l)!important;color:var(--sky-d);font-family:var(--f-disp);
+  font-size:12.5px;font-weight:700;padding:8px}
+.sect-row.conc td{background:var(--plum-l)!important;color:var(--plum)}
+.tot-row td{background:#F1EDE3!important;font-weight:700;border-top:1.5px solid var(--line2)}
+.tbl-scroll{max-height:62vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.nm{min-width:160px}
+td.cost{color:var(--corn-d);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+#dbTable{min-width:980px}
+#dbTable th,#dbTable td{padding:6px 5px}
+#dbTable input{min-width:66px}
+#dbTable .nm{min-width:200px;position:sticky;right:0;background:var(--card);z-index:1;
+  border-left:1px solid var(--line)}
+#dbTable tbody tr:nth-child(even) .nm{background:#FCFAF6}
+.ingsum{font-size:10.5px;color:var(--sky-d);background:var(--sky-l);display:inline-block;
+  padding:1px 8px;border-radius:20px;margin-top:3px;font-weight:600}
 
-input[type=number],input[type=text],select{
-  background:#0B121B;border:1px solid #24384F;color:var(--paper);
-  border-radius:6px;padding:5px 7px;font-family:var(--f-body);font-size:13.5px;
-  width:100%;font-variant-numeric:tabular-nums;text-align:center
-}
-input:focus,select:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 2px rgba(232,163,61,.2)}
-input.qty{max-width:86px}
-input.price{max-width:82px;border-color:var(--amber-dim)}
-input.warnp{border-color:var(--clay);background:rgba(217,99,78,.09)}
-td.cost{color:var(--amber);font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=text],input[type=number],select{background:#fff;border:1.5px solid var(--line2);
+  color:var(--ink);border-radius:var(--r2);padding:6px 7px;font-family:var(--f-body);
+  font-size:13.5px;width:100%;font-variant-numeric:tabular-nums;text-align:center}
+input:focus,select:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px rgba(46,111,168,.15)}
+input[readonly]{background:#F3EFE6;color:var(--mute)}
+input.warnp{border-color:var(--clay);background:var(--clay-l)}
+input.qty{max-width:92px}
 
-/* ---------- misc ---------- */
-.btn{
-  background:var(--panel2);border:1px solid var(--line);color:var(--paper);
-  border-radius:7px;padding:7px 13px;cursor:pointer;font-family:var(--f-body);
-  font-size:13px;font-weight:500;transition:.15s
-}
-.btn:hover{border-color:var(--slate);background:#22344A}
-.btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.btn.pri{background:var(--amber);color:#14202C;border-color:var(--amber);font-weight:700}
-.btn.pri:hover{background:#F2B052}
-.btn.sm{padding:4px 9px;font-size:12px}
-.btn.dgr{color:var(--clay);border-color:#472A26}
-.btn.sync{min-width:38px;font-size:12px}
-.btn.sync.on{color:var(--spruce);border-color:#20463C;background:rgba(63,169,135,.11)}
-.btn.sync.err{color:var(--clay);border-color:#4A2B26;background:rgba(217,99,78,.11)}
+.btn{background:#fff;border:1.5px solid var(--line2);color:var(--ink);border-radius:var(--r2);
+  padding:7px 13px;cursor:pointer;font-family:var(--f-body);font-size:13px;font-weight:600;transition:.15s}
+.btn:hover{border-color:var(--sky);color:var(--sky-d);background:var(--sky-l)}
+.btn:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.btn.pri{background:var(--corn);color:#fff;border-color:var(--corn-d)}
+.btn.pri:hover{background:var(--corn-d);color:#fff}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn.dgr{color:var(--clay-d);border-color:#E3B5AC}
+.btn.dgr:hover{background:var(--clay-l);border-color:var(--clay);color:var(--clay-d)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.chip{
-  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;
-  font-size:11.5px;font-weight:700;border:1px solid
-}
-.chip.ok{color:var(--spruce);border-color:#20463C;background:rgba(63,169,135,.11)}
-.chip.bad{color:var(--clay);border-color:#4A2B26;background:rgba(217,99,78,.11)}
-.chip.warn{color:var(--amber);border-color:#4A3A1C;background:rgba(232,163,61,.11)}
-.note{font-size:12px;color:var(--slate);line-height:1.65}
-.note b{color:var(--mute)}
-.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #1B2836;font-size:13.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
+  font-size:11.5px;font-weight:700;border:1px solid}
+.chip.ok{color:var(--soy-d);border-color:#B8D9B4;background:var(--soy-l)}
+.chip.bad{color:var(--clay-d);border-color:#E8B6AC;background:var(--clay-l)}
+.chip.warn{color:var(--corn-d);border-color:#EDD5A6;background:var(--corn-l)}
+.note{font-size:12px;color:var(--mute);line-height:1.65}
+.note b{color:var(--ink2)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;
+  border-bottom:1px solid #EFE9DC;font-size:13.5px}
 .kv:last-child{border:0}
-.kv span{color:var(--mute)}
-.kv b{font-family:var(--f-disp);font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink2)}
+.kv b{font-family:var(--f-disp);font-variant-numeric:tabular-nums;color:var(--ink)}
 .hide{display:none!important}
-.banner{
-  padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px;
-  border:1px solid;line-height:1.6
-}
-.banner.warn{background:rgba(232,163,61,.09);border-color:#4A3A1C;color:#F0C784}
-.banner.bad{background:rgba(217,99,78,.09);border-color:#4A2B26;color:#F0A292}
-.toast{
-  position:fixed;bottom:22px;right:50%;transform:translateX(50%) translateY(90px);
-  background:var(--spruce);color:#08130F;padding:11px 20px;border-radius:9px;
-  font-weight:700;font-size:13.5px;z-index:200;transition:transform .3s;box-shadow:0 8px 26px rgba(0,0,0,.5)
-}
+.banner{padding:10px 13px;border-radius:var(--r2);font-size:12.5px;margin-bottom:12px;
+  border:1px solid;border-right-width:4px;line-height:1.6}
+.banner.warn{background:var(--corn-l);border-color:#EDD5A6;border-right-color:var(--corn);color:var(--corn-d)}
+.banner.bad{background:var(--clay-l);border-color:#E8B6AC;border-right-color:var(--clay);color:var(--clay-d)}
+.toast{position:fixed;bottom:22px;right:50%;transform:translateX(50%) translateY(90px);
+  background:var(--soy-d);color:#fff;padding:11px 20px;border-radius:9px;font-weight:700;
+  font-size:13.5px;z-index:200;transition:transform .3s;box-shadow:0 8px 26px rgba(0,0,0,.25)}
 .toast.on{transform:translateX(50%) translateY(0)}
-.toast.err{background:var(--clay);color:#fff}
-label.fld{display:block;font-size:12px;color:var(--mute);margin-bottom:4px}
+.toast.err{background:var(--clay-d)}
+label.fld{display:block;font-size:12px;color:var(--ink2);margin-bottom:4px;font-weight:600}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px}
-details{border:1px solid var(--line);border-radius:8px;margin-top:11px;background:#101B27}
-summary{padding:9px 12px;cursor:pointer;font-size:13px;font-weight:700;color:var(--mute)}
-summary:hover{color:var(--paper)}
-details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
+details{border:1px solid var(--line);border-radius:var(--r2);margin-top:11px;background:var(--paper2)}
+summary{padding:9px 12px;cursor:pointer;font-size:13px;font-weight:700;color:var(--ink2)}
+summary:hover{color:var(--sky-d)}
+details[open] summary{border-bottom:1px solid var(--line);color:var(--sky-d)}
 .det-b{padding:12px}
-/* ---- إضافات ---- */
-.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
-.seg button{background:var(--panel);border:0;color:var(--mute);font-family:var(--f-body);
-  font-size:12.5px;padding:6px 12px;cursor:pointer}
-.seg button.on{background:var(--amber);color:#14202C;font-weight:700}
-.chk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mute);cursor:pointer}
+.seg{display:flex;border:1.5px solid var(--line2);border-radius:var(--r2);overflow:hidden}
+.seg button{background:#fff;border:0;color:var(--ink2);font-family:var(--f-body);font-size:12.5px;
+  padding:6px 12px;cursor:pointer;font-weight:600}
+.seg button.on{background:var(--corn);color:#fff}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink2);
+  cursor:pointer;font-weight:500}
 .chk input{width:auto}
-.ovl{position:fixed;inset:0;background:rgba(6,11,17,.82);z-index:150;display:flex;
+.ovl{position:fixed;inset:0;background:rgba(32,41,58,.5);z-index:150;display:flex;
   align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
-.dlg{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-  width:100%;max-width:520px;max-height:88vh;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+.dlg{background:var(--card);border:1px solid var(--line);border-radius:var(--r);width:100%;
+  max-width:520px;max-height:88vh;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.3)}
 .pick-row{display:flex;justify-content:space-between;gap:10px;padding:9px 11px;
-  border:1px solid var(--line);border-radius:7px;margin-bottom:6px;cursor:pointer;background:#101B27}
-.pick-row:hover{border-color:var(--amber);background:#1A2736}
+  border:1px solid var(--line);border-radius:var(--r2);margin-bottom:6px;cursor:pointer;
+  background:var(--paper2)}
+.pick-row:hover{border-color:var(--corn);background:var(--corn-l)}
 .pick-row b{font-size:13.5px;font-weight:500}
-.rowdel{background:none;border:0;color:var(--slate);cursor:pointer;font-size:15px;padding:2px 5px}
+.rowdel{background:none;border:0;color:var(--mute);cursor:pointer;font-size:15px;padding:2px 5px}
 .rowdel:hover{color:var(--clay)}
-input.nav:focus{background:#101d2b}
+.btn.sync.on{color:var(--soy-d);border-color:#B8D9B4;background:var(--soy-l)}
+.btn.sync.err{color:var(--clay-d);border-color:#E8B6AC;background:var(--clay-l)}
 
-/* ---- الطباعة ---- */
+/* ================== الطباعة ================== */
 #printArea{display:none}
 @media print{
-  @page{size:A4;margin:12mm}
-  body{background:#fff!important;color:#000!important;font-size:11pt}
+  @page{size:A4;margin:10mm}
+  html,body{background:#fff!important;color:#000!important}
   body>*{display:none!important}
   #printArea{display:block!important}
-  .pr-h{border-bottom:2px solid #1F3864;padding-bottom:8px;margin-bottom:14px}
-  .pr-h h1{font-size:17pt;margin:0 0 3px;color:#1F3864}
-  .pr-h .meta{font-size:9pt;color:#444}
-  #printArea table{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:12px}
-  #printArea th{background:#1F3864;color:#fff;padding:5px 6px;text-align:right;border:1px solid #999}
-  #printArea td{padding:4px 6px;border:1px solid #bbb}
-  #printArea tr.sec td{background:#e8eef7;font-weight:700;color:#1F3864}
-  #printArea tr.tot td{background:#f2f2f2;font-weight:700}
-  #printArea .pr-sum{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:9.5pt;margin-bottom:12px}
-  #printArea .pr-sum div{border:1px solid #ccc;padding:4px 9px;border-radius:4px}
-  #printArea .pr-foot{margin-top:14px;font-size:8.5pt;color:#555;border-top:1px solid #ccc;padding-top:6px}
-  #printArea .out{color:#b3402c;font-weight:700}
+  /* الهيدر اللاصق كان بيتكرر فى نص الجدول */
+  #printArea th{position:static!important;top:auto!important;z-index:auto!important}
+
+  #printArea{font-size:9.5pt;line-height:1.35}
+  #printArea.tight {font-size:8.4pt;line-height:1.24}
+  #printArea.xtight{font-size:7.3pt;line-height:1.16}
+
+  .pr-h{border-bottom:2.5px solid #C97F14;padding-bottom:7px;margin-bottom:11px}
+  .pr-h h1{font-size:15pt;margin:0 0 2px;color:#8A5A08}
+  #printArea.tight  .pr-h h1{font-size:13pt}
+  #printArea.xtight .pr-h h1{font-size:11.5pt}
+  .pr-h .meta{font-size:8.5pt;color:#444}
+
+  #printArea table{width:100%;border-collapse:collapse;margin-bottom:9px;page-break-inside:auto}
+  #printArea thead{display:table-header-group}
+  #printArea tr{page-break-inside:avoid;page-break-after:auto}
+  #printArea th{background:#20293A!important;color:#fff!important;padding:4px 5px;text-align:right;
+    border:.5pt solid #555;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea td{padding:2.6px 5px;border:.5pt solid #B9B9B9}
+  #printArea.tight  td{padding:1.9px 4px}
+  #printArea.xtight td{padding:1.2px 3px}
+  #printArea tr.sec td{background:#E1EDF8!important;font-weight:700;color:#1D4E7A;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea tr.sec.conc td{background:#F1E6F4!important;color:#6B4276}
+  #printArea tr.tot td{background:#F1EDE3!important;font-weight:700;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea .pr-sum{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:8.5pt;margin-bottom:8px}
+  #printArea .pr-sum div{border:.5pt solid #BBB;padding:2.5px 7px;border-radius:3px}
+  #printArea .pr-foot{margin-top:8px;font-size:7.5pt;color:#555;border-top:.5pt solid #CCC;
+    padding-top:5px;page-break-inside:avoid}
+  #printArea .out{color:#963325;font-weight:700}
+  #printArea h3{font-size:10pt;color:#1D4E7A;margin:4px 0}
+  #printArea>*{orphans:3;widows:3}
+  #printArea .keep{page-break-inside:avoid}
+  #printArea.onepage{page-break-after:avoid}
+  #printArea.onepage table{page-break-inside:avoid}
 }
 </style>
 </head>
@@ -410,11 +408,25 @@ input.nav:focus{background:#101d2b}
       <h2>أمر خلط المركز</h2>
       <label class="fld" style="margin:0">لعدد أطنان:</label>
       <input type="text" inputmode="decimal" id="batchTons" value="10" style="width:70px">
-      <button class="btn sm" id="btnBatchPrint">طباعة / PDF</button>
-      <button class="btn sm" id="btnBatchWa">واتساب</button>
-      <button class="btn sm" id="btnBatchImg">صورة</button>
     </div>
-    <div class="card-b">
+    <div class="card-b" style="padding-bottom:6px">
+      <div class="row" style="margin-bottom:11px">
+        <label class="fld" style="margin:0">التركيبات:</label>
+        <div class="seg" id="batchScope">
+          <button data-s="all" class="on">كلهم جنب بعض</button>
+          <button data-s="one">الحالية بس</button>
+        </div>
+        <label class="fld" style="margin:0 8px 0 0">التسعير:</label>
+        <div class="seg" id="batchPrice">
+          <button data-p="0" class="on">بدون</button>
+          <button data-p="1">مسعّرة</button>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:11px">
+        <button class="btn sm pri" id="btnBatchPrint">طباعة / PDF</button>
+        <button class="btn sm" id="btnBatchWa">واتساب</button>
+        <button class="btn sm" id="btnBatchImg">صورة</button>
+      </div>
       <p class="note" style="margin-top:0" id="batchHint"></p>
       <div id="batchOut"></div>
       <details open style="margin-top:14px">
@@ -577,7 +589,7 @@ const LSKEY='mathana.v2';
 /* ================= الحالة ================= */
 let S={cur:'starter',season:'normal',view:'ton',
   db:JSON.parse(JSON.stringify(SEED_DB)),fx:{},order:[],
-  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,updatedAt:0};
+  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,updatedAt:0};
 
 function buildSeedFormulas(){
   const fx={},order=[];
@@ -596,7 +608,7 @@ function persistOnly(){
   try{
     localStorage.setItem(LSKEY,JSON.stringify({cur:S.cur,season:S.season,view:S.view,
       db:S.db,fx:S.fx,order:S.order,matrix:S.matrix,mxOn:S.mxOn,scen:S.scen,
-      tons:S.tons,updatedAt:S.updatedAt||0}));
+      tons:S.tons,bScope:S.bScope,bPrice:S.bPrice,updatedAt:S.updatedAt||0}));
   }catch(e){}
 }
 function save(){
@@ -633,7 +645,8 @@ function load(){
   S.cur=(o.cur&&S.fx[o.cur])?o.cur:((o.stage&&S.fx[o.stage])?o.stage:S.order[0]);
   S.season=o.season||'normal'; S.view=o.view||'ton';
   S.matrix=Object.assign(JSON.parse(JSON.stringify(MATRIX_DEF)),o.matrix||{});
-  S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10; S.updatedAt=o.updatedAt||0;
+  S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10;
+  S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.updatedAt=o.updatedAt||0;
 }
 
 /* ================= مساعدات ================= */
@@ -955,8 +968,22 @@ function renderDB(){
       return `<td><input type="text" inputmode="decimal" class="num nav${warn}"
         data-r="${i}" data-c="${c}" data-d="${i}" data-f="${fl}" value="${val}"></td>`;
     };
+    /* ملخص سريع جنب الاسم — عشان القيم تبان من غير ما تلف الجدول على الموبايل */
+    const bits=[];
+    if(+d.CP)  bits.push('بروتين '+(d.CP*100).toFixed(1)+'%');
+    if(+d.ME)  bits.push('طاقة '+n0(d.ME));
+    if(+d.Fat && d.Fat*100>=0.05) bits.push('دهن '+(d.Fat*100).toFixed(1)+'%');
+    /* دقة كافية عشان القيم الصغيرة ما تبانش صفر */
+    const pc=(v,dg)=>{const x=(v*100).toFixed(dg);return parseFloat(x)?x:null;};
+    const caV=pc(d.Ca,2);   if(caV)  bits.push('Ca '+caV+'%');
+    const apV=pc(d.AvP,2);  if(apV)  bits.push('AvP '+apV+'%');
+    const lyV=pc(d.Lys,2);  if(lyV)  bits.push('ليسين '+lyV+'%');
+    const meV=pc(d.Met,2);  if(meV)  bits.push('ميثيونين '+meV+'%');
+    const sum=bits.length?`<div class="ingsum">${bits.join(' · ')}</div>`
+                         :`<div class="note" style="font-size:10.5px">مضاف — بدون قيم غذائية</div>`;
     return `<tr>
       <td class="nm">${esc(d.name)}${used[d.name]?'':' <span class="note">(غير مستخدمة)</span>'}
+        ${sum}
         ${d.note?`<div class="note" style="font-size:10.5px">${esc(d.note)}</div>`:''}</td>
       ${cols.map(c=>cell(c[0],c[1])).join('')}
       <td>${used[d.name]?'':`<button class="rowdel" data-del="${i}">✕</button>`}</td>
@@ -1191,15 +1218,16 @@ function textFull(id){
   s+=`\nتكلفة الطن: ${n2(a.cost)} ج  |  الكيلو: ${n2(a.costPerKg)} ج`;
   return s;
 }
-function textConc(id,tons){
+function textConc(id,tons,showPrices){
   const f=S.fx[id],a=analyze(id);
+  const sp=showPrices!==false;
   const t=tons||10;
   let s=`أمر خلط مركز — ${f.ar}\n`;
   if(f.code) s+=`كود: ${f.code}\n`;
   s+=`يكفى ${t} طن علف\n`+'—'.repeat(18)+'\n';
   f.conc.forEach((r,i)=>{ const v=(+r.qty||0)*t; if(v) s+=`${i+1}. ${r.name}: ${n2(v)} كجم\n`; });
   s+=`\nإجمالى المركز: ${n2(a.concKg*t)} كجم`;
-  s+=`\nالتكلفة: ${n0(a.concCost*t)} ج`;
+  if(sp) s+=`\nالتكلفة: ${n0(a.concCost*t)} ج`;
   s+=`\n\nيُخلط ${n2(a.concKg)} كجم مركز مع كل طن علف.`;
   return s;
 }
@@ -1273,19 +1301,22 @@ function buildPrintFull(id){
     <div class="pr-foot">القيم الغذائية من قاعدة الخامات وقابلة للتعديل. المستهدفات استرشادية
       للسلالات التجارية — راجعها مقابل دليل السلالة.${S.mxOn?' رصيد الإنزيمات مُفعّل.':''}</div>`;
 }
-function buildPrintConc(id,tons){
+function buildPrintConc(id,tons,showPrices){
   const f=S.fx[id],a=analyze(id),t=tons||S.tons||10;
+  const sp=showPrices!==false;
   let b='';
   f.conc.forEach((r,i)=>{ const v=(+r.qty||0)*t; if(!v)return;
     const g=findIng(r.name),p=g?+g.price||0:0;
-    b+=`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${n2(v)}</td><td>${p?n2(v*p):'—'}</td>
-        <td style="width:60px"></td></tr>`;});
-  b+=`<tr class="tot"><td></td><td>الإجمالى</td><td>${n2(a.concKg*t)}</td><td>${n2(a.concCost*t)}</td><td></td></tr>`;
+    b+=`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${n2(v)}</td>`+
+       (sp?`<td>${p?n2(v*p):'—'}</td>`:'')+`<td style="width:56px"></td></tr>`;});
+  b+=`<tr class="tot"><td></td><td>الإجمالى</td><td>${n2(a.concKg*t)}</td>`+
+     (sp?`<td>${n2(a.concCost*t)}</td>`:'')+`<td></td></tr>`;
   const micro=f.conc.filter(r=>+r.qty>0&&+r.qty<=0.5);
   return `<div class="pr-h"><h1>أمر خلط مركز — ${esc(f.ar)}</h1>
     <div class="meta">${esc([f.code?'كود: '+f.code:'',f.author?'إعداد: '+f.author:''].filter(Boolean).join('  •  '))}</div>
     <div class="meta">يكفى ${t} طن علف  •  ${n2(a.concKg)} كجم مركز لكل طن  •  طُبع ${today()}</div></div>
-    ${prTable(['#','المكون','الكمية (كجم)','تكلفة (ج)','✓ وزن'],b)}
+    ${prTable(sp?['#','المكون','الكمية (كجم)','تكلفة (ج)','✓ وزن']
+                 :['#','المكون','الكمية (كجم)','✓ وزن'],b)}
     ${micro.length?`<div class="pr-foot"><b>تنبيه الخلط:</b> ${micro.length} مكون بكمية
       ≤ 0.5 كجم/طن (${micro.map(m=>esc(m.name)).join('، ')}). اخلطهم الأول مع 20-30 ضعف
       وزنهم ذرة مطحونة ناعم قبل ما يدخلوا الخلاطة، عشان التوزيع يطلع متجانس.</div>`:''}
@@ -1318,9 +1349,19 @@ function buildPrintCmp(){
     ${prTable(head,b)}
     <div class="pr-foot">الأحمر = خارج المدى المستهدف للمرحلة.</div>`;
 }
-function doPrint(html){
-  $('#printArea').innerHTML=html;
-  setTimeout(()=>{ window.print(); },60);
+/* تقدير الحجم عشان يدخل فى ورقة واحدة من غير سطر يتيم */
+function fitClass(html,extra){
+  const rows=(html.match(/<tr/g)||[]).length + (extra||0);
+  if(rows<=30) return 'onepage';
+  if(rows<=44) return 'tight onepage';
+  if(rows<=62) return 'xtight onepage';
+  return 'xtight';           /* أكبر من كده لازم يتقسّم */
+}
+function doPrint(html,extraRows){
+  const el=$('#printArea');
+  el.className=fitClass(html,extraRows);
+  el.innerHTML=html;
+  setTimeout(()=>{ window.print(); },70);
 }
 
 /* ================= صورة ================= */
@@ -1479,6 +1520,66 @@ function renderPick(q){
     if(pickCb) pickCb(q);
     toast('اتضافت — دخّل قيمها فى الخامات');
   };
+}
+
+/* ================= المركزات جنب بعض =================
+   عمود لكل تركيبة. showPrices: بدون تسعير / مسعّرة. */
+function buildPrintConcSide(ids,tons,showPrices){
+  const t=tons||S.tons||10;
+  const A={}; ids.forEach(id=>A[id]=analyze(id));
+  const names=[];
+  ids.forEach(id=>S.fx[id].conc.forEach(r=>{ if(+r.qty>0&&names.indexOf(r.name)<0) names.push(r.name); }));
+
+  const head=['#','المكون'];
+  ids.forEach(id=>{
+    head.push(esc(S.fx[id].ar)+' (كجم)');
+    if(showPrices) head.push('ج');
+  });
+  head.push('✓ وزن');
+
+  let b='';
+  names.forEach((nm,i)=>{
+    const g=findIng(nm), p=g?+g.price||0:0;
+    b+=`<tr><td>${i+1}</td><td>${esc(nm)}</td>`;
+    ids.forEach(id=>{
+      const r=S.fx[id].conc.find(x=>x.name===nm);
+      const v=r?(+r.qty||0)*t:0;
+      b+=`<td>${v?n2(v):'—'}</td>`;
+      if(showPrices) b+=`<td>${v&&p?n2(v*p):'—'}</td>`;
+    });
+    b+='<td style="width:52px"></td></tr>';
+  });
+  b+='<tr class="tot"><td></td><td>الإجمالى</td>';
+  ids.forEach(id=>{
+    b+=`<td>${n2(concKg(id)*t)}</td>`;
+    if(showPrices) b+=`<td>${n2(A[id].concCost*t)}</td>`;
+  });
+  b+='<td></td></tr>';
+
+  const codes=ids.map(id=>{
+    const f=S.fx[id];
+    return esc(f.ar)+(f.code?' ('+esc(f.code)+')':'');
+  }).join('  •  ');
+
+  return `<div class="pr-h"><h1>أوامر خلط المركزات</h1>
+    <div class="meta">${codes}</div>
+    <div class="meta">كل عمود يكفى ${t} طن علف  •  طُبع ${today()}${showPrices?'':'  •  بدون تسعير'}</div></div>
+    ${prTable(head,b)}
+    <div class="pr-foot">خانة «✓ وزن» عشان اللى بيوزن يعلّم عليها أثناء التجهيز.
+      المكونات ≤ 0.5 كجم/طن لازم تتخلط الأول مع 20-30 ضعف وزنها ذرة مطحونة ناعم.</div>`;
+}
+function textConcSide(ids,tons,showPrices){
+  const t=tons||S.tons||10;
+  let s='أوامر خلط المركزات — يكفى '+t+' طن لكل تركيبة\n'+'—'.repeat(18)+'\n';
+  ids.forEach(id=>{
+    const f=S.fx[id],a=analyze(id);
+    s+='\n■ '+f.ar+(f.code?' ('+f.code+')':'')+'\n';
+    f.conc.forEach((r,i)=>{ const v=(+r.qty||0)*t; if(!v) return;
+      const g=findIng(r.name),p=g?+g.price||0:0;
+      s+=`${i+1}. ${r.name}: ${n2(v)} كجم`+(showPrices&&p?` — ${n0(v*p)} ج`:'')+'\n'; });
+    s+=`الإجمالى: ${n2(concKg(id)*t)} كجم`+(showPrices?` — ${n0(a.concCost*t)} ج`:'')+'\n';
+  });
+  return s;
 }
 
 /* ================= مزامنة Firebase =================
@@ -1735,10 +1836,23 @@ function init(){
   /* أمر الخلط */
   $('#batchTons').value=S.tons;
   $('#batchTons').oninput=renderBatch;
-  $('#btnBatchPrint').onclick=()=>doPrint(buildPrintConc(S.cur,S.tons));
-  $('#btnBatchWa').onclick   =()=>shareText(textConc(S.cur,S.tons));
-  $('#btnBatchImg').onclick  =()=>toImage(buildPrintConc(S.cur,S.tons),
-    ((S.fx[S.cur].code||S.fx[S.cur].ar)+'-مركز').replace(/[\\/:*?"<>|]/g,'-'));
+  $$('#batchScope button').forEach(b=>b.onclick=()=>{
+    S.bScope=b.dataset.s; save(); renderBatch();
+  });
+  $$('#batchPrice button').forEach(b=>b.onclick=()=>{
+    S.bPrice=+b.dataset.p; save(); renderBatch();
+  });
+  const batchIds=()=> S.bScope==='all' ? S.order.slice() : [S.cur];
+  const batchHtml=()=> S.bScope==='all'
+    ? buildPrintConcSide(batchIds(),S.tons,!!S.bPrice)
+    : buildPrintConc(S.cur,S.tons,!!S.bPrice);
+  const batchTxt =()=> S.bScope==='all'
+    ? textConcSide(batchIds(),S.tons,!!S.bPrice)
+    : textConc(S.cur,S.tons,!!S.bPrice);
+  $('#btnBatchPrint').onclick=()=>doPrint(batchHtml());
+  $('#btnBatchWa').onclick   =()=>shareText(batchTxt());
+  $('#btnBatchImg').onclick  =()=>toImage(batchHtml(),
+    (S.bScope==='all'?'مركزات':((S.fx[S.cur].code||S.fx[S.cur].ar)+'-مركز')).replace(/[\\/:*?"<>|]/g,'-'));
 
   ['#phFrom','#phTo','#phQty'].forEach(s=>$(s).oninput=calcPhos);
 
