@@ -189,11 +189,44 @@ summary{padding:9px 12px;cursor:pointer;font-size:13px;font-weight:700;color:var
 summary:hover{color:var(--paper)}
 details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
 .det-b{padding:12px}
+/* ---- إضافات ---- */
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{background:var(--panel);border:0;color:var(--mute);font-family:var(--f-body);
+  font-size:12.5px;padding:6px 12px;cursor:pointer}
+.seg button.on{background:var(--amber);color:#14202C;font-weight:700}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mute);cursor:pointer}
+.chk input{width:auto}
+.ovl{position:fixed;inset:0;background:rgba(6,11,17,.82);z-index:150;display:flex;
+  align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.dlg{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  width:100%;max-width:520px;max-height:88vh;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+.pick-row{display:flex;justify-content:space-between;gap:10px;padding:9px 11px;
+  border:1px solid var(--line);border-radius:7px;margin-bottom:6px;cursor:pointer;background:#101B27}
+.pick-row:hover{border-color:var(--amber);background:#1A2736}
+.pick-row b{font-size:13.5px;font-weight:500}
+.rowdel{background:none;border:0;color:var(--slate);cursor:pointer;font-size:15px;padding:2px 5px}
+.rowdel:hover{color:var(--clay)}
+input.nav:focus{background:#101d2b}
+
+/* ---- الطباعة ---- */
+#printArea{display:none}
 @media print{
-  body{background:#fff;color:#000}
-  .mast,.tabs,.btn,.stages{display:none!important}
-  .card{border-color:#ccc;background:#fff}
-  td,th{color:#000}
+  @page{size:A4;margin:12mm}
+  body{background:#fff!important;color:#000!important;font-size:11pt}
+  body>*{display:none!important}
+  #printArea{display:block!important}
+  .pr-h{border-bottom:2px solid #1F3864;padding-bottom:8px;margin-bottom:14px}
+  .pr-h h1{font-size:17pt;margin:0 0 3px;color:#1F3864}
+  .pr-h .meta{font-size:9pt;color:#444}
+  #printArea table{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:12px}
+  #printArea th{background:#1F3864;color:#fff;padding:5px 6px;text-align:right;border:1px solid #999}
+  #printArea td{padding:4px 6px;border:1px solid #bbb}
+  #printArea tr.sec td{background:#e8eef7;font-weight:700;color:#1F3864}
+  #printArea tr.tot td{background:#f2f2f2;font-weight:700}
+  #printArea .pr-sum{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:9.5pt;margin-bottom:12px}
+  #printArea .pr-sum div{border:1px solid #ccc;padding:4px 9px;border-radius:4px}
+  #printArea .pr-foot{margin-top:14px;font-size:8.5pt;color:#555;border-top:1px solid #ccc;padding-top:6px}
+  #printArea .out{color:#b3402c;font-weight:700}
 }
 </style>
 </head>
@@ -208,7 +241,7 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
     </div>
     <div class="cost-live">
       <b class="num" id="hdCost">—</b>
-      <span>جنيه / طن — <span id="hdStage">البادى</span></span>
+      <span>جنيه / طن — <span id="hdStage">—</span></span>
     </div>
     <button class="btn sm sync" id="syncBtn" title="المزامنة">☁</button>
   </div>
@@ -216,7 +249,7 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
     <button class="tab" role="tab" aria-selected="true" data-view="mix">التركيبة</button>
     <button class="tab" role="tab" aria-selected="false" data-view="db">الخامات والأسعار</button>
     <button class="tab" role="tab" aria-selected="false" data-view="batch">أمر خلط المركز</button>
-    <button class="tab" role="tab" aria-selected="false" data-view="compare">مقارنة المراحل</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="compare">مقارنة</button>
     <button class="tab" role="tab" aria-selected="false" data-view="phos">محول الفوسفات</button>
     <button class="tab" role="tab" aria-selected="false" data-view="scen">السيناريوهات</button>
   </nav>
@@ -225,13 +258,10 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
 <main class="wrap">
 
 <div class="card hide" id="syncPanel" style="margin-bottom:14px">
-  <div class="card-h"><h2>المزامنة بين الأجهزة</h2>
-    <span class="note" id="syncState">—</span></div>
+  <div class="card-h"><h2>المزامنة بين الأجهزة</h2><span class="note" id="syncState">—</span></div>
   <div class="card-b">
-    <p class="note" style="margin-top:0">
-      الأسعار والتركيبات والسيناريوهات بتتزامن مع باقى أجهزتك على نفس مشروعك.
-      الأحدث بيغلب — يعنى آخر تعديل عملته على أى جهاز هو اللى بيفضل.
-    </p>
+    <p class="note" style="margin-top:0">الأسعار والتركيبات والسيناريوهات بتتزامن مع باقى أجهزتك.
+      الأحدث بيغلب — آخر تعديل عملته على أى جهاز هو اللى بيفضل.</p>
     <div class="row" style="margin-top:11px">
       <button class="btn sm pri" id="btnSyncOn">تفعيل</button>
       <button class="btn sm" id="btnSyncPush">ارفع دلوقتى</button>
@@ -244,23 +274,47 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
 <!-- ============ MIX ============ -->
 <section id="v-mix">
   <div class="stages" id="stageBtns"></div>
+  <div class="row" style="margin-bottom:13px">
+    <button class="btn sm pri" id="btnNewFx">＋ تركيبة جديدة</button>
+    <button class="btn sm" id="btnDupFx">نسخة من الحالية</button>
+    <button class="btn sm" id="btnEditFx">بيانات التركيبة</button>
+    <button class="btn sm dgr" id="btnDelFx">حذف</button>
+  </div>
   <div id="mixAlerts"></div>
+
   <div class="grid">
     <div class="card">
       <div class="card-h">
         <h2 id="mixTitle">—</h2>
-        <button class="btn sm" id="btnBalance">موازنة الذرة لـ 1000</button>
-        <button class="btn sm" id="btnReset">استرجاع الأصلى</button>
+        <div class="seg" id="viewSeg">
+          <button data-v="ton"   class="on">طن علف</button>
+          <button data-v="batch">مركز 500ك</button>
+        </div>
+      </div>
+      <div class="card-b" style="padding-bottom:0">
+        <div class="row" style="margin-bottom:10px">
+          <label class="chk"><input type="checkbox" id="autoConc"> استكمال المركز لـ 500ك من الصويا</label>
+          <label class="chk"><input type="checkbox" id="autoRaw"> استكمال الطن من الذرة</label>
+        </div>
+        <p class="note" id="viewHint" style="margin:0 0 10px"></p>
       </div>
       <div class="tbl-scroll">
-        <table>
+        <table id="mixTable">
           <thead><tr>
             <th style="width:26px">#</th><th class="nm">المكون</th>
-            <th style="width:92px">كجم/طن</th><th style="width:62px">%</th>
-            <th style="width:88px">سعر/كجم</th><th style="width:82px">تكلفة</th>
+            <th style="width:96px" id="thQty">كجم/طن</th><th style="width:58px">%</th>
+            <th style="width:90px">سعر/كجم</th><th style="width:84px">تكلفة</th>
+            <th style="width:34px"></th>
           </tr></thead>
           <tbody id="mixBody"></tbody>
         </table>
+      </div>
+      <div class="card-b">
+        <div class="row">
+          <button class="btn sm" id="btnAddRaw">＋ خامة أساسية</button>
+          <button class="btn sm" id="btnAddConc">＋ بند مركز</button>
+          <button class="btn sm" id="btnReset">استرجاع الأصلى</button>
+        </div>
       </div>
     </div>
 
@@ -285,17 +339,33 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
         <div class="card-b" id="totalsBox"></div>
       </div>
 
+      <div class="card" style="margin-top:14px">
+        <div class="card-h"><h2>تصدير ومشاركة</h2></div>
+        <div class="card-b">
+          <p class="note" style="margin-top:0">التركيبة كاملة</p>
+          <div class="row" style="margin-bottom:12px">
+            <button class="btn sm" data-out="print:full">طباعة / PDF</button>
+            <button class="btn sm" data-out="wa:full">واتساب</button>
+            <button class="btn sm" data-out="img:full">صورة</button>
+          </div>
+          <p class="note">المركز لوحده</p>
+          <div class="row">
+            <button class="btn sm" data-out="print:conc">طباعة / PDF</button>
+            <button class="btn sm" data-out="wa:conc">واتساب</button>
+            <button class="btn sm" data-out="img:conc">صورة</button>
+          </div>
+          <p class="note" style="margin-bottom:0;margin-top:12px">
+            لـ PDF: اختار «حفظ كـ PDF» من نافذة الطباعة.
+          </p>
+        </div>
+      </div>
+
       <details>
         <summary>رصيد الإنزيمات (Matrix Credit)</summary>
         <div class="det-b">
-          <p class="note" style="margin-top:0">
-            الإنزيمات بتحرر طاقة وفوسفور مش محسوبين فى الجداول القياسية. فعّل الرصيد ده لو
-            التركيبة فيها الإنزيم فعلاً — <b>والقيم دى لازم تطابق نشرة المنتج اللى بتستخدمه،
-            مش أرقام عامة.</b>
-          </p>
-          <label class="row" style="margin:10px 0">
-            <input type="checkbox" id="mxOn" style="width:auto"> <span style="font-size:13px">تفعيل الرصيد</span>
-          </label>
+          <p class="note" style="margin-top:0">الإنزيمات بتحرر طاقة وفوسفور مش محسوبين فى الجداول
+            القياسية. <b>القيم دى لازم تطابق نشرة المنتج اللى بتستخدمه.</b></p>
+          <label class="chk" style="margin:10px 0"><input type="checkbox" id="mxOn"> تفعيل الرصيد</label>
           <div class="fgrid" id="mxFields"></div>
         </div>
       </details>
@@ -306,17 +376,18 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
 <!-- ============ DB ============ -->
 <section id="v-db" class="hide">
   <div class="banner warn">
-    الأسعار دى بتغذّى كل حسابات التكلفة فى التطبيق. الخامات المظللة لسه بسعر صفر —
-    التكلفة الظاهرة أقل من الحقيقة لحد ما تدخّل أسعارك الفعلية من فواتير الشراء.
+    الأسعار دى بتغذّى كل حسابات التكلفة. الخامات المظللة لسه بسعر صفر —
+    التكلفة أقل من الحقيقة لحد ما تدخّل أسعارك الفعلية.
   </div>
   <div class="card">
     <div class="card-h">
       <h2>قاعدة الخامات: القيم الغذائية والأسعار</h2>
       <span class="chip warn" id="dbMissing">—</span>
-      <button class="btn sm" id="btnAddIng">+ خامة جديدة</button>
+      <button class="btn sm" id="btnAddIng">＋ خامة جديدة</button>
+      <button class="btn sm" id="btnPrintDb">طباعة</button>
     </div>
     <div class="tbl-scroll">
-      <table>
+      <table id="dbTable">
         <thead><tr>
           <th class="nm">الخامة</th><th>سعر/كجم</th><th>CP%</th><th>ME</th>
           <th>دهن%</th><th>ألياف%</th><th>Ca%</th><th>AvP%</th>
@@ -327,8 +398,8 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
     </div>
   </div>
   <p class="note" style="margin-top:12px">
-    القيم الغذائية تقديرية من جداول تركيب أعلاف عامة. لو عندك شهادة تحليل معملى فعلية
-    لخامة، حدّثها هنا — كل الحسابات هتتغير على طول.
+    الأحماض الأمينية الصناعية بتساهم فى البروتين الخام (نيتروجين × 6.25) — دى محسوبة هنا.
+    لو عندك شهادة تحليل معملى لخامة، حدّثها وكل الحسابات هتتغير على طول.
   </p>
 </section>
 
@@ -337,10 +408,11 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
   <div class="card">
     <div class="card-h">
       <h2>أمر خلط المركز</h2>
-      <label class="fld" style="margin:0">لعدد أطنان علف:</label>
-      <input type="number" id="batchTons" value="10" min="1" step="1" style="width:80px">
-      <button class="btn sm" id="btnCopyBatch">نسخ للواتساب</button>
-      <button class="btn sm" id="btnPrint">طباعة</button>
+      <label class="fld" style="margin:0">لعدد أطنان:</label>
+      <input type="text" inputmode="decimal" id="batchTons" value="10" style="width:70px">
+      <button class="btn sm" id="btnBatchPrint">طباعة / PDF</button>
+      <button class="btn sm" id="btnBatchWa">واتساب</button>
+      <button class="btn sm" id="btnBatchImg">صورة</button>
     </div>
     <div class="card-b">
       <p class="note" style="margin-top:0" id="batchHint"></p>
@@ -356,17 +428,9 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
 <!-- ============ COMPARE ============ -->
 <section id="v-compare" class="hide">
   <div class="card">
-    <div class="card-h"><h2>مقارنة المراحل الثلاث</h2></div>
-    <div class="tbl-scroll">
-      <table>
-        <thead><tr><th class="nm">المؤشر</th><th>بادى</th><th>نامى</th><th>ناهى</th><th>الوحدة</th></tr></thead>
-        <tbody id="cmpBody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <div class="card-h"><h2>تدرّج المؤشرات</h2></div>
-    <div class="card-b"><div id="cmpChart"></div></div>
+    <div class="card-h"><h2>مقارنة التركيبات</h2>
+      <button class="btn sm" id="btnCmpPrint">طباعة / PDF</button></div>
+    <div class="tbl-scroll"><table><thead id="cmpHead"></thead><tbody id="cmpBody"></tbody></table></div>
   </div>
 </section>
 
@@ -376,26 +440,22 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
     <div class="card">
       <div class="card-h"><h2>محول MCP ↔ DCP</h2></div>
       <div class="card-b">
-        <p class="note" style="margin-top:0">
-          التحويل بيحافظ على نفس الفوسفور المتاح، وبيحسب تعديل الحجر الجيرى المطلوب
-          لتعويض فرق الكالسيوم.
-        </p>
+        <p class="note" style="margin-top:0">التحويل بيحافظ على نفس الفوسفور المتاح،
+          وبيحسب تعديل الحجر الجيرى لتعويض فرق الكالسيوم.</p>
         <div class="fgrid" style="margin-top:14px">
           <div><label class="fld">من خام</label><select id="phFrom"></select></div>
           <div><label class="fld">إلى خام</label><select id="phTo"></select></div>
-          <div><label class="fld">الكمية (كجم/طن)</label><input type="number" id="phQty" value="9.5" step="0.25" min="0"></div>
+          <div><label class="fld">الكمية (كجم/طن)</label>
+            <input type="text" inputmode="decimal" id="phQty" value="9.5"></div>
         </div>
         <div style="margin-top:16px" id="phOut"></div>
       </div>
     </div>
     <div class="card">
       <div class="card-h"><h2>مرجع خامات الفوسفات</h2></div>
-      <div class="tbl-scroll">
-        <table>
-          <thead><tr><th class="nm">الخام</th><th>AvP%</th><th>Ca%</th><th>الإتاحة</th></tr></thead>
-          <tbody id="phRef"></tbody>
-        </table>
-      </div>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th class="nm">الخام</th><th>AvP%</th><th>Ca%</th><th>الإتاحة</th></tr></thead>
+        <tbody id="phRef"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -409,24 +469,65 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--amber)}
       <button class="btn pri sm" id="btnSaveScen">حفظ الحالى</button>
     </div>
     <div class="card-b">
-      <p class="note" style="margin-top:0">
-        السيناريو بيحفظ التركيبات الثلاث + الأسعار وقت الحفظ، فتقدر تقارن تكلفة
-        نفس التركيبة على أسعار شهور مختلفة.
-      </p>
+      <p class="note" style="margin-top:0">السيناريو بيحفظ كل التركيبات + الأسعار وقت الحفظ،
+        فتقدر تقارن تكلفة نفس التركيبة على أسعار شهور مختلفة.</p>
       <div id="scenList" style="margin-top:12px"></div>
     </div>
   </div>
 </section>
 
 </main>
+
+<!-- ============ نافذة بيانات التركيبة ============ -->
+<div class="ovl hide" id="fxOvl">
+  <div class="dlg">
+    <div class="card-h"><h2 id="fxDlgTitle">تركيبة جديدة</h2>
+      <button class="btn sm" id="fxClose">إغلاق</button></div>
+    <div class="card-b">
+      <div class="fgrid">
+        <div><label class="fld">اسم التركيبة</label>
+          <input type="text" id="fxName" placeholder="مثال: بادى تسمين 23%"></div>
+        <div><label class="fld">اسم اللى عملها</label>
+          <input type="text" id="fxAuthor" placeholder="الاسم"></div>
+        <div><label class="fld">العمر / المرحلة</label>
+          <input type="text" id="fxAge" placeholder="مثال: 1-14 يوم"></div>
+        <div><label class="fld">تُقارن بمعايير</label>
+          <select id="fxTarget">
+            <option value="starter">بادى (Starter)</option>
+            <option value="grower">نامى (Grower)</option>
+            <option value="finisher">ناهى (Finisher)</option>
+          </select></div>
+      </div>
+      <p class="note" style="margin-top:12px">الكود بيتولّد تلقائى من اسم صاحبها + تاريخ الإضافة:
+        <b id="fxCodePrev">—</b></p>
+      <div class="row" style="margin-top:14px">
+        <button class="btn pri" id="fxSave">حفظ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ نافذة اختيار خامة ============ -->
+<div class="ovl hide" id="pickOvl">
+  <div class="dlg">
+    <div class="card-h"><h2 id="pickTitle">اختار خامة</h2>
+      <button class="btn sm" id="pickClose">إغلاق</button></div>
+    <div class="card-b">
+      <input type="text" id="pickSearch" placeholder="ابحث…" style="text-align:right">
+      <div id="pickList" style="max-height:46vh;overflow:auto;margin-top:11px"></div>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
 <div class="toast" id="toast"></div>
 <script>
-const SEED_DB=[{"name":"ذرة صفراء","CP":0.085,"ME":3350,"Fat":0.038,"Fiber":0.022,"Ca":0.0002,"AvP":0.0008,"Lys":0.0025,"Met":0.0018,"Thr":0.0029,"price":13,"note":"متوسط سوق محلي/مستورد - أغسطس 2026"},{"name":"ذرة صفراء مجروشة","CP":0.085,"ME":3350,"Fat":0.038,"Fiber":0.022,"Ca":0.0002,"AvP":0.0008,"Lys":0.0025,"Met":0.0018,"Thr":0.0029,"price":13.2,"note":"نفس الذرة + فرق طحن بسيط فى السعر"},{"name":"كسب فول الصويا (46%)","CP":0.46,"ME":2230,"Fat":0.015,"Fiber":0.06,"Ca":0.0029,"AvP":0.002,"Lys":0.0282,"Met":0.0065,"Thr":0.0175,"price":27,"note":"متوسط 24.3-30.7 ألف جنيه/طن - أسواق مصر أغسطس 2026"},{"name":"كسب فول الصويا (تكميلى للمركز)","CP":0.46,"ME":2230,"Fat":0.015,"Fiber":0.06,"Ca":0.0029,"AvP":0.002,"Lys":0.0282,"Met":0.0065,"Thr":0.0175,"price":27,"note":"نفس كسب الصويا 46%"},{"name":"زيت فول الصويا","CP":0,"ME":8800,"Fat":0.999,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":48,"note":"تقديرى (أعلى من كسب الصويا بحوالى 1.6-2x) - يحتاج تحديث من فاتورتك"},{"name":"الحجر الجيرى الناعم (0-2 مم)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0.38,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مونو كالسيوم فوسفات (MCP)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0.17,"AvP":0.21,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ملح الطعام","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"دل- ميثيونين","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0.99,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ل- ليسين هيدروكلوريد","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0.78,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ل- ثريونين","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0.98,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"بيكربونات الصوديوم","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"كولين كلوريد (60%)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"فيتامينات تسمين","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"املاح تسمين","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد سموم كيميائى","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد سموم بيولوجى (تي بيو)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد سالمونيلا (ديسال)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد كولستريديا (بيوترال مكس)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد كوكسيديا (ديكلا 0.50%)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ابراماكس","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم فايتيز 10000","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم بروتياز","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم طاقة للصويا (بيتامنانييز) 50000","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم طاقة","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ليبييز 50000","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ليجنوبوند","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"كيموتكس بلص","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مستحلب دهنى (برجابيور)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"برولاكت","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"هادي","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مولنجانيك","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"}];
+const SEED_DB=[{"name":"ذرة صفراء","CP":0.085,"ME":3350,"Fat":0.038,"Fiber":0.022,"Ca":0.0002,"AvP":0.0008,"Lys":0.0025,"Met":0.0018,"Thr":0.0029,"price":13,"note":"ذرة صفراء 8.5% بروتين — قيم جداول قياسية"},{"name":"ذرة صفراء مجروشة","CP":0.085,"ME":3350,"Fat":0.038,"Fiber":0.022,"Ca":0.0002,"AvP":0.0008,"Lys":0.0025,"Met":0.0018,"Thr":0.0029,"price":13.2,"note":"نفس الذرة، فرق الطحن فى السعر فقط"},{"name":"كسب فول الصويا (46%)","CP":0.46,"ME":2230,"Fat":0.015,"Fiber":0.06,"Ca":0.0029,"AvP":0.002,"Lys":0.0282,"Met":0.0065,"Thr":0.0175,"price":27,"note":"كسب صويا 46% — قيم جداول قياسية"},{"name":"كسب فول الصويا (تكميلى للمركز)","CP":0.46,"ME":2230,"Fat":0.015,"Fiber":0.06,"Ca":0.0029,"AvP":0.002,"Lys":0.0282,"Met":0.0065,"Thr":0.0175,"price":27,"note":"نفس كسب الصويا 46%"},{"name":"زيت فول الصويا","CP":0,"ME":8800,"Fat":0.999,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":48,"note":"زيت صويا — ME 8800 kcal/kg"},{"name":"الحجر الجيرى الناعم (0-2 مم)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0.38,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"كالسيوم 38%"},{"name":"مونو كالسيوم فوسفات (MCP)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0.17,"AvP":0.21,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"AvP 21% + Ca 17%"},{"name":"ملح الطعام","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"كلوريد صوديوم — مصدر Na/Cl"},{"name":"دل- ميثيونين","CP":0.581,"ME":5020,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0.99,"Thr":0,"price":0,"note":"CP من النيتروجين × 6.25"},{"name":"ل- ليسين هيدروكلوريد","CP":0.959,"ME":4100,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0.78,"Met":0,"Thr":0,"price":0,"note":"CP من النيتروجين × 6.25"},{"name":"ل- ثريونين","CP":0.72,"ME":3900,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0.98,"price":0,"note":"CP من النيتروجين × 6.25"},{"name":"بيكربونات الصوديوم","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"مصدر Na للتوازن الأيونى DEB"},{"name":"كولين كلوريد (60%)","CP":0.0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"عامل ميثيل — مش محسوب فى CP"},{"name":"فيتامينات تسمين","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"املاح تسمين","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد سموم كيميائى","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد سموم بيولوجى (تي بيو)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد سالمونيلا (ديسال)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد كولستريديا (بيوترال مكس)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مضاد كوكسيديا (ديكلا 0.50%)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ابراماكس","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم فايتيز 10000","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم بروتياز","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم طاقة للصويا (بيتامنانييز) 50000","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"انزيم طاقة","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ليبييز 50000","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"ليجنوبوند","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"كيموتكس بلص","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مستحلب دهنى (برجابيور)","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"برولاكت","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"هادي","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"},{"name":"مولنجانيك","CP":0,"ME":0,"Fat":0,"Fiber":0,"Ca":0,"AvP":0,"Lys":0,"Met":0,"Thr":0,"price":0,"note":"محتاج سعرك الفعلى من فاتورة الشراء / المورد"}];
 const SEED_FORMULAS={"starter":{"ar":"بادى تسمين سوبر 23%","en":"Starter","age":"1-10 / 1-14 يوم","raw":[{"name":"ذرة صفراء مجروشة","qty":554,"note":""},{"name":"كسب فول الصويا (46%)","qty":391,"note":""},{"name":"زيت فول الصويا","qty":5,"note":""}],"conc":[{"name":"الحجر الجيرى الناعم (0-2 مم)","qty":13.75,"note":""},{"name":"مونو كالسيوم فوسفات (MCP)","qty":9.5,"note":"مصدر Ca + P"},{"name":"ملح الطعام","qty":3,"note":""},{"name":"دل- ميثيونين","qty":3,"note":"حمض أميني أساسي"},{"name":"فيتامينات تسمين","qty":1,"note":"فيتامينات + معادن"},{"name":"املاح تسمين","qty":1.5,"note":""},{"name":"ل- ليسين هيدروكلوريد","qty":2,"note":"حمض أميني أساسي"},{"name":"بيكربونات الصوديوم","qty":1,"note":""},{"name":"ل- ثريونين","qty":1,"note":"حمض أميني محدد"},{"name":"مضاد سموم كيميائى","qty":1,"note":"مضاد سموم فطرية"},{"name":"كولين كلوريد (60%)","qty":0.75,"note":""},{"name":"كيموتكس بلص","qty":0.5,"note":""},{"name":"مضاد سموم بيولوجى (تي بيو)","qty":0.5,"note":"مضاد سموم فطرية"},{"name":"مستحلب دهنى (برجابيور)","qty":0,"note":""},{"name":"مضاد سالمونيلا (ديسال)","qty":0.5,"note":""},{"name":"برولاكت","qty":0.5,"note":""},{"name":"مضاد كولستريديا (بيوترال مكس)","qty":0.3,"note":""},{"name":"مضاد كوكسيديا (ديكلا 0.50%)","qty":0.2,"note":"وقاية"},{"name":"انزيم فايتيز 10000","qty":0.2,"note":"إنزيم فوسفور"},{"name":"انزيم بروتياز","qty":0.2,"note":"إنزيم بروتين"},{"name":"انزيم طاقة للصويا (بيتامنانييز) 50000","qty":0.2,"note":""},{"name":"انزيم طاقة","qty":0.1,"note":""},{"name":"ليبييز 50000","qty":0.1,"note":""},{"name":"ليجنوبوند","qty":0,"note":""},{"name":"هادي","qty":0,"note":""},{"name":"مولنجانيك","qty":0.2,"note":""},{"name":"كسب فول الصويا (تكميلى للمركز)","qty":9,"note":"تكميل لـ 50 كجم مركز"}]},"grower":{"ar":"نامى تسمين سوبر 21%","en":"Grower","age":"15-25 يوم","raw":[{"name":"ذرة صفراء","qty":652,"note":""},{"name":"كسب فول الصويا (46%)","qty":290,"note":""},{"name":"زيت فول الصويا","qty":8,"note":""}],"conc":[{"name":"الحجر الجيرى الناعم (0-2 مم)","qty":12.2,"note":""},{"name":"مونو كالسيوم فوسفات (MCP)","qty":8,"note":"مصدر Ca + P"},{"name":"ملح الطعام","qty":3,"note":""},{"name":"فيتامينات تسمين","qty":1,"note":""},{"name":"املاح تسمين","qty":1.5,"note":"فيتامينات + معادن"},{"name":"دل- ميثيونين","qty":2.75,"note":"حمض أميني أساسي"},{"name":"ل- ليسين هيدروكلوريد","qty":2,"note":"حمض أميني أساسي"},{"name":"بيكربونات الصوديوم","qty":1,"note":""},{"name":"ل- ثريونين","qty":1,"note":"حمض أميني محدد"},{"name":"مضاد سموم كيميائى","qty":0.75,"note":"مضاد سموم فطرية"},{"name":"كولين كلوريد (60%)","qty":0.5,"note":""},{"name":"كيموتكس بلص","qty":0.5,"note":"وقاية"},{"name":"مضاد سموم بيولوجى (تي بيو)","qty":0.5,"note":"مضاد سموم فطرية"},{"name":"مستحلب دهنى (برجابيور)","qty":0,"note":""},{"name":"مضاد سالمونيلا (ديسال)","qty":0,"note":""},{"name":"برولاكت","qty":0.5,"note":""},{"name":"مضاد كولستريديا (بيوترال مكس)","qty":0.25,"note":""},{"name":"مضاد كوكسيديا (ديكلا 0.50%)","qty":0.2,"note":""},{"name":"انزيم فايتيز 10000","qty":0.2,"note":"إنزيم فوسفور"},{"name":"انزيم بروتياز","qty":0.2,"note":"إنزيم بروتين"},{"name":"انزيم طاقة للصويا (بيتامنانييز) 50000","qty":0.2,"note":""},{"name":"انزيم طاقة","qty":0.15,"note":""},{"name":"ليبييز 50000","qty":0.1,"note":""},{"name":"ليجنوبوند","qty":2.5,"note":""},{"name":"ابراماكس","qty":1,"note":""},{"name":"كسب فول الصويا (تكميلى للمركز)","qty":10,"note":"تكميل لـ 50 كجم مركز"}]},"finisher":{"ar":"ناهى تسمين سوبر 19%","en":"Finisher","age":"+25 يوم","raw":[{"name":"ذرة صفراء","qty":704,"note":""},{"name":"كسب فول الصويا (46%)","qty":238,"note":""},{"name":"زيت فول الصويا","qty":8,"note":""}],"conc":[{"name":"الحجر الجيرى الناعم (0-2 مم)","qty":12.05,"note":""},{"name":"مونو كالسيوم فوسفات (MCP)","qty":7,"note":"مصدر Ca + P"},{"name":"ملح الطعام","qty":3,"note":""},{"name":"فيتامينات تسمين","qty":1,"note":"فيتامينات + معادن"},{"name":"املاح تسمين","qty":1.5,"note":""},{"name":"دل- ميثيونين","qty":2.5,"note":"حمض أميني أساسي"},{"name":"ل- ليسين هيدروكلوريد","qty":2.25,"note":"حمض أميني أساسي"},{"name":"بيكربونات الصوديوم","qty":1,"note":""},{"name":"ل- ثريونين","qty":0.75,"note":""},{"name":"مضاد سموم كيميائى","qty":0.5,"note":"مضاد سموم فطرية"},{"name":"كولين كلوريد (60%)","qty":0.5,"note":"حمض أميني محدد"},{"name":"كيموتكس بلص","qty":0.25,"note":""},{"name":"مضاد سموم بيولوجى (تي بيو)","qty":0.5,"note":"مضاد سموم فطرية"},{"name":"مستحلب دهنى (برجابيور)","qty":0,"note":""},{"name":"مضاد سالمونيلا (ديسال)","qty":0,"note":""},{"name":"برولاكت","qty":0.5,"note":""},{"name":"مضاد كولستريديا (بيوترال مكس)","qty":0.25,"note":"إنزيم بروتين"},{"name":"مضاد كوكسيديا (ديكلا 0.50%)","qty":0.2,"note":"وقاية"},{"name":"انزيم فايتيز 10000","qty":0.2,"note":"انزيم فسفور "},{"name":"انزيم بروتياز","qty":0.2,"note":""},{"name":"انزيم طاقة للصويا (بيتامنانييز) 50000","qty":0.1,"note":""},{"name":"انزيم طاقة","qty":0.15,"note":""},{"name":"ليبييز 50000","qty":0.1,"note":""},{"name":"ليجنوبوند","qty":2.5,"note":""},{"name":"ابراماكس","qty":1,"note":""},{"name":"كسب فول الصويا (تكميلى للمركز)","qty":12,"note":"تكميل لـ 50 كجم مركز"}]}};
 
 /* ================= معايير المراحل =================
    مستويات استرشادية للسلالات التجارية سريعة النمو (Ross 308 / Cobb 500).
-   مش بديل عن دليل السلالة الرسمى — راجعها مقابل نشرة السلالة اللى بتربيها. */
+   مش بديل عن دليل السلالة الرسمى. */
 const TARGETS = {
   starter : {CP:[.22,.24], ME:[2950,3100], Fat:[.03,.07], Fiber:[0,.045],
              Ca:[.0090,.0105], AvP:[.0045,.0050], Lys:[.0128,.0145],
@@ -438,14 +539,10 @@ const TARGETS = {
              Ca:[.0072,.0085], AvP:[.0035,.0042], Lys:[.0102,.0115],
              Met:[.0040,.0048], Thr:[.0068,.0079]}
 };
-
-/* تعديلات موسمية على المستهدف */
 const SEASON_ADJ = {
-  normal : {},
-  summer : {ME:[1.01,1.04], CP:[.97,.99], Met:[1.04,1.06], Lys:[1.02,1.04]},
-  winter : {ME:[1.01,1.03]}
+  normal:{}, summer:{ME:[1.01,1.04],CP:[.97,.99],Met:[1.04,1.06],Lys:[1.02,1.04]},
+  winter:{ME:[1.01,1.03]}
 };
-
 const NUTRIENTS = [
   {k:'CP',   ar:'بروتين خام',    u:'%',       pct:true },
   {k:'ME',   ar:'طاقة ممثلة',    u:'kcal/kg', pct:false},
@@ -457,7 +554,6 @@ const NUTRIENTS = [
   {k:'Met',  ar:'ميثيونين',      u:'%',       pct:true },
   {k:'Thr',  ar:'ثريونين',       u:'%',       pct:true }
 ];
-
 const PHOS_REF = [
   {n:'مونو كالسيوم فوسفات (MCP)', avp:.21,  ca:.17, bio:'92-95%'},
   {n:'داى كالسيوم فوسفات (DCP)',  avp:.165, ca:.22, bio:'85-90%'},
@@ -466,288 +562,356 @@ const PHOS_REF = [
   {n:'روك فوسفات',                avp:.04,  ca:.32, bio:'30-40% (ضعيف)'}
 ];
 const LIMESTONE_CA = .38;
-
-/* رصيد الإنزيمات — القيم الافتراضية شائعة تجاريًا، لكن لازم تتأكد من نشرة منتجك */
 const MATRIX_DEF = {
-  phytase  : {label:'فايتيز', ing:'انزيم فايتيز 10000',                    ME:45, AvP:.0013, Ca:.0011, on:true},
-  protease : {label:'بروتياز',ing:'انزيم بروتياز',                          ME:25, CP:.0060, on:true},
-  mannanase: {label:'بيتامنانييز',ing:'انزيم طاقة للصويا (بيتامنانييز) 50000',ME:50, on:true},
-  xylanase : {label:'انزيم طاقة (NSP)',ing:'انزيم طاقة',                    ME:55, on:true}
+  phytase  :{label:'فايتيز',          ing:'انزيم فايتيز 10000',                    ME:45,AvP:.0013,Ca:.0011,on:true},
+  protease :{label:'بروتياز',         ing:'انزيم بروتياز',                         ME:25,CP:.0060,on:true},
+  mannanase:{label:'بيتامنانييز',     ing:'انزيم طاقة للصويا (بيتامنانييز) 50000', ME:50,on:true},
+  xylanase :{label:'انزيم طاقة (NSP)',ing:'انزيم طاقة',                            ME:55,on:true}
 };
+const TARGET_META = {starter:{ar:'بادى',full:'البادى'},grower:{ar:'نامى',full:'النامى'},finisher:{ar:'ناهى',full:'الناهى'}};
 
-const STAGE_META = {
-  starter :{ar:'البادى', ico:'', short:'بادى'},
-  grower  :{ar:'النامى', ico:'', short:'نامى'},
-  finisher:{ar:'الناهى', ico:'', short:'ناهى'}
-};
-
-const LSKEY = 'mathana.v1';
+const TON=1000, CONC_PERTON=50, CONC_BATCH=500;
+const CONC_FILLER='كسب فول الصويا (تكميلى للمركز)';
+const LSKEY='mathana.v2';
 
 /* ================= الحالة ================= */
-let S = {
-  stage  : 'starter',
-  season : 'normal',
-  db     : JSON.parse(JSON.stringify(SEED_DB)),
-  fx     : JSON.parse(JSON.stringify(SEED_FORMULAS)),
-  matrix : JSON.parse(JSON.stringify(MATRIX_DEF)),
-  mxOn   : false,
-  scen   : [],
-  tons   : 10,
-  updatedAt: 0
-};
+let S={cur:'starter',season:'normal',view:'ton',
+  db:JSON.parse(JSON.stringify(SEED_DB)),fx:{},order:[],
+  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,updatedAt:0};
+
+function buildSeedFormulas(){
+  const fx={},order=[];
+  Object.keys(SEED_FORMULAS).forEach(k=>{
+    const f=SEED_FORMULAS[k];
+    fx[k]={id:k,ar:f.ar,age:f.age,target:k,builtin:true,
+      author:'أ.د/ محمد السيد بدوي',date:'',code:'',
+      rawFiller:'ذرة',autoRaw:true,autoConc:true,
+      raw:JSON.parse(JSON.stringify(f.raw)),conc:JSON.parse(JSON.stringify(f.conc))};
+    order.push(k);
+  });
+  return {fx,order};
+}
 
 function persistOnly(){
   try{
-    localStorage.setItem(LSKEY, JSON.stringify({
-      stage:S.stage, season:S.season, db:S.db, fx:S.fx,
-      matrix:S.matrix, mxOn:S.mxOn, scen:S.scen, tons:S.tons,
-      updatedAt:S.updatedAt||0
-    }));
-  }catch(e){ /* التخزين ممتلئ أو محظور — التطبيق يفضل شغال بدونه */ }
+    localStorage.setItem(LSKEY,JSON.stringify({cur:S.cur,season:S.season,view:S.view,
+      db:S.db,fx:S.fx,order:S.order,matrix:S.matrix,mxOn:S.mxOn,scen:S.scen,
+      tons:S.tons,updatedAt:S.updatedAt||0}));
+  }catch(e){}
 }
 function save(){
-  /* أى تعديل محلى بيرفع الطابع الزمنى — ده أساس ترجيح الأحدث فى المزامنة */
-  if(typeof fbApplying === 'undefined' || !fbApplying) S.updatedAt = Date.now();
+  if(typeof fbApplying==='undefined'||!fbApplying) S.updatedAt=Date.now();
   persistOnly();
-  if(typeof pushSoon === 'function') pushSoon();
+  if(typeof pushSoon==='function') pushSoon();
 }
 function load(){
-  try{
-    const raw = localStorage.getItem(LSKEY);
-    if(!raw) return;
-    const o = JSON.parse(raw);
-    if(o && o.db && o.fx){
-      S.stage=o.stage||'starter'; S.season=o.season||'normal';
-      S.db=o.db; S.fx=o.fx;
-      S.matrix=Object.assign(JSON.parse(JSON.stringify(MATRIX_DEF)), o.matrix||{});
-      S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10;
-      S.updatedAt=o.updatedAt||0;
-    }
-  }catch(e){}
+  const sd=buildSeedFormulas(); S.fx=sd.fx; S.order=sd.order.slice();
+  let raw=null;
+  try{ raw=localStorage.getItem(LSKEY)||localStorage.getItem('mathana.v1'); }catch(e){ return; }
+  if(!raw) return;
+  let o; try{ o=JSON.parse(raw); }catch(e){ return; }
+  if(!o) return;
+  if(o.db&&o.db.length) S.db=o.db;
+  if(o.fx&&Object.keys(o.fx).length){
+    Object.keys(o.fx).forEach(k=>{
+      const f=o.fx[k]; if(!f||!f.raw||!f.conc) return;
+      const base=sd.fx[k]||{};
+      S.fx[k]=Object.assign({},base,f,{
+        id:f.id||k,
+        target:f.target||base.target||'starter',
+        ar:f.ar||base.ar||k,
+        builtin:f.builtin!==undefined?f.builtin:!!sd.fx[k],
+        autoRaw :f.autoRaw !==undefined?f.autoRaw :true,
+        autoConc:f.autoConc!==undefined?f.autoConc:true,
+        rawFiller:f.rawFiller||'ذرة',
+        author:f.author||base.author||'',code:f.code||'',date:f.date||''
+      });
+    });
+    S.order=(o.order&&o.order.length)?o.order.filter(id=>S.fx[id]):Object.keys(S.fx);
+    Object.keys(S.fx).forEach(id=>{ if(S.order.indexOf(id)<0) S.order.push(id); });
+  }
+  S.cur=(o.cur&&S.fx[o.cur])?o.cur:((o.stage&&S.fx[o.stage])?o.stage:S.order[0]);
+  S.season=o.season||'normal'; S.view=o.view||'ton';
+  S.matrix=Object.assign(JSON.parse(JSON.stringify(MATRIX_DEF)),o.matrix||{});
+  S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10; S.updatedAt=o.updatedAt||0;
 }
 
 /* ================= مساعدات ================= */
-const $  = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
-const esc = s => String(s).replace(/[&<>"']/g, c =>
-  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const n2 = v => (Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const n0 = v => Math.round(v).toLocaleString('en-US');
-const findIng = nm => S.db.find(x => x.name === nm);
+const $ =s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n2=v=>(Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const n0=v=>Math.round(v).toLocaleString('en-US');
+const rnd=(v,d)=>{const m=Math.pow(10,d===undefined?4:d);return Math.round(v*m)/m;};
+const num=v=>{const x=parseFloat(String(v).replace(/[^\d.]/g,''));return isNaN(x)?0:x;};
+const findIng=nm=>S.db.find(x=>x.name===nm);
+const F=()=>S.fx[S.cur];
 
-function rows(stage){
-  const f = S.fx[stage];
-  return f.raw.concat(f.conc);
-}
-const rnd = (v,d) => Math.round(v * Math.pow(10,d===undefined?4:d)) / Math.pow(10,d===undefined?4:d);
-function totalKg(stage){
-  return rnd(rows(stage).reduce((s,r)=> s + (+r.qty||0), 0));
-}
-function concKg(stage){
-  return rnd(S.fx[stage].conc.reduce((s,r)=> s + (+r.qty||0), 0));
+function rows(id){const f=S.fx[id];return f?f.raw.concat(f.conc):[];}
+function sumQ(a){return rnd(a.reduce((s,r)=>s+(+r.qty||0),0));}
+function totalKg(id){return sumQ(rows(id));}
+function concKg(id){return sumQ(S.fx[id].conc);}
+function rawKg(id){return sumQ(S.fx[id].raw);}
+
+/* الاستكمال التلقائى: المركز 500 كجم يكفى 10 طن → 50 كجم/طن.
+   الناقص للـ500 من كسب الصويا التكميلى، والخامات تكمل الطن من الذرة. */
+function applyFillers(id){
+  const f=S.fx[id]; if(!f) return;
+  if(f.autoConc){
+    let i=f.conc.findIndex(r=>r.name===CONC_FILLER);
+    if(i<0){ f.conc.push({name:CONC_FILLER,qty:0,note:'استكمال لـ 500 كجم مركز'}); i=f.conc.length-1; }
+    const others=f.conc.reduce((s,r,k)=>k===i?s:s+(+r.qty||0),0);
+    f.conc[i].qty=Math.max(0,rnd(CONC_PERTON-others));
+  }
+  if(f.autoRaw){
+    const key=f.rawFiller||'ذرة';
+    let i=f.raw.findIndex(r=>String(r.name).indexOf(key)>=0);
+    if(i<0) i=0;
+    if(f.raw[i]){
+      const others=f.raw.reduce((s,r,k)=>k===i?s:s+(+r.qty||0),0);
+      f.raw[i].qty=Math.max(0,rnd(TON-concKg(id)-others));
+    }
+  }
 }
 
-/* التحليل الغذائى + التكلفة */
-function analyze(stage){
-  const out = {cost:0, missing:[]};
-  NUTRIENTS.forEach(n => out[n.k] = 0);
-  rows(stage).forEach(r => {
-    const q  = +r.qty || 0;
-    const ig = findIng(r.name);
+/* ================= التحليل ================= */
+function analyze(id){
+  const out={cost:0,missing:[]};
+  NUTRIENTS.forEach(n=>out[n.k]=0);
+  rows(id).forEach(r=>{
+    const q=+r.qty||0,ig=findIng(r.name);
     if(!ig){ if(q>0) out.missing.push(r.name); return; }
-    NUTRIENTS.forEach(n => out[n.k] += q * (+ig[n.k] || 0));
-    out.cost += q * (+ig.price || 0);
+    NUTRIENTS.forEach(n=>out[n.k]+=q*(+ig[n.k]||0));
+    out.cost+=q*(+ig.price||0);
   });
-  NUTRIENTS.forEach(n => out[n.k] = out[n.k] / 1000);
-
-  /* رصيد الإنزيمات */
+  NUTRIENTS.forEach(n=>out[n.k]=out[n.k]/TON);
   if(S.mxOn){
-    Object.values(S.matrix).forEach(m => {
+    Object.values(S.matrix).forEach(m=>{
       if(!m.on) return;
-      const row = rows(stage).find(r => r.name === m.ing);
-      if(!row || !(+row.qty > 0)) return;
-      ['ME','AvP','Ca','CP'].forEach(k => { if(m[k]) out[k] += m[k]; });
+      const r=rows(id).find(x=>x.name===m.ing);
+      if(!r||!(+r.qty>0)) return;
+      ['ME','AvP','Ca','CP'].forEach(k=>{ if(m[k]) out[k]+=m[k]; });
     });
   }
-
-  out.totalKg  = totalKg(stage);
-  out.concKg   = concKg(stage);
-  out.costPerKg= out.cost / 1000;
-  out.MetLys   = out.Lys ? out.Met/out.Lys : 0;
-  out.ThrLys   = out.Lys ? out.Thr/out.Lys : 0;
-  out.CaP      = out.AvP ? out.Ca/out.AvP : 0;
-  out.EP       = out.CP  ? out.ME/(out.CP*100) : 0;
+  out.totalKg=totalKg(id); out.concKg=concKg(id); out.rawKg=rawKg(id);
+  out.costPerKg=out.cost/TON;
+  out.MetLys=out.Lys?out.Met/out.Lys:0;
+  out.ThrLys=out.Lys?out.Thr/out.Lys:0;
+  out.CaP=out.AvP?out.Ca/out.AvP:0;
+  out.EP=out.CP?out.ME/(out.CP*100):0;
+  out.concCost=S.fx[id].conc.reduce((s,r)=>{const g=findIng(r.name);return s+(+r.qty||0)*(g?+g.price||0:0);},0);
+  out.rawCost =S.fx[id].raw .reduce((s,r)=>{const g=findIng(r.name);return s+(+r.qty||0)*(g?+g.price||0:0);},0);
   return out;
 }
-
-/* المستهدف بعد التعديل الموسمى */
-function targetFor(stage, key){
-  const base = TARGETS[stage][key];
+function targetFor(id,key){
+  const f=S.fx[id]; if(!f) return null;
+  const base=(TARGETS[f.target]||TARGETS.starter)[key];
   if(!base) return null;
-  const adj = (SEASON_ADJ[S.season]||{})[key];
-  if(!adj) return base.slice();
-  return [base[0]*adj[0], base[1]*adj[1]];
+  const adj=(SEASON_ADJ[S.season]||{})[key];
+  return adj?[base[0]*adj[0],base[1]*adj[1]]:base.slice();
 }
+
+/* ================= الكود والتعريف ================= */
+function slug(s){
+  const m={'أ':'A','إ':'A','ا':'A','ب':'B','ت':'T','ث':'TH','ج':'G','ح':'H','خ':'KH','د':'D','ذ':'Z',
+    'ر':'R','ز':'Z','س':'S','ش':'SH','ص':'S','ض':'D','ط':'T','ظ':'Z','ع':'A','غ':'GH','ف':'F','ق':'Q',
+    'ك':'K','ل':'L','م':'M','ن':'N','ه':'H','و':'W','ي':'Y','ى':'Y'};
+  const p=String(s||'').trim().split(/\s+/).filter(Boolean).slice(0,2);
+  const o=p.map(x=>{const c=x[0];return m[c]||(/[A-Za-z]/.test(c)?c.toUpperCase():'');}).join('');
+  return o||'MX';
+}
+function today(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function makeCode(author){
+  const pre=slug(author)+'-'+today().replace(/-/g,'');
+  let n=1;
+  while(Object.keys(S.fx).some(id=>S.fx[id].code===pre+'-'+String(n).padStart(2,'0'))) n++;
+  return pre+'-'+String(n).padStart(2,'0');
+}
+function newId(){return 'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 
 /* ================= توست ================= */
 let toastT;
-function toast(msg, bad){
-  const t = $('#toast');
-  t.textContent = msg;
-  t.className = 'toast on' + (bad ? ' err' : '');
+function toast(msg,bad){
+  const t=$('#toast'); t.textContent=msg;
+  t.className='toast on'+(bad?' err':'');
   clearTimeout(toastT);
-  toastT = setTimeout(()=> t.className = 'toast' + (bad?' err':''), 2600);
+  toastT=setTimeout(()=>t.className='toast'+(bad?' err':''),2600);
 }
 
 /* ================= التبويبات ================= */
 function showView(v){
-  ['mix','db','batch','compare','phos','scen'].forEach(x =>
-    $('#v-'+x).classList.toggle('hide', x !== v));
-  $$('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v));
-  if(v==='batch')   renderBatch();
-  if(v==='compare') renderCompare();
-  if(v==='phos')    renderPhos();
-  if(v==='scen')    renderScen();
-  if(v==='db')      renderDB();
+  ['mix','db','batch','compare','phos','scen'].forEach(x=>
+    $('#v-'+x).classList.toggle('hide',x!==v));
+  $$('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===v));
+  if(v==='batch')  renderBatch();
+  if(v==='compare')renderCompare();
+  if(v==='phos')   renderPhos();
+  if(v==='scen')   renderScen();
+  if(v==='db')     renderDB();
 }
 
-/* ================= اختيار المرحلة ================= */
+/* ================= شريط التركيبات ================= */
 function renderStages(){
-  $('#stageBtns').innerHTML = Object.keys(S.fx).map(k=>{
-    const f = S.fx[k], a = analyze(k);
-    return `<button class="stage" data-stage="${k}" aria-pressed="${k===S.stage}">
+  $('#stageBtns').innerHTML=S.order.map(id=>{
+    const f=S.fx[id],a=analyze(id);
+    return `<button class="stage" data-id="${esc(id)}" aria-pressed="${id===S.cur}">
       <b>${esc(f.ar)}</b>
-      <small>${esc(f.age)} · ${n0(a.cost)} ج/طن</small>
+      <small>${esc(f.age||TARGET_META[f.target].full)} · ${n0(a.cost)} ج/طن</small>
+      ${f.code?`<small style="opacity:.7">${esc(f.code)}</small>`:''}
     </button>`;
   }).join('');
-  $$('#stageBtns .stage').forEach(b => b.onclick = ()=>{
-    S.stage = b.dataset.stage; save(); renderMix();
+  $$('#stageBtns .stage').forEach(b=>b.onclick=()=>{
+    S.cur=b.dataset.id; save(); renderMix();
   });
 }
 
 /* ================= جدول التركيبة ================= */
-function renderMix(){
-  const stage = S.stage, f = S.fx[stage], a = analyze(stage);
+/* عامل التحويل: وضع "المركز 500ك" بيعرض بنود المركز × 10 */
+function bf(){ return S.view==='batch' ? (CONC_BATCH/CONC_PERTON) : 1; }
 
-  $('#mixTitle').textContent = f.ar + '  —  ' + f.age;
-  $('#hdCost').textContent   = n0(a.cost);
-  $('#hdStage').textContent  = STAGE_META[stage].ar;
+function renderMix(){
+  const id=S.cur, f=F();
+  if(!f){ S.cur=S.order[0]; return renderMix(); }
+  applyFillers(id);
+  const a=analyze(id);
+
+  $('#mixTitle').textContent=f.ar+(f.age?'  —  '+f.age:'');
+  $('#hdCost').textContent=n0(a.cost);
+  $('#hdStage').textContent=f.ar;
+  $('#autoConc').checked=!!f.autoConc;
+  $('#autoRaw').checked=!!f.autoRaw;
+  $$('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
+  $('#thQty').textContent=S.view==='batch'?'كجم/500ك':'كجم/طن';
+  $('#viewHint').textContent = S.view==='batch'
+    ? `بنود المركز معروضة على دفعة ${CONC_BATCH} كجم (تكفى 10 طن علف). الخامات الأساسية بتفضل على الطن.`
+    : `كل الكميات على طن علف واحد (${TON} كجم)، منهم ${CONC_PERTON} كجم مركز.`;
   renderStages();
 
   /* تنبيهات */
-  const al = [];
-  if(Math.abs(a.totalKg - 1000) > .01)
-    al.push(`<div class="banner bad">الإجمالى ${n2(a.totalKg)} كجم مش 1000. التحليل والتكلفة
-      هيبقوا غلط لحد ما توازن — اضغط "موازنة الذرة لـ 1000".</div>`);
+  const al=[];
+  if(Math.abs(a.totalKg-TON)>.01)
+    al.push(`<div class="banner bad">الإجمالى ${n2(a.totalKg)} كجم مش ${TON}.
+      شغّل الاستكمال التلقائى أو ظبّط الكميات يدوى.</div>`);
+  if(Math.abs(a.concKg-CONC_PERTON)>.01)
+    al.push(`<div class="banner warn">المركز ${n2(a.concKg)} كجم/طن بدل ${CONC_PERTON}
+      (${n2(a.concKg*10)} بدل ${CONC_BATCH} فى الدفعة).</div>`);
   if(a.missing.length)
-    al.push(`<div class="banner bad">مكونات مش موجودة فى قاعدة الخامات، والتكلفة بتتجاهلها:
+    al.push(`<div class="banner bad">مكونات مش فى قاعدة الخامات والتكلفة بتتجاهلها:
       ${a.missing.map(esc).join('، ')}</div>`);
-  const zeroPrice = rows(stage).filter(r => (+r.qty>0) && findIng(r.name) && !(+findIng(r.name).price));
-  if(zeroPrice.length)
-    al.push(`<div class="banner warn"><b>${zeroPrice.length}</b> مكون بسعر صفر —
-      التكلفة الظاهرة أقل من الحقيقة. دخّل أسعارك فى تبويب «الخامات والأسعار».</div>`);
-  $('#mixAlerts').innerHTML = al.join('');
+  const zp=rows(id).filter(r=>(+r.qty>0)&&findIng(r.name)&&!(+findIng(r.name).price));
+  if(zp.length)
+    al.push(`<div class="banner warn"><b>${zp.length}</b> مكون بسعر صفر —
+      التكلفة أقل من الحقيقة. دخّل أسعارك فى «الخامات والأسعار».</div>`);
+  $('#mixAlerts').innerHTML=al.join('');
 
-  /* الصفوف */
-  let html = `<tr class="sect-row"><td colspan="6">الخامات الأساسية</td></tr>`;
-  const put = (r,i,sect) => {
-    const ig = findIng(r.name);
-    const pr = ig ? (+ig.price||0) : 0;
-    const q  = +r.qty || 0;
+  /* الصفوف — data-r/data-c للتنقل بالكيبورد */
+  let r=0, html='';
+  const put=(row,i,sect,mult)=>{
+    const ig=findIng(row.name), pr=ig?(+ig.price||0):0, q=+row.qty||0;
+    const shown=q*mult;
+    const isFill=(sect==='conc'&&row.name===CONC_FILLER&&f.autoConc)||
+                 (sect==='raw'&&f.autoRaw&&String(row.name).indexOf(f.rawFiller||'ذرة')>=0);
+    const cur=r++;
     return `<tr>
       <td class="num">${i+1}</td>
-      <td class="nm">${esc(r.name)}${ig?'':' <span class="chip bad">غير معرّفة</span>'}
-        ${r.note?`<div class="note" style="font-size:10.5px">${esc(r.note)}</div>`:''}</td>
-      <td><input type="number" class="qty num" data-sect="${sect}" data-i="${i}"
-           value="${q}" step="0.05" min="0"></td>
+      <td class="nm">${esc(row.name)}${ig?'':' <span class="chip bad">غير معرّفة</span>'}
+        ${isFill?' <span class="chip warn">استكمال تلقائى</span>':''}
+        ${row.note?`<div class="note" style="font-size:10.5px">${esc(row.note)}</div>`:''}</td>
+      <td><input type="text" inputmode="decimal" class="qty num nav" data-r="${cur}" data-c="0"
+           data-sect="${sect}" data-i="${i}" data-mult="${mult}"
+           value="${rnd(shown,3)}" ${isFill?'readonly':''}></td>
       <td class="num">${(q/10).toFixed(2)}</td>
-      <td><input type="number" class="price num ${pr?'':'warnp'}" data-price="${esc(r.name)}"
-           value="${pr}" step="0.25" min="0" ${ig?'':'disabled'}></td>
+      <td><input type="text" inputmode="decimal" class="price num nav ${pr?'':'warnp'}"
+           data-r="${cur}" data-c="1" data-price="${esc(row.name)}"
+           value="${pr}" ${ig?'':'disabled'}></td>
       <td class="cost num">${n2(q*pr)}</td>
+      <td><button class="rowdel" data-del="${sect}:${i}" title="حذف الصف">✕</button></td>
     </tr>`;
   };
-  f.raw.forEach((r,i)=> html += put(r,i,'raw'));
-  const rawKg = f.raw.reduce((s,r)=>s+(+r.qty||0),0);
-  const rawCost = f.raw.reduce((s,r)=>{const g=findIng(r.name);return s+(+r.qty||0)*(g?+g.price||0:0);},0);
-  html += `<tr class="tot-row"><td></td><td>إجمالى الخامات</td>
-    <td class="num">${n2(rawKg)}</td><td class="num">${(rawKg/10).toFixed(1)}</td>
-    <td></td><td class="cost num">${n2(rawCost)}</td></tr>`;
 
-  html += `<tr class="sect-row"><td colspan="6">المركز — ${n2(a.concKg)} كجم</td></tr>`;
-  f.conc.forEach((r,i)=> html += put(r,i,'conc'));
-  const cCost = f.conc.reduce((s,r)=>{const g=findIng(r.name);return s+(+r.qty||0)*(g?+g.price||0:0);},0);
-  html += `<tr class="tot-row"><td></td><td>إجمالى المركز</td>
-    <td class="num">${n2(a.concKg)}</td><td class="num">${(a.concKg/10).toFixed(1)}</td>
-    <td></td><td class="cost num">${n2(cCost)}</td></tr>`;
-  html += `<tr class="tot-row" style="border-top:2px solid var(--amber)"><td></td>
-    <td><b>الإجمالى الكلى</b></td>
+  html+=`<tr class="sect-row"><td colspan="7">الخامات الأساسية — ${n2(a.rawKg)} كجم/طن</td></tr>`;
+  f.raw.forEach((x,i)=>html+=put(x,i,'raw',1));
+  html+=`<tr class="tot-row"><td></td><td>إجمالى الخامات</td>
+    <td class="num">${n2(a.rawKg)}</td><td class="num">${(a.rawKg/10).toFixed(1)}</td>
+    <td></td><td class="cost num">${n2(a.rawCost)}</td><td></td></tr>`;
+
+  const m=bf();
+  html+=`<tr class="sect-row"><td colspan="7">المركز — ${n2(a.concKg)} كجم/طن
+    (${n2(a.concKg*10)} كجم فى دفعة الـ${CONC_BATCH})</td></tr>`;
+  f.conc.forEach((x,i)=>html+=put(x,i,'conc',m));
+  html+=`<tr class="tot-row"><td></td><td>إجمالى المركز</td>
+    <td class="num">${n2(a.concKg*m)}</td><td class="num">${(a.concKg/10).toFixed(1)}</td>
+    <td></td><td class="cost num">${n2(a.concCost)}</td><td></td></tr>`;
+  html+=`<tr class="tot-row" style="border-top:2px solid var(--amber)"><td></td>
+    <td><b>الإجمالى الكلى / طن</b></td>
     <td class="num"><b>${n2(a.totalKg)}</b></td><td class="num">${(a.totalKg/10).toFixed(1)}</td>
-    <td></td><td class="cost num"><b>${n2(a.cost)}</b></td></tr>`;
+    <td></td><td class="cost num"><b>${n2(a.cost)}</b></td><td></td></tr>`;
+  $('#mixBody').innerHTML=html;
 
-  $('#mixBody').innerHTML = html;
-
-  /* ربط المدخلات */
-  $$('#mixBody .qty').forEach(inp => inp.onchange = e=>{
-    const v = parseFloat(e.target.value);
-    S.fx[stage][e.target.dataset.sect][+e.target.dataset.i].qty = isNaN(v)?0:Math.max(0,v);
-    save(); renderMix();
+  /* ربط الإدخال */
+  $$('#mixBody .qty').forEach(inp=>{
+    inp.onchange=e=>{
+      const t=e.target, mult=+t.dataset.mult||1;
+      S.fx[id][t.dataset.sect][+t.dataset.i].qty=rnd(num(t.value)/mult);
+      applyFillers(id); save(); renderMix();
+    };
   });
-  $$('#mixBody .price').forEach(inp => inp.onchange = e=>{
-    const ig = findIng(e.target.dataset.price);
-    if(!ig) return;
-    const v = parseFloat(e.target.value);
-    ig.price = isNaN(v)?0:Math.max(0,v);
-    save(); renderMix();
+  $$('#mixBody .price').forEach(inp=>{
+    inp.onchange=e=>{
+      const ig=findIng(e.target.dataset.price); if(!ig) return;
+      ig.price=num(e.target.value); save(); renderMix();
+    };
+  });
+  $$('#mixBody [data-del]').forEach(b=>b.onclick=()=>{
+    const [sect,i]=b.dataset.del.split(':');
+    const nm=S.fx[id][sect][+i].name;
+    if(!confirm(`حذف "${nm}" من التركيبة؟`)) return;
+    S.fx[id][sect].splice(+i,1);
+    applyFillers(id); save(); renderMix(); toast('اتحذف');
   });
 
-  renderSpecs(a);
-  renderTotals(a);
-  renderMatrixFields();
+  renderSpecs(a); renderTotals(a); renderMatrixFields();
 }
 
-/* ============ SIGNATURE: أشرطة المستهدف ============ */
+/* ============ أشرطة المستهدف ============ */
 function renderSpecs(a){
-  let inSpec = 0, total = 0;
-  const html = NUTRIENTS.map(n=>{
-    const t = targetFor(S.stage, n.k);
-    const v = a[n.k];
-    if(!t) return '';
-    total++;
-    const lo = t[0], hi = t[1];
-    const span = hi - lo;
-    const min = lo - span*1.15, max = hi + span*1.15;
-    const clamp = x => Math.max(0, Math.min(100, ((x-min)/(max-min))*100));
-    const state = v < lo ? 'lo' : (v > hi ? 'hi' : 'ok');
-    if(state === 'ok') inSpec++;
-    const fmt = x => n.pct ? (x*100).toFixed(2)+'%' : n0(x);
+  let ok=0,tot=0;
+  $('#specBars').innerHTML=NUTRIENTS.map(n=>{
+    const t=targetFor(S.cur,n.k); if(!t) return '';
+    tot++;
+    const v=a[n.k],lo=t[0],hi=t[1],sp=hi-lo;
+    const mn=lo-sp*1.15,mx=hi+sp*1.15;
+    const cl=x=>Math.max(0,Math.min(100,((x-mn)/(mx-mn))*100));
+    const st=v<lo?'lo':(v>hi?'hi':'ok'); if(st==='ok') ok++;
+    const fm=x=>n.pct?(x*100).toFixed(2)+'%':n0(x);
     return `<div class="spec">
-      <div class="spec-top">
-        <span class="spec-name">${n.ar}</span>
-        <span class="spec-val ${state} num">${fmt(v)}</span>
-      </div>
+      <div class="spec-top"><span class="spec-name">${n.ar}</span>
+        <span class="spec-val ${st} num">${fm(v)}</span></div>
       <div class="track">
-        <div class="band" style="right:${clamp(lo)}%;width:${clamp(hi)-clamp(lo)}%"></div>
-        <div class="pin ${state!=='ok'?'out':''}" style="right:calc(${clamp(v)}% - 1.5px)"></div>
+        <div class="band" style="right:${cl(lo)}%;width:${cl(hi)-cl(lo)}%"></div>
+        <div class="pin ${st!=='ok'?'out':''}" style="right:calc(${cl(v)}% - 1.5px)"></div>
       </div>
-      <div class="spec-target">المستهدف ${fmt(lo)} — ${fmt(hi)}</div>
-    </div>`;
+      <div class="spec-target">المستهدف ${fm(lo)} — ${fm(hi)}</div></div>`;
   }).join('');
-  $('#specBars').innerHTML = html;
-  const c = $('#specCount');
-  c.textContent = `${inSpec} / ${total} داخل المدى`;
-  c.className = 'chip ' + (inSpec===total ? 'ok' : (inSpec >= total-2 ? 'warn' : 'bad'));
+  const c=$('#specCount');
+  c.textContent=`${ok} / ${tot} داخل المدى`;
+  c.className='chip '+(ok===tot?'ok':(ok>=tot-2?'warn':'bad'));
 }
 
 function renderTotals(a){
-  const wOk = Math.abs(a.totalKg-1000) < .01;
-  const cOk = Math.abs(a.concKg-50) < .01;
-  $('#totalsBox').innerHTML = `
-    <div class="kv"><span>الإجمالى</span><b class="num">${n2(a.totalKg)} كجم
+  const wOk=Math.abs(a.totalKg-TON)<.01, cOk=Math.abs(a.concKg-CONC_PERTON)<.01;
+  $('#totalsBox').innerHTML=`
+    <div class="kv"><span>الإجمالى / طن</span><b class="num">${n2(a.totalKg)} كجم
       <span class="chip ${wOk?'ok':'bad'}">${wOk?'مضبوط':'غير مضبوط'}</span></b></div>
-    <div class="kv"><span>المركز</span><b class="num">${n2(a.concKg)} كجم
+    <div class="kv"><span>المركز / طن</span><b class="num">${n2(a.concKg)} كجم
       <span class="chip ${cOk?'ok':'warn'}">${cOk?'50':'≠ 50'}</span></b></div>
+    <div class="kv"><span>دفعة المركز</span><b class="num">${n2(a.concKg*10)} كجم</b></div>
     <div class="kv"><span>تكلفة الطن</span><b class="num">${n2(a.cost)} ج</b></div>
     <div class="kv"><span>تكلفة الكيلو</span><b class="num">${n2(a.costPerKg)} ج</b></div>
+    <div class="kv"><span>تكلفة دفعة المركز</span><b class="num">${n2(a.concCost*10)} ج</b></div>
     <div class="kv"><span>Met : Lys</span><b class="num">${(a.MetLys*100).toFixed(1)}%</b></div>
     <div class="kv"><span>Thr : Lys</span><b class="num">${(a.ThrLys*100).toFixed(1)}%</b></div>
     <div class="kv"><span>Ca : AvP</span><b class="num">${a.CaP.toFixed(2)} : 1</b></div>
@@ -755,63 +919,58 @@ function renderTotals(a){
 }
 
 function renderMatrixFields(){
-  $('#mxOn').checked = S.mxOn;
-  $('#mxFields').innerHTML = Object.keys(S.matrix).map(k=>{
-    const m = S.matrix[k];
-    const has = rows(S.stage).some(r => r.name===m.ing && +r.qty>0);
+  $('#mxOn').checked=S.mxOn;
+  $('#mxFields').innerHTML=Object.keys(S.matrix).map(k=>{
+    const m=S.matrix[k];
+    const has=rows(S.cur).some(r=>r.name===m.ing&&+r.qty>0);
     return `<div style="opacity:${has?1:.45}">
-      <label class="fld">
-        <input type="checkbox" data-mx="${k}" ${m.on?'checked':''} style="width:auto">
-        ${esc(m.label)} ${has?'':'<span class="note">(مش فى التركيبة)</span>'}
-      </label>
-      <input type="number" data-mxme="${k}" value="${m.ME||0}" step="5"
-        title="رصيد الطاقة kcal/kg" ${m.on&&has?'':'disabled'}>
-    </div>`;
+      <label class="chk"><input type="checkbox" data-mx="${k}" ${m.on?'checked':''}>
+        ${esc(m.label)}${has?'':' <span class="note">(مش فى التركيبة)</span>'}</label>
+      <input type="text" inputmode="decimal" data-mxme="${k}" value="${m.ME||0}"
+        title="رصيد الطاقة kcal/kg" ${m.on&&has?'':'disabled'}></div>`;
   }).join('');
-  $('#mxOn').onchange = e =>{ S.mxOn = e.target.checked; save(); renderMix(); };
-  $$('[data-mx]').forEach(c => c.onchange = e=>{
-    S.matrix[e.target.dataset.mx].on = e.target.checked; save(); renderMix();
-  });
-  $$('[data-mxme]').forEach(c => c.onchange = e=>{
-    const v = parseFloat(e.target.value);
-    S.matrix[e.target.dataset.mxme].ME = isNaN(v)?0:v; save(); renderMix();
-  });
+  $('#mxOn').onchange=e=>{S.mxOn=e.target.checked;save();renderMix();};
+  $$('[data-mx]').forEach(c=>c.onchange=e=>{
+    S.matrix[e.target.dataset.mx].on=e.target.checked;save();renderMix();});
+  $$('[data-mxme]').forEach(c=>c.onchange=e=>{
+    S.matrix[e.target.dataset.mxme].ME=num(e.target.value);save();renderMix();});
 }
 
 /* ================= قاعدة الخامات ================= */
 function renderDB(){
-  const used = {};
-  Object.keys(S.fx).forEach(k => rows(k).forEach(r => { if(+r.qty>0) used[r.name]=1; }));
-  const miss = S.db.filter(d => used[d.name] && !(+d.price)).length;
-  const chip = $('#dbMissing');
-  chip.textContent = miss ? `${miss} خامة بدون سعر` : 'كل الأسعار مدخّلة';
-  chip.className = 'chip ' + (miss ? 'warn' : 'ok');
+  const used={};
+  S.order.forEach(id=>rows(id).forEach(r=>{if(+r.qty>0)used[r.name]=1;}));
+  const miss=S.db.filter(d=>used[d.name]&&!(+d.price)).length;
+  const chip=$('#dbMissing');
+  chip.textContent=miss?`${miss} خامة بدون سعر`:'كل الأسعار مدخّلة';
+  chip.className='chip '+(miss?'warn':'ok');
 
-  const f = (v,d)=> (+v||0).toFixed(d===undefined?2:d);
-  $('#dbBody').innerHTML = S.db.map((d,i)=>`<tr>
-    <td class="nm">${esc(d.name)}${used[d.name]?'':' <span class="note">(غير مستخدمة)</span>'}
-      ${d.note?`<div class="note" style="font-size:10.5px">${esc(d.note)}</div>`:''}</td>
-    <td><input type="number" class="price num ${(+d.price)?'':'warnp'}" data-d="${i}" data-f="price" value="${+d.price||0}" step="0.25" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="CP"    value="${f(d.CP*100)}"    step="0.1" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="ME"    value="${+d.ME||0}"       step="10"  min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="Fat"   value="${f(d.Fat*100)}"   step="0.1" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="Fiber" value="${f(d.Fiber*100)}" step="0.1" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="Ca"    value="${f(d.Ca*100)}"    step="0.1" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="AvP"   value="${f(d.AvP*100)}"   step="0.1" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="Lys"   value="${f(d.Lys*100)}"   step="0.1" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="Met"   value="${f(d.Met*100)}"   step="0.1" min="0"></td>
-    <td><input type="number" class="num" data-d="${i}" data-f="Thr"   value="${f(d.Thr*100)}"   step="0.1" min="0"></td>
-    <td>${used[d.name]?'':`<button class="btn sm dgr" data-del="${i}">حذف</button>`}</td>
-  </tr>`).join('');
+  const f=(v,d)=>(+v||0).toFixed(d===undefined?2:d);
+  const cols=[['price',0],['CP',1],['ME',2],['Fat',3],['Fiber',4],['Ca',5],['AvP',6],['Lys',7],['Met',8],['Thr',9]];
+  $('#dbBody').innerHTML=S.db.map((d,i)=>{
+    const cell=(fl,c)=>{
+      const pctf=(fl!=='price'&&fl!=='ME');
+      const val=fl==='price'?(+d.price||0):(fl==='ME'?(+d.ME||0):f(d[fl]*100));
+      const warn=(fl==='price'&&!(+d.price))?' warnp':'';
+      return `<td><input type="text" inputmode="decimal" class="num nav${warn}"
+        data-r="${i}" data-c="${c}" data-d="${i}" data-f="${fl}" value="${val}"></td>`;
+    };
+    return `<tr>
+      <td class="nm">${esc(d.name)}${used[d.name]?'':' <span class="note">(غير مستخدمة)</span>'}
+        ${d.note?`<div class="note" style="font-size:10.5px">${esc(d.note)}</div>`:''}</td>
+      ${cols.map(c=>cell(c[0],c[1])).join('')}
+      <td>${used[d.name]?'':`<button class="rowdel" data-del="${i}">✕</button>`}</td>
+    </tr>`;
+  }).join('');
 
-  $$('#dbBody input').forEach(inp => inp.onchange = e=>{
-    const d = S.db[+e.target.dataset.d], fl = e.target.dataset.f;
-    let v = parseFloat(e.target.value); if(isNaN(v)) v = 0; v = Math.max(0,v);
-    d[fl] = (fl==='price'||fl==='ME') ? v : v/100;
+  $$('#dbBody input').forEach(inp=>inp.onchange=e=>{
+    const d=S.db[+e.target.dataset.d],fl=e.target.dataset.f;
+    const v=num(e.target.value);
+    d[fl]=(fl==='price'||fl==='ME')?v:v/100;
     save(); renderDB(); renderMix();
   });
-  $$('#dbBody [data-del]').forEach(b => b.onclick = ()=>{
-    const i = +b.dataset.del;
+  $$('#dbBody [data-del]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.del;
     if(confirm(`حذف "${S.db[i].name}" من قاعدة الخامات؟`)){
       S.db.splice(i,1); save(); renderDB(); toast('اتحذفت');
     }
@@ -820,173 +979,506 @@ function renderDB(){
 
 /* ================= أمر خلط المركز ================= */
 function renderBatch(){
-  const tons = Math.max(1, +$('#batchTons').value || 10);
-  S.tons = tons; save();
-  $('#batchHint').textContent =
-    `كميات المركز مضروبة × ${tons} — كل عمود يكفى ${tons} طن علف نهائى.`;
+  const tons=Math.max(1,num($('#batchTons').value)||10);
+  S.tons=tons; save();
+  $('#batchHint').textContent=
+    `كميات المركز لكل ${tons} طن علف. الدفعة القياسية ${CONC_BATCH} كجم تكفى 10 طن.`;
 
-  let html = '<div class="tbl-scroll"><table><thead><tr><th style="width:26px">#</th><th class="nm">المكون</th>';
-  const keys = Object.keys(S.fx);
-  keys.forEach(k => html += `<th>${esc(STAGE_META[k].short)} (كجم)</th>`);
-  html += '</tr></thead><tbody>';
+  let html='<div class="tbl-scroll"><table><thead><tr><th style="width:26px">#</th><th class="nm">المكون</th>';
+  S.order.forEach(id=>html+=`<th>${esc(S.fx[id].ar)}</th>`);
+  html+='</tr></thead><tbody>';
 
-  const names = [];
-  keys.forEach(k => S.fx[k].conc.forEach(r => { if(!names.includes(r.name)) names.push(r.name); }));
-
+  const names=[];
+  S.order.forEach(id=>S.fx[id].conc.forEach(r=>{if(names.indexOf(r.name)<0)names.push(r.name);}));
   names.forEach((nm,i)=>{
-    html += `<tr><td class="num">${i+1}</td><td class="nm">${esc(nm)}</td>`;
-    keys.forEach(k=>{
-      const r = S.fx[k].conc.find(x => x.name===nm);
-      const v = r ? (+r.qty||0)*tons : 0;
-      html += `<td class="num" style="${v?'':'opacity:.3'}">${v?n2(v):'—'}</td>`;
+    html+=`<tr><td class="num">${i+1}</td><td class="nm">${esc(nm)}</td>`;
+    S.order.forEach(id=>{
+      const r=S.fx[id].conc.find(x=>x.name===nm);
+      const v=r?(+r.qty||0)*tons:0;
+      html+=`<td class="num" style="${v?'':'opacity:.3'}">${v?n2(v):'—'}</td>`;
     });
-    html += '</tr>';
+    html+='</tr>';
   });
-  html += '<tr class="tot-row"><td></td><td><b>الإجمالى</b></td>';
-  keys.forEach(k => html += `<td class="num"><b>${n2(concKg(k)*tons)}</b></td>`);
-  html += '</tr><tr class="tot-row"><td></td><td>تكلفة المركز</td>';
-  keys.forEach(k=>{
-    const c = S.fx[k].conc.reduce((s,r)=>{const g=findIng(r.name);return s+(+r.qty||0)*(g?+g.price||0:0);},0);
-    html += `<td class="cost num">${n0(c*tons)}</td>`;
-  });
-  html += '</tr></tbody></table></div>';
-  $('#batchOut').innerHTML = html;
+  html+='<tr class="tot-row"><td></td><td><b>الإجمالى</b></td>';
+  S.order.forEach(id=>html+=`<td class="num"><b>${n2(concKg(id)*tons)}</b></td>`);
+  html+='</tr><tr class="tot-row"><td></td><td>التكلفة</td>';
+  S.order.forEach(id=>html+=`<td class="cost num">${n0(analyze(id).concCost*tons)}</td>`);
+  html+='</tr></tbody></table></div>';
+  $('#batchOut').innerHTML=html;
 
-  /* المكونات الدقيقة */
-  const micro = [];
-  S.fx[S.stage].conc.forEach(r=>{
-    const perTon = +r.qty||0;
-    if(perTon > 0 && perTon <= 0.5) micro.push({n:r.name, q:perTon*tons});
+  const micro=[];
+  S.fx[S.cur].conc.forEach(r=>{
+    const q=+r.qty||0;
+    if(q>0&&q<=0.5) micro.push({n:r.name,q:q*tons});
   });
-  $('#carrierNote').innerHTML = micro.length
-    ? `<p style="margin-top:0">فى مرحلة <b>${esc(STAGE_META[S.stage].ar)}</b> فيه
-        <b>${micro.length}</b> مكون بكمية ≤ 0.5 كجم/طن. الكميات دى صغيرة جدًا على الخلط
-        المباشر — التوزيع بيطلع غير متجانس، فبعض الطيور تاخد جرعة مضاعفة وبعضها ولا حاجة.</p>
+  $('#carrierNote').innerHTML=micro.length
+    ? `<p style="margin-top:0">فى <b>${esc(S.fx[S.cur].ar)}</b> فيه <b>${micro.length}</b> مكون
+        بكمية ≤ 0.5 كجم/طن. الكميات دى صغيرة جدًا على الخلط المباشر — التوزيع بيطلع
+        غير متجانس، فبعض الطيور تاخد جرعة مضاعفة وبعضها ولا حاجة.</p>
       <p><b>الطريقة:</b> اخلطهم الأول مع 20-30 ضعف وزنهم ذرة مطحونة ناعم (بريمكس أولى)،
         ادخلهم الخلاطة، وبعدين ضيف باقى المركز، وأخيرًا الخامات الكبيرة.</p>
       <ul style="margin:8px 0 0;padding-inline-start:18px">
-        ${micro.map(m=>`<li>${esc(m.n)} — ${n2(m.q)} كجم</li>`).join('')}
-      </ul>`
-    : '<p style="margin:0">مفيش مكونات أقل من 0.5 كجم/طن فى المرحلة دى.</p>';
-}
-
-function batchText(){
-  const t = S.tons, k = S.stage, f = S.fx[k];
-  let s = `أمر خلط مركز — ${f.ar}\nيكفى ${t} طن علف\n\n`;
-  f.conc.forEach((r,i)=>{ const v=(+r.qty||0)*t; if(v) s += `${i+1}. ${r.name}: ${n2(v)} كجم\n`; });
-  s += `\nإجمالى المركز: ${n2(concKg(k)*t)} كجم`;
-  return s;
+        ${micro.map(m=>`<li>${esc(m.n)} — ${n2(m.q)} كجم</li>`).join('')}</ul>`
+    : '<p style="margin:0">مفيش مكونات أقل من 0.5 كجم/طن فى التركيبة دى.</p>';
 }
 
 /* ================= المقارنة ================= */
 function renderCompare(){
-  const A = {}; Object.keys(S.fx).forEach(k => A[k]=analyze(k));
-  const line = (ar,get,unit,pct)=>{
-    const cells = ['starter','grower','finisher'].map(k=>{
-      const v = get(A[k]);
-      const t = TARGETS[k][ (NUTRIENTS.find(n=>n.ar===ar)||{}).k ];
-      let cls = '';
-      if(t) cls = (v<t[0]||v>t[1]) ? 'style="color:var(--clay)"' : 'style="color:var(--spruce)"';
+  const A={}; S.order.forEach(id=>A[id]=analyze(id));
+  $('#cmpHead').innerHTML='<tr><th class="nm">المؤشر</th>'+
+    S.order.map(id=>`<th>${esc(S.fx[id].ar)}</th>`).join('')+'<th>الوحدة</th></tr>';
+
+  const line=(label,get,unit,pct,key)=>{
+    const cells=S.order.map(id=>{
+      const v=get(A[id]);
+      let cls='';
+      if(key){
+        const t=targetFor(id,key);
+        if(t) cls=(v<t[0]||v>t[1])?'style="color:var(--clay)"':'style="color:var(--spruce)"';
+      }
       return `<td class="num" ${cls}>${pct?(v*100).toFixed(2):n2(v)}</td>`;
     }).join('');
-    return `<tr><td class="nm">${ar}</td>${cells}<td class="note">${unit}</td></tr>`;
+    return `<tr><td class="nm">${label}</td>${cells}<td class="note">${unit}</td></tr>`;
   };
-  let h = NUTRIENTS.map(n => line(n.ar, a=>a[n.k], n.u, n.pct)).join('');
-  h += `<tr class="sect-row"><td colspan="5">النسب والتكلفة</td></tr>`;
-  h += line('Met : Lys', a=>a.MetLys, '%', true);
-  h += line('Thr : Lys', a=>a.ThrLys, '%', true);
-  h += `<tr><td class="nm">Ca : AvP</td>${['starter','grower','finisher'].map(k=>`<td class="num">${A[k].CaP.toFixed(2)}</td>`).join('')}<td class="note">: 1</td></tr>`;
-  h += `<tr><td class="nm">طاقة : بروتين</td>${['starter','grower','finisher'].map(k=>`<td class="num">${A[k].EP.toFixed(1)}</td>`).join('')}<td class="note">kcal/%CP</td></tr>`;
-  h += `<tr class="tot-row"><td class="nm"><b>تكلفة الطن</b></td>${['starter','grower','finisher'].map(k=>`<td class="cost num"><b>${n0(A[k].cost)}</b></td>`).join('')}<td class="note">جنيه</td></tr>`;
-  $('#cmpBody').innerHTML = h;
-
-  /* رسم تدرّج بسيط */
-  const bars = ['CP','ME','Lys','cost'].map(key=>{
-    const meta = {CP:'بروتين %',ME:'طاقة kcal',Lys:'ليسين %',cost:'تكلفة ج/طن'}[key];
-    const vals = ['starter','grower','finisher'].map(k=> key==='cost'?A[k].cost:A[k][key]);
-    const mx = Math.max.apply(null, vals) || 1;
-    return `<div style="margin-bottom:14px">
-      <div class="note" style="margin-bottom:5px"><b>${meta}</b></div>
-      ${vals.map((v,i)=>{
-        const nm = ['بادى','نامى','ناهى'][i];
-        const disp = key==='ME'? n0(v) : (key==='cost'? n0(v) : (v*100).toFixed(2));
-        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <span class="note" style="width:38px">${nm}</span>
-          <div style="flex:1;height:16px;background:#0B121B;border-radius:4px;overflow:hidden;border:1px solid #1E2E42">
-            <div style="height:100%;width:${(v/mx*100).toFixed(1)}%;background:linear-gradient(90deg,var(--amber-dim),var(--amber))"></div>
-          </div>
-          <span class="num" style="width:62px;text-align:left;font-size:12px">${disp}</span>
-        </div>`;
-      }).join('')}
-    </div>`;
-  }).join('');
-  $('#cmpChart').innerHTML = bars;
+  let h=NUTRIENTS.map(n=>line(n.ar,a=>a[n.k],n.u,n.pct,n.k)).join('');
+  h+=`<tr class="sect-row"><td colspan="${S.order.length+2}">النسب والتكلفة</td></tr>`;
+  h+=line('Met : Lys',a=>a.MetLys,'%',true);
+  h+=line('Thr : Lys',a=>a.ThrLys,'%',true);
+  h+=`<tr><td class="nm">Ca : AvP</td>${S.order.map(id=>`<td class="num">${A[id].CaP.toFixed(2)}</td>`).join('')}<td class="note">: 1</td></tr>`;
+  h+=`<tr><td class="nm">طاقة : بروتين</td>${S.order.map(id=>`<td class="num">${A[id].EP.toFixed(1)}</td>`).join('')}<td class="note">kcal/%CP</td></tr>`;
+  h+=`<tr class="tot-row"><td class="nm"><b>تكلفة الطن</b></td>${S.order.map(id=>`<td class="cost num"><b>${n0(A[id].cost)}</b></td>`).join('')}<td class="note">جنيه</td></tr>`;
+  h+=`<tr class="tot-row"><td class="nm">تكلفة دفعة المركز</td>${S.order.map(id=>`<td class="cost num">${n0(A[id].concCost*10)}</td>`).join('')}<td class="note">جنيه</td></tr>`;
+  $('#cmpBody').innerHTML=h;
 }
 
 /* ================= محول الفوسفات ================= */
 function renderPhos(){
-  const opts = PHOS_REF.map((p,i)=>`<option value="${i}">${esc(p.n)}</option>`).join('');
+  const opts=PHOS_REF.map((p,i)=>`<option value="${i}">${esc(p.n)}</option>`).join('');
   if(!$('#phFrom').innerHTML){ $('#phFrom').innerHTML=opts; $('#phTo').innerHTML=opts; $('#phTo').value='1'; }
-  $('#phRef').innerHTML = PHOS_REF.map(p=>`<tr><td class="nm">${esc(p.n)}</td>
+  $('#phRef').innerHTML=PHOS_REF.map(p=>`<tr><td class="nm">${esc(p.n)}</td>
     <td class="num">${(p.avp*100).toFixed(1)}</td><td class="num">${(p.ca*100).toFixed(0)}</td>
     <td class="note">${esc(p.bio)}</td></tr>`).join('');
   calcPhos();
 }
 function calcPhos(){
-  const A = PHOS_REF[+$('#phFrom').value||0], B = PHOS_REF[+$('#phTo').value||0];
-  const q = +$('#phQty').value||0;
+  const A=PHOS_REF[+$('#phFrom').value||0],B=PHOS_REF[+$('#phTo').value||0];
+  const q=num($('#phQty').value);
   if(!A||!B||A===B){ $('#phOut').innerHTML='<p class="note">اختار خامين مختلفين.</p>'; return; }
-  const P    = q * A.avp;
-  const need = B.avp ? P / B.avp : 0;
-  const caA  = q * A.ca, caB = need * B.ca;
-  const dCa  = caB - caA;
-  const dLime= -dCa / LIMESTONE_CA;
-  $('#phOut').innerHTML = `
+  const P=q*A.avp, need=B.avp?P/B.avp:0;
+  const dCa=need*B.ca-q*A.ca, dLime=-dCa/LIMESTONE_CA;
+  $('#phOut').innerHTML=`
     <div class="kv"><span>الفوسفور المتاح (ثابت)</span><b class="num">${n2(P)} كجم</b></div>
     <div class="kv"><span>${esc(B.n)} المطلوب</span><b class="num" style="color:var(--amber)">${n2(need)} كجم</b></div>
     <div class="kv"><span>فرق الكالسيوم</span><b class="num">${dCa>0?'+':''}${n2(dCa)} كجم</b></div>
     <div class="kv"><span>تعديل الحجر الجيرى</span><b class="num" style="color:${dLime<0?'var(--clay)':'var(--spruce)'}">${dLime>0?'+':''}${n2(dLime)} كجم</b></div>
     <p class="note" style="margin-top:12px">
-      ${dLime<0 ? `قلّل الحجر الجيرى بمقدار ${n2(-dLime)} كجم` : `زوّد الحجر الجيرى بمقدار ${n2(dLime)} كجم`}
-      عشان تحافظ على نفس الكالسيوم. راجع الـ AvP فى نشرة الخام الفعلى — القيم دى متوسطات.
-    </p>`;
+      ${dLime<0?`قلّل الحجر الجيرى ${n2(-dLime)} كجم`:`زوّد الحجر الجيرى ${n2(dLime)} كجم`}
+      عشان تحافظ على نفس الكالسيوم. راجع الـ AvP فى نشرة الخام الفعلى — دى متوسطات.</p>`;
 }
 
 /* ================= السيناريوهات ================= */
 function renderScen(){
   if(!S.scen.length){
-    $('#scenList').innerHTML = '<p class="note">مفيش سيناريوهات محفوظة. اضبط تركيبة وأسعار، وبعدين احفظها باسم عشان ترجعلها وتقارن.</p>';
+    $('#scenList').innerHTML='<p class="note">مفيش سيناريوهات محفوظة. اضبط تركيبة وأسعار واحفظها باسم عشان ترجعلها وتقارن.</p>';
     return;
   }
-  const cur = {}; Object.keys(S.fx).forEach(k => cur[k]=analyze(k).cost);
-  $('#scenList').innerHTML = S.scen.map((s,i)=>{
-    const diffs = Object.keys(s.cost).map(k=>{
-      const d = cur[k] - s.cost[k];
-      const col = d>0?'var(--clay)':(d<0?'var(--spruce)':'var(--mute)');
-      return `<div class="kv"><span>${STAGE_META[k].ar}</span>
-        <b class="num">${n0(s.cost[k])} ج
-        <span style="color:${col};font-size:12px">(${d>0?'+':''}${n0(d)})</span></b></div>`;
+  const cur={}; S.order.forEach(id=>cur[id]=analyze(id).cost);
+  $('#scenList').innerHTML=S.scen.map((s,i)=>{
+    const rowsH=Object.keys(s.cost).map(id=>{
+      const nm=(s.fx&&s.fx[id])?s.fx[id].ar:id;
+      const d=(cur[id]!==undefined)?cur[id]-s.cost[id]:null;
+      const col=d===null?'var(--mute)':(d>0?'var(--clay)':(d<0?'var(--spruce)':'var(--mute)'));
+      return `<div class="kv"><span>${esc(nm)}</span><b class="num">${n0(s.cost[id])} ج
+        ${d===null?'':`<span style="color:${col};font-size:12px">(${d>0?'+':''}${n0(d)})</span>`}</b></div>`;
     }).join('');
     return `<div class="card" style="margin-bottom:11px">
-      <div class="card-h"><h2>${esc(s.name)}</h2>
-        <span class="note">${esc(s.date)}</span>
+      <div class="card-h"><h2>${esc(s.name)}</h2><span class="note">${esc(s.date)}</span>
         <button class="btn sm" data-load="${i}">تحميل</button>
         <button class="btn sm dgr" data-rm="${i}">حذف</button></div>
-      <div class="card-b">${diffs}
-        <p class="note" style="margin:9px 0 0">الفرق مقارنة بالتكلفة الحالية.</p></div>
-    </div>`;
+      <div class="card-b">${rowsH}
+        <p class="note" style="margin:9px 0 0">الفرق مقارنة بالتكلفة الحالية.</p></div></div>`;
   }).join('');
-  $$('[data-load]').forEach(b => b.onclick = ()=>{
-    const s = S.scen[+b.dataset.load];
+  $$('[data-load]').forEach(b=>b.onclick=()=>{
+    const s=S.scen[+b.dataset.load];
     if(!confirm(`تحميل "${s.name}"؟ ده هيستبدل التركيبات والأسعار الحالية.`)) return;
-    S.fx = JSON.parse(JSON.stringify(s.fx));
-    S.db = JSON.parse(JSON.stringify(s.db));
+    S.fx=JSON.parse(JSON.stringify(s.fx));
+    S.db=JSON.parse(JSON.stringify(s.db));
+    S.order=(s.order&&s.order.length)?s.order.slice():Object.keys(S.fx);
+    if(!S.fx[S.cur]) S.cur=S.order[0];
     save(); renderMix(); renderScen(); toast('تم التحميل');
   });
-  $$('[data-rm]').forEach(b => b.onclick = ()=>{
+  $$('[data-rm]').forEach(b=>b.onclick=()=>{
     if(!confirm('حذف السيناريو ده نهائى؟')) return;
     S.scen.splice(+b.dataset.rm,1); save(); renderScen(); toast('اتحذف');
   });
+}
+
+/* ================= التنقل بالكيبورد =================
+   Enter / الأسهم بتنقل بين الخلايا بانسيابية.
+   الحقول text مش number عشان الأسهم تنقل بدل ما تزوّد الرقم. */
+function navMove(from,dr,dc){
+  const box=from.closest('table'); if(!box) return false;
+  const r=+from.dataset.r, c=+from.dataset.c;
+  if(isNaN(r)||isNaN(c)) return false;
+  const all=Array.from(box.querySelectorAll('input.nav:not([disabled])'));
+  let tr=r+dr, tc=c+dc;
+  const at=(rr,cc)=>all.find(i=>+i.dataset.r===rr&&+i.dataset.c===cc);
+  /* لو الصف اللى بعده مفيهوش نفس العمود، دوّر على أقرب صف فيه */
+  if(dr!==0){
+    let guard=0;
+    while(guard++<400){
+      const t=at(tr,c);
+      if(t) return focusCell(t);
+      if(tr<0||tr>600) break;
+      tr+=dr;
+    }
+    return false;
+  }
+  const t=at(r,tc);
+  return t?focusCell(t):false;
+}
+function focusCell(el){
+  el.focus();
+  try{ el.setSelectionRange(0,el.value.length); }catch(e){}
+  el.scrollIntoView({block:'nearest',inline:'nearest'});
+  return true;
+}
+document.addEventListener('keydown',e=>{
+  const t=e.target;
+  if(!t||!t.classList||!t.classList.contains('nav')) return;
+  let dr=0,dc=0;
+  if(e.key==='Enter')            dr=e.shiftKey?-1:1;
+  else if(e.key==='ArrowDown')   dr=1;
+  else if(e.key==='ArrowUp')     dr=-1;
+  else if(e.key==='ArrowLeft')   dc=1;    /* RTL: يسار = للأمام */
+  else if(e.key==='ArrowRight')  dc=-1;
+  else return;
+  /* الأسهم الأفقية تنقل بس لو المؤشر عند طرف النص */
+  if(dc!==0){
+    const p=t.selectionStart, len=t.value.length;
+    if(dc===1 && p!==len) return;
+    if(dc===-1&& p!==0)   return;
+  }
+  if(t.onchange) t.onchange({target:t});
+  /* بعد onchange الجدول بيترسم من جديد — نستنى فريم ونركّز */
+  const r=t.dataset.r,c=t.dataset.c,tbl=t.closest('table');
+  e.preventDefault();
+  setTimeout(()=>{
+    const fresh=tbl&&tbl.querySelector(`input.nav[data-r="${r}"][data-c="${c}"]`);
+    if(fresh) navMove(fresh,dr,dc);
+  },0);
+});
+
+/* ================= بناء نص المشاركة ================= */
+function fxHeader(f){
+  const bits=[f.ar];
+  if(f.age)    bits.push(f.age);
+  if(f.code)   bits.push('كود: '+f.code);
+  if(f.author) bits.push('إعداد: '+f.author);
+  if(f.date)   bits.push(f.date);
+  return bits.join('\n');
+}
+function textFull(id){
+  const f=S.fx[id],a=analyze(id);
+  let s=fxHeader(f)+'\n'+'—'.repeat(18)+'\nلكل طن علف ('+TON+' كجم)\n\n■ الخامات الأساسية\n';
+  f.raw.forEach((r,i)=>{ if(+r.qty) s+=`${i+1}. ${r.name}: ${n2(r.qty)} كجم\n`; });
+  s+=`الإجمالى: ${n2(a.rawKg)} كجم\n\n■ المركز (${n2(a.concKg)} كجم/طن)\n`;
+  f.conc.forEach((r,i)=>{ if(+r.qty) s+=`${i+1}. ${r.name}: ${n2(r.qty)} كجم\n`; });
+  s+=`الإجمالى: ${n2(a.concKg)} كجم\n\n■ التحليل\n`;
+  NUTRIENTS.forEach(n=>{
+    s+=`${n.ar}: ${n.pct?(a[n.k]*100).toFixed(2)+'%':n0(a[n.k])+' kcal'}\n`;
+  });
+  s+=`\nتكلفة الطن: ${n2(a.cost)} ج  |  الكيلو: ${n2(a.costPerKg)} ج`;
+  return s;
+}
+function textConc(id,tons){
+  const f=S.fx[id],a=analyze(id);
+  const t=tons||10;
+  let s=`أمر خلط مركز — ${f.ar}\n`;
+  if(f.code) s+=`كود: ${f.code}\n`;
+  s+=`يكفى ${t} طن علف\n`+'—'.repeat(18)+'\n';
+  f.conc.forEach((r,i)=>{ const v=(+r.qty||0)*t; if(v) s+=`${i+1}. ${r.name}: ${n2(v)} كجم\n`; });
+  s+=`\nإجمالى المركز: ${n2(a.concKg*t)} كجم`;
+  s+=`\nالتكلفة: ${n0(a.concCost*t)} ج`;
+  s+=`\n\nيُخلط ${n2(a.concKg)} كجم مركز مع كل طن علف.`;
+  return s;
+}
+
+/* ================= نسخ / واتساب ================= */
+function copyText(txt,msg){
+  const done=()=>toast(msg||'اتنسخ — الزقه فى الواتساب');
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fbCopy(txt,done));
+  } else fbCopy(txt,done);
+}
+function fbCopy(txt,done){
+  const ta=document.createElement('textarea');
+  ta.value=txt; ta.setAttribute('readonly','');
+  ta.style.cssText='position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0,ta.value.length);
+  try{ document.execCommand('copy'); done(); }
+  catch(e){ toast('النسخ مش متاح — حدّد يدوى',true); }
+  document.body.removeChild(ta);
+}
+function shareText(txt){
+  if(navigator.share){
+    navigator.share({text:txt}).catch(()=>copyText(txt));
+  } else {
+    /* فتح واتساب مباشرة لو متاح، وإلا نسخ */
+    const url='https://wa.me/?text='+encodeURIComponent(txt);
+    const w=window.open(url,'_blank');
+    if(!w) copyText(txt);
+  }
+}
+
+/* ================= الطباعة / PDF ================= */
+function prTable(head,body){
+  return `<table><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`;
+}
+function buildPrintFull(id){
+  const f=S.fx[id],a=analyze(id);
+  let b='';
+  b+=`<tr class="sec"><td colspan="4">الخامات الأساسية</td></tr>`;
+  f.raw.forEach((r,i)=>{ if(!(+r.qty))return;
+    const g=findIng(r.name),p=g?+g.price||0:0;
+    b+=`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${n2(r.qty)}</td><td>${p?n2(r.qty*p):'—'}</td></tr>`;});
+  b+=`<tr class="tot"><td></td><td>إجمالى الخامات</td><td>${n2(a.rawKg)}</td><td>${n2(a.rawCost)}</td></tr>`;
+  b+=`<tr class="sec"><td colspan="4">المركز — ${n2(a.concKg)} كجم/طن</td></tr>`;
+  f.conc.forEach((r,i)=>{ if(!(+r.qty))return;
+    const g=findIng(r.name),p=g?+g.price||0:0;
+    b+=`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${n2(r.qty)}</td><td>${p?n2(r.qty*p):'—'}</td></tr>`;});
+  b+=`<tr class="tot"><td></td><td>إجمالى المركز</td><td>${n2(a.concKg)}</td><td>${n2(a.concCost)}</td></tr>`;
+  b+=`<tr class="tot"><td></td><td>الإجمالى الكلى</td><td>${n2(a.totalKg)}</td><td>${n2(a.cost)}</td></tr>`;
+
+  const spec=NUTRIENTS.map(n=>{
+    const t=targetFor(id,n.k),v=a[n.k];
+    const out=t&&(v<t[0]||v>t[1]);
+    const fm=x=>n.pct?(x*100).toFixed(2)+'%':n0(x);
+    return `<div class="${out?'out':''}"><b>${n.ar}:</b> ${fm(v)}${t?` <span style="color:#777">(${fm(t[0])}–${fm(t[1])})</span>`:''}</div>`;
+  }).join('');
+
+  return `<div class="pr-h"><h1>${esc(f.ar)}</h1>
+    <div class="meta">${esc([f.age,f.code?'كود: '+f.code:'',f.author?'إعداد: '+f.author:'',f.date].filter(Boolean).join('  •  '))}</div>
+    <div class="meta">لكل طن علف (${TON} كجم) — طُبع ${today()}</div></div>
+    ${prTable(['#','المكون','كجم/طن','تكلفة (ج)'],b)}
+    <h3 style="font-size:11pt;color:#1F3864;margin:6px 0">التحليل الغذائى</h3>
+    <div class="pr-sum">${spec}</div>
+    <div class="pr-sum">
+      <div><b>تكلفة الطن:</b> ${n2(a.cost)} ج</div>
+      <div><b>تكلفة الكيلو:</b> ${n2(a.costPerKg)} ج</div>
+      <div><b>Met:Lys:</b> ${(a.MetLys*100).toFixed(1)}%</div>
+      <div><b>Ca:AvP:</b> ${a.CaP.toFixed(2)}:1</div>
+      <div><b>طاقة:بروتين:</b> ${a.EP.toFixed(1)}</div></div>
+    <div class="pr-foot">القيم الغذائية من قاعدة الخامات وقابلة للتعديل. المستهدفات استرشادية
+      للسلالات التجارية — راجعها مقابل دليل السلالة.${S.mxOn?' رصيد الإنزيمات مُفعّل.':''}</div>`;
+}
+function buildPrintConc(id,tons){
+  const f=S.fx[id],a=analyze(id),t=tons||S.tons||10;
+  let b='';
+  f.conc.forEach((r,i)=>{ const v=(+r.qty||0)*t; if(!v)return;
+    const g=findIng(r.name),p=g?+g.price||0:0;
+    b+=`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${n2(v)}</td><td>${p?n2(v*p):'—'}</td>
+        <td style="width:60px"></td></tr>`;});
+  b+=`<tr class="tot"><td></td><td>الإجمالى</td><td>${n2(a.concKg*t)}</td><td>${n2(a.concCost*t)}</td><td></td></tr>`;
+  const micro=f.conc.filter(r=>+r.qty>0&&+r.qty<=0.5);
+  return `<div class="pr-h"><h1>أمر خلط مركز — ${esc(f.ar)}</h1>
+    <div class="meta">${esc([f.code?'كود: '+f.code:'',f.author?'إعداد: '+f.author:''].filter(Boolean).join('  •  '))}</div>
+    <div class="meta">يكفى ${t} طن علف  •  ${n2(a.concKg)} كجم مركز لكل طن  •  طُبع ${today()}</div></div>
+    ${prTable(['#','المكون','الكمية (كجم)','تكلفة (ج)','✓ وزن'],b)}
+    ${micro.length?`<div class="pr-foot"><b>تنبيه الخلط:</b> ${micro.length} مكون بكمية
+      ≤ 0.5 كجم/طن (${micro.map(m=>esc(m.name)).join('، ')}). اخلطهم الأول مع 20-30 ضعف
+      وزنهم ذرة مطحونة ناعم قبل ما يدخلوا الخلاطة، عشان التوزيع يطلع متجانس.</div>`:''}
+    <div class="pr-foot">خانة «✓ وزن» عشان اللى بيوزن يعلّم عليها أثناء التجهيز.</div>`;
+}
+function buildPrintDb(){
+  const b=S.db.map(d=>`<tr><td>${esc(d.name)}</td><td>${n2(+d.price||0)}</td>
+    <td>${((+d.CP||0)*100).toFixed(2)}</td><td>${n0(+d.ME||0)}</td>
+    <td>${((+d.Ca||0)*100).toFixed(2)}</td><td>${((+d.AvP||0)*100).toFixed(2)}</td>
+    <td>${((+d.Lys||0)*100).toFixed(2)}</td><td>${((+d.Met||0)*100).toFixed(2)}</td>
+    <td>${((+d.Thr||0)*100).toFixed(2)}</td></tr>`).join('');
+  return `<div class="pr-h"><h1>قاعدة الخامات — القيم الغذائية والأسعار</h1>
+    <div class="meta">طُبع ${today()}</div></div>
+    ${prTable(['الخامة','سعر/كجم','CP%','ME','Ca%','AvP%','ليسين%','ميثيونين%','ثريونين%'],b)}
+    <div class="pr-foot">الأحماض الأمينية الصناعية بتساهم فى البروتين الخام (نيتروجين × 6.25).</div>`;
+}
+function buildPrintCmp(){
+  const A={}; S.order.forEach(id=>A[id]=analyze(id));
+  const head=['المؤشر'].concat(S.order.map(id=>S.fx[id].ar)).concat(['الوحدة']);
+  let b=NUTRIENTS.map(n=>{
+    const cells=S.order.map(id=>{
+      const t=targetFor(id,n.k),v=A[id][n.k];
+      const out=t&&(v<t[0]||v>t[1]);
+      return `<td class="${out?'out':''}">${n.pct?(v*100).toFixed(2):n2(v)}</td>`;
+    }).join('');
+    return `<tr><td>${n.ar}</td>${cells}<td>${n.u}</td></tr>`;
+  }).join('');
+  b+=`<tr class="tot"><td>تكلفة الطن</td>${S.order.map(id=>`<td>${n0(A[id].cost)}</td>`).join('')}<td>جنيه</td></tr>`;
+  return `<div class="pr-h"><h1>مقارنة التركيبات</h1><div class="meta">طُبع ${today()}</div></div>
+    ${prTable(head,b)}
+    <div class="pr-foot">الأحمر = خارج المدى المستهدف للمرحلة.</div>`;
+}
+function doPrint(html){
+  $('#printArea').innerHTML=html;
+  setTimeout(()=>{ window.print(); },60);
+}
+
+/* ================= صورة ================= */
+function toImage(html,name){
+  $('#printArea').innerHTML='<div class="shot">'+html+'</div>';
+  const node=$('#printArea');
+  node.style.cssText='display:block;position:fixed;right:-10000px;top:0;width:820px;'+
+    'background:#fff;color:#111;padding:24px;font-family:'+
+    getComputedStyle(document.body).fontFamily+';z-index:-1';
+  node.querySelectorAll('table').forEach(t=>{
+    t.style.cssText='width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px';});
+  node.querySelectorAll('th').forEach(t=>{
+    t.style.cssText='background:#1F3864;color:#fff;padding:6px 8px;text-align:right;border:1px solid #999';});
+  node.querySelectorAll('td').forEach(t=>{t.style.cssText='padding:5px 8px;border:1px solid #bbb';});
+  node.querySelectorAll('tr.sec td').forEach(t=>{t.style.background='#e8eef7';t.style.fontWeight='700';});
+  node.querySelectorAll('tr.tot td').forEach(t=>{t.style.background='#f2f2f2';t.style.fontWeight='700';});
+  node.querySelectorAll('.pr-h h1').forEach(t=>{t.style.cssText='font-size:22px;margin:0 0 4px;color:#1F3864';});
+  node.querySelectorAll('.meta,.pr-foot').forEach(t=>{t.style.cssText='font-size:12px;color:#555';});
+  node.querySelectorAll('.pr-sum').forEach(t=>{t.style.cssText='display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin-bottom:10px';});
+  node.querySelectorAll('.pr-sum div').forEach(t=>{t.style.cssText='border:1px solid #ccc;padding:4px 9px;border-radius:4px';});
+  node.querySelectorAll('.out').forEach(t=>{t.style.color='#b3402c';t.style.fontWeight='700';});
+
+  const cleanup=()=>{ node.style.cssText=''; node.innerHTML=''; };
+  const go=()=>{
+    window.html2canvas(node,{backgroundColor:'#fff',scale:2,logging:false}).then(cv=>{
+      cv.toBlob(blob=>{
+        cleanup();
+        if(!blob){ toast('فشل إنشاء الصورة',true); return; }
+        const file=new File([blob],name+'.png',{type:'image/png'});
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          navigator.share({files:[file]}).catch(()=>dl(blob,name));
+        } else dl(blob,name);
+      },'image/png');
+    }).catch(()=>{ cleanup(); toast('فشل إنشاء الصورة',true); });
+  };
+  if(window.html2canvas) return go();
+  toast('بيجهّز الصورة…');
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js')
+    .then(go)
+    .catch(()=>{ cleanup(); toast('الصورة محتاجة إنترنت — استخدم الطباعة أو سكرين شوت الموبايل',true); });
+}
+function dl(blob,name){
+  const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u; a.download=name+'.png';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(u),4000);
+  toast('الصورة اتحفظت');
+}
+
+/* ================= إدارة التركيبات ================= */
+let fxEditId=null;
+function openFxDlg(mode,id){
+  fxEditId=(mode==='edit')?id:null;
+  const f=(mode==='edit')?S.fx[id]:null;
+  const src=(mode==='dup')?S.fx[id]:null;
+  $('#fxDlgTitle').textContent=mode==='edit'?'بيانات التركيبة':(mode==='dup'?'نسخة من التركيبة':'تركيبة جديدة');
+  $('#fxName').value  = f?f.ar:(src?src.ar+' — نسخة':'');
+  $('#fxAuthor').value= f?(f.author||''):(src?(src.author||''):'');
+  $('#fxAge').value   = f?(f.age||''):(src?(src.age||''):'');
+  $('#fxTarget').value= f?f.target:(src?src.target:'starter');
+  $('#fxOvl').dataset.mode=mode;
+  $('#fxOvl').dataset.src=(mode==='dup')?id:'';
+  updCodePrev();
+  $('#fxOvl').classList.remove('hide');
+  setTimeout(()=>$('#fxName').focus(),50);
+}
+function updCodePrev(){
+  const mode=$('#fxOvl').dataset.mode;
+  if(mode==='edit'&&fxEditId&&S.fx[fxEditId].code){
+    $('#fxCodePrev').textContent=S.fx[fxEditId].code; return;
+  }
+  const a=$('#fxAuthor').value.trim();
+  $('#fxCodePrev').textContent=a?makeCode(a):'—';
+}
+function saveFxDlg(){
+  const name=$('#fxName').value.trim();
+  if(!name){ toast('اكتب اسم التركيبة',true); return; }
+  const author=$('#fxAuthor').value.trim();
+  const age=$('#fxAge').value.trim();
+  const target=$('#fxTarget').value;
+  const mode=$('#fxOvl').dataset.mode;
+
+  if(mode==='edit'&&fxEditId){
+    const f=S.fx[fxEditId];
+    f.ar=name; f.author=author; f.age=age; f.target=target;
+    if(!f.code&&author){ f.code=makeCode(author); f.date=today(); }
+  }else{
+    const id=newId();
+    const src=(mode==='dup')?S.fx[$('#fxOvl').dataset.src]:null;
+    S.fx[id]={
+      id:id, ar:name, age:age, target:target, builtin:false,
+      author:author, code:author?makeCode(author):'', date:today(),
+      rawFiller:'ذرة', autoRaw:true, autoConc:true,
+      raw: src?JSON.parse(JSON.stringify(src.raw)):[
+        {name:'ذرة صفراء',qty:600,note:''},
+        {name:'كسب فول الصويا (46%)',qty:300,note:''},
+        {name:'زيت فول الصويا',qty:5,note:''}
+      ],
+      conc: src?JSON.parse(JSON.stringify(src.conc)):[
+        {name:'الحجر الجيرى الناعم (0-2 مم)',qty:12,note:''},
+        {name:'مونو كالسيوم فوسفات (MCP)',qty:8,note:'مصدر Ca + P'},
+        {name:'ملح الطعام',qty:3,note:''},
+        {name:'دل- ميثيونين',qty:2.5,note:'حمض أمينى أساسى'},
+        {name:'ل- ليسين هيدروكلوريد',qty:2,note:'حمض أمينى أساسى'},
+        {name:'ل- ثريونين',qty:1,note:''},
+        {name:'فيتامينات تسمين',qty:1,note:''},
+        {name:'املاح تسمين',qty:1.5,note:''},
+        {name:CONC_FILLER,qty:0,note:'استكمال لـ 500 كجم مركز'}
+      ]
+    };
+    S.order.push(id);
+    S.cur=id;
+    applyFillers(id);
+  }
+  $('#fxOvl').classList.add('hide');
+  save(); renderMix(); toast('اتحفظت');
+}
+function delFx(){
+  const f=F();
+  if(S.order.length<=1){ toast('لازم تفضل تركيبة واحدة على الأقل',true); return; }
+  if(!confirm(`حذف تركيبة "${f.ar}" نهائى؟`)) return;
+  delete S.fx[S.cur];
+  S.order=S.order.filter(x=>x!==S.cur);
+  S.cur=S.order[0];
+  save(); renderMix(); toast('اتحذفت');
+}
+
+/* ================= اختيار خامة ================= */
+let pickCb=null;
+function openPick(title,cb){
+  pickCb=cb;
+  $('#pickTitle').textContent=title;
+  $('#pickSearch').value='';
+  renderPick('');
+  $('#pickOvl').classList.remove('hide');
+  setTimeout(()=>$('#pickSearch').focus(),50);
+}
+function renderPick(q){
+  q=(q||'').trim();
+  const list=S.db.filter(d=>!q||d.name.indexOf(q)>=0);
+  $('#pickList').innerHTML=list.length
+    ? list.map(d=>`<div class="pick-row" data-n="${esc(d.name)}">
+        <b>${esc(d.name)}</b>
+        <span class="note">${(+d.price)?n2(d.price)+' ج/كجم':'بدون سعر'}</span></div>`).join('')
+    : `<p class="note">مفيش نتيجة. <button class="btn sm" id="pickNew">＋ ضيف "${esc(q)}" كخامة جديدة</button></p>`;
+  $$('#pickList .pick-row').forEach(el=>el.onclick=()=>{
+    $('#pickOvl').classList.add('hide');
+    if(pickCb) pickCb(el.dataset.n);
+  });
+  const nb=$('#pickNew');
+  if(nb) nb.onclick=()=>{
+    S.db.push({name:q,CP:0,ME:0,Fat:0,Fiber:0,Ca:0,AvP:0,Lys:0,Met:0,Thr:0,price:0,
+      note:'خامة مضافة يدويًا — دخّل قيمها الغذائية والسعر'});
+    save();
+    $('#pickOvl').classList.add('hide');
+    if(pickCb) pickCb(q);
+    toast('اتضافت — دخّل قيمها فى الخامات');
+  };
 }
 
 /* ================= مزامنة Firebase =================
@@ -1041,10 +1533,13 @@ function payload(){
     device    : devId(),
     db        : S.db,
     fx        : S.fx,
+    order     : S.order,
     matrix    : S.matrix,
     mxOn      : S.mxOn,
     scen      : S.scen,
     season    : S.season,
+    view      : S.view,
+    cur       : S.cur,
     tons      : S.tons
   };
 }
@@ -1053,7 +1548,8 @@ function payload(){
 function hasContent(p){
   if(!p) return false;
   const okDb = Array.isArray(p.db) && p.db.length > 0;
-  const okFx = p.fx && Object.keys(p.fx).length > 0;
+  const ids = p.fx ? Object.keys(p.fx) : [];
+  const okFx = ids.length > 0 && ids.every(k=>p.fx[k] && Array.isArray(p.fx[k].raw) && Array.isArray(p.fx[k].conc));
   return okDb && okFx;
 }
 
@@ -1062,11 +1558,16 @@ function applyCloud(c){
   fbApplying = true;
   S.db     = c.db;
   S.fx     = c.fx;
+  S.order  = (c.order&&c.order.length) ? c.order.filter(id=>S.fx[id]) : Object.keys(S.fx);
+  Object.keys(S.fx).forEach(id=>{ if(S.order.indexOf(id)<0) S.order.push(id); });
   S.matrix = Object.assign(JSON.parse(JSON.stringify(MATRIX_DEF)), c.matrix||{});
   S.mxOn   = !!c.mxOn;
   S.scen   = c.scen || [];
   S.season = c.season || 'normal';
+  S.view   = c.view || 'ton';
   S.tons   = c.tons || 10;
+  if(c.cur && S.fx[c.cur]) S.cur = c.cur;
+  if(!S.fx[S.cur]) S.cur = S.order[0];
   S.updatedAt = c.updatedAt || 0;
   persistOnly();
   const sel = $('#season'); if(sel) sel.value = S.season;
@@ -1148,105 +1649,136 @@ function flushOnHide(){
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) flushOnHide(); });
 window.addEventListener('pagehide', flushOnHide);
 
-/* ================= موازنة الذرة ================= */
-function balanceCorn(){
-  const f = S.fx[S.stage];
-  const corn = f.raw.find(r => r.name.indexOf('ذرة') === 0);
-  if(!corn){ toast('مفيش صف ذرة أوازن عليه', true); return; }
-  const others = totalKg(S.stage) - (+corn.qty||0);
-  const need = 1000 - others;
-  if(need < 0){
-    toast('باقى المكونات لوحدها أكتر من 1000 كجم — قلّل حاجة الأول', true);
-    return;
-  }
-  corn.qty = Math.round(need*100)/100;
-  save(); renderMix();
-  toast(`الذرة اتظبطت على ${n2(corn.qty)} كجم`);
-}
-
-/* ================= نسخ نص ================= */
-function copyText(txt){
-  const done = ()=> toast('اتنسخ — الزقه فى الواتساب');
-  if(navigator.clipboard && window.isSecureContext){
-    navigator.clipboard.writeText(txt).then(done).catch(()=>fallback(txt,done));
-  } else fallback(txt,done);
-}
-function fallback(txt,done){
-  const ta = document.createElement('textarea');
-  ta.value = txt;
-  ta.setAttribute('readonly','');
-  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
-  document.body.appendChild(ta);
-  ta.select(); ta.setSelectionRange(0, ta.value.length);
-  try{ document.execCommand('copy'); done(); }
-  catch(e){ toast('النسخ مش متاح — اعمل تحديد يدوى', true); }
-  document.body.removeChild(ta);
-}
-
 /* ================= التشغيل ================= */
 function init(){
   load();
+  S.order.forEach(id=>applyFillers(id));
 
-  $$('.tab').forEach(b => b.onclick = ()=> showView(b.dataset.view));
+  $$('.tab').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 
-  $('#season').value = S.season;
-  $('#season').onchange = e =>{ S.season = e.target.value; save(); renderMix(); };
+  $('#season').value=S.season;
+  $('#season').onchange=e=>{S.season=e.target.value;save();renderMix();};
 
-  $('#btnBalance').onclick = balanceCorn;
-  $('#btnReset').onclick = ()=>{
-    if(!confirm(`استرجاع تركيبة "${S.fx[S.stage].ar}" الأصلية؟ التعديلات الحالية هتضيع.`)) return;
-    S.fx[S.stage].raw  = JSON.parse(JSON.stringify(SEED_FORMULAS[S.stage].raw));
-    S.fx[S.stage].conc = JSON.parse(JSON.stringify(SEED_FORMULAS[S.stage].conc));
-    save(); renderMix(); toast('رجعت للأصلى');
+  /* وضع العرض: طن / دفعة 500ك */
+  $$('#viewSeg button').forEach(b=>b.onclick=()=>{
+    S.view=b.dataset.v; save(); renderMix();
+  });
+
+  /* الاستكمال التلقائى */
+  $('#autoConc').onchange=e=>{F().autoConc=e.target.checked;applyFillers(S.cur);save();renderMix();};
+  $('#autoRaw').onchange =e=>{F().autoRaw =e.target.checked;applyFillers(S.cur);save();renderMix();};
+
+  /* إدارة التركيبات */
+  $('#btnNewFx').onclick =()=>openFxDlg('new');
+  $('#btnDupFx').onclick =()=>openFxDlg('dup',S.cur);
+  $('#btnEditFx').onclick=()=>openFxDlg('edit',S.cur);
+  $('#btnDelFx').onclick =delFx;
+  $('#fxClose').onclick  =()=>$('#fxOvl').classList.add('hide');
+  $('#fxSave').onclick   =saveFxDlg;
+  $('#fxAuthor').oninput =updCodePrev;
+  $('#fxOvl').onclick=e=>{ if(e.target===$('#fxOvl')) $('#fxOvl').classList.add('hide'); };
+
+  /* إضافة صفوف */
+  $('#btnAddRaw').onclick=()=>openPick('ضيف خامة أساسية',nm=>{
+    if(F().raw.some(r=>r.name===nm)){ toast('موجودة بالفعل',true); return; }
+    F().raw.push({name:nm,qty:0,note:''});
+    applyFillers(S.cur); save(); renderMix(); toast('اتضافت — دخّل الكمية');
+  });
+  $('#btnAddConc').onclick=()=>openPick('ضيف بند للمركز',nm=>{
+    if(F().conc.some(r=>r.name===nm)){ toast('موجود بالفعل',true); return; }
+    const i=F().conc.findIndex(r=>r.name===CONC_FILLER);
+    const row={name:nm,qty:0,note:''};
+    if(i>=0) F().conc.splice(i,0,row); else F().conc.push(row);
+    applyFillers(S.cur); save(); renderMix(); toast('اتضاف — دخّل الكمية');
+  });
+  $('#pickClose').onclick=()=>$('#pickOvl').classList.add('hide');
+  $('#pickSearch').oninput=e=>renderPick(e.target.value);
+  $('#pickOvl').onclick=e=>{ if(e.target===$('#pickOvl')) $('#pickOvl').classList.add('hide'); };
+
+  $('#btnReset').onclick=()=>{
+    const f=F();
+    if(!f.builtin||!SEED_FORMULAS[S.cur]){ toast('دى تركيبة مخصصة — مفيش نسخة أصلية',true); return; }
+    if(!confirm(`استرجاع "${f.ar}" الأصلية؟ التعديلات هتضيع.`)) return;
+    f.raw =JSON.parse(JSON.stringify(SEED_FORMULAS[S.cur].raw));
+    f.conc=JSON.parse(JSON.stringify(SEED_FORMULAS[S.cur].conc));
+    applyFillers(S.cur); save(); renderMix(); toast('رجعت للأصلى');
   };
 
-  $('#btnAddIng').onclick = ()=>{
-    const nm = (prompt('اسم الخامة الجديدة:')||'').trim();
+  /* الخامات */
+  $('#btnAddIng').onclick=()=>{
+    const nm=(prompt('اسم الخامة الجديدة:')||'').trim();
     if(!nm) return;
-    if(findIng(nm)){ toast('الاسم ده موجود بالفعل', true); return; }
-    S.db.push({name:nm, CP:0,ME:0,Fat:0,Fiber:0,Ca:0,AvP:0,Lys:0,Met:0,Thr:0,price:0,
-               note:'خامة مضافة يدويًا — دخّل قيمها'});
-    save(); renderDB(); toast('اتضافت — دخّل قيمها');
+    if(findIng(nm)){ toast('الاسم ده موجود',true); return; }
+    S.db.push({name:nm,CP:0,ME:0,Fat:0,Fiber:0,Ca:0,AvP:0,Lys:0,Met:0,Thr:0,price:0,
+      note:'خامة مضافة يدويًا — دخّل قيمها'});
+    save(); renderDB(); toast('اتضافت');
   };
+  $('#btnPrintDb').onclick=()=>doPrint(buildPrintDb());
+  $('#btnCmpPrint').onclick=()=>doPrint(buildPrintCmp());
 
-  $('#batchTons').value = S.tons;
-  $('#batchTons').oninput = renderBatch;
-  $('#btnCopyBatch').onclick = ()=> copyText(batchText());
-  $('#btnPrint').onclick = ()=> window.print();
+  /* تصدير التركيبة */
+  $$('[data-out]').forEach(b=>b.onclick=()=>{
+    const [act,scope]=b.dataset.out.split(':');
+    const id=S.cur, f=S.fx[id];
+    const nm=(f.code||f.ar).replace(/[\\/:*?"<>|]/g,'-');
+    if(scope==='full'){
+      if(act==='print') doPrint(buildPrintFull(id));
+      if(act==='wa')    shareText(textFull(id));
+      if(act==='img')   toImage(buildPrintFull(id),nm);
+    }else{
+      if(act==='print') doPrint(buildPrintConc(id,S.tons));
+      if(act==='wa')    shareText(textConc(id,S.tons));
+      if(act==='img')   toImage(buildPrintConc(id,S.tons),nm+'-مركز');
+    }
+  });
 
-  ['#phFrom','#phTo','#phQty'].forEach(s => $(s).oninput = calcPhos);
+  /* أمر الخلط */
+  $('#batchTons').value=S.tons;
+  $('#batchTons').oninput=renderBatch;
+  $('#btnBatchPrint').onclick=()=>doPrint(buildPrintConc(S.cur,S.tons));
+  $('#btnBatchWa').onclick   =()=>shareText(textConc(S.cur,S.tons));
+  $('#btnBatchImg').onclick  =()=>toImage(buildPrintConc(S.cur,S.tons),
+    ((S.fx[S.cur].code||S.fx[S.cur].ar)+'-مركز').replace(/[\\/:*?"<>|]/g,'-'));
 
-  $('#btnSaveScen').onclick = ()=>{
-    const nm = ($('#scenName').value||'').trim();
-    if(!nm){ toast('اكتب اسم للسيناريو', true); return; }
-    const cost = {};
-    Object.keys(S.fx).forEach(k => cost[k] = analyze(k).cost);
-    S.scen.unshift({
-      name:nm,
-      date:new Date().toLocaleDateString('en-GB'),
-      fx:JSON.parse(JSON.stringify(S.fx)),
-      db:JSON.parse(JSON.stringify(S.db)),
-      cost:cost
-    });
-    if(S.scen.length > 20) S.scen.length = 20;
-    $('#scenName').value = '';
+  ['#phFrom','#phTo','#phQty'].forEach(s=>$(s).oninput=calcPhos);
+
+  /* السيناريوهات */
+  $('#btnSaveScen').onclick=()=>{
+    const nm=($('#scenName').value||'').trim();
+    if(!nm){ toast('اكتب اسم للسيناريو',true); return; }
+    const cost={}; S.order.forEach(id=>cost[id]=analyze(id).cost);
+    S.scen.unshift({name:nm,date:today(),
+      fx:JSON.parse(JSON.stringify(S.fx)),order:S.order.slice(),
+      db:JSON.parse(JSON.stringify(S.db)),cost:cost});
+    if(S.scen.length>20) S.scen.length=20;
+    $('#scenName').value='';
     save(); renderScen(); toast('اتحفظ');
   };
 
-  $('#syncBtn').onclick = ()=> $('#syncPanel').classList.toggle('hide');
-  $('#btnSyncOn').onclick  = syncOn;
-  $('#btnSyncOff').onclick = syncOff;
-  $('#btnSyncPush').onclick= ()=>{ if(!fbReady){ toast('فعّل المزامنة الأول', true); return; }
-    S.updatedAt = Date.now(); persistOnly(); pushNow(); toast('اترفع للسحابة'); };
-  $('#devIdTxt').textContent = devId();
+  /* المزامنة */
+  $('#syncBtn').onclick=()=>$('#syncPanel').classList.toggle('hide');
+  $('#btnSyncOn').onclick =syncOn;
+  $('#btnSyncOff').onclick=syncOff;
+  $('#btnSyncPush').onclick=()=>{
+    if(!fbReady){ toast('فعّل المزامنة الأول',true); return; }
+    S.updatedAt=Date.now(); persistOnly(); pushNow(); toast('اترفع للسحابة');
+  };
+  $('#devIdTxt').textContent=devId();
+
+  /* اقفل النوافذ بـ Escape */
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape') return;
+    $('#fxOvl').classList.add('hide');
+    $('#pickOvl').classList.add('hide');
+  });
 
   renderMix();
   showView('mix');
   syncRestore();
 }
 
-if(document.readyState === 'loading')
-  document.addEventListener('DOMContentLoaded', init);
+if(document.readyState==='loading')
+  document.addEventListener('DOMContentLoaded',init);
 else init();
 
 </script>
