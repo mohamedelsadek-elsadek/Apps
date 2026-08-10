@@ -504,6 +504,30 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
     </div>
     <div class="card-b">
       <p class="note" style="margin-top:0">عمود لكل تركيبة فى ورقة واحدة — الكميات لكل طن علف.</p>
+      <div class="row" style="margin:12px 0 0">
+        <label class="fld" style="margin:0">البنود:</label>
+        <div class="seg" id="pickMode">
+          <button data-m="all" class="on">كلها</button>
+          <button data-m="some">مختارة</button>
+        </div>
+        <span class="chip warn hide" id="pickCount">—</span>
+      </div>
+      <div id="pickPanel" class="hide" style="margin-top:11px;border:1px solid var(--line);
+           border-radius:8px;background:var(--paper2);padding:11px">
+        <div class="row" style="margin-bottom:9px">
+          <button class="btn sm" data-qp="none">مسح الكل</button>
+          <button class="btn sm" data-qp="raw">الخامات الأساسية</button>
+          <button class="btn sm" data-qp="conc">بنود المركز</button>
+          <button class="btn sm" data-qp="all">اختيار الكل</button>
+        </div>
+        <div id="pickBoxes" style="max-height:38vh;overflow:auto"></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn sm pri" data-side="print:pick">طباعة المختار / PDF</button>
+        <button class="btn sm" data-side="wa:pick">واتساب</button>
+        <button class="btn sm" data-side="img:pick">صورة</button>
+      </div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
       <p class="note" style="margin:12px 0 5px"><b>التركيبات كاملة</b> (خامات + مركز)</p>
       <div class="row">
         <button class="btn sm pri" data-side="print:full">طباعة / PDF</button>
@@ -730,7 +754,7 @@ const LSKEY='mathana.v2';
 /* ================= الحالة ================= */
 let S={cur:'starter',season:'normal',view:'ton',sid:false,mixerKg:500,mixStep:0.05,
   db:JSON.parse(JSON.stringify(SEED_DB)),fx:{},order:[],
-  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,sPrice:0,prog:{starter:0.55,grower:1.35,finisher:2.10},updatedAt:0};
+  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,sPrice:0,pickMode:'all',pick:[],prog:{starter:0.55,grower:1.35,finisher:2.10},updatedAt:0};
 
 function buildSeedFormulas(){
   const fx={},order=[];
@@ -748,7 +772,7 @@ function buildSeedFormulas(){
 function persistOnly(){
   try{
     localStorage.setItem(LSKEY,JSON.stringify({cur:S.cur,season:S.season,view:S.view,
-      sid:S.sid,mixerKg:S.mixerKg,mixStep:S.mixStep,prog:S.prog,
+      sid:S.sid,mixerKg:S.mixerKg,mixStep:S.mixStep,prog:S.prog,pickMode:S.pickMode,pick:S.pick,
       db:S.db,fx:S.fx,order:S.order,matrix:S.matrix,mxOn:S.mxOn,scen:S.scen,
       tons:S.tons,bScope:S.bScope,bPrice:S.bPrice,sPrice:S.sPrice,updatedAt:S.updatedAt||0}));
   }catch(e){}
@@ -790,7 +814,8 @@ function load(){
   S.prog=Object.assign({},S.prog,o.prog||{});
   S.matrix=Object.assign(JSON.parse(JSON.stringify(MATRIX_DEF)),o.matrix||{});
   S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10;
-  S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.sPrice=o.sPrice?1:0; S.updatedAt=o.updatedAt||0;
+  S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.sPrice=o.sPrice?1:0;
+  S.pickMode=o.pickMode||'all'; S.pick=Array.isArray(o.pick)?o.pick:[]; S.updatedAt=o.updatedAt||0;
   if(runMigrations()) persistOnly();
 }
 
@@ -1423,6 +1448,7 @@ function renderCompare(){
   h+=`<tr class="tot-row"><td class="nm"><b>تكلفة الطن</b></td>${S.order.map(id=>`<td class="cost num"><b>${n0(A[id].cost)}</b></td>`).join('')}<td class="note">جنيه</td></tr>`;
   h+=`<tr class="tot-row"><td class="nm">تكلفة دفعة المركز</td>${S.order.map(id=>`<td class="cost num">${n0(A[id].concCost*10)}</td>`).join('')}<td class="note">جنيه</td></tr>`;
   $('#cmpBody').innerHTML=h;
+  renderPickPanel();
 }
 
 /* ================= محول الفوسفات ================= */
@@ -1570,6 +1596,42 @@ function renderSens(){
     </div>`).join('')
     +`<p class="note" style="margin-top:10px">تكلفة الطن الحالية ${n0(base)} ج.
       الخامات اللى فوق هى اللى تستاهل تثبّت سعرها بعقد.</p>`;
+}
+
+/* ================= اختيار البنود للطباعة ================= */
+function allNames(){
+  const raw=[],conc=[];
+  S.order.forEach(id=>{
+    S.fx[id].raw.forEach(r=>{ if(+r.qty>0&&raw.indexOf(r.name)<0) raw.push(r.name); });
+    S.fx[id].conc.forEach(r=>{ if(+r.qty>0&&conc.indexOf(r.name)<0) conc.push(r.name); });
+  });
+  return {raw:raw,conc:conc};
+}
+function renderPickPanel(){
+  const on=S.pickMode==='some';
+  $('#pickPanel').classList.toggle('hide',!on);
+  $$('#pickMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===S.pickMode));
+  const chip=$('#pickCount');
+  chip.classList.toggle('hide',!on);
+  chip.textContent=S.pick.length?`${S.pick.length} بند مختار`:'مفيش بنود مختارة';
+  chip.className='chip '+(S.pick.length?'ok':'bad')+(on?'':' hide');
+  if(!on) return;
+
+  const g=allNames();
+  const box=(nm)=>`<label class="chk" style="display:flex;padding:5px 3px;border-bottom:1px solid #EFE9DC">
+      <input type="checkbox" data-pk="${esc(nm)}" ${S.pick.indexOf(nm)>=0?'checked':''}>
+      <span style="flex:1">${esc(nm)}</span></label>`;
+  $('#pickBoxes').innerHTML=
+    `<div class="note" style="font-weight:700;color:var(--sky-d);margin:4px 0">الخامات الأساسية</div>`+
+    g.raw.map(box).join('')+
+    `<div class="note" style="font-weight:700;color:var(--plum);margin:9px 0 4px">بنود المركز</div>`+
+    g.conc.map(box).join('');
+  $$('#pickBoxes [data-pk]').forEach(c=>c.onchange=e=>{
+    const nm=e.target.dataset.pk, i=S.pick.indexOf(nm);
+    if(e.target.checked){ if(i<0) S.pick.push(nm); }
+    else if(i>=0) S.pick.splice(i,1);
+    save(); renderPickPanel();
+  });
 }
 
 /* ================= التنقل بالكيبورد =================
@@ -2057,8 +2119,11 @@ function textConcSide(ids,tons,showPrices){
 
 /* ================= التركيبات جنب بعض =================
    scope: 'full' = خامات + مركز   |   'raw' = الخامات الأساسية بس */
-function buildPrintFxSide(ids,scope,showPrices){
+function buildPrintFxSide(ids,scope,showPrices,pick){
   const sp=!!showPrices;
+  /* pick = قايمة أسماء مختارة، أو null = كل البنود */
+  const sel=(pick&&pick.length)?pick:null;
+  const keep=nm=>!sel||sel.indexOf(nm)>=0;
   const A={}; ids.forEach(id=>A[id]=analyze(id));
   const nCols=ids.length*(sp?2:1);
 
@@ -2068,8 +2133,21 @@ function buildPrintFxSide(ids,scope,showPrices){
   /* اتحاد أسماء المكونات مع الحفاظ على ترتيب أول ظهور */
   const collect=key=>{
     const out=[];
-    ids.forEach(id=>S.fx[id][key].forEach(r=>{ if(+r.qty>0&&out.indexOf(r.name)<0) out.push(r.name); }));
+    ids.forEach(id=>S.fx[id][key].forEach(r=>{
+      if(+r.qty>0&&keep(r.name)&&out.indexOf(r.name)<0) out.push(r.name);
+    }));
     return out;
+  };
+  /* مجموع البنود المختارة لتركيبة */
+  const selSum=(id,keys)=>{
+    let kg=0,cost=0;
+    keys.forEach(k=>(S.fx[id][k]||[]).forEach(r=>{
+      if(!keep(r.name)) return;
+      const q=+r.qty||0; if(!q) return;
+      const g=findIng(r.name);
+      kg+=q; cost+=q*(g?+g.price||0:0);
+    }));
+    return {kg:kg,cost:cost};
   };
   const line=(nm,i,key)=>{
     const g=findIng(nm), p=g?+g.price||0:0;
@@ -2093,6 +2171,50 @@ function buildPrintFxSide(ids,scope,showPrices){
 
   let b='';
   const raws=collect('raw');
+
+  /* وضع البنود المختارة: جدول واحد من غير تقسيم أقسام */
+  if(sel){
+    const all=[];
+    ids.forEach(id=>['raw','conc'].forEach(k=>S.fx[id][k].forEach(r=>{
+      if(+r.qty>0&&keep(r.name)&&all.indexOf(r.name)<0) all.push(r.name);
+    })));
+    all.forEach((nm,i)=>{
+      const g=findIng(nm),p=g?+g.price||0:0;
+      b+=`<tr><td>${i+1}</td><td>${esc(nm)}</td>`;
+      ids.forEach(id=>{
+        const r=(S.fx[id].raw.find(x=>x.name===nm))||(S.fx[id].conc.find(x=>x.name===nm));
+        const v=r?(+r.qty||0):0;
+        b+=`<td>${v?n2(v):'—'}</td>`;
+        if(sp) b+=`<td>${v&&p?n2(v*p):'—'}</td>`;
+      });
+      b+='</tr>';
+    });
+    b+=`<tr class="tot"><td></td><td>إجمالى البنود المختارة</td>`;
+    ids.forEach(id=>{
+      const t=selSum(id,['raw','conc']);
+      b+=`<td>${n2(t.kg)}</td>`;
+      if(sp) b+=`<td>${n2(t.cost)}</td>`;
+    });
+    b+='</tr>';
+    b+=`<tr class="tot"><td></td><td>الإجمالى الكلى / طن</td>`;
+    ids.forEach(id=>{
+      b+=`<td>${n2(A[id].totalKg)}</td>`;
+      if(sp) b+=`<td>${n2(A[id].cost)}</td>`;
+    });
+    b+='</tr>';
+
+    const codes2=ids.map(id=>{
+      const f=S.fx[id];
+      return esc(f.ar)+(f.code?' ('+esc(f.code)+')':'');
+    }).join('  •  ');
+    return `<div class="pr-h"><h1>بنود مختارة — جنب بعض</h1>
+      <div class="meta">${codes2}</div>
+      <div class="meta">${all.length} بند  •  الكميات لكل طن علف (${TON} كجم)  •  طُبع ${today()}${sp?'':'  •  بدون تسعير'}</div></div>
+      ${prTable(head,b)}
+      <div class="pr-foot">الجدول ده لبنود مختارة بس — مش التركيبة كاملة.
+        صف «الإجمالى الكلى» موجود للمرجعية.</div>`;
+  }
+
   if(scope==='raw'){
     raws.forEach((nm,i)=>b+=line(nm,i,'raw'));
     b+=totLine('إجمالى الخامات',a=>a.rawKg,a=>a.rawCost);
@@ -2136,19 +2258,26 @@ function buildPrintFxSide(ids,scope,showPrices){
       : 'المركز مبنى على دفعة 500 كجم تكفى 10 طن — يعنى 50 كجم فى الطن.'}
       القيم الغذائية من قاعدة الخامات وقابلة للتعديل.</div>`;
 }
-function textFxSide(ids,scope,showPrices){
+function textFxSide(ids,scope,showPrices,pick){
   const sp=!!showPrices;
-  let s=(scope==='raw'?'الخامات الأساسية':'التركيبات كاملة')+' — لكل طن علف\n'+'—'.repeat(18)+'\n';
+  const sel=(pick&&pick.length)?pick:null;
+  const keep=nm=>!sel||sel.indexOf(nm)>=0;
+  let s=(sel?'بنود مختارة':(scope==='raw'?'الخامات الأساسية':'التركيبات كاملة'))+' — لكل طن علف\n'+'—'.repeat(18)+'\n';
   ids.forEach(id=>{
     const f=S.fx[id],a=analyze(id);
     s+='\n■ '+f.ar+(f.code?' ('+f.code+')':'')+'\n';
-    const list=(scope==='raw')?f.raw:f.raw.concat(f.conc);
+    const list=(sel?f.raw.concat(f.conc):(scope==='raw'?f.raw:f.raw.concat(f.conc))).filter(r=>keep(r.name));
     list.forEach((r,i)=>{ if(!(+r.qty))return;
       const g=findIng(r.name),p=g?+g.price||0:0;
       s+=`${i+1}. ${r.name}: ${n2(r.qty)} كجم`+(sp&&p?` — ${n0(r.qty*p)} ج`:'')+'\n'; });
-    if(scope==='raw') s+=`إجمالى الخامات: ${n2(a.rawKg)} كجم  (+ ${n2(a.concKg)} مركز)\n`;
+    if(sel){
+      let kg=0,c2=0;
+      list.forEach(r=>{const g=findIng(r.name);kg+=(+r.qty||0);c2+=(+r.qty||0)*(g?+g.price||0:0);});
+      s+=`إجمالى المختار: ${n2(kg)} كجم`+(sp?` — ${n0(c2)} ج`:'')+`  (من ${n2(a.totalKg)} كجم)\n`;
+    }
+    else if(scope==='raw') s+=`إجمالى الخامات: ${n2(a.rawKg)} كجم  (+ ${n2(a.concKg)} مركز)\n`;
     else s+=`الإجمالى: ${n2(a.totalKg)} كجم\n`;
-    s+=`بروتين ${(a.CP*100).toFixed(2)}%  |  طاقة ${n0(a.ME)}`+(sp?`  |  تكلفة ${n0(a.cost)} ج`:'')+'\n';
+    if(!sel) s+=`بروتين ${(a.CP*100).toFixed(2)}%  |  طاقة ${n0(a.ME)}`+(sp?`  |  تكلفة ${n0(a.cost)} ج`:'')+'\n';
   });
   return s;
 }
@@ -2522,13 +2651,31 @@ function init(){
     S.sPrice=+b.dataset.p; save();
     $$('#sidePrice button').forEach(x=>x.classList.toggle('on',x===b));
   });
+  $$('#pickMode button').forEach(b=>b.onclick=()=>{
+    S.pickMode=b.dataset.m; save(); renderPickPanel();
+  });
+  $$('[data-qp]').forEach(b=>b.onclick=()=>{
+    const g=allNames(), m=b.dataset.qp;
+    if(m==='none') S.pick=[];
+    if(m==='raw')  S.pick=g.raw.slice();
+    if(m==='conc') S.pick=g.conc.slice();
+    if(m==='all')  S.pick=g.raw.concat(g.conc);
+    save(); renderPickPanel();
+  });
   $$('[data-side]').forEach(b=>b.onclick=()=>{
     const [act,scope]=b.dataset.side.split(':');
     const ids=S.order.slice(), sp=!!S.sPrice;
-    const nm=(scope==='raw'?'الخامات-الأساسية':'التركيبات-كاملة');
-    if(act==='print') doPrint(buildPrintFxSide(ids,scope,sp));
-    if(act==='wa')    shareText(textFxSide(ids,scope,sp));
-    if(act==='img')   toImage(buildPrintFxSide(ids,scope,sp),nm);
+    let pick=null, nm=(scope==='raw'?'الخامات-الأساسية':'التركيبات-كاملة');
+    if(scope==='pick'){
+      if(!S.pick.length){ toast('اختار البنود الأول',true); return; }
+      pick=S.pick.slice(); nm='بنود-مختارة';
+    }else if(S.pickMode==='some'&&S.pick.length){
+      pick=S.pick.slice();   /* الاختيار مفعّل → يتطبق على الطباعة كمان */
+      nm='بنود-مختارة';
+    }
+    if(act==='print') doPrint(buildPrintFxSide(ids,scope,sp,pick));
+    if(act==='wa')    shareText(textFxSide(ids,scope,sp,pick));
+    if(act==='img')   toImage(buildPrintFxSide(ids,scope,sp,pick),nm);
   });
 
   /* تصدير التركيبة */
