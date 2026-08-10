@@ -114,6 +114,7 @@ td.cost{color:var(--corn-d);font-weight:600;font-variant-numeric:tabular-nums;wh
 .ingsum{font-size:10.5px;color:var(--sky-d);background:var(--sky-l);display:inline-block;
   padding:1px 8px;border-radius:20px;margin-top:3px;font-weight:600}
 
+input.num{direction:ltr;unicode-bidi:plaintext}
 input[type=text],input[type=number],select{background:#fff;border:1.5px solid var(--line2);
   color:var(--ink);border-radius:var(--r2);padding:6px 7px;font-family:var(--f-body);
   font-size:13.5px;width:100%;font-variant-numeric:tabular-nums;text-align:center}
@@ -178,6 +179,13 @@ details[open] summary{border-bottom:1px solid var(--line);color:var(--sky-d)}
 .pick-row:hover{border-color:var(--corn);background:var(--corn-l)}
 .pick-row b{font-size:13.5px;font-weight:500}
 .rowdel{background:none;border:0;color:var(--mute);cursor:pointer;font-size:15px;padding:2px 5px}
+.rowren{background:none;border:0;color:var(--line2);cursor:pointer;font-size:12px;padding:0 4px}
+.rowren:hover{color:var(--sky)}
+tr:hover .rowren{color:var(--sky-d)}
+input.ingname{text-align:right;font-size:13px;padding:4px 7px;border-color:transparent;
+  background:transparent;font-weight:500}
+input.ingname:hover{border-color:var(--line2);background:#fff}
+input.ingname:focus{border-color:var(--sky);background:#fff}
 .rowdel:hover{color:var(--clay)}
 .btn.sync.on{color:var(--soy-d);border-color:#B8D9B4;background:var(--soy-l)}
 .btn.sync.err{color:var(--clay-d);border-color:#E8B6AC;background:var(--clay-l)}
@@ -730,7 +738,7 @@ function buildSeedFormulas(){
     const f=SEED_FORMULAS[k];
     fx[k]={id:k,ar:f.ar,age:f.age,target:k,builtin:true,
       author:'أ.د/ محمد السيد بدوي',date:'',code:'',
-      rawFiller:'ذرة',autoRaw:true,autoConc:true,
+      rawFiller:'',concFiller:CONC_FILLER,autoRaw:true,autoConc:true,
       raw:JSON.parse(JSON.stringify(f.raw)),conc:JSON.parse(JSON.stringify(f.conc))};
     order.push(k);
   });
@@ -769,7 +777,7 @@ function load(){
         builtin:f.builtin!==undefined?f.builtin:!!sd.fx[k],
         autoRaw :f.autoRaw !==undefined?f.autoRaw :true,
         autoConc:f.autoConc!==undefined?f.autoConc:true,
-        rawFiller:f.rawFiller||'ذرة',
+        rawFiller:f.rawFiller||'',concFiller:f.concFiller||CONC_FILLER,
         author:f.author||base.author||'',code:f.code||'',date:f.date||''
       });
     });
@@ -831,7 +839,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const n2=v=>(Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const n0=v=>Math.round(v).toLocaleString('en-US');
 const rnd=(v,d)=>{const m=Math.pow(10,d===undefined?4:d);return Math.round(v*m)/m;};
-const num=v=>{const x=parseFloat(String(v).replace(/[^\d.]/g,''));return isNaN(x)?0:x;};
+const num=v=>{const x=parseFloat(typeof toEn==='function'?toEn(v).replace(/[^\d.]/g,''):String(v).replace(/[^\d.]/g,''));return isNaN(x)?0:x;};
 const findIng=nm=>S.db.find(x=>x.name===nm);
 const F=()=>S.fx[S.cur];
 
@@ -843,23 +851,65 @@ function rawKg(id){return sumQ(S.fx[id].raw);}
 
 /* الاستكمال التلقائى: المركز 500 كجم يكفى 10 طن → 50 كجم/طن.
    الناقص للـ500 من كسب الصويا التكميلى، والخامات تكمل الطن من الذرة. */
+/* بيحدد صف الاستكمال بالاسم المخزّن، ولو مش موجود بيرجع لأقرب تطابق */
+function fillerIdx(f,sect){
+  const want=(sect==='conc')?(f.concFiller||CONC_FILLER):(f.rawFiller||'');
+  const arr=f[sect]||[];
+  let i=arr.findIndex(r=>r.name===want);
+  if(i>=0) return i;
+  const hint=(sect==='conc')?'تكميل':'ذرة';
+  i=arr.findIndex(r=>String(r.name).indexOf(hint)>=0);
+  return i;
+}
 function applyFillers(id){
   const f=S.fx[id]; if(!f) return;
   if(f.autoConc){
-    let i=f.conc.findIndex(r=>r.name===CONC_FILLER);
-    if(i<0){ f.conc.push({name:CONC_FILLER,qty:0,note:'استكمال لـ 500 كجم مركز'}); i=f.conc.length-1; }
+    let i=fillerIdx(f,'conc');
+    if(i<0){
+      const nm=f.concFiller||CONC_FILLER;
+      f.conc.push({name:nm,qty:0,note:'استكمال لـ 500 كجم مركز'});
+      i=f.conc.length-1;
+    }
+    f.concFiller=f.conc[i].name;
     const others=f.conc.reduce((s,r,k)=>k===i?s:s+(+r.qty||0),0);
     f.conc[i].qty=Math.max(0,rnd(CONC_PERTON-others));
   }
   if(f.autoRaw){
-    const key=f.rawFiller||'ذرة';
-    let i=f.raw.findIndex(r=>String(r.name).indexOf(key)>=0);
+    let i=fillerIdx(f,'raw');
     if(i<0) i=0;
     if(f.raw[i]){
+      f.rawFiller=f.raw[i].name;
       const others=f.raw.reduce((s,r,k)=>k===i?s:s+(+r.qty||0),0);
       f.raw[i].qty=Math.max(0,rnd(TON-concKg(id)-others));
     }
   }
+}
+
+/* ================= إعادة تسمية خامة =================
+   بيغيّر الاسم فى قاعدة الخامات وفى كل التركيبات ومراجع الاستكمال
+   ورصيد الإنزيمات. لو الاسم الجديد موجود بالفعل بيدمج الاتنين. */
+function renameIngredient(oldName,newName){
+  newName=String(newName||'').trim();
+  if(!newName || newName===oldName) return {ok:false};
+  const clash=S.db.some(x=>x.name===newName);
+  if(clash){
+    if(!confirm(`"${newName}" موجودة بالفعل فى قاعدة الخامات.\nتحب تدمج "${oldName}" فيها؟ الكميات هتتجمع.`))
+      return {ok:false};
+    mergeIngredient(oldName,newName);
+    return {ok:true,merged:true};
+  }
+  const ig=S.db.find(x=>x.name===oldName);
+  if(ig) ig.name=newName;
+  Object.keys(S.fx).forEach(id=>{
+    const f=S.fx[id]; if(!f) return;
+    ['raw','conc'].forEach(sect=>{
+      (f[sect]||[]).forEach(r=>{ if(r.name===oldName) r.name=newName; });
+    });
+    if(f.rawFiller===oldName)  f.rawFiller=newName;
+    if(f.concFiller===oldName) f.concFiller=newName;
+  });
+  Object.keys(S.matrix).forEach(k=>{ if(S.matrix[k].ing===oldName) S.matrix[k].ing=newName; });
+  return {ok:true};
 }
 
 /* ================= التحليل ================= */
@@ -1045,7 +1095,8 @@ function renderMix(){
     const cur=r++;
     return `<tr>
       <td class="num">${i+1}</td>
-      <td class="nm">${esc(row.name)}${ig?'':' <span class="chip bad">غير معرّفة</span>'}
+      <td class="nm">${esc(row.name)}
+        <button class="rowren" data-ren="${esc(row.name)}" title="تغيير الاسم">✎</button>${ig?'':' <span class="chip bad">غير معرّفة</span>'}
         ${isFill?' <span class="chip warn">استكمال تلقائى</span>':''}
         ${row.note?`<div class="note" style="font-size:10.5px">${esc(row.note)}</div>`:''}</td>
       <td><input type="text" inputmode="decimal" class="qty num nav" data-r="${cur}" data-c="0"
@@ -1094,6 +1145,16 @@ function renderMix(){
       const ig=findIng(e.target.dataset.price); if(!ig) return;
       ig.price=num(e.target.value); save(); renderMix();
     };
+  });
+  $$('#mixBody [data-ren]').forEach(b=>b.onclick=()=>{
+    const oldN=b.dataset.ren;
+    const newN=(prompt('الاسم الجديد للمكوّن:',oldN)||'').trim();
+    if(!newN||newN===oldN) return;
+    const r=renameIngredient(oldN,newN);
+    if(!r.ok) return;
+    S.order.forEach(x=>applyFillers(x));
+    save(); renderMix();
+    toast(r.merged?'اتدمج مع الموجود':'الاسم اتغيّر فى كل التركيبات');
   });
   $$('#mixBody [data-del]').forEach(b=>b.onclick=()=>{
     const [sect,i]=b.dataset.del.split(':');
@@ -1253,7 +1314,9 @@ function renderDB(){
     const sum=bits.length?`<div class="ingsum">${bits.join(' · ')}</div>`
                          :`<div class="note" style="font-size:10.5px">مضاف — بدون قيم غذائية</div>`;
     return `<tr>
-      <td class="nm">${esc(d.name)}${used[d.name]?'':' <span class="note">(غير مستخدمة)</span>'}
+      <td class="nm">
+        <input type="text" class="ingname" data-ren="${esc(d.name)}" value="${esc(d.name)}">
+        ${used[d.name]?'':'<span class="note">(غير مستخدمة)</span>'}
         ${sum}
         ${d.note?`<div class="note" style="font-size:10.5px">${esc(d.note)}</div>`:''}</td>
       ${cols.map(c=>cell(c[0],c[1])).join('')}
@@ -1266,6 +1329,18 @@ function renderDB(){
     const v=num(e.target.value);
     d[fl]=(fl==='price'||fl==='ME')?v:v/100;
     save(); renderDB(); renderMix();
+  });
+  $$('#dbBody .ingname').forEach(inp=>{
+    inp.onchange=e=>{
+      const oldN=e.target.dataset.ren, newN=e.target.value.trim();
+      if(!newN){ e.target.value=oldN; toast('الاسم مايبقاش فاضى',true); return; }
+      if(newN===oldN) return;
+      const r=renameIngredient(oldN,newN);
+      if(!r.ok){ e.target.value=oldN; renderDB(); return; }
+      S.order.forEach(id=>applyFillers(id));
+      save(); renderDB(); renderMix();
+      toast(r.merged?'اتدمجت مع الموجودة':'الاسم اتغيّر فى كل التركيبات');
+    };
   });
   $$('#dbBody [data-del]').forEach(b=>b.onclick=()=>{
     const i=+b.dataset.del;
@@ -1498,59 +1573,100 @@ function renderSens(){
 }
 
 /* ================= التنقل بالكيبورد =================
-   Enter / الأسهم بتنقل بين الخلايا بانسيابية.
+   Enter / الأسهم بتنقل بين الخلايا، والقيمة بتتحدد كاملة عشان تكتب فوقها على طول.
    الحقول text مش number عشان الأسهم تنقل بدل ما تزوّد الرقم. */
-function navMove(from,dr,dc){
-  const box=from.closest('table'); if(!box) return false;
-  const r=+from.dataset.r, c=+from.dataset.c;
-  if(isNaN(r)||isNaN(c)) return false;
-  const all=Array.from(box.querySelectorAll('input.nav:not([disabled])'));
-  let tr=r+dr, tc=c+dc;
-  const at=(rr,cc)=>all.find(i=>+i.dataset.r===rr&&+i.dataset.c===cc);
-  /* لو الصف اللى بعده مفيهوش نفس العمود، دوّر على أقرب صف فيه */
+
+/* الأرقام العربية/الفارسية بتتحوّل لإنجليزى تلقائى */
+function toEn(v){
+  return String(v==null?'':v)
+    .replace(/[\u0660-\u0669]/g,d=>String.fromCharCode(d.charCodeAt(0)-0x0660+48))
+    .replace(/[\u06F0-\u06F9]/g,d=>String.fromCharCode(d.charCodeAt(0)-0x06F0+48))
+    .replace(/[\u066B\u060C\u066C,،]/g,'.');
+}
+function cleanNum(v){ return toEn(v).replace(/[^\d.]/g,''); }
+
+function navCells(tbl){
+  return Array.from(tbl.querySelectorAll('input.nav'))
+    .filter(i=>!i.disabled && !i.readOnly);
+}
+function cellAt(tbl,r,c){
+  return navCells(tbl).find(i=>+i.dataset.r===r && +i.dataset.c===c) || null;
+}
+/* بيدوّر على أقرب خلية فى الاتجاه المطلوب، ويتخطى الصفوف المقفولة */
+function findNext(tbl,r,c,dr,dc){
+  if(!tbl) return null;
   if(dr!==0){
-    let guard=0;
-    while(guard++<400){
-      const t=at(tr,c);
-      if(t) return focusCell(t);
-      if(tr<0||tr>600) break;
-      tr+=dr;
+    for(let i=1;i<=400;i++){
+      const t=cellAt(tbl,r+dr*i,c);
+      if(t) return t;
+      if(r+dr*i<-2 || r+dr*i>800) break;
     }
-    return false;
+    return null;
   }
-  const t=at(r,tc);
-  return t?focusCell(t):false;
+  for(let i=1;i<=12;i++){
+    const t=cellAt(tbl,r,c+dc*i);
+    if(t) return t;
+    if(c+dc*i<-2 || c+dc*i>20) break;
+  }
+  return null;
 }
 function focusCell(el){
+  if(!el) return false;
   el.focus();
   try{ el.setSelectionRange(0,el.value.length); }catch(e){}
-  el.scrollIntoView({block:'nearest',inline:'nearest'});
+  if(el.scrollIntoView) el.scrollIntoView({block:'nearest',inline:'nearest'});
   return true;
 }
+
+/* بعد أى إعادة رسم الجدول بيتبنى من جديد، فبنمسك مكان الخلية ونرجّعلها */
+let navTarget=null;
+function restoreNav(){
+  if(!navTarget) return false;
+  const t=navTarget; navTarget=null;
+  const tbl=document.getElementById(t.tbl);
+  if(!tbl) return false;
+  return focusCell(cellAt(tbl,t.r,t.c));
+}
+
 document.addEventListener('keydown',e=>{
   const t=e.target;
   if(!t||!t.classList||!t.classList.contains('nav')) return;
   let dr=0,dc=0;
-  if(e.key==='Enter')            dr=e.shiftKey?-1:1;
-  else if(e.key==='ArrowDown')   dr=1;
-  else if(e.key==='ArrowUp')     dr=-1;
-  else if(e.key==='ArrowLeft')   dc=1;    /* RTL: يسار = للأمام */
-  else if(e.key==='ArrowRight')  dc=-1;
+  if(e.key==='Enter')           dr=e.shiftKey?-1:1;
+  else if(e.key==='ArrowDown')  dr=1;
+  else if(e.key==='ArrowUp')    dr=-1;
+  else if(e.key==='ArrowLeft')  dc=1;    /* RTL: يسار = للأمام */
+  else if(e.key==='ArrowRight') dc=-1;
   else return;
-  /* الأسهم الأفقية تنقل بس لو المؤشر عند طرف النص */
-  if(dc!==0){
-    const p=t.selectionStart, len=t.value.length;
-    if(dc===1 && p!==len) return;
-    if(dc===-1&& p!==0)   return;
-  }
-  if(t.onchange) t.onchange({target:t});
-  /* بعد onchange الجدول بيترسم من جديد — نستنى فريم ونركّز */
-  const r=t.dataset.r,c=t.dataset.c,tbl=t.closest('table');
   e.preventDefault();
-  setTimeout(()=>{
-    const fresh=tbl&&tbl.querySelector(`input.nav[data-r="${r}"][data-c="${c}"]`);
-    if(fresh) navMove(fresh,dr,dc);
-  },0);
+
+  const tbl=t.closest('table');
+  const dest=findNext(tbl,+t.dataset.r,+t.dataset.c,dr,dc);
+  navTarget = (tbl&&dest) ? {tbl:tbl.id,r:+dest.dataset.r,c:+dest.dataset.c} : null;
+
+  /* نطبّق التعديل الأول (لو فيه) — ده بيعيد رسم الجدول */
+  const changed = t.value !== t.defaultValue;
+  if(changed && t.onchange) t.onchange({target:t});
+
+  /* لو مفيش إعادة رسم، نركّز على الخلية على طول */
+  if(!restoreNav() && dest) focusCell(dest);
+});
+
+/* تحويل الأرقام العربية أثناء الكتابة + تحديد الكل عند الدخول */
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(!t||!t.classList||!t.classList.contains('nav')) return;
+  const clean=cleanNum(t.value);
+  if(clean!==t.value){
+    const at=t.selectionStart;
+    t.value=clean;
+    try{ t.setSelectionRange(at,at); }catch(err){}
+  }
+});
+document.addEventListener('focusin',e=>{
+  const t=e.target;
+  if(!t||!t.classList||!t.classList.contains('nav')) return;
+  setTimeout(()=>{ try{ t.setSelectionRange(0,t.value.length); }catch(err){} },0);
 });
 
 /* ================= بناء نص المشاركة ================= */
