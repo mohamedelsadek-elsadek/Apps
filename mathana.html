@@ -208,25 +208,32 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
   .pr-h h1{font-size:15pt;margin:0 0 2px;color:#8A5A08}
   #printArea.tight  .pr-h h1{font-size:13pt}
   #printArea.xtight .pr-h h1{font-size:11.5pt}
-  .pr-h .meta{font-size:8.5pt;color:#444}
+  .pr-h .meta{font-size:8.8pt;color:#333;font-weight:600}
 
   #printArea table{width:100%;border-collapse:collapse;margin-bottom:9px;page-break-inside:auto}
   #printArea thead{display:table-header-group}
   #printArea tr{page-break-inside:avoid;page-break-after:auto}
-  #printArea th{background:#20293A!important;color:#fff!important;padding:4px 5px;text-align:right;
-    border:.5pt solid #555;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  #printArea td{padding:2.6px 5px;border:.5pt solid #B9B9B9}
-  #printArea.tight  td{padding:1.9px 4px}
-  #printArea.xtight td{padding:1.2px 3px}
-  #printArea tr.sec td{background:#E1EDF8!important;font-weight:700;color:#1D4E7A;
+  #printArea th{background:#20293A!important;color:#fff!important;padding:5px;text-align:center;
+    font-weight:800;border:.5pt solid #555;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* الأرقام: أكبر وغامقة وفى نص الخانة */
+  #printArea td{padding:3px 5px;border:.5pt solid #B9B9B9;text-align:center;
+    font-weight:700;font-size:1.14em;font-variant-numeric:tabular-nums}
+  /* عمود اسم المكوّن: على اليمين */
+  #printArea table:not(.nf) th:nth-child(2),
+  #printArea table:not(.nf) td:nth-child(2){text-align:right;font-size:1em;font-weight:700}
+  #printArea table.nf th:first-child,
+  #printArea table.nf td:first-child{text-align:right;font-size:1em;font-weight:700}
+  #printArea.tight  td{padding:2.2px 4px}
+  #printArea.xtight td{padding:1.5px 3px}
+  #printArea tr.sec td{background:#E1EDF8!important;font-weight:800;color:#16405F;text-align:right;
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
   #printArea tr.sec.conc td{background:#F1E6F4!important;color:#6B4276}
-  #printArea tr.tot td{background:#F1EDE3!important;font-weight:700;
+  #printArea tr.tot td{background:#F1EDE3!important;font-weight:800;
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
-  #printArea .pr-sum{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:8.5pt;margin-bottom:8px}
-  #printArea .pr-sum div{border:.5pt solid #BBB;padding:2.5px 7px;border-radius:3px}
-  #printArea .pr-foot{margin-top:8px;font-size:7.5pt;color:#555;border-top:.5pt solid #CCC;
-    padding-top:5px;page-break-inside:avoid}
+  #printArea .pr-sum{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:9pt;margin-bottom:8px}
+  #printArea .pr-sum div{border:.5pt solid #BBB;padding:3px 8px;border-radius:3px;font-weight:700}
+  #printArea .pr-foot{margin-top:8px;font-size:8pt;color:#333;font-weight:600;
+    border-top:.5pt solid #CCC;padding-top:5px;page-break-inside:avoid}
   #printArea .out{color:#963325;font-weight:700}
   #printArea h3{font-size:10pt;color:#1D4E7A;margin:4px 0}
   #printArea>*{orphans:3;widows:3}
@@ -303,6 +310,12 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
         <div class="row" style="margin-bottom:10px">
           <label class="chk"><input type="checkbox" id="autoConc"> استكمال المركز لـ 500ك من الصويا</label>
           <label class="chk"><input type="checkbox" id="autoRaw"> استكمال الطن من الذرة</label>
+        </div>
+        <div class="row" style="margin-bottom:10px">
+          <label class="chk"><input type="checkbox" id="cpAuto"> تثبيت البروتين على</label>
+          <input type="text" inputmode="decimal" id="cpTarget" style="width:76px">
+          <span class="note">% — يظبط الذرة والصويا تلقائى</span>
+          <button class="btn sm" id="btnCpNow">خُد البروتين الحالى</button>
         </div>
         <p class="note" id="viewHint" style="margin:0 0 10px"></p>
       </div>
@@ -769,7 +782,7 @@ function buildSeedFormulas(){
     const f=SEED_FORMULAS[k];
     fx[k]={id:k,ar:f.ar,age:f.age,target:k,builtin:true,
       author:'أ.د/ محمد السيد بدوي',date:'',code:'',
-      rawFiller:'',concFiller:CONC_FILLER,autoRaw:true,autoConc:true,
+      rawFiller:'',concFiller:CONC_FILLER,autoRaw:true,autoConc:true,cpAuto:true,cpTarget:0,
       raw:JSON.parse(JSON.stringify(f.raw)),conc:JSON.parse(JSON.stringify(f.conc))};
     order.push(k);
   });
@@ -809,6 +822,7 @@ function load(){
         autoRaw :f.autoRaw !==undefined?f.autoRaw :true,
         autoConc:f.autoConc!==undefined?f.autoConc:true,
         rawFiller:f.rawFiller||'',concFiller:f.concFiller||CONC_FILLER,
+        cpAuto:f.cpAuto!==undefined?f.cpAuto:true,cpTarget:f.cpTarget||0,
         author:f.author||base.author||'',code:f.code||'',date:f.date||''
       });
     });
@@ -865,6 +879,21 @@ function runMigrations(){
   return ch;
 }
 
+/* هدف البروتين الافتراضى = البروتين الحالى للتركيبة،
+   عشان تفعيل الموازنة ما يغيّرش أى تركيبة موجودة لوحده. */
+function ensureDefaults(){
+  sortOrder();
+  S.order.forEach(id=>{
+    const f=S.fx[id]; if(!f) return;
+    if(f.cpAuto===undefined) f.cpAuto=true;
+    if(!(+f.cpTarget)){
+      const was=f.cpAuto; f.cpAuto=false;      /* نحسب من غير موازنة */
+      f.cpTarget=rnd(analyze(id).CP,5);
+      f.cpAuto=was;
+    }
+  });
+}
+
 /* ================= مساعدات ================= */
 const $ =s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
@@ -908,12 +937,23 @@ function applyFillers(id){
     f.conc[i].qty=Math.max(0,rnd(CONC_PERTON-others));
   }
   if(f.autoRaw){
-    let i=fillerIdx(f,'raw');
-    if(i<0) i=0;
-    if(f.raw[i]){
-      f.rawFiller=f.raw[i].name;
+    /* لو موازنة البروتين شغالة، هى اللى بتظبط الذرة والصويا مع بعض */
+    if(f.cpAuto && +f.cpTarget){
+      f.cpCap = balanceCP(id);
+      /* ضبط أخير للوزن لو فيه كسور تقريب */
+      let i=fillerIdx(f,'raw'); if(i<0) i=0;
       const others=f.raw.reduce((s,r,k)=>k===i?s:s+(+r.qty||0),0);
-      f.raw[i].qty=Math.max(0,rnd(TON-concKg(id)-others));
+      const need=rnd(TON-concKg(id)-others);
+      if(f.raw[i] && Math.abs(need-(+f.raw[i].qty||0))>0.001) f.raw[i].qty=Math.max(0,need);
+    }else{
+      f.cpCap=null;
+      let i=fillerIdx(f,'raw');
+      if(i<0) i=0;
+      if(f.raw[i]){
+        f.rawFiller=f.raw[i].name;
+        const others=f.raw.reduce((s,r,k)=>k===i?s:s+(+r.qty||0),0);
+        f.raw[i].qty=Math.max(0,rnd(TON-concKg(id)-others));
+      }
     }
   }
 }
@@ -968,6 +1008,67 @@ function concSorted(id){
   return arr.map((r,i)=>({r:r,i:i,k:rank(r.name)}))
     .sort((a,b)=>a.k-b.k||a.i-b.i)
     .map(x=>x.r);
+}
+
+/* ================= موازنة البروتين تلقائى =================
+   بيظبط نسبة (الذرة : الصويا الأساسية) عشان البروتين يفضل ثابت على الهدف،
+   من غير ما يمس الوزن الكلى — الطن بيفضل 1000 والمركز 50. */
+function matrixCP(id){
+  if(!S.mxOn) return 0;
+  let c=0;
+  Object.keys(S.matrix).forEach(k=>{
+    const m=S.matrix[k];
+    if(!m.on||!m.CP) return;
+    const r=rows(id).find(x=>x.name===m.ing);
+    if(r&&+r.qty>0) c+=m.CP;
+  });
+  return c;
+}
+/* صف مصدر البروتين = أعلى خامة أساسية فى البروتين غير صف الذرة */
+function protIdx(f,ci){
+  let pi=-1,best=-1;
+  f.raw.forEach((r,i)=>{
+    if(i===ci) return;
+    const g=findIng(r.name); if(!g) return;
+    if((+g.CP||0)>best){ best=+g.CP||0; pi=i; }
+  });
+  return pi;
+}
+function balanceCP(id){
+  const f=S.fx[id];
+  if(!f||!f.cpAuto||!f.autoRaw) return null;
+  const T=+f.cpTarget||0; if(!T) return null;
+  let ci=fillerIdx(f,'raw'); if(ci<0) ci=0;
+  const corn=f.raw[ci]; if(!corn) return null;
+  const cg=findIng(corn.name); if(!cg) return null;
+  const pi=protIdx(f,ci); if(pi<0) return null;
+  const soy=f.raw[pi], sg=findIng(soy.name); if(!sg) return null;
+  const cc=+cg.CP||0, cs=+sg.CP||0;
+  if(cs-cc<0.01) return null;                 /* لازم فرق بروتين حقيقى */
+
+  /* الكمية المتاحة للتوزيع بين الذرة والصويا */
+  const K=rnd(TON-concKg(id)-f.raw.reduce((s,r,i)=>(i===ci||i===pi)?s:s+(+r.qty||0),0));
+  if(K<=0) return null;
+
+  /* بروتين كل حاجة تانية (كجم) */
+  let B=0;
+  rows(id).forEach(r=>{
+    if(r===corn||r===soy) return;
+    const g=findIng(r.name); if(!g) return;
+    B+=(+r.qty||0)*(+g.CP||0);
+  });
+  const X=(T-matrixCP(id))*TON;
+  let Y=(X-B-K*cc)/(cs-cc);
+  const want=Y;
+  Y=Math.max(0,Math.min(K,rnd(Y,2)));
+  /* لو الفرق أقل من 50 جرام، سيبها زى ما هى — عشان مايبقاش فيه كسور بلا داعى */
+  if(Math.abs(Y-(+soy.qty||0))>=0.05 || Math.abs(rnd(K-Y,2)-(+corn.qty||0))>=0.05){
+    soy.qty=Y;
+    corn.qty=rnd(K-Y,2);
+  }
+  f.rawFiller=corn.name; f.protRow=soy.name;
+  /* لو مقدرش يوصل للهدف (الصويا وصلت الحد) */
+  return (Math.abs(want-Y)>0.05)?{capped:true,want:want,got:Y}:null;
 }
 
 /* ================= التحليل ================= */
@@ -1113,6 +1214,9 @@ function renderMix(){
   $('#hdStage').textContent=f.ar;
   $('#autoConc').checked=!!f.autoConc;
   $('#autoRaw').checked=!!f.autoRaw;
+  $('#cpAuto').checked=!!f.cpAuto;
+  const cpEl=$('#cpTarget');
+  if(cpEl&&document.activeElement!==cpEl) cpEl.value=(+f.cpTarget?(f.cpTarget*100).toFixed(2):'');
   $$('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
   $('#thQty').textContent=S.view==='batch'?'كجم/500ك':'كجم/طن';
   $('#viewHint').textContent = S.view==='batch'
@@ -1135,6 +1239,10 @@ function renderMix(){
   if(zp.length)
     al.push(`<div class="banner warn"><b>${zp.length}</b> مكون بسعر صفر —
       التكلفة أقل من الحقيقة. دخّل أسعارك فى «الخامات والأسعار».</div>`);
+  if(f.cpAuto&&f.cpCap)
+    al.unshift(`<div class="banner bad">مقدرش يوصل لبروتين ${((+f.cpTarget)*100).toFixed(2)}% —
+      الصويا وصلت الحد الأقصى المتاح. المتاح دلوقتى
+      ${(analyze(id).CP*100).toFixed(2)}%. قلّل بند من المركز أو غيّر الهدف.</div>`);
   if(f.approved)
     al.unshift(`<div class="banner" style="background:var(--soy-l);border-color:#B8D9B4;
       border-right-color:var(--soy);color:var(--soy-d)">✓ نسخة معتمدة —
@@ -1829,8 +1937,8 @@ function shareText(txt){
 }
 
 /* ================= الطباعة / PDF ================= */
-function prTable(head,body){
-  return `<table><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`;
+function prTable(head,body,nameFirst){
+  return `<table class="${nameFirst?'nf':''}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`;
 }
 function buildPrintFull(id){
   const f=S.fx[id],a=analyze(id);
@@ -1898,7 +2006,7 @@ function buildPrintDb(){
     <td>${((+d.Thr||0)*100).toFixed(2)}</td></tr>`).join('');
   return `<div class="pr-h"><h1>قاعدة الخامات — القيم الغذائية والأسعار</h1>
     <div class="meta">طُبع ${today()}</div></div>
-    ${prTable(['الخامة','سعر/كجم','CP%','ME','Ca%','AvP%','ليسين%','ميثيونين%','ثريونين%'],b)}
+    ${prTable(['الخامة','سعر/كجم','CP%','ME','Ca%','AvP%','ليسين%','ميثيونين%','ثريونين%'],b,true)}
     <div class="pr-foot">الأحماض الأمينية الصناعية بتساهم فى البروتين الخام (نيتروجين × 6.25).</div>`;
 }
 function buildPrintCmp(){
@@ -1914,7 +2022,7 @@ function buildPrintCmp(){
   }).join('');
   b+=`<tr class="tot"><td>تكلفة الطن</td>${S.order.map(id=>`<td>${n0(A[id].cost)}</td>`).join('')}<td>جنيه</td></tr>`;
   return `<div class="pr-h"><h1>مقارنة التركيبات</h1><div class="meta">طُبع ${today()}</div></div>
-    ${prTable(head,b)}
+    ${prTable(head,b,true)}
     <div class="pr-foot">الأحمر = خارج المدى المستهدف للمرحلة.</div>`;
 }
 /* تقدير الحجم عشان يدخل فى ورقة واحدة من غير سطر يتيم */
@@ -2631,7 +2739,8 @@ function applyCloud(c){
   if(c.cur && S.fx[c.cur]) S.cur = c.cur;
   if(!S.fx[S.cur]) S.cur = S.order[0];
   S.updatedAt = c.updatedAt || 0;
-  if(typeof sortOrder==='function') sortOrder();
+  if(typeof ensureDefaults==='function') ensureDefaults();
+  else if(typeof sortOrder==='function') sortOrder();
   if(typeof runMigrations==='function') runMigrations();
   persistOnly();
   const sel = $('#season'); if(sel) sel.value = S.season;
@@ -2716,6 +2825,7 @@ window.addEventListener('pagehide', flushOnHide);
 /* ================= التشغيل ================= */
 function init(){
   load();
+  ensureDefaults();
   S.order.forEach(id=>applyFillers(id));
 
   $$('.tab').forEach(b=>b.onclick=()=>showView(b.dataset.view));
@@ -2731,6 +2841,22 @@ function init(){
   /* الاستكمال التلقائى */
   $('#autoConc').onchange=e=>{F().autoConc=e.target.checked;applyFillers(S.cur);save();renderMix();};
   $('#autoRaw').onchange =e=>{F().autoRaw =e.target.checked;applyFillers(S.cur);save();renderMix();};
+  $('#cpAuto').onchange=e=>{
+    const f=F();
+    f.cpAuto=e.target.checked;
+    if(f.cpAuto&&!(+f.cpTarget)) f.cpTarget=rnd(analyze(S.cur).CP,5);
+    applyFillers(S.cur); save(); renderMix();
+  };
+  $('#cpTarget').onchange=e=>{
+    F().cpTarget=num(e.target.value)/100;
+    applyFillers(S.cur); save(); renderMix();
+  };
+  $('#btnCpNow').onclick=()=>{
+    const f=F(); const was=f.cpAuto; f.cpAuto=false;
+    f.cpTarget=rnd(analyze(S.cur).CP,5); f.cpAuto=was;
+    applyFillers(S.cur); save(); renderMix();
+    toast('الهدف اتظبط على '+(f.cpTarget*100).toFixed(2)+'%');
+  };
 
   /* إدارة التركيبات */
   $('#btnNewFx').onclick =()=>openFxDlg('new');
