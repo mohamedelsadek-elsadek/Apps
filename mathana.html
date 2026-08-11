@@ -38,6 +38,9 @@ h1,h2,h3,.disp{font-family:var(--f-disp);font-weight:600}
 .brand{flex:1;min-width:180px}
 .brand h1{font-size:24px;margin:0;color:var(--ink);letter-spacing:-.5px}
 .brand .kicker{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--corn-d)}
+.ver{font-family:var(--f-body);font-size:11px;font-weight:700;color:var(--corn-d);
+  background:var(--corn-l);border:1px solid #EBD3A2;border-radius:20px;padding:2px 9px;
+  vertical-align:middle;letter-spacing:0}
 .cost-live{text-align:left;line-height:1.2;background:var(--corn-l);
   border:1px solid #EBD3A2;border-radius:var(--r2);padding:6px 12px}
 .cost-live b{font-size:21px;color:var(--corn-d);font-family:var(--f-disp);display:block}
@@ -220,6 +223,7 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
   border-top:.5pt solid #CCC;padding-top:.45em;page-break-inside:avoid}
 #printArea .out{color:#963325;font-weight:800}
 #printArea h3{font-size:1.05em;color:#1D4E7A;margin:.35em 0}
+#printArea .pr-ver{text-align:left;font-size:.72em;color:#888;font-weight:600;margin-top:.3em}
 
 @media print{
   @page{size:A4;margin:10mm}
@@ -235,7 +239,7 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
     <div class="brand">
       <div>
         <div class="kicker">GENOVET · تركيبات التسمين</div>
-        <h1>مَطحنة</h1>
+        <h1>مَطحنة <span class="ver" id="appVer">—</span></h1>
       </div>
     </div>
     <div class="cost-live">
@@ -756,6 +760,8 @@ const TARGET_META = {starter:{ar:'بادى',full:'البادى'},grower:{ar:'ن�
 const TON=1000, CONC_PERTON=50, CONC_BATCH=500;
 const CONC_FILLER='كسب فول الصويا (تكميلى للمركز)';
 const LSKEY='mathana.v2';
+const APP_VER='1.4';
+const APP_BUILD='2026-08-11';
 
 /* ================= الحالة ================= */
 let S={cur:'starter',season:'normal',view:'ton',sid:false,mixerKg:500,mixStep:0.05,
@@ -1050,7 +1056,10 @@ function balanceCP(id){
      (نص كيلو صويا = 0.02% بروتين) والوزّان مش هيقدر يوزنها أصلًا */
   Y=Math.max(0,Math.min(K,Math.round(Y)));
   const C=rnd(K-Y,2);
-  if(Math.abs(Y-(+soy.qty||0))>=0.5 || Math.abs(C-(+corn.qty||0))>=0.5){
+  const oldY=+soy.qty||0, oldC=+corn.qty||0;
+  const hasFrac=v=>Math.abs(v-Math.round(v))>1e-9;
+  /* نكتب القيمة لو فيه فرق حقيقى، أو لو القيمة القديمة فيها كسور لازم تتنضّف */
+  if(Math.abs(Y-oldY)>=0.5 || Math.abs(C-oldC)>=0.5 || hasFrac(oldY) || hasFrac(oldC)){
     soy.qty=Y;
     corn.qty=C;
   }
@@ -2040,7 +2049,8 @@ function fitToPage(el){
 function doPrint(html){
   const el=$('#printArea');
   el.className='';
-  el.innerHTML=html;
+  /* ختم الإصدار فى آخر كل ورقة */
+  el.innerHTML=html+`<div class="pr-ver">مَطحنة v${APP_VER} · ${APP_BUILD}</div>`;
   const r=fitToPage(el);
   if(!r.fits) toast('المحتوى أكبر من ورقة — هيتقسم على أكتر من صفحة');
   setTimeout(()=>{ window.print(); },80);
@@ -3057,6 +3067,8 @@ function init(){
     S.updatedAt=Date.now(); persistOnly(); pushNow(); toast('اترفع للسحابة');
   };
   $('#devIdTxt').textContent=devId();
+  $('#appVer').textContent='v'+APP_VER;
+  $('#appVer').title='إصدار '+APP_VER+' — '+APP_BUILD;
 
   /* اقفل النوافذ بـ Escape */
   document.addEventListener('keydown',e=>{
