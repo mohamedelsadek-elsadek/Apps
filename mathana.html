@@ -470,6 +470,13 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
         <button class="btn sm" id="btnBatchWa">واتساب</button>
         <button class="btn sm" id="btnBatchImg">صورة</button>
       </div>
+      <div class="row" style="margin-bottom:11px;padding-top:11px;border-top:1px solid var(--line)">
+        <span class="note" style="font-weight:700;color:var(--sky-d)">أمر تشغيل
+          <span style="font-weight:400">(خامات لطن + مركز لـ 10 طن)</span></span>
+        <button class="btn sm pri" id="btnRunPrint">طباعة / PDF</button>
+        <button class="btn sm" id="btnRunWa">واتساب</button>
+        <button class="btn sm" id="btnRunImg">صورة</button>
+      </div>
       <p class="note" style="margin-top:0" id="batchHint"></p>
       <details style="margin-bottom:12px">
         <summary>سعة الخلاطة — أوزان الدفعة الفعلية</summary>
@@ -816,6 +823,7 @@ function load(){
   S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10;
   S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.sPrice=o.sPrice?1:0;
   S.pickMode=o.pickMode||'all'; S.pick=Array.isArray(o.pick)?o.pick:[]; S.updatedAt=o.updatedAt||0;
+  sortOrder();
   if(runMigrations()) persistOnly();
 }
 
@@ -935,6 +943,31 @@ function renameIngredient(oldName,newName){
   });
   Object.keys(S.matrix).forEach(k=>{ if(S.matrix[k].ing===oldName) S.matrix[k].ing=newName; });
   return {ok:true};
+}
+
+/* ================= الترتيب الثابت =================
+   التركيبات دايمًا: بادى ← نامى ← ناهى.
+   والمركز دايمًا يبدأ بالحجر الجيرى ثم المونو ثم ملح الطعام. */
+const TARGET_RANK={starter:0,grower:1,finisher:2};
+function sortOrder(){
+  S.order=S.order
+    .map((id,i)=>({id:id,i:i,r:TARGET_RANK[(S.fx[id]||{}).target]!==undefined
+      ?TARGET_RANK[S.fx[id].target]:9}))
+    .sort((a,b)=>a.r-b.r||a.i-b.i)
+    .map(x=>x.id);
+  return S.order;
+}
+/* البنود اللى بتتثبّت فى أول المركز */
+const CONC_PINS=['حجر','مونو','ملح'];
+function concSorted(id){
+  const arr=(S.fx[id]&&S.fx[id].conc)||[];
+  const rank=nm=>{
+    for(let i=0;i<CONC_PINS.length;i++) if(String(nm).indexOf(CONC_PINS[i])>=0) return i;
+    return CONC_PINS.length;
+  };
+  return arr.map((r,i)=>({r:r,i:i,k:rank(r.name)}))
+    .sort((a,b)=>a.k-b.k||a.i-b.i)
+    .map(x=>x.r);
 }
 
 /* ================= التحليل ================= */
@@ -1387,7 +1420,7 @@ function renderBatch(){
   html+='</tr></thead><tbody>';
 
   const names=[];
-  S.order.forEach(id=>S.fx[id].conc.forEach(r=>{if(names.indexOf(r.name)<0)names.push(r.name);}));
+  S.order.forEach(id=>concSorted(id).forEach(r=>{if(names.indexOf(r.name)<0)names.push(r.name);}));
   names.forEach((nm,i)=>{
     html+=`<tr><td class="num">${i+1}</td><td class="nm">${esc(nm)}</td>`;
     S.order.forEach(id=>{
@@ -1982,6 +2015,7 @@ function saveFxDlg(){
   if(mode==='edit'&&fxEditId){
     const f=S.fx[fxEditId];
     f.ar=name; f.author=author; f.age=age; f.target=target;
+    sortOrder();
     if(!f.code&&author){ f.code=makeCode(author); f.date=today(); }
   }else{
     const id=newId();
@@ -2008,6 +2042,7 @@ function saveFxDlg(){
       ]
     };
     S.order.push(id);
+    sortOrder();
     S.cur=id;
     applyFillers(id);
   }
@@ -2410,6 +2445,104 @@ function guardLocked(id){
   return true;
 }
 
+/* ================= أمر تشغيل =================
+   الخامات الأساسية لكل طن، وتحتها دفعة المركز اللى تكفى 10 طن. */
+function buildPrintRun(ids,showPrices,tons){
+  const sp=!!showPrices;
+  const T=tons||10;                       /* دفعة المركز بتكفى كام طن */
+  const A={}; ids.forEach(id=>A[id]=analyze(id));
+  const nCols=ids.length*(sp?2:1);
+
+  const head=['#','المكون'];
+  ids.forEach(id=>{ head.push(esc(S.fx[id].ar)); if(sp) head.push('ج'); });
+  head.push('✓ وزن');
+
+  const cell=(v,p)=>`<td>${v?n2(v):'—'}</td>`+(sp?`<td>${v&&p?n2(v*p):'—'}</td>`:'');
+
+  /* --- الخامات الأساسية: لكل طن --- */
+  const raws=[];
+  ids.forEach(id=>S.fx[id].raw.forEach(r=>{ if(+r.qty>0&&raws.indexOf(r.name)<0) raws.push(r.name); }));
+  let b=`<tr class="sec"><td colspan="${nCols+3}">أولًا: الخامات الأساسية — لكل <b>طن واحد</b> علف</td></tr>`;
+  raws.forEach((nm,i)=>{
+    const g=findIng(nm),p=g?+g.price||0:0;
+    b+=`<tr><td>${i+1}</td><td>${esc(nm)}</td>`;
+    ids.forEach(id=>{
+      const r=S.fx[id].raw.find(x=>x.name===nm);
+      b+=cell(r?(+r.qty||0):0,p);
+    });
+    b+='<td style="width:52px"></td></tr>';
+  });
+  b+=`<tr class="tot"><td></td><td>إجمالى الخامات / طن</td>`;
+  ids.forEach(id=>{ b+=`<td>${n2(A[id].rawKg)}</td>`+(sp?`<td>${n2(A[id].rawCost)}</td>`:''); });
+  b+='<td></td></tr>';
+  b+=`<tr class="tot"><td></td><td>+ مركز جاهز / طن</td>`;
+  ids.forEach(id=>{ b+=`<td>${n2(A[id].concKg)}</td>`+(sp?`<td>${n2(A[id].concCost)}</td>`:''); });
+  b+='<td></td></tr>';
+  b+=`<tr class="tot"><td></td><td><b>إجمالى الطن</b></td>`;
+  ids.forEach(id=>{ b+=`<td><b>${n2(A[id].totalKg)}</b></td>`+(sp?`<td><b>${n2(A[id].cost)}</b></td>`:''); });
+  b+='<td></td></tr>';
+
+  /* --- المركز: دفعة تكفى T طن --- */
+  const concNames=[];
+  ids.forEach(id=>concSorted(id).forEach(r=>{
+    if(+r.qty>0&&concNames.indexOf(r.name)<0) concNames.push(r.name);
+  }));
+  b+=`<tr class="sec conc"><td colspan="${nCols+3}">ثانيًا: المركز — دفعة تكفى <b>${T} طن</b> علف</td></tr>`;
+  concNames.forEach((nm,i)=>{
+    const g=findIng(nm),p=g?+g.price||0:0;
+    b+=`<tr><td>${i+1}</td><td>${esc(nm)}</td>`;
+    ids.forEach(id=>{
+      const r=S.fx[id].conc.find(x=>x.name===nm);
+      b+=cell(r?(+r.qty||0)*T:0,p);
+    });
+    b+='<td style="width:52px"></td></tr>';
+  });
+  b+=`<tr class="tot"><td></td><td><b>إجمالى دفعة المركز</b></td>`;
+  ids.forEach(id=>{
+    b+=`<td><b>${n2(A[id].concKg*T)}</b></td>`+(sp?`<td><b>${n2(A[id].concCost*T)}</b></td>`:'');
+  });
+  b+='<td></td></tr>';
+
+  const codes=ids.map(id=>{
+    const f=S.fx[id];
+    return esc(f.ar)+(f.code?' ('+esc(f.code)+')':'')+(f.approved?' ✓معتمدة':'');
+  }).join('  •  ');
+  const micro=[];
+  ids.forEach(id=>S.fx[id].conc.forEach(r=>{
+    if(+r.qty>0&&+r.qty<=0.5&&micro.indexOf(r.name)<0) micro.push(r.name);
+  }));
+
+  return `<div class="pr-h"><h1>أمر تشغيل</h1>
+    <div class="meta">${codes}</div>
+    <div class="meta">الخامات لكل طن  •  المركز لدفعة ${T} طن  •  طُبع ${today()}${sp?'':'  •  بدون تسعير'}</div></div>
+    ${prTable(head,b)}
+    <div class="pr-foot"><b>طريقة التشغيل:</b> جهّز دفعة المركز الأول (${T} طن)، وبعدين
+      لكل طن علف خُد الخامات الأساسية + ${ids.length===1?n2(A[ids[0]].concKg):'50'} كجم من المركز.
+      ${micro.length?`<br><b>تنبيه:</b> ${micro.length} مكوّن بكمية ≤ 0.5 كجم/طن
+        (${micro.slice(0,6).map(esc).join('، ')}${micro.length>6?'…':''}) —
+        اخلطهم الأول مع 20-30 ضعف وزنهم ذرة مطحونة ناعم قبل الخلاطة.`:''}
+      <br>خانة «✓ وزن» عشان اللى بيوزن يعلّم عليها.</div>
+    <div class="pr-sum" style="margin-top:10px">
+      <div>اسم المشغّل: ...................</div>
+      <div>التاريخ: ...................</div>
+      <div>التوقيع: ...................</div></div>`;
+}
+function textRun(ids,showPrices,tons){
+  const T=tons||10, sp=!!showPrices;
+  let s='أمر تشغيل\n'+'—'.repeat(18)+'\n';
+  ids.forEach(id=>{
+    const f=S.fx[id],a=analyze(id);
+    s+='\n■ '+f.ar+(f.code?' ('+f.code+')':'')+'\n';
+    s+='• الخامات الأساسية (لكل طن):\n';
+    f.raw.forEach((r,i)=>{ if(+r.qty) s+=`  ${i+1}. ${r.name}: ${n2(r.qty)} كجم\n`; });
+    s+=`  إجمالى: ${n2(a.rawKg)} كجم + ${n2(a.concKg)} مركز = ${n2(a.totalKg)}\n`;
+    s+=`• المركز (دفعة ${T} طن):\n`;
+    concSorted(id).forEach((r,i)=>{ const v=(+r.qty||0)*T; if(v) s+=`  ${i+1}. ${r.name}: ${n2(v)} كجم\n`; });
+    s+=`  إجمالى الدفعة: ${n2(a.concKg*T)} كجم`+(sp?` — ${n0(a.concCost*T)} ج`:'')+'\n';
+  });
+  return s;
+}
+
 /* ================= مزامنة Firebase =================
    نفس مشروع my-app-sync — مسار مستقل "mathana/" عشان مايتداخلش
    مع بيانات باقي البرامج. */
@@ -2498,6 +2631,7 @@ function applyCloud(c){
   if(c.cur && S.fx[c.cur]) S.cur = c.cur;
   if(!S.fx[S.cur]) S.cur = S.order[0];
   S.updatedAt = c.updatedAt || 0;
+  if(typeof sortOrder==='function') sortOrder();
   if(typeof runMigrations==='function') runMigrations();
   persistOnly();
   const sel = $('#season'); if(sel) sel.value = S.season;
@@ -2710,6 +2844,10 @@ function init(){
   const batchTxt =()=> S.bScope==='all'
     ? textConcSide(batchIds(),S.tons,!!S.bPrice)
     : textConc(S.cur,S.tons,!!S.bPrice);
+  const runIds=()=> S.bScope==='all' ? sortOrder().slice() : [S.cur];
+  $('#btnRunPrint').onclick=()=>doPrint(buildPrintRun(runIds(),!!S.bPrice,S.tons));
+  $('#btnRunWa').onclick   =()=>shareText(textRun(runIds(),!!S.bPrice,S.tons));
+  $('#btnRunImg').onclick  =()=>toImage(buildPrintRun(runIds(),!!S.bPrice,S.tons),'أمر-تشغيل');
   $('#btnBatchPrint').onclick=()=>doPrint(batchHtml());
   $('#btnBatchWa').onclick   =()=>shareText(batchTxt());
   $('#btnBatchImg').onclick  =()=>toImage(batchHtml(),
