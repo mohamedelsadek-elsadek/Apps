@@ -1046,11 +1046,13 @@ function balanceCP(id){
   const X=(T-matrixCP(id))*TON;
   let Y=(X-B-K*cc)/(cs-cc);
   const want=Y;
-  Y=Math.max(0,Math.min(K,rnd(Y,2)));
-  /* لو الفرق أقل من 50 جرام، سيبها زى ما هى — عشان مايبقاش فيه كسور بلا داعى */
-  if(Math.abs(Y-(+soy.qty||0))>=0.05 || Math.abs(rnd(K-Y,2)-(+corn.qty||0))>=0.05){
+  /* بنقرّب الذرة والصويا لكيلو صحيح — الكسور هنا مالهاش تأثير عملى
+     (نص كيلو صويا = 0.02% بروتين) والوزّان مش هيقدر يوزنها أصلًا */
+  Y=Math.max(0,Math.min(K,Math.round(Y)));
+  const C=rnd(K-Y,2);
+  if(Math.abs(Y-(+soy.qty||0))>=0.5 || Math.abs(C-(+corn.qty||0))>=0.5){
     soy.qty=Y;
-    corn.qty=rnd(K-Y,2);
+    corn.qty=C;
   }
   f.rawFiller=corn.name; f.protRow=soy.name;
   /* لو مقدرش يوصل للهدف (الصويا وصلت الحد) */
