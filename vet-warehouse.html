@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v31</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v33</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -210,7 +210,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v31</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v33</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +422,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v31 — اتصال السحابة';
+const APP_VERSION='v33 — تحسين المرتجعات';
 let DB={};
 
 /* ====================================================================
@@ -463,6 +463,15 @@ function initFirebase(){
   }catch(e){console.error('Firebase init error',e);return false;}
 }
 let lastCloudJSON='';
+
+function vwRecCount(d){
+  var n=0;
+  ['products','purchases','sales','vaccines','farmInvoices','storeDocs','returns'].forEach(function(k){
+    if(d&&Array.isArray(d[k])) n+=d[k].length;
+  });
+  return n;
+}
+
 function attachRealtime(){
   if(!fbReady)return;
   dbRef=fbDB.ref('erp_data');
@@ -477,6 +486,13 @@ function attachRealtime(){
       /* حماية الختم الزمني: سحابة أقدم من شغلي؟ تتجاهل ويترفع بتاعي */
       const _inTs=val.updatedAt||0, _myTs=DB.updatedAt||0;
       if(_inTs<_myTs||localStorage.getItem('vw_dirty')){ pushToCloud(); return; }
+      /* حارس التراجع: تحديث "أحدث" بس فيه سجلات أقل بوضوح = خطر، يوقف ويسأل بدل الدهس الصامت */
+      const _myCount=vwRecCount(DB), _rCount=vwRecCount(val);
+      if(_myCount>0 && _rCount<_myCount*0.8){
+        try{ localStorage.setItem('vw_conflict', JSON.stringify({t:Date.now(),myCount:_myCount,rCount:_rCount,data:val})); }catch(e){}
+        toast&&toast('⚠️ تحديث فيه بيانات أقل بوضوح اتوقف — راجع لوحة التحكم','red');
+        return;
+      }
       snapshotBeforeCloud();
       // لا تقاطع المستخدم أثناء فتح نافذة أو الكتابة في حقل
       const modalOpen=document.querySelector('.modal-bg[style*="flex"],.modal-bg.open');
@@ -704,6 +720,7 @@ function monthSumSales(){const m=today().slice(0,7);return DB.sales.filter(x=>!x
 function renderDashboard(page){
   const lowCount=lowStockList().length;
   const _dataIssues=(typeof dataHealthCheck==='function')?dataHealthCheck():0;
+  const _vwConflict=(function(){ try{return JSON.parse(localStorage.getItem('vw_conflict')||'null');}catch(e){return null;} })();
   const expSoon=DB.products.filter(p=>p.expiry&&daysTo(p.expiry)<=60&&daysTo(p.expiry)>=0).length;
   const cards=[
     {ico:'💵',lbl:'قيمة المخزون',val:money(stockValue()),meta:DB.products.length+' صنف',c:'var(--primary)'},
@@ -713,7 +730,14 @@ function renderDashboard(page){
     {ico:'💰',lbl:'مبيعات الشهر',val:money(monthSumSales()+farmMonthSum()),meta:'شامل فواتير المزارع',c:'var(--green)'},
     {ico:'⏰',lbl:'قرب الصلاحية',val:fmt(expSoon),meta:'خلال 60 يوم',c:'var(--red)'},
   ];
-  page.innerHTML=`${_dataIssues?`<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+  page.innerHTML=`${_vwConflict?`<div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px 16px;margin-bottom:14px">
+    <div style="font-weight:800;color:#b91c1c;margin-bottom:6px">⚠️ فيه تحديث اتوقف — بيانات أقل بوضوح</div>
+    <div style="font-size:13px;color:#7f1d1d;line-height:1.8">وصل تحديث فيه ${_vwConflict.rCount} سجل، وعندك حالياً ${_vwConflict.myCount}. راجع الأرقام قبل ما تقرر.</div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn" style="background:#f1f5f9" onclick="rejectVwConflict()">🗑 تجاهل (خلي بياناتي)</button>
+      <button class="btn" style="background:#dc2626;color:#fff" onclick="acceptVwConflict()">⚠️ استبدل ببيانات التحديث</button>
+    </div>
+  </div>`:''}${_dataIssues?`<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
     <div><b style="color:#b91c1c">⚠️ فيه مشكلة في بعض البيانات المحفوظة</b><br><span style="font-size:12px;color:#666">لو البرنامج فتح ناقص أو فاضي، دوس الزرار عشان يجيب النسخة النضيفة من السحابة</span></div>
     <button class="btn" style="background:#dc2626;color:#fff" onclick="repairData()">🔧 إصلاح البيانات من السحابة</button>
   </div>`:''}<div class="cards">${cards.map(c=>`
@@ -994,6 +1018,20 @@ function connectCloud(){
 }
 
 /* ===== إصلاح البيانات المعطوبة — يمسح المحلي المعطوب ويجيب من السحابة ===== */
+
+function rejectVwConflict(){ try{localStorage.removeItem('vw_conflict');}catch(e){} toast('تم تجاهل التحديث','green'); renderPage('dashboard'); }
+function acceptVwConflict(){
+  var raw=localStorage.getItem('vw_conflict'); var c=null; try{c=JSON.parse(raw);}catch(e){}
+  if(!c)return;
+  if(!confirm('استبدال بياناتك الحالية بتحديث فيه '+c.rCount+' سجل؟'))return;
+  try{ snapshotBeforeCloud(); }catch(e){}
+  DB=c.data;
+  localStorage.setItem(DB_KEY,JSON.stringify(DB));
+  ensureTables();
+  try{localStorage.removeItem('vw_conflict');}catch(e){}
+  buildNav&&buildNav(); renderPage('dashboard'); toast('تم الاستبدال','green');
+}
+
 function repairData(){
   if(!confirm('ده هيمسح البيانات المحلية المعطوبة ويجيب النسخة النضيفة من السحابة.\n\nمتأكد؟'))return;
   try{
@@ -1317,6 +1355,107 @@ function applyInvoiceStock(inv,sign){
   // sign=+1 شراء(يزيد) / -1 بيع(ينقص) ... المرتجعات بالعكس
   inv.items.forEach(it=>adjustStock(it.productId,sign*it.qty));
 }
+
+/* ===== تحويل الأرقام العربية/الفارسية لإنجليزي تلقائي أثناء الكتابة ===== */
+function toEnDigits(s){
+  if(s==null) return s;
+  const ar='٠١٢٣٤٥٦٧٨٩', fa='۰۱۲۳۴۵۶۷۸۹';
+  return String(s).replace(/[٠-٩۰-۹]/g, ch=>{
+    let i=ar.indexOf(ch); if(i>-1) return i;
+    i=fa.indexOf(ch); if(i>-1) return i;
+    return ch;
+  });
+}
+/* يربط أي input رقمي بالتحويل التلقائي أثناء الكتابة (يحافظ على موضع المؤشر) */
+function bindEnDigits(el){
+  if(!el || el._enDigitsBound) return; el._enDigitsBound=true;
+  el.addEventListener('input',()=>{
+    const conv=toEnDigits(el.value);
+    if(conv!==el.value){ const pos=el.selectionStart; el.value=conv; try{el.setSelectionRange(pos,pos);}catch(e){} }
+  });
+}
+/* يفعّلها تلقائياً على أي input[type=number] أو [inputmode=decimal] موجود دلوقتي أو هيتضاف بعدين */
+function autoBindEnDigits(root){
+  (root||document).querySelectorAll('input[type="number"],input[inputmode="decimal"],input[inputmode="numeric"]').forEach(bindEnDigits);
+}
+/* ===== تطبيع نص عربي للمقارنة (يشيل التشكيل واختلافات الألف/الياء) ===== */
+function normAr(s){
+  return String(s||'').trim().toLowerCase()
+    .replace(/[أإآا]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+    .replace(/[\u064B-\u0652]/g,'');  /* تشكيل */
+}
+/* بحث بكلمة كاملة/جزء كلمة حقيقي — مش تطابق حرف عشوائي داخل الاسم.
+   بيتطلب حرفين على الأقل، وبيقارن كل كلمة في الاسم تبدأ بنص البحث (أو تحتويه ككلمة). */
+function matchWholeWord(name,q){
+  q=normAr(q); if(q.length<2) return false;
+  const n=normAr(name);
+  if(n.includes(q)) return true;                 /* تطابق جزئي حقيقي (كلمة/جزء كلمة متتالي) */
+  return n.split(/\s+/).some(w=>w.startsWith(q)); /* أو أي كلمة في الاسم بتبدأ بيه */
+}
+
+
+/* ===== أداة بحث بالاسم + إضافة بضغطة Enter — نفس طريقتنا في باقي البرامج =====
+   الاستخدام: productPickerHtml(idPrefix) لبناء الـ HTML، ثم bindProductPicker(idPrefix, onAdd) لتفعيلها.
+   الكتابة تفلتر بالاسم (كلمة كاملة، حرفين على الأقل) → سهم لأسفل يختار → Enter يضيف وينضّف الحقل جاهز للي بعده. */
+function productPickerHtml(p){
+  return `<div style="display:grid;grid-template-columns:2fr .8fr 1fr auto;gap:8px;align-items:end;position:relative">
+    <div class="field" style="position:relative">
+      <label>الصنف (اكتب الاسم)</label>
+      <input id="${p}_q" placeholder="اكتب اسم الصنف..." autocomplete="off">
+      <div id="${p}_list" style="position:absolute;top:100%;right:0;left:0;background:var(--card,#fff);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:220px;overflow:auto;z-index:50;display:none"></div>
+    </div>
+    <div class="field"><label>الكمية</label><input id="${p}_qty" type="number" inputmode="decimal" value="1" min="0"></div>
+    <div class="field"><label>السعر</label><input id="${p}_price" type="number" inputmode="decimal" value="0"></div>
+    <button class="btn sm" id="${p}_add">➕ أضف</button>
+  </div>`;
+}
+function bindProductPicker(p, onAdd){
+  const q=$('#'+p+'_q'), list=$('#'+p+'_list'), qty=$('#'+p+'_qty'), price=$('#'+p+'_price'), addBtn=$('#'+p+'_add');
+  let matches=[], hi=-1, chosen=null;
+  autoBindEnDigits(document);
+  function renderList(){
+    const term=q.value;
+    if(normAr(term).length<2){ list.style.display='none'; matches=[]; return; }
+    matches=DB.products.filter(pr=>matchWholeWord(pr.name,term)).slice(0,30);
+    if(!matches.length){ list.innerHTML='<div style="padding:10px;color:var(--text3)">مفيش نتائج</div>'; list.style.display='block'; return; }
+    list.innerHTML=matches.map((pr,i)=>`<div class="pk-row" data-i="${i}" style="padding:9px 12px;cursor:pointer;${i===hi?'background:var(--primary-soft,#eef2ff)':''}">
+      <b>${pr.name}</b> <span style="color:var(--text3);font-size:12px">— ${pr.cat||''} · متاح ${fmt(pr.stock||0)}</span></div>`).join('');
+    list.style.display='block';
+    list.querySelectorAll('.pk-row').forEach(row=>{
+      row.onclick=()=>{ pick(+row.dataset.i); };          /* كليك واحد = اختيار مباشر */
+    });
+  }
+  function pick(i){
+    const pr=matches[i]; if(!pr)return;
+    chosen=pr; q.value=pr.name; list.style.display='none';
+    price.value = price.value==='0'||!price.value ? (pr.price||0) : price.value;
+    qty.focus(); qty.select();
+  }
+  function doAdd(){
+    if(!chosen){ if(matches.length===1) chosen=matches[0]; else { toast('اختر صنف من القايمة الأول','red'); return; } }
+    const qv=+qty.value||0, pv=+price.value||0;
+    if(qv<=0){ toast('الكمية لازم أكبر من صفر','red'); return; }
+    onAdd({productId:chosen.id, name:chosen.name, qty:qv, price:pv});
+    chosen=null; q.value=''; qty.value=1; price.value=0; matches=[]; hi=-1;
+    list.style.display='none'; q.focus();
+  }
+  q.addEventListener('input',()=>{ chosen=null; hi=-1; renderList(); });
+  q.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'){ e.preventDefault(); if(matches.length){ hi=Math.min(hi+1,matches.length-1); renderList(); } }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); if(matches.length){ hi=Math.max(hi-1,0); renderList(); } }
+    else if(e.key==='Enter'){
+      e.preventDefault();
+      if(hi>=0 && matches[hi]) pick(hi);
+      else if(matches.length===1) pick(0);
+      else if(chosen) doAdd();
+    }
+  });
+  qty.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); price.focus(); price.select(); } });
+  price.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doAdd(); } });
+  addBtn.onclick=doAdd;
+  document.addEventListener('click',ev=>{ if(!list.contains(ev.target)&&ev.target!==q) list.style.display='none'; });
+}
+
 function productOptions(selId){
   return DB.products.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar'))
     .map(p=>`<option value="${p.id}">${p.name} — ${p.cat}</option>`).join('');
@@ -1528,20 +1667,31 @@ function editReturn(id){
     <div class="form-grid"><div class="field"><label>التاريخ</label><input id="er_date" type="date" value="${r.date}"></div>
     <div class="field"><label>الطرف</label><input value="${r.partyName}" disabled></div></div>
     <div class="tbl-wrap" style="margin-top:12px;max-height:240px"><table><thead><tr>
-      <th>الصنف</th><th>الكمية</th><th>السعر</th><th></th></tr></thead><tbody>${rowsHtml()}</tbody></table></div>
+      <th>الصنف</th><th>الكمية</th><th>السعر</th><th></th></tr></thead><tbody id="er_body">${rowsHtml()}</tbody></table></div>
+    <div style="border:1px solid var(--border);border-radius:9px;padding:11px;margin-top:14px">
+      <div class="mini" style="margin-bottom:8px;font-weight:700">➕ إضافة صنف للمرتجع</div>
+      ${productPickerHtml('er_pk')}
+    </div>
     <p class="mini" style="margin-top:8px">سيُعاد حساب أثر المخزون والخزينة تلقائياً بعد الحفظ.</p>`,
     ()=>{
       // 1) اعكس الأثر القديم بالقيم القديمة أولاً (قبل أي تعديل)
       reverseReturnEffect(r);
-      // 2) اقرأ القيم الجديدة وطبّقها على r
-      document.querySelectorAll('.er-qty').forEach(inp=>{r.items[+inp.dataset.ix].qty=+inp.value||0;});
-      document.querySelectorAll('.er-price').forEach(inp=>{r.items[+inp.dataset.ix].price=+inp.value||0;});
+      // 2) اقرأ القيم الجديدة وطبّقها على r (الأصناف الأصلية)
+      document.querySelectorAll('.er-qty').forEach(inp=>{if(r.items[+inp.dataset.ix])r.items[+inp.dataset.ix].qty=+toEnDigits(inp.value)||0;});
+      document.querySelectorAll('.er-price').forEach(inp=>{if(r.items[+inp.dataset.ix])r.items[+inp.dataset.ix].price=+toEnDigits(inp.value)||0;});
       r.items=r.items.filter(it=>it.qty>0);
       r.date=$('#er_date').value;
       r.total=r.items.reduce((s,i)=>s+i.qty*i.price,0);
       // 3) طبّق الأثر الجديد
       applyReturnEffect(r);
       saveDB();renderPage('returns');toast('تم تعديل المرتجع ✓','green');});
+  autoBindEnDigits(document);
+  bindProductPicker('er_pk', item=>{
+    const ex=r.items.find(i=>i.productId===item.productId);
+    if(ex) ex.qty+=item.qty; else r.items.push(item);
+    $('#er_body').innerHTML=rowsHtml();
+    toast('اتضاف الصنف — هيتحفظ لما تدوس حفظ','green');
+  });
 }
 window.erDelItem=(id,ix)=>{const r=DB.returns.find(x=>x.id===id);if(r){r.items.splice(ix,1);editReturn(id);}};
 /* أثر المرتجع على المخزون والخزينة (للتعديل النظيف) */
