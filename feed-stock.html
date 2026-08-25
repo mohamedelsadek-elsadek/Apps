@@ -159,7 +159,7 @@
 </div>
 
 <header class="app">
-  <h1>🌾 مخزون العلف <span style="font-size:10px;color:var(--acc);font-weight:800;vertical-align:super">v5</span></h1>
+  <h1>🌾 مخزون العلف <span style="font-size:10px;color:var(--acc);font-weight:800;vertical-align:super">v7 — بيان تفصيلي وطباعة</span></h1>
   <div class="hd-r">
     <div class="sync"><span class="dot" id="syncDot"></span><span id="syncTxt">محلي</span></div>
     <div class="who" id="who" onclick="logout()"></div>
@@ -286,7 +286,11 @@
     <div class="card">
       <h2>🧾 أمر الشراء — مجمّع حسب المورد</h2>
       <div id="poList"></div>
-      <button class="btn blue" style="margin-top:10px" onclick="expPO()">⬇️ تصدير أمر الشراء Excel</button>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn blue" onclick="expPO()">⬇️ تصدير Excel</button>
+        <button class="btn-sm" onclick="printPO(true)">🖨️ طباعة تفصيلية</button>
+        <button class="btn-sm" onclick="printPO(false)">🖨️ طباعة مبسّطة</button>
+      </div>
     </div>
   </div>
 
@@ -313,6 +317,7 @@
       <button class="btn nav" style="margin-top:9px" onclick="openUser(null)">+ إضافة مستخدم</button>
       <div class="hint"><b>مدير:</b> كل شي · <b>مخزنجي:</b> الرصيد والحركات · <b>مشتريات:</b> الموردين والأسعار وأمر الشراء · <b>مشاهد:</b> قراية بس.</div>
     </div>
+    <div id="fstConflictBanner"></div>
     <div class="card">
       <h2>☁️ مزامنة Firebase</h2>
       <label>Firebase Database URL</label>
@@ -441,7 +446,7 @@ function seedDB(){
   var s;try{s=JSON.parse($('seed').textContent)}catch(e){s={targets:{b:300,c:300},items:[],sups:[]}}
   DB.targets={b:n2(s.targets&&s.targets.b)||300,c:n2(s.targets&&s.targets.c)||300};
   DB.items=(s.items||[]).map(function(x){
-    return {id:uid(),name:x.name,unit:x.unit||'كيلو',stock:n2(x.stock),rB:n2(x.rB),rC:n2(x.rC),sup:x.sup||'',price:(x.price==null?null:n2(x.price))};
+    return {id:uid(),name:x.name,unit:x.unit||'كيلو',stock:n2(x.stock),rB:n2(x.rB),rC:n2(x.rC),sup:x.sup||'',price:(x.price==null?null:n2(x.price)),extraMfg:n2(x.extraMfg||0),manualNeeded:(x.manualNeeded==null?null:n2(x.manualNeeded))};
   });
   DB.sups=(s.sups||[]).slice();
 }
@@ -456,7 +461,9 @@ function load(){
   if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;
 }
 function save(push){
+  DB.__ts=Date.now();
   SS.set('feedstock2',JSON.stringify(DB));
+  try{ if(push!==false) localStorage.setItem('fst_dirty','1'); }catch(e){}
   autoBackup();
   if(push!==false)pushFb();
 }
@@ -494,9 +501,12 @@ function calc(it){
   var reqB=n2(DB.targets.b)*n2(it.rB);
   var reqC=n2(DB.targets.c)*n2(it.rC);
   var total=reqB+reqC;
-  var short=Math.max(0,total-n2(it.stock));
+  var autoShort=Math.max(0,total-n2(it.stock))+n2(it.extraMfg);
+  /* لو فيه مطلوب مكتوب يدوي، هو اللي بيحكم — مش الحساب التلقائي */
+  var short=(it.manualNeeded!=null)?n2(it.manualNeeded):autoShort;
   var cost=(it.price!=null&&short>0)?short*n2(it.price):null;
-  return {reqB:reqB,reqC:reqC,total:total,short:short,cost:cost};
+  return {reqB:reqB,reqC:reqC,total:total,autoShort:autoShort,short:short,cost:cost,
+    rate:(n2(it.rB)>0?n2(it.rB):n2(it.rC)), isManual:(it.manualNeeded!=null)};
 }
 function itemByName(nm){
   var n=norm(nm);
@@ -739,36 +749,79 @@ function renderMov(){
 }
 
 /* ================= أمر الشراء ================= */
-function buildPO(){
+function buildPO(onlyNeeded){
   var map={};
   DB.items.forEach(function(it){
     var c=calc(it);
-    if(c.short<=0||!it.sup)return;
+    if(!it.sup)return;
+    if(onlyNeeded && c.short<=0)return;
     if(!map[it.sup])map[it.sup]={sup:it.sup,rows:[],total:0};
-    map[it.sup].rows.push({name:it.name,unit:it.unit||'',qty:c.short,price:it.price,cost:c.cost});
+    map[it.sup].rows.push({id:it.id,name:it.name,unit:it.unit||'',stock:n2(it.stock),
+      rate:c.rate,extraMfg:n2(it.extraMfg),qty:c.short,autoQty:c.autoShort,isManual:c.isManual,
+      price:it.price,cost:c.cost});
     if(c.cost)map[it.sup].total+=c.cost;
   });
   return Object.keys(map).map(function(k){return map[k]});
 }
+var _poOnlyNeeded=true;   /* يتحكم فيها زرار إظهار/إخفاء الأصناف المكتفية */
+function togglePOFilter(){ _poOnlyNeeded=!_poOnlyNeeded; renderPO(); }
 function renderPO(){
-  var groups=buildPO();
-  var grand=0;groups.forEach(function(g){grand+=g.total});
+  var groups=buildPO(_poOnlyNeeded);
+  var grand=0,itemsN=0;groups.forEach(function(g){grand+=g.total;itemsN+=g.rows.length});
   $('pKn').textContent=groups.length;$('pKc').textContent=fmt(grand);
-  if(!groups.length){$('poList').innerHTML='<div class="empty"><div class="em">✅</div><h3>مفيش نواقص</h3><p>كل الأصناف مكتفية، أو مفيش موردين محدّدين.</p></div>';return}
-  $('poList').innerHTML=groups.map(function(g){
-    var rows=g.rows.map(function(r){
-      return '<tr><td>'+esc(r.name)+'</td><td class="num">'+fmt(r.qty,1)+'</td>'+
+  var filterBtn='<button class="btn-sm" onclick="togglePOFilter()" style="margin-bottom:10px">'+
+    (_poOnlyNeeded?'👁️ عرض كل الأصناف (حتى المكتفية)':'🎯 الأصناف الناقصة بس')+'</button>';
+  if(!groups.length){$('poList').innerHTML=filterBtn+'<div class="empty"><div class="em">✅</div><h3>مفيش نواقص</h3><p>كل الأصناف مكتفية، أو مفيش موردين محدّدين.</p></div>';return}
+  $('poList').innerHTML=filterBtn+groups.map(function(g){
+    var rows=g.rows.map(function(r,i){
+      return '<tr data-id="'+r.id+'"><td class="num">'+(i+1)+'</td><td>'+esc(r.name)+'</td>'+
+        '<td class="num">'+fmt(r.stock,1)+'</td>'+
+        '<td class="num"><input class="po-in" data-field="rate" data-id="'+r.id+'" type="text" inputmode="decimal" value="'+fmt(r.rate,2)+'" style="width:60px;text-align:center"></td>'+
+        '<td class="num"><input class="po-in" data-field="extraMfg" data-id="'+r.id+'" type="text" inputmode="decimal" value="'+fmt(r.extraMfg,1)+'" style="width:60px;text-align:center"></td>'+
+        '<td class="num"><input class="po-in" data-field="manual" data-id="'+r.id+'" type="text" inputmode="decimal" placeholder="'+fmt(r.autoQty,1)+'" value="'+(r.isManual?fmt(r.qty,1):'')+'" style="width:64px;text-align:center;'+(r.isManual?'border-color:#f59e0b;font-weight:800':'')+'" title="سيبها فاضية = حساب تلقائي"></td>'+
         '<td>'+(r.price!=null?fmt(r.price,2):'—')+'</td>'+
         '<td class="num">'+(r.cost?fmt(r.cost,0):'—')+'</td></tr>';
     }).join('');
     return '<div class="po"><h3>🏢 '+esc(g.sup)+'</h3><div class="tot">'+g.rows.length+' صنف</div>'+
-      '<table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>التكلفة</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div class="tbl-wrap"><table><thead><tr><th>م</th><th>الصنف</th><th>الفعلي</th><th>معدل الإضافة</th><th>تصنيع إضافي</th><th>المطلوب</th><th>السعر</th><th>التكلفة</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
       '<div class="sum"><span>إجمالي المورد</span><span>'+fmt(g.total,2)+' ج.م</span></div>'+
       '<button class="btn-sm" style="width:100%;margin-top:9px" onclick="sharePO(\''+esc(g.sup).replace(/'/g,"\\'")+'\')">📤 مشاركة</button></div>';
   }).join('');
+  bindPOInputs();
+}
+/* تعديل مباشر في الجدول — معدل الإضافة / تصنيع إضافي / مطلوب يدوي — بيحفظ ويعيد الحساب فورًا */
+function toEnDigits(s){
+  if(s==null) return s;
+  var ar='٠١٢٣٤٥٦٧٨٩', fa='۰۱۲۳۴۵۶۷۸۹';
+  return String(s).replace(/[٠-٩۰-۹]/g, function(ch){
+    var i=ar.indexOf(ch); if(i>-1) return i;
+    i=fa.indexOf(ch); if(i>-1) return i;
+    return ch;
+  });
+}
+function bindPOInputs(){
+  var host=$('poList'); if(!host||host._poBound)return; host._poBound=true;
+  host.addEventListener('input',function(ev){
+    var inp=ev.target; if(!inp||!inp.classList||!inp.classList.contains('po-in'))return;
+    var conv=(typeof toEnDigits==='function')?toEnDigits(inp.value):inp.value;
+    if(conv!==inp.value){var pos=inp.selectionStart;inp.value=conv;try{inp.setSelectionRange(pos,pos);}catch(e){}}
+    var id=inp.dataset.id, field=inp.dataset.field;
+    var it=DB.items.filter(function(x){return x.id===id})[0]; if(!it)return;
+    if(!can('rate')&&(field==='rate')){toast('مالكش صلاحية تعديل المعدل','⚠️');return}
+    if(field==='rate'){
+      var v=n2(inp.value);
+      if(it.rB>0)it.rB=v; else it.rC=v;   /* المعدل الفعّال بتاع الصنف ده */
+    } else if(field==='extraMfg'){
+      it.extraMfg=n2(inp.value);
+    } else if(field==='manual'){
+      it.manualNeeded=(inp.value.trim()==='')?null:n2(inp.value);
+    }
+    save();
+    renderPO();   /* إعادة رسم كاملة — الجدول مش طويل قد التركيبات فمفيش مشكلة تركيز */
+  });
 }
 function sharePO(sup){
-  var g=buildPO().filter(function(x){return x.sup===sup})[0];
+  var g=buildPO(true).filter(function(x){return x.sup===sup})[0];
   if(!g)return;
   var t='🧾 أمر شراء — '+g.sup+'\n'+'التاريخ: '+today()+'\n\n';
   g.rows.forEach(function(r,i){
@@ -1114,8 +1167,44 @@ function impMov(inp){
     else toast('❌ فشل قراءة الملف');
   });
 }
+
+/* ===== طباعة / PDF لأمر الشراء — تفصيلي أو مبسّط ===== */
+function printPO(detailed){
+  var groups=buildPO(true);   /* الأصناف الناقصة بس — دي اللي فعلاً محتاجة شراء */
+  if(!groups.length){ toast('مفيش نواقص للطباعة'); return; }
+  var head = detailed
+    ? '<th>م</th><th>الصنف</th><th>الفعلي</th><th>معدل الإضافة</th><th>تصنيع إضافي</th><th>المطلوب</th><th>الشركة</th>'
+    : '<th>م</th><th>الصنف</th><th>المطلوب</th><th>الشركة</th>';
+  var body='';
+  groups.forEach(function(g){
+    body += '<tr class="grp"><td colspan="'+(detailed?7:4)+'">🏢 '+esc(g.sup)+' — '+g.rows.length+' صنف</td></tr>';
+    g.rows.forEach(function(r,i){
+      body += detailed
+        ? '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+'</td><td>'+fmt(r.stock,1)+'</td><td>'+fmt(r.rate,2)+'</td><td>'+fmt(r.extraMfg,1)+'</td><td><b>'+fmt(r.qty,1)+' '+esc(r.unit||'')+'</b></td><td>'+esc(g.sup)+'</td></tr>'
+        : '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+'</td><td><b>'+fmt(r.qty,1)+' '+esc(r.unit||'')+'</b></td><td>'+esc(g.sup)+'</td></tr>';
+    });
+  });
+  var title = detailed ? 'بيان أمر الشراء التفصيلي' : 'أمر الشراء';
+  var html = '<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>'+title+'</title><style>'
+    + 'body{font-family:Tahoma,Arial,sans-serif;padding:20px;color:#111}'
+    + 'h1{font-size:20px;margin-bottom:2px}.sub{color:#666;font-size:12px;margin-bottom:16px}'
+    + 'table{width:100%;border-collapse:collapse;font-size:13px}'
+    + 'th,td{border:1px solid #ccc;padding:6px 8px;text-align:center}'
+    + 'th{background:#eef1fb}'
+    + 'tr.grp td{background:#dfe4fb;font-weight:800;text-align:right;font-size:14px}'
+    + '@media print{body{padding:0}}'
+    + '</style></head><body>'
+    + '<h1>🌾 '+title+'</h1><div class="sub">تاريخ: '+today()+'</div>'
+    + '<table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table>'
+    + '<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>'
+    + '</body></html>';
+  var w=window.open('','_blank');
+  if(!w){ toast('امنع حظر النوافذ المنبثقة للموقع','⚠️'); return; }
+  w.document.write(html); w.document.close();
+}
+
 function expPO(){
-  var groups=buildPO();
+  var groups=buildPO(true);
   var rows=[['المورد','الصنف','الكمية','الوحدة','السعر','التكلفة']];
   groups.forEach(function(g){
     g.rows.forEach(function(r){rows.push([g.sup,r.name,n2(r.qty),r.unit||'',(r.price==null?'':r.price),(r.cost==null?'':r.cost)])});
@@ -1130,15 +1219,50 @@ function setSync(on){
   if(DB.fbUrl){d.className='dot '+(on?'on':'off');t.textContent=on?'متزامن':'خطأ'}
   else{d.className='dot';t.textContent='محلي'}
 }
+
+function fstRecCount(d){ return ((d&&d.items)||[]).length + ((d&&d.movs)||[]).length; }
+function pendingFstConflict(){ try{return JSON.parse(localStorage.getItem('fst_conflict')||'null');}catch(e){return null;} }
+function fstShouldBlock(d){
+  var myCount=fstRecCount(DB), rCount=fstRecCount(d);
+  var myTs=DB.__ts||0, rTs=d.__ts||0;
+  var dirty=false; try{dirty=!!localStorage.getItem('fst_dirty');}catch(e){}
+  if((dirty||myTs>rTs) && myCount>0 && rCount<=myCount) return 'skip';   /* بتاعي أحدث/معلّق — تجاهل بصمت */
+  if(myCount>0 && rCount < myCount*0.8) return 'conflict';               /* سجلات أقل بوضوح — يوقف ويسأل */
+  return false;
+}
+function rejectFstConflict(){ try{localStorage.removeItem('fst_conflict');}catch(e){} toast('اتجاهل التحديث'); renderAll(); }
+function acceptFstConflict(){
+  var c=pendingFstConflict(); if(!c)return;
+  if(!confirm('استبدال بياناتك الحالية بتحديث فيه '+fstRecCount(c.data)+' سجل؟'))return;
+  DB=c.data; if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL; if(!DB.movs)DB.movs=[];
+  if(!DB.users||!DB.users.length)DB.users=[{id:uid(),name:'المدير',pin:'1234',role:'admin'}];
+  save(false);
+  try{localStorage.removeItem('fst_conflict');}catch(e){}
+  renderAll(); toast('تم الاستبدال');
+}
+
 function pushFb(){
   if(!DB.fbUrl)return;
   fetch(DB.fbUrl+'/feed_stock2.json',{method:'PUT',body:JSON.stringify(DB)})
-    .then(function(r){setSync(r.ok)}).catch(function(){setSync(false)});
+    .then(function(r){
+      setSync(r.ok);
+      if(r.ok){ try{localStorage.removeItem('fst_dirty');}catch(e){} }
+      else setTimeout(pushFb,5000);
+    }).catch(function(){ setSync(false); setTimeout(pushFb,5000); });
 }
 function pullFb(){
   if(!DB.fbUrl){toast('أدخل رابط Firebase');return}
   fetch(DB.fbUrl+'/feed_stock2.json').then(function(r){return r.json()}).then(function(d){
-    if(d&&d.items){DB=d;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;if(!DB.movs)DB.movs=[];if(!DB.users||!DB.users.length)DB.users=[{id:uid(),name:'المدير',pin:'1234',role:'admin'}];
+    if(d&&d.items){
+      var block=fstShouldBlock(d);
+      if(block==='conflict'){
+        try{localStorage.setItem('fst_conflict',JSON.stringify({t:Date.now(),data:d}));}catch(e){}
+        setSync(true); renderAll();
+        toast('⚠️ التحديث فيه سجلات أقل بوضوح — اتوقف. راجع الإعدادات','⚠️');
+        return;
+      }
+      if(block==='skip'){ setSync(true); toast('بياناتك أحدث بالفعل'); return; }
+      DB=d;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;if(!DB.movs)DB.movs=[];if(!DB.users||!DB.users.length)DB.users=[{id:uid(),name:'المدير',pin:'1234',role:'admin'}];
       save(false);renderAll();setSync(true);toast('تم السحب ✅')}
     else toast('مفيش بيانات سحابية');
   }).catch(function(){setSync(false);toast('فشل الاتصال')});
@@ -1250,6 +1374,19 @@ function renderAll(){
   $('fbUrl').value=DB.fbUrl||'';
   $('fbUrl').disabled=!can('reset');
   setSync(!!DB.fbUrl);
+  renderFstConflictBanner();
+}
+function renderFstConflictBanner(){
+  var el=document.getElementById('fstConflictBanner'); if(!el)return;
+  var c=pendingFstConflict();
+  if(!c){ el.innerHTML=''; return; }
+  var rCount=fstRecCount(c.data), myCount=fstRecCount(DB);
+  el.innerHTML='<div class="card" style="border:2px solid #dc2626">'
+    +'<h2 style="color:#dc2626">⚠️ فيه تحديث اتوقف — سجلات أقل بوضوح</h2>'
+    +'<div class="hint">التحديث فيه '+rCount+' سجل، وعندك حالياً '+myCount+'. راجع الأرقام قبل ما تقرر.</div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px">'
+    +'<button class="btn nav" onclick="rejectFstConflict()">🗑 تجاهل</button>'
+    +'<button class="btn" style="background:#dc2626" onclick="acceptFstConflict()">⚠️ استبدل</button></div></div>';
 }
 var tabs=$('tabs').querySelectorAll('button');
 for(var i=0;i<tabs.length;i++){
@@ -1289,6 +1426,14 @@ if(DB.fbUrl){
   setSync(true);
   fetch(DB.fbUrl+'/feed_stock2.json').then(function(r){return r.json()}).then(function(d){
     if(d&&d.items&&d.items.length){
+      var block=fstShouldBlock(d);
+      if(block==='conflict'){
+        try{localStorage.setItem('fst_conflict',JSON.stringify({t:Date.now(),data:d}));}catch(e){}
+        setSync(true); renderAll();
+        toast('⚠️ فيه تحديث اتوقف — سجلات أقل بوضوح. راجع الإعدادات','⚠️');
+        return;
+      }
+      if(block==='skip'){ setSync(true); renderAll(); return; }
       DB=d;if(!DB.fbUrl)DB.fbUrl=DEFAULT_FB_URL;if(!DB.movs)DB.movs=[];
       if(!DB.users||!DB.users.length)DB.users=[{id:uid(),name:'المدير',pin:'1234',role:'admin'}];
       SS.set('feedstock2',JSON.stringify(DB));renderAll();setSync(true);
