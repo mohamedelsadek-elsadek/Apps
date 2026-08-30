@@ -209,6 +209,10 @@
   .btn-primary:hover{background:var(--forest-2);}
   .btn-wheat{background:var(--wheat);color:#3A2A08;}
   .btn-ghost{background:transparent;color:var(--forest);border:1px solid var(--line);}
+  .mini-btn{background:#f0ede3;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:#333}
+  .mini-btn.active{background:var(--forest);color:#fff;border-color:var(--forest)}
+  .mini-btn.danger{background:#fde8e8;color:#b91c1c;border-color:#f3c6c6}
+  .kv-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}
   .btn-danger{background:var(--bad-bg);color:var(--bad);}
   .btn-sm{padding:6px 10px;font-size:12px;border-radius:7px;}
   .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
@@ -376,6 +380,8 @@
     listSnapshots:()=>get(ref(db,"poultry_cost_calc/snapshots")).then(snap=>snap.val()||{})
   };
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -439,7 +445,7 @@ function defaultState(){
     suppliers:[], supplierTx:[],
     itemCatalog:{}, extraCosts:[],
     payments:[], payers:[], samples:[], benchmarks:{}, credits:[],
-    archivedCycles:[]
+    archivedCycles:[], attendance:[]
   };
 }
 
@@ -801,7 +807,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v1 — مزامنة سحابية';
+const APP_VERSION='v3 — شريط أدوات التقارير الكامل';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -2097,7 +2103,7 @@ function wireSetup(){
                                : (state.setup.cycleName?state.setup.cycleName+" 2":"دورة 2");
     state.setup.chicksCount = 0;
     state.setup.dateReceived = "";
-    save(); toast("تمت الأرشفة وبدء دورة جديدة"); renderAll();
+    auditLog("أرشفة دورة", (state.setup.cycleName||"")+" ← دورة جديدة"); save(); toast("تمت الأرشفة وبدء دورة جديدة"); renderAll();
   });
   document.getElementById("exportBtn").addEventListener("click", ()=>{
     const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
@@ -2999,6 +3005,596 @@ function kvTable(id,title,rows){
 }
 
 let repTab = "cycle_end";
+
+
+/* ═══════════════ شريط أدوات التقارير — حجم خط، عرض، زوم، تصدير، مشاركة ═══════════════ */
+let repFontSize = 15;     // px
+let repWidth = "full";    // narrow | medium | wide | full
+let repZoom = 100;        // %
+
+function repToolbarCss(){
+  const widthMap = {narrow:"760px", medium:"1000px", wide:"1300px", full:"100%"};
+  return `#reportsPanelHost{max-width:${widthMap[repWidth]};margin:0 auto;
+    font-size:${repFontSize}px; zoom:${repZoom}%; transition:all .15s;}`;
+}
+function repToolbarHtml(){
+  return `
+  <style id="repToolbarStyle">${repToolbarCss()}</style>
+  <div class="card" id="repToolbarCard" style="margin-bottom:14px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+      <button class="btn btn-wheat btn-sm" onclick="repExportExcel()">📊 تصدير Excel</button>
+      <button class="btn btn-ghost btn-sm" onclick="repPrint()">🖨️ طباعة</button>
+      <button class="btn btn-ghost btn-sm" onclick="repToPDF()">📄 PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="repScreenshot()">📸 سكرين شوت</button>
+      <button class="btn btn-wheat btn-sm" onclick="repShareWhatsPDF()">📱 واتساب PDF</button>
+      <button class="btn btn-wheat btn-sm" onclick="repShareWhatsImg()">📱 واتساب صورة</button>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:13px">
+      <div style="display:flex;gap:4px;align-items:center">
+        <span class="sub" style="margin:0">🔍 حجم الخط:</span>
+        <button class="mini-btn" onclick="repAdjFont(-1)">− تصغير</button>
+        <span style="min-width:38px;text-align:center;font-weight:800">${repFontSize}px</span>
+        <button class="mini-btn" onclick="repAdjFont(1)">+ تكبير</button>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <span class="sub" style="margin:0">📐 المساحة:</span>
+        ${["narrow","medium","wide","full"].map(w=>{
+          const lbl={narrow:"تصغير",medium:"متوسط",wide:"واسع",full:"كامل"}[w];
+          return `<button class="mini-btn ${repWidth===w?'active':''}" onclick="repSetWidth('${w}')">${lbl}</button>`;
+        }).join("")}
+      </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <span class="sub" style="margin:0">🔎 زووم:</span>
+        <button class="mini-btn" onclick="repAdjZoom(-10)">− تصغير</button>
+        <span style="min-width:44px;text-align:center;font-weight:800">${repZoom}%</span>
+        <button class="mini-btn" onclick="repAdjZoom(10)">+ تكبير</button>
+      </div>
+    </div>
+  </div>`;
+}
+function repAdjFont(d){ repFontSize=Math.max(10,Math.min(24,repFontSize+d)); repApplyStyle(); }
+function repSetWidth(w){ repWidth=w; repApplyStyle(); }
+function repAdjZoom(d){ repZoom=Math.max(50,Math.min(200,repZoom+d)); repApplyStyle(); }
+function repApplyStyle(){
+  const st=document.getElementById("repToolbarStyle");
+  if(st) st.textContent=repToolbarCss();
+  // حدّث أرقام الأزرار من غير إعادة رسم الصفحة كلها (يحافظ على مكانك)
+  const host=document.getElementById("mainArea");
+  if(host){
+    const fontEls=host.querySelectorAll('[data-rep-font]'); fontEls.forEach(e=>e.textContent=repFontSize+"px");
+    const zoomEls=host.querySelectorAll('[data-rep-zoom]'); zoomEls.forEach(e=>e.textContent=repZoom+"%");
+    host.querySelectorAll('[data-rep-width-btn]').forEach(b=>b.classList.toggle('active', b.dataset.repWidthBtn===repWidth));
+  }
+}
+function repActiveCard(){
+  const host=document.getElementById("reportsPanelHost");
+  if(!host) return null;
+  return host.querySelector(".card:not(#repToolbarCard)") || host;
+}
+function repPrint(){
+  const card = repActiveCard();
+  printElement(card);
+}
+async function repToPDF(){
+  const card = repActiveCard(); if(!card) return;
+  if(typeof html2canvas==="undefined" || !window.jspdf){ toast&&toast("مكتبة PDF لسه بتحمّل — جرّب تاني بعد ثانية"); return; }
+  try{
+    const canvas = await html2canvas(card,{scale:2,backgroundColor:"#ffffff"});
+    const img = canvas.toDataURL("image/png");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:"p", unit:"mm", format:"a4"});
+    const pw = pdf.internal.pageSize.getWidth();
+    const ph = (canvas.height*pw)/canvas.width;
+    pdf.addImage(img,"PNG",0,0,pw,ph);
+    pdf.save((state.setup.cycleName||"تقرير")+".pdf");
+  }catch(e){ toast&&toast("تعذّر إنشاء PDF"); }
+}
+async function repScreenshot(){
+  const card = repActiveCard(); if(!card) return;
+  if(typeof html2canvas==="undefined"){ toast&&toast("مكتبة الصور لسه بتحمّل — جرّب تاني بعد ثانية"); return; }
+  try{
+    const canvas = await html2canvas(card,{scale:2,backgroundColor:"#ffffff"});
+    canvas.toBlob(blob=>{
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download=(state.setup.cycleName||"تقرير")+".png";
+      a.click();
+    });
+  }catch(e){ toast&&toast("تعذّر أخذ سكرين شوت"); }
+}
+async function repShareWhatsImg(){
+  const card = repActiveCard(); if(!card) return;
+  if(typeof html2canvas==="undefined"){ toast&&toast("مكتبة الصور لسه بتحمّل — جرّب تاني"); return; }
+  try{
+    const canvas = await html2canvas(card,{scale:2,backgroundColor:"#ffffff"});
+    canvas.toBlob(async blob=>{
+      const file = new File([blob], "تقرير.png", {type:"image/png"});
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file], title:"تقرير"}); return; }catch(e){}
+      }
+      // fallback: نزّل الصورة واقترح فتح واتساب
+      const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="تقرير.png"; a.click();
+      toast&&toast("اتحمّلت الصورة — ارفقها يدوي في واتساب");
+    });
+  }catch(e){ toast&&toast("تعذّرت المشاركة"); }
+}
+async function repShareWhatsPDF(){
+  const card = repActiveCard(); if(!card) return;
+  if(typeof html2canvas==="undefined" || !window.jspdf){ toast&&toast("مكتبة PDF لسه بتحمّل — جرّب تاني"); return; }
+  try{
+    const canvas = await html2canvas(card,{scale:2,backgroundColor:"#ffffff"});
+    const img = canvas.toDataURL("image/png");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:"p", unit:"mm", format:"a4"});
+    const pw = pdf.internal.pageSize.getWidth();
+    const ph = (canvas.height*pw)/canvas.width;
+    pdf.addImage(img,"PNG",0,0,pw,ph);
+    const blob = pdf.output("blob");
+    const file = new File([blob], "تقرير.pdf", {type:"application/pdf"});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:"تقرير"}); return; }catch(e){}
+    }
+    pdf.save("تقرير.pdf");
+    toast&&toast("اتحمّل الـ PDF — ارفقه يدوي في واتساب");
+  }catch(e){ toast&&toast("تعذّر إنشاء PDF"); }
+}
+/* تصدير Excel (CSV) — بياخد أول جدول موجود في التقرير النشط */
+function repExportExcel(){
+  const card = repActiveCard(); if(!card) return;
+  const table = card.querySelector("table");
+  let rows=[];
+  if(table){
+    table.querySelectorAll("tr").forEach(tr=>{
+      const cells=[...tr.children].map(td=>'"'+td.textContent.replace(/"/g,'""').trim()+'"');
+      rows.push(cells.join(","));
+    });
+  } else {
+    // مفيش جدول (زي kvTable) — نصدّر أي عناصر key/value ظاهرة
+    card.querySelectorAll(".kv-row, tr").forEach(r=>{
+      rows.push('"'+r.textContent.replace(/"/g,'""').trim()+'"');
+    });
+  }
+  if(!rows.length){ toast&&toast("مفيش بيانات جدولية في التقرير ده للتصدير"); return; }
+  const csv = "\uFEFF"+rows.join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=(state.setup.cycleName||"تقرير")+".csv";
+  a.click();
+}
+
+/* ═══════════════════════ تقارير جديدة — دفعة شاملة ═══════════════════════ */
+
+/* ---- ١) مقارنة يومية بالكتالوج (باستخدام rossRow الموجودة) ---- */
+function repCatalogDaily(){
+  const start = dailyStart();
+  if(!start) return `<div class="card"><p class="sub">حدّد تاريخ استلام الكتاكيت من «الإعدادات» الأول.</p></div>`;
+  const rows = [...state.daily].sort((a,b)=>(a.date||"")<(b.date||"")?-1:1);
+  if(!rows.length) return `<div class="card"><p class="sub">مفيش متابعة يومية مسجّلة لسه.</p></div>`;
+  let cumFeed=0;
+  const trs = rows.map(d=>{
+    const age = ageOnDate(d.date);
+    const stdW = rossWeightG(age), stdFcr = rossFCR(age);
+    cumFeed += num(d.feedKg);
+    const actFcr = num(d.weightG)>0 ? (cumFeed/((num(state.setup.chicksCount)||1)*num(d.weightG)/1000)) : 0;
+    const wDiff = num(d.weightG) - stdW;
+    const color = wDiff>=0 ? "#1a7f4b" : (wDiff>-stdW*0.1 ? "#b8860b" : "#b91c1c");
+    return `<tr><td>${d.date}</td><td>${age}</td>
+      <td>${fmt(num(d.weightG),0)}</td><td>${fmt(stdW,0)}</td>
+      <td style="color:${color};font-weight:800">${wDiff>=0?"+":""}${fmt(wDiff,0)}</td>
+      <td>${fmt(num(d.feedKg),1)}</td><td>${fmt(stdFcr,2)}</td></tr>`;
+  }).join("");
+  return `<div class="card"><h2><span class="ic">📅</span> مقارنة يومية بالكتالوج (روص القياسي)</h2>
+    <p class="sub">الوزن الفعلي مقابل المعيار القياسي لكل يوم من عمر القطيع.</p>
+    <table class="rep-tbl"><thead><tr><th>التاريخ</th><th>العمر</th><th>الوزن الفعلي</th><th>القياسي</th><th>الفرق</th><th>علف اليوم</th><th>FCR قياسي</th></tr></thead>
+    <tbody>${trs}</tbody></table></div>`;
+}
+
+/* ---- ٢) مقارنة أسبوعية بالكتالوج ---- */
+function repCatalogWeekly(){
+  const start = dailyStart();
+  if(!start) return `<div class="card"><p class="sub">حدّد تاريخ استلام الكتاكيت من «الإعدادات» الأول.</p></div>`;
+  const weeks = {};
+  state.daily.forEach(d=>{
+    const age = ageOnDate(d.date);
+    const wk = Math.ceil(age/7)||1;
+    if(!weeks[wk]) weeks[wk] = {feed:0, lastW:0, lastAge:age, days:0};
+    weeks[wk].feed += num(d.feedKg);
+    if(num(d.weightG)>0){ weeks[wk].lastW = num(d.weightG); weeks[wk].lastAge = age; }
+    weeks[wk].days++;
+  });
+  const wkNums = Object.keys(weeks).map(Number).sort((a,b)=>a-b);
+  if(!wkNums.length) return `<div class="card"><p class="sub">مفيش متابعة يومية كفاية لحساب الأسابيع.</p></div>`;
+  const trs = wkNums.map(wk=>{
+    const w = weeks[wk];
+    const stdW = rossWeightG(w.lastAge);
+    const diff = w.lastW - stdW;
+    const color = diff>=0 ? "#1a7f4b" : "#b91c1c";
+    return `<tr><td>أسبوع ${wk}</td><td>${w.lastAge}</td><td>${fmt(w.lastW,0)}</td><td>${fmt(stdW,0)}</td>
+      <td style="color:${color};font-weight:800">${diff>=0?"+":""}${fmt(diff,0)}</td><td>${fmt(w.feed,1)}</td></tr>`;
+  }).join("");
+  return `<div class="card"><h2><span class="ic">📆</span> مقارنة أسبوعية بالكتالوج</h2>
+    <table class="rep-tbl"><thead><tr><th>الأسبوع</th><th>العمر (آخر يوم)</th><th>الوزن الفعلي</th><th>القياسي</th><th>الفرق</th><th>علف الأسبوع (كجم)</th></tr></thead>
+    <tbody>${trs}</tbody></table></div>`;
+}
+
+/* ---- ٣) السجل اليومي (طباعة كاملة) ---- */
+function repDailyLog(){
+  const rows = [...state.daily].sort((a,b)=>(a.date||"")<(b.date||"")?-1:1);
+  if(!rows.length) return `<div class="card"><p class="sub">مفيش متابعة يومية مسجّلة لسه.</p></div>`;
+  const trs = rows.map(d=>`<tr><td>${d.date}</td><td>${fmt(num(d.feedKg),1)}</td><td>${num(d.mortality)}</td>
+    <td>${num(d.culls)||0}</td><td>${fmt(num(d.weightG),0)}</td><td>${fmt(num(d.waterL),1)}</td>
+    <td>${num(d.tempC)||"—"}</td><td>${esc(d.notes||"")}</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">🗓️</span> السجل اليومي الكامل</h2>
+    <table class="rep-tbl"><thead><tr><th>التاريخ</th><th>علف (كجم)</th><th>نافق</th><th>مستبعد</th><th>الوزن (جم)</th><th>مياه (لتر)</th><th>حرارة</th><th>ملاحظات</th></tr></thead>
+    <tbody>${trs}</tbody></table></div>`;
+}
+
+/* ---- ٤) التقرير الأسبوعي المفصّل ---- */
+function repWeeklyDetail(){
+  const rows = [...state.weekly].sort((a,b)=>num(a.week)-num(b.week));
+  if(!rows.length) return `<div class="card"><p class="sub">مفيش بيانات أسبوعية مسجّلة لسه.</p></div>`;
+  let cumFeed=0;
+  const trs = rows.map(w=>{
+    cumFeed += num(w.feedKg)||0;
+    const fcr = num(w.avgWeightG)>0 ? (cumFeed/((num(state.setup.chicksCount)||1)*num(w.avgWeightG)/1000)) : 0;
+    return `<tr><td>أسبوع ${w.week}</td><td>${fmt(num(w.avgWeightG),0)}</td><td>${num(w.mortality)||0}</td>
+      <td>${fmt(num(w.feedKg)||0,1)}</td><td>${fmt(fcr,2)}</td></tr>`;
+  }).join("");
+  return `<div class="card"><h2><span class="ic">📊</span> التقرير الأسبوعي المفصّل</h2>
+    <table class="rep-tbl"><thead><tr><th>الأسبوع</th><th>متوسط الوزن (جم)</th><th>النافق</th><th>علف الأسبوع</th><th>FCR تراكمي</th></tr></thead>
+    <tbody>${trs}</tbody></table></div>`;
+}
+
+/* ---- ٥) بطاقات أداء الدورات ---- */
+function repCycleCards(){
+  const c = computed();
+  const cur = {cycleName: state.setup.cycleName||"الدورة الحالية", chicksCount:c.chicks, totalCost:c.totalCost,
+    costPerKg:c.basisWeightKg>0?c.totalCost/c.basisWeightKg:0, fcr:c.feedConsumedKg>0&&c.basisWeightKg>0?c.feedConsumedKg/c.basisWeightKg:0,
+    profit:c.hasSales?(c.salesRevenue-c.totalCost):null, isCurrent:true};
+  const all = [cur, ...state.archivedCycles.slice().reverse().map(a=>({...a,isCurrent:false}))];
+  const cards = all.map(cy=>`
+    <div class="rep-card" style="border:2px solid ${cy.isCurrent?'#1a7f4b':'#ddd'};border-radius:12px;padding:14px;min-width:200px">
+      <div style="font-weight:800;margin-bottom:8px">${cy.isCurrent?'🟢 ':''}${esc(cy.cycleName)}</div>
+      <div class="sub">عدد الكتاكيت: ${fmt(num(cy.chicksCount),0)}</div>
+      <div class="sub">التكلفة الكلية: ${fmt(num(cy.totalCost),0)} ج.م</div>
+      <div class="sub">تكلفة الكيلو: ${fmt(num(cy.costPerKg),2)} ج.م</div>
+      <div class="sub">FCR: ${fmt(num(cy.fcr),2)}</div>
+      ${cy.profit!=null?`<div style="font-weight:800;color:${cy.profit>=0?'#1a7f4b':'#b91c1c'}">الربح: ${fmt(cy.profit,0)} ج.م</div>`:''}
+    </div>`).join("");
+  return `<div class="card"><h2><span class="ic">🏅</span> بطاقات أداء الدورات</h2>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">${cards}</div></div>`;
+}
+
+/* ---- ٦) مخطط الدورات الزمني ---- */
+function repCycleTimeline(){
+  const all = state.archivedCycles.slice().reverse();
+  if(!all.length) return `<div class="card"><p class="sub">مفيش دورات مؤرشفة لسه.</p></div>`;
+  const trs = all.map((a,i)=>`<tr><td>${all.length-i}</td><td>${esc(a.cycleName)}</td><td>${a.archivedAt}</td>
+    <td>${fmt(num(a.chicksCount),0)}</td><td>${fmt(num(a.costPerKg),2)}</td><td>${fmt(num(a.fcr),2)}</td>
+    <td style="color:${num(a.profit)>=0?'#1a7f4b':'#b91c1c'};font-weight:800">${fmt(num(a.profit),0)}</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">📅</span> مخطط الدورات الزمني</h2>
+    <table class="rep-tbl"><thead><tr><th>#</th><th>الدورة</th><th>تاريخ الأرشفة</th><th>الكتاكيت</th><th>تكلفة الكيلو</th><th>FCR</th><th>الربح</th></tr></thead>
+    <tbody>${trs}</tbody></table></div>`;
+}
+
+/* ---- ٧) تحليل الفرق بين دورتين ---- */
+let diffCycleA="", diffCycleB="";
+function repCycleDiff(){
+  const opts = state.archivedCycles.map(a=>`<option value="${a.id}">${esc(a.cycleName)} (${a.archivedAt})</option>`).join("");
+  const A = state.archivedCycles.find(a=>a.id===diffCycleA);
+  const B = state.archivedCycles.find(a=>a.id===diffCycleB);
+  let body = `<p class="sub">مفيش دورتين محدّدتين للمقارنة.</p>`;
+  if(A && B){
+    const metrics = [["التكلفة الكلية","totalCost",0],["تكلفة الكيلو","costPerKg",2],["FCR","fcr",2],["الربح","profit",0]];
+    const rows = metrics.map(([lbl,key,d])=>{
+      const va=num(A[key]), vb=num(B[key]), diff=vb-va;
+      return `<tr><td>${lbl}</td><td>${fmt(va,d)}</td><td>${fmt(vb,d)}</td>
+        <td style="color:${diff>=0?'#1a7f4b':'#b91c1c'};font-weight:800">${diff>=0?"+":""}${fmt(diff,d)}</td></tr>`;
+    }).join("");
+    body = `<table class="rep-tbl"><thead><tr><th>المؤشر</th><th>${esc(A.cycleName)}</th><th>${esc(B.cycleName)}</th><th>الفرق</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  return `<div class="card"><h2><span class="ic">🔀</span> تحليل الفرق بين دورتين</h2>
+    <div class="chip-row" style="gap:10px">
+      <select id="diffA" onchange="diffCycleA=this.value;renderAll()"><option value="">— اختر الدورة الأولى —</option>${opts}</select>
+      <select id="diffB" onchange="diffCycleB=this.value;renderAll()"><option value="">— اختر الدورة التانية —</option>${opts}</select>
+    </div>${body}</div>`;
+}
+
+/* ---- ٨) إجمالي المزرعة (كل الدورات) ---- */
+function repFarmTotal(){
+  const c = computed();
+  const arch = state.archivedCycles;
+  const totalChicks = num(c.chicks) + sum(arch, a=>num(a.chicksCount));
+  const totalCost = num(c.totalCost) + sum(arch, a=>num(a.totalCost));
+  const totalProfit = (c.hasSales?(c.salesRevenue-c.totalCost):0) + sum(arch, a=>num(a.profit));
+  const avgFcr = arch.length ? (sum(arch,a=>num(a.fcr))/arch.length) : c.fcr;
+  return `<div class="card"><h2><span class="ic">🏛️</span> إجمالي المزرعة (كل الدورات)</h2>
+    <p class="sub">عدد الدورات: ${arch.length+1} (شاملة الدورة الحالية)</p>
+    ${kvTable("farmTotalKv","",[
+      ["إجمالي الكتاكيت عبر كل الدورات", fmt(totalChicks,0)],
+      ["إجمالي التكاليف عبر كل الدورات", fmt(totalCost,0)+" ج.م"],
+      ["إجمالي الربح/الخسارة", fmt(totalProfit,0)+" ج.م"],
+      ["متوسط FCR للدورات المؤرشفة", fmt(avgFcr,2)]
+    ])}</div>`;
+}
+
+/* ---- ٩) إجمالي الشركة (كل الموردين والمدفوعات) ---- */
+function repCompanyTotal(){
+  const c = computed();
+  const bySupplier = {};
+  [...state.feed, ...state.meds].forEach(x=>{
+    const s = x.supplier||"غير محدّد";
+    bySupplier[s] = (bySupplier[s]||0) + (num(x.cost)||(num(x.qtyTon)*num(x.pricePerTon))||0);
+  });
+  const supRows = Object.keys(bySupplier).sort((a,b)=>bySupplier[b]-bySupplier[a])
+    .map(s=>`<tr><td>${esc(s)}</td><td>${fmt(bySupplier[s],0)} ج.م</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">🏢</span> إجمالي الشركة</h2>
+    ${kvTable("compTotKv","",[
+      ["إجمالي التكاليف (الدورة الحالية)", fmt(c.totalCost,0)+" ج.م"],
+      ["إجمالي المدفوعات المسجّلة", fmt(sum(state.payments,p=>num(p.amount)),0)+" ج.م"]
+    ])}
+    <h3 style="margin-top:14px">التكلفة حسب المورد</h3>
+    <table class="rep-tbl"><thead><tr><th>المورد</th><th>الإجمالي</th></tr></thead><tbody>${supRows||'<tr><td colspan=2>مفيش بيانات موردين</td></tr>'}</tbody></table></div>`;
+}
+
+/* ---- ١٠) المقارنة التاريخية (Benchmark) ---- */
+function repHistoricalBM(){
+  const c = computed();
+  const arch = state.archivedCycles;
+  if(!arch.length) return `<div class="card"><p class="sub">محتاج دورة مؤرشفة واحدة على الأقل للمقارنة التاريخية.</p></div>`;
+  const avgCostKg = sum(arch,a=>num(a.costPerKg))/arch.length;
+  const avgFcr = sum(arch,a=>num(a.fcr))/arch.length;
+  const curCostKg = c.basisWeightKg>0 ? c.totalCost/c.basisWeightKg : 0;
+  const diffCost = curCostKg - avgCostKg, diffFcr = c.fcr - avgFcr;
+  return `<div class="card"><h2><span class="ic">🎖️</span> المقارنة التاريخية (Benchmark)</h2>
+    <p class="sub">الدورة الحالية مقابل متوسط ${arch.length} دورة سابقة</p>
+    <table class="rep-tbl"><thead><tr><th>المؤشر</th><th>متوسط تاريخي</th><th>الدورة الحالية</th><th>الفرق</th></tr></thead><tbody>
+    <tr><td>تكلفة الكيلو</td><td>${fmt(avgCostKg,2)}</td><td>${fmt(curCostKg,2)}</td>
+      <td style="color:${diffCost<=0?'#1a7f4b':'#b91c1c'};font-weight:800">${diffCost>=0?"+":""}${fmt(diffCost,2)}</td></tr>
+    <tr><td>FCR</td><td>${fmt(avgFcr,2)}</td><td>${fmt(c.fcr,2)}</td>
+      <td style="color:${diffFcr<=0?'#1a7f4b':'#b91c1c'};font-weight:800">${diffFcr>=0?"+":""}${fmt(diffFcr,2)}</td></tr>
+    </tbody></table></div>`;
+}
+
+/* ---- ١١) تقرير التكاليف التفصيلي ---- */
+function repCostDetail(){
+  const c = computed();
+  const cats = [["الكتاكيت",c.chickCost],["العلف",c.feedCost],["الأدوية والتحصينات",c.medsCost],
+    ["العمالة",c.laborCost],["الصيانة/التأسيس",c.maintCost],["بنود أخرى",c.otherCost],["تكاليف إضافية",c.extraCost]];
+  const rows = cats.map(([lbl,val])=>`<tr><td>${lbl}</td><td>${fmt(val,0)} ج.م</td>
+    <td>${c.grossCost>0?fmt(val/c.grossCost*100,1):0}%</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">💰</span> تقرير التكاليف التفصيلي</h2>
+    <table class="rep-tbl"><thead><tr><th>البند</th><th>القيمة</th><th>% من الإجمالي</th></tr></thead>
+    <tbody>${rows}<tr style="font-weight:800;border-top:2px solid #333"><td>الإجمالي الخام</td><td>${fmt(c.grossCost,0)} ج.م</td><td>100%</td></tr>
+    <tr><td>الخصومات والمرتجعات</td><td>-${fmt(c.creditsTotal,0)} ج.م</td><td>—</td></tr>
+    <tr style="font-weight:800"><td>الصافي</td><td>${fmt(c.totalCost,0)} ج.م</td><td>—</td></tr></tbody></table></div>`;
+}
+
+/* ---- ١٢) نقطة التعادل ---- */
+function repBreakeven(){
+  const c = computed();
+  const be = c.basisWeightKg>0 ? c.totalCost/c.basisWeightKg : 0;
+  return `<div class="card"><h2><span class="ic">⚖️</span> نقطة التعادل</h2>
+    ${kvTable("beKv","",[
+      ["إجمالي التكلفة", fmt(c.totalCost,0)+" ج.م"],
+      ["الإنتاج (كجم)", fmt(c.basisWeightKg,0)],
+      ["سعر التعادل / كجم", fmt(be,2)+" ج.م"],
+      ["سعر البيع الحالي/المتوقع", fmt(c.basisPrice,2)+" ج.م"],
+      ["هامش الأمان", fmt(c.basisPrice-be,2)+" ج.م/كجم"]
+    ])}
+    <p class="sub" style="margin-top:10px">لازم تبيع فوق ${fmt(be,2)} ج.م/كجم عشان تغطي تكاليفك.</p></div>`;
+}
+
+/* ---- ١٣) حاسبة: أبيع الآن؟ ---- */
+function repSellNow(){
+  const c = computed();
+  const avgDailyFeedCost = state.daily.length>0 ? (c.dailyFeedKg*c.avgFeedPrice)/state.daily.length : 0;
+  const dailyGainG = c.ageToday>1 ? rossDailyGainG(c.ageToday) : 30;
+  const scenarios=[0,3,5,7].map(days=>{
+    const projW = c.avgWeightKgNow + (dailyGainG*days/1000);
+    const projFeedCost = avgDailyFeedCost*days;
+    const projCost = c.totalCost + projFeedCost;
+    const projKg = c.birdsInHouse*projW + c.salesWeightKg;
+    const projCostKg = projKg>0 ? projCost/projKg : 0;
+    return {days, projW, projCostKg, revenue: c.birdsInHouse*projW*c.basisPrice};
+  });
+  const rows = scenarios.map(s=>`<tr><td>${s.days===0?"دلوقتي":"بعد "+s.days+" أيام"}</td>
+    <td>${fmt(s.projW,2)} كجم</td><td>${fmt(s.projCostKg,2)} ج.م</td><td>${fmt(s.revenue,0)} ج.م</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">🐔</span> حاسبة: أبيع الآن؟</h2>
+    <p class="sub">مقارنة البيع دلوقتي مقابل الانتظار، بافتراض معدل النمو واستهلاك العلف الحالي.</p>
+    <table class="rep-tbl"><thead><tr><th>التوقيت</th><th>الوزن المتوقع</th><th>تكلفة الكيلو</th><th>الإيراد المتوقع (بالسعر الحالي)</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+/* ---- ١٤) مقارنة سعرية (سيناريوهات البيع/الاستمرار) ---- */
+function repROCP(){
+  const c = computed();
+  const prices=[c.basisPrice*0.9, c.basisPrice, c.basisPrice*1.1];
+  const rows = prices.map(p=>{
+    const rev = c.basisWeightKg*p;
+    const profit = rev - c.totalCost;
+    return `<tr><td>${fmt(p,2)} ج.م/كجم</td><td>${fmt(rev,0)} ج.م</td>
+      <td style="color:${profit>=0?'#1a7f4b':'#b91c1c'};font-weight:800">${fmt(profit,0)} ج.م</td></tr>`;
+  }).join("");
+  return `<div class="card"><h2><span class="ic">💵</span> مقارنة سعرية (سيناريوهات السعر)</h2>
+    <table class="rep-tbl"><thead><tr><th>سعر البيع</th><th>الإيراد</th><th>الربح/الخسارة</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+/* ---- ١٥) تقرير العنابر أثناء البيع ---- */
+function repHouseStatus(){
+  const c = computed();
+  return `<div class="card"><h2><span class="ic">🏠</span> تقرير العنبر أثناء البيع</h2>
+    ${kvTable("houseKv","",[
+      ["الطيور الموجودة فعليًا", fmt(c.birdsInHouse,0)],
+      ["متوسط الوزن الحالي", fmt(c.avgWeightKgNow,2)+" كجم"],
+      ["الوزن الإجمالي المتبقي", fmt(c.remainingWeightKg,0)+" كجم"],
+      ["المباع لغاية دلوقتي", fmt(c.soldBirds,0)+" طائر ("+fmt(c.salesWeightKg,0)+" كجم)"],
+      ["نسبة الحيوية", fmt(c.livability,1)+"%"],
+      ["عمر القطيع اليوم", fmt(c.ageToday,0)+" يوم"]
+    ])}</div>`;
+}
+
+/* ---- ١٦) تقرير السبلة (حالة العنبر) ---- */
+function repSebla(){
+  const s = state.setup;
+  const c = computed();
+  return `<div class="card"><h2><span class="ic">🧺</span> تقرير السبلة</h2>
+    ${kvTable("seblaKv","",[
+      ["مساحة العنبر", fmt(num(s.houseAreaM2),0)+" م²"],
+      ["عدد المراوح", fmt(num(s.fanCount),0)],
+      ["طاقة المروحة", fmt(num(s.fanCapacity),0)],
+      ["الكثافة الحالية (طائر/م²)", num(s.houseAreaM2)>0?fmt(c.birdsInHouse/num(s.houseAreaM2),1):"—"],
+      ["مياه اليوم الأخير", state.daily.length?fmt(num(state.daily[state.daily.length-1].waterL),1)+" لتر":"—"],
+      ["حرارة اليوم الأخير", state.daily.length?(num(state.daily[state.daily.length-1].tempC)||"—")+" °م":"—"]
+    ])}</div>`;
+}
+
+/* ---- ١٧) برنامج التحصين (تقرير) ---- */
+function repVaccineReport(){
+  const rows = [...state.vaccines].sort((a,b)=>num(a.day)-num(b.day));
+  if(!rows.length) return `<div class="card"><p class="sub">مفيش برنامج تحصين مسجّل.</p></div>`;
+  const trs = rows.map(v=>`<tr><td>${num(v.day)}</td><td>${esc(v.name)}</td><td>${esc(v.route||"—")}</td>
+    <td style="color:${v.done==='yes'?'#1a7f4b':'#b91c1c'};font-weight:800">${v.done==='yes'?'✓ تم':'لسه'}</td>
+    <td>${fmt(num(v.cost),0)} ج.م</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">💉</span> برنامج التحصين — تقرير</h2>
+    <table class="rep-tbl"><thead><tr><th>اليوم</th><th>التحصين</th><th>الطريقة</th><th>الحالة</th><th>التكلفة</th></tr></thead>
+    <tbody>${trs}</tbody></table>
+    <p class="sub" style="margin-top:8px">إجمالي تكلفة التحصينات: ${fmt(sum(rows,r=>num(r.cost)),0)} ج.م</p></div>`;
+}
+
+/* ---- ١٨) تقرير حضور العمال (بيانات جديدة + إدخال مباشر) ---- */
+function repAttendance(){
+  state.attendance = state.attendance||[];
+  const rows = [...state.attendance].sort((a,b)=>(a.date||"")<(b.date||"")?1:-1);
+  const trs = rows.map(a=>`<tr><td>${a.date}</td><td>${num(a.present)}</td><td>${num(a.absent)}</td><td>${esc(a.note||"")}</td>
+    <td><button class="mini-btn danger" onclick="delAttendance('${a.id}')">حذف</button></td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">👷</span> تقرير حضور العمال</h2>
+    <div class="chip-row" style="gap:8px;flex-wrap:wrap">
+      <input type="date" id="attDate" value="${todayISO()}">
+      <input type="number" id="attPresent" placeholder="حاضر" style="width:80px">
+      <input type="number" id="attAbsent" placeholder="غايب" style="width:80px">
+      <input type="text" id="attNote" placeholder="ملاحظة">
+      <button class="btn" onclick="addAttendance()">➕ تسجيل</button>
+    </div>
+    <table class="rep-tbl" style="margin-top:10px"><thead><tr><th>التاريخ</th><th>حاضر</th><th>غايب</th><th>ملاحظة</th><th></th></tr></thead>
+    <tbody>${trs||'<tr><td colspan=5>مفيش تسجيلات حضور لسه</td></tr>'}</tbody></table></div>`;
+}
+function addAttendance(){
+  const date=document.getElementById("attDate").value||todayISO();
+  const present=num(document.getElementById("attPresent").value);
+  const absent=num(document.getElementById("attAbsent").value);
+  const note=document.getElementById("attNote").value||"";
+  state.attendance = state.attendance||[];
+  state.attendance.push({id:uid(), date, present, absent, note});
+  save(); renderAll();
+}
+function delAttendance(id){
+  state.attendance = (state.attendance||[]).filter(a=>a.id!==id);
+  save(); renderAll();
+}
+
+/* ---- ١٩) سجل التدقيق (يسجّل الأحداث المهمة: الأرشفة والتحصين) ---- */
+function auditLog(action, detail){
+  try{
+    state.auditLog = state.auditLog||[];
+    state.auditLog.push({t:Date.now(), at:new Date().toLocaleString("ar-EG"), action, detail:detail||""});
+    while(state.auditLog.length>200) state.auditLog.shift();
+  }catch(e){}
+}
+function repAuditLog(){
+  const rows = (state.auditLog||[]).slice().reverse();
+  if(!rows.length) return `<div class="card"><p class="sub">مفيش أحداث مسجّلة لسه — السجل بيتحدّث تلقائيًا مع الأرشفة وتسجيل التحصينات.</p></div>`;
+  const trs = rows.map(r=>`<tr><td>${r.at}</td><td>${esc(r.action)}</td><td>${esc(r.detail)}</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">📝</span> سجل التدقيق</h2>
+    <table class="rep-tbl"><thead><tr><th>الوقت</th><th>الحدث</th><th>التفاصيل</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+}
+
+/* ---- ٢٠) المنحنيات البيانية (SVG) ---- */
+function repCurves(){
+  const rows = [...state.daily].sort((a,b)=>(a.date||"")<(b.date||"")?-1:1);
+  if(rows.length<2) return `<div class="card"><p class="sub">محتاج متابعة يومية كفاية (يومين على الأقل) لرسم المنحنى.</p></div>`;
+  const W=700,H=220,pad=30;
+  function svgLine(vals, color){
+    const max=Math.max(...vals,1), min=Math.min(...vals,0);
+    const range=(max-min)||1;
+    const pts = vals.map((v,i)=>{
+      const x = pad + (i/(vals.length-1))*(W-2*pad);
+      const y = H-pad - ((v-min)/range)*(H-2*pad);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+    return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5"/>`;
+  }
+  const weights = rows.map(d=>num(d.weightG));
+  const feeds = rows.map((d,i)=>i===0?num(d.feedKg):num(d.feedKg)+ (rows[i-1]._cum||0));
+  let cum=0; rows.forEach(d=>{ cum+=num(d.feedKg); d._cum=cum; });
+  return `<div class="card"><h2><span class="ic">📈</span> المنحنيات البيانية</h2>
+    <p class="sub">الوزن (أخضر) وتراكمي العلف (بنفسجي) عبر الأيام</p>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:700px;background:#fafafa;border-radius:8px">
+      ${svgLine(weights,"#1a7f4b")}
+      ${svgLine(rows.map(d=>d._cum),"#7c3aed")}
+    </svg></div>`;
+}
+
+/* ---- ٢١) مقارنة المزارع (لوحة ألوان) — مقابل كتالوج التكلفة الموجود ---- */
+function repFarmBoard(){
+  const c = computed();
+  const BM = benchmarks();
+  const actualPct = {
+    "كتاكيت": c.grossCost>0?c.chickCost/c.grossCost*100:0,
+    "علف": c.grossCost>0?c.feedCost/c.grossCost*100:0,
+    "أدوية وتحصينات": c.grossCost>0?c.medsCost/c.grossCost*100:0,
+    "عمالة": c.grossCost>0?c.laborCost/c.grossCost*100:0
+  };
+  const cells = Object.keys(actualPct).map(k=>{
+    const bm = BM[k]||{min:0,max:100};
+    const v = actualPct[k];
+    const ok = v>=bm.min && v<=bm.max;
+    const color = ok?"#1a7f4b":(v>bm.max?"#b91c1c":"#b8860b");
+    return `<div style="background:${color};color:#fff;border-radius:10px;padding:14px;text-align:center;min-width:130px">
+      <div style="font-weight:800">${k}</div><div style="font-size:22px;font-weight:900">${fmt(v,1)}%</div>
+      <div style="font-size:11px">المعيار: ${fmt(bm.min,1)}–${fmt(bm.max,1)}%</div></div>`;
+  }).join("");
+  return `<div class="card"><h2><span class="ic">🎨</span> لوحة ألوان — نسب التكلفة مقابل الكتالوج</h2>
+    <p class="sub">أخضر = ضمن المعيار، أصفر = أقل من المتوقع، أحمر = أعلى من المعيار</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">${cells}</div></div>`;
+}
+
+/* ---- ٢٢) تجهيز بين الدورات ---- */
+function repPrepBetween(){
+  const arch = state.archivedCycles;
+  if(arch.length<1) return `<div class="card"><p class="sub">محتاج دورة مؤرشفة واحدة على الأقل.</p></div>`;
+  const rows=[];
+  for(let i=0;i<arch.length;i++){
+    const endDate = arch[i].archivedAt;
+    const nextStart = i+1<arch.length ? null : (state.setup.dateReceived||null);
+    if(nextStart){
+      const days = Math.round((new Date(nextStart)-new Date(endDate))/86400000);
+      rows.push({from:arch[i].cycleName, to:state.setup.cycleName, days});
+    }
+  }
+  const trs = rows.map(r=>`<tr><td>${esc(r.from)} ← ${esc(r.to)}</td><td>${r.days} يوم</td></tr>`).join("");
+  return `<div class="card"><h2><span class="ic">🧹</span> تجهيز بين الدورات</h2>
+    <table class="rep-tbl"><thead><tr><th>الانتقال</th><th>مدة التجهيز</th></tr></thead>
+    <tbody>${trs||'<tr><td colspan=2>مفيش بيانات كفاية للحساب</td></tr>'}</tbody></table></div>`;
+}
+
+/* ---- ٢٣) المزارع النشطة (يومي) — لقطة اليوم للدورة الحالية ---- */
+function repActiveDaily(){
+  const c = computed();
+  const today = state.daily.find(d=>d.date===todayISO());
+  return `<div class="card"><h2><span class="ic">🏠</span> المزارع النشطة — لقطة اليوم</h2>
+    ${kvTable("activeKv","",[
+      ["المزرعة/الدورة", esc(state.setup.farmName||"—")+" — "+esc(state.setup.cycleName||"—")],
+      ["عمر القطيع اليوم", fmt(c.ageToday,0)+" يوم"],
+      ["الطيور الموجودة", fmt(c.birdsInHouse,0)],
+      ["علف اليوم", today?fmt(num(today.feedKg),1)+" كجم":"لسه ما اتسجّلش"],
+      ["نافق اليوم", today?fmt(num(today.mortality),0):"لسه ما اتسجّلش"],
+      ["آخر وزن مسجّل", fmt(c.currentAvgWeightG,0)+" جم"]
+    ])}</div>`;
+}
+
 const REP_TABS = [
   {id:"daily_sales", name:"🧾 البيع اليومي"},
   {id:"cycle_end", name:"🏁 نهاية الدورة"},
@@ -3011,6 +3607,29 @@ const REP_TABS = [
   {id:"traders", name:"🤝 التجار"},
   {id:"uniformity", name:"📐 التوحيد CV%"},
   {id:"cycles", name:"🏅 مقارنة الدورات"},
+  {id:"catalog_daily", name:"📅 مقارنة يومية بالكتالوج"},
+  {id:"catalog_weekly", name:"📆 مقارنة أسبوعية بالكتالوج"},
+  {id:"daily_log", name:"🗓️ السجل اليومي"},
+  {id:"weekly_detail", name:"📊 التقرير الأسبوعي المفصّل"},
+  {id:"cycle_cards", name:"🏅 بطاقات أداء الدورات"},
+  {id:"cycle_timeline", name:"📅 مخطط الدورات الزمني"},
+  {id:"cycle_diff", name:"🔀 الفرق بين دورتين"},
+  {id:"farm_total", name:"🏛️ إجمالي المزرعة"},
+  {id:"company_total", name:"🏢 إجمالي الشركة"},
+  {id:"historical_bm", name:"🎖️ المقارنة التاريخية"},
+  {id:"cost_detail", name:"💰 التكاليف التفصيلي"},
+  {id:"breakeven", name:"⚖️ نقطة التعادل"},
+  {id:"sell_now", name:"🐔 أبيع الآن؟"},
+  {id:"ro_cp", name:"💵 مقارنة سعرية"},
+  {id:"house_status", name:"🏠 العنبر أثناء البيع"},
+  {id:"sebla", name:"🧺 تقرير السبلة"},
+  {id:"vaccine_report", name:"💉 برنامج التحصين"},
+  {id:"attendance_report", name:"👷 حضور العمال"},
+  {id:"audit_log", name:"📝 سجل التدقيق"},
+  {id:"curves", name:"📈 المنحنيات البيانية"},
+  {id:"farm_board", name:"🎨 لوحة الألوان"},
+  {id:"prep_between", name:"🧹 تجهيز بين الدورات"},
+  {id:"active_daily", name:"🏠 لقطة اليوم"},
 ];
 
 /* ===== تقرير البيع اليومي ===== */
@@ -3467,10 +4086,18 @@ function panelReports(){
     daily_sales:repDailySales,
     cycle_end:repCycleEnd, postsale:repPostSale, owner_sales:repOwnerSales,
     fcr_sens:repFcrSens, price_sens:repPriceSens, variance:repVariance,
-    cashflow:repCashflow, traders:repTraders, uniformity:repUniformity, cycles:repCycles
+    cashflow:repCashflow, traders:repTraders, uniformity:repUniformity, cycles:repCycles,
+    catalog_daily:repCatalogDaily, catalog_weekly:repCatalogWeekly,
+    daily_log:repDailyLog, weekly_detail:repWeeklyDetail,
+    cycle_cards:repCycleCards, cycle_timeline:repCycleTimeline, cycle_diff:repCycleDiff,
+    farm_total:repFarmTotal, company_total:repCompanyTotal, historical_bm:repHistoricalBM,
+    cost_detail:repCostDetail, breakeven:repBreakeven, sell_now:repSellNow, ro_cp:repROCP,
+    house_status:repHouseStatus, sebla:repSebla, vaccine_report:repVaccineReport,
+    attendance_report:repAttendance, audit_log:repAuditLog, curves:repCurves,
+    farm_board:repFarmBoard, prep_between:repPrepBetween, active_daily:repActiveDaily
   };
   const fn = map[repTab] || repCycleEnd;
-  return tabsHtml + fn();
+  return `<div id="reportsPanelHost">${repToolbarHtml()}${tabsHtml}${fn()}</div>`;
 }
 function wireReports(){
   document.querySelectorAll(".rep-chip").forEach(b=>{
