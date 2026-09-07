@@ -807,7 +807,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v3 — شريط أدوات التقارير الكامل';
+const APP_VERSION='v4 — إصلاح امتلاء المساحة + استرجاع سحابي';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -852,15 +852,21 @@ function snapshotBeforeCloudApply(){
   try{
     if(Date.now()-__lastCloudSnap<120000) return;
     __lastCloudSnap=Date.now();
-    const snapObj={t:Date.now(),date:new Date().toLocaleString('ar-EG'),data:JSON.stringify(state)};
-    let snaps=JSON.parse(localStorage.getItem('pcc_cloud_snaps')||'[]');
-    snaps.push(snapObj);
-    while(snaps.length>5) snaps.shift();
-    localStorage.setItem('pcc_cloud_snaps',JSON.stringify(snaps));
+    const dataStr = JSON.stringify(state);
+    const snapObj={t:Date.now(),date:new Date().toLocaleString('ar-EG'),data:dataStr};
+    /* السحابة أولوية دايمًا — مساحتها مش محدودة زي المتصفح، وده أهم مصدر إنقاذ */
     if(window.__fb&&window.__fb.pushSnapshot){
       window.__fb.pushSnapshot(deviceTag()+'_'+Date.now(), {...snapObj, device:deviceTag()}).catch(()=>{});
     }
-  }catch(e){}
+    /* النسخة المحلية اختيارية بس — نفس حارس الحجم اللي في autoSnapshot الأصلية، وعدد أقل */
+    if(dataStr.length > 300000) return;   // بيانات كبيرة → متضيفش ضغط على مساحة محدودة أصلاً
+    let snaps=JSON.parse(localStorage.getItem('pcc_cloud_snaps')||'[]');
+    snaps.push(snapObj);
+    while(snaps.length>2) snaps.shift();   // 2 بدل 5 — نفس حد autoSnapshot الأصلية
+    localStorage.setItem('pcc_cloud_snaps',JSON.stringify(snaps));
+  }catch(e){
+    try{ localStorage.removeItem('pcc_cloud_snaps'); }catch(e2){}
+  }
 }
 function pendingConflict(){ try{return JSON.parse(localStorage.getItem('pcc_conflict')||'null');}catch(e){return null;} }
 function rejectConflict(){ try{localStorage.removeItem('pcc_conflict');}catch(e){} renderAll(); }
@@ -973,14 +979,20 @@ function save(){
     localStorage.setItem(STORAGE_KEY, payload);
     saveFailed = false;
   }catch(e){
-    // المساحة اتملت → امسح النسخ التلقائية وجرّب تاني
+    // المساحة اتملت → امسح النسخ الاحتياطية القديمة (المحلية بتاعتنا + بتاعة التطبيق) وجرّب تاني
     try{ localStorage.removeItem(SNAP_KEY); }catch(e2){}
+    try{ localStorage.removeItem('pcc_cloud_snaps'); }catch(e2){}
     try{
       localStorage.setItem(STORAGE_KEY, payload);
       saveFailed = false;
     }catch(e3){
       saveFailed = true;
       showSaveError();
+      /* المهم: حتى لو المتصفح رفض يخزّن محليًا، سيبها ترفع للسحابة —
+         مساحة السحابة مش محدودة زي المتصفح، ودي أهم طوق نجاة هنا */
+      if(!__fbApplying && window.__fb && window.__fb.ready){
+        window.__fb.push(state).catch(()=>{});
+      }
       return false;
     }
   }
@@ -1650,6 +1662,43 @@ function wireCostList(key){
 }
 
 /* ========================= PANELS ========================= */
+
+/* ===== لقطات السحابة — تحميل وعرض واسترجاع (من كل الأجهزة، مش بس ده) ===== */
+let __cloudSnapsCache = null;
+function loadCloudSnapsForSettings(){
+  const box = document.getElementById("cloudSnapsBody");
+  if(!box) return;
+  if(!window.__fb || !window.__fb.listSnapshots){ box.innerHTML = '<div class="empty-hint">المزامنة السحابية لسه بتحمّل...</div>'; return; }
+  window.__fb.listSnapshots().then(obj=>{
+    __cloudSnapsCache = Object.keys(obj||{}).map(k=>({...obj[k], _id:k})).sort((a,b)=>(b.t||0)-(a.t||0));
+    renderCloudSnapsBox();
+  }).catch(()=>{ box.innerHTML = '<div class="empty-hint">تعذّر تحميل لقطات السحابة — جرّب تاني</div>'; });
+}
+function renderCloudSnapsBox(){
+  const box = document.getElementById("cloudSnapsBody");
+  if(!box) return;
+  const snaps = __cloudSnapsCache || [];
+  if(!snaps.length){ box.innerHTML = '<div class="empty-hint">مفيش لقطات سحابية لسه</div>'; return; }
+  box.innerHTML = `<div class="table-wrap"><table class="grid-table">
+    <thead><tr><th class="c-text">التاريخ</th><th class="c-text">الجهاز</th><th class="c-num">الحجم</th><th class="c-text">استعادة</th></tr></thead>
+    <tbody>${snaps.map((s,i)=>`<tr>
+      <td class="rocell c-text" style="text-align:right">${esc(s.date||"")}</td>
+      <td class="rocell c-text" style="text-align:right">${s.device===deviceTag()?"هذا الجهاز":"جهاز تاني"}</td>
+      <td class="rocell c-num"><span class="numcell">${fmt(Math.round((s.data||"").length/1024))} KB</span></td>
+      <td class="rocell c-text" style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="restoreCloudSnap(${i})">↺ استعادة</button></td>
+    </tr>`).join("")}</tbody></table></div>`;
+}
+function restoreCloudSnap(i){
+  const snaps = __cloudSnapsCache || []; const s = snaps[i]; if(!s) return;
+  if(!confirm("هيتم استبدال بياناتك الحالية بلقطة "+s.date+". هنعمل نسخة من الحالي قبلها. متأكد؟")) return;
+  try{ autoSnapshot(); }catch(e){}
+  try{
+    applyImported(JSON.parse(s.data));
+    toast("تمت الاستعادة من السحابة");
+    renderAll();
+  }catch(e){ toast("فشلت الاستعادة — بيانات اللقطة تالفة"); }
+}
+
 function panelSetup(){
   const s = state.setup;
   return `
@@ -1819,6 +1868,11 @@ function panelSetup(){
           <td class="rocell c-text" style="text-align:right;"><button class="btn btn-ghost btn-sm snap-restore" data-idx="${sn.length-1-i}">↺ استعادة</button></td>
         </tr>`).join("")}</tbody>
       </table></div>` : `<div class="empty-hint">لسه مفيش نسخ تلقائية — بتتاخد نسخة كل ساعة شغل</div>`;})()}
+  </div>
+  <div class="card" id="cloudSnapsCard" style="border:2px solid #1a7f4b">
+    <h2><span class="ic">☁️</span> لقطات أمان من السحابة (كل الأجهزة)</h2>
+    <p class="sub">محفوظة على سيرفر منفصل — متاحة حتى لو مساحة المتصفح امتلأت أو اتمسحت. بتحمّل تلقائيًا.</p>
+    <div id="cloudSnapsBody"><div class="empty-hint">بيتحمّل...</div></div>
   </div>
 
   <div class="card">
@@ -5154,7 +5208,7 @@ function renderAll(){
   main.innerHTML = `<div class="panel active">${html}</div>`;
 
   switch(activeTab){
-    case "setup": wireSetup(); break;
+    case "setup": wireSetup(); loadCloudSnapsForSettings(); break;
     case "feed": wireFeed(); break;
     case "meds": wireCostList("meds"); break;
     case "labor": wireCostList("labor"); break;
