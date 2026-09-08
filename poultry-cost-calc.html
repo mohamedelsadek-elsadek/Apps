@@ -401,6 +401,11 @@
       <span class="eyebrow" id="eyebrowCycle">دورة تسمين جارية</span>
       <h1 id="farmTitle">حاسبة تكاليف مزرعة الدواجن</h1>
       <p id="farmSub">تسجيل التكاليف · متابعة أسبوعية · نقطة تعادل · سيناريوهات ربح وخسارة</p>
+      <p style="font-size:11.5px;margin:2px 0 0;opacity:.85">
+        <span id="hdrVersion" style="font-weight:800"></span>
+        <span> · </span>
+        <span id="hdrSyncBadge" style="font-weight:700">⏳ بيتصل...</span>
+      </p>
     </div>
   </div>
   <div class="kpi-strip">
@@ -807,7 +812,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v4 — إصلاح امتلاء المساحة + استرجاع سحابي';
+const APP_VERSION='v5 — مؤشر النسخة والمزامنة الحي';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -834,11 +839,13 @@ function cloudPush(){
   __fbTimer=setTimeout(()=>{ __lastTs=state.__ts; pushNow(); }, 600);
 }
 function pushNow(){
-  if(!window.__fb||!window.__fb.ready) return;
+  if(!window.__fb||!window.__fb.ready){ updateSyncBadge('offline'); return; }
+  updateSyncBadge('syncing');
   const p=window.__fb.push(state);
-  const done=()=>{ try{localStorage.removeItem('pcc_dirty');}catch(e){} };
-  if(p&&typeof p.then==='function'){ p.then(done).catch(()=>{ setTimeout(pushNow,5000); }); }
-  else{ done(); }
+  const done=()=>{ try{localStorage.removeItem('pcc_dirty');}catch(e){} updateSyncBadge('synced'); };
+  if(p&&typeof p.then==='function'){
+    p.then(done).catch(()=>{ updateSyncBadge('error'); setTimeout(pushNow,5000); });
+  } else{ done(); }
 }
 function deviceTag(){
   try{
@@ -894,12 +901,13 @@ function conflictBannerHtml(){
   </div>`;
 }
 function startSync(){
-  if(!window.__fb||!window.__fb.ready) return;
+  if(!window.__fb||!window.__fb.ready){ updateSyncBadge('offline'); return; }
   __mySeq=state.__seq||0;
   window.__fb.subscribe((payload)=>{
     try{
       const remote=JSON.parse(payload);
       __gotCloud=true;
+      updateSyncBadge('synced');
       const rTs=remote.__ts||0, myTs=state.__ts||0;
       if(rTs<=myTs){ return; }
       const myCount=totalRecords(state), rCount=totalRecords(remote);
@@ -922,10 +930,12 @@ function startSync(){
     window.__fb.getOnce().then(v=>{
       if(__gotCloud) return;
       if(v && v.payload) return;   /* فيه بيانات فعلًا — الاستماع العادي هيستقبلها */
-      stampSync(); pushNow();      /* السحابة فاضية فعلًا — آمن نبذرها */
-    }).catch(()=>{});
+      stampSync(); pushNow();      /* السحابة فاضية فعلًا — آمن نبذرها (pushNow هتحدّث الحالة لـ"متزامن") */
+    }).catch(()=>{ updateSyncBadge('error'); });
   }
 }
+window.addEventListener('online', ()=>{ updateSyncBadge('syncing'); cloudPush(); });
+window.addEventListener('offline', ()=>{ updateSyncBadge('offline'); });
 /* ===== كاشف فتح البرنامج في أكتر من تاب في نفس المتصفح ===== */
 function initTabConflictDetector(){
   if(typeof BroadcastChannel==='undefined') return;
@@ -1582,6 +1592,28 @@ function renderHeader(){
   document.getElementById("hdrProfit").textContent = (c.profit>=0?"+":"") + fmtMoney(c.profit);
   const pl=document.getElementById("hdrProfitLbl");
   if(pl) pl.textContent = c.cycleClosed?"صافي الربح الفعلي":"الربح المتوقع";
+  const vEl=document.getElementById("hdrVersion");
+  if(vEl) vEl.textContent = APP_VERSION;
+  updateSyncBadge();
+}
+/* حالة المزامنة الحقيقية — بتتحدّث مع كل حدث في دورة الرفع/الاستقبال */
+let __syncState = "connecting";   // connecting | syncing | synced | offline | error
+function updateSyncBadge(state_){
+  if(state_) __syncState = state_;
+  const el = document.getElementById("hdrSyncBadge");
+  if(!el) return;
+  if(typeof navigator!=="undefined" && navigator.onLine===false){
+    el.textContent = "📴 أوفلاين"; el.style.color = "#B23A32"; return;
+  }
+  const map = {
+    connecting: ["⏳ بيتصل...", "#8a7a4a"],
+    syncing:    ["⏳ بيرفع...", "#8a7a4a"],
+    synced:     ["☁️ متزامن", "#1a7f4b"],
+    offline:    ["📴 أوفلاين", "#B23A32"],
+    error:      ["⚠️ تعذّر الاتصال", "#B23A32"]
+  };
+  const [txt,color] = map[__syncState] || map.connecting;
+  el.textContent = txt; el.style.color = color;
 }
 
 /* ========================= GENERIC COST TABLE (meds/labor/maint/other) ========================= */
