@@ -269,6 +269,14 @@
   .pill.neutral{background:#EDE9E0;color:var(--muted);}
 
   .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .rep-grid{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:14px;}
+  .rep-grid-btn{
+    background:var(--card);border:1.5px solid var(--line);border-radius:11px;
+    padding:10px 16px;font-size:13.5px;font-weight:700;color:var(--ink);
+    cursor:pointer;white-space:nowrap;transition:.15s;box-shadow:0 1px 2px rgba(99,102,241,.06);
+  }
+  .rep-grid-btn:hover{border-color:var(--forest);background:#F4F3FF;}
+  .rep-grid-btn.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(99,102,241,.28);}
   .chip{
     background:#EFEAD9;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--forest);
   }
@@ -375,6 +383,9 @@
     body.printing-section .card{display:none !important;}
     body.printing-section .card.print-target{display:block !important;}
     body.printing-section .card.print-target *{visibility:visible;}
+    /* شبكة أزرار التقارير مش .card فمكنتش بتتخفي — والتولبار (خط/مساحة/زووم) برضه مالوش لازمة في الورق */
+    body.printing-section .rep-grid,
+    body.printing-section #repToolbarCard{display:none !important;}
   }
 </style>
 <script type="module">
@@ -830,7 +841,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v9 — ألوان مصنع الكوثر البنفسجية';
+const APP_VERSION='v11 — طباعة نظيفة بدون شبكة التقارير';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -4288,8 +4299,8 @@ function repCycles(){
 }
 
 function panelReports(){
-  const tabsHtml = `<div class="chip-row">${REP_TABS.map(t=>
-    `<button class="tab-btn ${t.id===repTab?'active':''} rep-chip" data-rep="${t.id}" style="padding:6px 12px;">${t.name}</button>`).join("")}</div>`;
+  const tabsHtml = `<div class="rep-grid">${REP_TABS.map(t=>
+    `<button class="rep-grid-btn ${t.id===repTab?'active':''} rep-chip" data-rep="${t.id}">${t.name}</button>`).join("")}</div>`;
   const map = {
     daily_sales:repDailySales,
     cycle_end:repCycleEnd, postsale:repPostSale, owner_sales:repOwnerSales,
