@@ -9,23 +9,24 @@
 <title>حاسبة تكاليف مزرعة الدواجن</title>
 <style>
   :root{
-    --ink:#1E2A24;
-    --paper:#F3F1EA;
+    --ink:#2d2a55;
+    --paper:#f4f3ff;
     --card:#FFFFFF;
-    --line:#DCD7C8;
-    --forest:#1F3B33;
-    --forest-2:#2E5346;
-    --wheat:#D89A3D;
-    --wheat-2:#B97C22;
+    --line:#e7e5ff;
+    --forest:#6366f1;
+    --forest-2:#5b6fe0;
+    --grad:linear-gradient(135deg,#6366f1 0%,#7c6fdb 50%,#8b7fe8 100%);
+    --wheat:#8b7fe8;
+    --wheat-2:#7c6fdb;
     --brick:#9C4A2E;
     --sky:#3B6E8F;
-    --good:#2E7D4F;
+    --good:#22c55e;
     --good-bg:#E7F4EC;
-    --bad:#B23A32;
+    --bad:#ef4444;
     --bad-bg:#FBEAE8;
-    --muted:#6E6A5E;
+    --muted:#857fb0;
     --radius:12px;
-    --shadow:0 1px 3px rgba(30,42,36,.08), 0 6px 18px rgba(30,42,36,.06);
+    --shadow:0 1px 3px rgba(99,102,241,.10), 0 6px 18px rgba(99,102,241,.10);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -41,7 +42,7 @@
 
   /* ===== Header ===== */
   header.top{
-    background:linear-gradient(135deg,var(--forest) 0%,var(--forest-2) 65%,#3a6353 100%);
+    background:linear-gradient(135deg,var(--forest) 0%,var(--forest-2) 65%,#9d7fe8 100%);
     color:#fff;
     padding:22px 18px 70px;
     position:relative;
@@ -63,7 +64,7 @@
     box-shadow:0 4px 10px rgba(0,0,0,.25);
   }
   .brand-text h1{margin:0;font-size:19px;font-weight:800;letter-spacing:.2px;}
-  .brand-text p{margin:2px 0 0;font-size:12.5px;color:#CFE0D5;}
+  .brand-text p{margin:2px 0 0;font-size:12.5px;color:#E4E1FF;}
   .eyebrow{
     display:inline-block;font-size:11px;letter-spacing:1.5px;color:var(--wheat);
     text-transform:uppercase;margin-bottom:6px;font-weight:700;
@@ -76,15 +77,20 @@
   }
   @media(min-width:640px){.kpi-strip{grid-template-columns:repeat(4,1fr);}}
   .kpi{
-    background:rgba(255,255,255,.09);
-    border:1px solid rgba(255,255,255,.16);
+    background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.22);
     border-radius:var(--radius);
     padding:12px 14px;
     backdrop-filter:blur(2px);
+    position:relative;overflow:hidden;
   }
-  .kpi .lbl{font-size:11.5px;color:#CFE0D5;margin-bottom:4px;}
+  .kpi::after{content:"";position:absolute;top:-18px;left:-18px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.10)}
+  .kpi:nth-child(2){background:linear-gradient(135deg,rgba(124,111,219,.30),rgba(255,255,255,.06))}
+  .kpi:nth-child(3){background:linear-gradient(135deg,rgba(91,111,224,.30),rgba(255,255,255,.06))}
+  .kpi:nth-child(4){background:linear-gradient(135deg,rgba(139,127,232,.30),rgba(255,255,255,.06))}
+  .kpi .lbl{font-size:11.5px;color:#E4E1FF;margin-bottom:4px;}
   .kpi .val{font-size:19px;font-weight:800;}
-  .kpi .val small{font-size:12px;font-weight:600;color:#CFE0D5;}
+  .kpi .val small{font-size:12px;font-weight:600;color:#E4E1FF;}
   .kpi.profit .val{color:#A9E8BE;}
   .kpi.loss .val{color:#F4B3AC;}
 
@@ -824,7 +830,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v7 — تقارير مالك ونهاية دورة+ملخص شركاء';
+const APP_VERSION='v9 — ألوان مصنع الكوثر البنفسجية';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -912,8 +918,15 @@ function conflictBannerHtml(){
     </div>
   </div>`;
 }
-function startSync(){
-  if(!window.__fb||!window.__fb.ready){ updateSyncBadge('offline'); return; }
+function startSync(attempt){
+  attempt = attempt||0;
+  if(!window.__fb||!window.__fb.ready){
+    /* سكريبت Firebase (type=module) مؤجّل التنفيذ حسب مواصفات المتصفح — بيتأخر عن السكريبت
+       الرئيسي العادي. لسه معندناش دليل حقيقي إننا أوفلاين، بس لسه مستنيين الوحدة تجهز.
+       نحاول تاني كل 200ms لحد 10 ثواني قبل ما نستسلم فعلًا ونقول أوفلاين. */
+    if(attempt < 50){ setTimeout(()=>startSync(attempt+1), 200); return; }
+    updateSyncBadge('offline'); return;
+  }
   __mySeq=state.__seq||0;
   window.__fb.subscribe((payload)=>{
     try{
@@ -2531,7 +2544,7 @@ function svgBars(items, w=560, h=200){
       const y = top + i*rowH + (rowH-barH)/2;
       const bw = Math.max(2,(it.value/max)*(w-padL-padR-140));
       return `<g>
-        <rect x="${w-padR-bw-70}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="${it.color||'#2E5346'}"/>
+        <rect x="${w-padR-bw-70}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="${it.color||'#5b6fe0'}"/>
         <text x="${w-padR}" y="${y+barH*0.75}" text-anchor="end" font-size="11" fill="#1E2A24">${esc(it.label)}</text>
         <text x="${w-padR-bw-76}" y="${y+barH*0.75}" text-anchor="end" font-size="11" fill="#6E6A5E">${fmt(it.value,0)}</text>
       </g>`;
@@ -2546,7 +2559,7 @@ function costDashHTML(){
   const bad = cats.filter(x=>x.status.c==="bad");
   const hidden = cats.filter(x=>x.hidden);
   const hiddenTotal = hidden.reduce((a,x)=>a+x.amount,0);
-  const colors=["#D89A3D","#1F3B33","#3B6E8F","#9C4A2E","#7A6A4E","#9AA3A0","#6B7F86","#B97C22","#2E5346","#5A6E7F"];
+  const colors=["#8b7fe8","#6366f1","#3B6E8F","#9C4A2E","#7A6A4E","#9AA3A0","#6B7F86","#7c6fdb","#5b6fe0","#5A6E7F"];
   const bars = cats.slice(0,10).map((x,i)=>({label:x.key, value:x.amount, color:colors[i%colors.length]}));
   return `
   <div class="dash-kpis" style="margin-bottom:14px;">
@@ -4175,7 +4188,7 @@ function repCashflow(){
   <div class="card">
     <h2><span class="ic">💸</span> التدفق النقدي الزمني</h2>
     <p class="sub">كل مصروف وإيراد بترتيب التاريخ والرصيد التراكمي.</p>
-    ${svgLine(cf.map(r=>r.cum),560,150,"#1F3B33","#1F3B33")}
+    ${svgLine(cf.map(r=>r.cum),560,150,"#6366f1","#6366f1")}
     <div class="table-wrap" id="repCfT" style="margin-top:10px;">
       <table class="grid-table">
         <thead><tr><th class="c-date">التاريخ</th><th class="c-text">البند</th><th class="c-text">الطرف</th><th class="c-num">خارج</th><th class="c-num">داخل</th><th class="c-num">الرصيد</th></tr></thead>
@@ -5130,7 +5143,7 @@ function svgDonut(segments, size=170, strokeW=26){
   </svg>`;
 }
 
-function svgLine(points, w=560, h=140, color="#2E5346", fillColor=null){
+function svgLine(points, w=560, h=140, color="#5b6fe0", fillColor=null){
   if(points.length===0) return `<div class="empty-hint">لا توجد بيانات كافية للرسم</div>`;
   const pad=26;
   const maxV = Math.max(...points, 1);
@@ -5167,7 +5180,7 @@ function panelDash(){
     {label:"بنود إضافية", value:c.extraCost, color:"#6B7F86"},
   ].filter(s=>s.value>0);
   // resolve css vars for inline svg (svg doesn't read var() reliably in all contexts, so map manually)
-  const colorMap = {"var(--wheat)":"#D89A3D","var(--forest)":"#1F3B33","var(--sky)":"#3B6E8F","var(--brick)":"#9C4A2E"};
+  const colorMap = {"var(--wheat)":"#8b7fe8","var(--forest)":"#6366f1","var(--sky)":"#3B6E8F","var(--brick)":"#9C4A2E"};
   donutSegs.forEach(s=>{ if(colorMap[s.color]) s.color = colorMap[s.color]; });
 
   const dailyRows = dailyStart()? buildDailyRows() : [];
@@ -5287,7 +5300,7 @@ function panelDash(){
   <div class="grid cols-2">
     <div class="card">
       <h2><span class="ic">📈</span> منحنى نمو الوزن (g)</h2>
-      ${svgLine(weightPoints,260,140,"#1F3B33","#1F3B33")}
+      ${svgLine(weightPoints,260,140,"#6366f1","#6366f1")}
     </div>
     <div class="card">
       <h2><span class="ic">📉</span> النافق اليومي (عدد)</h2>
