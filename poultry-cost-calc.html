@@ -210,6 +210,18 @@
   .btn-wheat{background:var(--wheat);color:#3A2A08;}
   .btn-ghost{background:transparent;color:var(--forest);border:1px solid var(--line);}
   .mini-btn{background:#f0ede3;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:#333}
+  /* ألوان جدول المالك — بروح الشيت المرفوع: تان/بيج + أزرق للتسميات، أصفر + أزرق للإجمالي */
+  .xls-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.xls-wrap{grid-template-columns:1fr}}
+  .xls-table{border-collapse:collapse;width:100%}
+  .xls-table th{background:#6F93A8;color:#fff;font-weight:800;padding:10px;text-align:center;border:1px solid #5a7c8f;font-size:15px}
+  .xls-table td{border:1px solid #c9c3b4;padding:9px 12px;text-align:center;font-weight:800;font-size:15px}
+  .xls-table .xls-lbl{background:#6F93A8;color:#fff;font-weight:800;width:52%}
+  .xls-table.tan .xls-val{background:#D9D2C2;color:#B23A32}
+  .xls-table.yellow .xls-val{background:#FFF6A8;color:#B23A32}
+  .xls-title{font-size:19px;font-weight:900;text-align:center;margin-bottom:10px}
+  .xls-title.blue{color:#2456A6}
+  .xls-title.green{color:#2E7D4F}
   .mini-btn.active{background:var(--forest);color:#fff;border-color:var(--forest)}
   .mini-btn.danger{background:#fde8e8;color:#b91c1c;border-color:#f3c6c6}
   .kv-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}
@@ -812,7 +824,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v6 — إصلاح كشف الأوفلاين الخاطئ';
+const APP_VERSION='v7 — تقارير مالك ونهاية دورة+ملخص شركاء';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -1091,6 +1103,11 @@ function toast(msg){
 function fmt(n, d=0){
   if(n===undefined||n===null||isNaN(n)) n=0;
   return Number(n).toLocaleString("en-US",{maximumFractionDigits:d, minimumFractionDigits:0});
+}
+/* زي fmt بس بترغم عدد الخانات العشرية بالظبط (مايشيلش الأصفار) — لتطابق تنسيق الشيتات المرجعية */
+function fmtD(n, d=2){
+  if(n===undefined||n===null||isNaN(n)) n=0;
+  return Number(n).toLocaleString("en-US",{maximumFractionDigits:d, minimumFractionDigits:d});
 }
 function fmtMoney(n){ return fmt(n,0) + " EGP"; }
 function fmtKg(n){ return fmt(n,1) + " kg"; }
@@ -3716,6 +3733,7 @@ const REP_TABS = [
   {id:"farm_board", name:"🎨 لوحة الألوان"},
   {id:"prep_between", name:"🧹 تجهيز بين الدورات"},
   {id:"active_daily", name:"🏠 لقطة اليوم"},
+  {id:"partner_summary", name:"🤝 ملخص الشركاء"},
 ];
 
 /* ===== تقرير البيع اليومي ===== */
@@ -3723,6 +3741,87 @@ let saleDayFilter = "";
 function saleDays(){
   return Array.from(new Set(state.sales.map(s=>s.date).filter(Boolean))).sort();
 }
+
+/* ═══ ملخص الدورة كحساب ختامي للشركاء — بنود مرتبة، جاهز للطباعة ═══ */
+function repPartnerSummary(){
+  const s=cycleSummary(); const c=s.c;
+  const avgAge = (s.ageStart&&s.ageEnd) ? (s.ageStart+s.ageEnd)/2 : 0;
+  const cfcDiff = (2 - s.avgW) / 4;
+  const cfc = s.fcrSold>0 ? s.fcrSold + cfcDiff : 0;
+  const section = (title, rows) => `
+    <div style="margin-bottom:16px">
+      <div style="background:var(--forest);color:#fff;font-weight:800;padding:8px 14px;border-radius:8px 8px 0 0;font-size:14.5px">${title}</div>
+      <table class="xls-table tan" style="margin-top:0;border-radius:0 0 8px 8px;overflow:hidden">
+        ${rows.map(([lbl,val,extra])=>`<tr><td class="xls-val" style="${extra||''}">${val}</td><td class="xls-lbl">${lbl}</td></tr>`).join("")}
+      </table>
+    </div>`;
+  const feedTotal = sum(state.feed,f=>num(f.cost)||(num(f.qtyTon)*num(f.pricePerTon))||0);
+  const medsTotal = sum(state.meds,m=>num(m.cost));
+  const laborTotal = sum(state.labor,l=>num(l.cost));
+  const maintTotal = sum(state.maint,m=>num(m.cost));
+  const otherTotal = sum(state.other,o=>num(o.cost));
+  const extraTotal = sum(state.extraCosts,e=>num(e.cost));
+  const creditsTotal = sum(state.credits,cr=>creditAmount(cr));
+
+  return `
+  <div class="card" id="repPartnerT">
+    <h2><span class="ic">🤝</span> ملخص الدورة — حساب ختامي للشركاء</h2>
+    <p class="sub">${esc(state.setup.farmName||"المزرعة")} — ${esc(state.setup.cycleName||"")} — جاهز للطباعة والمشاركة</p>
+
+    ${section("١) بيانات الدورة الأساسية",[
+      ["تاريخ التسكين", state.setup.dateReceived||"—"],
+      ["تاريخ آخر بيع", s.lastSale||"—"],
+      ["عمر بداية البيع", s.ageStart?fmt(s.ageStart,0)+" يوم":"—"],
+      ["عمر نهاية البيع", s.ageEnd?fmt(s.ageEnd,0)+" يوم":"—"],
+      ["متوسط العمر", avgAge?fmt(avgAge,2)+" يوم":"—"],
+      ["الكتاكيت الوارد", fmt(c.chicks,0)],
+    ])}
+
+    ${section("٢) الأداء الإنتاجي",[
+      ["إجمالي النافق", fmt(c.totalMortality,0)],
+      ["نسبة النافق", fmt(c.mortalityPct,2)+"%"],
+      ["نسبة الحياة", fmt(c.livability,2)+"%"],
+      ["العدد المباع", fmt(s.soldBirds,0)],
+      ["اجمالي اللحم المباع", fmt(s.soldW,1)+" kg"],
+      ["متوسط الوزن للطائر", fmt(s.avgW,2)+" kg"],
+      ["العلف المستهلك", fmt(c.feedConsumedKg,0)+" kg"],
+      ["متوسط العلف للطائر", fmt(s.feedPerBird,3)+" kg"],
+      ["معامل التحويل FCR", s.fcrSold>0?fmt(s.fcrSold,3):"—"],
+      ["cfc (مصحّح لوزن 2 كجم)", cfc>0?fmt(cfc,2):"—"],
+    ])}
+
+    ${section("٣) تفصيل التكاليف",[
+      ["الكتاكيت", fmtMoney(c.chickCost)],
+      ["العلف", fmtMoney(feedTotal)],
+      ["الأدوية والتحصينات", fmtMoney(medsTotal)],
+      ["العمالة", fmtMoney(laborTotal)],
+      ["الصيانة والتأسيس", fmtMoney(maintTotal)],
+      ["بنود أخرى", fmtMoney(otherTotal)],
+      ["تكاليف إضافية", fmtMoney(extraTotal)],
+      ["الخصومات والمرتجعات", "-"+fmtMoney(creditsTotal)],
+      ["إجمالي التكاليف (صافي)", fmtMoney(c.totalCost), "font-weight:900;background:#c9c0ab"],
+    ])}
+
+    ${section("٤) الإيرادات",[
+      ["عدد دفعات البيع", fmt(state.sales.length,0)],
+      ["إجمالي الوزن المباع", fmt(s.soldW,1)+" kg"],
+      ["متوسط سعر البيع", fmt(s.avgPrice,2)+" EGP/kg"],
+      ["إجمالي الإيراد", fmtMoney(s.revenue), "font-weight:900;background:#c9c0ab"],
+    ])}
+
+    ${section("٥) الخلاصة المالية",[
+      ["تكلفة الكيلو", fmt(c.costPerKg,2)+" EGP"],
+      ["سعر التعادل", fmt(c.breakEvenPrice,2)+" EGP/kg"],
+      ["صافي الربح / الخسارة", (s.profit>=0?"+":"")+fmtMoney(s.profit), `font-weight:900;font-size:17px;background:${s.profit>=0?'#cdeed9':'#f6d3ce'};color:${s.profit>=0?'var(--good)':'var(--bad)'}`],
+      ["ربح/خسارة الطائر", fmt(s.profitPerBird,2)+" EGP", `color:${s.profitPerBird>=0?'var(--good)':'var(--bad)'};font-weight:800`],
+      ["ربح/خسارة الكيلو", s.soldW>0?fmt(s.profitPerKg,2)+" EGP":"—", `color:${s.profitPerKg>=0?'var(--good)':'var(--bad)'};font-weight:800`],
+    ])}
+
+    <p class="sub" style="margin-top:16px;text-align:center">تم إعداد هذا الملخص بتاريخ ${todayISO()}</p>
+    ${exportBar("repPartnerT","ملخص الدورة للشركاء")}
+  </div>`;
+}
+
 function repDailySales(){
   const c = computed();
   const days = saleDays();
@@ -3858,35 +3957,40 @@ function repDailySales(){
 
 function repCycleEnd(){
   const s=cycleSummary(); const c=s.c;
+  const avgAge = (s.ageStart&&s.ageEnd) ? (s.ageStart+s.ageEnd)/2 : 0;
+  /* cfc = معامل تحويل مصحّح على أساس وزن قياسي 2 كجم — كل ما الوزن الفعلي يزيد عن 2 يتحسّن، وكل ما يقل يزيد (يسوء) */
+  const cfcDiff = (2 - s.avgW) / 4;
+  const cfc = s.fcrSold>0 ? s.fcrSold + cfcDiff : 0;
+  const rows = [
+    ["تاريخ التسكين", state.setup.dateReceived||"—"],
+    ["تاريخ البيع", s.lastSale||"—"],
+    ["الكتاكيت الوارد", fmt(c.chicks,0)],
+    ["العدد المباع", fmt(s.soldBirds,0)],
+    ["أجمالي النافق", fmt(c.totalMortality,0)],
+    ["للنافق %", fmtD(c.mortalityPct,2)],
+    ["حياتيه الطيور", fmt(c.livability,2)],
+    ["العلف المستهلك", fmt(c.feedConsumedKg,0)],
+    ["متوسط العلف للطائر", fmt(s.feedPerBird,3)],
+    ["اجمالي اللحم", fmt(s.soldW,1)],
+    ["متوسط الوزن للطائر", fmtD(s.avgW,2)],
+    ["عمر بدايه البيع", s.ageStart?fmt(s.ageStart,0):"—"],
+    ["عمر نهايه البيع", s.ageEnd?fmt(s.ageEnd,0):"—"],
+    ["متوسط العمر", avgAge?fmt(avgAge,2):"—"],
+    ["معامل التحويل", s.fcrSold>0?fmt(s.fcrSold,3):"—"],
+    ["cfc", cfc>0?fmtD(cfc,2):"—"],
+  ];
   return `
   <div class="card">
     <h2><span class="ic">🏁</span> تقرير نهاية الدورة</h2>
-    <p class="sub">الملخص الكامل للدورة من التسكين حتى آخر بيع.</p>
-    ${kvTable("repCycleEndT","البند",[
-      ["تاريخ التسكين", state.setup.dateReceived||"—"],
-      ["تاريخ آخر بيع", s.lastSale||"—"],
-      ["عمر بداية البيع", s.ageStart?fmt(s.ageStart)+" يوم":"—"],
-      ["عمر نهاية البيع", s.ageEnd?fmt(s.ageEnd)+" يوم":"—"],
-      ["الكتاكيت الوارد", fmt(c.chicks)],
-      ["إجمالي النافق", fmt(c.totalMortality)],
-      ["نسبة النافق", fmt(c.mortalityPct,2)+"%"],
-      ["نسبة الحياة", fmt(c.livability,2)+"%"],
-      ["العدد المباع", fmt(s.soldBirds)],
-      ["اللحم المباع", fmt(s.soldW,1)+" kg"],
-      ["متوسط وزن الطائر المباع", s.avgW>0?fmt(s.avgW,3)+" kg":"—"],
-      ["العلف المستهلك", fmt(c.feedConsumedKg,1)+" kg"],
-      ["متوسط العلف للطائر", fmt(s.feedPerBird,3)+" kg"],
-      ["معامل التحويل FCR", c.fcr>0?fmt(c.fcr,3):"—"],
-      ["EPEF", fmt(c.epef,0)],
-      ["إجمالي التكاليف", fmtMoney(c.totalCost)],
-      ["إجمالي الإيراد", fmtMoney(s.revenue)],
-      ["متوسط سعر البيع", fmt(s.avgPrice,2)+" EGP/kg"],
-      ["تكلفة الكيلو", fmt(c.costPerKg,2)+" EGP"],
-      ["سعر التعادل", fmt(c.breakEvenPrice,2)+" EGP/kg"],
-      ["صافي الربح", (s.profit>=0?"+":"")+fmtMoney(s.profit), `color:${s.profit>=0?'var(--good)':'var(--bad)'};font-weight:800;`],
-      ["ربح الطائر", fmt(s.profitPerBird,2)+" EGP", `color:${s.profitPerBird>=0?'var(--good)':'var(--bad)'};font-weight:800;`],
-      ["ربح الكيلو", s.soldW>0?fmt(s.profitPerKg,2)+" EGP":"—", `color:${s.profitPerKg>=0?'var(--good)':'var(--bad)'};font-weight:800;`],
-    ])}
+    <p class="sub">الملخص الكامل للدورة من التسكين حتى آخر بيع. <b>cfc</b> = معامل تحويل مصحّح على وزن قياسي 2 كجم.</p>
+    <table class="xls-table tan" id="repCycleEndT" style="max-width:520px">
+      ${rows.map(([lbl,val])=>`<tr><td class="xls-val">${val}</td><td class="xls-lbl">${lbl}</td></tr>`).join("")}
+    </table>
+    <div class="totalbar" style="margin-top:14px;"><span>إجمالي التكاليف</span><span>${fmtMoney(c.totalCost)}</span></div>
+    <div class="totalbar" style="margin-top:6px;"><span>إجمالي الإيراد</span><span>${fmtMoney(s.revenue)}</span></div>
+    <div class="totalbar" style="margin-top:6px;"><span>تكلفة الكيلو</span><span>${fmt(c.costPerKg,2)} EGP</span></div>
+    <div class="totalbar" style="margin-top:6px;"><span>سعر التعادل</span><span>${fmt(c.breakEvenPrice,2)} EGP/kg</span></div>
+    <div class="totalbar" style="margin-top:6px;"><span>صافي الربح</span><span style="color:${s.profit>=0?'var(--good)':'var(--bad)'};font-weight:800">${(s.profit>=0?"+":"")+fmtMoney(s.profit)}</span></div>
     ${exportBar("repCycleEndT","تقرير نهاية الدورة")}
   </div>`;
 }
@@ -3918,42 +4022,47 @@ function repPostSale(){
 }
 function repOwnerSales(){
   const s=cycleSummary(); const c=s.c;
-  const rows=[...state.sales].sort((a,b)=>(a.date||"")<(b.date||"")?-1:1);
+  const rows=[...state.sales].sort((a,b)=>(a.date||"")>(b.date||"")?-1:1);   /* الأحدث أولاً */
+  const last = rows[0];   /* آخر دفعة بيع — تمثّل "المبيعات يوميا" */
+  const lastW=last?num(last.weightKg):0, lastP=last?num(last.pricePerKg):0, lastB=last?num(last.birds):0;
+  const lastAmount = lastW*lastP;
+  const lastDayAvg = lastB>0 ? lastW/lastB : 0;
+  /* اجمالي المبيعات — أرقام تراكمية على مستوى الدورة كلها */
+  const remainingRaw = c.chicks - c.totalMortality - s.soldBirds;   /* ممكن تطلع سالبة — فرق حقيقي يستاهل يتشاف */
   return `
   <div class="card">
     <h2><span class="ic">👑</span> تقرير مبيعات المالك</h2>
-    <p class="sub">كل دفعة بيع بتفاصيلها، والعمر عند البيع، ونصيبها من الإيراد.</p>
-    ${rows.length===0?`<div class="empty-hint">لا توجد مبيعات مسجّلة</div>`:`
-    <div class="table-wrap" id="repOwnerT">
-      <table class="grid-table">
-        <thead><tr>
-          <th class="c-date">التاريخ</th><th class="c-num">العمر</th><th class="c-text">التاجر</th>
-          <th class="c-num">الطيور</th><th class="c-num">الوزن (kg)</th><th class="c-num">م.وزن الطائر</th>
-          <th class="c-num">السعر</th><th class="c-num">الإجمالي</th><th class="c-num">% من الإيراد</th>
-        </tr></thead>
-        <tbody>
-        ${rows.map(r=>{
-          const w=num(r.weightKg), p=num(r.pricePerKg), b=num(r.birds), t=w*p;
-          return `<tr>
-            <td class="rocell c-date"><span class="numcell">${r.date||"—"}</span></td>
-            <td class="rocell c-num"><span class="numcell">${r.date&&dailyStart()?fmt(ageOnDate(r.date)):"—"}</span></td>
-            <td class="rocell c-text" style="text-align:right;">${esc(r.trader||"—")}</td>
-            <td class="rocell c-num"><span class="numcell">${b?fmt(b):"—"}</span></td>
-            <td class="rocell c-num"><span class="numcell">${fmt(w,1)}</span></td>
-            <td class="rocell c-num"><span class="numcell">${b>0?fmt(w/b,3):"—"}</span></td>
-            <td class="rocell c-num"><span class="numcell">${fmt(p,2)}</span></td>
-            <td class="rocell c-num"><span class="numcell">${fmt(t,0)}</span></td>
-            <td class="rocell c-num"><span class="numcell">${s.revenue>0?fmt(t/s.revenue*100,1)+"%":"—"}</span></td>
-          </tr>`;
-        }).join("")}
-        </tbody>
-      </table>
+    <p class="sub">آخر دفعة بيع، وإجمالي الدورة كاملة.</p>
+    <div class="xls-wrap" id="repOwnerT">
+      <div>
+        <div class="xls-title blue">المبيعات يوميا</div>
+        <table class="xls-table tan">
+          <tr><td class="xls-val">${last?fmt(lastB):"—"}</td><td class="xls-lbl">العدد</td></tr>
+          <tr><td class="xls-val">${last?fmt(lastW,1):"—"}</td><td class="xls-lbl">الوزن</td></tr>
+          <tr><td class="xls-val">${last?fmt(lastAmount,0):"—"}</td><td class="xls-lbl">المبلغ</td></tr>
+          <tr><td class="xls-val">${last?fmtD(lastDayAvg,2):"—"}</td><td class="xls-lbl">متوسط اليوم</td></tr>
+          <tr><td class="xls-val">${last?fmtD(lastP,2):"—"}</td><td class="xls-lbl">السعر</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="xls-title green">اجمالي المبيعات</div>
+        <table class="xls-table yellow">
+          <tr><td class="xls-val">${fmt(c.ageToday||s.ageEnd,0)}</td><td class="xls-lbl">العمر</td></tr>
+          <tr><td class="xls-val">${fmt(c.chicks,0)}</td><td class="xls-lbl">العدد</td></tr>
+          <tr><td class="xls-val">${fmt(c.totalMortality,0)}</td><td class="xls-lbl">النافق</td></tr>
+          <tr><td class="xls-val">${fmtD(c.mortalityPct,2)}</td><td class="xls-lbl">نسبه النافق</td></tr>
+          <tr><td class="xls-val">${fmt(s.soldBirds,0)}</td><td class="xls-lbl">المبيعات</td></tr>
+          <tr><td class="xls-val" style="${remainingRaw<0?'color:#B23A32':''}">${fmt(remainingRaw,0)}</td><td class="xls-lbl">العدد المتبقي</td></tr>
+          <tr><td class="xls-val">${fmt(c.feedConsumedKg,0)}</td><td class="xls-lbl">العلف الكلي</td></tr>
+          <tr><td class="xls-val">${fmtD(s.avgW,2)}</td><td class="xls-lbl">متوسط الوزن</td></tr>
+          <tr><td class="xls-val">${fmt(s.soldW,1)}</td><td class="xls-lbl">اجمالي الوزن</td></tr>
+          <tr><td class="xls-val">${fmt(s.revenue,0)}</td><td class="xls-lbl">اجمالي المبلغ</td></tr>
+          <tr><td class="xls-val" style="font-weight:900">${fmtD(s.avgPrice,2)}</td><td class="xls-lbl">= متوسط السعر</td></tr>
+        </table>
+      </div>
     </div>
-    <div class="totalbar" style="margin-top:10px;"><span>إجمالي الوزن المباع</span><span>${fmt(s.soldW,1)} kg</span></div>
-    <div class="totalbar" style="margin-top:6px;"><span>إجمالي الإيراد</span><span>${fmtMoney(s.revenue)}</span></div>
-    <div class="totalbar" style="margin-top:6px;"><span>متوسط سعر البيع</span><span>${fmt(s.avgPrice,2)} EGP/kg</span></div>
-    <div class="totalbar" style="margin-top:6px;"><span>صافي الربح</span><span>${(s.profit>=0?"+":"")+fmtMoney(s.profit)}</span></div>
-    ${exportBar("repOwnerT","تقرير مبيعات المالك")}`}
+    ${remainingRaw<0?'<div class="note" style="background:var(--bad-bg);border-color:#f0c9c4;color:var(--bad);margin-top:10px">⚠️ العدد المتبقي سالب — يعني عدد المباع + النافق أكتر من الوارد. راجع أعداد الطيور في دفعات البيع أو المتابعة اليومية.</div>':''}
+    ${exportBar("repOwnerT","تقرير مبيعات المالك")}
   </div>`;
 }
 function repFcrSens(){
@@ -4180,7 +4289,7 @@ function panelReports(){
     cost_detail:repCostDetail, breakeven:repBreakeven, sell_now:repSellNow, ro_cp:repROCP,
     house_status:repHouseStatus, sebla:repSebla, vaccine_report:repVaccineReport,
     attendance_report:repAttendance, audit_log:repAuditLog, curves:repCurves,
-    farm_board:repFarmBoard, prep_between:repPrepBetween, active_daily:repActiveDaily
+    farm_board:repFarmBoard, prep_between:repPrepBetween, active_daily:repActiveDaily, partner_summary:repPartnerSummary
   };
   const fn = map[repTab] || repCycleEnd;
   return `<div id="reportsPanelHost">${repToolbarHtml()}${tabsHtml}${fn()}</div>`;
