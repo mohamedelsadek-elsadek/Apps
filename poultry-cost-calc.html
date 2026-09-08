@@ -812,7 +812,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v5 — مؤشر النسخة والمزامنة الحي';
+const APP_VERSION='v6 — إصلاح كشف الأوفلاين الخاطئ';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -1599,12 +1599,12 @@ function renderHeader(){
 /* حالة المزامنة الحقيقية — بتتحدّث مع كل حدث في دورة الرفع/الاستقبال */
 let __syncState = "connecting";   // connecting | syncing | synced | offline | error
 function updateSyncBadge(state_){
+  /* navigator.onLine مش موثوق فيه — خصوصًا على Safari بالآيفون، بيرجّع false غلط
+     حتى لو النت شغال فعليًا. عشان كده بقينا نعتمد بس على نتيجة عمليات Firebase
+     الحقيقية (نجاح/فشل الرفع والاستقبال)، مش على قراءة المتصفح العامة دي. */
   if(state_) __syncState = state_;
   const el = document.getElementById("hdrSyncBadge");
   if(!el) return;
-  if(typeof navigator!=="undefined" && navigator.onLine===false){
-    el.textContent = "📴 أوفلاين"; el.style.color = "#B23A32"; return;
-  }
   const map = {
     connecting: ["⏳ بيتصل...", "#8a7a4a"],
     syncing:    ["⏳ بيرفع...", "#8a7a4a"],
