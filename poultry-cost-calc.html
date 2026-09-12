@@ -472,7 +472,8 @@ function defaultState(){
     setup:{
       farmName:"", cycleName:"Cycle 1", dateReceived:"", chicksCount:0, chickPrice:0,
       houseArea:"", breed:"روص/كوب", expectedCycleDays:35, expectedPrice:0, amortCycles:4,
-      houseAreaM2:0, fanCapacity:0, fanCount:0, chickSupplier:"", chickPayer:"", chickPayStatus:"نقدي"
+      houseAreaM2:0, fanCapacity:0, fanCount:0, chickSupplier:"", chickPayer:"", chickPayStatus:"نقدي",
+      farmId:"", flockId:"", houseType:"", startWeightG:42
     },
     feed:[], meds:[], labor:[], maint:[], other:[],
     weekly:[], sales:[], daily:[], dailyStartDate:"", vaccines:[],
@@ -841,7 +842,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v11 — طباعة نظيفة بدون شبكة التقارير';
+const APP_VERSION='v12 — قياسات المزرعة ومقارنة أسبوعية';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -1783,6 +1784,10 @@ function panelSetup(){
       <div class="field"><label>اسم الدورة</label><input type="text" id="s_cycleName" value="${esc(s.cycleName)}" placeholder="Cycle 1 / January 2026"></div>
       <div class="field"><label>تاريخ استلام الكتاكيت</label><input type="date" id="s_dateReceived" value="${s.dateReceived||""}"></div>
       <div class="field"><label>السلالة</label><input type="text" id="s_breed" value="${esc(s.breed)}"></div>
+      <div class="field"><label>Farm_ID</label><input type="text" id="s_farmId" value="${esc(s.farmId||"")}" placeholder="F-01"></div>
+      <div class="field"><label>Flock_ID</label><input type="text" id="s_flockId" value="${esc(s.flockId||"")}" placeholder="FL-2026-01"></div>
+      <div class="field"><label>نوع العنبر</label><input type="text" id="s_houseType" value="${esc(s.houseType||"")}" placeholder="مغلق / مفتوح / نفق"></div>
+      <div class="field"><label>وزن الكتكوت عند الاستلام (جم)</label><input type="text" inputmode="decimal" class="num-input" id="s_startWeightG" value="${s.startWeightG||42}"></div>
       <div class="field"><label>عدد الكتاكيت الوارد</label><input type="text" inputmode="decimal" class="num-input" id="s_chicksCount" value="${s.chicksCount||""}"></div>
       <div class="field"><label>سعر الكتكوت (جنيه)</label><input type="text" inputmode="decimal" class="num-input" id="s_chickPrice" value="${s.chickPrice||""}"></div>
       <div class="field"><label>مساحة العنبر</label><input type="text" id="s_houseArea" value="${esc(s.houseArea)}" placeholder="م²"></div>
@@ -2024,6 +2029,10 @@ function wireSetup(){
     s.cycleName = document.getElementById("s_cycleName").value.trim();
     s.dateReceived = document.getElementById("s_dateReceived").value;
     s.breed = document.getElementById("s_breed").value.trim();
+    s.farmId = document.getElementById("s_farmId").value.trim();
+    s.flockId = document.getElementById("s_flockId").value.trim();
+    s.houseType = document.getElementById("s_houseType").value.trim();
+    s.startWeightG = num(document.getElementById("s_startWeightG").value)||42;
     s.chicksCount = num(document.getElementById("s_chicksCount").value);
     s.chickPrice = num(document.getElementById("s_chickPrice").value);
     s.houseArea = document.getElementById("s_houseArea").value.trim();
@@ -2207,7 +2216,11 @@ function wireSetup(){
       grossCost: c.grossCost,
       credits: c.creditsTotal,
       carryover: c.carryoverTotal,
-      profit: c.profit
+      profit: c.profit,
+      /* لقطة كاملة (مش بس الملخص) — أساس تقرير قياسات المزرعة ومقارنة المزارع لاحقًا */
+      setupSnapshot: JSON.parse(JSON.stringify(state.setup)),
+      dailyRecords: JSON.parse(JSON.stringify(state.daily)),
+      salesRecords: JSON.parse(JSON.stringify(state.sales))
     });
     // reset per-cycle operational data; keep suppliers, and keep only "setup" (one-time) maintenance items
     // الرصيد الفاضل (علف/دوا) يترحّل كتكلفة أول للدورة الجديدة
@@ -3099,6 +3112,60 @@ function varianceAnalysis(){
 }
 
 /* 🏁 ملخص نهاية الدورة / ما بعد البيع */
+/* الموسم من شهر التسكين — تصنيف مناخي مصري نمطي */
+function seasonFromDate(dateStr){
+  if(!dateStr) return "—";
+  const m = new Date(dateStr).getMonth()+1;   // 1..12
+  if(m>=12 || m<=2) return "شتاء";
+  if(m>=3 && m<=5) return "ربيع";
+  if(m>=6 && m<=8) return "صيف";
+  return "خريف";
+}
+/* تجميع سجلات يومية لأسبوعية — أساس Weekly Bird Performance Data.
+   بيرجع مصفوفة [{week, endWeightG, mortWeek, mortCumPct, avgTemp, avgHum, feedPerBirdWeek, feedPerBirdCum, fcr}] */
+function weeklyAggFromDaily(dailyArr, chicksCount, startWeightG){
+  const rows = [...(dailyArr||[])].filter(d=>d&&d.date).sort((a,b)=>a.date<b.date?-1:1);
+  if(!rows.length || !chicksCount) return [];
+  const d0 = new Date(rows[0].date);
+  const weeks = {};
+  let cumFeedKg=0, cumMort=0;
+  rows.forEach(d=>{
+    const age = Math.floor((new Date(d.date)-d0)/86400000)+1;   // يوم 1 = أول يوم متابعة
+    const wk = Math.max(1, Math.ceil(age/7));
+    cumFeedKg += num(d.feedKg);
+    cumMort += num(d.mortality);
+    if(!weeks[wk]) weeks[wk] = {week:wk, lastAge:age, lastW:0, mortWeek:0, tempSum:0, tempN:0, humSum:0, humN:0, feedWeekKg:0};
+    const w = weeks[wk];
+    w.lastAge = age;
+    if(num(d.weightG)>0) w.lastW = num(d.weightG);
+    w.mortWeek += num(d.mortality);
+    w.feedWeekKg += num(d.feedKg);
+    if(num(d.tempC)) { w.tempSum += num(d.tempC); w.tempN++; }
+    if(num(d.humidity)) { w.humSum += num(d.humidity); w.humN++; }
+    w.cumFeedKg = cumFeedKg;
+    w.cumMort = cumMort;
+  });
+  const wkNums = Object.keys(weeks).map(Number).sort((a,b)=>a-b);
+  let prevW = num(startWeightG)||42;
+  return wkNums.map(wk=>{
+    const w = weeks[wk];
+    const aliveAtStart = chicksCount;   // تبسيط: بيُحسب % النافق من إجمالي الوارد
+    const gain = Math.max(0, (w.lastW||prevW) - prevW);
+    const feedPerBirdWeek = chicksCount>0 ? w.feedWeekKg*1000/chicksCount : 0;   // جرام/طائر
+    const feedPerBirdCum = chicksCount>0 ? w.cumFeedKg*1000/chicksCount : 0;
+    const fcrWeek = gain>0 ? (feedPerBirdWeek/gain) : 0;
+    const fcrCum = w.lastW>0 ? (feedPerBirdCum/1000)/(w.lastW/1000) : 0;
+    const out = {
+      week: wk, ageEnd: w.lastAge, weightG: w.lastW||null,
+      mortWeek: w.mortWeek, mortCumPct: aliveAtStart>0 ? (w.cumMort/aliveAtStart*100) : 0,
+      avgTemp: w.tempN>0 ? w.tempSum/w.tempN : null, avgHum: w.humN>0 ? w.humSum/w.humN : null,
+      feedPerBirdWeek, feedPerBirdCum, fcrWeek, fcrCum,
+      rossW: rossWeightG(w.lastAge), rossFcr: rossFCR(w.lastAge)
+    };
+    prevW = w.lastW || prevW;
+    return out;
+  });
+}
 function cycleSummary(){
   const c=computed();
   const sales=state.sales;
@@ -3758,6 +3825,8 @@ const REP_TABS = [
   {id:"prep_between", name:"🧹 تجهيز بين الدورات"},
   {id:"active_daily", name:"🏠 لقطة اليوم"},
   {id:"partner_summary", name:"🤝 ملخص الشركاء"},
+  {id:"farm_measure", name:"📋 قياسات المزرعة"},
+  {id:"multi_farm_compare", name:"🆚 مقارنة مزارع أسبوعية"},
 ];
 
 /* ===== تقرير البيع اليومي ===== */
@@ -3843,6 +3912,153 @@ function repPartnerSummary(){
 
     <p class="sub" style="margin-top:16px;text-align:center">تم إعداد هذا الملخص بتاريخ ${todayISO()}</p>
     ${exportBar("repPartnerT","ملخص الدورة للشركاء")}
+  </div>`;
+}
+
+/* ═══ تقرير قياسات المزرعة — نموذج علمي + Weekly Bird Performance ═══ */
+function repFarmMeasurement(){
+  const s = state.setup;
+  const c = computed();
+  const weeks = weeklyAggFromDaily(state.daily, num(s.chicksCount), s.startWeightG);
+  const lastWeek = weeks[weeks.length-1];
+  const cycleDurationDays = (s.dateReceived) ? (weeks.length?weeks[weeks.length-1].ageEnd:0) : 0;
+  const chicksEnd = c.birdsInHouse!=null ? c.birdsInHouse : (num(s.chicksCount) - num(c.totalMortality));
+
+  const idRows = [
+    ["اسم المزرعة", esc(s.farmName)||"—"],
+    ["Farm_ID", esc(s.farmId)||"—"],
+    ["Flock_ID", esc(s.flockId)||"—"],
+    ["السلالة", esc(s.breed)||"—"],
+    ["الموسم", seasonFromDate(s.dateReceived)],
+    ["نوع العنبر", esc(s.houseType)||"—"],
+    ["تاريخ الدخول", s.dateReceived||"—"],
+    ["العدد أول الدورة", fmt(num(s.chicksCount),0)],
+    ["العدد آخر الدورة", fmt(chicksEnd,0)],
+    ["مدة الدورة (يوم)", cycleDurationDays?fmt(cycleDurationDays,0):"—"],
+    ["عمر البيع من", c.ageStart?fmt(c.ageStart,0):"—"],
+    ["عمر البيع إلى", c.ageEnd?fmt(c.ageEnd,0):"—"],
+    ["متوسط عمر البيع", (c.ageStart&&c.ageEnd)?fmtD((c.ageStart+c.ageEnd)/2,1):"—"],
+    ["وزن البداية (جم)", fmt(num(s.startWeightG)||42,0)],
+    ["وزن النهاية (جم)", lastWeek?fmt(lastWeek.weightG,0):"—"],
+  ];
+
+  const wkCols = weeks.map(w=>w.week);
+  const metricRows = [
+    ["وزن الجسم (جم)", w=>w.weightG?fmt(w.weightG,0):"—"],
+    ["مرجع Ross (جم)", w=>fmt(w.rossW,0)],
+    ["النافق الأسبوعي", w=>fmt(w.mortWeek,0)],
+    ["النافق التراكمي %", w=>fmtD(w.mortCumPct,2)],
+    ["الحرارة °م", w=>w.avgTemp!=null?fmtD(w.avgTemp,1):"—"],
+    ["الرطوبة %", w=>w.avgHum!=null?fmtD(w.avgHum,1):"—"],
+    ["علف/طائر أسبوعي (جم)", w=>fmt(w.feedPerBirdWeek,0)],
+    ["علف/طائر تراكمي (جم)", w=>fmt(w.feedPerBirdCum,0)],
+    ["FCR", w=>w.fcrCum?fmtD(w.fcrCum,3):"—"],
+    ["مرجع Ross FCR", w=>fmtD(w.rossFcr,3)],
+  ];
+
+  return `
+  <div class="card" id="repFarmMeasureT">
+    <h2><span class="ic">📋</span> تقرير قياسات المزرعة</h2>
+    <p class="sub">بيانات تعريفية + أداء أسبوعي مقارن بمرجع Ross.</p>
+
+    <table class="xls-table tan" style="max-width:620px;margin-bottom:18px">
+      ${idRows.map(([lbl,val])=>`<tr><td class="xls-val">${val}</td><td class="xls-lbl">${lbl}</td></tr>`).join("")}
+    </table>
+
+    <div class="xls-title blue" style="text-align:right">Weekly Bird Performance Data</div>
+    ${wkCols.length ? `
+    <div class="table-wrap">
+    <table class="xls-table yellow" style="min-width:${100+wkCols.length*90}px">
+      <tr><th style="background:#6F93A8">المؤشر</th>${wkCols.map(w=>`<th>Week ${w}</th>`).join("")}</tr>
+      ${metricRows.map(([lbl,fn])=>`<tr><td class="xls-lbl" style="text-align:right">${lbl}</td>${weeks.map(w=>`<td class="xls-val">${fn(w)}</td>`).join("")}</tr>`).join("")}
+    </table>
+    </div>` : `<p class="sub">لسه مفيش متابعة يومية كفاية لحساب الأداء الأسبوعي.</p>`}
+
+    ${exportBar("repFarmMeasureT","تقرير قياسات المزرعة")}
+  </div>`;
+}
+
+/* ═══ مقارنة أسبوعية بين عدة مزارع (دورات) ═══ */
+let selectedFarmsForCompare = [];
+function toggleFarmCompare(id){
+  const i = selectedFarmsForCompare.indexOf(id);
+  if(i>-1) selectedFarmsForCompare.splice(i,1); else selectedFarmsForCompare.push(id);
+  renderAll();
+}
+/* كل "المزارع" المتاحة للمقارنة: الدورة الحالية + أي دورة مؤرشفة عندها تفاصيل محفوظة */
+function availableFarmsForCompare(){
+  const list = [];
+  if(state.daily && state.daily.length){
+    list.push({id:"__current__", label:(state.setup.cycleName||"الدورة الحالية")+" (حالية)",
+      setup:state.setup, dailyRecords:state.daily, chicksCount:num(state.setup.chicksCount)});
+  }
+  (state.archivedCycles||[]).forEach(a=>{
+    if(a.dailyRecords && a.dailyRecords.length){
+      list.push({id:a.id, label:a.cycleName+" ("+a.archivedAt+")",
+        setup:a.setupSnapshot||{}, dailyRecords:a.dailyRecords, chicksCount:num(a.chicksCount)});
+    }
+  });
+  return list;
+}
+function repMultiFarmCompare(){
+  const all = availableFarmsForCompare();
+  const picker = `<div class="chip-row">${all.map(f=>
+    `<button class="rep-grid-btn ${selectedFarmsForCompare.includes(f.id)?'active':''}" onclick="toggleFarmCompare('${f.id}')">${esc(f.label)}</button>`).join("")}</div>`;
+
+  const chosen = all.filter(f=>selectedFarmsForCompare.includes(f.id));
+  if(chosen.length<2){
+    return `<div class="card"><h2><span class="ic">🆚</span> مقارنة أسبوعية بين عدة مزارع</h2>
+      <p class="sub">اختر مزرعتين أو أكتر من اللي تحت للمقارنة.</p>${picker}
+      <p class="note" style="margin-top:12px">محتاج اختيار مزرعتين على الأقل.</p></div>`;
+  }
+
+  const farms = chosen.map(f=>({
+    ...f, weeks: weeklyAggFromDaily(f.dailyRecords, f.chicksCount, f.setup.startWeightG)
+  }));
+  const maxWeeks = Math.max(...farms.map(f=>f.weeks.length), 0);
+
+  const idHeadRow = `<tr><th style="background:#6F93A8">البيان</th>${farms.map(f=>`<th>${esc(f.setup.farmName||f.label)}</th>`).join("")}</tr>`;
+  const idRows = [
+    ["Farm_ID", f=>esc(f.setup.farmId)||"—"],
+    ["السلالة", f=>esc(f.setup.breed)||"—"],
+    ["الموسم", f=>seasonFromDate(f.setup.dateReceived)],
+    ["تاريخ الدخول", f=>f.setup.dateReceived||"—"],
+    ["عدد الكتاكيت", f=>fmt(f.chicksCount,0)],
+  ];
+
+  const metrics = [
+    ["وزن الجسم (جم)", "weightG", 0, "max"],
+    ["النافق التراكمي %", "mortCumPct", 2, "min"],
+    ["FCR تراكمي", "fcrCum", 3, "min"],
+    ["علف/طائر تراكمي (جم)", "feedPerBirdCum", 0, "min"],
+  ];
+
+  function metricTable(label, key, dec, better){
+    const rows = [];
+    for(let w=1; w<=maxWeeks; w++){
+      const vals = farms.map(f=>{
+        const wk = f.weeks.find(x=>x.week===w);
+        return wk ? num(wk[key]) : null;
+      });
+      const valid = vals.filter(v=>v!=null && v>0);
+      const bestVal = valid.length ? (better==="max"?Math.max(...valid):Math.min(...valid)) : null;
+      rows.push(`<tr><td class="xls-lbl">Week ${w}</td>${vals.map(v=>{
+        const isBest = v!=null && bestVal!=null && v===bestVal && valid.length>1;
+        return `<td class="xls-val" style="${isBest?'background:#bdeecb;color:#1a7f4b;font-weight:900':''}">${v!=null?fmtD(v,dec):"—"}</td>`;
+      }).join("")}</tr>`);
+    }
+    return `<div class="xls-title green" style="text-align:right;margin-top:16px">${label}</div>
+      <table class="xls-table tan"><tr><th style="background:#6F93A8">الأسبوع</th>${farms.map(f=>`<th>${esc(f.setup.farmName||f.label)}</th>`).join("")}</tr>${rows.join("")}</table>`;
+  }
+
+  return `<div class="card" id="repMultiFarmT">
+    <h2><span class="ic">🆚</span> مقارنة أسبوعية بين عدة مزارع</h2>
+    ${picker}
+    <div class="xls-title blue" style="text-align:right;margin-top:14px">بيانات تعريفية</div>
+    <table class="xls-table yellow">${idHeadRow}${idRows.map(([lbl,fn])=>`<tr><td class="xls-lbl">${lbl}</td>${farms.map(f=>`<td class="xls-val">${fn(f)}</td>`).join("")}</tr>`).join("")}</table>
+    ${metrics.map(([lbl,key,dec,better])=>metricTable(lbl,key,dec,better)).join("")}
+    <p class="sub" style="margin-top:10px">🟢 = الأفضل في الأسبوع ده بين المزارع المختارة.</p>
+    ${exportBar("repMultiFarmT","مقارنة المزارع الأسبوعية")}
   </div>`;
 }
 
@@ -4313,7 +4529,8 @@ function panelReports(){
     cost_detail:repCostDetail, breakeven:repBreakeven, sell_now:repSellNow, ro_cp:repROCP,
     house_status:repHouseStatus, sebla:repSebla, vaccine_report:repVaccineReport,
     attendance_report:repAttendance, audit_log:repAuditLog, curves:repCurves,
-    farm_board:repFarmBoard, prep_between:repPrepBetween, active_daily:repActiveDaily, partner_summary:repPartnerSummary
+    farm_board:repFarmBoard, prep_between:repPrepBetween, active_daily:repActiveDaily, partner_summary:repPartnerSummary,
+    farm_measure:repFarmMeasurement, multi_farm_compare:repMultiFarmCompare
   };
   const fn = map[repTab] || repCycleEnd;
   return `<div id="reportsPanelHost">${repToolbarHtml()}${tabsHtml}${fn()}</div>`;
@@ -4437,7 +4654,7 @@ function ensureDailyRange(){
   let added = false;
   dateRangeISO(start, end).forEach(dt=>{
     if(!existing.has(dt)){
-      state.daily.push({id:uid(), date:dt, feedKg:0, mortality:0, weightG:0, waterL:0, culls:0, tempC:0, notes:""});
+      state.daily.push({id:uid(), date:dt, feedKg:0, mortality:0, weightG:0, waterL:0, culls:0, tempC:0, humidity:0, notes:""});
       existing.add(dt);
       added = true;
     }
@@ -4558,6 +4775,7 @@ function dailyColumns(){
     }},
     {field:"culls", label:"استبعاد", type:"number"},
     {field:"tempC", label:"حرارة °C", type:"number"},
+    {field:"humidity", label:"رطوبة %", type:"number"},
     {field:"dayCost", label:"تكلفة اليوم", type:"readonly", format:r=>fmtMoney(num(r.feedKg)*c.avgFeedPrice + c.dailyOtherCost)},
     {field:"notes", label:"ملاحظات", type:"text"},
   ];
@@ -4568,7 +4786,7 @@ function dailyColumns(){
     core[3], byField._cumMort, byField._soldToday, byField._cumSold,
     byField.culls, byField.waterL, byField._wf,
     core[4], core[5], core[6], core[7], core[8],
-    byField.tempC, byField.dayCost, core[9], byField.notes
+    byField.tempC, byField.humidity, byField.dayCost, core[9], byField.notes
   ].filter(Boolean);
 }
 function dailyTotalsHTML(){
