@@ -190,6 +190,9 @@ input.ingname{text-align:right;font-size:13px;padding:4px 7px;border-color:trans
 input.ingname:hover{border-color:var(--line2);background:#fff}
 input.ingname:focus{border-color:var(--sky);background:#fff}
 .rowdel:hover{color:var(--clay)}
+.btn.mx-btn{font-weight:700;padding:10px 14px;font-size:13px;justify-content:center}
+.btn.mx-btn.on{background:var(--soy-l);border-color:var(--soy);color:var(--soy-d)}
+.btn.mx-btn.off{background:var(--corn-l);border-color:var(--corn);color:var(--corn-d)}
 .btn.sync.on{color:var(--soy-d);border-color:#B8D9B4;background:var(--soy-l)}
 .btn.sync.err{color:var(--clay-d);border-color:#E8B6AC;background:var(--clay-l)}
 
@@ -253,6 +256,7 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
     <button class="tab" role="tab" aria-selected="false" data-view="db">الخامات والأسعار</button>
     <button class="tab" role="tab" aria-selected="false" data-view="batch">أمر خلط المركز</button>
     <button class="tab" role="tab" aria-selected="false" data-view="compare">مقارنة</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="ross">مطابقة Ross</button>
     <button class="tab" role="tab" aria-selected="false" data-view="phos">محول الفوسفات</button>
     <button class="tab" role="tab" aria-selected="false" data-view="buy">الشراء</button>
     <button class="tab" role="tab" aria-selected="false" data-view="scen">السيناريوهات</button>
@@ -333,6 +337,8 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
       <div class="card">
         <div class="card-h"><h2>التحليل مقابل المستهدف</h2><span id="specCount" class="chip ok">—</span></div>
         <div class="card-b">
+          <button class="btn mx-btn" id="mxToggle" style="width:100%;margin-bottom:12px"></button>
+          <p class="note" id="mxHint" style="margin:-6px 0 12px"></p>
           <div class="row" style="margin-bottom:10px">
             <label class="fld" style="margin:0">الموسم:</label>
             <select id="season" style="width:auto;flex:1">
@@ -585,6 +591,56 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
   </div>
 </section>
 
+<!-- ============ ROSS ============ -->
+<section id="v-ross" class="hide">
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-h"><h2>مطابقة التركيبة مع دليل Ross</h2>
+      <button class="btn sm pri" id="btnRossPrint">طباعة / PDF</button>
+      <button class="btn sm" id="btnRossWa">واتساب</button>
+    </div>
+    <div class="card-b">
+      <p class="note" style="margin-top:0">المقارنة بتتعمل على أساس الأحماض الأمينية <b>المهضومة (SID)</b>
+        زى ما Ross بيحدد، مهما كان وضع العرض فى تبويب التركيبة.</p>
+      <div class="fgrid" style="margin-top:12px">
+        <div><label class="fld">دليل Ross</label><select id="rossSet"></select></div>
+        <div><label class="fld">مرحلة Ross</label><select id="rossPh"></select></div>
+      </div>
+      <button class="btn mx-btn" id="mxToggle2" style="width:100%;margin-top:12px"></button>
+      <p class="note" id="mxHint2" style="margin:8px 0 0"></p>
+      <p class="note" id="rossSrc" style="margin:10px 0 0"></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-h"><h2>الملخص</h2><span class="chip" id="rossScore">—</span></div>
+    <div class="card-b"><div id="rossSum"></div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-h"><h2>التركيبة مقابل Ross</h2></div>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th class="nm">البند</th><th>تركيبتك</th><th>Ross</th><th>الفرق</th><th>الحالة</th></tr></thead>
+      <tbody id="rossTbl"></tbody></table></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-h"><h2>نسب البروتين المتوازن</h2></div>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th class="nm">النسبة (من الليسين المهضوم)</th><th>تركيبتك</th><th>Ross</th><th>الحالة</th></tr></thead>
+      <tbody id="rossRatio"></tbody></table></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-h"><h2>ملاحظات للمصنع</h2><span class="chip" id="rossNoteCount">—</span></div>
+    <div class="card-b"><div id="rossNotes"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><h2>مرجع تشغيلى من دليل Ross</h2></div>
+    <div class="card-b"><div id="rossGuide"></div></div>
+  </div>
+</section>
+
 <!-- ============ BUY ============ -->
 <section id="v-buy" class="hide">
   <div class="card" style="margin-bottom:14px">
@@ -691,8 +747,8 @@ input.ingname:focus{border-color:var(--sky);background:#fff}
 <div id="printArea"></div>
 <div class="toast" id="toast"></div>
 <script>
-const SEED_DB=[{"name": "ذرة صفراء", "CP": 0.085, "ME": 3350, "Fat": 0.038, "Fiber": 0.022, "Ca": 0.0002, "AvP": 0.0008, "Lys": 0.0025, "Met": 0.0018, "Thr": 0.0029, "price": 13, "note": "ذرة صفراء 8.5% بروتين — قيم جداول قياسية", "Na": 0.0002, "K": 0.0033, "Cl": 0.0005, "Cys": 0.0019, "dLys": 0.78, "dMet": 0.87, "dCys": 0.82, "dThr": 0.8}, {"name": "كسب فول الصويا (46%)", "CP": 0.46, "ME": 2230, "Fat": 0.015, "Fiber": 0.06, "Ca": 0.0029, "AvP": 0.002, "Lys": 0.0282, "Met": 0.0065, "Thr": 0.0175, "price": 27, "note": "كسب صويا 46% — قيم جداول قياسية", "Na": 0.0002, "K": 0.02, "Cl": 0.0005, "Cys": 0.0066, "dLys": 0.89, "dMet": 0.91, "dCys": 0.84, "dThr": 0.86}, {"name": "كسب فول الصويا (تكميلى للمركز)", "CP": 0.46, "ME": 2230, "Fat": 0.015, "Fiber": 0.06, "Ca": 0.0029, "AvP": 0.002, "Lys": 0.0282, "Met": 0.0065, "Thr": 0.0175, "price": 27, "note": "نفس كسب الصويا 46%", "Na": 0.0002, "K": 0.02, "Cl": 0.0005, "Cys": 0.0066, "dLys": 0.89, "dMet": 0.91, "dCys": 0.84, "dThr": 0.86}, {"name": "زيت فول الصويا", "CP": 0, "ME": 8800, "Fat": 0.999, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 48, "note": "زيت صويا — ME 8800 kcal/kg", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "الحجر الجيرى الناعم (0-2 مم)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0.38, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "كالسيوم 38%", "Na": 0.0006, "K": 0.0003, "Cl": 0.0002, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مونو كالسيوم فوسفات (MCP)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0.17, "AvP": 0.21, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "AvP 21% + Ca 17%", "Na": 0.0002, "K": 0.0001, "Cl": 0.0001, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ملح الطعام", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "كلوريد صوديوم — Na 39.3% / Cl 60.7% (يدخل حساب DEB)", "Na": 0.393, "K": 0, "Cl": 0.607, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "دل- ميثيونين", "CP": 0.581, "ME": 5020, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0.99, "Thr": 0, "price": 0, "note": "CP من النيتروجين × 6.25", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 1.0, "dCys": 0, "dThr": 0}, {"name": "ل- ليسين هيدروكلوريد", "CP": 0.959, "ME": 4100, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0.78, "Met": 0, "Thr": 0, "price": 0, "note": "يحتوى Cl 19.4% — بيخفّض DEB. CP من النيتروجين × 6.25", "Na": 0, "K": 0, "Cl": 0.194, "Cys": 0, "dLys": 1.0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ل- ثريونين", "CP": 0.72, "ME": 3900, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0.98, "price": 0, "note": "CP من النيتروجين × 6.25", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 1.0}, {"name": "بيكربونات الصوديوم", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "Na 27.4% — بترفع DEB من غير كلوريد", "Na": 0.274, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "كولين كلوريد (60%)", "CP": 0.0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "يحتوى Cl 15.2% — بيخفّض DEB", "Na": 0, "K": 0, "Cl": 0.152, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "فيتامينات تسمين", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "املاح تسمين", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سموم كيميائى", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سموم بيولوجى (تي بيو)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سالمونيلا (ديسال)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد كولستريديا (بيوترال مكس)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ابراماكس", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم فايتيز 10000", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم بروتياز", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم طاقة", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ليبييز 50000", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ليجنوبوند", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "كيموتكس بلص", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مستحلب دهنى (برجابيور)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "برولاكت", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "هادي", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مولنجانيك", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "بريمكس تسمين", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "بريمكس فيتامينات + معادن مجمّع — محتاج سعرك الفعلى من الفاتورة", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "فورمات الصوديوم", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "Na ≈ 33% — بيرفع DEB من غير كلوريد + تأثير مثبط للسالمونيلا", "Na": 0.33, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "بيتاين طبيعى", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "مانح مجاميع ميثيل — بيوفّر جزء من الكولين/الميثيونين ومنظم أسموزى فى الحر", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد كوكسيديا (ايونوفور - ماديوراميسين 1%)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "ايونوفور — راعى فترة السحب قبل الذبح", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سالمونيلا (احماض عضوية محمية)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "أحماض عضوية محمية — محتاج سعرك الفعلى من الفاتورة", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}];
-const SEED_FORMULAS={"starter": {"ar": "بادى تسمين سوبر 23%", "en": "Starter", "age": "1-10 / 1-14 يوم", "raw": [{"name": "ذرة صفراء", "qty": 554, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 391, "note": ""}, {"name": "زيت فول الصويا", "qty": 5, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 13.75, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 9.5, "note": "مصدر Ca + P"}, {"name": "ملح الطعام", "qty": 3, "note": ""}, {"name": "دل- ميثيونين", "qty": 3, "note": "حمض أميني أساسي"}, {"name": "فيتامينات تسمين", "qty": 1, "note": "فيتامينات + معادن"}, {"name": "املاح تسمين", "qty": 1.5, "note": ""}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2, "note": "حمض أميني أساسي"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": ""}, {"name": "ل- ثريونين", "qty": 1, "note": "حمض أميني محدد"}, {"name": "مضاد سموم كيميائى", "qty": 1, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 0.75, "note": ""}, {"name": "كيموتكس بلص", "qty": 0.5, "note": ""}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0, "note": ""}, {"name": "مضاد سالمونيلا (ديسال)", "qty": 0.5, "note": ""}, {"name": "برولاكت", "qty": 0.5, "note": ""}, {"name": "مضاد كولستريديا (بيوترال مكس)", "qty": 0.3, "note": ""}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": "وقاية"}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "إنزيم فوسفور"}, {"name": "انزيم بروتياز", "qty": 0.2, "note": "إنزيم بروتين"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.2, "note": ""}, {"name": "انزيم طاقة", "qty": 0.1, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "ليجنوبوند", "qty": 0, "note": ""}, {"name": "هادي", "qty": 0, "note": ""}, {"name": "مولنجانيك", "qty": 0.2, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 9, "note": "تكميل لـ 50 كجم مركز"}]}, "grower": {"ar": "نامى تسمين سوبر 21%", "en": "Grower", "age": "15-25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 652, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 290, "note": ""}, {"name": "زيت فول الصويا", "qty": 8, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 12.2, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 8, "note": "مصدر Ca + P"}, {"name": "ملح الطعام", "qty": 3, "note": ""}, {"name": "فيتامينات تسمين", "qty": 1, "note": ""}, {"name": "املاح تسمين", "qty": 1.5, "note": "فيتامينات + معادن"}, {"name": "دل- ميثيونين", "qty": 2.75, "note": "حمض أميني أساسي"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2, "note": "حمض أميني أساسي"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": ""}, {"name": "ل- ثريونين", "qty": 1, "note": "حمض أميني محدد"}, {"name": "مضاد سموم كيميائى", "qty": 0.75, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 0.5, "note": ""}, {"name": "كيموتكس بلص", "qty": 0.5, "note": "وقاية"}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0, "note": ""}, {"name": "مضاد سالمونيلا (ديسال)", "qty": 0, "note": ""}, {"name": "برولاكت", "qty": 0.5, "note": ""}, {"name": "مضاد كولستريديا (بيوترال مكس)", "qty": 0.25, "note": ""}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": ""}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "إنزيم فوسفور"}, {"name": "انزيم بروتياز", "qty": 0.2, "note": "إنزيم بروتين"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.2, "note": ""}, {"name": "انزيم طاقة", "qty": 0.15, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "ليجنوبوند", "qty": 2.5, "note": ""}, {"name": "ابراماكس", "qty": 1, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 10, "note": "تكميل لـ 50 كجم مركز"}]}, "grower_med": {"ar": "نامى سوبر علاجى 21% — مفتت (1.7-1.9 مم)", "en": "Grower (medicated)", "age": "15-25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 657.5, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 288.5, "note": "إجمالى الصويا 300 كجم/طن مع التكميلى"}, {"name": "زيت فول الصويا", "qty": 4, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 11.6, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 8, "note": "مصدر Ca + P"}, {"name": "بريمكس تسمين", "qty": 3, "note": "فيتامينات + معادن"}, {"name": "ملح الطعام", "qty": 2.5, "note": ""}, {"name": "دل- ميثيونين", "qty": 2.75, "note": "حمض أمينى أساسى"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2, "note": "حمض أمينى أساسى"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": "رفع DEB"}, {"name": "فورمات الصوديوم", "qty": 1, "note": "Na + تثبيط سالمونيلا"}, {"name": "ل- ثريونين", "qty": 1, "note": "حمض أمينى محدد"}, {"name": "مضاد سموم كيميائى", "qty": 1, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 1, "note": ""}, {"name": "بيتاين طبيعى", "qty": 1, "note": "مانح ميثيل + إجهاد حرارى"}, {"name": "مضاد كوكسيديا (ايونوفور - ماديوراميسين 1%)", "qty": 0.5, "note": "ايونوفور — راعى فترة السحب"}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "انزيم بروتياز", "qty": 0.3, "note": "إنزيم بروتين"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0.25, "note": ""}, {"name": "مضاد سالمونيلا (احماض عضوية محمية)", "qty": 0.25, "note": ""}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "إنزيم فوسفور"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.2, "note": ""}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": "كيميائى — برنامج مشترك"}, {"name": "انزيم طاقة", "qty": 0.15, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 11.5, "note": "تكميل لـ 50 كجم مركز"}]}, "finisher": {"ar": "ناهى تسمين سوبر 19%", "en": "Finisher", "age": "+25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 704, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 238, "note": ""}, {"name": "زيت فول الصويا", "qty": 8, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 12.05, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 7, "note": "مصدر Ca + P"}, {"name": "ملح الطعام", "qty": 3, "note": ""}, {"name": "فيتامينات تسمين", "qty": 1, "note": "فيتامينات + معادن"}, {"name": "املاح تسمين", "qty": 1.5, "note": ""}, {"name": "دل- ميثيونين", "qty": 2.5, "note": "حمض أميني أساسي"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2.25, "note": "حمض أميني أساسي"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": ""}, {"name": "ل- ثريونين", "qty": 0.75, "note": ""}, {"name": "مضاد سموم كيميائى", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 0.5, "note": "حمض أميني محدد"}, {"name": "كيموتكس بلص", "qty": 0.25, "note": ""}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0, "note": ""}, {"name": "مضاد سالمونيلا (ديسال)", "qty": 0, "note": ""}, {"name": "برولاكت", "qty": 0.5, "note": ""}, {"name": "مضاد كولستريديا (بيوترال مكس)", "qty": 0.25, "note": "إنزيم بروتين"}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": "وقاية"}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "انزيم فسفور "}, {"name": "انزيم بروتياز", "qty": 0.2, "note": ""}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.1, "note": ""}, {"name": "انزيم طاقة", "qty": 0.15, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "ليجنوبوند", "qty": 2.5, "note": ""}, {"name": "ابراماكس", "qty": 1, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 12, "note": "تكميل لـ 50 كجم مركز"}]}};
+const SEED_DB=[{"name": "ذرة صفراء", "CP": 0.085, "ME": 3350, "Fat": 0.038, "Fiber": 0.022, "Ca": 0.0002, "AvP": 0.0008, "Lys": 0.0025, "Met": 0.0018, "Thr": 0.0029, "price": 13, "note": "ذرة صفراء 8.5% بروتين — قيم جداول قياسية", "Na": 0.0002, "K": 0.0033, "Cl": 0.0005, "Cys": 0.0019, "dLys": 0.78, "dMet": 0.87, "dCys": 0.82, "dThr": 0.8}, {"name": "كسب فول الصويا (46%)", "CP": 0.46, "ME": 2230, "Fat": 0.015, "Fiber": 0.06, "Ca": 0.0029, "AvP": 0.002, "Lys": 0.0282, "Met": 0.0065, "Thr": 0.0175, "price": 27, "note": "كسب صويا 46% — قيم جداول قياسية", "Na": 0.0002, "K": 0.02, "Cl": 0.0005, "Cys": 0.0066, "dLys": 0.89, "dMet": 0.91, "dCys": 0.84, "dThr": 0.86}, {"name": "كسب فول الصويا (تكميلى للمركز)", "CP": 0.46, "ME": 2230, "Fat": 0.015, "Fiber": 0.06, "Ca": 0.0029, "AvP": 0.002, "Lys": 0.0282, "Met": 0.0065, "Thr": 0.0175, "price": 27, "note": "نفس كسب الصويا 46%", "Na": 0.0002, "K": 0.02, "Cl": 0.0005, "Cys": 0.0066, "dLys": 0.89, "dMet": 0.91, "dCys": 0.84, "dThr": 0.86}, {"name": "زيت فول الصويا", "CP": 0, "ME": 8800, "Fat": 0.999, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 48, "note": "زيت صويا — ME 8800 kcal/kg", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "الحجر الجيرى الناعم (0-2 مم)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0.38, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "كالسيوم 38%", "Na": 0.0006, "K": 0.0003, "Cl": 0.0002, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مونو كالسيوم فوسفات (MCP)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0.17, "AvP": 0.21, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "AvP 21% + Ca 17%", "Na": 0.0002, "K": 0.0001, "Cl": 0.0001, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ملح الطعام", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "كلوريد صوديوم — Na 39.3% / Cl 60.7% (يدخل حساب DEB)", "Na": 0.393, "K": 0, "Cl": 0.607, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "دل- ميثيونين", "CP": 0.581, "ME": 5020, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0.99, "Thr": 0, "price": 0, "note": "CP من النيتروجين × 6.25", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 1.0, "dCys": 0, "dThr": 0}, {"name": "ل- ليسين هيدروكلوريد", "CP": 0.959, "ME": 4100, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0.78, "Met": 0, "Thr": 0, "price": 0, "note": "يحتوى Cl 19.4% — بيخفّض DEB. CP من النيتروجين × 6.25", "Na": 0, "K": 0, "Cl": 0.194, "Cys": 0, "dLys": 1.0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ل- ثريونين", "CP": 0.72, "ME": 3900, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0.98, "price": 0, "note": "CP من النيتروجين × 6.25", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 1.0}, {"name": "بيكربونات الصوديوم", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "Na 27.4% — بترفع DEB من غير كلوريد", "Na": 0.274, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "كولين كلوريد (60%)", "CP": 0.0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "يحتوى Cl 15.2% — بيخفّض DEB", "Na": 0, "K": 0, "Cl": 0.152, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "فيتامينات تسمين", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "املاح تسمين", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سموم كيميائى", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سموم بيولوجى (تي بيو)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سالمونيلا (ديسال)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد كولستريديا (بيوترال مكس)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ابراماكس", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم فايتيز 10000", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم بروتياز", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "انزيم طاقة", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ليبييز 50000", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "ليجنوبوند", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "كيموتكس بلص", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مستحلب دهنى (برجابيور)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "برولاكت", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "هادي", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مولنجانيك", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "محتاج سعرك الفعلى من فاتورة الشراء / المورد", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "بريمكس تسمين", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "بريمكس فيتامينات + معادن مجمّع — محتاج سعرك الفعلى من الفاتورة", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "فورمات الصوديوم", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "Na ≈ 33% — بيرفع DEB من غير كلوريد + تأثير مثبط للسالمونيلا", "Na": 0.33, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "بيتاين طبيعى", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "مانح مجاميع ميثيل — بيوفّر جزء من الكولين/الميثيونين ومنظم أسموزى فى الحر", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد كوكسيديا (ايونوفور - ماديوراميسين 1%)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "ايونوفور — راعى فترة السحب قبل الذبح", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "مضاد سالمونيلا (احماض عضوية محمية)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "أحماض عضوية محمية — محتاج سعرك الفعلى من الفاتورة", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "داى كالسيوم فوسفات (DCP)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0.22, "AvP": 0.165, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "AvP 16.5% + Ca 22% — إتاحة أقل من MCP (85-90%)", "Na": 0.0002, "K": 0.0001, "Cl": 0.0001, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}, {"name": "بيل جيل بودر (لاصق حبيبات)", "CP": 0, "ME": 0, "Fat": 0, "Fiber": 0, "Ca": 0, "AvP": 0, "Lys": 0, "Met": 0, "Thr": 0, "price": 0, "note": "لاصق حبيبات للتحبيب — محتاج سعرك الفعلى من الفاتورة", "Na": 0, "K": 0, "Cl": 0, "Cys": 0, "dLys": 0, "dMet": 0, "dCys": 0, "dThr": 0}];
+const SEED_FORMULAS={"starter": {"ar": "بادى تسمين سوبر 23%", "en": "Starter", "age": "1-10 / 1-14 يوم", "raw": [{"name": "ذرة صفراء", "qty": 554, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 391, "note": ""}, {"name": "زيت فول الصويا", "qty": 5, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 13.75, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 9.5, "note": "مصدر Ca + P"}, {"name": "ملح الطعام", "qty": 3, "note": ""}, {"name": "دل- ميثيونين", "qty": 3, "note": "حمض أميني أساسي"}, {"name": "فيتامينات تسمين", "qty": 1, "note": "فيتامينات + معادن"}, {"name": "املاح تسمين", "qty": 1.5, "note": ""}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2, "note": "حمض أميني أساسي"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": ""}, {"name": "ل- ثريونين", "qty": 1, "note": "حمض أميني محدد"}, {"name": "مضاد سموم كيميائى", "qty": 1, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 0.75, "note": ""}, {"name": "كيموتكس بلص", "qty": 0.5, "note": ""}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0, "note": ""}, {"name": "مضاد سالمونيلا (ديسال)", "qty": 0.5, "note": ""}, {"name": "برولاكت", "qty": 0.5, "note": ""}, {"name": "مضاد كولستريديا (بيوترال مكس)", "qty": 0.3, "note": ""}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": "وقاية"}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "إنزيم فوسفور"}, {"name": "انزيم بروتياز", "qty": 0.2, "note": "إنزيم بروتين"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.2, "note": ""}, {"name": "انزيم طاقة", "qty": 0.1, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "ليجنوبوند", "qty": 0, "note": ""}, {"name": "هادي", "qty": 0, "note": ""}, {"name": "مولنجانيك", "qty": 0.2, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 9, "note": "تكميل لـ 50 كجم مركز"}]}, "hashem_starter": {"ar": "بادى د/ مسعد هاشم 22.8%", "en": "Starter (Hashem)", "age": "1-10 / 1-14 يوم", "raw": [{"name": "ذرة صفراء", "qty": 558.607, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 386.393, "note": "إجمالى الصويا 402.099 كجم/طن مع التكميلى"}, {"name": "زيت فول الصويا", "qty": 5.0, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 9.626, "note": ""}, {"name": "داى كالسيوم فوسفات (DCP)", "qty": 11.539, "note": "مصدر Ca + P"}, {"name": "بريمكس تسمين", "qty": 3.0, "note": "فيتامينات + معادن"}, {"name": "دل- ميثيونين", "qty": 3.101, "note": "حمض أمينى أساسى"}, {"name": "ملح الطعام", "qty": 2.095, "note": ""}, {"name": "بيكربونات الصوديوم", "qty": 1.188, "note": "رفع DEB"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 1.073, "note": "حمض أمينى أساسى"}, {"name": "كولين كلوريد (60%)", "qty": 1.0, "note": ""}, {"name": "ل- ثريونين", "qty": 0.472, "note": "حمض أمينى محدد"}, {"name": "بيل جيل بودر (لاصق حبيبات)", "qty": 0.35, "note": "لاصق حبيبات"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.3, "note": "Hemicell"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0.25, "note": "Emulsifier"}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "Phytase-G3"}, {"name": "انزيم طاقة", "qty": 0.1, "note": "Energy Enzyme"}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 15.706, "note": "تكميل لـ 50 كجم مركز"}]}, "grower": {"ar": "نامى تسمين سوبر 21%", "en": "Grower", "age": "15-25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 652, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 290, "note": ""}, {"name": "زيت فول الصويا", "qty": 8, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 12.2, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 8, "note": "مصدر Ca + P"}, {"name": "ملح الطعام", "qty": 3, "note": ""}, {"name": "فيتامينات تسمين", "qty": 1, "note": ""}, {"name": "املاح تسمين", "qty": 1.5, "note": "فيتامينات + معادن"}, {"name": "دل- ميثيونين", "qty": 2.75, "note": "حمض أميني أساسي"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2, "note": "حمض أميني أساسي"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": ""}, {"name": "ل- ثريونين", "qty": 1, "note": "حمض أميني محدد"}, {"name": "مضاد سموم كيميائى", "qty": 0.75, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 0.5, "note": ""}, {"name": "كيموتكس بلص", "qty": 0.5, "note": "وقاية"}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0, "note": ""}, {"name": "مضاد سالمونيلا (ديسال)", "qty": 0, "note": ""}, {"name": "برولاكت", "qty": 0.5, "note": ""}, {"name": "مضاد كولستريديا (بيوترال مكس)", "qty": 0.25, "note": ""}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": ""}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "إنزيم فوسفور"}, {"name": "انزيم بروتياز", "qty": 0.2, "note": "إنزيم بروتين"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.2, "note": ""}, {"name": "انزيم طاقة", "qty": 0.15, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "ليجنوبوند", "qty": 2.5, "note": ""}, {"name": "ابراماكس", "qty": 1, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 10, "note": "تكميل لـ 50 كجم مركز"}]}, "grower_med": {"ar": "نامى سوبر علاجى 21% — مفتت (1.7-1.9 مم)", "en": "Grower (medicated)", "age": "15-25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 657.5, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 288.5, "note": "إجمالى الصويا 300 كجم/طن مع التكميلى"}, {"name": "زيت فول الصويا", "qty": 4, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 11.6, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 8, "note": "مصدر Ca + P"}, {"name": "بريمكس تسمين", "qty": 3, "note": "فيتامينات + معادن"}, {"name": "ملح الطعام", "qty": 2.5, "note": ""}, {"name": "دل- ميثيونين", "qty": 2.75, "note": "حمض أمينى أساسى"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2, "note": "حمض أمينى أساسى"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": "رفع DEB"}, {"name": "فورمات الصوديوم", "qty": 1, "note": "Na + تثبيط سالمونيلا"}, {"name": "ل- ثريونين", "qty": 1, "note": "حمض أمينى محدد"}, {"name": "مضاد سموم كيميائى", "qty": 1, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 1, "note": ""}, {"name": "بيتاين طبيعى", "qty": 1, "note": "مانح ميثيل + إجهاد حرارى"}, {"name": "مضاد كوكسيديا (ايونوفور - ماديوراميسين 1%)", "qty": 0.5, "note": "ايونوفور — راعى فترة السحب"}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "انزيم بروتياز", "qty": 0.3, "note": "إنزيم بروتين"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0.25, "note": ""}, {"name": "مضاد سالمونيلا (احماض عضوية محمية)", "qty": 0.25, "note": ""}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "إنزيم فوسفور"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.2, "note": ""}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": "كيميائى — برنامج مشترك"}, {"name": "انزيم طاقة", "qty": 0.15, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 11.5, "note": "تكميل لـ 50 كجم مركز"}]}, "hashem_grower": {"ar": "نامى د/ مسعد هاشم 21%", "en": "Grower (Hashem)", "age": "15-25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 610.577, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 332.858, "note": "إجمالى الصويا 356.911 كجم/طن مع التكميلى"}, {"name": "زيت فول الصويا", "qty": 6.565, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 6.731, "note": ""}, {"name": "داى كالسيوم فوسفات (DCP)", "qty": 7.991, "note": "مصدر Ca + P"}, {"name": "بريمكس تسمين", "qty": 3.0, "note": "فيتامينات + معادن"}, {"name": "دل- ميثيونين", "qty": 2.298, "note": "حمض أمينى أساسى"}, {"name": "ملح الطعام", "qty": 2.278, "note": ""}, {"name": "بيكربونات الصوديوم", "qty": 0.934, "note": "رفع DEB"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 0.493, "note": "حمض أمينى أساسى"}, {"name": "كولين كلوريد (60%)", "qty": 1.0, "note": ""}, {"name": "ل- ثريونين", "qty": 0.022, "note": "حمض أمينى محدد"}, {"name": "بيل جيل بودر (لاصق حبيبات)", "qty": 0.35, "note": "لاصق حبيبات"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.3, "note": "Hemicell"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0.25, "note": "Emulsifier"}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "Phytase-G3"}, {"name": "انزيم طاقة", "qty": 0.1, "note": "Energy Enzyme"}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 24.053, "note": "تكميل لـ 50 كجم مركز"}]}, "finisher": {"ar": "ناهى تسمين سوبر 19%", "en": "Finisher", "age": "+25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 704, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 238, "note": ""}, {"name": "زيت فول الصويا", "qty": 8, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 12.05, "note": ""}, {"name": "مونو كالسيوم فوسفات (MCP)", "qty": 7, "note": "مصدر Ca + P"}, {"name": "ملح الطعام", "qty": 3, "note": ""}, {"name": "فيتامينات تسمين", "qty": 1, "note": "فيتامينات + معادن"}, {"name": "املاح تسمين", "qty": 1.5, "note": ""}, {"name": "دل- ميثيونين", "qty": 2.5, "note": "حمض أميني أساسي"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 2.25, "note": "حمض أميني أساسي"}, {"name": "بيكربونات الصوديوم", "qty": 1, "note": ""}, {"name": "ل- ثريونين", "qty": 0.75, "note": ""}, {"name": "مضاد سموم كيميائى", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "كولين كلوريد (60%)", "qty": 0.5, "note": "حمض أميني محدد"}, {"name": "كيموتكس بلص", "qty": 0.25, "note": ""}, {"name": "مضاد سموم بيولوجى (تي بيو)", "qty": 0.5, "note": "مضاد سموم فطرية"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0, "note": ""}, {"name": "مضاد سالمونيلا (ديسال)", "qty": 0, "note": ""}, {"name": "برولاكت", "qty": 0.5, "note": ""}, {"name": "مضاد كولستريديا (بيوترال مكس)", "qty": 0.25, "note": "إنزيم بروتين"}, {"name": "مضاد كوكسيديا (ديكلا 0.50%)", "qty": 0.2, "note": "وقاية"}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "انزيم فسفور "}, {"name": "انزيم بروتياز", "qty": 0.2, "note": ""}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.1, "note": ""}, {"name": "انزيم طاقة", "qty": 0.15, "note": ""}, {"name": "ليبييز 50000", "qty": 0.1, "note": ""}, {"name": "ليجنوبوند", "qty": 2.5, "note": ""}, {"name": "ابراماكس", "qty": 1, "note": ""}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 12, "note": "تكميل لـ 50 كجم مركز"}]}, "hashem_finisher": {"ar": "ناهى د/ مسعد هاشم 19%", "en": "Finisher (Hashem)", "age": "+25 يوم", "raw": [{"name": "ذرة صفراء", "qty": 664.006, "note": ""}, {"name": "كسب فول الصويا (46%)", "qty": 277.595, "note": "إجمالى الصويا 303.914 كجم/طن مع التكميلى"}, {"name": "زيت فول الصويا", "qty": 8.399, "note": ""}], "conc": [{"name": "الحجر الجيرى الناعم (0-2 مم)", "qty": 7.31, "note": ""}, {"name": "داى كالسيوم فوسفات (DCP)", "qty": 5.106, "note": "مصدر Ca + P"}, {"name": "بريمكس تسمين", "qty": 3.0, "note": "فيتامينات + معادن"}, {"name": "دل- ميثيونين", "qty": 1.961, "note": "حمض أمينى أساسى"}, {"name": "ملح الطعام", "qty": 2.179, "note": ""}, {"name": "بيكربونات الصوديوم", "qty": 1.087, "note": "رفع DEB"}, {"name": "ل- ليسين هيدروكلوريد", "qty": 0.807, "note": "حمض أمينى أساسى"}, {"name": "كولين كلوريد (60%)", "qty": 1.0, "note": ""}, {"name": "ل- ثريونين", "qty": 0.031, "note": "حمض أمينى محدد"}, {"name": "بيل جيل بودر (لاصق حبيبات)", "qty": 0.35, "note": "لاصق حبيبات"}, {"name": "انزيم طاقة للصويا (بيتامنانييز) 50000", "qty": 0.3, "note": "Hemicell"}, {"name": "مستحلب دهنى (برجابيور)", "qty": 0.25, "note": "Emulsifier"}, {"name": "انزيم فايتيز 10000", "qty": 0.2, "note": "Phytase-G3"}, {"name": "انزيم طاقة", "qty": 0.1, "note": "Energy Enzyme"}, {"name": "كسب فول الصويا (تكميلى للمركز)", "qty": 26.319, "note": "تكميل لـ 50 كجم مركز"}]}};
 
 /* ================= معايير المراحل =================
    مستويات استرشادية للسلالات التجارية سريعة النمو (Ross 308 / Cobb 500).
@@ -749,33 +805,59 @@ const PHOS_REF = [
   {n:'روك فوسفات',                avp:.04,  ca:.32, bio:'30-40% (ضعيف)'}
 ];
 const LIMESTONE_CA = .38;
+/* رصيد الإنزيمات: القيم دى لكل «الجرعة المرجعية»، والرصيد الفعلى بيتناسب مع
+   الجرعة الموجودة فى التركيبة (نصف الجرعة = نصف الرصيد، بحد أقصى ضعف الجرعة).
+   رصيد البروتياز بينزل على الأحماض الأمينية المهضومة مش على البروتين الخام. */
 const MATRIX_DEF = {
-  phytase  :{label:'فايتيز',          ing:'انزيم فايتيز 10000',                    ME:45,AvP:.0013,Ca:.0011,on:true},
-  protease :{label:'بروتياز',         ing:'انزيم بروتياز',                         ME:25,CP:.0060,on:true},
-  mannanase:{label:'بيتامنانييز',     ing:'انزيم طاقة للصويا (بيتامنانييز) 50000', ME:50,on:true},
-  xylanase :{label:'انزيم طاقة (NSP)',ing:'انزيم طاقة',                            ME:55,on:true}
+  phytase  :{label:'فايتيز',          ing:'انزيم فايتيز 10000',                    dose:0.20,ME:45,AvP:.0013,Ca:.0011,on:true},
+  protease :{label:'بروتياز',         ing:'انزيم بروتياز',                         dose:0.20,ME:25,dLys:.00045,dMet:.00020,dThr:.00040,on:true},
+  mannanase:{label:'بيتامنانييز',     ing:'انزيم طاقة للصويا (بيتامنانييز) 50000', dose:0.20,ME:50,on:true},
+  xylanase :{label:'انزيم طاقة (NSP)',ing:'انزيم طاقة',                            dose:0.10,ME:55,on:true}
 };
+const MX_CAP=2;   /* أقصى تناسب: ضعف الجرعة المرجعية */
+const MX_FIELDS=[
+  {k:'ME',  ar:'طاقة',            u:'kcal/kg', pct:0},
+  {k:'AvP', ar:'فوسفور متاح',     u:'%',       pct:1},
+  {k:'Ca',  ar:'كالسيوم',         u:'%',       pct:1},
+  {k:'dLys',ar:'ليسين مهضوم',     u:'%',       pct:1},
+  {k:'dMet',ar:'ميثيونين مهضوم',  u:'%',       pct:1},
+  {k:'dThr',ar:'ثريونين مهضوم',   u:'%',       pct:1}
+];
+/* الجرعة الموجودة فعلياً من إنزيم فى تركيبة */
+function mxQty(id,m){
+  const r=rows(id).find(x=>x.name===m.ing);
+  return r?(+r.qty||0):0;
+}
+/* معامل التناسب مع الجرعة */
+function mxFactor(m,q){
+  const d=+m.dose>0?+m.dose:0;
+  if(!(q>0)) return 0;
+  if(!d) return 1;                    /* مفيش جرعة مرجعية → الرصيد كامل */
+  return Math.min(MX_CAP,q/d);
+}
 const TARGET_META = {starter:{ar:'بادى',full:'البادى'},grower:{ar:'نامى',full:'النامى'},finisher:{ar:'ناهى',full:'الناهى'}};
 
 const TON=1000, CONC_PERTON=50, CONC_BATCH=500;
 const CONC_FILLER='كسب فول الصويا (تكميلى للمركز)';
 const LSKEY='mathana.v2';
-const APP_VER='1.5';
-const APP_BUILD='2026-09-16';
+const APP_VER='1.8';
+const APP_BUILD='2026-09-19';
 
 /* ================= الحالة ================= */
 let S={cur:'starter',season:'normal',view:'ton',sid:false,mixerKg:500,mixStep:0.05,
   db:JSON.parse(JSON.stringify(SEED_DB)),fx:{},order:[],
-  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,sPrice:0,pickMode:'all',pick:[],prog:{starter:0.55,grower:1.35,finisher:2.10},updatedAt:0};
+  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,sPrice:0,pickMode:'all',pick:[],prog:{starter:0.55,grower:1.35,finisher:2.10},rossSet:'std_2035',rossPh:{},updatedAt:0};
 
 /* التركيبات الجاهزة اللى ID بتاعها مش هو نفسه المرحلة */
-const SEED_TARGET={grower_med:'grower'};
+const SEED_TARGET={grower_med:'grower',hashem_starter:'starter',hashem_grower:'grower',hashem_finisher:'finisher'};
+/* مؤلف التركيبة الجاهزة لو مش أ.د/ محمد السيد بدوي */
+const SEED_AUTHOR={hashem_starter:'د/ مسعد هاشم',hashem_grower:'د/ مسعد هاشم',hashem_finisher:'د/ مسعد هاشم'};
 function buildSeedFormulas(){
   const fx={},order=[];
   Object.keys(SEED_FORMULAS).forEach(k=>{
     const f=SEED_FORMULAS[k];
     fx[k]={id:k,ar:f.ar,age:f.age,target:SEED_TARGET[k]||k,builtin:true,
-      author:'أ.د/ محمد السيد بدوي',date:'',code:'',
+      author:SEED_AUTHOR[k]||'أ.د/ محمد السيد بدوي',date:'',code:'',
       rawFiller:'',concFiller:CONC_FILLER,autoRaw:true,autoConc:true,cpAuto:true,cpTarget:0,
       raw:JSON.parse(JSON.stringify(f.raw)),conc:JSON.parse(JSON.stringify(f.conc))};
     order.push(k);
@@ -788,7 +870,8 @@ function persistOnly(){
     localStorage.setItem(LSKEY,JSON.stringify({cur:S.cur,season:S.season,view:S.view,
       sid:S.sid,mixerKg:S.mixerKg,mixStep:S.mixStep,prog:S.prog,pickMode:S.pickMode,pick:S.pick,
       db:S.db,fx:S.fx,order:S.order,matrix:S.matrix,mxOn:S.mxOn,scen:S.scen,
-      tons:S.tons,bScope:S.bScope,bPrice:S.bPrice,sPrice:S.sPrice,updatedAt:S.updatedAt||0}));
+      tons:S.tons,bScope:S.bScope,bPrice:S.bPrice,sPrice:S.sPrice,
+      rossSet:S.rossSet,rossPh:S.rossPh,updatedAt:S.updatedAt||0}));
   }catch(e){}
 }
 function save(){
@@ -831,6 +914,8 @@ function load(){
   S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10;
   S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.sPrice=o.sPrice?1:0;
   S.pickMode=o.pickMode||'all'; S.pick=Array.isArray(o.pick)?o.pick:[]; S.updatedAt=o.updatedAt||0;
+  S.rossSet=(o.rossSet&&ROSS_SETS[o.rossSet])?o.rossSet:'std_2035';
+  S.rossPh=(o.rossPh&&typeof o.rossPh==='object')?o.rossPh:{};
   sortOrder();
   if(runMigrations()) persistOnly();
 }
@@ -869,7 +954,8 @@ function mergeIngredient(from,to){
 const MERGES=[['ذرة صفراء مجروشة','ذرة صفراء']];
 /* خامات اتضافت فى إصدار أحدث — بتتزرع فى قاعدة بيانات قديمة لو ناقصة */
 const ADD_INGS=['بريمكس تسمين','فورمات الصوديوم','بيتاين طبيعى',
-  'مضاد كوكسيديا (ايونوفور - ماديوراميسين 1%)','مضاد سالمونيلا (احماض عضوية محمية)'];
+  'مضاد كوكسيديا (ايونوفور - ماديوراميسين 1%)','مضاد سالمونيلا (احماض عضوية محمية)',
+  'داى كالسيوم فوسفات (DCP)','بيل جيل بودر (لاصق حبيبات)'];
 function seedMissingIngredients(){
   let ch=false;
   ADD_INGS.forEach(nm=>{
@@ -879,10 +965,27 @@ function seedMissingIngredients(){
   });
   return ch;
 }
+/* ترقية مصفوفة الإنزيمات للشكل الجديد: جرعة مرجعية + رصيد البروتياز على
+   الأحماض الأمينية المهضومة بدل البروتين الخام */
+function migrateMatrix(){
+  let ch=false;
+  Object.keys(MATRIX_DEF).forEach(k=>{
+    const d=MATRIX_DEF[k];
+    if(!S.matrix[k]){ S.matrix[k]=JSON.parse(JSON.stringify(d)); ch=true; return; }
+    const m=S.matrix[k];
+    if(!(+m.dose>0)){ m.dose=d.dose; ch=true; }
+    if(k==='protease'){
+      if(m.CP!==undefined){ delete m.CP; ch=true; }
+      ['dLys','dMet','dThr'].forEach(a=>{ if(m[a]===undefined){ m[a]=d[a]; ch=true; } });
+    }
+  });
+  return ch;
+}
 function runMigrations(){
   let ch=false;
   MERGES.forEach(m=>{ if(mergeIngredient(m[0],m[1])) ch=true; });
   if(seedMissingIngredients()) ch=true;
+  if(migrateMatrix()) ch=true;
   return ch;
 }
 
@@ -1026,8 +1129,8 @@ function matrixCP(id){
   Object.keys(S.matrix).forEach(k=>{
     const m=S.matrix[k];
     if(!m.on||!m.CP) return;
-    const r=rows(id).find(x=>x.name===m.ing);
-    if(r&&+r.qty>0) c+=m.CP;
+    const q=mxQty(id,m);
+    if(q>0) c+=m.CP*mxFactor(m,q);
   });
   return c;
 }
@@ -1101,11 +1204,17 @@ function analyze(id){
   SUMMED.forEach(k=>out[k]=out[k]/TON);
   Object.keys(sidSum).forEach(aa=>out['sid'+aa]=sidSum[aa]/TON);
   if(S.mxOn){
+    out.mxCredit={ME:0,AvP:0,Ca:0,dLys:0,dMet:0,dThr:0};
     Object.values(S.matrix).forEach(m=>{
       if(!m.on) return;
-      const r=rows(id).find(x=>x.name===m.ing);
-      if(!r||!(+r.qty>0)) return;
-      ['ME','AvP','Ca','CP'].forEach(k=>{ if(m[k]) out[k]+=m[k]; });
+      const q=mxQty(id,m); if(!(q>0)) return;
+      const fc=mxFactor(m,q);
+      ['ME','AvP','Ca','CP'].forEach(k=>{
+        if(m[k]){ out[k]+=m[k]*fc; if(out.mxCredit[k]!==undefined) out.mxCredit[k]+=m[k]*fc; } });
+      /* رصيد الهضم بينزل على الأحماض الأمينية المهضومة */
+      if(m.dLys){ out.sidLys+=m.dLys*fc; out.mxCredit.dLys+=m.dLys*fc; }
+      if(m.dMet){ out.sidMet+=m.dMet*fc; out.mxCredit.dMet+=m.dMet*fc; }
+      if(m.dThr){ out.sidThr+=m.dThr*fc; out.mxCredit.dThr+=m.dThr*fc; }
     });
   }
   /* التوازن الأيونى mEq/kg */
@@ -1180,11 +1289,12 @@ function toast(msg,bad){
 
 /* ================= التبويبات ================= */
 function showView(v){
-  ['mix','db','batch','compare','phos','buy','scen'].forEach(x=>
+  ['mix','db','batch','compare','ross','phos','buy','scen'].forEach(x=>
     $('#v-'+x).classList.toggle('hide',x!==v));
   $$('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===v));
   if(v==='batch')  renderBatch();
   if(v==='compare')renderCompare();
+  if(v==='ross')   renderRoss();
   if(v==='phos')   renderPhos();
   if(v==='scen')   renderScen();
   if(v==='db')     renderDB();
@@ -1347,6 +1457,7 @@ function renderMix(){
 
 /* ============ أشرطة المستهدف ============ */
 function renderSpecs(a){
+  renderMxToggle();
   let ok=0,tot=0;
   $('#specBars').innerHTML=NUTRIENTS.map(n=>{
     const t=targetFor(S.cur,n.k); if(!t) return '';
@@ -1388,22 +1499,70 @@ function renderTotals(a){
     <div class="kv"><span>طاقة : بروتين</span><b class="num">${a.EP.toFixed(1)}</b></div>`;
 }
 
+/* ---- زرار تفعيل رصيد الإنزيمات ---- */
+function mxActive(id){
+  return Object.keys(S.matrix).filter(k=>S.matrix[k].on&&mxQty(id,S.matrix[k])>0);
+}
+function toggleMx(){
+  S.mxOn=!S.mxOn; save(); renderMix();
+  if(!$('#v-ross').classList.contains('hide')) renderRoss();
+  toast(S.mxOn?'رصيد الإنزيمات مُفعّل':'رصيد الإنزيمات مقفول');
+}
+function renderMxToggle(){
+  const id=S.cur,a=analyze(id),act=mxActive(id);
+  const on=S.mxOn;
+  const cr=on&&a.mxCredit?a.mxCredit:null;
+  const bits=[];
+  if(cr){
+    if(cr.ME)   bits.push(`+${n0(cr.ME)} kcal`);
+    if(cr.AvP)  bits.push(`+${(cr.AvP*100).toFixed(3)}% فوسفور`);
+    if(cr.Ca)   bits.push(`+${(cr.Ca*100).toFixed(3)}% كالسيوم`);
+    if(cr.dLys) bits.push(`+${(cr.dLys*100).toFixed(3)}% ليسين مهضوم`);
+    if(cr.dMet) bits.push(`+${(cr.dMet*100).toFixed(3)}% ميثيونين مهضوم`);
+    if(cr.dThr) bits.push(`+${(cr.dThr*100).toFixed(3)}% ثريونين مهضوم`);
+  }
+  const lbl=on?`✔ رصيد الإنزيمات مُفعّل — ${act.length} إنزيم`
+              :`✕ رصيد الإنزيمات مقفول — اضغط للتفعيل`;
+  const hint=on
+    ? (act.length?`الرصيد المحتسب: ${bits.join(' · ')||'لا شىء'} — متناسب مع الجرعة الفعلية.`
+                 :'مفيش إنزيم من اللى ليها رصيد موجود فى التركيبة دى.')
+    : (act.length?`فيه ${act.length} إنزيم فى التركيبة من غير رصيد محتسب — التحليل بيطلع أقل من الحقيقة.`
+                 :'مفيش إنزيم من اللى ليها رصيد موجود فى التركيبة دى.');
+  ['#mxToggle','#mxToggle2'].forEach(sel=>{
+    const b=$(sel); if(!b) return;
+    b.textContent=lbl; b.className='btn mx-btn '+(on?'on':'off'); b.onclick=toggleMx;
+  });
+  ['#mxHint','#mxHint2'].forEach(sel=>{ const e=$(sel); if(e) e.textContent=hint; });
+}
 function renderMatrixFields(){
   $('#mxOn').checked=S.mxOn;
   $('#mxFields').innerHTML=Object.keys(S.matrix).map(k=>{
-    const m=S.matrix[k];
-    const has=rows(S.cur).some(r=>r.name===m.ing&&+r.qty>0);
+    const m=S.matrix[k],q=mxQty(S.cur,m),has=q>0;
+    const fc=mxFactor(m,q);
+    const inp=MX_FIELDS.filter(f=>m[f.k]!==undefined).map(f=>
+      `<label class="fld" style="margin:6px 0 2px">${f.ar} <span class="note">${f.u} / الجرعة</span></label>
+       <input type="text" inputmode="decimal" data-mxv="${k}|${f.k}"
+         value="${f.pct?(m[f.k]*100).toFixed(3):m[f.k]}" ${m.on?'':'disabled'}>`).join('');
     return `<div style="opacity:${has?1:.45}">
       <label class="chk"><input type="checkbox" data-mx="${k}" ${m.on?'checked':''}>
-        ${esc(m.label)}${has?'':' <span class="note">(مش فى التركيبة)</span>'}</label>
-      <input type="text" inputmode="decimal" data-mxme="${k}" value="${m.ME||0}"
-        title="رصيد الطاقة kcal/kg" ${m.on&&has?'':'disabled'}></div>`;
+        <b>${esc(m.label)}</b></label>
+      <label class="fld" style="margin:6px 0 2px">الجرعة المرجعية <span class="note">كجم/طن</span></label>
+      <input type="text" inputmode="decimal" data-mxd="${k}" value="${m.dose||0}" ${m.on?'':'disabled'}>
+      ${inp}
+      <p class="note" style="margin:6px 0 0">${has
+        ? `فى التركيبة ${n2(q)} كجم/طن → الرصيد × ${fc.toFixed(2)}`
+        : 'مش موجود فى التركيبة دى'}</p></div>`;
   }).join('');
   $('#mxOn').onchange=e=>{S.mxOn=e.target.checked;save();renderMix();};
   $$('[data-mx]').forEach(c=>c.onchange=e=>{
     S.matrix[e.target.dataset.mx].on=e.target.checked;save();renderMix();});
-  $$('[data-mxme]').forEach(c=>c.onchange=e=>{
-    S.matrix[e.target.dataset.mxme].ME=num(e.target.value);save();renderMix();});
+  $$('[data-mxd]').forEach(c=>c.onchange=e=>{
+    S.matrix[e.target.dataset.mxd].dose=num(e.target.value);save();renderMix();});
+  $$('[data-mxv]').forEach(c=>c.onchange=e=>{
+    const [k,f]=e.target.dataset.mxv.split('|');
+    const meta=MX_FIELDS.find(x=>x.k===f);
+    S.matrix[k][f]=meta.pct?num(e.target.value)/100:num(e.target.value);
+    save();renderMix();});
 }
 
 function renderGain(a){
@@ -1946,6 +2105,368 @@ function shareText(txt){
     const w=window.open(url,'_blank');
     if(!w) copyText(txt);
   }
+}
+
+/* ================= مرجع Ross =================
+   مصدر الأرقام: Ross Broiler Nutrition Specifications 2022 (جداول 1-3)،
+   و Ross All Plant Protein-Based Feeds 2022، و Ross Broiler Nutrition Supplement 2025.
+   الأحماض الأمينية كلها مهضومة (SID). النسب كسور (0.0132 = 1.32%). */
+function rPh(k,ar,days,ME,CP,Lys,TSAA,Met,Thr,Ca,AvP,chol,LA,rMet,rTSAA,rThr){
+  return {k:k,ar:ar,days:days,ME:ME,CP:CP,Lys:Lys,TSAA:TSAA,Met:Met,Thr:Thr,
+    Ca:Ca,AvP:AvP,chol:chol,LA:LA,r:{Met:rMet,TSAA:rTSAA,Thr:rThr}};
+}
+const ROSS_SETS={
+  std_le2:{ar:'Ross قياسى — وزن نهائى ≤ 2.0 كجم', plant:false,
+    src:'Ross Broiler Nutrition Specifications 2022 — جدول 1',
+    ph:[rPh('s','بادى','0-10',2975,.230,.0132,.0100,.0055,.0088,.0095,.0050,1700,.0125,42,76,67),
+        rPh('g','نامى','11-24',3050,.215,.0118,.0092,.0051,.0079,.0075,.0042,1600,.0120,43,78,67),
+        rPh('f','ناهى','25-التسويق',3100,.195,.0108,.0086,.0048,.0072,.0065,.0036,1500,.0100,44,80,67)]},
+  std_2035:{ar:'Ross قياسى — وزن نهائى 2.0-3.5 كجم', plant:false,
+    src:'Ross Broiler Nutrition Specifications 2022 — جدول 2',
+    ph:[rPh('s','بادى','0-10',2975,.230,.0132,.0100,.0055,.0088,.0095,.0050,1700,.0125,42,76,67),
+        rPh('g','نامى','11-24',3050,.215,.0118,.0092,.0051,.0079,.0075,.0042,1600,.0120,43,78,67),
+        rPh('f1','ناهى 1','25-39',3100,.195,.0108,.0086,.0048,.0072,.0065,.0036,1500,.0100,44,80,67),
+        rPh('f2','ناهى 2','40-التسويق',3125,.180,.0102,.0082,.0045,.0068,.0060,.0034,1450,.0100,44,80,67)]},
+  std_gt35:{ar:'Ross قياسى — وزن نهائى > 3.5 كجم', plant:false,
+    src:'Ross Broiler Nutrition Specifications 2022 — جدول 3',
+    ph:[rPh('s','بادى','0-10',2975,.230,.0132,.0100,.0055,.0088,.0095,.0050,1700,.0125,42,76,67),
+        rPh('g','نامى','11-24',3050,.215,.0118,.0092,.0051,.0079,.0075,.0042,1600,.0120,43,78,67),
+        rPh('f1','ناهى 1','25-39',3100,.195,.0108,.0086,.0048,.0072,.0065,.0036,1500,.0100,44,80,67),
+        rPh('f2','ناهى 2','40-51',3125,.180,.0102,.0082,.0045,.0068,.0060,.0034,1450,.0100,44,80,67),
+        rPh('f3','ناهى 3','52-التسويق',3150,.170,.0096,.0077,.0042,.0064,.0055,.0032,1450,.0100,44,80,67)]},
+  plant:{ar:'Ross بروتين نباتى بالكامل (1.70-3.50 كجم)', plant:true,
+    src:'Ross All Plant Protein-Based Feeds 2022 — جدول 1',
+    ph:[rPh('s','بادى','0-10',2975,.220,.0126,.0096,.0053,.0084,.0095,.0050,1700,.0125,42,76,67),
+        rPh('g1','نامى 1','11-20',3050,.205,.0114,.0089,.0049,.0076,.0075,.0042,1600,.0120,43,78,67),
+        rPh('g2','نامى 2','21-30',3075,.190,.0106,.0084,.0047,.0071,.0070,.0039,1500,.0100,44,79,67),
+        rPh('f1','ناهى 1','31-40',3100,.180,.0102,.0082,.0045,.0068,.0065,.0036,1450,.0100,44,80,67),
+        rPh('f2','ناهى 2','41-التسويق',3125,.175,.0098,.0078,.0043,.0066,.0060,.0034,1450,.0100,44,80,67)]}
+};
+/* مديات ثابتة فى كل مراحل Ross */
+const ROSS_MIN={Na:[.0018,.0023],Cl:[.0018,.0023],K:[.0060,.0090]};
+
+function rossSet(){ return ROSS_SETS[S.rossSet]||ROSS_SETS.std_2035; }
+/* مرحلة Ross المناسبة للتركيبة — المستخدم يقدر يغيّرها وتتحفظ */
+function rossPhaseKey(id){
+  const set=rossSet();
+  const saved=S.rossPh[id];
+  if(saved&&set.ph.some(p=>p.k===saved)) return saved;
+  const t=(S.fx[id]||{}).target||'starter';
+  const want=t==='starter'?'بادى':(t==='grower'?'نامى':'ناهى');
+  const hit=set.ph.find(p=>p.ar.indexOf(want)===0);
+  return hit?hit.k:set.ph[0].k;
+}
+function rossPhase(id){
+  const set=rossSet(),k=rossPhaseKey(id);
+  return set.ph.find(p=>p.k===k)||set.ph[0];
+}
+/* التوازن الأيونى: المدى بيتغيّر بالموسم ونوع الدليل */
+function rossDEB(){
+  if(S.season==='summer') return {t:[240,260],why:'إجهاد حرارى — Ross بيوصى 240-260 mEq/kg'};
+  if(rossSet().plant)     return {t:[200,220],why:'بروتين نباتى / جودة فرشة — Ross بيوصى 200-220 mEq/kg'};
+  return {t:[220,240],why:'المدى العام مع بوتاسيوم ~0.85% — 220-240 mEq/kg'};
+}
+/* كولين تقديرى: المضاف + مساهمة الذرة والصويا (قيم جداول) */
+function rossCholine(id){
+  let add=0,nat=0;
+  rows(id).forEach(r=>{
+    const q=+r.qty||0,nm=String(r.name);
+    if(nm.indexOf('كولين كلوريد')>=0) add+=q*448;
+    else if(nm.indexOf('ذرة')>=0)     nat+=q*0.62;
+    else if(nm.indexOf('صويا')>=0&&nm.indexOf('زيت')<0) nat+=q*2.67;
+  });
+  return {add:add,nat:nat,tot:add+nat};
+}
+function rossNaFromBicarb(id){
+  let bi=0,tot=0;
+  rows(id).forEach(r=>{
+    const q=+r.qty||0,g=findIng(r.name),na=q*(g?+g.Na||0:0);
+    tot+=na;
+    if(String(r.name).indexOf('بيكربونات')>=0||String(r.name).indexOf('فورمات')>=0) bi+=na;
+  });
+  return tot?bi/tot:0;
+}
+
+/* ---- المقارنة ---- */
+const ROSS_ROWS=[
+  {k:'ME',  ar:'طاقة ممثلة',            u:'kcal/kg', g:a=>a.ME,     t:s=>[s.ME-75,s.ME+75]},
+  {k:'CP',  ar:'بروتين خام',            pct:1, soft:1, g:a=>a.CP,   t:s=>[s.CP-.005,s.CP+.010]},
+  {k:'Lys', ar:'ليسين مهضوم',           pct:1, min:1, g:a=>a.sidLys,  t:s=>[s.Lys,s.Lys*1.08]},
+  {k:'TSAA',ar:'ميثيونين+سيستين مهضوم', pct:1, min:1, g:a=>a.sidTSAA, t:s=>[s.TSAA,s.TSAA*1.08]},
+  {k:'Met', ar:'ميثيونين مهضوم',        pct:1, min:1, g:a=>a.sidMet,  t:s=>[s.Met,s.Met*1.12]},
+  {k:'Thr', ar:'ثريونين مهضوم',         pct:1, min:1, g:a=>a.sidThr,  t:s=>[s.Thr,s.Thr*1.10]},
+  {k:'Ca',  ar:'كالسيوم كلى',           pct:1, g:a=>a.Ca,  t:s=>[s.Ca*.95,s.Ca*1.05]},
+  {k:'AvP', ar:'فوسفور متاح',           pct:1, g:a=>a.AvP, t:s=>[s.AvP*.95,s.AvP*1.05]},
+  {k:'Na',  ar:'صوديوم',                pct:1, g:a=>a.Na,  t:()=>ROSS_MIN.Na},
+  {k:'Cl',  ar:'كلوريد',                pct:1, g:a=>a.Cl,  t:()=>ROSS_MIN.Cl},
+  {k:'K',   ar:'بوتاسيوم',              pct:1, g:a=>a.K,   t:()=>ROSS_MIN.K},
+  {k:'DEB', ar:'التوازن الأيونى',       u:'mEq/kg', g:a=>a.DEB, t:()=>rossDEB().t}
+];
+function rossCompare(id){
+  const a=analyze(id),s=rossPhase(id);
+  return ROSS_ROWS.map(r=>{
+    const v=r.g(a)||0,t=r.t(s),lo=t[0],hi=t[1];
+    const st=v<lo?'lo':(v>hi?'hi':'ok');
+    return {k:r.k,ar:r.ar,pct:!!r.pct,u:r.u||'',soft:!!r.soft,min:!!r.min,
+      v:v,lo:lo,hi:hi,st:st,gap:v<lo?lo-v:(v>hi?v-hi:0)};
+  });
+}
+function rossRatios(id){
+  const a=analyze(id),s=rossPhase(id),L=a.sidLys||0;
+  const mk=(ar,val,tgt)=>{
+    const v=L?val/L*100:0,st=(v<tgt*0.92)?'lo':(v>tgt*1.10?'hi':'ok');
+    return {ar:ar,v:v,t:tgt,st:st};
+  };
+  return [mk('ميثيونين : ليسين',a.sidMet||0,s.r.Met),
+          mk('ميثيونين+سيستين : ليسين',a.sidTSAA||0,s.r.TSAA),
+          mk('ثريونين : ليسين',a.sidThr||0,s.r.Thr)];
+}
+
+/* ---- ملاحظات للمصنع ---- */
+function rossFmt(v,pct,u){ return pct?(v*100).toFixed(3)+'%':(n0(v)+(u?' '+u:'')); }
+function rossNotes(id){
+  const a=analyze(id),s=rossPhase(id),c=rossCompare(id),N=[];
+  const add=(lv,tx)=>N.push({lv:lv,tx:tx});
+  const get=k=>c.find(x=>x.k===k);
+  const kgFor=(deficit,conc)=>n2(deficit*TON/conc);   /* نقص كسرى → كجم/طن من خام تركيزه conc */
+
+  /* --- طاقة وبروتين --- */
+  const me=get('ME');
+  if(me.st==='lo') add('bad',`الطاقة أقل من Ross بـ ${n0(me.gap)} kcal/kg — زوّد الزيت حوالى `+
+    `${n2(me.gap/5.45)} كجم/طن (كل 1 كجم زيت بدل ذرة ≈ +5.4 kcal/kg)، أو فعّل مصفوفة الإنزيمات لو مش مفعّلة.`);
+  if(me.st==='hi') add('warn',`الطاقة أعلى من Ross بـ ${n0(me.gap)} kcal/kg — تكلفة زايدة واحتمال دهن بطنى؛ `+
+    `راجع نسبة الطاقة:بروتين (${a.EP.toFixed(1)}) قبل ما تقلل الزيت.`);
+  const cp=get('CP');
+  if(cp.st==='hi') add('warn',`البروتين الخام أعلى من مستوى Ross الاسترشادى — Ross بيقول ركّز على الأحماض الأمينية `+
+    `المهضومة مش على رقم البروتين. كل 1% بروتين زيادة = حوالى 10% نيتروجين وأمونيا زيادة فى الفرشة، `+
+    `وحمل حرارى زيادة على الطاير.`);
+  if(cp.st==='lo') add('info','البروتين الخام أقل من رقم Ross الاسترشادى — مش مشكلة طالما الأحماض الأمينية المهضومة مظبوطة، '+
+    'بس خلّى بالك من الأحماض غير الأساسية لو النزول كبير.');
+
+  /* --- أحماض أمينية --- */
+  const conc={Lys:0.78,Met:0.99,Thr:0.98};
+  [['Lys','ل- ليسين هيدروكلوريد',conc.Lys],['Met','دل- ميثيونين',conc.Met],['Thr','ل- ثريونين',conc.Thr]]
+   .forEach(([k,ing,cc])=>{
+    const r=get(k);
+    if(r.st==='lo') add('bad',`${r.ar} ناقص ${(r.gap*100).toFixed(3)}% عن Ross — محتاج حوالى `+
+      `${kgFor(r.gap,cc)} كجم/طن زيادة من ${ing}.`);
+    if(r.st==='hi') add('info',`${r.ar} أعلى من Ross بهامش واسع — فلوس زيادة من غير عائد أكيد؛ `+
+      `راجعه لو بتحسب تكلفة الكيلو لحم.`);
+  });
+  const ts=get('TSAA'),mt=get('Met');
+  if(ts.st==='lo'&&mt.st!=='lo') add('warn','الميثيونين مظبوط بس (ميثيونين+سيستين) ناقص — السيستين بيجى من البروتين نفسه، '+
+    'فزوّد دل-ميثيونين أو ارفع الصويا شوية.');
+
+  /* --- نسب البروتين المتوازن --- */
+  rossRatios(id).forEach(r=>{
+    if(r.st==='lo') add('warn',`${r.ar} = ${r.v.toFixed(0)}% والمثالى عند Ross ${r.t}% — النسبة دى بتحدد كفاءة `+
+      `استغلال الليسين، والنقص فيها بيضيّع جزء من قيمة البروتين.`);
+    if(r.st==='hi') add('info',`${r.ar} = ${r.v.toFixed(0)}% أعلى من المثالى (${r.t}%) — زيادة بتتحرق طاقة من غير فايدة.`);
+  });
+
+  /* --- معادن --- */
+  const ca=get('Ca'),ap=get('AvP');
+  if(ca.st==='lo') add('bad',`الكالسيوم ناقص ${(ca.gap*100).toFixed(3)}% — زوّد الحجر الجيرى حوالى `+
+    `${kgFor(ca.gap,0.38)} كجم/طن (38% كالسيوم).`);
+  if(ca.st==='hi') add('warn',`الكالسيوم أعلى من Ross بـ ${(ca.gap*100).toFixed(3)}% — الزيادة بتقفل على الفوسفور `+
+    `والزنك وبتقلل كفاءة الفايتيز.`);
+  if(ap.st==='lo') add('bad',`الفوسفور المتاح ناقص ${(ap.gap*100).toFixed(3)}% — يا إما ${kgFor(ap.gap,0.21)} كجم/طن `+
+    `مونو كالسيوم فوسفات زيادة، يا إما تفعّل رصيد الفايتيز. خد بالك إن MCP بيرفع الكالسيوم كمان (17%).`);
+  if(ap.st==='hi') add('info','الفوسفور المتاح أعلى من Ross — فوسفات غالية وإفراز فوسفور زيادة فى الفرشة.');
+  const capRoss=s.Ca/s.AvP;
+  if(a.AvP&&(a.CaP<capRoss*0.85||a.CaP>capRoss*1.2))
+    add('warn',`نسبة كالسيوم : فوسفور متاح عندك ${a.CaP.toFixed(2)}:1 وعند Ross ${capRoss.toFixed(2)}:1 — `+
+      `الخروج عن النسبة دى بيأثر على العظم حتى لو كل عنصر لوحده قريب من المستهدف.`);
+
+  /* --- الفايتيز والمصفوفة --- */
+  const act=mxActive(id);
+  if(act.length&&!S.mxOn) add('warn',`فى ${act.length} إنزيم ليها رصيد موجودين فى التركيبة (${
+    act.map(k=>S.matrix[k].label).join('، ')}) بس رصيد الإنزيمات مقفول — يعنى بتدفع تمن الإنزيم وتمن `+
+    `الطاقة والفوسفات مع بعض، والمقارنة دى بتطلع أسوأ من الحقيقة. اضغط زرار «رصيد الإنزيمات» فوق.`);
+  if(S.mxOn){
+    act.forEach(k=>{
+      const m=S.matrix[k],q=mxQty(id,m),fc=mxFactor(m,q);
+      if(+m.dose>0&&q/m.dose>MX_CAP) add('warn',`جرعة ${m.label} فى التركيبة ${n2(q)} كجم/طن — أكتر من ضعف `+
+        `الجرعة المرجعية (${n2(m.dose)})، والبرنامج وقّف التناسب عند ×${MX_CAP} عشان ميبالغش. راجع نشرة المنتج.`);
+      else if(Math.abs(fc-1)>0.15) add('info',`${m.label}: الجرعة ${n2(q)} كجم/طن مقابل جرعة مرجعية `+
+        `${n2(m.dose)} → الرصيد اتحسب × ${fc.toFixed(2)}.`);
+    });
+  }
+  if(rows(id).some(r=>String(r.name).indexOf('فايتيز')>=0&&+r.qty>0))
+    add('info','Ross بيقول إن تقليل الفيتات بالفايتيز بيرفع إتاحة الكالسيوم كمان مش الفوسفور بس — '+
+      'تأكد إن رصيد الكالسيوم فى مصفوفة الفايتيز متحسوب.');
+  if(S.mxOn&&act.length>1) add('info','Ross بينبّه إن اجتماع أكتر من إنزيم فى نفس العليقة بيحتاج التأكد من '+
+    'تجميعية المصفوفات (additivity) قبل الاعتماد عليها ميدانياً — مش مضمون إنها بتتجمع خطياً.');
+
+  /* --- صوديوم / كلوريد / توازن أيونى --- */
+  const na=get('Na'),cl=get('Cl'),deb=get('DEB'),dm=rossDEB();
+  if(na.st==='lo') add('bad',`الصوديوم ${(na.v*100).toFixed(3)}% وأقل من مدى Ross (0.18-0.23%) — نقص الصوديوم `+
+    `بيقلل الأكل والنمو.`);
+  if(na.st==='hi') add('warn',`الصوديوم أعلى من 0.23% — شرب مية زيادة وفرشة مبلولة.`);
+  if(cl.st==='hi') add('bad',`الكلوريد ${(cl.v*100).toFixed(3)}% فوق مدى Ross — Ross بيشدد إن التحكم فى الكلوريد `+
+    `هو الأهم؛ حوّل جزء من الملح لبيكربونات صوديوم.`);
+  if(cl.st==='lo') add('info','الكلوريد أقل من المدى — راجع مصادر الكلور (ملح، ليسين هيدروكلوريد، كولين كلوريد).');
+  if(deb.st!=='ok') add(deb.st==='lo'?'bad':'warn',
+    `التوازن الأيونى ${n0(deb.v)} mEq/kg — ${dm.why}. `+
+    (deb.st==='lo'?'ارفعه ببيكربونات الصوديوم بدل جزء من الملح.'
+                  :'نزّله بتقليل البيكربونات، أو راجع البوتاسيوم من الصويا.'));
+  /* Ross بيشدد إن أنيونات البريمكس تتحسب فى التوازن الأيونى */
+  if(na.st!=='ok'||cl.st!=='ok'||deb.st!=='ok'){
+    const pm=rows(id).filter(r=>+r.qty>0&&/بريمكس|فيتامينات|املاح/.test(String(r.name)))
+      .map(r=>findIng(r.name)).filter(g=>g&&!(+g.Na)&&!(+g.Cl)&&!(+g.K));
+    if(pm.length) add('warn','البريمكس/الأملاح فى التركيبة مسجّل عندك بصوديوم وكلوريد وبوتاسيوم = صفر، '+
+      'و Ross بيقول إن أنيونات بريمكس الفيتامينات والمعادن لازم تتحسب فى التوازن الأيونى. '+
+      'هات مواصفة البريمكس من المورد ودخّل قيم Na و Cl و K — غالباً ده سبب جزء من فرق الصوديوم.');
+  }
+  const biSh=rossNaFromBicarb(id);
+  if(S.season==='summer'&&biSh<0.4) add('warn',`فى الحر Ross بيوصى إن البيكربونات (أو السسكى كربونات) تغطى حوالى `+
+    `50% من صوديوم العليقة — عندك ${(biSh*100).toFixed(0)}% بس. البيكربونات بتعوّض فقد البيكربونات فى الدم وقت اللهث.`);
+
+  /* --- كولين --- */
+  const ch=rossCholine(id);
+  if(ch.tot<s.chol) add('warn',`الكولين التقديرى ${n0(ch.tot)} مجم/كجم (مضاف ${n0(ch.add)} + من الذرة والصويا `+
+    `${n0(ch.nat)}) والحد الأدنى عند Ross ${n0(s.chol)} — ده تقدير بجداول قياسية، أكّده من تحليل البريمكس.`);
+
+  /* --- سلامة التركيبة نفسها --- */
+  if(Math.abs(a.totalKg-TON)>0.01) add('bad',`إجمالى التركيبة ${n2(a.totalKg)} كجم مش 1000 — اظبط الاستكمال الأول `+
+    `قبل ما تعتمد أى مقارنة.`);
+  if(Math.abs(a.concKg-CONC_PERTON)>0.01) add('warn',`المركز ${n2(a.concKg)} كجم/طن بدل ${CONC_PERTON} — `+
+    `ده معناه إن أمر خلط المركز هيطلع غلط.`);
+  if(a.missing.length) add('bad','خامات مش موجودة فى قاعدة البيانات فالتحليل ناقص: '+a.missing.join('، '));
+  const noPrice=rows(id).filter(r=>+r.qty>0).map(r=>findIng(r.name)).filter(g=>g&&!(+g.price));
+  if(noPrice.length) add('info',`${noPrice.length} خامة سعرها صفر — تكلفة الطن أقل من الحقيقة؛ دخّل أسعار الفواتير.`);
+
+  /* --- حدود المقارنة نفسها --- */
+  add('info','المقارنة دى مش شاملة الفيتامينات والمعادن الصغرى ولا الفالين والأيزوليوسين والأرجينين '+
+    'والتربتوفان — دول مش فى قاعدة خاماتك. راجعهم من مواصفة البريمكس مباشرة.');
+
+  return N;
+}
+
+/* ---- مرجع تشغيلى ثابت من دليل Ross ---- */
+function rossGuide(id){
+  const s=rossPhase(id),G=[];
+  const young=s.days.indexOf('0-10')===0;
+  const mid=/^1[01]-/.test(s.days);
+  G.push(['شكل العلف', young
+    ? 'بادى: مفتت (كرامبل) 2.0-3.5 مم. الناعم أقل من 1 مم لازم يكون أقل من 10%، والمفتت أكتر من 10 أيام بينزّل الأكل.'
+    : (mid ? 'محبب 3.0-5.0 مم قطر و5.0-7.0 مم طول، وأكتر من 80% أكبر من 3 مم عند المعالف.'
+           : 'محبب 3.0-5.0 مم قطر و6.0-10.0 مم طول، وأكتر من 80% أكبر من 3 مم عند المعالف.')]);
+  G.push(['متانة الحبيبة','هدف Holmen: 95% بعد 30 ثانية، أو 98% بعد 10 دقايق بطريقة Tumbling Can — يتقاس قبل الشحن ومن المعلفة كمان.']);
+  G.push(['التكييف الحرارى','فوق 88°م لمدة طويلة بيرفع المتانة بس بيضرب هضم المغذيات والإنزيمات — رش الإنزيمات بعد التحبيب أو استخدم أنواع ثابتة حرارياً، وراجع استرداد الإنزيم دورياً.']);
+  G.push(['جودة الدهن','رطوبة وشوائب ≤ 1% · أحماض دهنية حرة ≤ 15% · أحماض مؤكسدة ≤ 2% · مضاد أكسدة موجود. جزء من الزيت بعد التحبيب بيحسّن المتانة.']);
+  G.push(['البريمكس','استبعد الكولين كلوريد والأملاح والمعادن الصغرى من بريمكس الفيتامينات (بتأكسده)، وخزّنه بارد مظلم جاف مع مضاد أكسدة.']);
+  G.push(['الحبوب الكاملة', young?'البادى: صفر حبوب كاملة.'
+    :'النامى: تدرّج لـ 15-20% · الناهى: 15-30% · وتترفع من العلف قبل الذبح بيومين، وتتعالج بأحماض عضوية ضد السالمونيلا.']);
+  if(S.season==='summer')
+    G.push(['الحر','ارفع الفيتامينات 1.25% لكل درجة من 21 لـ 28°م، و2.5% لكل درجة فوق 28°م · بيتاين كمنظم أسموزى · '+
+      'طاقة من الدهن بدل الكربوهيدرات (حرارة هضم أقل) · واختار مضاد الكوكسيديا بحذر: فيه أنواع بترفع النفوق فى الحر أو بتلخبط استهلاك الصوديوم والبوتاسيوم.']);
+  G.push(['جودة الفرشة','Ross بيربط الفرشة المبلولة بزيادة البروتين الخام وزيادة الملح — وبيوصى DEB أقل (200-220) لما جودة الفرشة تبقى أولوية.']);
+  G.push(['تحديث المصفوفة','قيم الخامات بتختلف بالموسم والمصدر — تحليل دورى للذرة والصويا وتحديث البروتين والأحماض الأمينية فى المصفوفة.']);
+  return G;
+}
+
+/* ---- العرض ---- */
+function renderRoss(){
+  const id=S.cur,f=S.fx[id]; if(!f) return;
+  const set=rossSet(),ph=rossPhase(id);
+  $('#rossSet').innerHTML=Object.keys(ROSS_SETS).map(k=>
+    `<option value="${k}" ${k===S.rossSet?'selected':''}>${esc(ROSS_SETS[k].ar)}</option>`).join('');
+  $('#rossPh').innerHTML=set.ph.map(p=>
+    `<option value="${p.k}" ${p.k===ph.k?'selected':''}>${esc(p.ar)} — ${esc(p.days)} يوم</option>`).join('');
+  $('#rossSrc').innerHTML=`التركيبة: <b>${esc(f.ar)}</b> · المرجع: ${esc(set.src)}`+
+    (S.season==='summer'?' · مستهدفات الصيف مفعّلة':'');
+  $('#rossSet').onchange=e=>{S.rossSet=e.target.value;save();renderRoss();};
+  $('#rossPh').onchange =e=>{S.rossPh[id]=e.target.value;save();renderRoss();};
+
+  renderMxToggle();
+  const c=rossCompare(id);
+  const fm=(v,r)=>r.pct?(v*100).toFixed(3)+'%':n0(v);
+  $('#rossTbl').innerHTML=c.map(r=>{
+    const lbl=r.st==='ok'?'مطابق':(r.st==='lo'?'أقل':'أعلى');
+    const cls=r.st==='ok'?'ok':(r.soft?'warn':'bad');
+    const tgt=r.min?`${fm(r.lo,r)} فأكتر`:`${fm(r.lo,r)} — ${fm(r.hi,r)}`;
+    const gap=r.gap?((r.st==='lo'?'-':'+')+fm(r.gap,r)):'—';
+    return `<tr><td class="nm">${r.ar}${r.u?' <span class="note">'+r.u+'</span>':''}</td>
+      <td class="num">${fm(r.v,r)}</td><td class="num">${tgt}</td>
+      <td class="num">${gap}</td><td><span class="chip ${cls}">${lbl}</span></td></tr>`;
+  }).join('');
+
+  $('#rossRatio').innerHTML=rossRatios(id).map(r=>{
+    const lbl=r.st==='ok'?'مطابق':(r.st==='lo'?'أقل':'أعلى');
+    return `<tr><td class="nm">${r.ar}</td><td class="num">${r.v.toFixed(0)}%</td>
+      <td class="num">${r.t}%</td><td><span class="chip ${r.st==='ok'?'ok':'warn'}">${lbl}</span></td></tr>`;
+  }).join('');
+
+  const N=rossNotes(id);
+  const nBad=N.filter(x=>x.lv==='bad').length,nWarn=N.filter(x=>x.lv==='warn').length;
+  $('#rossNoteCount').textContent=`${nBad} حرجة · ${nWarn} للمراجعة`;
+  $('#rossNoteCount').className='chip '+(nBad?'bad':(nWarn?'warn':'ok'));
+  $('#rossNotes').innerHTML=N.map(x=>
+    `<div class="banner ${x.lv==='bad'?'bad':(x.lv==='warn'?'warn':'')}" style="margin-bottom:8px">${x.tx}</div>`).join('');
+
+  /* الملخص */
+  const ok=c.filter(x=>x.st==='ok').length;
+  $('#rossScore').textContent=`${ok} / ${c.length} مطابق`;
+  $('#rossScore').className='chip '+(ok===c.length?'ok':(ok>=c.length-3?'warn':'bad'));
+  const worst=c.filter(x=>x.st!=='ok').sort((a,b)=>
+    (b.gap/(b.hi||1))-(a.gap/(a.hi||1))).slice(0,3);
+  const a=analyze(id),ch=rossCholine(id);
+  $('#rossSum').innerHTML=
+    `<div class="kv"><span>مرحلة Ross</span><b>${esc(ph.ar)} (${esc(ph.days)} يوم)</b></div>`+
+    `<div class="kv"><span>بنود مطابقة</span><b class="num">${ok} من ${c.length}</b></div>`+
+    `<div class="kv"><span>أهم فجوة</span><b>${worst.length?esc(worst[0].ar):'لا يوجد'}</b></div>`+
+    `<div class="kv"><span>تكلفة الطن</span><b class="num">${n2(a.cost)} ج</b></div>`+
+    `<div class="kv"><span>كولين تقديرى</span><b class="num">${n0(ch.tot)} / ${n0(ph.chol)} مجم/كجم</b></div>`+
+    `<div class="kv"><span>ملاحظات حرجة</span><b class="num">${nBad}</b></div>`+
+    (worst.length?`<p class="note" style="margin:11px 0 0">أول ٣ حاجات تتظبط: `+
+      worst.map(w=>esc(w.ar)+(w.st==='lo'?' (ناقص)':' (زايد)')).join(' · ')+`</p>`:'')+
+    `<p class="note" style="margin:6px 0 0">الأرقام دى محسوبة بقيم قاعدة خاماتك — أى اختلاف فى مصفوفة `+
+    `المصنع هيغيّر النتيجة، فالأفضل تحدّث قيم الذرة والصويا من تحليل فعلى.</p>`;
+
+  $('#rossGuide').innerHTML=rossGuide(id).map(g=>
+    `<div class="kv" style="display:block"><b>${esc(g[0])}</b>
+      <p class="note" style="margin:4px 0 0">${esc(g[1])}</p></div>`).join('');
+
+  $('#btnRossPrint').onclick=()=>doPrint(buildRossPrint(id));
+  $('#btnRossWa').onclick  =()=>shareText(rossText(id));
+}
+
+function buildRossPrint(id){
+  const f=S.fx[id],set=rossSet(),ph=rossPhase(id),c=rossCompare(id),N=rossNotes(id);
+  const fm=(v,r)=>r.pct?(v*100).toFixed(3)+'%':n0(v);
+  let b='';
+  c.forEach(r=>{
+    const lbl=r.st==='ok'?'مطابق':(r.st==='lo'?'أقل':'أعلى');
+    const tgt=r.min?fm(r.lo,r)+' فأكتر':fm(r.lo,r)+' — '+fm(r.hi,r);
+    b+=`<tr><td>${esc(r.ar)}</td><td>${fm(r.v,r)}</td><td>${tgt}</td>`+
+       `<td class="${r.st==='ok'?'':'out'}">${lbl}</td></tr>`;
+  });
+  rossRatios(id).forEach(r=>{
+    b+=`<tr><td>${esc(r.ar)}</td><td>${r.v.toFixed(0)}%</td><td>${r.t}%</td>`+
+       `<td class="${r.st==='ok'?'':'out'}">${r.st==='ok'?'مطابق':'خارج المدى'}</td></tr>`;
+  });
+  const ok=c.filter(x=>x.st==='ok').length;
+  return `<div class="pr-h"><h1>مطابقة Ross — ${esc(f.ar)}</h1>
+    <div class="meta">${esc(set.ar)} · مرحلة ${esc(ph.ar)} (${esc(ph.days)} يوم) · ${today()}</div></div>
+    <div class="pr-sum"><div>مطابق: ${ok} / ${c.length}</div>
+      <div>تكلفة الطن: ${n2(analyze(id).cost)} ج</div>
+      <div>المرجع: ${esc(set.src)}</div></div>`+
+    prTable(['البند','تركيبتك','Ross','الحالة'],b,true)+
+    `<h3>ملاحظات للمصنع</h3><ol style="margin:0;padding-inline-start:18px">`+
+    N.map(x=>`<li style="margin-bottom:3px">${x.tx.replace(/<[^>]+>/g,'')}</li>`).join('')+
+    `</ol><div class="pr-foot">المقارنة محسوبة بقيم قاعدة خامات مَطحنة — مش بديل عن تحليل معملى ولا عن مصفوفة المصنع.</div>`;
+}
+function rossText(id){
+  const f=S.fx[id],set=rossSet(),ph=rossPhase(id),c=rossCompare(id),N=rossNotes(id);
+  const fm=(v,r)=>r.pct?(v*100).toFixed(3)+'%':n0(v);
+  let s=`مطابقة Ross — ${f.ar}\n${set.ar} · ${ph.ar} (${ph.days} يوم)\n`+'—'.repeat(16)+'\n';
+  c.forEach(r=>{ if(r.st!=='ok')
+    s+=`• ${r.ar}: ${fm(r.v,r)} (Ross ${fm(r.lo,r)}${r.min?' فأكتر':' — '+fm(r.hi,r)})\n`; });
+  const ok=c.filter(x=>x.st==='ok').length;
+  s+=`\nمطابق ${ok} من ${c.length}\n\nأهم الملاحظات:\n`;
+  N.filter(x=>x.lv==='bad').slice(0,6).forEach(x=>s+='- '+x.tx.replace(/<[^>]+>/g,'')+'\n');
+  return s;
 }
 
 /* ================= الطباعة / PDF ================= */
