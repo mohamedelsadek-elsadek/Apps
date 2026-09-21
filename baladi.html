@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دراسة جدوى تسمين بلدي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5EE; --surface:#FFFFFF; --ink:#1F2B1C; --muted:#5E6B58; --line:#D8DDCF;
+  --olive:#3E5B34; --olive-soft:#E3EBDC; --grain:#A8781F; --grain-soft:#F4E9CF;
+  --comb:#A33A2C; --comb-soft:#F6E0DC;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131911; --surface:#1B2318; --ink:#E6EBDF; --muted:#9AA692; --line:#2E3A2A;
+    --olive:#8DB57C; --olive-soft:#243121; --grain:#E0B354; --grain-soft:#2F2918;
+    --comb:#E58070; --comb-soft:#3A221E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131911; --surface:#1B2318; --ink:#E6EBDF; --muted:#9AA692; --line:#2E3A2A;
+  --olive:#8DB57C; --olive-soft:#243121; --grain:#E0B354; --grain-soft:#2F2918;
+  --comb:#E58070; --comb-soft:#3A221E;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:16px;line-height:1.7}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-family:"Readex Pro","IBM Plex Sans Arabic",sans-serif;line-height:1.3;margin:0}
+h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:700}
+h2{font-size:1.3rem;font-weight:600;margin-bottom:12px}
+h3{font-size:1rem;font-weight:600}
+.num{font-family:"Readex Pro",sans-serif;font-variant-numeric:tabular-nums}
+header{padding:8px 0 20px;border-bottom:2px solid var(--olive)}
+header p{margin:6px 0 0;color:var(--muted)}
+.ledger{margin:22px 0 8px;font-family:"Readex Pro",sans-serif;font-size:clamp(1.05rem,2.8vw,1.35rem);line-height:2.1}
+.ledger b{background:var(--olive-soft);color:var(--olive);padding:1px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+.ledger b.loss{background:var(--comb-soft);color:var(--comb)}
+.ledger b.gain{background:var(--grain-soft);color:var(--grain)}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:center}
+@media(max-width:760px){.hero{grid-template-columns:1fr}}
+.curve{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.curve svg{width:100%;height:auto;display:block}
+.curve figcaption{font-size:.85rem;color:var(--muted);margin-top:4px}
+section{margin-top:34px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:18px}
+.kpi{background:var(--surface);padding:12px 14px}
+.kpi span{display:block;font-size:.82rem;color:var(--muted)}
+.kpi strong{font-family:"Readex Pro",sans-serif;font-size:1.25rem;font-weight:600}
+.kpi.pos strong{color:var(--olive)} .kpi.neg strong{color:var(--comb)}
+details.inputs{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 16px}
+details.inputs summary{cursor:pointer;padding:12px 0;font-family:"Readex Pro",sans-serif;font-weight:600;font-size:1.1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px 18px;padding-bottom:16px}
+.grp{grid-column:1/-1;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);color:var(--olive);font-weight:600}
+label{display:flex;flex-direction:column;font-size:.88rem;color:var(--muted);gap:4px}
+label small{font-size:.75rem;color:var(--grain)}
+input,select{font:inherit;font-family:"Readex Pro",sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--grain);outline-offset:2px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:14px}
+button{font:inherit;cursor:pointer;border:1px solid var(--olive);background:transparent;color:var(--olive);border-radius:8px;padding:7px 14px}
+button.on{background:var(--olive);color:var(--surface)}
+.bars{display:flex;height:26px;border-radius:7px;overflow:hidden;border:1px solid var(--line)}
+.bars div{height:100%}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 18px;margin-top:10px;font-size:.92rem}
+.legend div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding:4px 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-left:6px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);max-height:560px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:760px}
+th,td{padding:7px 9px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th{position:sticky;top:0;background:var(--olive-soft);color:var(--ink);font-weight:600;font-size:.8rem;z-index:1}
+td{font-family:"Readex Pro",sans-serif;font-variant-numeric:tabular-nums}
+tr.mk td{background:var(--grain-soft);font-weight:600}
+tr.ph td:first-child{border-right:3px solid var(--olive)}
+.vac{list-style:none;margin:0;padding:0;border-right:2px solid var(--olive)}
+.vac li{position:relative;padding:8px 18px 12px 0}
+.vac li::before{content:"";position:absolute;right:-7px;top:15px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--olive)}
+.vac li.opt::before{border-style:dashed;border-color:var(--grain)}
+.vac .d{font-family:"Readex Pro",sans-serif;font-weight:600;color:var(--olive)}
+.vac .m{font-size:.85rem;color:var(--muted)}
+.note{font-size:.88rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.note ul{margin:6px 0;padding-right:18px}
+.sens td.neg{color:var(--comb)} .sens td.pos{color:var(--olive)} .sens td.base{outline:2px solid var(--grain);outline-offset:-2px}
+.sens table{min-width:520px}
+footer{margin-top:40px;font-size:.8rem;color:var(--muted)}
+@media print{details.inputs{display:none}.tbl{max-height:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>دراسة جدوى دورة تسمين بلدي</h1>
+  <p>أسعار سبتمبر 2026 في السوق المصري — كل الأرقام قابلة للتعديل والنتائج بتتحسب فورًا</p>
+</header>
+
+<div class="hero">
+  <p class="ledger" id="ledger"></p>
+  <figure class="curve" style="margin:0">
+    <svg id="curve" viewBox="0 0 360 200" role="img" aria-label="منحنى الوزن الأسبوعي"></svg>
+    <figcaption>منحنى الوزن الحي (جم) — العلامة عند عمر البيع</figcaption>
+  </figure>
+</div>
+
+<div class="kpis" id="kpis"></div>
+
+<section>
+  <details class="inputs" open>
+    <summary>المدخلات والأسعار</summary>
+    <div class="grid">
+      <div class="grp">الدورة</div>
+      <label>عدد الكتاكيت<input type="number" id="n" value="5000" min="100" step="100"></label>
+      <label>عمر البيع (أسبوع)<select id="mw"></select></label>
+      <label>الوزن النهائي عند البيع (جم)<input type="number" id="tw" value="1420" step="10" min="500"><small>أنت اللي بتحدده</small></label>
+      <label>معامل التحويل المستهدف<input type="number" id="fcr" value="3.3" step="0.05" min="1.5" max="6"><small>كجم علف ÷ كجم لحم مكتسب</small></label>
+      <label>معامل النافق (% من القياسي)<input type="number" id="mf" value="100" min="30" max="300"></label>
+      <label>نسبة المياه : العلف<input type="number" id="wr" value="2" step="0.1" min="1.5" max="3"><small>2 شتاء — 2.5 صيف</small></label>
+
+      <div class="grp">أسعار اليوم</div>
+      <label>سعر الكتكوت البلدي (ج)<input type="number" id="cp" value="6.5" step="0.5"><small>بورصة 21/9/2026 — متذبذب جدًا</small></label>
+      <label>طن بادي 23% (ج)<input type="number" id="f1" value="22500" step="100"></label>
+      <label>طن نامي 21% (ج)<input type="number" id="f2" value="22400" step="100"></label>
+      <label>طن ناهي 19% (ج)<input type="number" id="f3" value="22300" step="100"></label>
+      <label>سعر بيع كيلو البلدي بالمزرعة (ج)<input type="number" id="sp" value="112" step="1"><small>البورصة 114–115</small></label>
+
+      <div class="grp">مراحل العلف</div>
+      <label>البادي حتى أسبوع<input type="number" id="p1" value="4" min="2" max="6"></label>
+      <label>النامي حتى أسبوع<input type="number" id="p2" value="9" min="5" max="12"></label>
+
+      <div class="grp">تكاليف أخرى</div>
+      <label>تحصينات وأدوية (ج/كتكوت)<input type="number" id="vm" value="6" step="0.5"></label>
+      <label>فرشة (ج/كتكوت)<input type="number" id="lt" value="1.2" step="0.1"></label>
+      <label>تدفئة (ج/كتكوت)<input type="number" id="ht" value="1.5" step="0.1"></label>
+      <label>كهرباء ومياه (ج/كتكوت)<input type="number" id="el" value="1" step="0.1"></label>
+      <label>عدد العمال<input type="number" id="wk" value="1" min="0"></label>
+      <label>مرتب العامل الشهري (ج)<input type="number" id="sal" value="9000" step="500"></label>
+      <label>إيجار/إهلاك العنبر للدورة (ج)<input type="number" id="rent" value="15000" step="500"></label>
+      <label>نقل وتسويق (ج/كجم)<input type="number" id="tr" value="1" step="0.5"></label>
+      <label>نثريات (% من التكاليف)<input type="number" id="misc" value="3" step="0.5"></label>
+      <label>بيع السبلة (ج للدورة)<input type="number" id="man" value="3000" step="500"></label>
+    </div>
+    <div class="btns"><button type="button" id="reset">رجوع للأسعار الافتراضية</button></div>
+  </details>
+</section>
+
+<section>
+  <h2>توزيع التكاليف</h2>
+  <div class="bars" id="bars"></div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<section>
+  <h2>النموذج القياسي: أوزان، علف، مياه، نافق</h2>
+  <div class="btns">
+    <button type="button" id="vW" class="on">أسبوعي</button>
+    <button type="button" id="vD">يومي</button>
+  </div>
+  <div class="tbl"><table id="tbl"></table></div>
+</section>
+
+<section>
+  <h2>برنامج التحصينات المقترح</h2>
+  <ul class="vac">
+    <li><span class="d">يوم 1</span> — ماريك (في المعمل) + نيوكاسل HB1 أو كلون 30 + IB H120 رش أو تقطير<div class="m">اتأكد إن المعمل حصّن ماريك؛ البلدي عمره طويل وأكثر عرضة</div></li>
+    <li><span class="d">يوم 5–7</span> — أنفلونزا H5 + H9 مع نيوكاسل (زيتي) 0.3 مل تحت جلد الرقبة + لاسوتا تقطير</li>
+    <li class="opt"><span class="d">يوم 3–5</span> — لقاح كوكسيديا (اختياري) أو مضاد كوكسيديا في العلف<div class="m">البلدي بيقعد على الفرشة 3 شهور — الكوكسيديا أكبر خطر اقتصادي</div></li>
+    <li><span class="d">يوم 10–12</span> — جمبورو وسط بلس (مياه شرب)</li>
+    <li><span class="d">يوم 18</span> — نيوكاسل لاسوتا/كلون + IB (مياه أو رش)</li>
+    <li><span class="d">يوم 21–24</span> — جمبورو منشط (مياه شرب)</li>
+    <li><span class="d">يوم 28</span> — جدري الطيور (وخز غشاء الجناح)<div class="m">ضروري للدورات الطويلة، خصوصًا في موسم الناموس</div></li>
+    <li><span class="d">يوم 32–35</span> — نيوكاسل لاسوتا (مياه)</li>
+    <li><span class="d">يوم 40–45</span> — منشط أنفلونزا H5 (زيتي) تحت الجلد</li>
+    <li><span class="d">يوم 50–55</span> — نيوكاسل لاسوتا (مياه)</li>
+    <li class="opt"><span class="d">يوم 70</span> — نيوكاسل لاسوتا (حسب ضغط المنطقة)</li>
+    <li class="opt"><span class="d">حسب المنطقة</span> — ILT في المناطق الموبوءة (مياه/تقطير بعد 4 أسابيع)</li>
+  </ul>
+  <p class="note">المواعيد استرشادية؛ عدّلها حسب مناعة الأمهات، نتائج الـ HI/ELISA، وضغط العدوى في منطقتك. أوقف أي علاج مائي 24 ساعة قبل وبعد اللقاح الحي، واستخدم مثبت كلور أو لبن فرز في المياه.</p>
+</section>
+
+<section class="sens">
+  <h2>حساسية الربح (ج/طائر مباع)</h2>
+  <p style="margin:0 0 10px;color:var(--muted);font-size:.9rem">الصفوف سعر بيع الكيلو — الأعمدة معامل التحويل</p>
+  <div class="tbl"><table id="sens"></table></div>
+</section>
+
+<section>
+  <h2>ملاحظات فنية</h2>
+  <div class="note">
+    <ul>
+      <li>المنحنى محسوب لبلدي تسمين محسّن تحت إدارة جيدة؛ الوزن النهائي ومعامل التحويل بتدخلهم بنفسك؛ المنحنى الأسبوعي والعلف اليومي بيتضبطوا عليهم تلقائيًا بنفس شكل النمو القياسي.</li>
+      <li>الكثافة: 12–14 طائر/م² في الأسبوع الأول، وتنزل لـ 7–8 طائر/م² عند البيع. عنبر 5000 طائر ≈ 650–700 م².</li>
+      <li>الحرارة: 32–33° أول أسبوع، وتقل 2–3° أسبوعيًا لحد 21–24°.</li>
+      <li>الإضاءة: 23 ساعة أول 3 أيام، ثم 18–20 ساعة.</li>
+      <li>المساقي: 1 سقاية حلمة لكل 10–12 طائر؛ المعالف: 1 طبق لكل 40–50 طائر.</li>
+      <li>سعر الكتكوت البلدي النهارده منخفض جدًا (موسم ضعف طلب)؛ في الشتاء ممكن يوصل 12–18 ج — جرّب الرقم في المدخلات.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>المصادر: بورصة الدواجن والأعلاف المنشورة في الصحف المصرية (سبتمبر 2026). أسعار الأعلاف تختلف حسب المصنع ونسبة البروتين والنولون.</footer>
+</div>
+
+<script>
+(function(){
+// Standard weekly curve: end-of-week body weight (g), avg daily feed (g/bird), weekly mortality %
+const STD=[
+ {bw:75,fd:8,m:2.0},{bw:135,fd:14,m:1.2},{bw:215,fd:20,m:0.8},{bw:305,fd:26,m:0.7},
+ {bw:405,fd:32,m:0.6},{bw:515,fd:38,m:0.5},{bw:625,fd:44,m:0.4},{bw:735,fd:50,m:0.4},
+ {bw:855,fd:55,m:0.4},{bw:975,fd:60,m:0.4},{bw:1095,fd:65,m:0.4},{bw:1205,fd:69,m:0.4},
+ {bw:1315,fd:72,m:0.4},{bw:1420,fd:75,m:0.4},{bw:1520,fd:77,m:0.4},{bw:1610,fd:78,m:0.4}
+];
+const BW0=32;
+const IDS=["n","mw","tw","fcr","mf","wr","cp","f1","f2","f3","sp","p1","p2","vm","lt","ht","el","wk","sal","rent","tr","misc","man"];
+const $=id=>document.getElementById(id);
+const fmt=(v,d=0)=>Number(v).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const mw=$("mw");
+for(let w=10;w<=16;w++){const o=document.createElement("option");o.value=w;o.textContent=w+" أسبوع ("+(w*7)+" يوم)";if(w===14)o.selected=true;mw.appendChild(o);}
+const DEF={};IDS.forEach(i=>DEF[i]=$(i).value);
+try{const s=JSON.parse(localStorage.getItem("baladi-feas2")||"null");if(s)IDS.forEach(i=>{if(s[i]!=null)$(i).value=s[i];});}catch(e){}
+let view="W";
+
+function inputs(){const o={};IDS.forEach(i=>o[i]=parseFloat($(i).value)||0);return o;}
+
+function simulate(p,feedDelta=0,priceOverride=null){
+  const M=Math.round(p.mw), mf=p.mf/100;
+  const wf=(p.tw||STD[M-1].bw)/STD[M-1].bw;
+  // pass 1: unscaled flock feed to derive feed factor from target FCR
+  let a0=p.n, raw=0;
+  for(let w=1;w<=M;w++){const s=STD[w-1];const d=a0*s.m/100*mf;raw+=(a0-d/2)*s.fd*7/1000;a0-=d;}
+  const sold0=a0, wt=STD[M-1].bw*wf/1000, liveKg=sold0*wt;
+  const ff=p.fcr>0?p.fcr*(liveKg-sold0*BW0/1000)/raw:1;
+  let alive=p.n, deadTot=0; const kg=[0,0,0]; const weeks=[]; let cum=0;
+  for(let w=1;w<=M;w++){
+    const s=STD[w-1], fd=s.fd*ff;
+    const dead=alive*s.m/100*mf;
+    const avgAlive=alive-dead/2;
+    const wkFeed=avgAlive*fd*7/1000;
+    const ph=w<=p.p1?0:(w<=p.p2?1:2);
+    kg[ph]+=wkFeed; cum+=fd*7;
+    weeks.push({w,bw:s.bw*wf,fd,wkFeedBird:fd*7,cum,water:fd*p.wr,m:s.m*mf,dead,aliveStart:alive,aliveEnd:alive-dead,flockFeed:wkFeed,ph});
+    alive-=dead; deadTot+=dead;
+  }
+  const sold=alive;
+  const fp=[p.f1+feedDelta,p.f2+feedDelta,p.f3+feedDelta];
+  const feedCost=kg[0]*fp[0]/1000+kg[1]*fp[1]/1000+kg[2]*fp[2]/1000;
+  const months=(M*7+14)/30;
+  const c={
+    "الكتاكيت":p.n*p.cp,
+    "العلف":feedCost,
+    "تحصينات وأدوية":p.n*p.vm,
+    "فرشة وتدفئة":p.n*(p.lt+p.ht),
+    "كهرباء ومياه":p.n*p.el,
+    "عمالة":p.wk*p.sal*months,
+    "إيجار/إهلاك":p.rent,
+    "نقل وتسويق":liveKg*p.tr
+  };
+  let sub=Object.values(c).reduce((a,b)=>a+b,0);
+  c["نثريات"]=sub*p.misc/100;
+  const total=sub+c["نثريات"];
+  const price=priceOverride??p.sp;
+  const revenue=liveKg*price+p.man;
+  const profit=revenue-total;
+  const feedTot=kg[0]+kg[1]+kg[2];
+  const gain=liveKg-p.n*BW0/1000+deadTot*0; 
+  return {weeks,kg,feedTot,sold,deadTot,wt,liveKg,c,total,revenue,profit,
+    perBird:profit/sold,costKg:total/liveKg,be:(total-p.man)/liveKg,
+    roi:profit/total*100,fcr:feedTot/(liveKg-sold*BW0/1000),months,M,wf,ff};
+}
+
+const COLORS={"الكتاكيت":"var(--grain)","العلف":"var(--olive)","تحصينات وأدوية":"var(--comb)","فرشة وتدفئة":"#8A7B5C","كهرباء ومياه":"#5B7F8C","عمالة":"#7A6A9A","إيجار/إهلاك":"#9A6A55","نقل وتسويق":"#6B8F5E","نثريات":"#999"};
+
+function render(){
+  const p=inputs();
+  try{localStorage.setItem("baladi-feas2",JSON.stringify(Object.fromEntries(IDS.map(i=>[i,$(i).value]))));}catch(e){}
+  const r=simulate(p);
+  const pos=r.profit>=0;
+  $("ledger").innerHTML=`<b>${fmt(p.n)}</b> كتكوت بلدي، نافق <b class="loss">${fmt(r.deadTot)}</b> طائر (${fmt(r.deadTot/p.n*100,1)}%)، نبيع <b>${fmt(r.sold)}</b> طائر عند <b>${r.M*7}</b> يوم بوزن <b>${fmt(r.wt,2)}</b> كجم = <b>${fmt(r.liveKg/1000,2)}</b> طن لحم حي، بتكلفة <b>${fmt(r.costKg,1)}</b> ج للكيلو، و${pos?"ربح":"خسارة"} <b class="${pos?"gain":"loss"}">${fmt(Math.abs(r.profit))}</b> جنيه للدورة.`;
+  const k=[
+    ["إجمالي التكاليف",fmt(r.total)+" ج"],["الإيرادات",fmt(r.revenue)+" ج"],
+    ["صافي الربح",fmt(r.profit)+" ج",pos],["ربح الطائر",fmt(r.perBird,1)+" ج",pos],
+    ["العائد على التكلفة",fmt(r.roi,1)+"%",pos],["سعر التعادل",fmt(r.be,1)+" ج/كجم"],
+    ["تكلفة الكيلو",fmt(r.costKg,1)+" ج"],["معامل التحويل",fmt(r.fcr,2)],
+    ["إجمالي العلف",fmt(r.feedTot/1000,2)+" طن"],["علف الطائر",fmt(r.weeks.at(-1).cum/1000,2)+" كجم"]
+  ];
+  $("kpis").innerHTML=k.map(x=>`<div class="kpi ${x[2]===true?"pos":x[2]===false?"neg":""}"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+  // bars
+  const ents=Object.entries(r.c);
+  $("bars").innerHTML=ents.map(([n,v])=>`<div title="${n}" style="width:${v/r.total*100}%;background:${COLORS[n]}"></div>`).join("");
+  $("legend").innerHTML=ents.map(([n,v])=>`<div><span><i style="background:${COLORS[n]}"></i>${n}</span><span class="num">${fmt(v)} ج · ${fmt(v/r.total*100,1)}%</span></div>`).join("")+
+   `<div><span>علف بادي / نامي / ناهي</span><span class="num">${fmt(r.kg[0]/1000,2)} / ${fmt(r.kg[1]/1000,2)} / ${fmt(r.kg[2]/1000,2)} طن</span></div>`;
+  drawCurve(p,r); drawTable(p,r); drawSens(p,r);
+}
+
+function drawCurve(p,r){
+  const wf=r.wf, W=360,H=200,L=34,B=24,T=10,R=10;
+  const maxBw=1700*Math.max(1,wf);
+  const x=w=>R+(W-L-R)*(16-w)/16, y=g=>T+(H-T-B)*(1-g/maxBw);
+  const pts=[[0,BW0],...STD.map((s,i)=>[i+1,s.bw*wf])];
+  let s="";
+  [400,800,1200,1600].forEach(g=>{s+=`<line x1="${R}" x2="${W-L}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)"/><text x="${W-L+4}" y="${y(g)+4}" font-size="10" fill="var(--muted)" font-family="Readex Pro">${g}</text>`;});
+  [2,4,6,8,10,12,14,16].forEach(w=>{s+=`<text x="${x(w)}" y="${H-6}" font-size="10" text-anchor="middle" fill="var(--muted)" font-family="Readex Pro">${w}</text>`;});
+  const path=pts.map((q,i)=>(i?"L":"M")+x(q[0]).toFixed(1)+","+y(q[1]).toFixed(1)).join("");
+  const area=path+`L${x(16)},${y(0)}L${x(0)},${y(0)}Z`;
+  s+=`<path d="${area}" fill="var(--olive-soft)"/><path d="${path}" fill="none" stroke="var(--olive)" stroke-width="2.5"/>`;
+  const M=r.M, mx=x(M), my=y(STD[M-1].bw*wf);
+  s+=`<line x1="${mx}" x2="${mx}" y1="${my}" y2="${y(0)}" stroke="var(--grain)" stroke-dasharray="3 3"/><circle cx="${mx}" cy="${my}" r="5" fill="var(--grain)"/><text x="${mx}" y="${my-10}" font-size="11" text-anchor="middle" fill="var(--grain)" font-family="Readex Pro" font-weight="600">${fmt(STD[M-1].bw*wf)} جم</text>`;
+  $("curve").innerHTML=s;
+}
+
+const PH=["بادي","نامي","ناهي"];
+function drawTable(p,r){
+  let h="";
+  if(view==="W"){
+    h=`<thead><tr><th>الأسبوع</th><th>العمر (يوم)</th><th>الوزن (جم)</th><th>علف يومي (جم/طائر)</th><th>علف أسبوعي (جم/طائر)</th><th>علف تراكمي (جم)</th><th>مياه يومية (مل/طائر)</th><th>نافق %</th><th>نافق (طائر)</th><th>الحي آخر الأسبوع</th><th>علف القطيع (كجم)</th><th>مياه القطيع/يوم (لتر)</th><th>نوع العلف</th></tr></thead><tbody>`;
+    let prevPh=-1;
+    r.weeks.forEach(w=>{
+      const cls=[w.w===r.M?"mk":"",w.ph!==prevPh?"ph":""].join(" ");prevPh=w.ph;
+      h+=`<tr class="${cls}"><td>${w.w}</td><td>${w.w*7}</td><td>${fmt(w.bw)}</td><td>${fmt(w.fd,1)}</td><td>${fmt(w.wkFeedBird)}</td><td>${fmt(w.cum)}</td><td>${fmt(w.water)}</td><td>${fmt(w.m,2)}</td><td>${fmt(w.dead)}</td><td>${fmt(w.aliveEnd)}</td><td>${fmt(w.flockFeed)}</td><td>${fmt(w.aliveEnd*w.water/1000)}</td><td>${PH[w.ph]}</td></tr>`;
+    });
+    const tDead=r.deadTot;
+    h+=`<tr class="mk"><td colspan="7">الإجمالي</td><td>${fmt(tDead/p.n*100,1)}</td><td>${fmt(tDead)}</td><td>${fmt(r.sold)}</td><td>${fmt(r.feedTot)}</td><td colspan="2"></td></tr></tbody>`;
+  }else{
+    h=`<thead><tr><th>اليوم</th><th>الوزن (جم)</th><th>علف (جم/طائر)</th><th>مياه (مل/طائر)</th><th>نافق (طائر)</th><th>الحي</th><th>علف القطيع (كجم)</th><th>مياه القطيع (لتر)</th><th>نوع العلف</th></tr></thead><tbody>`;
+    const wf=r.wf;
+    // daily feed interpolation between weekly midpoints
+    const mids=[[0,5*r.ff],...STD.map((s,i)=>[i*7+3.5,s.fd*r.ff])];
+    const feedAt=d=>{for(let i=1;i<mids.length;i++){if(d<=mids[i][0]){const a=mids[i-1],b=mids[i];return a[1]+(b[1]-a[1])*(d-a[0])/(b[0]-a[0]);}}return mids.at(-1)[1];};
+    let alive=p.n;
+    for(let d=1;d<=r.M*7;d++){
+      const wi=Math.ceil(d/7)-1, wk=r.weeks[wi];
+      const prevBw=wi===0?BW0:STD[wi-1].bw*wf, endBw=STD[wi].bw*wf;
+      const bw=prevBw+(endBw-prevBw)*((d-wi*7)/7);
+      const f=feedAt(d-0.5), wat=f*p.wr;
+      const dead=wk.dead/7; alive-=dead;
+      const cls=(d===r.M*7?"mk":"")+(d%7===1?" ph":"");
+      h+=`<tr class="${cls}"><td>${d}</td><td>${fmt(bw)}</td><td>${fmt(f,1)}</td><td>${fmt(wat)}</td><td>${fmt(dead,1)}</td><td>${fmt(alive)}</td><td>${fmt(alive*f/1000,1)}</td><td>${fmt(alive*wat/1000,1)}</td><td>${PH[wk.ph]}</td></tr>`;
+    }
+    h+="</tbody>";
+  }
+  $("tbl").innerHTML=h;
+}
+
+function drawSens(p,r){
+  const fd=[-0.4,-0.2,0,0.2,0.4], pd=[-20,-10,0,10,20];
+  let h=`<thead><tr><th>سعر البيع \\ التحويل</th>${fd.map(d=>`<th>${fmt(p.fcr+d,2)}</th>`).join("")}</tr></thead><tbody>`;
+  pd.forEach(dp=>{
+    const price=p.sp+dp;
+    h+=`<tr><td style="font-weight:600">${fmt(price)} ج</td>`;
+    fd.forEach(df=>{const s=simulate({...p,fcr:p.fcr+df},0,price);h+=`<td class="${s.perBird<0?"neg":"pos"} ${dp===0&&df===0?"base":""}">${fmt(s.perBird,1)}</td>`;});
+    h+="</tr>";
+  });
+  $("sens").innerHTML=h+"</tbody>";
+}
+
+IDS.forEach(i=>$(i).addEventListener("input",render));
+$("vW").onclick=()=>{view="W";$("vW").classList.add("on");$("vD").classList.remove("on");render();};
+$("vD").onclick=()=>{view="D";$("vD").classList.add("on");$("vW").classList.remove("on");render();};
+$("reset").onclick=()=>{IDS.forEach(i=>$(i).value=DEF[i]);render();};
+render();
+})();
+</script>
+</body>
+</html>

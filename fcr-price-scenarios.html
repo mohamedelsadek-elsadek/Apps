@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة سيناريوهات التسمين — الربح ونقطة التعادل</title>
+<style>
+  :root{
+    --bg:#f6f2e7;
+    --header:#1d3d2e;
+    --header-text:#f3ead2;
+    --panel:#ffffff;
+    --panel-alt:#faf5e8;
+    --line:#ddd3b8;
+    --text:#2b2a22;
+    --sub:#7d7460;
+    --gold:#c68a2e;
+    --green:#3c8a5c;
+    --red:#b8433a;
+    --blue:#1a5fb4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"Segoe UI","Tahoma",Arial,sans-serif;
+    padding:0 0 60px;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 14px;}
+
+  .hero{background:var(--header); color:var(--header-text); padding:22px 16px; margin-bottom:18px;}
+  .hero-inner{max-width:960px;margin:0 auto;}
+  .hero h1{font-size:21px;margin:0 0 4px;font-weight:700;}
+  .hero p{margin:0;color:#cfe0d3;font-size:13px;}
+
+  .section-title{
+    font-size:17px; color:var(--header); font-weight:800; margin:26px 0 12px;
+    padding-bottom:8px; border-bottom:2px solid var(--gold);
+  }
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px;}
+  .card h2{font-size:15px;margin:0 0 12px;color:var(--header);font-weight:700;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+  label{display:flex;flex-direction:column;font-size:12px;color:var(--sub);gap:4px;}
+  input[type=number]{
+    background:var(--panel-alt); border:1px solid var(--line); color:var(--text);
+    padding:8px; border-radius:6px; font-size:14px; direction:ltr; text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+  input[type=number]:focus{outline:1px solid var(--gold);}
+
+  .check-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);}
+  .check-row input{width:16px;height:16px;}
+
+  .toggle-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .toggle-group button{
+    background:var(--panel-alt); border:1px solid var(--line); color:var(--text);
+    padding:8px 14px; border-radius:6px; font-size:13px; cursor:pointer;
+  }
+  .toggle-group button.active{background:var(--header);color:var(--header-text);border-color:var(--header);font-weight:700;}
+
+  .weight-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .weight-row button{
+    background:var(--panel-alt); border:1px solid var(--line); color:var(--text);
+    padding:7px 12px; border-radius:6px; font-size:13px; cursor:pointer;
+  }
+  .weight-row button.active{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700;}
+  .weight-row input{width:90px;}
+
+  .weight-badge{
+    display:inline-block; background:#e4eefb; color:var(--blue); border:1px solid #b9d4f2;
+    padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700; margin-bottom:12px;
+  }
+
+  .table-wrap{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-size:13px;}
+  th,td{padding:8px 10px;text-align:center;white-space:nowrap;border:1px solid var(--line);
+    font-variant-numeric:tabular-nums;}
+  thead th{background:var(--panel-alt);color:var(--header);font-weight:700;}
+  tbody th{background:var(--panel-alt);color:var(--text);font-weight:700;}
+  td.cost{color:var(--sub);}
+  .cost-main{font-weight:700;color:var(--text);}
+  .cost-kg{font-size:11px;color:var(--gold);margin-top:2px;font-weight:600;}
+  .cell-main{font-weight:700;}
+  .cell-sub{font-size:11px;color:var(--sub);margin-top:2px;}
+  .pos{color:var(--green);}
+  .neg{color:var(--red);}
+  .be-main{font-weight:700;color:var(--blue);}
+  .be-sub{font-size:11px;color:var(--sub);margin-top:2px;}
+
+  .hint{font-size:11px;color:var(--sub);margin-top:6px;}
+  .foot{font-size:11px;color:var(--sub);text-align:center;margin-top:24px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>حاسبة سيناريوهات التسمين</h1>
+    <p>مدخلات واحدة — مصفوفة ربح حسب السعر، ومصفوفة نقطة تعادل حسب الوزن</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>البيانات الأساسية (مشتركة)</h2>
+    <div class="grid">
+      <label>عدد الكتاكيت
+        <input type="number" id="chicks" value="10000" min="1">
+      </label>
+      <label>نسبة النفوق %
+        <input type="number" id="mortality" value="5" step="0.1" min="0" max="100">
+      </label>
+      <label>سعر الكتكوت (جنيه)
+        <input type="number" id="chickPrice" value="8" step="0.1" min="0">
+      </label>
+      <label>سعر طن العلف (جنيه)
+        <input type="number" id="feedPrice" value="18000" step="100" min="0">
+      </label>
+      <label>سعر الدواء للطائر (جنيه)
+        <input type="number" id="medPerBird" value="1.5" step="0.1" min="0">
+      </label>
+      <label>تكلفة التدفئة للطائر (جنيه)
+        <input type="number" id="heatPerBird" value="1.0" step="0.1" min="0">
+      </label>
+      <label>مصاريف إضافية للطائر (جنيه)
+        <input type="number" id="extraPerBird" value="0.8" step="0.1" min="0">
+      </label>
+    </div>
+    <p class="hint">الأدوية والتدفئة والمصاريف الإضافية بسعر الطائر الواحد، وبتتضرب تلقائيًا في عدد الكتاكيت. البيانات دي بتغذي المصفوفتين تحت.</p>
+  </div>
+
+  <div class="card">
+    <h2>سيناريوهات معامل التحويل الغذائي (FCR) — مشتركة</h2>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);max-width:420px;">
+      <label>من
+        <input type="number" id="fcrFrom" value="1.70" step="0.01">
+      </label>
+      <label>إلى
+        <input type="number" id="fcrTo" value="1.30" step="0.01">
+      </label>
+      <label>الخطوة
+        <input type="number" id="fcrStep" value="0.05" step="0.01" min="0.01">
+      </label>
+    </div>
+    <p class="hint">يبدأ من الأعلى وينزل تدريجيًا حتى القيمة الأدنى — نفس المدى مستخدم في المصفوفتين.</p>
+  </div>
+
+  <h2 class="section-title">1) مصفوفة الربح حسب سعر البيع</h2>
+
+  <div class="card">
+    <h2>الوزن المستخدم في هذه المصفوفة</h2>
+    <div class="grid" style="max-width:260px;">
+      <label>الوزن المستهدف عند التسويق (كغ)
+        <input type="number" id="weight" value="2.0" step="0.05" min="0.1">
+      </label>
+    </div>
+    <div class="weight-row" id="weightRow" style="margin-top:10px;">
+      <input type="number" id="weightCustom" step="0.05" min="0.1" placeholder="وزن آخر">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>سيناريوهات سعر البيع (جنيه / كغ حي)</h2>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);max-width:420px;">
+      <label>من
+        <input type="number" id="priceFrom" value="30" step="0.5">
+      </label>
+      <label>إلى
+        <input type="number" id="priceTo" value="40" step="0.5">
+      </label>
+      <label>الخطوة
+        <input type="number" id="priceStep" value="2" step="0.5" min="0.1">
+      </label>
+    </div>
+    <p class="hint">تقدر تتحكم في الخطوة زي ما انت عايز — كل الأسعار من الأقل للأعلى.</p>
+  </div>
+
+  <div class="card">
+    <h2>خيارات العرض</h2>
+    <p class="hint" style="margin:0 0 8px;">وحدة عرض نتائج المصفوفة</p>
+    <div class="toggle-group" id="viewMode">
+      <button data-mode="bird" class="active">تكلفة / ربح الطائر الكامل</button>
+      <button data-mode="kg">تكلفة / ربح الكيلو</button>
+    </div>
+    <label class="check-row">
+      <input type="checkbox" id="showTotal">
+      إظهار إجمالي ربح الدورة كاملة كمان
+    </label>
+  </div>
+
+  <div class="card">
+    <h2>مصفوفة الربح</h2>
+    <div class="weight-badge" id="weightBadge">الوزن الحالي: -- كغ</div>
+    <div class="table-wrap"><table id="resultTable1"></table></div>
+    <p class="hint" id="baseHint1"></p>
+  </div>
+
+  <h2 class="section-title">2) مصفوفة نقطة التعادل حسب الوزن</h2>
+
+  <div class="card">
+    <h2>سيناريوهات الوزن عند التسويق (كغ)</h2>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);max-width:420px;">
+      <label>من
+        <input type="number" id="wFrom" value="1.8" step="0.05">
+      </label>
+      <label>إلى
+        <input type="number" id="wTo" value="2.6" step="0.05">
+      </label>
+      <label>الخطوة
+        <input type="number" id="wStep" value="0.2" step="0.05" min="0.01">
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>مصفوفة نقطة التعادل</h2>
+    <div class="weight-badge" id="birdsBadge2">عدد الطيور المستهدفة: --</div>
+    <div class="table-wrap"><table id="resultTable2"></table></div>
+    <p class="hint">كل خلية = سعر التعادل (جنيه/كغ) — البيع بأعلى من الرقم ده يحقق ربح، وبأقل منه يحقق خسارة. الرقم الصغير تحته هو تكلفة الطائر الكامل عند هذا السيناريو.</p>
+  </div>
+
+  <p class="foot">الأرقام إرشادية لدعم القرار — راجعها مقابل بيانات الدورة الفعلية.</p>
+</div>
+
+<script>
+let viewMode = 'bird';
+const weightPresets = [1.8, 2.0, 2.2, 2.4, 2.6];
+
+function fmt(n, d){
+  return Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+
+function rangeList(fromId, toId, stepId, decimals){
+  const from = parseFloat(document.getElementById(fromId).value);
+  const to = parseFloat(document.getElementById(toId).value);
+  const step = Math.abs(parseFloat(document.getElementById(stepId).value)) || 0.01;
+  const list = [];
+  if(from >= to){
+    for(let v = from; v >= to - 1e-9; v -= step) list.push(Math.round(v * Math.pow(10,decimals)) / Math.pow(10,decimals));
+  } else {
+    for(let v = from; v <= to + 1e-9; v += step) list.push(Math.round(v * Math.pow(10,decimals)) / Math.pow(10,decimals));
+  }
+  return list;
+}
+
+function baseFixedCostPerBird(){
+  const chicks = parseFloat(document.getElementById('chicks').value) || 0;
+  const mortality = parseFloat(document.getElementById('mortality').value) || 0;
+  const chickPrice = parseFloat(document.getElementById('chickPrice').value) || 0;
+  const feedPrice = parseFloat(document.getElementById('feedPrice').value) || 0;
+  const medPerBird = parseFloat(document.getElementById('medPerBird').value) || 0;
+  const heatPerBird = parseFloat(document.getElementById('heatPerBird').value) || 0;
+  const extraPerBird = parseFloat(document.getElementById('extraPerBird').value) || 0;
+
+  const survivors = chicks * (1 - mortality / 100);
+  const feedPricePerKg = feedPrice / 1000;
+  const totalChickCost = chicks * chickPrice;
+  const medTotal = medPerBird * chicks;
+  const heatTotal = heatPerBird * chicks;
+  const extraTotal = extraPerBird * chicks;
+  const fixedCostPerBird = survivors > 0
+    ? (totalChickCost + medTotal + heatTotal + extraTotal) / survivors
+    : 0;
+
+  return {chicks, survivors, feedPricePerKg, fixedCostPerBird};
+}
+
+function computeProfitMatrix(){
+  const base = baseFixedCostPerBird();
+  const weight = parseFloat(document.getElementById('weight').value) || 0;
+  const showTotal = document.getElementById('showTotal').checked;
+
+  const fcrs = rangeList('fcrFrom','fcrTo','fcrStep', 2);
+  const prices = rangeList('priceFrom','priceTo','priceStep', 2);
+
+  const table = document.getElementById('resultTable1');
+  const costHeader = viewMode === 'bird' ? 'تكلفة/طائر' : 'تكلفة/كيلو';
+  let html = `<thead><tr><th>FCR \\ السعر</th><th>${costHeader}</th>`;
+  prices.forEach(p => html += `<th>${fmt(p,1)}</th>`);
+  html += '</tr></thead><tbody>';
+
+  fcrs.forEach(fcr => {
+    const feedConsumed = fcr * weight;
+    const feedCostPerBird = feedConsumed * base.feedPricePerKg;
+    const costPerBird = base.fixedCostPerBird + feedCostPerBird;
+    const costPerKg = weight > 0 ? costPerBird / weight : 0;
+    html += `<tr><th>${fmt(fcr,2)}</th><td class="cost">
+      <div class="cost-main">${fmt(costPerBird,2)}</div>
+      <div class="cost-kg">كيلو: ${fmt(costPerKg,2)}</div>
+    </td>`;
+    prices.forEach(price => {
+      const revenuePerBird = weight * price;
+      const profitPerBird = revenuePerBird - costPerBird;
+      const profitPerKg = weight > 0 ? profitPerBird / weight : 0;
+      const totalProfit = profitPerBird * base.survivors;
+      const mainValue = viewMode === 'bird' ? profitPerBird : profitPerKg;
+      const cls = mainValue >= 0 ? 'pos' : 'neg';
+      let cell = `<div class="cell-main ${cls}">${fmt(mainValue,2)}</div>`;
+      if(showTotal){
+        cell += `<div class="cell-sub ${cls}">الدورة: ${fmt(totalProfit,0)}</div>`;
+      }
+      html += `<td>${cell}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+
+  const modeLabel = viewMode === 'bird' ? 'الطائر الكامل' : 'الكيلو';
+  document.getElementById('weightBadge').textContent = `الوزن الحالي: ${fmt(weight,2)} كغ`;
+  document.getElementById('baseHint1').textContent =
+    `عدد الطيور المستهدفة: ${fmt(base.survivors,0)} من أصل ${fmt(base.chicks,0)} — سعر كغ العلف: ${fmt(base.feedPricePerKg,2)} جنيه — عرض حسب: ${modeLabel}` + (showTotal ? ' / إجمالي الدورة' : '');
+}
+
+function computeBreakEvenMatrix(){
+  const base = baseFixedCostPerBird();
+  const fcrs = rangeList('fcrFrom','fcrTo','fcrStep', 2);
+  const weights = rangeList('wFrom','wTo','wStep', 2);
+
+  document.getElementById('birdsBadge2').textContent = `عدد الطيور المستهدفة: ${fmt(base.survivors,0)} من أصل ${fmt(base.chicks,0)}`;
+
+  const table = document.getElementById('resultTable2');
+  let html = '<thead><tr><th>FCR \\ الوزن (كغ)</th>';
+  weights.forEach(w => html += `<th>${fmt(w,2)}</th>`);
+  html += '</tr></thead><tbody>';
+
+  fcrs.forEach(fcr => {
+    html += `<tr><th>${fmt(fcr,2)}</th>`;
+    weights.forEach(weight => {
+      const feedConsumed = fcr * weight;
+      const feedCostPerBird = feedConsumed * base.feedPricePerKg;
+      const costPerBird = base.fixedCostPerBird + feedCostPerBird;
+      const breakEvenPerKg = weight > 0 ? costPerBird / weight : 0;
+      html += `<td>
+        <div class="be-main">${fmt(breakEvenPerKg,2)}</div>
+        <div class="be-sub">طائر: ${fmt(costPerBird,2)}</div>
+      </td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function computeAll(){
+  computeProfitMatrix();
+  computeBreakEvenMatrix();
+}
+
+function renderWeightRow(){
+  const row = document.getElementById('weightRow');
+  const customInput = document.getElementById('weightCustom');
+  const currentWeight = parseFloat(document.getElementById('weight').value);
+  row.querySelectorAll('button').forEach(b => b.remove());
+  weightPresets.forEach(w => {
+    const btn = document.createElement('button');
+    btn.textContent = fmt(w,1) + ' كغ';
+    btn.dataset.weight = w;
+    if(Math.abs(w - currentWeight) < 0.001) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      document.getElementById('weight').value = w;
+      customInput.value = '';
+      computeAll();
+    });
+    row.insertBefore(btn, customInput);
+  });
+}
+
+document.getElementById('viewMode').addEventListener('click', e => {
+  if(e.target.tagName !== 'BUTTON') return;
+  viewMode = e.target.dataset.mode;
+  document.querySelectorAll('#viewMode button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  computeProfitMatrix();
+});
+
+document.getElementById('weightCustom').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  if(v > 0){
+    document.getElementById('weight').value = v;
+    computeAll();
+    renderWeightRow();
+  }
+});
+
+document.getElementById('weight').addEventListener('input', renderWeightRow);
+
+document.querySelectorAll('input').forEach(inp => {
+  inp.addEventListener('input', computeAll);
+});
+
+renderWeightRow();
+computeAll();
+</script>
+</body>
+</html>
