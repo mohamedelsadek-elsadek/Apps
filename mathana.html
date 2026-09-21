@@ -840,13 +840,13 @@ const TARGET_META = {starter:{ar:'بادى',full:'البادى'},grower:{ar:'ن�
 const TON=1000, CONC_PERTON=50, CONC_BATCH=500;
 const CONC_FILLER='كسب فول الصويا (تكميلى للمركز)';
 const LSKEY='mathana.v2';
-const APP_VER='1.8';
+const APP_VER='1.9';
 const APP_BUILD='2026-09-19';
 
 /* ================= الحالة ================= */
 let S={cur:'starter',season:'normal',view:'ton',sid:false,mixerKg:500,mixStep:0.05,
   db:JSON.parse(JSON.stringify(SEED_DB)),fx:{},order:[],
-  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,sPrice:0,pickMode:'all',pick:[],prog:{starter:0.55,grower:1.35,finisher:2.10},rossSet:'std_2035',rossPh:{},updatedAt:0};
+  matrix:JSON.parse(JSON.stringify(MATRIX_DEF)),mxOn:false,scen:[],tons:10,bScope:'all',bPrice:0,sPrice:0,pickMode:'all',pick:[],prog:{starter:0.55,grower:1.35,finisher:2.10},rossSet:'std_2035',rossPh:{},delFx:[],updatedAt:0};
 
 /* التركيبات الجاهزة اللى ID بتاعها مش هو نفسه المرحلة */
 const SEED_TARGET={grower_med:'grower',hashem_starter:'starter',hashem_grower:'grower',hashem_finisher:'finisher'};
@@ -871,7 +871,7 @@ function persistOnly(){
       sid:S.sid,mixerKg:S.mixerKg,mixStep:S.mixStep,prog:S.prog,pickMode:S.pickMode,pick:S.pick,
       db:S.db,fx:S.fx,order:S.order,matrix:S.matrix,mxOn:S.mxOn,scen:S.scen,
       tons:S.tons,bScope:S.bScope,bPrice:S.bPrice,sPrice:S.sPrice,
-      rossSet:S.rossSet,rossPh:S.rossPh,updatedAt:S.updatedAt||0}));
+      rossSet:S.rossSet,rossPh:S.rossPh,delFx:S.delFx,updatedAt:S.updatedAt||0}));
   }catch(e){}
 }
 function save(){
@@ -914,6 +914,7 @@ function load(){
   S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.tons=o.tons||10;
   S.bScope=o.bScope||'all'; S.bPrice=o.bPrice?1:0; S.sPrice=o.sPrice?1:0;
   S.pickMode=o.pickMode||'all'; S.pick=Array.isArray(o.pick)?o.pick:[]; S.updatedAt=o.updatedAt||0;
+  S.delFx=Array.isArray(o.delFx)?o.delFx:[];
   S.rossSet=(o.rossSet&&ROSS_SETS[o.rossSet])?o.rossSet:'std_2035';
   S.rossPh=(o.rossPh&&typeof o.rossPh==='object')?o.rossPh:{};
   sortOrder();
@@ -967,6 +968,21 @@ function seedMissingIngredients(){
 }
 /* ترقية مصفوفة الإنزيمات للشكل الجديد: جرعة مرجعية + رصيد البروتياز على
    الأحماض الأمينية المهضومة بدل البروتين الخام */
+/* تركيبات جاهزة اتضافت فى إصدار أحدث: بترجع لو ناقصة من نسخة سحابية أو نسخة
+   احتياطية أقدم — إلا لو المستخدم حذفها بنفسه (S.delFx). */
+function seedMissingFormulas(){
+  let ch=false;
+  const sd=buildSeedFormulas();
+  Object.keys(sd.fx).forEach(k=>{
+    if(S.fx[k]) return;
+    if((S.delFx||[]).indexOf(k)>=0) return;
+    S.fx[k]=sd.fx[k];
+    if(S.order.indexOf(k)<0) S.order.push(k);
+    ch=true;
+  });
+  if(ch&&typeof sortOrder==='function') sortOrder();
+  return ch;
+}
 function migrateMatrix(){
   let ch=false;
   Object.keys(MATRIX_DEF).forEach(k=>{
@@ -985,6 +1001,7 @@ function runMigrations(){
   let ch=false;
   MERGES.forEach(m=>{ if(mergeIngredient(m[0],m[1])) ch=true; });
   if(seedMissingIngredients()) ch=true;
+  if(seedMissingFormulas()) ch=true;
   if(migrateMatrix()) ch=true;
   return ch;
 }
@@ -1361,7 +1378,8 @@ function renderMix(){
   if(zp.length)
     al.push(`<div class="banner warn"><b>${zp.length}</b> مكون بسعر صفر —
       التكلفة أقل من الحقيقة. دخّل أسعارك فى «الخامات والأسعار».</div>`);
-  if(f.cpAuto&&f.cpCap)
+  /* منعرضش التحذير لو الفرق أقل من 0.05% — ده تقريب أرقام مش عجز حقيقى */
+  if(f.cpAuto&&f.cpCap&&Math.abs(analyze(id).CP-(+f.cpTarget||0))>0.0005)
     al.unshift(`<div class="banner bad">مقدرش يوصل لبروتين ${((+f.cpTarget)*100).toFixed(2)}% —
       الصويا وصلت الحد الأقصى المتاح. المتاح دلوقتى
       ${(analyze(id).CP*100).toFixed(2)}%. قلّل بند من المركز أو غيّر الهدف.</div>`);
@@ -2713,6 +2731,7 @@ function delFx(){
   const f=F();
   if(S.order.length<=1){ toast('لازم تفضل تركيبة واحدة على الأقل',true); return; }
   if(!confirm(`حذف تركيبة "${f.ar}" نهائى؟`)) return;
+  if(SEED_FORMULAS[S.cur]&&(S.delFx||[]).indexOf(S.cur)<0) S.delFx.push(S.cur);
   delete S.fx[S.cur];
   S.order=S.order.filter(x=>x!==S.cur);
   S.cur=S.order[0];
@@ -2981,7 +3000,8 @@ function textFxSide(ids,scope,showPrices,pick){
 function exportBackup(){
   const data={app:'mathana',ver:3,at:new Date().toISOString(),
     db:S.db,fx:S.fx,order:S.order,matrix:S.matrix,mxOn:S.mxOn,scen:S.scen,
-    season:S.season,sid:S.sid,mixerKg:S.mixerKg,mixStep:S.mixStep,prog:S.prog,tons:S.tons};
+    season:S.season,sid:S.sid,mixerKg:S.mixerKg,mixStep:S.mixStep,prog:S.prog,tons:S.tons,
+    delFx:S.delFx};
   const blob=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});
   const nm='mathana-نسخة-'+today()+'.json';
   const u=URL.createObjectURL(blob),a=document.createElement('a');
@@ -3005,8 +3025,9 @@ function importBackup(file){
     S.mxOn=!!o.mxOn; S.scen=o.scen||[]; S.season=o.season||'normal';
     S.sid=!!o.sid; S.mixerKg=o.mixerKg||500; S.mixStep=o.mixStep||0.05;
     S.prog=Object.assign({},S.prog,o.prog||{}); S.tons=o.tons||10;
+    S.delFx=Array.isArray(o.delFx)?o.delFx:[];
     if(!S.fx[S.cur]) S.cur=S.order[0];
-    runMigrations();
+    runMigrations(); ensureDefaults();
     save(); renderMix(); showView('mix'); toast('اترجعت النسخة');
   };
   rd.onerror=()=>toast('فشل قراءة الملف',true);
@@ -3262,7 +3283,8 @@ function payload(){
     season    : S.season,
     view      : S.view,
     cur       : S.cur,
-    tons      : S.tons
+    tons      : S.tons,
+    delFx     : S.delFx
   };
 }
 
@@ -3290,10 +3312,13 @@ function applyCloud(c){
   S.tons   = c.tons || 10;
   if(c.cur && S.fx[c.cur]) S.cur = c.cur;
   if(!S.fx[S.cur]) S.cur = S.order[0];
+  S.delFx  = Array.isArray(c.delFx) ? c.delFx : (S.delFx||[]);
   S.updatedAt = c.updatedAt || 0;
+  /* الترقيات الأول: السحابة ممكن تكون نسخة أقدم من إصدار البرنامج،
+     فالخامات والتركيبات الجاهزة الجديدة لازم ترجع قبل حساب الافتراضيات */
+  if(typeof runMigrations==='function') runMigrations();
   if(typeof ensureDefaults==='function') ensureDefaults();
   else if(typeof sortOrder==='function') sortOrder();
-  if(typeof runMigrations==='function') runMigrations();
   persistOnly();
   const sel = $('#season'); if(sel) sel.value = S.season;
   renderMix();
