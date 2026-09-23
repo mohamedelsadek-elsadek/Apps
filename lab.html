@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Poultry Lab Submission and Results System - manage sample submissions, PCR and serology results, GMT/CV analysis and reports across partner laboratories.">
 <meta name="color-scheme" content="light dark">
-<title>Poultry Lab System v2.9</title>
+<title>Poultry Lab System v2.12</title>
 <style>
 /* ============================================================
    THEME TOKENS  (light default + dark override)
@@ -86,6 +86,11 @@ a{color:var(--blue)}
 .savepill.show{opacity:1}
 .savepill .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
 .tb-icon{background:none;border:none;color:var(--ink-2);cursor:pointer;padding:6px;border-radius:8px;display:flex}
+.ver-chip{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
+.ver-chip:hover{border-color:var(--amber)}
+.ver-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 auto}
+.ver-dot.ok{background:#16a34a}.ver-dot.err{background:#dc2626}.ver-dot.local{background:#9aa4b2}.ver-dot.busy{background:#f5a623}
+@media(max-width:600px){.ver-chip #syncWord{display:none}}
 .tb-icon:hover{background:var(--surface-2);color:var(--ink)}
 .tb-icon svg{width:19px;height:19px}
 .user{display:flex;align-items:center;gap:9px}
@@ -344,6 +349,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
       <button data-view="dash" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span data-i18n="nav.dash">Dashboard</span></button>
       <button data-view="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 11v6M9 14h6"/></svg><span data-i18n="nav.new">New Submission</span></button>
       <button data-view="my"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span data-i18n="nav.my">My Submissions</span></button>
+      <button data-view="flock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M8 12h8M8 15h5"/></svg><span data-i18n="nav.flock">Flock Files</span></button>
       <button data-view="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span data-i18n="nav.reports">Reports</span></button>
       <button data-view="deventer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 2h6M12 2v4M5 10a7 7 0 1014 0 7 7 0 00-14 0zM12 10v4l2 2"/></svg><span data-i18n="nav.deventer">Deventer</span></button>
       <button data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7 1.1V21a2 2 0 11-4 0v-.1A1.6 1.6 0 006 19.4l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.6 1.6 0 003 15H3a2 2 0 110-4h.1A1.6 1.6 0 004.6 9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9.3A1.6 1.6 0 0011 4.6V4a2 2 0 114 0v.1a1.6 1.6 0 002.7 1.1l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V11a2 2 0 110 4h-.1z"/></svg><span data-i18n="nav.settings">Settings</span></button>
@@ -352,7 +358,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
       <button class="theme-toggle" id="langBtn" aria-label="Toggle language" style="margin-bottom:8px"><span>&#127760;</span><span id="langLbl">العربية</span></button>
       <button class="theme-toggle" id="themeBtn" aria-label="Toggle theme"><span id="themeIco"></span><span id="themeLbl">Dark mode</span></button>
       <button class="theme-toggle" id="updateBtn" aria-label="Check for updates" style="margin-top:8px"><span>&#8635;</span><span data-i18n="upd.check">Check for updates</span></button>
-      <div class="ver" id="verLabel">Version 2.9.2</div>
+      <div class="ver" id="verLabel">Version 2.12.1</div>
       <div class="ver" id="updMsg" style="font-size:10px;margin-top:2px"></div>
     </div>
   </aside>
@@ -364,6 +370,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
       <button class="hamb" id="hamb" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="search-btn" id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span data-i18n="search.everything">Search everything...</span><span class="kbd">Ctrl K</span></button>
       <div class="tb-right">
+        <button class="ver-chip" id="verChip" title="Version &amp; sync status"><span id="verChipV">v2.12.1</span><span class="ver-dot" id="syncDot"></span><span id="syncWord"></span></button>
         <div class="savepill" id="savePill"><span class="dot"></span>Saved</div>
         <button class="tb-icon" id="themeBtn2" aria-label="Toggle theme" title="Toggle theme"><span id="themeIco2"></span></button>
         <button class="tb-icon" id="helpBtn" aria-label="Keyboard shortcuts" title="Shortcuts (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
@@ -405,9 +412,10 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
       <section id="v-new" class="view">
         <div class="page-h"><h2 data-i18n="new.title">New Submission</h2><p data-i18n="new.sub">Client &amp; sample &rarr; choose lab &rarr; lab form &amp; tests.</p></div>
         <div class="card"><h3 data-i18n="new.s1">1 &middot; Client &amp; Sample</h3>
-          <div class="row">
+          <div class="row3">
             <div class="fld"><label data-i18n="new.company">Company / Client name *</label><input id="f_company" list="dl_company" data-i18n-ph="ph.company" placeholder="e.g. Fakieh / Aryash"><datalist id="dl_company"></datalist></div>
             <div class="fld"><label data-i18n="new.farm">Farm name *</label><input id="f_farm" list="dl_farm" placeholder="e.g. Akhaween Farm"><datalist id="dl_farm"></datalist></div>
+            <div class="fld"><label data-i18n="new.cycle">Cycle / Flock</label><input id="f_cycle" list="dl_cycle" placeholder="e.g. Cycle 5 / 2026-A"><datalist id="dl_cycle"></datalist></div>
           </div>
           <div class="row3">
             <div class="fld"><label data-i18n="new.date">Sample date</label><input id="f_date" type="date"></div>
@@ -475,6 +483,58 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
           <div class="empty" id="myEmpty" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg><div data-i18n="my.empty">No submissions match your filters.</div></div>
           <div class="pager" id="myPager"></div>
         </div>
+      </section>
+
+      <!-- FLOCK FILES -->
+      <section id="v-flock" class="view">
+        <div class="page-h"><h2 data-i18n="flock.title">Flock Files</h2><p data-i18n="flock.sub">A cumulative file per cycle, farm and company - serology, PCR, bacteriology and feed/water results grouped and averaged over time.</p></div>
+        <div class="card">
+          <div class="row3">
+            <div class="fld"><label data-i18n="flock.company">Company</label><select id="fk_company"><option value="" data-i18n="flock.all">- All -</option></select></div>
+            <div class="fld"><label data-i18n="flock.farm">Farm</label><select id="fk_farm"><option value="" data-i18n="flock.all">- All -</option></select></div>
+            <div class="fld"><label data-i18n="flock.cycle">Cycle / Flock</label><select id="fk_cycle"><option value="" data-i18n="flock.all">- All -</option></select></div>
+          </div>
+          <div class="row3">
+            <div class="fld"><label data-i18n="flock.type">Analysis type</label><select id="fk_type">
+              <option value="all" data-i18n="flock.tAll">All</option>
+              <option value="Serology" data-i18n="flock.tSero">Serology</option>
+              <option value="PCR" data-i18n="flock.tPcr">PCR</option>
+              <option value="Bacteriology" data-i18n="flock.tBact">Bacteriology</option>
+              <option value="FeedWater" data-i18n="flock.tFeed">Feed &amp; Water</option></select></div>
+            <div class="fld"><label data-i18n="flock.disease">Disease / parameter</label><select id="fk_disease"><option value="" data-i18n="flock.all">- All -</option></select></div>
+            <div class="fld" style="display:flex;align-items:flex-end;gap:8px">
+              <button class="btn" id="fk_build" style="flex:1" data-i18n="flock.build">Build file</button>
+              <button class="btn ghost" id="fk_print" data-i18n="flock.print">Print</button></div>
+          </div>
+        </div>
+        <div class="card" id="fk_manualCard">
+          <h3 data-i18n="flock.manualTitle">Add a result (serology / PCR / bacteriology / feed &amp; water)</h3>
+          <p class="hint" data-i18n="flock.manualHint" style="margin-bottom:10px">Enter results here and they become real samples under the chosen lab - they appear in My Submissions, the Dashboard, Reports and this flock file, all together.</p>
+          <div class="row3">
+            <div class="fld"><label data-i18n="flock.mCompany">Company</label><input id="mk_company" list="dl_company"></div>
+            <div class="fld"><label data-i18n="flock.mFarm">Farm</label><input id="mk_farm" list="dl_farm"></div>
+            <div class="fld"><label data-i18n="flock.mCycle">Cycle</label><input id="mk_cycle" list="dl_cycle"></div>
+          </div>
+          <div class="row3">
+            <div class="fld"><label data-i18n="flock.mLab">Laboratory</label><select id="mk_lab"></select></div>
+            <div class="fld"><label data-i18n="flock.mType">Type</label><select id="mk_type">
+              <option value="Serology" data-i18n="flock.tSero">Serology</option>
+              <option value="PCR" data-i18n="flock.tPcr">PCR</option>
+              <option value="Bacteriology" data-i18n="flock.tBact">Bacteriology</option>
+              <option value="FeedWater" data-i18n="flock.tFeed">Feed &amp; Water</option></select></div>
+            <div class="fld"><label data-i18n="flock.mDate">Date</label><input id="mk_date" type="date"></div>
+          </div>
+          <div class="row3">
+            <div class="fld"><label data-i18n="flock.mAge">Age (days)</label><input id="mk_age" type="number" min="0"></div>
+            <div class="fld"></div><div class="fld"></div>
+          </div>
+          <div id="mk_dyn"></div>
+          <div class="btnrow"><button class="btn" id="mk_add" data-i18n="flock.mAdd">Add record</button>
+            <button class="btn ghost" id="mk_cancel" style="display:none" data-i18n="flock.mCancel">Cancel edit</button>
+            <span id="mk_msg" class="hint"></span></div>
+        </div>
+        <div class="card" id="mk_listCard" style="display:none"><h3 data-i18n="flock.listTitle">Manual records (edit / delete)</h3><div id="mk_list"></div></div>
+        <div id="flockResult"></div>
       </section>
 
       <!-- REPORTS -->
@@ -586,7 +646,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 
 
       <div class="foot">
-        Poultry Lab System v2.9 &middot; Local working copy - all data is saved in this browser only. Attachments are stored as links.<br>
+        Poultry Lab System v2.12 &middot; Local working copy - all data is saved in this browser only. Attachments are stored as links.<br>
         Labs: Vetbio Global (KSA) &middot; Royal GD (NL) &middot; ANICON/SAN Group (DE) &middot; x-OvO Flockscreen.
       </div>
     </div>
@@ -601,7 +661,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 <script>
 "use strict";
 /* Build metadata - single source of truth for version display + update checks */
-const BUILD={version:"2.9.2",date:"2026-07-02",label:"v2.9.2 (2026-07-02)"};
+const BUILD={version:"2.12.1",date:"2026-09-23",label:"v2.12.1 (2026-09-23)"};
 /* Geography data: Egypt (governorate -> cities) + Saudi Arabia (region -> governorate -> cities)
    Postal codes: Egypt uses per-governorate representative codes; KSA uses region-level short codes.
    Compiled offline. Not exhaustive to every village; covers governorates/regions and major cities. */
@@ -856,7 +916,7 @@ const STATUSES=["New","Shipped","Processing","ResultReady","Complete"];
    STORE : persistence + autosave signal + audit trail
    ============================================================================ */
 const Store=(()=>{
-  const K="poultry_lab_system_v1", CK="poultry_lab_config_v1", AK="poultry_lab_audit_v1", TK="poultry_lab_tomb_v1";
+  const K="poultry_lab_system_v1", CK="poultry_lab_config_v1", AK="poultry_lab_audit_v1", TK="poultry_lab_tomb_v1", FK="poultry_flock_records_v1";
   const DEFAULT_CONFIG={
     companies:["Akhaween","Aryash","Fakieh","Astra","Almarai"],
     farms:["Akhaween Farm","Aryash Farm","Fakieh Farm","AstraPOL Farm"],
@@ -864,22 +924,24 @@ const Store=(()=>{
     diseases:["IB","ND","IBD","H9","AI","ART","Reovirus","MG","MS","ILT","Marek","Coryza","Chlamydia","Histomonas","FAdV","CAV","Other"],
     regions:[],
     managers:[],
+    cycles:[],
     extraTests:{},customLabs:{}
   };
-  let DB=[], CONFIG={}, AUDIT=[], TOMB={};
+  let DB=[], CONFIG={}, AUDIT=[], TOMB={}, FLOCK=[];
   function loadDB(){try{return JSON.parse(localStorage.getItem(K)||"[]");}catch(e){return[];}}
   function loadCfg(){try{return Object.assign({},DEFAULT_CONFIG,JSON.parse(localStorage.getItem(CK)||"{}"));}catch(e){return JSON.parse(JSON.stringify(DEFAULT_CONFIG));}}
   function loadAudit(){try{return JSON.parse(localStorage.getItem(AK)||"[]");}catch(e){return[];}}
   function loadTomb(){try{return JSON.parse(localStorage.getItem(TK)||"{}");}catch(e){return{};}}
-  function persist(){try{localStorage.setItem(K,JSON.stringify(DB));localStorage.setItem(CK,JSON.stringify(CONFIG));localStorage.setItem(AK,JSON.stringify(AUDIT.slice(0,60)));localStorage.setItem(TK,JSON.stringify(TOMB));signalSaved();if(typeof Sync!=="undefined")Sync.schedulePush();}catch(e){Toast.show("Storage full - export a backup and clear old records.","err");}}
+  function loadFlock(){try{return JSON.parse(localStorage.getItem(FK)||"[]");}catch(e){return[];}}
+  function persist(){try{localStorage.setItem(K,JSON.stringify(DB));localStorage.setItem(CK,JSON.stringify(CONFIG));localStorage.setItem(AK,JSON.stringify(AUDIT.slice(0,60)));localStorage.setItem(TK,JSON.stringify(TOMB));localStorage.setItem(FK,JSON.stringify(FLOCK));signalSaved();if(typeof Sync!=="undefined")Sync.schedulePush();}catch(e){Toast.show("Storage full - export a backup and clear old records.","err");}}
   let pillTimer;
   function signalSaved(){const p=el("savePill");if(!p)return;p.classList.add("show");clearTimeout(pillTimer);pillTimer=setTimeout(()=>p.classList.remove("show"),1400);}
   function log(action,detail){AUDIT.unshift({ts:new Date().toISOString(),action,detail});}
   return {
-    init(){DB=loadDB();CONFIG=loadCfg();AUDIT=loadAudit();TOMB=loadTomb();},
-    reset(){DB=[];CONFIG=JSON.parse(JSON.stringify(DEFAULT_CONFIG));AUDIT=[];TOMB={};persist();},
-    db:()=>DB, cfg:()=>CONFIG, audit:()=>AUDIT, tomb:()=>TOMB,
-    setDB(v){DB=v;}, setCfg(v){CONFIG=Object.assign({},DEFAULT_CONFIG,v);},
+    init(){DB=loadDB();CONFIG=loadCfg();AUDIT=loadAudit();TOMB=loadTomb();FLOCK=loadFlock();},
+    reset(){DB=[];CONFIG=JSON.parse(JSON.stringify(DEFAULT_CONFIG));AUDIT=[];TOMB={};FLOCK=[];persist();},
+    db:()=>DB, cfg:()=>CONFIG, audit:()=>AUDIT, tomb:()=>TOMB, flock:()=>FLOCK,
+    setDB(v){DB=v;}, setCfg(v){CONFIG=Object.assign({},DEFAULT_CONFIG,v);}, setFlock(v){FLOCK=Array.isArray(v)?v:[];},
     tombstone(id){TOMB[id]=Date.now();},
     save(action,detail){if(action)log(action,detail);persist();},
     DEFAULT_CONFIG
@@ -976,7 +1038,16 @@ const Lang=(()=>{
   const DICT={
     ar:{
       "nav.dash":"لوحة التحكم","nav.new":"عينة جديدة","nav.my":"عيناتي",
-      "nav.reports":"التقارير","nav.settings":"الإعدادات","nav.deventer":"Deventer",
+      "nav.reports":"التقارير","nav.settings":"الإعدادات","nav.deventer":"Deventer","nav.flock":"ملفات المزارع",
+      "flock.title":"ملفات المزارع","flock.sub":"ملف تراكمي لكل دورة ومزرعة وشركة - نتائج السيرولوجي والـ PCR والبكتريولوجي والعلف/المياه مجمّعة ومتوسّطة عبر الوقت.",
+      "flock.company":"الشركة","flock.farm":"المزرعة","flock.cycle":"الدورة / القطيع","flock.all":"- الكل -",
+      "flock.type":"نوع التحليل","flock.tAll":"الكل","flock.tSero":"سيرولوجي","flock.tPcr":"PCR","flock.tBact":"بكتريولوجي","flock.tFeed":"علف ومياه",
+      "flock.disease":"المرض / البيان","flock.build":"بناء الملف","flock.print":"طباعة",
+      "flock.manualTitle":"إضافة نتيجة يدوية (علف / مياه / بكتريولوجي / سيرولوجي سريع)",
+      "flock.manualHint":"للنتائج اللي مش مدخّلة كعينات معمل - تحاليل العلف والمياه، عزلات البكتريا، أو ملخص titre سريع. بتنضم لنفس ملف المزرعة.",
+      "flock.mCompany":"الشركة","flock.mFarm":"المزرعة","flock.mCycle":"الدورة","flock.mLab":"المعمل","flock.mType":"النوع","flock.mDate":"التاريخ","flock.mAge":"العمر (يوم)",
+      "flock.mParam":"البيان / المرض / العزلة","flock.mValue":"القيمة / النتيجة","flock.mUnit":"الوحدة / ملاحظة","flock.mAdd":"إضافة سجل",
+      "flock.mCancel":"إلغاء التعديل","flock.listTitle":"السجلات اليدوية (تعديل / حذف)",
       "search.everything":"ابحث عن أي شيء...",
       "dash.title":"لوحة التحكم","dash.sub":"نظرة حية على المعامل الشريكة.",
       "dash.qnew":"عينة جديدة","dash.qnewd":"إنشاء طلب","dash.qmy":"عيناتي","dash.qmyd":"إدخال النتائج",
@@ -1005,7 +1076,7 @@ const Lang=(()=>{
       "new.s1":"1 \u00b7 العميل والعينة","new.s2":"2 \u00b7 اختر المعمل","new.s4":"4 \u00b7 الاختبارات المطلوبة",
       "ph.company":"مثال: الفقيه / أرياش","new.company":"اسم الشركة / العميل *","new.farm":"اسم المزرعة *","new.sampleDesc":"وصف العينة",
       "new.code":"كود العينة","new.codeHint":"تلقائي من التاريخ + رقم العينة + المعمل + العميل + مدير المنطقة. قابل للتعديل.",
-      "new.date":"تاريخ العينة","new.sampleNo":"رقم العينة","new.manager":"مدير المنطقة",
+      "new.date":"تاريخ العينة","new.sampleNo":"رقم العينة","new.manager":"مدير المنطقة","new.cycle":"الدورة / القطيع",
       "new.cmethod":"طريقة التواصل","new.cdetails":"بيانات التواصل","new.location":"الموقع (رابط خريطة / عنوان)",
       "new.gps":"استخدم موقع GPS الحالي","new.birdType":"نوع الطائر","new.age":"العمر عند أخذ العينة (يوم)",
       "new.region":"المنطقة / المحافظة (نص حر)","new.lab":"المعمل *","new.testsHint":"كل اختبار موسوم PCR أو Serology - وده بيحدد طريقة إدخال النتيجة.",
@@ -1058,7 +1129,7 @@ const Lang=(()=>{
     const lbl=el("langLbl");if(lbl)lbl.textContent=rtl?"English":"العربية";
   }
   function get(){return localStorage.getItem(LK)||"en";}
-  function toggle(){const l=get()==="ar"?"en":"ar";localStorage.setItem(LK,l);apply(l);renderMy&&renderMy();renderReports&&renderReports();renderDash&&renderDash();}
+  function toggle(){const l=get()==="ar"?"en":"ar";localStorage.setItem(LK,l);apply(l);renderMy&&renderMy();renderReports&&renderReports();renderDash&&renderDash();if(typeof setTopSync==="function")setTopSync();}
   return{init(){apply(get());},toggle,current:get,t,STATUS_AR,DICT};
 })();
 
@@ -1100,7 +1171,8 @@ const Sync=(()=>{
   function saveCfg(c){cfg=c;localStorage.setItem(CFGK,JSON.stringify(c));}
   function enabled(){return !!(cfg&&cfg.url);}
   function base(){let u=cfg.url.replace(/\/$/,"");const p=cfg.path?("/"+cfg.path.replace(/^\/|\/$/g,"")):"/poultryLab";return u+p;}
-  function status(msg,kind){const e=el("syncStatus");if(e){e.textContent=msg;e.style.color=kind==="err"?"var(--red)":kind==="ok"?"var(--green)":"var(--muted)";}}
+  function status(msg,kind){const e=el("syncStatus");if(e){e.textContent=msg;e.style.color=kind==="err"?"var(--red)":kind==="ok"?"var(--green)":"var(--muted)";}
+    setTopSync(kind==="ok"?"ok":kind==="err"?"err":"busy");}
   async function pull(){
     if(!enabled())return null;
     const r=await fetch(base()+".json"+(cfg.auth?("?auth="+encodeURIComponent(cfg.auth)):""));
@@ -1132,15 +1204,19 @@ const Sync=(()=>{
     const allTomb=Store.tomb();
     for(let i=local.length-1;i>=0;i--){if(allTomb[local[i].id]){local.splice(i,1);removed++;}}
     // merge config lists (union)
-    if(remote.cfg){const c=CONFIG();["companies","farms","regions","contactMethods","diseases"].forEach(k=>{
-      (remote.cfg[k]||[]).forEach(v=>{if(v&&!c[k].includes(v))c[k].push(v);});});
+    if(remote.cfg){const c=CONFIG();["companies","farms","regions","contactMethods","diseases","managers","cycles"].forEach(k=>{
+      c[k]=c[k]||[];(remote.cfg[k]||[]).forEach(v=>{if(v&&!c[k].includes(v))c[k].push(v);});});
       if(remote.cfg.customLabs)Object.assign(c.customLabs,remote.cfg.customLabs);
       if(remote.cfg.extraTests)Object.assign(c.extraTests,remote.cfg.extraTests);}
+    // merge manual flock records (union by id)
+    if(remote.flock){const fl=Store.flock(),haveId={};fl.forEach(x=>haveId[x.id]=1);
+      Object.values(remote.flock).forEach(rec=>{if(rec&&rec.id&&!haveId[rec.id]){fl.push(rec);haveId[rec.id]=1;}});}
     return{added,updated,removed};
   }
   function buildPayload(){
     const subs={};DB().forEach(s=>{subs[s.id]=s;});
-    return{subs,tomb:Store.tomb(),cfg:CONFIG(),_ts:Date.now()};
+    const flock={};Store.flock().forEach(r=>{if(r&&r.id)flock[r.id]=r;});
+    return{subs,tomb:Store.tomb(),cfg:CONFIG(),flock,_ts:Date.now()};
   }
   async function syncNow(silent){
     if(!enabled()){if(!silent)Toast.show(Lang.current()==="ar"?"فعّل المزامنة أولاً من الإعدادات.":"Enable sync first in Settings.","warn");return;}
@@ -1162,7 +1238,7 @@ const Sync=(()=>{
   }
   return{init(){cfg=loadCfg();},enabled,saveCfg,getCfg:()=>cfg,syncNow,schedulePush,status};
 })();
-const VIEWS=["dash","new","my","reports","deventer","settings"];
+const VIEWS=["dash","new","my","flock","reports","deventer","settings"];
 function go(v){
   if(!VIEWS.includes(v))v="dash";
   $$(".sb-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
@@ -1174,6 +1250,7 @@ function go(v){
   if(v==="settings")renderSettings();
   if(v==="new")initNewForm();
   if(v==="deventer")initDeventerView();
+  if(v==="flock")initFlockView();
   closeSidebar();window.scrollTo(0,0);
 }
 
@@ -1188,6 +1265,7 @@ function initNewForm(){
   const labSel=el("f_lab");
   labSel.innerHTML=`<option value="">- Select a laboratory -</option>`+Object.keys(allLabs()).map(k=>`<option value="${k}">${esc(getLab(k).full)}</option>`).join("");
   el("dl_manager").innerHTML=(CONFIG().managers||[]).map(c=>`<option value="${esc(c)}">`).join("");
+  el("dl_cycle")&&(el("dl_cycle").innerHTML=(CONFIG().cycles||[]).map(c=>`<option value="${esc(c)}">`).join(""));
   if(el("f_date")&&!el("f_date").value)el("f_date").value=today();
   initGeo();
 }
@@ -1342,7 +1420,9 @@ function saveSubmission(){
   const cityPair=val("f_city"),city=geoName(cityPair);
   const postal=val("f_postal");
   const code=val("f_code")||suggestCode();
-  DB().unshift({id:uid(),code,company,farm,sample:val("f_sample"),cmethod:val("f_cmethod"),cvalue:val("f_cvalue"),
+  const cycle=val("f_cycle");
+  if(cycle&&!(cfg.cycles||(cfg.cycles=[])).includes(cycle))cfg.cycles.push(cycle);
+  DB().unshift({id:uid(),code,company,farm,cycle,sample:val("f_sample"),cmethod:val("f_cmethod"),cvalue:val("f_cvalue"),
     location:val("f_location"),birdType:val("f_birdtype"),ageDays:val("f_age"),region,manager,sampleNo:val("f_sampleno"),
     country,city,postal,lab,form,tests,status:"New",created:sampleDate,results:{},reportLink:"",updatedAt:Date.now()});
   Store.save("create","Created "+code);
@@ -1350,7 +1430,7 @@ function saveSubmission(){
   resetForm();go("my");
 }
 function resetForm(){
-  ["f_company","f_farm","f_sample","f_code","f_cvalue","f_location","f_age","f_region","f_sampleno","f_manager","f_postal"].forEach(id=>el(id)&&(el(id).value=""));
+  ["f_company","f_farm","f_cycle","f_sample","f_code","f_cvalue","f_location","f_age","f_region","f_sampleno","f_manager","f_postal"].forEach(id=>el(id)&&(el(id).value=""));
   el("f_lab").value="";el("f_birdtype").value="";el("f_code").dataset.auto="1";el("gpsMsg").textContent="";el("saveMsg").textContent="";
   if(el("f_date"))el("f_date").value=today();
   if(el("f_country")){el("f_country").value="";onCountryChange();}
@@ -2286,19 +2366,440 @@ function renderDeventerDash(){
     <div class="hint" style="margin-top:4px;color:var(--amber-d)">${ar?"معادلة Deventer (de Wit) - تفترض معايرة IDEXX. أكّد بضغط العدوى الحقلي والحالة الإكلينيكية.":"Deventer (de Wit) formula - assumes IDEXX calibration. Confirm with field pressure and clinical status."}</div></div>`;
 }
 
+/* ============================================================================
+   FLOCK FILES - cumulative file per cycle / farm / company.
+   Merges results from lab submissions with manually entered records
+   (feed/water/bacteriology/quick serology). Groups by analysis type and
+   disease/parameter, orders chronologically with age, and averages serology.
+   ============================================================================ */
+function flockRecords(){return Store.flock();}
+/* One-time migration: convert old separate flock records into real submissions */
+function migrateFlockRecords(){
+  const old=Store.flock();if(!old||!old.length)return;
+  old.forEach(m=>{
+    const lab=Object.keys(allLabs())[0];const ty=m.type||"FeedWater";let tid,result;
+    if(ty==="Serology"){const dis=m.param||"Other",assay=m.assay||"HI";
+      tid=ensureManualTest(lab,dis+" "+assay,"Serology",dis,"Serology");
+      const st=(m.gmt!=null)?{gmt:m.gmt,cv:m.cv||0,mean:m.mean||0,n:m.n||0,min:m.min||0,max:m.max||0}:null;
+      result={assay,n:m.n||0,titres:(m.titres||[]).map(String),stats:st,note:""};
+    }else if(ty==="PCR"){const dis=m.disease||m.paramDisease||m.param||"Other";
+      tid=ensureManualTest(lab,m.param||(dis+" PCR"),"PCR",dis,"PCR");
+      result={detected:m.detected||"",ct:m.ct||"",typing:m.typing||"",serotyping:""};
+    }else if(ty==="Bacteriology"){tid=ensureManualTest(lab,"BACT: "+(m.param||"Isolate"),"PCR","Other","Bacteriology");
+      result={detected:m.detected||"",value:m.value||"",unit:m.unit||"",ct:"",typing:""};
+    }else{tid=ensureManualTest(lab,"FEED/WATER: "+(m.param||"Item"),"PCR","Other","FeedWater");
+      result={value:m.value||"",unit:m.unit||""};}
+    DB().unshift({id:m.id||uid(),origin:"manual",company:m.company||"",farm:m.farm||"",cycle:m.cycle||"",lab,
+      code:manualCode(lab,m.farm,m.date),sample:"",cmethod:"",cvalue:"",location:"",birdType:"",ageDays:m.age||"",
+      region:"",manager:"",tests:[tid],results:{[tid]:result},status:"Complete",created:m.date||today(),reportLink:"",updatedAt:Date.now()});
+  });
+  Store.setFlock([]);
+  Store.save("migrate","Migrated "+old.length+" flock records to samples");
+}
+/* Classify a submission test into a flock analysis type */
+function flockTypeOf(t){
+  if(!t)return "PCR";
+  if(t.cat)return t.cat; // manual tests carry an explicit category
+  if(t.m==="Serology")return "Serology";
+  const id=(t.id||"").toLowerCase(),nm=(t.n||"").toLowerCase();
+  if(id.indexOf("bact")===0||/isolation|sensitivity|bacteria|antibiogram/.test(nm))return "Bacteriology";
+  return "PCR";
+}
+/* Flatten ALL submissions into a unified record list (manual entries are
+   stored as real submissions with origin:"manual", so they flow through too). */
+function flockAllRecords(){
+  const out=[];
+  DB().forEach(s=>{
+    const cat=labTests(s.lab);
+    Object.keys(s.results||{}).forEach(tid=>{
+      const t=cat.find(x=>x.id===tid)||{n:tid,m:"PCR",d:"Other"};
+      const r=s.results[tid];const type=flockTypeOf(t);
+      const rec={src:"sub",id:s.id,company:s.company||"",farm:s.farm||"",cycle:s.cycle||"",
+        date:s.created||"",age:s.ageDays||"",type,disease:t.d||"Other",name:t.n||tid,lab:s.lab,code:s.code,manual:s.origin==="manual"};
+      if(type==="Serology"&&r.stats){rec.assay=r.assay||"ELISA";rec.gmt=r.stats.gmt;rec.cv=r.stats.cv;rec.mean=r.stats.mean;rec.n=r.stats.n;rec.max=r.stats.max;rec.min=r.stats.min;rec.value="GMT "+Math.round(r.stats.gmt)+" (n="+r.stats.n+")";}
+      else if(type==="FeedWater"){rec.value=r.value||"";rec.unit=r.unit||"";}
+      else{rec.detected=r.detected||"";rec.ct=r.ct||"";rec.typing=r.typing||"";rec.serotyping=r.serotyping||"";rec.unit=r.unit||r.note||"";
+        rec.value=r.detected==="pos"?"Detected":r.detected==="neg"?"Not detected":(r.value||"");}
+      out.push(rec);
+    });
+  });
+  return out;
+}
+/* Ensure a test exists in the chosen lab's catalog (via extraTests) and return its id.
+   This makes manual entries first-class: they appear across My Submissions, Dashboard,
+   Reports and the flock file exactly like any lab test. */
+function ensureManualTest(lab,name,method,disease,cat){
+  const found=labTests(lab).find(x=>x.m===method&&x.d===disease&&x.n===name&&(x.cat||flockTypeOf(x))===cat);
+  if(found)return found.id;
+  const cfg=CONFIG();cfg.extraTests=cfg.extraTests||{};cfg.extraTests[lab]=cfg.extraTests[lab]||[];
+  const t={id:"mt_"+uid(),n:name,m:method,d:disease,cat};
+  cfg.extraTests[lab].push(t);
+  return t.id;
+}
+function fkUniq(arr){return [...new Set(arr.filter(x=>x!==""&&x!=null))].sort();}
+function initFlockView(){
+  const recs=flockAllRecords();
+  const fill=(id,vals)=>{const s=el(id);if(!s)return;const cur=s.value;
+    s.innerHTML=`<option value="">${Lang.current()==="ar"?"- الكل -":"- All -"}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+    if([...s.options].some(o=>o.value===cur))s.value=cur;else s.value="";};
+  const co=el("fk_company")?el("fk_company").value:"";
+  const fa=el("fk_farm")?el("fk_farm").value:"";
+  fill("fk_company",fkUniq(recs.map(r=>r.company)));
+  fill("fk_farm",fkUniq(recs.filter(r=>!co||r.company===co).map(r=>r.farm)));
+  fill("fk_cycle",fkUniq(recs.filter(r=>(!co||r.company===co)&&(!fa||r.farm===fa)).map(r=>r.cycle)));
+  fill("fk_disease",fkUniq(recs.map(r=>r.disease)));
+  el("dl_company")&&(el("dl_company").innerHTML=CONFIG().companies.map(c=>`<option value="${esc(c)}">`).join(""));
+  el("dl_farm")&&(el("dl_farm").innerHTML=CONFIG().farms.map(c=>`<option value="${esc(c)}">`).join(""));
+  el("dl_cycle")&&(el("dl_cycle").innerHTML=(CONFIG().cycles||[]).map(c=>`<option value="${esc(c)}">`).join(""));
+  if(el("mk_lab")){const cur=el("mk_lab").value;el("mk_lab").innerHTML=Object.keys(allLabs()).map(k=>`<option value="${k}">${esc(getLab(k).full||getLab(k).name)}</option>`).join("");if(cur)el("mk_lab").value=cur;}
+  if(el("mk_date")&&!el("mk_date").value)el("mk_date").value=today();
+  if(!el("fk_build").dataset.wired){
+    el("fk_build").onclick=buildFlockFile;
+    el("fk_print").onclick=printFlockFile;
+    el("mk_add").onclick=addFlockRecord;
+    el("mk_cancel").onclick=mkCancelEdit;
+    el("mk_type").onchange=()=>{if(!MK_EDIT_ID)renderMkDyn();else renderMkDyn();};
+    el("fk_company").onchange=()=>{el("fk_farm").value="";el("fk_cycle").value="";initFlockView();renderMkList();};
+    el("fk_farm").onchange=()=>{el("fk_cycle").value="";initFlockView();renderMkList();};
+    el("fk_cycle").onchange=()=>renderMkList();
+    el("fk_build").dataset.wired="1";
+  }
+  if(!MK_EDIT_ID)renderMkDyn();
+  renderMkList();
+}
+/* Dynamic manual-entry body per analysis type */
+const MK_MIN_ROWS=12;
+function renderMkDyn(){
+  const host=el("mk_dyn");if(!host)return;const ar=Lang.current()==="ar";
+  const ty=el("mk_type").value;
+  const dOpts=(CONFIG().diseases||[]).map(d=>`<option value="${esc(d)}">${esc(diseaseLabel(d))}</option>`).join("");
+  if(ty==="Serology"){
+    host.innerHTML=`<div class="row3">
+        <div class="fld"><label>${ar?"المرض":"Disease"}</label><select id="mk_disease">${dOpts}</select></div>
+        <div class="fld"><label>${ar?"نوع التحليل":"Assay"}</label><select id="mk_assay"><option value="HI">HI</option><option value="ELISA">ELISA</option></select></div>
+        <div class="fld"><label>${ar?"ملاحظة":"Note"}</label><input id="mk_note" placeholder="${ar?"اختياري":"optional"}"></div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>${ar?"قراءات العينات الفردية (كل عينة في صف)":"Individual sample readings (one per row)"}</label>
+          <div style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px"><table class="titre-input-tbl" id="mkTitreTbl"><tbody></tbody></table></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+            <button type="button" class="addbtn" id="mkAddRow">${ar?"+ صف":"+ Row"}</button>
+            <button type="button" class="addbtn" id="mkClr">${ar?"مسح":"Clear"}</button>
+            <span class="hint" id="mkCount"></span></div></div>
+        <div class="fld"><label>${ar?"الإحصائيات المحسوبة تلقائيًا":"Auto-computed statistics"}</label>
+          <div id="mkStats" class="dtv-box" style="min-height:80px"><span class="hint">${ar?"أدخل القراءات وسيتم الحساب فورًا (GMT / CV / المتوسط).":"Enter readings - GMT / CV / mean compute live."}</span></div></div>
+      </div>`;
+    mkEnsureRows();
+    el("mkAddRow").onclick=()=>mkAddRow(true);
+    el("mkClr").onclick=()=>{el("mkTitreTbl").querySelector("tbody").innerHTML="";mkEnsureRows();mkUpdateStats();};
+    mkUpdateStats();
+  }else if(ty==="PCR"){
+    host.innerHTML=`<div class="row3">
+        <div class="fld"><label>${ar?"المرض":"Disease"}</label><select id="mk_disease">${dOpts}</select></div>
+        <div class="fld"><label>${ar?"الاختبار":"Test name"}</label><input id="mk_param" placeholder="e.g. ND PCR"></div>
+        <div class="fld"><label>${ar?"النتيجة":"Result"}</label><select id="mk_detected"><option value="pos">${ar?"موجب":"Detected"}</option><option value="neg">${ar?"سالب":"Not detected"}</option></select></div>
+      </div>
+      <div class="row3">
+        <div class="fld"><label>Ct</label><input id="mk_ct" placeholder="e.g. 24.6"></div>
+        <div class="fld"><label>${ar?"التنميط":"Typing"}</label><input id="mk_typing" placeholder="e.g. genotype VII"></div>
+        <div class="fld"><label>${ar?"ملاحظة":"Note"}</label><input id="mk_note" placeholder="${ar?"اختياري":"optional"}"></div>
+      </div>`;
+  }else if(ty==="Bacteriology"){
+    host.innerHTML=`<div class="row3">
+        <div class="fld"><label>${ar?"العزلة / الاختبار":"Isolate / test"}</label><input id="mk_param" placeholder="e.g. Salmonella spp."></div>
+        <div class="fld"><label>${ar?"النتيجة":"Result"}</label><select id="mk_detected"><option value="pos">${ar?"موجب":"Positive"}</option><option value="neg">${ar?"سالب":"Negative"}</option><option value="">${ar?"نص حر":"free text"}</option></select></div>
+        <div class="fld"><label>${ar?"عدد/قيمة (اختياري)":"Count / value (optional)"}</label><input id="mk_value" placeholder="e.g. 3x10^4 cfu/g"></div>
+      </div>
+      <div class="fld"><label>${ar?"حساسية المضادات / ملاحظة":"Antibiotic sensitivity / note"}</label><input id="mk_unit" placeholder="${ar?"مثال: حساس: Enrofloxacin؛ مقاوم: Amoxicillin":"e.g. Sensitive: Enrofloxacin; Resistant: Amoxicillin"}"></div>`;
+  }else{ // FeedWater
+    host.innerHTML=`<div class="row3">
+        <div class="fld"><label>${ar?"البيان":"Parameter"}</label><input id="mk_param" placeholder="${ar?"مثال: بروتين خام / سالمونيلا / عدد بكتيري":"e.g. Crude protein / Salmonella / TVC"}"></div>
+        <div class="fld"><label>${ar?"القيمة / النتيجة":"Value / result"}</label><input id="mk_value" placeholder="e.g. 21.5 / Absent / 1x10^3"></div>
+        <div class="fld"><label>${ar?"الوحدة / ملاحظة":"Unit / note"}</label><input id="mk_unit" placeholder="e.g. %, cfu/g, /25g"></div>
+      </div>`;
+  }
+}
+function mkReadTitres(){return $$("#mkTitreTbl input").map(i=>parseFloat(i.value)).filter(v=>!isNaN(v)&&v>0);}
+function mkAddRow(focus){
+  const tb=el("mkTitreTbl")&&el("mkTitreTbl").querySelector("tbody");if(!tb)return null;
+  const n=tb.children.length+1;const tr=document.createElement("tr");
+  tr.innerHTML=`<td class="idx">${n}</td><td><input type="number" inputmode="numeric" dir="ltr"></td>`;
+  const inp=tr.querySelector("input");
+  inp.addEventListener("input",mkUpdateStats);
+  inp.addEventListener("keydown",e=>{
+    if(e.key==="Enter"||(e.key==="Tab"&&!e.shiftKey)){
+      const next=tr.nextElementSibling;
+      if(!next){e.preventDefault();mkAddRow(true);}
+      else if(e.key==="Enter"){e.preventDefault();next.querySelector("input").focus();}
+    }
+  });
+  inp.addEventListener("paste",e=>{const txt=(e.clipboardData||window.clipboardData).getData("text");
+    if(/[\n\r,;\t ]/.test(txt.trim())){e.preventDefault();
+      const nums=txt.split(/[\s,;]+/).map(s=>parseFloat(s)).filter(v=>!isNaN(v)&&v>0);mkFill(nums);}});
+  tb.appendChild(tr);if(focus)inp.focus();return tr;
+}
+function mkFill(nums){const tb=el("mkTitreTbl").querySelector("tbody");tb.innerHTML="";
+  const total=Math.max(nums.length+2,MK_MIN_ROWS);for(let i=0;i<total;i++)mkAddRow(false);
+  const inputs=$$("#mkTitreTbl input");nums.forEach((v,i)=>{if(inputs[i])inputs[i].value=v;});mkUpdateStats();}
+function mkEnsureRows(){const tb=el("mkTitreTbl")&&el("mkTitreTbl").querySelector("tbody");if(tb&&tb.children.length===0){for(let i=0;i<MK_MIN_ROWS;i++)mkAddRow(false);}}
+function mkUpdateStats(){
+  const ar=Lang.current()==="ar";const host=el("mkStats");if(!host)return;
+  const vals=mkReadTitres();const c=el("mkCount");
+  if(c){c.textContent=(ar?"عدد العينات: ":"Samples: ")+vals.length;c.style.color=vals.length<5?"var(--muted)":"var(--green)";}
+  if(vals.length<1){host.innerHTML=`<span class="hint">${ar?"أدخل القراءات وسيتم الحساب فورًا (GMT / CV / المتوسط).":"Enter readings - GMT / CV / mean compute live."}</span>`;return;}
+  const st=statsOf(vals),f=x=>Number.isInteger(x)?x:x.toFixed(1);
+  const cvR=typeof cvRating==="function"?cvRating(st.cv):{label:"",cls:""};
+  host.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+    <div><div class="big" style="font-size:18px">${f(st.gmt)}</div><div class="hint">GMT</div></div>
+    <div><div class="big" style="font-size:18px">${f(st.cv)}%</div><div class="hint">CV ${cvR.label?"("+cvR.label+")":""}</div></div>
+    <div><div class="big" style="font-size:18px">${f(st.mean)}</div><div class="hint">${ar?"المتوسط":"Mean"}</div></div>
+    <div><div class="big" style="font-size:16px">${f(st.min)}</div><div class="hint">Min</div></div>
+    <div><div class="big" style="font-size:16px">${f(st.max)}</div><div class="hint">Max</div></div>
+    <div><div class="big" style="font-size:16px">${st.n}</div><div class="hint">n</div></div></div>`;
+}
+let MK_EDIT_ID=null;
+function manualCode(lab,farm,date){
+  const dt=(date||today()).replace(/-/g,"").slice(2);
+  const f=(farm||"FARM").trim().replace(/\s+/g,"_").slice(0,10);
+  return (getLab(lab).abbr||"XX")+"-"+f+"-"+dt+"-"+String(DB().length+1).padStart(3,"0");
+}
+/* Create/update a REAL submission from the manual entry, so it appears everywhere */
+function addFlockRecord(){
+  const ar=Lang.current()==="ar",msg=el("mk_msg");
+  const company=val("mk_company"),farm=val("mk_farm");
+  if(!company||!farm){msg.style.color="var(--red)";msg.textContent=ar?"أدخل الشركة والمزرعة.":"Enter company and farm.";return;}
+  const lab=val("mk_lab")||Object.keys(allLabs())[0];
+  const ty=val("mk_type"),date=el("mk_date").value||today(),age=val("mk_age"),cycle=val("mk_cycle");
+  let tid,result;
+  if(ty==="Serology"){
+    const vals=mkReadTitres();
+    if(vals.length<1){msg.style.color="var(--red)";msg.textContent=ar?"أدخل قراءات العينات أولاً.":"Enter sample readings first.";return;}
+    const assay=val("mk_assay")||"HI",dis=val("mk_disease")||"Other";
+    tid=ensureManualTest(lab,dis+" "+assay,"Serology",dis,"Serology");
+    result={assay,n:vals.length,titres:vals.map(String),stats:statsOf(vals),note:val("mk_note")};
+  }else if(ty==="PCR"){
+    const dis=val("mk_disease")||"Other",nm=val("mk_param")||(dis+" PCR");
+    tid=ensureManualTest(lab,nm,"PCR",dis,"PCR");
+    result={detected:val("mk_detected"),ct:val("mk_ct"),typing:val("mk_typing"),serotyping:"",unit:val("mk_note")};
+  }else if(ty==="Bacteriology"){
+    const nm=val("mk_param")||"Isolate";
+    tid=ensureManualTest(lab,"BACT: "+nm,"PCR","Other","Bacteriology");
+    result={detected:val("mk_detected"),value:val("mk_value"),unit:val("mk_unit"),ct:"",typing:""};
+  }else{ // FeedWater
+    const nm=val("mk_param");
+    if(!nm){msg.style.color="var(--red)";msg.textContent=ar?"أدخل البيان.":"Enter a parameter.";return;}
+    tid=ensureManualTest(lab,"FEED/WATER: "+nm,"PCR","Other","FeedWater");
+    result={value:val("mk_value"),unit:val("mk_unit")};
+  }
+  const arr=DB();let sub;
+  if(MK_EDIT_ID){sub=arr.find(x=>x.id===MK_EDIT_ID);}
+  if(!sub){sub={id:MK_EDIT_ID||uid(),origin:"manual"};arr.unshift(sub);}
+  Object.assign(sub,{origin:"manual",company,farm,cycle,lab,code:sub.code||manualCode(lab,farm,date),
+    sample:"",cmethod:"",cvalue:"",location:"",birdType:sub.birdType||"",ageDays:age,region:sub.region||"",manager:sub.manager||"",
+    tests:[tid],results:{[tid]:result},status:"Complete",created:date,reportLink:sub.reportLink||"",updatedAt:Date.now()});
+  const cfg=CONFIG();
+  if(company&&!cfg.companies.includes(company))cfg.companies.push(company);
+  if(farm&&!cfg.farms.includes(farm))cfg.farms.push(farm);
+  if(cycle&&!(cfg.cycles||(cfg.cycles=[])).includes(cycle))cfg.cycles.push(cycle);
+  Store.save("flock",(MK_EDIT_ID?"Updated":"Added")+" flock sample "+sub.code);
+  msg.style.color="var(--green)";msg.textContent=MK_EDIT_ID?(ar?"تم التعديل ✓":"Updated ✓"):(ar?"تمت الإضافة كعينة ✓":"Added as a sample ✓");
+  mkCancelEdit();
+  initFlockView();renderMkList();buildFlockFile();renderDash&&renderDash();
+}
+function mkCancelEdit(){
+  MK_EDIT_ID=null;
+  el("mk_age").value="";
+  const ar=Lang.current()==="ar";
+  el("mk_add").textContent=ar?"إضافة سجل":"Add record";
+  el("mk_cancel").style.display="none";
+  renderMkDyn();
+}
+/* info about a manual submission's single test/result */
+function manualSubInfo(s){
+  const tid=(s.tests||[])[0];const t=labTests(s.lab).find(x=>x.id===tid)||{n:tid,m:"PCR",d:"Other"};
+  return{tid,t,type:flockTypeOf(t),r:(s.results||{})[tid]||{}};
+}
+function editFlockRecord(id){
+  const s=DB().find(x=>x.id===id);if(!s)return;const ar=Lang.current()==="ar";
+  MK_EDIT_ID=id;
+  const{t,type,r}=manualSubInfo(s);
+  el("mk_company").value=s.company||"";el("mk_farm").value=s.farm||"";el("mk_cycle").value=s.cycle||"";
+  if(el("mk_lab")){el("mk_lab").value=s.lab||el("mk_lab").value;}
+  el("mk_type").value=type;el("mk_date").value=s.created||today();el("mk_age").value=s.ageDays||"";
+  renderMkDyn();
+  if(type==="Serology"){
+    if(el("mk_disease"))el("mk_disease").value=t.d||"Other";
+    if(el("mk_assay"))el("mk_assay").value=r.assay||"HI";
+    if(el("mk_note"))el("mk_note").value=r.note||"";
+    if(r.titres&&r.titres.length)mkFill(r.titres.map(Number));
+  }else if(type==="PCR"){
+    if(el("mk_disease"))el("mk_disease").value=t.d||"Other";
+    if(el("mk_param"))el("mk_param").value=t.n||"";
+    if(el("mk_detected"))el("mk_detected").value=r.detected||"pos";
+    if(el("mk_ct"))el("mk_ct").value=r.ct||"";if(el("mk_typing"))el("mk_typing").value=r.typing||"";if(el("mk_note"))el("mk_note").value=r.unit||"";
+  }else if(type==="Bacteriology"){
+    if(el("mk_param"))el("mk_param").value=(t.n||"").replace(/^BACT:\s*/,"");if(el("mk_detected"))el("mk_detected").value=r.detected||"";
+    if(el("mk_value"))el("mk_value").value=r.value||"";if(el("mk_unit"))el("mk_unit").value=r.unit||"";
+  }else{
+    if(el("mk_param"))el("mk_param").value=(t.n||"").replace(/^FEED\/WATER:\s*/,"");if(el("mk_value"))el("mk_value").value=r.value||"";if(el("mk_unit"))el("mk_unit").value=r.unit||"";
+  }
+  el("mk_add").textContent=ar?"حفظ التعديل":"Save changes";
+  el("mk_cancel").style.display="";
+  el("mk_listCard").scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function deleteFlockRecord(id){
+  const ar=Lang.current()==="ar";
+  if(!await Dialog.confirm(ar?"حذف هذه العينة نهائيًا؟":"Delete this sample permanently?",{title:ar?"حذف":"Delete",okLabel:ar?"حذف":"Delete",danger:true}))return;
+  const arr=DB();const i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1);
+  if(typeof Store.tombstone==="function")Store.tombstone(id);
+  if(MK_EDIT_ID===id)mkCancelEdit();
+  Store.save("flock","Deleted flock sample");
+  initFlockView();renderMkList();buildFlockFile();renderDash&&renderDash();
+  Toast.show(ar?"تم الحذف.":"Deleted.","info");
+}
+function renderMkList(){
+  const host=el("mk_list"),card=el("mk_listCard");if(!host)return;const ar=Lang.current()==="ar";
+  const co=el("fk_company")?el("fk_company").value:"",fa=el("fk_farm")?el("fk_farm").value:"",cy=el("fk_cycle")?el("fk_cycle").value:"";
+  const subs=DB().filter(s=>s.origin==="manual"&&(!co||s.company===co)&&(!fa||s.farm===fa)&&(!cy||(s.cycle||"")===cy));
+  if(!subs.length){card.style.display="none";host.innerHTML="";return;}
+  card.style.display="";
+  const tmap={Serology:ar?"سيرولوجي":"Serology",PCR:"PCR",Bacteriology:ar?"بكتريولوجي":"Bacteriology",FeedWater:ar?"علف/مياه":"Feed/Water"};
+  let h=`<div class="tablewrap"><table><thead><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"المزرعة/الدورة":"Farm/Cycle"}</th><th>${ar?"المعمل":"Lab"}</th><th>${ar?"النوع":"Type"}</th><th>${ar?"البيان":"Item"}</th><th>${ar?"النتيجة":"Result"}</th><th>${ar?"العمر":"Age"}</th><th></th></tr></thead><tbody>`;
+  subs.forEach(s=>{const{t,type,r}=manualSubInfo(s);
+    let value="";if(type==="Serology"&&r.stats)value="GMT "+Math.round(r.stats.gmt)+" (n="+r.stats.n+")";
+    else if(type==="FeedWater")value=(r.value||"")+" "+(r.unit||"");
+    else value=r.detected==="pos"?(ar?"موجب":"Detected"):r.detected==="neg"?(ar?"سالب":"Not detected"):(r.value||"");
+    h+=`<tr><td>${esc(s.created||"-")}</td><td>${esc(s.farm||"")}${s.cycle?" / "+esc(s.cycle):""}</td><td>${esc(getLab(s.lab).abbr||s.lab||"")}</td><td>${tmap[type]||type}</td>
+      <td>${esc(t.n||"")}</td><td>${esc(value)}</td>
+      <td><input type="number" min="0" class="mkAgeEdit" data-id="${s.id}" value="${esc(String(s.ageDays||""))}" style="width:64px;padding:3px 5px"></td>
+      <td style="white-space:nowrap"><button class="addbtn mkEditBtn" data-id="${s.id}">${ar?"تعديل":"Edit"}</button>
+        <button class="addbtn mkDelBtn" data-id="${s.id}" style="color:var(--red)">${ar?"حذف":"Delete"}</button></td></tr>`;
+  });
+  h+=`</tbody></table></div><div class="hint" style="margin-top:6px">${ar?"غيّر العمر مباشرة في الخانة، أو اضغط تعديل للتعديل الكامل. دي عينات حقيقية بتظهر في عيناتي ولوحة التحكم والتقارير.":"Change age inline, or press Edit. These are real samples shown in My Submissions, Dashboard and Reports."}</div>`;
+  host.innerHTML=h;
+  $$(".mkEditBtn",host).forEach(b=>b.onclick=()=>editFlockRecord(b.dataset.id));
+  $$(".mkDelBtn",host).forEach(b=>b.onclick=()=>deleteFlockRecord(b.dataset.id));
+  $$(".mkAgeEdit",host).forEach(inp=>inp.onchange=()=>{
+    const s=DB().find(x=>x.id===inp.dataset.id);if(s){s.ageDays=inp.value;s.updatedAt=Date.now();Store.save("flock","Set age");buildFlockFile();}
+  });
+}
+function flockFiltered(){
+  const co=el("fk_company").value,fa=el("fk_farm").value,cy=el("fk_cycle").value,
+    ty=el("fk_type").value,di=el("fk_disease").value;
+  return flockAllRecords().filter(r=>{
+    if(co&&r.company!==co)return false;
+    if(fa&&r.farm!==fa)return false;
+    if(cy&&(r.cycle||"")!==cy)return false;
+    if(ty&&ty!=="all"&&r.type!==ty)return false;
+    if(di&&r.disease!==di)return false;
+    return true;
+  });
+}
+function fkDateAge(r){const ar=Lang.current()==="ar";return (r.date||"-")+(r.age!==""&&r.age!=null?" &middot; "+(ar?"عمر ":"age ")+r.age+(ar?"ي":"d"):"");}
+function buildFlockFile(){
+  const host=el("flockResult");if(!host)return;const ar=Lang.current()==="ar";
+  const recs=flockFiltered();
+  if(!recs.length){host.innerHTML=`<div class="card"><div class="empty">${ar?"لا توجد نتائج مطابقة. اختر الفلاتر واضغط \"بناء الملف\"، أو أضف سجلًا يدويًا.":"No matching results. Choose filters and press \"Build file\", or add a manual record."}</div></div>`;return;}
+  const co=el("fk_company").value,fa=el("fk_farm").value,cy=el("fk_cycle").value;
+  const scope=[co||(ar?"كل الشركات":"All companies"),fa||(ar?"كل المزارع":"All farms"),cy||(ar?"كل الدورات":"All cycles")].join(" &rsaquo; ");
+  let h=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <h3 style="margin:0">${ar?"ملف":"File"}: ${scope}</h3><span class="hint">${recs.length} ${ar?"نتيجة":"records"}</span></div></div>`;
+  // ---- SEROLOGY ----
+  const sero=recs.filter(r=>r.type==="Serology");
+  if(sero.length){
+    h+=`<div class="card"><h3>${ar?"السيرولوجي (HI / ELISA)":"Serology (HI / ELISA)"}</h3>`;
+    const groups={};
+    sero.forEach(r=>{const key=r.disease+" | "+(r.assay||"-");(groups[key]=groups[key]||[]).push(r);});
+    Object.keys(groups).sort().forEach(key=>{
+      const rows=groups[key].slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0));
+      const [dis,assay]=key.split(" | ");
+      const gmts=rows.map(r=>r.gmt).filter(v=>v>0);
+      const avg=gmts.length?Math.round(gmts.reduce((a,b)=>a+b,0)/gmts.length):0;
+      h+=`<div style="margin-bottom:14px"><div class="tg-head">${esc(diseaseLabel(dis))} &middot; ${esc(assay)} <span class="hint">(${rows.length} ${ar?"سحبة":"rounds"})</span></div>`;
+      h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"العمر":"Age"}</th><th>n</th><th>GMT</th><th>CV%</th><th>Min-Max</th><th>${ar?"المعمل/المصدر":"Source"}</th></tr>`;
+      rows.forEach(r=>{h+=`<tr><td>${esc(r.date||"-")}</td><td>${r.age!==""&&r.age!=null?esc(String(r.age)):"-"}</td><td>${r.n||"-"}</td>
+        <td><b>${r.gmt?Math.round(r.gmt):"-"}</b></td><td>${r.cv!=null?(+r.cv).toFixed(0):"-"}</td>
+        <td>${r.min!=null?Math.round(r.min)+"-"+Math.round(r.max):"-"}</td><td>${r.manual?(ar?"يدوي":"manual"):esc(getLab(r.lab).abbr||r.lab||"")}</td></tr>`;});
+      h+=`<tr style="background:var(--surface-2)"><td colspan="3"><b>${ar?"متوسط GMT عبر السحبات":"Average GMT across rounds"}</b></td><td colspan="4"><b style="color:var(--amber-d)">${avg||"-"}</b></td></tr>`;
+      h+=`</table>`;
+      if(gmts.length>=2&&typeof trendSVG==="function"){
+        const pts=rows.filter(r=>r.gmt>0).map(r=>({date:r.date,gmt:r.gmt,cur:false}));
+        h+=`<div>${trendSVG(pts)}</div>`;
+      }
+      h+=`</div>`;
+    });
+    h+=`</div>`;
+  }
+  // ---- PCR ----
+  const pcr=recs.filter(r=>r.type==="PCR");
+  if(pcr.length){
+    h+=`<div class="card"><h3>${ar?"تحليل PCR":"PCR"}</h3>`;
+    const groups={};pcr.forEach(r=>{(groups[r.disease]=groups[r.disease]||[]).push(r);});
+    Object.keys(groups).sort().forEach(dis=>{
+      const rows=groups[dis].slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0));
+      const posN=rows.filter(r=>r.detected==="pos").length;const tot=rows.filter(r=>r.detected).length;
+      h+=`<div style="margin-bottom:14px"><div class="tg-head">${esc(diseaseLabel(dis))} <span class="hint">(${tot?Math.round(posN/tot*100):0}% ${ar?"إيجابية":"positive"}, n=${rows.length})</span></div>`;
+      h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"العمر":"Age"}</th><th>${ar?"الاختبار":"Test"}</th><th>${ar?"النتيجة":"Result"}</th><th>Ct</th><th>${ar?"التنميط":"Typing"}</th></tr>`;
+      rows.forEach(r=>{const det=r.detected==="pos"?`<b style="color:#b91c1c">${ar?"موجب":"Detected"}</b>`:r.detected==="neg"?`<span style="color:#15803d">${ar?"سالب":"Not detected"}</span>`:(r.value?esc(r.value):"-");
+        h+=`<tr><td>${esc(r.date||"-")}</td><td>${r.age!==""&&r.age!=null?esc(String(r.age)):"-"}</td><td>${esc(r.name||"")}</td><td>${det}</td><td>${esc(r.ct||"-")}</td><td>${esc(r.typing||r.serotyping||"-")}</td></tr>`;});
+      h+=`</table></div>`;
+    });
+    h+=`</div>`;
+  }
+  // ---- BACTERIOLOGY ----
+  const bact=recs.filter(r=>r.type==="Bacteriology");
+  if(bact.length){
+    h+=`<div class="card"><h3>${ar?"البكتريولوجي والعزل":"Bacteriology & isolation"}</h3>`;
+    const rows=bact.slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0));
+    h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"العمر":"Age"}</th><th>${ar?"العزلة/الاختبار":"Isolate / test"}</th><th>${ar?"النتيجة":"Result"}</th><th>${ar?"ملاحظة/حساسية":"Note / sensitivity"}</th></tr>`;
+    rows.forEach(r=>{const res=r.detected==="pos"?(ar?"موجب":"Positive"):r.detected==="neg"?(ar?"سالب":"Negative"):(r.value?esc(r.value):"-");
+      h+=`<tr><td>${esc(r.date||"-")}</td><td>${r.age!==""&&r.age!=null?esc(String(r.age)):"-"}</td><td>${esc(r.name||r.disease||"")}</td><td>${res}</td><td>${esc(r.unit||"")}</td></tr>`;});
+    h+=`</table></div>`;
+  }
+  // ---- FEED / WATER ----
+  const feed=recs.filter(r=>r.type==="FeedWater");
+  if(feed.length){
+    h+=`<div class="card"><h3>${ar?"تحاليل العلف والمياه":"Feed & water analyses"}</h3>`;
+    const rows=feed.slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0));
+    h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"البيان":"Parameter"}</th><th>${ar?"القيمة":"Value"}</th><th>${ar?"الوحدة/ملاحظة":"Unit / note"}</th></tr>`;
+    rows.forEach(r=>{h+=`<tr><td>${esc(r.date||"-")}</td><td>${esc(r.name||r.disease||"")}</td><td><b>${esc(r.value||"-")}</b></td><td>${esc(r.unit||"")}</td></tr>`;});
+    h+=`</table></div>`;
+  }
+  host.innerHTML=h;
+}
+function printFlockFile(){
+  const host=el("flockResult");if(!host||!host.innerHTML.trim()){Toast.show(Lang.current()==="ar"?"ابنِ الملف أولاً.":"Build the file first.","warn");return;}
+  const ar=Lang.current()==="ar";
+  const w=window.open("","_blank");if(!w){Toast.show(ar?"اسمح بالنوافذ المنبثقة.":"Allow pop-ups.","warn");return;}
+  w.document.open();
+  w.document.write(`<!DOCTYPE html><html lang="${ar?"ar":"en"}" dir="${ar?"rtl":"ltr"}"><head><meta charset="UTF-8"><title>${ar?"ملف المزرعة":"Flock File"}</title><style>
+    *{font-family:Arial,Helvetica,sans-serif;color:#1f2733}body{margin:0;padding:28px;${ar?"direction:rtl":""}}
+    h1{font-size:19px;border-bottom:3px solid #f5a623;padding-bottom:8px}h3{font-size:14px;color:#e8951a;margin:16px 0 6px}
+    table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}th,td{border:1px solid #e5e7eb;padding:5px 8px;text-align:${ar?"right":"left"}}th{background:#fafafa}
+    .card{margin-bottom:12px}.tg-head{font-weight:700;color:#e8951a;margin-top:8px}.hint{color:#888;font-size:11px}.empty{color:#888}
+    svg{max-width:340px}.ft{margin-top:20px;font-size:10px;color:#888;border-top:1px solid #eee;padding-top:8px}</style></head><body>
+    <h1>${ar?"الملف التراكمي للمزرعة":"Cumulative Flock File"}</h1>${host.innerHTML}
+    <div class="ft">${ar?"صادر من Poultry Lab System":"Generated by Poultry Lab System"} ${BUILD.label} &middot; ${today()}</div>
+    <script>window.onload=function(){window.print();}<\/script></body></html>`);
+  w.document.close();
+}
+
 function renderDash(){
   const db=DB();
   const total=db.length,pending=db.filter(s=>["New","Shipped","Processing"].includes(s.status)).length,
     ready=db.filter(s=>["ResultReady","Complete"].includes(s.status)).length;
   let pcrTotal=0,pcrPos=0;db.forEach(s=>Object.values(s.results||{}).forEach(r=>{if(r.detected){pcrTotal++;if(r.detected==="pos")pcrPos++;}}));
   const farms=new Set(db.map(s=>s.farm)).size;
+  const flockN=db.filter(s=>s.origin==="manual").length;
+  const ar=Lang.current()==="ar";
   const ic=(bg,color,svg)=>`<div class="ic" style="background:${bg};color:${color}">${svg}</div>`;
   el("kpis").innerHTML=`
-    <div class="kpi">${ic("var(--blue-bg)","var(--blue)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 10h16"/></svg>')}<div class="n">${total}</div><div class="l">Total submissions</div></div>
-    <div class="kpi">${ic("var(--amber-soft)","var(--amber-d)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>')}<div class="n" style="color:var(--amber-d)">${pending}</div><div class="l">In pipeline</div></div>
-    <div class="kpi">${ic("var(--green-bg)","var(--green)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>')}<div class="n" style="color:var(--green)">${ready}</div><div class="l">Results ready</div></div>
-    <div class="kpi">${ic("var(--red-bg)","var(--red)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/></svg>')}<div class="n" style="color:var(--red)">${pcrPos}/${pcrTotal||0}</div><div class="l">PCR positives</div></div>
-    <div class="kpi">${ic("var(--purple-bg)","var(--purple)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21v-4l11-11 4 4L7 21z"/></svg>')}<div class="n">${farms}</div><div class="l">Farms</div></div>`;
+    <div class="kpi">${ic("var(--blue-bg)","var(--blue)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 10h16"/></svg>')}<div class="n">${total}</div><div class="l">${ar?"إجمالي العينات":"Total submissions"}</div></div>
+    <div class="kpi">${ic("var(--amber-soft)","var(--amber-d)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>')}<div class="n" style="color:var(--amber-d)">${pending}</div><div class="l">${ar?"قيد التنفيذ":"In pipeline"}</div></div>
+    <div class="kpi">${ic("var(--green-bg)","var(--green)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>')}<div class="n" style="color:var(--green)">${ready}</div><div class="l">${ar?"نتائج جاهزة":"Results ready"}</div></div>
+    <div class="kpi">${ic("var(--red-bg)","var(--red)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/></svg>')}<div class="n" style="color:var(--red)">${pcrPos}/${pcrTotal||0}</div><div class="l">${ar?"إيجابيات PCR":"PCR positives"}</div></div>
+    <div class="kpi">${ic("var(--purple-bg)","var(--purple)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21v-4l11-11 4 4L7 21z"/></svg>')}<div class="n">${farms}</div><div class="l">${ar?"المزارع":"Farms"}</div></div>
+    <div class="kpi">${ic("var(--blue-bg)","var(--blue)",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>')}<div class="n">${flockN}</div><div class="l">${ar?"عينات ملفات المزارع":"Flock file samples"}</div></div>`;
   const statusColors={New:"#f5a623",Shipped:"#2563eb",Processing:"#7c3aed",ResultReady:"#16a34a",Complete:"#22a06b"};
   el("chLab").innerHTML=bars(groupCount(db,s=>getLab(s.lab).abbr));
   el("chStatus").innerHTML=donut(groupCount(db,s=>s.status),{colors:statusColors,label:labelStatus});
@@ -2411,7 +2912,7 @@ function exportAll(){
 }
 function download(content,name,type){const blob=new Blob([content],{type:type||"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 function backupData(){
-  const payload={app:"poultry-lab-system",version:2,exported:new Date().toISOString(),data:DB(),config:CONFIG(),audit:Store.audit()};
+  const payload={app:"poultry-lab-system",version:2,exported:new Date().toISOString(),data:DB(),config:CONFIG(),audit:Store.audit(),flock:Store.flock()};
   download(JSON.stringify(payload,null,2),"poultry-lab-backup-"+today().replace(/-/g,"")+".json","application/json");
   Store.save("backup","Downloaded backup");Toast.show("Backup downloaded.","ok");
 }
@@ -2420,7 +2921,7 @@ function importData(input){
   rd.onload=async()=>{try{
     const j=JSON.parse(rd.result);if(!j.data||!Array.isArray(j.data))throw new Error("Invalid backup file.");
     if(!await Dialog.confirm("This will REPLACE all current data with the backup ("+j.data.length+" submissions). Continue?",{title:"Import backup",okLabel:"Import",danger:true})){input.value="";return;}
-    Store.setDB(j.data);if(j.config)Store.setCfg(j.config);
+    Store.setDB(j.data);if(j.config)Store.setCfg(j.config);if(j.flock)Store.setFlock(j.flock);
     el("f_lab").innerHTML="";el("myLab").dataset.init="";
     Store.save("import","Imported "+j.data.length+" submissions");
     initNewForm();renderSettings();renderMy();renderDash();Toast.show("Imported "+j.data.length+" submissions.","ok");
@@ -2674,6 +3175,7 @@ function bindEvents(){
   el("themeBtn").onclick=Theme.toggle;el("themeBtn2").onclick=Theme.toggle;
   el("langBtn").onclick=Lang.toggle;
   el("updateBtn")&&(el("updateBtn").onclick=()=>Updater.check(true));
+  el("verChip")&&(el("verChip").onclick=()=>{go("settings");setTimeout(()=>{const c=el("syncSaveBtn");if(c)c.scrollIntoView({behavior:"smooth",block:"center"});},120);});
   el("dtvCalc")&&(el("dtvCalc").onclick=renderDTV);
   el("devGoBtn")&&(el("devGoBtn").onclick=()=>go("deventer"));
   if(el("devVax")){fillDevBt();el("devVax").onchange=fillDevBt;}
@@ -2747,10 +3249,22 @@ function bindEvents(){
   });
 }
 
+/* Top-bar version + live sync indicator */
+let TOP_SYNC_STATE="local";
+function setTopSync(state){
+  if(state)TOP_SYNC_STATE=state;else state=TOP_SYNC_STATE;
+  const dot=el("syncDot"),word=el("syncWord");if(!dot)return;const ar=Lang.current&&Lang.current()==="ar";
+  dot.className="ver-dot "+(state||"local");
+  const words=ar?{ok:"متزامن",err:"غير متزامن",busy:"مزامنة...",local:"محلي"}:{ok:"Synced",err:"Not synced",busy:"Syncing...",local:"Local only"};
+  if(word)word.textContent=words[state]||words.local;
+  const chip=el("verChip");if(chip)chip.title=(ar?"الإصدار":"Version")+" "+BUILD.version+" · "+(words[state]||words.local);
+}
 function boot(){
   try{
-    Theme.init();Lang.init();Store.init();Sync.init();bindEvents();Role.init();initNewForm();renderDash();
+    Theme.init();Lang.init();Store.init();migrateFlockRecords();Sync.init();bindEvents();Role.init();initNewForm();renderDash();
     const vl=el("verLabel");if(vl)vl.textContent="Version "+BUILD.version;
+    if(el("verChipV"))el("verChipV").textContent="v"+BUILD.version;
+    setTopSync(Sync.enabled()?"busy":"local");
     setTimeout(()=>Updater.check(false),1500);
     if(Sync.enabled())setTimeout(()=>Sync.syncNow(true),800);
   }catch(err){console.error(err);Toast&&Toast.show("Startup error: "+err.message,"err");}
