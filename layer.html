@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض v3.1</title>
+<title>نظام إدارة مزرعة الدجاج البياض v3.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2041,6 +2041,22 @@ function renderSales(){
       </div>
       <div style="padding:0 18px 16px;font-size:12.5px;color:var(--muted)">💡 الطبق = ${DB.dishSize} بيضة. البيع بيتخصم من مخزون العنبر اللي تختاره.<span id="sl_gradeHint"></span></div>
     </div>
+    <div class="panel" style="margin-bottom:18px"><div class="panel-head"><h3>📑 تقرير المبيعات</h3></div>
+      <div style="padding:16px 18px 6px">
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">🏠 اختر العنابر:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <label class="chip active" style="cursor:pointer;display:flex;align-items:center;gap:6px"><input type="checkbox" id="sr_all" checked> إجمالي المزرعة</label>
+          ${DB.houses.map((h,i)=>`<label class="chip" style="cursor:pointer;display:flex;align-items:center;gap:6px"><input type="checkbox" class="sr_h" value="${i}"> ${esc(h.name)}</label>`).join('')}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end">
+          <div class="field"><label>📅 من (اختياري)</label><input class="input" type="date" id="sr_from"></div>
+          <div class="field"><label>📅 إلى (اختياري)</label><input class="input" type="date" id="sr_to"></div>
+          <button class="btn" id="sr_show" style="height:42px">📊 عرض التقرير</button>
+          <button class="btn green" id="sr_print" style="height:42px">🖨️ طباعة</button>
+        </div>
+      </div>
+      <div id="sr_out" style="padding:6px 18px 16px"></div>
+    </div>
     <div class="panel"><div class="panel-head"><h3>📋 سجل المبيعات</h3></div>
       ${allSales.length?`<div class="tbl-wrap"><table>
         <thead><tr><th>التاريخ</th><th>العنبر</th><th>التاجر</th><th>النوع</th><th>الدرجة</th><th>الأطباق</th><th>سعر الطبق</th><th>المبلغ</th><th></th></tr></thead>
@@ -2101,6 +2117,58 @@ function renderSales(){
     h.sales.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
     save(); toast('تم تسجيل البيع'); renderSales();
   };
+  /* ===== تقرير المبيعات (مزرعة / عنبر / أكتر من عنبر) ===== */
+  const srAll=$('#sr_all'), srHs=$$('.sr_h');
+  const syncChips=()=>{ $$('#page-sales label.chip').forEach(l=>{const c=l.querySelector('input'); if(c) l.classList.toggle('active',c.checked);}); };
+  if(srAll) srAll.onchange=()=>{ if(srAll.checked) srHs.forEach(c=>c.checked=false); syncChips(); };
+  srHs.forEach(c=>c.onchange=()=>{ if(c.checked) srAll.checked=false; if(!srHs.some(x=>x.checked)) srAll.checked=true; syncChips(); });
+  const srBuild=()=>{
+    const idx=srAll.checked?DB.houses.map((h,i)=>i):srHs.filter(c=>c.checked).map(c=>+c.value);
+    const from=$('#sr_from').value, to=$('#sr_to').value;
+    const groups={}; const order=[];
+    idx.forEach(i=>{ const h=DB.houses[i];
+      (h.sales||[]).forEach((s,si)=>{
+        if(from&&s.date<from) return; if(to&&s.date>to) return;
+        const key=s.dist?('D|'+s.dist):('S|'+i+'|'+si);
+        if(!groups[key]){ groups[key]={date:s.date,dishes:0,price:n0(s.dishPrice),amount:0,houses:[],trader:s.trader||''}; order.push(key); }
+        const g=groups[key]; g.dishes+=n0(s.dishes); g.amount+=n0(s.dishes)*n0(s.dishPrice); if(!g.houses.includes(h.name)) g.houses.push(h.name);
+      });
+    });
+    const rows=order.map(k=>groups[k]).sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
+    rows.forEach(r=>{ r.dishes=Math.round(r.dishes*100)/100; r.price=r.dishes?r.amount/r.dishes:r.price; });
+    const tD=rows.reduce((a,r)=>a+r.dishes,0), tM=rows.reduce((a,r)=>a+r.amount,0);
+    const scope=srAll.checked?'إجمالي المزرعة':idx.map(i=>DB.houses[i].name).join(' + ');
+    return {rows,tD,tM,scope,from,to,multi:idx.length>1};
+  };
+  const srTable=(R)=>R.rows.length?`<div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>التاريخ</th>${R.multi?'<th>العنبر</th>':''}<th>التاجر</th><th>عدد الأطباق</th><th>سعر الطبق</th><th>المبلغ</th></tr></thead>
+      <tbody>${R.rows.map((r,k)=>`<tr><td>${k+1}</td><td><b>${esc(r.date)}</b></td>${R.multi?`<td>${esc(r.houses.join(' + '))}</td>`:''}<td>${r.trader?esc(r.trader):'—'}</td>
+        <td class="num">${fmtN(r.dishes)}</td><td class="num">${r.price.toFixed(2).replace(/\.00$/,'')}</td><td class="num" style="font-weight:700">${fmtMoney(r.amount)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr style="font-weight:800;background:var(--primary-soft)"><td colspan="${R.multi?4:3}">الإجمالي</td><td class="num">${fmtN(Math.round(R.tD*100)/100)}</td>
+        <td class="num">${R.tD?(R.tM/R.tD).toFixed(2):'—'}</td><td class="num">${fmtMoney(R.tM)}</td></tr></tfoot>
+    </table></div>`:`<div class="empty"><div class="big">📑</div>لا مبيعات في الاختيار ده</div>`;
+  $('#sr_show').onclick=()=>{ const R=srBuild();
+    $('#sr_out').innerHTML=`<div style="font-size:13px;margin-bottom:8px"><b>${esc(R.scope)}</b>${R.from||R.to?` · الفترة ${R.from||'البداية'} ← ${R.to||'الآن'}`:' · كل الفترة'} · ${R.rows.length} عملية بيع</div>${srTable(R)}`; };
+  $('#sr_print').onclick=()=>{ const R=srBuild(); const f=getActiveFarm(); const fname=f?f.name:'المزرعة'; const cur=DB.currency||'ج.م';
+    const w=window.open('','_blank'); if(!w){ toast('اسمح بالنوافذ المنبثقة للطباعة','err'); return; }
+    w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>تقرير مبيعات ${esc(fname)}</title>
+      <style>*{font-family:'Segoe UI',Tahoma,Arial,sans-serif;box-sizing:border-box}body{padding:26px;color:#1a1a1a}
+      .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #16a34a;padding-bottom:10px;margin-bottom:14px}
+      h2{margin:0;font-size:22px}.meta{font-size:12.5px;color:#444;line-height:1.8}
+      table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #bbb;padding:7px 9px;text-align:center}
+      th{background:#eef7f0}tfoot td{font-weight:800;background:#f3f4f6}
+      .sum{display:flex;gap:14px;margin:14px 0}.box{flex:1;border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center}
+      .box b{display:block;font-size:18px;margin-top:3px}.sig{display:flex;justify-content:space-between;margin-top:50px;font-size:13px}
+      .foot{margin-top:24px;font-size:10.5px;color:#888;text-align:center}</style></head><body>
+      <div class="hd"><div><h2>🧾 تقرير مبيعات البيض</h2><div class="meta">${esc(fname)} — ${esc(R.scope)}</div></div>
+        <div class="meta">الفترة: ${R.from||'من البداية'} ← ${R.to||'حتى الآن'}<br>تاريخ الطباعة: ${new Date().toLocaleDateString('en-CA')}</div></div>
+      <div class="sum"><div class="box">عدد العمليات<b>${R.rows.length}</b></div><div class="box">إجمالي الأطباق<b>${fmtN(Math.round(R.tD*100)/100)}</b></div>
+        <div class="box">متوسط سعر الطبق<b>${R.tD?(R.tM/R.tD).toFixed(2):'—'}</b></div><div class="box">إجمالي المبلغ<b>${fmtMoney(R.tM)}</b></div></div>
+      ${srTable(R).replace(/class="tbl-wrap"/,'').replace(/var\(--primary-soft\)/,'#f3f4f6')}
+      <div class="sig"><span>توقيع المسؤول: ................</span><span>توقيع المستلم: ................</span></div>
+      <div class="foot">العملة: ${esc(cur)} · الطبق = ${DB.dishSize} بيضة</div>
+      ${'<scr'+'ipt>'}window.onload=function(){window.print();}${'</scr'+'ipt>'}</body></html>`);
+    w.document.close(); };
   $$('#page-sales [data-h]').forEach(b=>b.onclick=()=>{ if(confirm('حذف هذا البيع؟')){ DB.houses[+b.dataset.h].sales.splice(+b.dataset.s,1); save(); renderSales(); toast('تم الحذف'); } });
   const SF={date:['date'],trader:['select',()=>DB.traders],eggColor:['select',()=>['احمر','ابيض']],dishes:['number'],dishPrice:['number']};
   $$('#page-sales tr[data-hi]').forEach(tr=>{
