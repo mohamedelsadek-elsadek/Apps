@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض v3.2</title>
+<title>نظام إدارة مزرعة الدجاج البياض v3.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3528,6 +3528,7 @@ function renderEcon(){
         📌 التكلفة التشغيلية = المصاريف المتكررة (بدون الكتاكيت). الكتاكيت تكلفة رأسمالية تُسترد على مدى الدورة كلها، فبنفصلها عشان قرار التسعير اليومي يبقى سليم.
       </div>
     </div>`:`<div class="rep-hint">💡 لسه مفيش إنتاج/مبيعات كفاية لحساب تكلفة الطبق. سجّل الإنتاج والمبيعات وهيتحسب تلقائياً من الأرقام المدخلة.</div>`}
+    ${c.dishesProduced>0?estSectionHTML(c,money):''}
     `;
   $('#econPrint')&&($('#econPrint').onclick=()=>window.print());
   // رسم هيكل التكاليف
@@ -3537,6 +3538,208 @@ function renderEcon(){
       data:{labels:parts.map(p=>p[0]),datasets:[{data:parts.map(p=>Math.round(p[1])),backgroundColor:parts.map(p=>p[2])}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11}}}}}});
   }catch(e){ console.warn('econChart',e); }
+  try{ wireEst(); }catch(e){ console.warn('est',e); }
+}
+
+/* ============ 🧩 البيانات الناقصة (تقديري) + التحليل المقترح ============
+   الفكرة: لكل بند تكلفة نعرف آخر تاريخ اتسجل فيه فعلياً، والفجوة من بعده لحد "تاريخ التحليل"
+   بتتقدّر بمتوسط/سعر يحدده المستخدم. أول ما يتسجل الفعلي، آخر تاريخ بيتقدم والفجوة بتصغر
+   تلقائياً — يعني التقدير بيتلغي من نفسه (كأنه لم يكن) من غير أي تدخل. */
+function _estD(s){ if(!s) return null; const d=new Date(s+'T00:00:00'); return isNaN(d)?null:d; }
+function _estISO(d){ const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function _estAdd(s,n){ const d=_estD(s); if(!d) return s; d.setDate(d.getDate()+n); return _estISO(d); }
+function _estDays(a,b){ const A=_estD(a),B=_estD(b); if(!A||!B) return 0; return Math.max(0,Math.round((B-A)/864e5)+1); }
+function estCfg(){ if(!DB.estCfg||typeof DB.estCfg!=='object') DB.estCfg={items:{}}; if(!DB.estCfg.items) DB.estCfg.items={}; return DB.estCfg; }
+function estimateMissing(){
+  const cfg=estCfg(), IT=cfg.items, today=todayISO();
+  const end=cfg.endDate||today;
+  const dish=DB.dishSize||30, bagKg=DB.feedBagKg||50;
+  const starts=DB.houses.map(h=>h.startDate).filter(Boolean).sort();
+  const farmStart=starts[0]||end;
+  // تجميع يومي على مستوى المزرعة
+  const E={},F={},S={},P={}; let lastEggLog='',lastFeedLog='';
+  DB.houses.forEach(h=>{
+    (h.days||[]).forEach(d=>{ if(!d.date||d.date>end) return;
+      if(n0(d.eggs)>0){ E[d.date]=(E[d.date]||0)+n0(d.eggs); if(d.date>lastEggLog) lastEggLog=d.date; }
+      if(n0(d.feedBags)>0){ F[d.date]=(F[d.date]||0)+n0(d.feedBags); if(d.date>lastFeedLog) lastFeedLog=d.date; } });
+    (h.sales||[]).forEach(s=>{ if(!s.date||s.date>end) return; S[s.date]=(S[s.date]||0)+n0(s.dishes);
+      (P[s.date]=P[s.date]||[]).push([n0(s.dishes),n0(s.dishPrice)]); });
+  });
+  const lastN=(obj,n)=>{ const k=Object.keys(obj).sort().slice(-n); return k.length? k.reduce((a,x)=>a+obj[x],0)/k.length : 0; };
+  const feedRate=lastN(F,14);          // شيكارة/يوم (متوسط آخر ١٤ يوم مسجل)
+  const eggRate=lastN(E,14);           // بيضة/يوم
+  const sumRange=(obj,a,b)=>Object.keys(obj).reduce((t,k)=>t+((k>=a&&k<=b)?obj[k]:0),0);
+  const clampFrom=(lastRec,key)=>{ let f=lastRec?_estAdd(lastRec,1):farmStart; const ov=(IT[key]||{}).from; if(ov&&ov>f) f=ov; return f; };
+  const itm=(key,def)=>Object.assign({on:def.on!==false},IT[key]||{});
+  const rows=[];
+
+  // ١) إنتاج تقديري بعد آخر يوم مسجل (عشان التكلفة/طبق متتظلمش)
+  let prodDays=0, prodDishes=0;
+  if(lastEggLog && lastEggLog<end){ prodDays=_estDays(_estAdd(lastEggLog,1),end); prodDishes=prodDays*eggRate/dish; }
+
+  // ٢) العلف: الكمية من السجل اليومي بعد آخر فاتورة + امتداد بمعدل آخر ١٤ يوم × سعر الطن
+  const sc=DB.samehCosts||[], co=DB.cashOut||[];
+  const lastOf=(arr,f)=>arr.filter(f).map(x=>x.date||'').filter(Boolean).sort().pop()||'';
+  const totOf=(arr,f)=>arr.filter(f).reduce((a,x)=>a+n0(x.amount),0);
+  { const key='feed', last=lastOf(sc,x=>x.item==='علف'), from=clampFrom(last,key), o=itm(key,{});
+    let bags=0, logged=0, ext=0;
+    if(from<=end){
+      logged=sumRange(F,from,lastFeedLog&&lastFeedLog<end?lastFeedLog:end);
+      const extFrom = lastFeedLog? (_estAdd(lastFeedLog,1)>from?_estAdd(lastFeedLog,1):from) : from;
+      ext = extFrom<=end? _estDays(extFrom,end)*feedRate : 0;
+      bags=logged+ext; }
+    const tons=bags*bagKg/1000, rate=n0(o.rate);
+    rows.push({key,label:'🌾 علف',kind:'feed',last,from,gap:from<=end?_estDays(from,end):0,
+      qty:tons, qtyTxt:tons?tons.toFixed(1)+' طن':'—',
+      basis:`${fmtN(logged)} شيكارة مسجلة يومياً${ext?` + ${fmtN(Math.round(ext))} تقدير (${fmtN(feedRate)}/يوم)`:''}`,
+      rate, rateUnit:'ج/طن', rateDef:0, on:o.on, value:o.on? tons*rate : 0, needRate:!rate&&tons>0, bucket:'feed'}); }
+
+  // ٣) الأطباق والكراتين: بالطبق المنتَج بعد آخر شراء
+  { const key='trays', f=x=>x.item==='أطباق وكراتين', last=lastOf(sc,f), tot=totOf(sc,f), from=clampFrom(last,key), o=itm(key,{});
+    const baseDish=sumRange(E,farmStart,last||farmStart)/dish;
+    const rateDef= baseDish>0? tot/baseDish : 0;
+    let d=0; if(from<=end){ d=sumRange(E,from,end)/dish; if(lastEggLog&&lastEggLog<end){ const xf=_estAdd(lastEggLog,1)>from?_estAdd(lastEggLog,1):from; d+=_estDays(xf,end)*eggRate/dish; } }
+    const rate=o.rate!=null&&o.rate!==''?n0(o.rate):rateDef;
+    rows.push({key,label:'🥚 أطباق وكراتين',kind:'perDish',last,from,gap:from<=end?_estDays(from,end):0,
+      qty:d, qtyTxt:d?fmtN(Math.round(d))+' طبق':'—', basis:'تكلفة الطبق المنتَج', rate, rateDef, rateUnit:'ج/طبق', on:o.on, value:o.on? d*rate : 0, bucket:'trays'}); }
+
+  // ٤) باقي البنود (توريدات + مصاريف الخزنة): متوسط شهري من بداية الدورة لآخر تسجيل
+  const oneOff=/مراوح|شفاط|تبريد/;
+  const generic=[];
+  [...new Set(sc.map(x=>x.item||'أخرى'))].filter(k=>!['علف','كتاكيت','أطباق وكراتين'].includes(k)).forEach(k=>generic.push(['s:'+k,k,sc.filter(x=>(x.item||'أخرى')===k),k==='أدوية ولقاحات'?'vet':'otherSupply']));
+  [...new Set(co.map(x=>x.category||'أخرى'))].forEach(k=>generic.push(['c:'+k,k,co.filter(x=>(x.category||'أخرى')===k),'opex']));
+  generic.forEach(([key,label,arr,bucket])=>{
+    const last=arr.map(x=>x.date||'').filter(Boolean).sort().pop()||'', tot=arr.reduce((a,x)=>a+n0(x.amount),0);
+    const baseDays=_estDays(farmStart,last||farmStart);
+    const rateDef= baseDays>0? tot/baseDays*30 : 0;
+    const o=itm(key,{on:!oneOff.test(label)});
+    const from=clampFrom(last,key), gap=from<=end?_estDays(from,end):0;
+    const rate=o.rate!=null&&o.rate!==''?n0(o.rate):rateDef;
+    rows.push({key,label:(bucket==='opex'?'🏭 ':bucket==='vet'?'💉 ':'📦 ')+label,kind:'monthly',last,from,gap,
+      qty:gap, qtyTxt:gap?gap+' يوم':'—', basis:`متوسط ${fmtN(Math.round(rateDef))}/شهر (إجمالي ${fmtN(Math.round(tot))} على ${baseDays} يوم)`,
+      rate, rateDef, rateUnit:'ج/شهر', on:o.on, value:o.on? rate/30*gap : 0, bucket});
+  });
+
+  // ٥) مبيعات ناقصة: رصيد محسوب − رصيد فعلي (في تاريخ الجرد)
+  const st=cfg.stock||{}; let miss=null;
+  if(st.date && st.dishes!=null && st.dishes!==''){
+    const calc=sumRange(E,'0000',st.date)/dish - sumRange(S,'0000',st.date);
+    const back=_estAdd(st.date,-30); let q=0,m=0; Object.keys(P).forEach(k=>{ if(k>back&&k<=st.date) P[k].forEach(([a,p])=>{q+=a;m+=a*p;}); });
+    const priceDef=q>0?m/q:0, price=st.price!=null&&st.price!==''?n0(st.price):priceDef;
+    const dishes=Math.max(0,calc-n0(st.dishes));
+    miss={date:st.date,calc,actual:n0(st.dishes),dishes,price,priceDef,value:dishes*price};
+  }
+  const tot=rows.reduce((a,r)=>a+r.value,0);
+  const by=b=>rows.filter(r=>r.bucket===b).reduce((a,r)=>a+r.value,0);
+  return {end,today,farmStart,lastEggLog,lastFeedLog,feedRate,eggRate,prodDays,prodDishes,rows,miss,tot,
+    feed:by('feed'),trays:by('trays'),vet:by('vet'),otherSupply:by('otherSupply'),opex:by('opex')};
+}
+function estSectionHTML(c,money){
+  const x=estimateMissing(), cfg=estCfg();
+  const fmt2=v=>v>0?Number(v).toLocaleString('en-US',{maximumFractionDigits:2}):'—';
+  const inp=(k,v,w,t,ph)=>`<input class="est-in" data-k="${k}" type="${t||'number'}" step="any" value="${v==null?'':esc(String(v))}" placeholder="${ph||''}" style="width:${w||90}px;padding:5px 7px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit">`;
+  const needFeed=x.rows.some(r=>r.needRate);
+  // التحليل المقترح = فعلي + تقديري
+  const dishesA=c.dishesProduced+x.prodDishes;
+  const missDishes=x.miss?x.miss.dishes:0, missVal=x.miss?x.miss.value:0;
+  const opA=c.operating+x.tot, allA=opA+c.chicks, revA=c.revenue+missVal, soldA=c.dishes+missDishes;
+  const feedA=c.feed+x.feed;
+  const stockA=Math.max(0,(c.inStock/(DB.dishSize||30))-missDishes+x.prodDishes);
+  const priceRef=x.miss&&x.miss.price?x.miss.price:(soldA>0?revA/soldA:0);
+  const R=[
+    ['إنتاج (طبق)', c.dishesProduced, x.prodDishes, dishesA, 'n'],
+    ['مبيعات (طبق)', c.dishes, missDishes, soldA, 'n'],
+    ['🌾 علف', c.feed, x.feed, feedA, 'm'],
+    ['💉 أدوية ولقاحات', c.vet, x.vet, c.vet+x.vet, 'm'],
+    ['🥚 أطباق وكراتين', c.trays, x.trays, c.trays+x.trays, 'm'],
+    ['📦 توريدات أخرى', c.otherSupply, x.otherSupply, c.otherSupply+x.otherSupply, 'm'],
+    ['🏭 مصاريف الخزنة', c.opex, x.opex, c.opex+x.opex, 'm'],
+    ['الإجمالي التشغيلي', c.operating, x.tot, opA, 'mb'],
+    ['الإيراد', c.revenue, missVal, revA, 'mb'],
+    ['تكلفة الطبق (تشغيلي)', c.costPerDishOp, null, dishesA>0?opA/dishesA:0, 'm2'],
+    ['تكلفة الطبق (شامل الكتاكيت)', c.costPerDishAll, null, dishesA>0?allA/dishesA:0, 'm2'],
+    ['متوسط سعر البيع', c.avgSale, null, soldA>0?revA/soldA:0, 'm2'],
+    ['ربح/خسارة تشغيلي', c.grossProfit, null, revA-opA, 'mp'],
+    ['قيمة المخزون الحالي (تقديري)', null, null, stockA*priceRef, 'm'],
+    ['الصافي شامل الكتاكيت والمخزون', c.netAllIn, null, revA+stockA*priceRef-allA, 'mp'],
+    ['العلف من التكلفة', c.feedPctOfCost, null, opA>0?feedA/opA*100:0, 'p'],
+    ['ربح تشغيلي/دجاجة', c.profitPerHen, null, c.initial>0?(revA-opA)/c.initial:0, 'mp'],
+  ];
+  const cell=(v,t)=>{ if(v==null) return '<td class="num" style="color:var(--muted2)">—</td>';
+    if(t==='n') return `<td class="num">${fmtN(Math.round(v))}</td>`;
+    if(t==='p') return `<td class="num">${v.toFixed(1)}٪</td>`;
+    if(t==='m2') return `<td class="num">${v?Number(v).toLocaleString('en-US',{maximumFractionDigits:2})+' '+(DB.currency||'ج.م'):'—'}</td>`;
+    const col=t==='mp'?(v>=0?'#1a8f3c':'#dc2626'):'';
+    return `<td class="num" ${col?`style="color:${col};font-weight:700"`:''}>${money(v)}</td>`; };
+  return `
+    <div class="section-title" id="estSec">🧩 البيانات الناقصة (تقديري) <span class="pill gray" style="font-size:11px">بيتلغي تلقائياً لما تسجّل الفعلي</span></div>
+    <div class="panel" style="margin-bottom:14px"><div class="panel-head"><h3>⚙️ إعدادات التقدير</h3></div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px 22px;padding:12px 18px;align-items:end;font-size:12.5px">
+        <label>📅 تاريخ التحليل<br>${inp('endDate',cfg.endDate||x.today,140,'date')}</label>
+        <label>🌾 متوسط سعر طن العلف<br>${inp('i:feed:rate',(cfg.items.feed||{}).rate,120,'number','مطلوب')}</label>
+        <label>📦 الرصيد الفعلي في المخزن (طبق)<br>${inp('stock:dishes',(cfg.stock||{}).dishes,110,'number','جرد فعلي')}</label>
+        <label>بتاريخ<br>${inp('stock:date',(cfg.stock||{}).date||'',140,'date')}</label>
+        <label>سعر الطبق للمبيعات الناقصة<br>${inp('stock:price',(cfg.stock||{}).price,100,'number',x.miss&&x.miss.priceDef?x.miss.priceDef.toFixed(1):'متوسط آخر ٣٠ يوم')}</label>
+        <button class="btn" id="estReset" style="margin-inline-start:auto">↺ رجّع المتوسطات التلقائية</button>
+      </div>
+      ${needFeed?`<div class="rep-hint" style="margin:0 18px 12px">⚠️ أدخل <b>متوسط سعر طن العلف</b> عشان تتحسب قيمة العلف الناقص.</div>`:''}
+      <div style="padding:0 18px 12px;font-size:11.5px;color:var(--muted2);line-height:1.9">
+        آخر إنتاج مسجل: <b>${esc(x.lastEggLog||'—')}</b> · آخر علف يومي: <b>${esc(x.lastFeedLog||'—')}</b> · معدل العلف: <b>${fmtN(x.feedRate)}</b> شيكارة/يوم · معدل الإنتاج: <b>${fmtN(Math.round(x.eggRate/(DB.dishSize||30)))}</b> طبق/يوم
+        ${x.prodDays?` · <span style="color:#b45309">إنتاج ${x.prodDays} يوم مش متسجل اتقدّر ${fmtN(Math.round(x.prodDishes))} طبق</span>`:''}
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:14px"><div class="panel-head"><h3>📋 بنود ناقصة من بعد آخر تسجيل</h3>
+      <span style="font-size:11px;color:var(--muted2)">عدّل المعدل أو "يبدأ من" لو فيه فاتورة مدفوعة مقدماً</span></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>✓</th><th>البند</th><th>آخر تسجيل فعلي</th><th>يبدأ من</th><th>الفجوة</th><th>الكمية</th><th>المعدل</th><th>القيمة التقديرية</th></tr></thead>
+        <tbody>${x.rows.map(r=>`<tr style="${r.on?'':'opacity:.5'}">
+          <td><input type="checkbox" class="est-in" data-k="i:${esc(r.key)}:on" ${r.on?'checked':''}></td>
+          <td><b>${esc(r.label)}</b><div style="font-size:10.5px;color:var(--muted2)">${esc(r.basis)}</div></td>
+          <td class="num">${esc(r.last||'—')}</td>
+          <td>${inp('i:'+r.key+':from',r.from<=x.end?r.from:'',128,'date')}</td>
+          <td class="num">${r.gap?r.gap+' يوم':'<span style="color:#1a8f3c">✓ مكتمل</span>'}</td>
+          <td class="num">${r.qtyTxt}</td>
+          <td>${r.key==='feed'?`<span style="font-size:11px;color:var(--muted2)">من الإعدادات</span>`:inp('i:'+r.key+':rate',r.rate?Math.round(r.rate*100)/100:'',82)} <span style="font-size:10.5px;color:var(--muted2)">${r.rateUnit}</span></td>
+          <td class="num" style="font-weight:800;color:${r.value?'#b45309':'var(--muted2)'}">${r.value?money(r.value):(r.needRate?'أدخل السعر':'—')}</td></tr>`).join('')}
+          ${x.miss?`<tr style="background:color-mix(in srgb,#06b6d4 8%,transparent)"><td>💵</td><td><b>مبيعات مش متسجلة</b><div style="font-size:10.5px;color:var(--muted2)">رصيد محسوب ${fmtN(Math.round(x.miss.calc))} − جرد فعلي ${fmtN(x.miss.actual)} في ${esc(x.miss.date)}</div></td>
+            <td colspan="3"></td><td class="num">${fmtN(Math.round(x.miss.dishes))} طبق</td><td class="num">${fmt2(x.miss.price)} ج/طبق</td><td class="num" style="font-weight:800;color:#1a8f3c">+ ${money(x.miss.value)}</td></tr>`:''}
+          <tr style="background:var(--panel2);font-weight:800"><td></td><td>إجمالي التكاليف التقديرية</td><td colspan="5"></td><td class="num">${money(x.tot)}</td></tr>
+        </tbody></table></div>
+      <div style="padding:10px 18px;font-size:11.5px;color:var(--muted2);line-height:1.9">
+        📌 <b>إزاي بيتلغي؟</b> كل بند بيبدأ من اليوم اللي بعد آخر تسجيل فعلي ليه. أول ما تسجّل فاتورة علف أو مصروف بتاريخ أحدث، الفجوة بتصغر أو بتختفي، والتقدير اللي كان مكانها بيتشال من الحساب لوحده. المعدلات اللي تدخلها بتتحفظ وتفضل تشتغل على أي فجوة جديدة.<br>
+        🧮 العلف = الشكاير المسجلة يومياً بعد آخر فاتورة + امتداد بمعدل آخر ١٤ يوم × سعر الطن. الأطباق = الأطباق المنتجة × تكلفة الطبق. باقي البنود = متوسط شهري من بداية الدورة لآخر تسجيل (المراوح/الشفاطات متشالة افتراضياً لأنها مش متكررة).
+      </div>
+    </div>
+    <div class="section-title">📈 التحليل الفني والاقتصادي المقترح (فعلي + تقديري)</div>
+    <div class="kpi-grid">
+      ${[['🧾','#f59e0b','تكلفة الطبق المقترحة',dishesA>0?money(opA/dishesA):'—','فعلي: '+money(c.costPerDishOp)],
+         ['🏷️','#06b6d4','متوسط سعر البيع',soldA>0?money(revA/soldA):'—','فعلي: '+money(c.avgSale)],
+         ['⚖️',revA-opA>=0?'#22c55e':'#ef4444','ربح/خسارة تشغيلي مقترح',money(revA-opA),'فعلي: '+money(c.grossProfit)],
+         ['🌾','#10b981','العلف من التكلفة',opA>0?(feedA/opA*100).toFixed(0)+'٪':'—','الطبيعي ٦٠–٧٠٪']]
+        .map(([i,a,l,v,s])=>`<div class="kpi" style="--accent:${a};--accent-soft:color-mix(in srgb,${a} 14%,transparent)"><div class="ico">${i}</div><div class="label">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('')}
+    </div>
+    <div class="panel" style="margin-bottom:18px"><div class="panel-head"><h3>🔍 مقارنة: المسجّل فعلياً ← المقترح</h3></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>البند</th><th>مسجّل فعلياً</th><th>تقديري (ناقص)</th><th>المقترح</th></tr></thead>
+        <tbody>${R.map(([l,a,e,p,t])=>`<tr ${t==='mb'||l.startsWith('الصافي')?'style="background:var(--panel2);font-weight:800"':''}><td>${l}</td>${cell(a,t)}${cell(e,t)}${cell(p,t)}</tr>`).join('')}</tbody>
+      </table></div>
+      <div style="padding:10px 18px;font-size:11.5px;color:var(--muted2);line-height:1.9">
+        ⚠️ ده تحليل <b>مقترح</b> مبني على تقديرات، مش حساب ختامي. كل ما تسجّل فعلي أكتر، العمود التقديري بيقل والمقترح بيقرب من الفعلي. قيمة المخزون محسوبة بسعر ${fmt2(priceRef)} للطبق.
+      </div>
+    </div>`;
+}
+function wireEst(){
+  const pg=$('#page-econ'); if(!pg) return;
+  const rerender=()=>{ const sc=document.scrollingElement, y=sc?sc.scrollTop:0, m=pg.closest('.main,main,.content'), my=m?m.scrollTop:0;
+    save(); renderEcon(); if(sc) sc.scrollTop=y; if(m) m.scrollTop=my; };
+  pg.querySelectorAll('.est-in').forEach(el=>el.addEventListener('change',()=>{
+    const cfg=estCfg(), k=el.dataset.k, v=el.type==='checkbox'?el.checked:el.value;
+    if(k==='endDate'){ cfg.endDate=(v&&v!==todayISO())?v:''; }
+    else if(k.startsWith('stock:')){ cfg.stock=cfg.stock||{}; cfg.stock[k.slice(6)]=v; }
+    else if(k.startsWith('i:')){ const p=k.split(':'), f=p.pop(), key=p.slice(1).join(':'); cfg.items[key]=cfg.items[key]||{}; cfg.items[key][f]=v; }
+    rerender(); }));
+  const rs=$('#estReset'); if(rs) rs.onclick=()=>{ if(!confirm('ترجيع المعدلات والتواريخ للقيم التلقائية؟ (سعر العلف والجرد هيفضلوا)')) return;
+    const cfg=estCfg(), fp=(cfg.items.feed||{}).rate; cfg.items={}; if(fp) cfg.items.feed={rate:fp}; rerender(); };
 }
 
 
