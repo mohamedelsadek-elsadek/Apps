@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض v3</title>
+<title>نظام إدارة مزرعة الدجاج البياض v3.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2026,6 +2026,7 @@ function renderSales(){
       <div style="padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;align-items:end">
         <div class="field"><label>📅 التاريخ</label><input class="input" type="date" id="sl_date" value="${today}"></div>
         <div class="field"><label>🏠 العنبر (المتاح فيه بيض)</label><select class="input" id="sl_house">
+          ${housesWithStock.length>1?`<option value="ALL">🔀 غير محدد — يوزّع على العنابر بنسبة الإنتاج</option>`:''}
           ${housesWithStock.length?housesWithStock.map(x=>`<option value="${x.i}">${esc(x.h.name)} — متاح ${fmtN(Math.floor(x.st.inStockEggs/DB.dishSize))} طبق</option>`).join(''):'<option value="">لا يوجد بيض متاح</option>'}
         </select></div>
         <div class="field"><label>🥚 نوع البيض</label><select class="input" id="sl_color"><option>احمر</option><option>ابيض</option></select></div>
@@ -2044,7 +2045,7 @@ function renderSales(){
       ${allSales.length?`<div class="tbl-wrap"><table>
         <thead><tr><th>التاريخ</th><th>العنبر</th><th>التاجر</th><th>النوع</th><th>الدرجة</th><th>الأطباق</th><th>سعر الطبق</th><th>المبلغ</th><th></th></tr></thead>
         <tbody>${allSales.map(s=>`<tr data-hi="${s.hi}" data-si="${s.si}">
-          <td><span class="cell-edit" data-f="date"><b>${esc(s.date)}</b></span></td><td>${esc(s.house)}</td>
+          <td><span class="cell-edit" data-f="date"><b>${esc(s.date)}</b></span></td><td>${esc(s.house)}${s.dist?` <span class="pill gray" style="font-size:9px" title="بيع موزّع تلقائيًا بنسبة الإنتاج">موزّع ${s.distPct||''}٪</span>`:''}</td>
           <td><span class="cell-edit" data-f="trader">${s.trader?esc(s.trader):'<span class="pill gray">غير محدد</span>'}</span></td>
           <td><span class="cell-edit" data-f="eggColor"><span class="pill ${s.eggColor==='ابيض'?'gray':'red'}">${esc(s.eggColor||'احمر')}</span></span></td>
           <td>${(()=>{const g=EGG_GRADES.find(x=>x.k===s.grade); return g?`<span class="pill" style="background:${g.col}22;color:${g.col};border:1px solid ${g.col}55">${g.ar}</span>`:'<span style="color:var(--muted)">—</span>';})()}</td>
@@ -2071,11 +2072,32 @@ function renderSales(){
     const dishes=parseFloat($('#sl_dishes').value), price=parseFloat($('#sl_price').value);
     if(isNaN(dishes)||dishes<=0){ toast('أدخل عدد الأطباق','err'); return; }
     if(isNaN(price)){ toast('أدخل سعر الطبق','err'); return; }
+    const date=$('#sl_date').value, eggColor=$('#sl_color').value, trader=$('#sl_trader').value, grade=($('#sl_grade')?$('#sl_grade').value:'');
+    if(hi==='ALL'){
+      // توزيع البيع على العنابر بنسبة إنتاجية/مخزون كل عنبر
+      const list=DB.houses.map((h,i)=>({h,st:houseStats(h)})).filter(x=>x.st.inStockEggs>0);
+      const totalStock=list.reduce((a,x)=>a+x.st.inStockEggs,0);
+      if(list.length===0||totalStock<=0){ toast('لا يوجد مخزون للتوزيع','err'); return; }
+      const needEggs=dishes*DB.dishSize;
+      if(needEggs>totalStock){ if(!confirm(`الكمية (${fmtN(needEggs)} بيضة) أكبر من إجمالي المخزون المتاح (${fmtN(totalStock)}). تسجّل برضه؟`)) return; }
+      const batch='D'+Date.now();
+      const shares=list.map(x=>x.st.inStockEggs/totalStock);
+      const assigned=shares.map(sh=>Math.round(dishes*sh*100)/100);
+      let diff=Math.round((dishes-assigned.reduce((a,b)=>a+b,0))*100)/100;
+      if(diff!==0){ let bi=0; shares.forEach((s,idx)=>{ if(s>shares[bi]) bi=idx; }); assigned[bi]=Math.round((assigned[bi]+diff)*100)/100; }
+      let cnt=0;
+      list.forEach((x,idx)=>{ if(assigned[idx]<=0) return; cnt++;
+        x.h.sales=x.h.sales||[];
+        x.h.sales.push({date,dishes:assigned[idx],eggColor,dishPrice:price,trader,grade,dist:batch,distPct:Math.round(shares[idx]*1000)/10});
+        x.h.sales.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
+      });
+      save(); toast(`تم توزيع البيع على ${cnt} عنبر بنسبة الإنتاج`); renderSales(); return;
+    }
     const h=DB.houses[+hi]; const st=houseStats(h);
     const needEggs=dishes*DB.dishSize;
     if(needEggs>st.inStockEggs){ if(!confirm(`الكمية (${fmtN(needEggs)} بيضة) أكبر من المخزون المتاح (${fmtN(st.inStockEggs)}). تسجّل برضه؟`)) return; }
     h.sales=h.sales||[];
-    h.sales.push({date:$('#sl_date').value,dishes,eggColor:$('#sl_color').value,dishPrice:price,trader:$('#sl_trader').value, grade:($('#sl_grade')?$('#sl_grade').value:'')});
+    h.sales.push({date,dishes,eggColor,dishPrice:price,trader,grade});
     h.sales.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
     save(); toast('تم تسجيل البيع'); renderSales();
   };
@@ -3098,6 +3120,18 @@ function renderOwner(){
       ${kpi('📦','#8b5cf6','مخزون بيض',fmtN(fs.inStock)+' بيضة',fmtN(Math.floor(fs.inStock/dishSize))+' طبق')}
       ${kpi('⚖️','#06b6d4','صافي محاسبي حتى تاريخه',fmtMoney(rev-cost),`إيراد ${fmtMoney(rev)} − تكلفة ${fmtMoney(cost)}`)}
     </div>
+    <div class="panel" style="margin-top:6px"><div class="panel-head"><h3>🥚🌾 كفاءة العلف للبيضة — كام جرام علف لكل بيضة</h3></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>الفترة</th><th>علف (كجم)</th><th>بيض (عدد)</th><th>جم علف / بيضة</th></tr></thead>
+        <tbody id="ownFeedEgg"><tr><td colspan="4" style="color:var(--muted)">—</td></tr></tbody></table></div>
+      <div style="padding:12px 16px 4px;display:flex;gap:10px;align-items:end;flex-wrap:wrap;border-top:1px solid var(--line)">
+        <div class="field"><label>📅 من</label><input class="input" type="date" id="fe_from"></div>
+        <div class="field"><label>📅 إلى</label><input class="input" type="date" id="fe_to"></div>
+        <button class="btn" id="fe_calc" style="height:42px">احسب الفترة المخصصة</button>
+        <div id="fe_customRes" style="font-weight:800;color:var(--primary);align-self:center"></div>
+      </div>
+      <div style="padding:4px 16px 14px;font-size:12px;color:var(--muted)">💡 المؤشر = (إجمالي العلف بالجرام ÷ إجمالي البيض) خلال الفترة. الشيكارة = ${DB.feedBagKg||50} كجم.</div>
+    </div>
     <div class="grid2">
       ${chartCard('ownProd','🥚 الإنتاج اليومي (طبق)','لكل عنبر')}
       ${chartCard('ownHD','📈 نسبة الإنتاج HD٪','لكل عنبر')}
@@ -3112,6 +3146,37 @@ function renderOwner(){
         <thead><tr><th>العنبر</th><th>بيض (طبق)</th><th>إنتاج٪</th><th>الاتجاه</th><th>نافق</th><th>علف (ش)</th><th>جم/طائر</th></tr></thead>
         <tbody id="ownTbl"></tbody></table></div></div>`;
   $$('.chip',$('#page-owner')).forEach(c=>c.onclick=()=>{UI.ownRange=+c.dataset.r;renderOwner();});
+  /* ====== كفاءة العلف للبيضة (جم علف لكل بيضة) ====== */
+  (function(){
+    const bagKg=DB.feedBagKg||50;
+    const feGpe=(rows)=>{ let fb=0,eg=0; rows.forEach(r=>{fb+=n0(r.feedBags);eg+=n0(r.eggs);}); return {feedKg:fb*bagKg, eggs:eg, gpe:eg>0?(fb*bagKg*1000)/eg:0}; };
+    const lastKey=daily.length?daily[daily.length-1].key:null;
+    const lastN=(nDays)=>{ if(!lastKey) return []; const d=new Date(lastKey); d.setDate(d.getDate()-nDays+1); const cut=d.toLocaleDateString('en-CA'); return daily.filter(r=>r.key>=cut); };
+    const firstEgg=(daily.find(r=>n0(r.eggs)>0)||{}).key||null;
+    const prodRows=firstEgg?daily.filter(r=>r.key>=firstEgg):daily.slice();
+    let lastDayRows=[]; for(let i=daily.length-1;i>=0;i--){ if(n0(daily[i].eggs)>0){ lastDayRows=[daily[i]]; break; } }
+    const defs=[
+      ['🗓️ اليوم (آخر يوم مسجّل)', lastDayRows],
+      ['📆 آخر ٧ أيام', lastN(7)],
+      ['🗓️ آخر ٣٠ يوم', lastN(30)],
+      ['🗓️ آخر ٣ شهور', lastN(90)],
+      ['⏳ كل فترة الإنتاج', prodRows]
+    ];
+    const cell=(o)=>o.eggs>0?`<td class="num">${fmtN(Math.round(o.feedKg))}</td><td class="num">${fmtN(o.eggs)}</td><td class="num" style="font-weight:800;color:var(--primary)">${o.gpe.toFixed(1)} جم</td>`:`<td class="num">${fmtN(Math.round(o.feedKg))}</td><td class="num">0</td><td class="num" style="color:var(--muted)">—</td>`;
+    const tb=$('#ownFeedEgg');
+    if(tb) tb.innerHTML=defs.map(([lbl,rows])=>{ const o=feGpe(rows); return `<tr><td>${lbl}</td>${cell(o)}</tr>`; }).join('');
+    // الفترة المخصصة
+    if(firstEgg&&$('#fe_from')&&!$('#fe_from').value) $('#fe_from').value=firstEgg;
+    if(lastKey&&$('#fe_to')&&!$('#fe_to').value) $('#fe_to').value=lastKey;
+    if($('#fe_calc')) $('#fe_calc').onclick=()=>{
+      const f=$('#fe_from').value, t=$('#fe_to').value;
+      if(!f||!t){ toast('اختر الفترة من وإلى','err'); return; }
+      const rows=daily.filter(r=>r.key>=f&&r.key<=t); const o=feGpe(rows);
+      $('#fe_customRes').innerHTML = o.eggs>0
+        ? `الفترة ${f} ← ${t}: <b>${o.gpe.toFixed(1)}</b> جم علف/بيضة · علف ${fmtN(Math.round(o.feedKg))} كجم · بيض ${fmtN(o.eggs)}`
+        : `لا يوجد بيض مسجّل في الفترة المختارة.`;
+    };
+  })();
   // بيانات لكل عنبر داخل الفترة
   const hNames=DB.houses.map(h=>h.name);
   const colors=['#f59e0b','#ef4444','#3b82f6','#22c55e','#7c3aed','#06b6d4'];
