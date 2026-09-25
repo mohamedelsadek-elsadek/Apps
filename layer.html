@@ -3439,7 +3439,8 @@ function renderEcon(){
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-family:var(--display);font-size:16px;font-weight:800">🔬 الأداء الفني والاقتصادي</span>
         <span class="pill gray">حتى تاريخه</span></div>
-      <button class="btn primary" id="econPrint">🖨️ طباعة / PDF</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="econJumpEst" style="background:#fef3c7;border-color:#f59e0b;color:#92400e;font-weight:800">🧩 البيانات الناقصة وسعر العلف ⬇</button>
+      <button class="btn primary" id="econPrint">🖨️ طباعة / PDF</button></div>
     </div>
 
     <div class="section-title">⚙️ الكفاءة الفنية (مقاييس البياض الحقيقية)</div>
@@ -3539,6 +3540,7 @@ function renderEcon(){
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11}}}}}});
   }catch(e){ console.warn('econChart',e); }
   try{ wireEst(); }catch(e){ console.warn('est',e); }
+  const jb=$('#econJumpEst'); if(jb) jb.onclick=()=>{ const t=$('#estSec'); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); else alert('القسم بيظهر بعد تسجيل إنتاج.'); };
 }
 
 /* ============ 🧩 البيانات الناقصة (تقديري) + التحليل المقترح ============
@@ -3699,7 +3701,7 @@ function estSectionHTML(c,money){
           <td>${inp('i:'+r.key+':from',r.from<=x.end?r.from:'',128,'date')}</td>
           <td class="num">${r.gap?r.gap+' يوم':'<span style="color:#1a8f3c">✓ مكتمل</span>'}</td>
           <td class="num">${r.qtyTxt}</td>
-          <td>${r.key==='feed'?`<span style="font-size:11px;color:var(--muted2)">من الإعدادات</span>`:inp('i:'+r.key+':rate',r.rate?Math.round(r.rate*100)/100:'',82)} <span style="font-size:10.5px;color:var(--muted2)">${r.rateUnit}</span></td>
+          <td>${r.key==='feed'?`<span style="font-size:11px;color:var(--muted2)">من الإعدادات</span>`:inp('i:'+r.key+':rate',r.rate?(r.kind==='monthly'?Math.round(r.rate):Math.round(r.rate*100)/100):'',92)} <span style="font-size:10.5px;color:var(--muted2)">${r.rateUnit}</span></td>
           <td class="num" style="font-weight:800;color:${r.value?'#b45309':'var(--muted2)'}">${r.value?money(r.value):(r.needRate?'أدخل السعر':'—')}</td></tr>`).join('')}
           ${x.miss?`<tr style="background:color-mix(in srgb,#06b6d4 8%,transparent)"><td>💵</td><td><b>مبيعات مش متسجلة</b><div style="font-size:10.5px;color:var(--muted2)">رصيد محسوب ${fmtN(Math.round(x.miss.calc))} − جرد فعلي ${fmtN(x.miss.actual)} في ${esc(x.miss.date)}</div></td>
             <td colspan="3"></td><td class="num">${fmtN(Math.round(x.miss.dishes))} طبق</td><td class="num">${fmt2(x.miss.price)} ج/طبق</td><td class="num" style="font-weight:800;color:#1a8f3c">+ ${money(x.miss.value)}</td></tr>`:''}
