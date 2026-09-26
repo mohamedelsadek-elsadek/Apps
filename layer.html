@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض v3.4</title>
+<title>نظام إدارة مزرعة الدجاج البياض v3.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -690,6 +690,7 @@ function loadORG(){
   seedOmdaFarm();
   updateOmdaJul3();
   importNovoSep26();
+  fixSamehNovoRecon();
 }
 
 /* يجيب DB القديم (مزرعة واحدة) من المفتاح القديم أو من الـ seed */
@@ -788,6 +789,35 @@ function importNovoSep26(){
     return true;
   }catch(e){ console.warn('importNovo',e); return false; }
 }
+/* ===== مطابقة حساب د سامح مع كشف نوفو (مرة واحدة) =====
+   ١) "مدفوعات" نوفو النقدية (فلوس نوفو دفعتها/سلّمتها للمزرعة) كانت متسجلة تسليمات (دائن) — مكانها الصح مدين.
+   ٢) الرصيد الافتتاحي = الفرق بين رصيد نوفو في ١/١/٢٠٢٦ وتوريدات ٢٠٢٥ المتسجلة (٤٥٠٫٠٤).
+   ٣) رصيد الكشف الرسمي يتصفّر عشان المديونية تتحسب لايف من القيود (وتقدر تكتبه يدوي من الـ KPI). */
+function fixSamehNovoRecon(){
+  try{
+    let farm=null;
+    (ORG.companies||[]).forEach(c=>(c.farms||[]).forEach(f=>{ if(farm||!f.db) return;
+      const sc=f.db.samehCosts||[]; if(sc.some(x=>x.date==='2026-06-13'&&+x.amount===141200)) farm=f; }));
+    if(!farm) return false;
+    const db=farm.db; db._imp=db._imp||{};
+    if(db._imp.samehRecon1 || !db._imp.novo2609) return false;
+    db.samehPayments=db.samehPayments||[]; db.samehCosts=db.samehCosts||[];
+    const keep=[]; let moved=0;
+    db.samehPayments.forEach(x=>{
+      if(x && x.via==='شراء/مصاريف'){
+        db.samehCosts.push({amount:+x.amount||0,date:x.date,item:/تبن/.test(x.note||'')?'شراء تبن':'بند مصاريف',
+          note:((x.note||'')+' — مدفوعات نقدية من نوفو (اتنقلت من التسليمات)').trim(),src:'recon1'}); moved++;
+      } else keep.push(x); });
+    db.samehPayments=keep;
+    db.samehOpeningDebit=450.04;
+    db.samehOfficialBalance=0;
+    db._imp.samehRecon1=Date.now();
+    if(farm===getActiveFarm()) bindDBToActiveFarm();
+    if(typeof saveORG==='function') saveORG();
+    if(typeof toast==='function') setTimeout(()=>toast('🔁 تمت مطابقة حساب د سامح مع كشف نوفو ('+moved+' حركة اتصححت)'),1500);
+    return true;
+  }catch(e){ console.warn('samehRecon',e); return false; }
+}
 /* ===== إضافة مزرعة "العمدة" مرة واحدة (بيانات دفتر العمدة) ===== */
 function seedOmdaFarm(){
   try{
@@ -841,7 +871,7 @@ function companyRollup(company){
 
 
 let UI={ repTab:'periodic', perUnit:'week', perHouse:'all', ownRange:30, healthHouse:0, fcWeeks:8, fcPrice:0, dailyHouse:0, prodHouse:0, repHouse:'all', repPreset:'all', repFrom:'', repTo:'',
-  smFrom:'', smTo:'', smType:'all', smItem:'all', smQ:'' };
+  smFrom:'', smTo:'', smType:'all', smItem:'all', smQ:'', smSort:'desc' };
 
 const $=(s,el=document)=>el.querySelector(s);
 const $$=(s,el=document)=>[...el.querySelectorAll(s)];
@@ -1071,7 +1101,7 @@ function applyCloudData(val){
     ORG=val; if(!getActiveCompany()&&ORG.companies[0])ORG.activeCompany=ORG.companies[0].id;
     const c=getActiveCompany(); if(c&&!getActiveFarm()&&(c.farms||[])[0])ORG.activeFarm=c.farms[0].id;
     bindDBToActiveFarm(); try{localStorage.setItem(ORG_KEY,JSON.stringify(ORG));}catch(e){}
-    try{ importNovoSep26(); }catch(e){}
+    try{ importNovoSep26(); fixSamehNovoRecon(); }catch(e){}
   } else {  // بيانات قديمة (مزرعة واحدة) — نحطها في المزرعة النشطة
     const f=getActiveFarm(); if(f){ f.db=normalizeFarmDB(val); bindDBToActiveFarm(); saveORG(); }
   }
@@ -2454,6 +2484,33 @@ function renderTreasury(){
 }
 
 /* 🧾 حساب د سامح — المورد */
+/* تعديل أي حركة في حساب د سامح (توريد أو تسليمة) من نافذة واحدة — مع إمكانية تحويل نوعها */
+function editSamehRec(kind,i){
+  const arr=kind==='supply'?DB.samehCosts:DB.samehPayments; const r=arr[i]; if(!r) return;
+  const opt=(list,v)=>[...new Set([...(list||[]),v].filter(Boolean))].map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+  openModal(`<div class="modal-head"><h3>✏️ تعديل حركة — ${kind==='supply'?'📦 توريد (مدين)':'💸 تسليمة (دائن)'}</h3><button class="x" id="se_x">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>النوع</label><select class="input" id="se_kind"><option value="supply" ${kind==='supply'?'selected':''}>📦 توريد (مدين — علينا)</option><option value="payment" ${kind==='payment'?'selected':''}>💸 تسليمة (دائن — دفعناها)</option></select></div>
+      <div class="field"><label>📅 التاريخ</label><input class="input" type="date" id="se_date" value="${esc(r.date||'')}"></div>
+      <div class="field"><label>💰 المبلغ</label><input class="input" type="number" step="any" id="se_amount" value="${r.amount!=null?r.amount:''}"></div>
+      <div class="field" id="se_itemW" style="${kind==='supply'?'':'display:none'}"><label>📦 الصنف</label><select class="input" id="se_item">${opt(DB.supplyItems,r.item)}</select></div>
+      <div class="field" id="se_viaW" style="${kind==='payment'?'':'display:none'}"><label>🤝 وصّلها / الطريقة</label><select class="input" id="se_via">${opt(DB.samehVias,r.via)}</select></div>
+      <div class="field"><label>📝 ملاحظة</label><textarea class="input" id="se_note" style="min-height:70px">${esc(r.note||'')}</textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn primary" id="se_save">💾 حفظ</button><button class="btn danger" id="se_del">🗑 حذف</button><button class="btn" id="se_cancel">إلغاء</button></div>`);
+  $('#se_x').onclick=$('#se_cancel').onclick=()=>closeModal();
+  $('#se_kind').onchange=()=>{ const k=$('#se_kind').value; $('#se_itemW').style.display=k==='supply'?'':'none'; $('#se_viaW').style.display=k==='payment'?'':'none'; };
+  $('#se_save').onclick=()=>{
+    const amount=parseFloat($('#se_amount').value), date=$('#se_date').value, nk=$('#se_kind').value;
+    if(!date||isNaN(amount)){ toast('أدخل التاريخ والمبلغ','err'); return; }
+    const base=Object.assign({},r,{date,amount,note:$('#se_note').value});
+    if(nk==='supply'){ base.item=$('#se_item').value; delete base.via; } else { base.via=$('#se_via').value; delete base.item; }
+    if(nk===kind){ arr[i]=base; }
+    else { arr.splice(i,1); (nk==='supply'?DB.samehCosts:DB.samehPayments).push(base); }
+    save(); closeModal(); toast('تم التحديث'); renderSameh();
+  };
+  $('#se_del').onclick=()=>{ if(!confirm('حذف الحركة دي نهائياً؟')) return; arr.splice(i,1); save(); closeModal(); toast('تم الحذف'); renderSameh(); };
+}
 /* كشف حساب د سامح التفصيلي المفلتر */
 function drawSamehLedger(){
   if(!$('#smLedger')) return;
@@ -2462,7 +2519,7 @@ function drawSamehLedger(){
   const q=(f.smQ||'').trim();
   // وحّد التوريدات (مدين) والمدفوعات (دائن) في حركة واحدة
   let rows=[];
-  (DB.samehCosts||[]).forEach((x,i)=>rows.push({date:x.date,type:'supply',item:x.item||'أخرى',debit:n0(x.amount),credit:0,note:x.note||'',_i:i}));
+  (DB.samehCosts||[]).forEach((x,i)=>{ const a=n0(x.amount); rows.push({date:x.date,type:'supply',ret:a<0,item:x.item||'أخرى',debit:a>0?a:0,credit:a<0?-a:0,note:x.note||'',_i:i}); });
   (DB.samehPayments||[]).forEach((x,i)=>rows.push({date:x.date,type:'payment',item:x.note||'سداد',debit:0,credit:n0(x.amount),note:(x.via||'')+(x.note?' — '+x.note:''),_i:i}));
   // فلترة
   rows=rows.filter(r=>{
@@ -2474,34 +2531,43 @@ function drawSamehLedger(){
     if(q&&!((r.note||'').includes(q)||(r.item||'').includes(q))) return false;
     return true;
   });
-  rows.sort((a,b)=>(parseDate(a.date)||0)-(parseDate(b.date)||0));
+  rows.sort((a,b)=>((a.date||'')<(b.date||'')?-1:(a.date||'')>(b.date||'')?1:(a.type===b.type?a._i-b._i:(a.type==='supply'?-1:1))));
   const tDebit=rows.reduce((a,r)=>a+r.debit,0), tCredit=rows.reduce((a,r)=>a+r.credit,0);
-  // الرصيد الجاري
-  let bal=0;
-  const body=rows.map(r=>{ bal+=r.debit-r.credit;
-    return `<tr>
+  // الرصيد الجاري بيتحسب دايماً بالترتيب الزمني، وبعدين نعرض بالترتيب المختار
+  const _nofilt=!f.smFrom&&!f.smTo&&f.smType==='all'&&f.smItem==='all'&&!q;
+  let bal=_nofilt?n0(DB.samehOpeningDebit):0; rows.forEach(r=>{ bal+=r.debit-r.credit; r._bal=bal; });
+  if(UI.smSort!=='asc') rows.reverse();
+  const openRow=_nofilt&&n0(DB.samehOpeningDebit)?`<tr style="background:var(--panel2)"><td><b>—</b></td><td><span class="pill gray">رصيد افتتاحي</span></td><td class="num" style="color:#dc2626">${fmtN(n0(DB.samehOpeningDebit))}</td><td></td><td class="num" style="font-weight:700">${fmtN(n0(DB.samehOpeningDebit))}</td><td style="font-size:11.5px;color:var(--muted)">فرق رصيد أول المدة مع كشف المورد</td><td></td></tr>`:'';
+  const body=(UI.smSort==='asc'?openRow:'')+rows.map(r=>{ const bal=r._bal;
+    return `<tr data-smk="${r.type}" data-smi="${r._i}" style="cursor:pointer" title="اضغط للتعديل">
       <td><b>${esc(r.date)}</b></td>
-      <td>${r.type==='supply'?`<span class="pill amber">📦 ${esc(r.item)}</span>`:`<span class="pill green">💸 سداد</span>`}</td>
+      <td>${r.type==='supply'?(r.ret?`<span class="pill blue">↩️ مرتجع ${esc(r.item)}</span>`:`<span class="pill amber">📦 ${esc(r.item)}</span>`):`<span class="pill green">💸 سداد</span>`}</td>
       <td class="num" style="color:#dc2626">${r.debit?fmtN(r.debit):''}</td>
       <td class="num" style="color:#1a8f3c">${r.credit?fmtN(r.credit):''}</td>
       <td class="num" style="font-weight:700">${fmtN(bal)}</td>
-      <td style="font-size:11.5px;color:var(--muted);white-space:normal;max-width:200px">${esc(r.note||'')}</td></tr>`;
-  }).join('');
+      <td style="font-size:11.5px;color:var(--muted);white-space:normal;max-width:200px">${esc(r.note||'')}</td>
+      <td style="white-space:nowrap"><button class="btn sm" data-sme="1">✏️</button></td></tr>`;
+  }).join('')+(UI.smSort!=='asc'?openRow:'');
+  const _op=_nofilt?n0(DB.samehOpeningDebit):0;
   $('#smSummary').innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap;padding:12px 18px;background:var(--bg2);border-bottom:1px solid var(--line)">
-    <span class="pill amber">مدين (توريدات): ${fmtMoney(tDebit)}</span>
-    <span class="pill green">دائن (مدفوعات): ${fmtMoney(tCredit)}</span>
-    <span class="pill ${tDebit-tCredit>=0?'red':'blue'}">صافي الفترة: ${fmtMoney(tDebit-tCredit)}</span>
+    <span class="pill amber">مدين${_op?' (شامل الافتتاحي)':''}: ${fmtMoney(tDebit+_op)}</span>
+    <span class="pill green">دائن: ${fmtMoney(tCredit)}</span>
+    <span class="pill ${tDebit+_op-tCredit>=0?'red':'blue'}">${_op?'الرصيد':'صافي الفترة'}: ${fmtMoney(tDebit+_op-tCredit)}</span>
     <span class="pill gray">${rows.length} حركة</span></div>`;
   $('#smLedger').innerHTML=rows.length?`<div class="tbl-wrap" style="max-height:60vh;overflow:auto"><table>
-    <thead><tr><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th><th>الرصيد الجاري</th><th>ملاحظة</th></tr></thead>
+    <thead><tr><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th><th>الرصيد الجاري</th><th>ملاحظة</th><th></th></tr></thead>
     <tbody>${body}</tbody></table></div>`:`<div class="empty"><div class="big">🔍</div>لا حركات مطابقة للفلتر</div>`;
+  $$('#smLedger tr[data-smk]').forEach(tr=>tr.onclick=()=>editSamehRec(tr.dataset.smk,+tr.dataset.smi));
 }
 function renderSameh(){
+  if(!UI._smSortLoaded){ UI._smSortLoaded=1; try{ const v=localStorage.getItem('sm_sort'); if(v) UI.smSort=v; }catch(e){} }
   const st=samehStats();
   const today=new Date().toLocaleDateString('en-CA');
   const opt=(arr)=>(arr||[]).map(v=>`<option>${esc(v)}</option>`).join('');
-  const pays=[...(DB.samehPayments||[])].map((x,i)=>({...x,_i:i})).sort((a,b)=>(parseDate(b.date)||0)-(parseDate(a.date)||0));
-  const costs=[...(DB.samehCosts||[])].map((x,i)=>({...x,_i:i})).sort((a,b)=>(parseDate(b.date)||0)-(parseDate(a.date)||0));
+  const _sd=UI.smSort==='asc'?1:-1;
+  const _cmp=(a,b)=>(((a.date||'')<(b.date||'')?-1:(a.date||'')>(b.date||'')?1:a._i-b._i)*_sd);
+  const pays=[...(DB.samehPayments||[])].map((x,i)=>({...x,_i:i})).sort(_cmp);
+  const costs=[...(DB.samehCosts||[])].map((x,i)=>({...x,_i:i})).sort(_cmp);
   $('#page-sameh').innerHTML=`
     <div style="background:var(--amber-soft);border:1px solid var(--amber);border-radius:13px;padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.8">
       🧾 <b>د سامح</b> هو مورّد <b>العلف والكتاكيت والأدوية وأطباق البيض الفارغة</b>. المزرعة بتسدد مديونيته نقدياً — سجّل هنا <b>التوريدات</b> (اللي علينا) و<b>التسليمات</b> (اللي وصله).
@@ -2519,7 +2585,9 @@ function renderSameh(){
           <div class="bar-track"><div class="bar-fill" style="width:${v/mx*100}%;background:${COL[k]||'#64748b'}"></div></div>
           <span class="amt">${fmtMoney(v)}</span></div>`).join('')||'<div class="empty">لا توريدات</div>'; })()}
       </div></div>
-    <div class="panel" style="margin-bottom:18px"><div class="panel-head"><h3>📋 كشف حساب تفصيلي (مدين / دائن / رصيد جاري)</h3></div>
+    <div class="panel" style="margin-bottom:18px"><div class="panel-head"><h3>📋 كشف حساب تفصيلي (مدين / دائن / رصيد جاري)</h3>
+      <button class="btn sm" id="sm_sort" title="يغيّر ترتيب كل جداول د سامح">${UI.smSort==='asc'?'⬆️ من الأقدم للأحدث':'⬇️ من الأحدث للأقدم'}</button></div>
+      <div style="padding:6px 18px 0;font-size:11.5px;color:var(--muted2)">✏️ اضغط على أي حركة عشان تعدّل تاريخها أو مبلغها أو صنفها أو نوعها، أو تحذفها.</div>
       <div class="filters">
         <div class="field"><label>من تاريخ</label><input class="input" type="date" id="sm_from" value="${UI.smFrom}"></div>
         <div class="field"><label>إلى تاريخ</label><input class="input" type="date" id="sm_to" value="${UI.smTo}"></div>
@@ -2551,7 +2619,7 @@ function renderSameh(){
           <tbody>${pays.map(x=>`<tr data-spi="${x._i}"><td><span class="cell-edit" data-f="date"><b>${esc(x.date)}</b></span></td><td class="num"><span class="cell-edit" data-f="amount" style="color:#1a8f3c;font-weight:700">${fmtMoney(x.amount)}</span></td>
             <td><span class="cell-edit" data-f="via"><span class="pill blue">${esc(x.via||'—')}</span></span></td>
             <td style="font-size:11.5px;color:var(--muted);white-space:normal;max-width:150px"><span class="cell-edit" data-f="note">${esc(x.note||'')||'—'}</span></td>
-            <td><button class="btn sm danger" data-sp="${x._i}">🗑</button></td></tr>`).join('')||'<tr><td colspan="5"><div class="empty">لا تسليمات</div></td></tr>'}</tbody>
+            <td style="white-space:nowrap"><button class="btn sm" data-spe="${x._i}">✏️</button> <button class="btn sm danger" data-sp="${x._i}">🗑</button></td></tr>`).join('')||'<tr><td colspan="5"><div class="empty">لا تسليمات</div></td></tr>'}</tbody>
         </table></div>
       </div>
 
@@ -2570,7 +2638,7 @@ function renderSameh(){
             <td><span class="cell-edit" data-f="item"><span class="pill amber">${esc(x.item||'—')}</span></span></td>
             <td class="num"><span class="cell-edit" data-f="amount" style="color:#dc2626;font-weight:700">${fmtMoney(x.amount)}</span></td>
             <td style="font-size:11.5px;color:var(--muted);white-space:normal;max-width:150px"><span class="cell-edit" data-f="note">${esc(x.note||'')||'—'}</span></td>
-            <td><button class="btn sm danger" data-sc="${x._i}">🗑</button></td></tr>`).join('')||'<tr><td colspan="5"><div class="empty">لا توريدات بعد — هتترفع مع بيان أسعار العلف</div></td></tr>'}</tbody>
+            <td style="white-space:nowrap"><button class="btn sm" data-sce="${x._i}">✏️</button> <button class="btn sm danger" data-sc="${x._i}">🗑</button></td></tr>`).join('')||'<tr><td colspan="5"><div class="empty">لا توريدات بعد — هتترفع مع بيان أسعار العلف</div></td></tr>'}</tbody>
         </table></div>
       </div>
     </div>
@@ -2588,6 +2656,9 @@ function renderSameh(){
   ['sm_from','sm_to','sm_type','sm_item'].forEach(id=>$('#'+id).onchange=reSm);
   $('#sm_q').oninput=reSm;
   $('#sm_reset').onclick=()=>{ UI.smFrom=UI.smTo='';UI.smType='all';UI.smItem='all';UI.smQ=''; renderSameh(); };
+  $('#sm_sort').onclick=()=>{ UI.smSort=UI.smSort==='asc'?'desc':'asc'; try{localStorage.setItem('sm_sort',UI.smSort);}catch(e){} renderSameh(); };
+  $$('[data-spe]').forEach(b=>b.onclick=()=>editSamehRec('payment',+b.dataset.spe));
+  $$('[data-sce]').forEach(b=>b.onclick=()=>editSamehRec('supply',+b.dataset.sce));
   drawSamehLedger();
   $('#sp_save').onclick=()=>{
     const amount=parseFloat($('#sp_amount').value);
