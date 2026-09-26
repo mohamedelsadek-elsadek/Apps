@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض v3.3</title>
+<title>نظام إدارة مزرعة الدجاج البياض v3.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -689,6 +689,7 @@ function loadORG(){
   bindDBToActiveFarm();
   seedOmdaFarm();
   updateOmdaJul3();
+  importNovoSep26();
 }
 
 /* يجيب DB القديم (مزرعة واحدة) من المفتاح القديم أو من الـ seed */
@@ -761,6 +762,32 @@ function updateOmdaJul3(){
   }catch(e){ console.warn('updateOmda',e); }
 }
 
+
+/* ===== استيراد كشف نوفو (١٥/٦ → ٢٦/٩/٢٠٢٦) للمزرعة الرئيسية — مرة واحدة، من غير تكرار =====
+   كل قيد عليه src:"novo:<رقم الحركة>" عشان مايتكررش لو اتشغل تاني (جهاز تاني/سحابة قديمة).
+   القيود عادية تماماً بعد الإضافة: تتعدل وتتمسح من صفحاتها، والعلَم _imp.novo2609 بيمنع رجوعها لو اتمسحت. */
+function importNovoSep26(){
+  try{
+    const PAYLOAD={"samehCosts":[{"amount":12375.0,"date":"2026-06-16","item":"أدوية ولقاحات","note":"فاتورة 2601789: بان فلور ×3، كولى تريكس ×12، ) (novo ligoاملح نوفوليجو 1لتر ×12","src":"novo:2601789"},{"amount":14100.0,"date":"2026-06-20","item":"أدوية ولقاحات","note":"فاتورة 2601824: %سوراموكس اموكسى 50 ×2، كولى تريكس ×12","src":"novo:2601824"},{"amount":12375.0,"date":"2026-07-04","item":"أدوية ولقاحات","note":"فاتورة 2601946: v4 ×2، ليفاميد ×2، بان فلور ×3، جيبكو تايلوزين ×3","src":"novo:2601946"},{"amount":34700.0,"date":"2026-07-07","item":"أدوية ولقاحات","note":"فاتورة 2601981: باستروميد ×20، كولستريديا ميتروجت 2/1لتر ×15، بان فلور ×2، bio - fix novoبيو فيكس ×24","src":"novo:2601981"},{"amount":12650.0,"date":"2026-07-23","item":"أدوية ولقاحات","note":"فاتورة 2602150: بان فلور ×4، تايلوزين كوباد ×3","src":"novo:2602150"},{"amount":5075.0,"date":"2026-08-01","item":"أدوية ولقاحات","note":"فاتورة 2602215: بان فلور ×7","src":"novo:2602215"},{"amount":49400.0,"date":"2026-08-02","item":"أدوية ولقاحات","note":"فاتورة 2602233: كولستريديا ميتروجت 2/1لتر ×24، كوبا موكس ×12، سوبر فيتا ليت ×4، بان فلور ×24","src":"novo:2602233"},{"amount":9000.0,"date":"2026-08-06","item":"أدوية ولقاحات","note":"فاتورة 2602283: لسوتا فايزر 2500 ×4، كولى تريكس ×12","src":"novo:2602283"},{"amount":1300.0,"date":"2026-08-13","item":"أدوية ولقاحات","note":"فاتورة 2602352: ليفاميد ×2","src":"novo:2602352"},{"amount":45160.0,"date":"2026-08-25","item":"بند مصاريف","note":"مدفوعات نقدية من نوفو دخلت خزنة المزرعة (2601590) — لحين التأكيد","src":"novo:2601590"},{"amount":7950.0,"date":"2026-08-26","item":"أدوية ولقاحات","note":"فاتورة 2602486: املح فوس لوهمان ×12، انروتين ×3","src":"novo:2602486"},{"amount":10800.0,"date":"2026-08-30","item":"أدوية ولقاحات","note":"فاتورة 2602516: امبيسلين النخبة ×4، تايلوزين غنام ×20، لسوتا فايزر 2500 ×4","src":"novo:2602516"},{"amount":25300.0,"date":"2026-09-07","item":"أدوية ولقاحات","note":"فاتورة 2602575: بان فلور ×20، ) (revilغسيل كلوى ومنشط ريفيل 1لتر ×12، (b.k colب -ك -كولين -نوفو 1لتر ×12","src":"novo:2602575"},{"amount":58200.0,"date":"2026-09-10","item":"أدوية ولقاحات","note":"فاتورة 2602608: فوسفاك 500جم ×6، تايلوزين النخبة 500جم ×6، املح فوس لوهمان ×24، ه -سيلينيوم 1لتر لوهمان ×12، اتكوموكس %40ابو النجا ×6، bio - fix novoبيو فيكس ×24","src":"novo:2602608"},{"amount":6600.0,"date":"2026-09-10","item":"أدوية ولقاحات","note":"فاتورة 2602611: كولستين ×12","src":"novo:2602611"},{"amount":2500.0,"date":"2026-09-12","item":"أدوية ولقاحات","note":"فاتورة 2602616: فوسفاك 500جم ×2","src":"novo:2602616"},{"amount":140000.0,"date":"2026-09-14","item":"بند مصاريف","note":"مدفوعات نقدية من نوفو دخلت خزنة المزرعة (2601737) — لحين التأكيد","src":"novo:2601737"},{"amount":1800.0,"date":"2026-09-23","item":"أدوية ولقاحات","note":"فاتورة 2602721: لسوتا فايزر 2500 ×4","src":"novo:2602721"}],"samehPayments":[{"amount":50000.0,"date":"2026-06-15","note":"سداد دفعة (2601264)","via":"سداد نقدي","src":"novo:2601264"},{"amount":48000.0,"date":"2026-06-18","note":"سداد دفعة (2601278)","via":"سداد نقدي","src":"novo:2601278"},{"amount":1275.0,"date":"2026-06-20","note":"سداد دفعة (2601285)","via":"سداد نقدي","src":"novo:2601285"},{"amount":55000.0,"date":"2026-06-21","note":"سداد دفعة (2601298)","via":"سداد نقدي","src":"novo:2601298"},{"amount":10120.0,"date":"2026-07-04","note":"سداد دفعة (2601361)","via":"سداد نقدي","src":"novo:2601361"},{"amount":39000.0,"date":"2026-07-07","note":"سداد دفعة (2601382)","via":"سداد نقدي","src":"novo:2601382"},{"amount":9900.0,"date":"2026-07-09","note":"سداد دفعة (2601397)","via":"سداد نقدي","src":"novo:2601397"},{"amount":10400.0,"date":"2026-07-12","note":"سداد دفعة (2601409)","via":"سداد نقدي","src":"novo:2601409"},{"amount":2200.0,"date":"2026-07-18","note":"سداد دفعة (2601449)","via":"سداد نقدي","src":"novo:2601449"},{"amount":2200.0,"date":"2026-07-20","note":"سداد دفعة (2601463)","via":"سداد نقدي","src":"novo:2601463"},{"amount":350.0,"date":"2026-07-21","note":"سداد دفعة (2601473)","via":"سداد نقدي","src":"novo:2601473"},{"amount":1000.0,"date":"2026-07-27","note":"سداد دفعة (2601504)","via":"سداد نقدي","src":"novo:2601504"},{"amount":10230.0,"date":"2026-08-01","note":"سداد دفعة (2601521)","via":"سداد نقدي","src":"novo:2601521"},{"amount":40000.0,"date":"2026-08-02","note":"سداد دفعة (2601528)","via":"سداد نقدي","src":"novo:2601528"},{"amount":6510.0,"date":"2026-08-02","note":"سداد دفعة (2601531)","via":"سداد نقدي","src":"novo:2601531"},{"amount":10670.0,"date":"2026-08-06","note":"سداد دفعة (2601562)","via":"سداد نقدي","src":"novo:2601562"},{"amount":130000.0,"date":"2026-08-10","note":"سداد دفعة (2601594)","via":"سداد نقدي","src":"novo:2601594"},{"amount":50000.0,"date":"2026-08-18","note":"سداد دفعة (2601645)","via":"سداد نقدي","src":"novo:2601645"},{"amount":90000.0,"date":"2026-08-19","note":"سداد دفعة (2601650)","via":"سداد نقدي","src":"novo:2601650"},{"amount":15600.0,"date":"2026-08-25","note":"سداد دفعة (2601695)","via":"سداد نقدي","src":"novo:2601695"},{"amount":185000.0,"date":"2026-09-12","note":"سداد دفعة (2601804)","via":"سداد نقدي","src":"novo:2601804"},{"amount":100000.0,"date":"2026-09-26","note":"سداد دفعة (2601881)","via":"سداد نقدي","src":"novo:2601881"}],"cashIn":[{"amount":45160.0,"date":"2026-08-25","note":"مدفوعات نوفو (2601590) — لحين التأكيد","source":"دفعة من د سامح","src":"novo:2601590"},{"amount":140000.0,"date":"2026-09-14","note":"مدفوعات نوفو (2601737) — لحين التأكيد","source":"دفعة من د سامح","src":"novo:2601737"}]};
+    let farm=null;
+    (ORG.companies||[]).forEach(c=>(c.farms||[]).forEach(f=>{ if(farm||!f.db) return;
+      const sc=f.db.samehCosts||[];
+      if(f.name==='المزرعة الرئيسية' || sc.some(x=>x.date==='2026-06-13'&&+x.amount===141200)) farm=f; }));
+    if(!farm) return false;
+    const db=farm.db; db._imp=db._imp||{};
+    if(db._imp.novo2609) return false;
+    let added=0;
+    const has=(arr,r)=>arr.some(x=>x&&(x.src===r.src || (x.date===r.date && Math.abs((+x.amount||0)-r.amount)<0.01)));
+    ['samehCosts','samehPayments','cashIn'].forEach(k=>{ db[k]=db[k]||[];
+      PAYLOAD[k].forEach(r=>{ if(!has(db[k],r)){ db[k].push(Object.assign({},r)); added++; } }); });
+    db.samehOfficialBalance=3220576.04;
+    db._imp.novo2609=Date.now();
+    if(farm===getActiveFarm()) bindDBToActiveFarm();
+    if(typeof saveORG==='function') saveORG();
+    if(added>0 && typeof toast==='function') setTimeout(()=>toast('📥 تم إضافة كشف نوفو لحد ٢٦/٩: '+added+' قيد'),900);
+    return true;
+  }catch(e){ console.warn('importNovo',e); return false; }
+}
 /* ===== إضافة مزرعة "العمدة" مرة واحدة (بيانات دفتر العمدة) ===== */
 function seedOmdaFarm(){
   try{
@@ -1044,6 +1071,7 @@ function applyCloudData(val){
     ORG=val; if(!getActiveCompany()&&ORG.companies[0])ORG.activeCompany=ORG.companies[0].id;
     const c=getActiveCompany(); if(c&&!getActiveFarm()&&(c.farms||[])[0])ORG.activeFarm=c.farms[0].id;
     bindDBToActiveFarm(); try{localStorage.setItem(ORG_KEY,JSON.stringify(ORG));}catch(e){}
+    try{ importNovoSep26(); }catch(e){}
   } else {  // بيانات قديمة (مزرعة واحدة) — نحطها في المزرعة النشطة
     const f=getActiveFarm(); if(f){ f.db=normalizeFarmDB(val); bindDBToActiveFarm(); saveORG(); }
   }
@@ -2481,7 +2509,7 @@ function renderSameh(){
     <div class="kpi-grid">
       <div class="kpi" style="--accent:var(--amber);--accent-soft:var(--amber-soft)"><div class="ico">📦</div><div class="label">إجمالي التوريدات</div><div class="val">${fmtMoney(st.costs)}</div><div class="sub">علف+كتاكيت+أدوية+أطباق</div></div>
       <div class="kpi" style="--accent:var(--green);--accent-soft:var(--green-soft)"><div class="ico">💸</div><div class="label">المدفوع له</div><div class="val">${fmtMoney(st.paid)}</div><div class="sub">${(DB.samehPayments||[]).length} دفعة</div></div>
-      <div class="kpi" style="--accent:var(--red);--accent-soft:var(--red-soft)"><div class="ico">⚖️</div><div class="label">المديونية المستحقة عليه للمورد</div><div class="val">${fmtMoney(DB.samehOfficialBalance||st.balance)}</div><div class="sub">رصيد كشف الحساب</div></div>
+      <div class="kpi" style="--accent:var(--red);--accent-soft:var(--red-soft)"><div class="ico">⚖️</div><div class="label">المديونية المستحقة عليه للمورد</div><div class="val"><span class="cell-edit" id="samehOffVal" title="اضغط للتعديل — امسحه عشان يتحسب من القيود">${fmtMoney(DB.samehOfficialBalance||st.balance)} ✏️</span></div><div class="sub">${DB.samehOfficialBalance?`رصيد كشف الحساب · المحسوب من القيود: ${fmtMoney(st.balance)}`:"محسوب من القيود (اضغط لإدخال رصيد الكشف)"}</div></div>
     </div>
 
     <div class="panel" style="margin-bottom:18px"><div class="panel-head"><h3>📦 التوريدات حسب الصنف</h3></div>
@@ -2580,6 +2608,7 @@ function renderSameh(){
     tr.querySelectorAll('.cell-edit').forEach(el=>el.onclick=()=>{ const f=el.dataset.f,[type,o]=PF[f];
       editVal(el,rec[f],type,o?o():null,v=>{ rec[f]=(type==='number')?(v==null?0:v):v; save(); toast('تم التحديث'); renderSameh(); }); }); });
   const CF={date:['date'],amount:['number'],item:['select',()=>DB.supplyItems],note:['text']};
+  { const ov=$('#samehOffVal'); if(ov) ov.onclick=()=>editVal(ov,DB.samehOfficialBalance||'','number',null,v=>{ DB.samehOfficialBalance=n0(v); save(); toast('تم التحديث'); renderSameh(); }); }
   $$('#page-sameh tr[data-sci]').forEach(tr=>{ const rec=DB.samehCosts[+tr.dataset.sci];
     tr.querySelectorAll('.cell-edit').forEach(el=>el.onclick=()=>{ const f=el.dataset.f,[type,o]=CF[f];
       editVal(el,rec[f],type,o?o():null,v=>{ rec[f]=(type==='number')?(v==null?0:v):v; save(); toast('تم التحديث'); renderSameh(); }); }); });
@@ -3379,7 +3408,8 @@ function farmCosting(){
   const chicks = byItem['كتاكيت']||0;
   const vet = byItem['أدوية ولقاحات']||0;
   const trays = byItem['أطباق وكراتين']||0;
-  const otherSupply = sum(sc) - feed - chicks - vet - trays;
+  const advances = byItem['بند مصاريف']||0;   // فلوس نقدية دخلت الخزنة — مش تكلفة لحد ما تتصرف
+  const otherSupply = sum(sc) - feed - chicks - vet - trays - advances;
   // منصرف الخزنة حسب البند
   const opByCat={}; co.forEach(x=>{ const k=x.category||'أخرى'; opByCat[k]=(opByCat[k]||0)+n0(x.amount); });
   const opex = sum(co);
@@ -3391,7 +3421,7 @@ function farmCosting(){
   const revenue = fs.money;
   const avgSale = fs.dishes>0? revenue/fs.dishes : 0;
   return {
-    feed,chicks,vet,trays,otherSupply:Math.max(0,otherSupply),opex,opByCat,byItem,
+    feed,chicks,vet,trays,advances,otherSupply:Math.max(0,otherSupply),opex,opByCat,byItem,
     operating,totalAllIn,
     dishesProduced, revenue, avgSale,
     costPerDishOp: dishesProduced>0? operating/dishesProduced : 0,
@@ -3608,7 +3638,7 @@ function estimateMissing(){
   // ٤) باقي البنود (توريدات + مصاريف الخزنة): متوسط شهري من بداية الدورة لآخر تسجيل
   const oneOff=/مراوح|شفاط|تبريد/;
   const generic=[];
-  [...new Set(sc.map(x=>x.item||'أخرى'))].filter(k=>!['علف','كتاكيت','أطباق وكراتين'].includes(k)).forEach(k=>generic.push(['s:'+k,k,sc.filter(x=>(x.item||'أخرى')===k),k==='أدوية ولقاحات'?'vet':'otherSupply']));
+  [...new Set(sc.map(x=>x.item||'أخرى'))].filter(k=>!['علف','كتاكيت','أطباق وكراتين','بند مصاريف'].includes(k)).forEach(k=>generic.push(['s:'+k,k,sc.filter(x=>(x.item||'أخرى')===k),k==='أدوية ولقاحات'?'vet':'otherSupply']));
   [...new Set(co.map(x=>x.category||'أخرى'))].forEach(k=>generic.push(['c:'+k,k,co.filter(x=>(x.category||'أخرى')===k),'opex']));
   generic.forEach(([key,label,arr,bucket])=>{
     const last=arr.map(x=>x.date||'').filter(Boolean).sort().pop()||'', tot=arr.reduce((a,x)=>a+n0(x.amount),0);
