@@ -494,7 +494,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
             <div class="fld"><label data-i18n="flock.farm">Farm</label><select id="fk_farm"><option value="" data-i18n="flock.all">- All -</option></select></div>
             <div class="fld"><label data-i18n="flock.cycle">Cycle / Flock</label><select id="fk_cycle"><option value="" data-i18n="flock.all">- All -</option></select></div>
           </div>
-          <div class="row3">
+          <div class="row3" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
             <div class="fld"><label data-i18n="flock.type">Analysis type</label><select id="fk_type">
               <option value="all" data-i18n="flock.tAll">All</option>
               <option value="Serology" data-i18n="flock.tSero">Serology</option>
@@ -502,6 +502,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
               <option value="Bacteriology" data-i18n="flock.tBact">Bacteriology</option>
               <option value="FeedWater" data-i18n="flock.tFeed">Feed &amp; Water</option></select></div>
             <div class="fld"><label data-i18n="flock.disease">Disease / parameter</label><select id="fk_disease"><option value="" data-i18n="flock.all">- All -</option></select></div>
+            <div class="fld"><label data-i18n="flock.house">House</label><select id="fk_house"><option value="" data-i18n="flock.allHouses">- All houses -</option></select></div>
             <div class="fld" style="display:flex;align-items:flex-end;gap:8px">
               <button class="btn" id="fk_build" style="flex:1" data-i18n="flock.build">Build file</button>
               <button class="btn ghost" id="fk_print" data-i18n="flock.print">Print</button></div>
@@ -526,7 +527,8 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
           </div>
           <div class="row3">
             <div class="fld"><label data-i18n="flock.mAge">Age (days)</label><input id="mk_age" type="number" min="0"></div>
-            <div class="fld"></div><div class="fld"></div>
+            <div class="fld"><label data-i18n="flock.mHouse">House (optional)</label><input id="mk_house" list="dl_house" placeholder="1 / A / H1"><datalist id="dl_house"></datalist></div>
+            <div class="fld"><label data-i18n="flock.mVacc">House vaccination (if different)</label><input id="mk_vacc" list="dl_vacc" placeholder="-"><datalist id="dl_vacc"></datalist></div>
           </div>
           <div id="mk_dyn"></div>
           <div class="btnrow"><button class="btn" id="mk_add" data-i18n="flock.mAdd">Add record</button>
@@ -661,7 +663,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 <script>
 "use strict";
 /* Build metadata - single source of truth for version display + update checks */
-const BUILD={version:"2.12.1",date:"2026-09-23",label:"v2.12.1 (2026-09-23)"};
+const BUILD={version:"2.13.0",date:"2026-09-26",label:"v2.13.0 (2026-09-26)"};
 /* Geography data: Egypt (governorate -> cities) + Saudi Arabia (region -> governorate -> cities)
    Postal codes: Egypt uses per-governorate representative codes; KSA uses region-level short codes.
    Compiled offline. Not exhaustive to every village; covers governorates/regions and major cities. */
@@ -1045,7 +1047,7 @@ const Lang=(()=>{
       "flock.disease":"المرض / البيان","flock.build":"بناء الملف","flock.print":"طباعة",
       "flock.manualTitle":"إضافة نتيجة يدوية (علف / مياه / بكتريولوجي / سيرولوجي سريع)",
       "flock.manualHint":"للنتائج اللي مش مدخّلة كعينات معمل - تحاليل العلف والمياه، عزلات البكتريا، أو ملخص titre سريع. بتنضم لنفس ملف المزرعة.",
-      "flock.mCompany":"الشركة","flock.mFarm":"المزرعة","flock.mCycle":"الدورة","flock.mLab":"المعمل","flock.mType":"النوع","flock.mDate":"التاريخ","flock.mAge":"العمر (يوم)",
+      "flock.mCompany":"الشركة","flock.mHouse":"العنبر (اختياري)","flock.mVacc":"تحصين العنبر (لو مختلف)","flock.house":"العنبر","flock.allHouses":"- كل العنابر -","flock.mFarm":"المزرعة","flock.mCycle":"الدورة","flock.mLab":"المعمل","flock.mType":"النوع","flock.mDate":"التاريخ","flock.mAge":"العمر (يوم)",
       "flock.mParam":"البيان / المرض / العزلة","flock.mValue":"القيمة / النتيجة","flock.mUnit":"الوحدة / ملاحظة","flock.mAdd":"إضافة سجل",
       "flock.mCancel":"إلغاء التعديل","flock.listTitle":"السجلات اليدوية (تعديل / حذف)",
       "search.everything":"ابحث عن أي شيء...",
@@ -2415,7 +2417,8 @@ function flockAllRecords(){
       const t=cat.find(x=>x.id===tid)||{n:tid,m:"PCR",d:"Other"};
       const r=s.results[tid];const type=flockTypeOf(t);
       const rec={src:"sub",id:s.id,company:s.company||"",farm:s.farm||"",cycle:s.cycle||"",
-        date:s.created||"",age:s.ageDays||"",type,disease:t.d||"Other",name:t.n||tid,lab:s.lab,code:s.code,manual:s.origin==="manual"};
+        date:s.created||"",age:s.ageDays||"",type,disease:t.d||"Other",name:t.n||tid,lab:s.lab,code:s.code,manual:s.origin==="manual",
+        house:(s.house||"").trim(),vacc:(s.vaccProgram||"").trim()};
       if(type==="Serology"&&r.stats){rec.assay=r.assay||"ELISA";rec.gmt=r.stats.gmt;rec.cv=r.stats.cv;rec.mean=r.stats.mean;rec.n=r.stats.n;rec.max=r.stats.max;rec.min=r.stats.min;rec.value="GMT "+Math.round(r.stats.gmt)+" (n="+r.stats.n+")";}
       else if(type==="FeedWater"){rec.value=r.value||"";rec.unit=r.unit||"";}
       else{rec.detected=r.detected||"";rec.ct=r.ct||"";rec.typing=r.typing||"";rec.serotyping=r.serotyping||"";rec.unit=r.unit||r.note||"";
@@ -2448,6 +2451,11 @@ function initFlockView(){
   fill("fk_farm",fkUniq(recs.filter(r=>!co||r.company===co).map(r=>r.farm)));
   fill("fk_cycle",fkUniq(recs.filter(r=>(!co||r.company===co)&&(!fa||r.farm===fa)).map(r=>r.cycle)));
   fill("fk_disease",fkUniq(recs.map(r=>r.disease)));
+  { const cy=el("fk_cycle")?el("fk_cycle").value:"";const s=el("fk_house");
+    if(s){const cur=s.value;const hs=fkUniq(recs.filter(r=>(!co||r.company===co)&&(!fa||r.farm===fa)&&(!cy||r.cycle===cy)).map(r=>r.house));
+      s.innerHTML=`<option value="">${Lang.current()==="ar"?"- كل العنابر -":"- All houses -"}</option>`+hs.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+      if([...s.options].some(o=>o.value===cur))s.value=cur;else s.value="";} }
+  mkRefreshHouseLists();
   el("dl_company")&&(el("dl_company").innerHTML=CONFIG().companies.map(c=>`<option value="${esc(c)}">`).join(""));
   el("dl_farm")&&(el("dl_farm").innerHTML=CONFIG().farms.map(c=>`<option value="${esc(c)}">`).join(""));
   el("dl_cycle")&&(el("dl_cycle").innerHTML=(CONFIG().cycles||[]).map(c=>`<option value="${esc(c)}">`).join(""));
@@ -2461,7 +2469,9 @@ function initFlockView(){
     el("mk_type").onchange=()=>{if(!MK_EDIT_ID)renderMkDyn();else renderMkDyn();};
     el("fk_company").onchange=()=>{el("fk_farm").value="";el("fk_cycle").value="";initFlockView();renderMkList();};
     el("fk_farm").onchange=()=>{el("fk_cycle").value="";initFlockView();renderMkList();};
-    el("fk_cycle").onchange=()=>renderMkList();
+    el("fk_cycle").onchange=()=>{initFlockView();renderMkList();};
+    el("fk_house").onchange=()=>buildFlockFile();
+    el("mk_house").onchange=mkHouseChanged;el("mk_farm").addEventListener("change",mkRefreshHouseLists);el("mk_cycle").addEventListener("change",mkRefreshHouseLists);
     el("fk_build").dataset.wired="1";
   }
   if(!MK_EDIT_ID)renderMkDyn();
@@ -2563,6 +2573,19 @@ function manualCode(lab,farm,date){
   const f=(farm||"FARM").trim().replace(/\s+/g,"_").slice(0,10);
   return (getLab(lab).abbr||"XX")+"-"+f+"-"+dt+"-"+String(DB().length+1).padStart(3,"0");
 }
+/* Houses: suggestions from previous samples of the same farm (and cycle), and remembered vaccination per house */
+function mkRefreshHouseLists(){
+  const fa=(val("mk_farm")||"").trim(),cy=(val("mk_cycle")||"").trim();
+  const subs=DB().filter(s=>(!fa||s.farm===fa)&&(!cy||(s.cycle||"")===cy));
+  const dh=el("dl_house");if(dh)dh.innerHTML=fkUniq(subs.map(s=>(s.house||"").trim())).map(v=>`<option value="${esc(v)}">`).join("");
+  const dv=el("dl_vacc");if(dv)dv.innerHTML=fkUniq(DB().map(s=>(s.vaccProgram||"").trim())).map(v=>`<option value="${esc(v)}">`).join("");
+}
+function mkHouseChanged(){
+  const fa=(val("mk_farm")||"").trim(),cy=(val("mk_cycle")||"").trim(),ho=(val("mk_house")||"").trim();
+  if(!ho||!el("mk_vacc")||el("mk_vacc").value)return;
+  const prev=DB().filter(s=>s.farm===fa&&(s.cycle||"")===cy&&(s.house||"").trim()===ho&&s.vaccProgram).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+  if(prev)el("mk_vacc").value=prev.vaccProgram;
+}
 /* Create/update a REAL submission from the manual entry, so it appears everywhere */
 function addFlockRecord(){
   const ar=Lang.current()==="ar",msg=el("mk_msg");
@@ -2596,7 +2619,8 @@ function addFlockRecord(){
   if(!sub){sub={id:MK_EDIT_ID||uid(),origin:"manual"};arr.unshift(sub);}
   Object.assign(sub,{origin:"manual",company,farm,cycle,lab,code:sub.code||manualCode(lab,farm,date),
     sample:"",cmethod:"",cvalue:"",location:"",birdType:sub.birdType||"",ageDays:age,region:sub.region||"",manager:sub.manager||"",
-    tests:[tid],results:{[tid]:result},status:"Complete",created:date,reportLink:sub.reportLink||"",updatedAt:Date.now()});
+    tests:[tid],results:{[tid]:result},status:"Complete",created:date,reportLink:sub.reportLink||"",updatedAt:Date.now(),
+    house:(val("mk_house")||"").trim(),vaccProgram:(val("mk_vacc")||"").trim()});
   const cfg=CONFIG();
   if(company&&!cfg.companies.includes(company))cfg.companies.push(company);
   if(farm&&!cfg.farms.includes(farm))cfg.farms.push(farm);
@@ -2626,6 +2650,7 @@ function editFlockRecord(id){
   el("mk_company").value=s.company||"";el("mk_farm").value=s.farm||"";el("mk_cycle").value=s.cycle||"";
   if(el("mk_lab")){el("mk_lab").value=s.lab||el("mk_lab").value;}
   el("mk_type").value=type;el("mk_date").value=s.created||today();el("mk_age").value=s.ageDays||"";
+  if(el("mk_house"))el("mk_house").value=s.house||"";if(el("mk_vacc"))el("mk_vacc").value=s.vaccProgram||"";
   renderMkDyn();
   if(type==="Serology"){
     if(el("mk_disease"))el("mk_disease").value=t.d||"Other";
@@ -2669,7 +2694,7 @@ function renderMkList(){
     let value="";if(type==="Serology"&&r.stats)value="GMT "+Math.round(r.stats.gmt)+" (n="+r.stats.n+")";
     else if(type==="FeedWater")value=(r.value||"")+" "+(r.unit||"");
     else value=r.detected==="pos"?(ar?"موجب":"Detected"):r.detected==="neg"?(ar?"سالب":"Not detected"):(r.value||"");
-    h+=`<tr><td>${esc(s.created||"-")}</td><td>${esc(s.farm||"")}${s.cycle?" / "+esc(s.cycle):""}</td><td>${esc(getLab(s.lab).abbr||s.lab||"")}</td><td>${tmap[type]||type}</td>
+    h+=`<tr><td>${esc(s.created||"-")}</td><td>${esc(s.farm||"")}${s.cycle?" / "+esc(s.cycle):""}${s.house?` <span class="labtag">${ar?"عنبر":"H"} ${esc(s.house)}</span>`:""}</td><td>${esc(getLab(s.lab).abbr||s.lab||"")}</td><td>${tmap[type]||type}</td>
       <td>${esc(t.n||"")}</td><td>${esc(value)}</td>
       <td><input type="number" min="0" class="mkAgeEdit" data-id="${s.id}" value="${esc(String(s.ageDays||""))}" style="width:64px;padding:3px 5px"></td>
       <td style="white-space:nowrap"><button class="addbtn mkEditBtn" data-id="${s.id}">${ar?"تعديل":"Edit"}</button>
@@ -2685,17 +2710,64 @@ function renderMkList(){
 }
 function flockFiltered(){
   const co=el("fk_company").value,fa=el("fk_farm").value,cy=el("fk_cycle").value,
-    ty=el("fk_type").value,di=el("fk_disease").value;
+    ty=el("fk_type").value,di=el("fk_disease").value,ho=el("fk_house")?el("fk_house").value:"";
   return flockAllRecords().filter(r=>{
     if(co&&r.company!==co)return false;
     if(fa&&r.farm!==fa)return false;
     if(cy&&(r.cycle||"")!==cy)return false;
     if(ty&&ty!=="all"&&r.type!==ty)return false;
     if(di&&r.disease!==di)return false;
+    if(ho&&r.house!==ho)return false;
     return true;
   });
 }
 function fkDateAge(r){const ar=Lang.current()==="ar";return (r.date||"-")+(r.age!==""&&r.age!=null?" &middot; "+(ar?"عمر ":"age ")+r.age+(ar?"ي":"d"):"");}
+function fkNum(x){x=+x;return Number.isInteger(x)?String(x):(Math.abs(x)>=100?String(Math.round(x)):x.toFixed(1));}
+/* House-vs-house comparison for one disease/assay group.
+   HI readings are entered as log2 titres, so the MEAN is the primary figure; ELISA uses GMT. */
+function fkHouseCompare(rows,assay){
+  const ar=Lang.current()==="ar";const isHI=/^HI$/i.test(assay||"");
+  const metric=r=>isHI?(+r.mean||0):(+r.gmt||0);const mLbl=isHI?(ar?"المتوسط (log2)":"Mean (log2)"):"GMT";
+  const houses=fkUniq(rows.map(r=>r.house).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true}));
+  // vaccination per house (latest non-empty)
+  const vacc={};houses.forEach(hs=>{const v=rows.filter(r=>r.house===hs&&r.vacc).sort((a,b)=>(a.date<b.date?1:-1))[0];vacc[hs]=v?v.vacc:"";});
+  const distinctV=new Set(houses.map(hs=>vacc[hs]||"__same__"));
+  const diffVacc=distinctV.size>1;
+  // rounds = same date (fallback: same age)
+  const rk=r=>(r.date||"")+"|"+(r.age||"");
+  const rounds=[...new Set(rows.map(rk))].sort();
+  const cell={};rows.forEach(r=>{if(!r.house)return;(cell[rk(r)]=cell[rk(r)]||{})[r.house]=r;});
+  let h=`<div style="margin:10px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+      <b>${ar?"مقارنة العنابر":"House comparison"} · ${esc(mLbl)}</b>
+      ${diffVacc?`<span class="pill" style="background:#fef3c7;color:#92400e">${ar?"برامج تحصين مختلفة":"Different vaccination"}</span>`:`<span class="pill" style="background:#dcfce7;color:#166534">${ar?"نفس برنامج التحصين":"Same vaccination"}</span>`}</div>
+    <table class="interp-tbl" style="margin:8px 0"><tr><th>${ar?"السحبة":"Round"}</th>${houses.map(hs=>`<th>${ar?"عنبر":"H"} ${esc(hs)}</th>`).join("")}<th>${ar?"الفرق":"Spread"}</th></tr>`;
+  rounds.forEach(k=>{const [d,a]=k.split("|");const c=cell[k]||{};
+    const vals=houses.map(hs=>c[hs]?metric(c[hs]):null);const got=vals.filter(v=>v!=null&&v>0);
+    const mx=got.length?Math.max(...got):0,mn=got.length?Math.min(...got):0;
+    const spread=got.length>=2?(isHI?(mx-mn):(mn>0?mx/mn:0)):null;
+    const flag=spread!=null&&(isHI?spread>=2:spread>=2);
+    h+=`<tr><td>${esc(d||"-")}${a?` <span class="hint">(${ar?"عمر":"age"} ${esc(a)})</span>`:""}</td>${vals.map((v,i)=>{
+      if(v==null)return `<td class="hint">-</td>`;const r=c[houses[i]];
+      const col=got.length>=2&&v===mx?"color:#15803d;font-weight:700":got.length>=2&&v===mn?"color:#b91c1c;font-weight:700":"";
+      return `<td style="${col}">${fkNum(v)} <span class="hint">CV ${r.cv!=null?(+r.cv).toFixed(0):"-"}%</span></td>`;}).join("")}
+      <td style="${flag?"color:#b91c1c;font-weight:700":""}">${spread==null?"-":isHI?("Δ "+fkNum(spread)+" log2"):("×"+fkNum(spread))}${flag?" ⚠":""}</td></tr>`;});
+  // per-house summary
+  h+=`<tr style="background:var(--surface)"><td><b>${ar?"متوسط العنبر":"House avg"}</b></td>${houses.map(hs=>{const v=rows.filter(r=>r.house===hs).map(metric).filter(x=>x>0);
+      return `<td><b>${v.length?fkNum(v.reduce((a,b)=>a+b,0)/v.length):"-"}</b></td>`;}).join("")}<td></td></tr>`;
+  h+=`<tr><td>${ar?"التحصين":"Vaccination"}</td>${houses.map(hs=>`<td style="font-size:11.5px">${vacc[hs]?esc(vacc[hs]):`<span class="hint">${ar?"نفس برنامج المزرعة":"farm program"}</span>`}</td>`).join("")}<td></td></tr></table>`;
+  // bars for the latest round that has >=2 houses
+  const lastK=[...rounds].reverse().find(k=>Object.keys(cell[k]||{}).length>=2);
+  if(lastK){const c=cell[lastK];const items=houses.filter(hs=>c[hs]).map(hs=>({hs,v:metric(c[hs])}));const mx=Math.max(1,...items.map(i=>i.v));
+    h+=`<div class="hint" style="margin:4px 0">${ar?"آخر سحبة":"Latest round"}: ${esc(lastK.split("|")[0])}</div>`+items.map(i=>`<div style="display:flex;align-items:center;gap:8px;margin:3px 0">
+      <span style="width:70px;font-size:12px">${ar?"عنبر":"H"} ${esc(i.hs)}</span>
+      <div style="flex:1;background:var(--line);border-radius:6px;height:14px;overflow:hidden"><div style="width:${(i.v/mx*100).toFixed(0)}%;height:100%;background:${vacc[i.hs]&&diffVacc?"#f59e0b":"#3b82f6"}"></div></div>
+      <b style="width:52px;font-size:12px">${fkNum(i.v)}</b></div>`).join("");}
+  h+=`<div class="hint" style="margin-top:6px">${isHI
+      ?(ar?"⚠ فرق ٢ log2 أو أكتر بين العنابر في نفس السحبة = فرق حقيقي في المناعة (تحصين/تطبيق/تحدي). CV فوق ٣٠-٣٥٪ = تجانس ضعيف.":"⚠ A gap of 2 log2 or more between houses in one round is a real immunity difference (vaccine, application or field challenge). CV above 30-35% = poor uniformity.")
+      :(ar?"⚠ فرق ×٢ أو أكتر في GMT بين العنابر في نفس السحبة يستاهل مراجعة التحصين أو التطبيق أو وجود تحدي حقلي.":"⚠ A 2-fold or larger GMT gap between houses in one round deserves a look at vaccine, application or field challenge.")}</div></div>`;
+  return h;
+}
 function buildFlockFile(){
   const host=el("flockResult");if(!host)return;const ar=Lang.current()==="ar";
   const recs=flockFiltered();
@@ -2711,18 +2783,20 @@ function buildFlockFile(){
     const groups={};
     sero.forEach(r=>{const key=r.disease+" | "+(r.assay||"-");(groups[key]=groups[key]||[]).push(r);});
     Object.keys(groups).sort().forEach(key=>{
-      const rows=groups[key].slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0));
+      const rows=groups[key].slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:String(a.house||"").localeCompare(String(b.house||""),undefined,{numeric:true})));
       const [dis,assay]=key.split(" | ");
       const gmts=rows.map(r=>r.gmt).filter(v=>v>0);
       const avg=gmts.length?Math.round(gmts.reduce((a,b)=>a+b,0)/gmts.length):0;
       h+=`<div style="margin-bottom:14px"><div class="tg-head">${esc(diseaseLabel(dis))} &middot; ${esc(assay)} <span class="hint">(${rows.length} ${ar?"سحبة":"rounds"})</span></div>`;
-      h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"العمر":"Age"}</th><th>n</th><th>GMT</th><th>CV%</th><th>Min-Max</th><th>${ar?"المعمل/المصدر":"Source"}</th></tr>`;
-      rows.forEach(r=>{h+=`<tr><td>${esc(r.date||"-")}</td><td>${r.age!==""&&r.age!=null?esc(String(r.age)):"-"}</td><td>${r.n||"-"}</td>
-        <td><b>${r.gmt?Math.round(r.gmt):"-"}</b></td><td>${r.cv!=null?(+r.cv).toFixed(0):"-"}</td>
+      const hasH=rows.some(r=>r.house);
+      h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"العمر":"Age"}</th>${hasH?`<th>${ar?"العنبر":"House"}</th>`:""}<th>n</th><th>GMT</th><th>${ar?"المتوسط":"Mean"}</th><th>CV%</th><th>Min-Max</th><th>${ar?"المعمل/المصدر":"Source"}</th></tr>`;
+      rows.forEach(r=>{h+=`<tr><td>${esc(r.date||"-")}</td><td>${r.age!==""&&r.age!=null?esc(String(r.age)):"-"}</td>${hasH?`<td>${r.house?esc(r.house):"-"}</td>`:""}<td>${r.n||"-"}</td>
+        <td><b>${r.gmt?fkNum(r.gmt):"-"}</b></td><td>${r.mean?fkNum(r.mean):"-"}</td><td>${r.cv!=null?(+r.cv).toFixed(0):"-"}</td>
         <td>${r.min!=null?Math.round(r.min)+"-"+Math.round(r.max):"-"}</td><td>${r.manual?(ar?"يدوي":"manual"):esc(getLab(r.lab).abbr||r.lab||"")}</td></tr>`;});
-      h+=`<tr style="background:var(--surface-2)"><td colspan="3"><b>${ar?"متوسط GMT عبر السحبات":"Average GMT across rounds"}</b></td><td colspan="4"><b style="color:var(--amber-d)">${avg||"-"}</b></td></tr>`;
+      h+=`<tr style="background:var(--surface-2)"><td colspan="${hasH?4:3}"><b>${ar?"متوسط GMT عبر السحبات":"Average GMT across rounds"}</b></td><td colspan="5"><b style="color:var(--amber-d)">${avg||"-"}</b></td></tr>`;
       h+=`</table>`;
-      if(gmts.length>=2&&typeof trendSVG==="function"){
+      if(new Set(rows.map(r=>r.house).filter(Boolean)).size>=2)h+=fkHouseCompare(rows,assay);
+      if(gmts.length>=2&&typeof trendSVG==="function"&&new Set(rows.map(r=>r.house).filter(Boolean)).size<2){
         const pts=rows.filter(r=>r.gmt>0).map(r=>({date:r.date,gmt:r.gmt,cur:false}));
         h+=`<div>${trendSVG(pts)}</div>`;
       }
@@ -2739,9 +2813,10 @@ function buildFlockFile(){
       const rows=groups[dis].slice().sort((a,b)=>(a.date<b.date?-1:a.date>b.date?1:0));
       const posN=rows.filter(r=>r.detected==="pos").length;const tot=rows.filter(r=>r.detected).length;
       h+=`<div style="margin-bottom:14px"><div class="tg-head">${esc(diseaseLabel(dis))} <span class="hint">(${tot?Math.round(posN/tot*100):0}% ${ar?"إيجابية":"positive"}, n=${rows.length})</span></div>`;
-      h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"العمر":"Age"}</th><th>${ar?"الاختبار":"Test"}</th><th>${ar?"النتيجة":"Result"}</th><th>Ct</th><th>${ar?"التنميط":"Typing"}</th></tr>`;
+      const pH=rows.some(r=>r.house);
+      h+=`<table class="interp-tbl" style="margin:6px 0"><tr><th>${ar?"التاريخ":"Date"}</th><th>${ar?"العمر":"Age"}</th>${pH?`<th>${ar?"العنبر":"House"}</th>`:""}<th>${ar?"الاختبار":"Test"}</th><th>${ar?"النتيجة":"Result"}</th><th>Ct</th><th>${ar?"التنميط":"Typing"}</th></tr>`;
       rows.forEach(r=>{const det=r.detected==="pos"?`<b style="color:#b91c1c">${ar?"موجب":"Detected"}</b>`:r.detected==="neg"?`<span style="color:#15803d">${ar?"سالب":"Not detected"}</span>`:(r.value?esc(r.value):"-");
-        h+=`<tr><td>${esc(r.date||"-")}</td><td>${r.age!==""&&r.age!=null?esc(String(r.age)):"-"}</td><td>${esc(r.name||"")}</td><td>${det}</td><td>${esc(r.ct||"-")}</td><td>${esc(r.typing||r.serotyping||"-")}</td></tr>`;});
+        h+=`<tr><td>${esc(r.date||"-")}</td><td>${r.age!==""&&r.age!=null?esc(String(r.age)):"-"}</td>${pH?`<td>${r.house?esc(r.house):"-"}</td>`:""}<td>${esc(r.name||"")}</td><td>${det}</td><td>${esc(r.ct||"-")}</td><td>${esc(r.typing||r.serotyping||"-")}</td></tr>`;});
       h+=`</table></div>`;
     });
     h+=`</div>`;
