@@ -101,7 +101,15 @@
   .po table{width:100%;border-collapse:collapse;font-size:12px}
   .po th{color:var(--mut);font-weight:600;text-align:right;padding:4px 3px;border-bottom:1px solid var(--line);font-size:11px}
   .po td{padding:5px 3px;border-bottom:1px solid #ffffff0d}
-  .po td.num{font-weight:700}
+  .po td.num{font-weight:700;white-space:nowrap}
+  .po td,.po th{white-space:nowrap}
+  .po td.nm{white-space:normal;min-width:110px}
+  .po .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .po-in{padding:5px 6px!important;font-size:13.5px!important;text-align:center;min-width:58px;box-sizing:content-box}
+  .po td.mk{color:#22c55e}
+  .po td.mk.low{color:#f59e0b}
+  .prt-opt{display:block;width:100%;text-align:right;margin-top:9px;padding:12px;line-height:1.5}
+  .prt-opt small{display:block;color:var(--mut);font-weight:400;font-size:11.5px}
   .po .sum{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:2px solid var(--line);font-weight:800;font-size:13.5px}
   .po .sum span:last-child{color:var(--gold)}
 
@@ -282,14 +290,14 @@
     <div class="kpis">
       <div class="kpi b"><div class="n" id="pKn">—</div><div class="l">عدد الموردين</div></div>
       <div class="kpi g"><div class="n" id="pKc">—</div><div class="l">الإجمالي (ج.م)</div></div>
+      <div class="kpi b"><div class="n" id="pKm">—</div><div class="l" id="pKmL">المتاح تصنيعه من الموجود (طن)</div></div>
     </div>
     <div class="card">
       <h2>🧾 أمر الشراء — مجمّع حسب المورد</h2>
       <div id="poList"></div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn blue" onclick="expPO()">⬇️ تصدير Excel</button>
-        <button class="btn-sm" onclick="printPO(true)">🖨️ طباعة تفصيلية</button>
-        <button class="btn-sm" onclick="printPO(false)">🖨️ طباعة مبسّطة</button>
+        <button class="btn-sm" onclick="askPrint(null)">🖨️ طباعة (كل الموردين)</button>
       </div>
     </div>
   </div>
@@ -399,6 +407,16 @@
 </div>
 
 <!-- ====== اختيار طريقة التصدير ====== -->
+<div class="ov" id="ovPrint">
+  <div class="sheet" style="max-width:420px">
+    <h2>🖨️ طباعة أمر الشراء</h2>
+    <div style="font-size:12.5px;color:var(--mut);margin-bottom:6px" id="prtFor"></div>
+    <button class="btn-sm prt-opt" onclick="doPrint('full')">📋 طباعة كاملة<small>كل الأعمدة: الفعلي، المعدل، يصنّع كام، تصنيع إضافي، المطلوب، السعر، التكلفة</small></button>
+    <button class="btn-sm prt-opt" onclick="doPrint('mid')">📊 الصنف · الفعلي · معدل الإضافة · يصنّع كام · المطلوب<small>بدون أسعار — للمخزن أو المصنع</small></button>
+    <button class="btn-sm prt-opt" onclick="doPrint('short')">🧾 الصنف والمطلوب بس<small>للمورد — الكمية النهائية (اليدوي لو متسجل)</small></button>
+    <button class="btn-sm" style="width:100%;margin-top:12px" onclick="$('ovPrint').classList.remove('on')">إلغاء</button>
+  </div>
+</div>
 <div class="ov" id="ovOut">
   <div class="sheet" style="max-width:400px">
     <h2>📊 الملف جاهز</h2>
@@ -507,6 +525,15 @@ function calc(it){
   var cost=(it.price!=null&&short>0)?short*n2(it.price):null;
   return {reqB:reqB,reqC:reqC,total:total,autoShort:autoShort,short:short,cost:cost,
     rate:(n2(it.rB)>0?n2(it.rB):n2(it.rC)), isManual:(it.manualNeeded!=null)};
+}
+/* كام طن علف ممكن يتصنّع من الرصيد الفعلي للصنف ده (الرصيد ÷ معدل الإضافة كجم/طن).
+   لو الصنف داخل في الفراخ والعجول مع بعض، بنحسب على خلطة بنسبة الأهداف. */
+function canMake(it){
+  var st=n2(it.stock), rB=n2(it.rB), rC=n2(it.rC), tb=n2(DB.targets.b), tc=n2(DB.targets.c);
+  var r;
+  if(rB>0&&rC>0){ r=(tb+tc)>0?(rB*tb+rC*tc)/(tb+tc):(rB+rC)/2; }
+  else r=rB>0?rB:rC;
+  return r>0? st/r : null;
 }
 function itemByName(nm){
   var n=norm(nm);
@@ -757,7 +784,7 @@ function buildPO(onlyNeeded){
     if(onlyNeeded && c.short<=0)return;
     if(!map[it.sup])map[it.sup]={sup:it.sup,rows:[],total:0};
     map[it.sup].rows.push({id:it.id,name:it.name,unit:it.unit||'',stock:n2(it.stock),
-      rate:c.rate,extraMfg:n2(it.extraMfg),qty:c.short,autoQty:c.autoShort,isManual:c.isManual,
+      rate:c.rate,extraMfg:n2(it.extraMfg),qty:c.short,autoQty:c.autoShort,isManual:c.isManual,canMake:canMake(it),
       price:it.price,cost:c.cost});
     if(c.cost)map[it.sup].total+=c.cost;
   });
@@ -769,23 +796,29 @@ function renderPO(){
   var groups=buildPO(_poOnlyNeeded);
   var grand=0,itemsN=0;groups.forEach(function(g){grand+=g.total;itemsN+=g.rows.length});
   $('pKn').textContent=groups.length;$('pKc').textContent=fmt(grand);
+  var lim=null; DB.items.forEach(function(it){ var m=canMake(it); if(m!=null&&(lim==null||m<lim.v))lim={v:m,n:it.name}; });
+  $('pKm').textContent=lim?fmt(lim.v,1):'—'; $('pKmL').textContent=lim?('المتاح تصنيعه (طن) — بيحدده: '+lim.n):'المتاح تصنيعه من الموجود (طن)';
   var filterBtn='<button class="btn-sm" onclick="togglePOFilter()" style="margin-bottom:10px">'+
     (_poOnlyNeeded?'👁️ عرض كل الأصناف (حتى المكتفية)':'🎯 الأصناف الناقصة بس')+'</button>';
   if(!groups.length){$('poList').innerHTML=filterBtn+'<div class="empty"><div class="em">✅</div><h3>مفيش نواقص</h3><p>كل الأصناف مكتفية، أو مفيش موردين محدّدين.</p></div>';return}
   $('poList').innerHTML=filterBtn+groups.map(function(g){
     var rows=g.rows.map(function(r,i){
-      return '<tr data-id="'+r.id+'"><td class="num">'+(i+1)+'</td><td>'+esc(r.name)+'</td>'+
+      var tgt=n2(DB.targets.b)+n2(DB.targets.c);
+      return '<tr data-id="'+r.id+'"><td class="num">'+(i+1)+'</td><td class="nm">'+esc(r.name)+'</td>'+
         '<td class="num">'+fmt(r.stock,1)+'</td>'+
-        '<td class="num"><input class="po-in" data-field="rate" data-id="'+r.id+'" type="text" inputmode="decimal" value="'+fmt(r.rate,2)+'" style="width:60px;text-align:center"></td>'+
-        '<td class="num"><input class="po-in" data-field="extraMfg" data-id="'+r.id+'" type="text" inputmode="decimal" value="'+fmt(r.extraMfg,1)+'" style="width:60px;text-align:center"></td>'+
-        '<td class="num"><input class="po-in" data-field="manual" data-id="'+r.id+'" type="text" inputmode="decimal" placeholder="'+fmt(r.autoQty,1)+'" value="'+(r.isManual?fmt(r.qty,1):'')+'" style="width:64px;text-align:center;'+(r.isManual?'border-color:#f59e0b;font-weight:800':'')+'" title="سيبها فاضية = حساب تلقائي"></td>'+
-        '<td>'+(r.price!=null?fmt(r.price,2):'—')+'</td>'+
+        '<td class="num">'+poIn('rate',r.id,fmt(r.rate,2),'')+'</td>'+
+        '<td class="num mk'+(r.canMake!=null&&tgt>0&&r.canMake<tgt?' low':'')+'" title="الرصيد الفعلي ÷ معدل الإضافة">'+(r.canMake!=null?fmt(r.canMake,1):'—')+'</td>'+
+        '<td class="num">'+poIn('extraMfg',r.id,fmt(r.extraMfg,1),'')+'</td>'+
+        '<td class="num" style="color:var(--mut)">'+fmt(r.autoQty,1)+'</td>'+
+        '<td class="num">'+poIn('manual',r.id,(r.isManual?fmt(r.qty,1):''),'يدوي',r.isManual)+'</td>'+
+        '<td class="num">'+(r.price!=null?fmt(r.price,2):'—')+'</td>'+
         '<td class="num">'+(r.cost?fmt(r.cost,0):'—')+'</td></tr>';
     }).join('');
     return '<div class="po"><h3>🏢 '+esc(g.sup)+'</h3><div class="tot">'+g.rows.length+' صنف</div>'+
-      '<div class="tbl-wrap"><table><thead><tr><th>م</th><th>الصنف</th><th>الفعلي</th><th>معدل الإضافة</th><th>تصنيع إضافي</th><th>المطلوب</th><th>السعر</th><th>التكلفة</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+      '<div class="tbl-wrap"><table><thead><tr><th>م</th><th>الصنف</th><th>الفعلي</th><th>معدل الإضافة</th><th>يصنّع كام (طن)</th><th>تصنيع إضافي</th><th>المطلوب (حساب)</th><th>المطلوب يدوي</th><th>السعر</th><th>التكلفة</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
       '<div class="sum"><span>إجمالي المورد</span><span>'+fmt(g.total,2)+' ج.م</span></div>'+
-      '<button class="btn-sm" style="width:100%;margin-top:9px" onclick="sharePO(\''+esc(g.sup).replace(/'/g,"\\'")+'\')">📤 مشاركة</button></div>';
+      '<div style="display:flex;gap:8px;margin-top:9px"><button class="btn-sm" style="flex:1" onclick="sharePO(\''+esc(g.sup).replace(/'/g,"\\'")+'\')">📤 مشاركة</button>'+
+      '<button class="btn-sm" style="flex:1" onclick="askPrint(\''+esc(g.sup).replace(/'/g,"\\'")+'\')">🖨️ طباعة</button></div></div>';
   }).join('');
   bindPOInputs();
 }
@@ -799,12 +832,22 @@ function toEnDigits(s){
     return ch;
   });
 }
+/* خانة إدخال بتكبر مع الرقم عشان مايختفيش */
+function poW(v,ph){var L=Math.max(String(v==null?'':v).length,String(ph||'').length,3);return 'width:'+(L+1)+'ch'}
+function poIn(field,id,v,ph,hl){
+  return '<input class="po-in" data-field="'+field+'" data-id="'+id+'" type="text" inputmode="decimal" value="'+esc(v)+'"'+
+    (ph?' placeholder="'+esc(ph)+'"':'')+' style="'+poW(v,ph)+(hl?';border-color:#f59e0b;font-weight:800':'')+'"'+
+    (field==='manual'?' title="اكتب الكمية اللي عايزها — سيبها فاضية = الحساب التلقائي"':'')+'>';
+}
 function bindPOInputs(){
   var host=$('poList'); if(!host||host._poBound)return; host._poBound=true;
+  /* أثناء الكتابة: نكبّر الخانة ونحفظ بس — إعادة الرسم بعد ما تخلص (change) عشان الكيبورد مايقفلش */
+  host.addEventListener('change',function(ev){ var inp=ev.target; if(inp&&inp.classList&&inp.classList.contains('po-in')) renderPO(); });
   host.addEventListener('input',function(ev){
     var inp=ev.target; if(!inp||!inp.classList||!inp.classList.contains('po-in'))return;
     var conv=(typeof toEnDigits==='function')?toEnDigits(inp.value):inp.value;
     if(conv!==inp.value){var pos=inp.selectionStart;inp.value=conv;try{inp.setSelectionRange(pos,pos);}catch(e){}}
+    inp.style.width=poW(inp.value,inp.placeholder).slice(6);
     var id=inp.dataset.id, field=inp.dataset.field;
     var it=DB.items.filter(function(x){return x.id===id})[0]; if(!it)return;
     if(!can('rate')&&(field==='rate')){toast('مالكش صلاحية تعديل المعدل','⚠️');return}
@@ -817,7 +860,6 @@ function bindPOInputs(){
       it.manualNeeded=(inp.value.trim()==='')?null:n2(inp.value);
     }
     save();
-    renderPO();   /* إعادة رسم كاملة — الجدول مش طويل قد التركيبات فمفيش مشكلة تركيز */
   });
 }
 function sharePO(sup){
@@ -1203,6 +1245,49 @@ function printPO(detailed){
   w.document.write(html); w.document.close();
 }
 
+var _prtSup=null;
+function askPrint(sup){ _prtSup=sup; $('prtFor').textContent=sup?('المورد: '+sup):'كل الموردين'; $('ovPrint').classList.add('on'); }
+function doPrint(mode){
+  $('ovPrint').classList.remove('on');
+  var groups=buildPO(_poOnlyNeeded).filter(function(g){return !_prtSup||g.sup===_prtSup});
+  if(!groups.length){ toast('مفيش أصناف للطباعة'); return; }
+  var cols={
+    full:[['م'],['الصنف'],['الفعلي'],['معدل الإضافة (كجم/طن)'],['يصنّع كام (طن)'],['تصنيع إضافي'],['المطلوب (حساب)'],['المطلوب النهائي'],['السعر'],['التكلفة']],
+    mid:[['م'],['الصنف'],['الفعلي'],['معدل الإضافة (كجم/طن)'],['يصنّع كام (طن)'],['المطلوب']],
+    short:[['م'],['الصنف'],['المطلوب']]}[mode];
+  var nC=cols.length, grand=0, body='';
+  groups.forEach(function(g){
+    if(groups.length>1||!_prtSup) body+='<tr class="grp"><td colspan="'+nC+'">🏢 '+esc(g.sup)+' — '+g.rows.length+' صنف</td></tr>';
+    g.rows.forEach(function(r,i){
+      var u=esc(r.unit||''), q='<b>'+fmt(r.qty,1)+' '+u+'</b>'+(r.isManual&&mode!=='short'?' <small>(يدوي)</small>':'');
+      var mk=(r.canMake!=null?fmt(r.canMake,1):'—');
+      var cells = mode==='full'
+        ? [i+1,esc(r.name),fmt(r.stock,1)+' '+u,fmt(r.rate,2),mk,fmt(r.extraMfg,1),fmt(r.autoQty,1),q,(r.price!=null?fmt(r.price,2):'—'),(r.cost?fmt(r.cost,0):'—')]
+        : mode==='mid' ? [i+1,esc(r.name),fmt(r.stock,1)+' '+u,fmt(r.rate,2),mk,q]
+        : [i+1,esc(r.name),q];
+      body+='<tr>'+cells.map(function(c,k){return '<td'+(k===1?' class="nm"':'')+'>'+c+'</td>'}).join('')+'</tr>';
+    });
+    if(mode==='full'){ grand+=g.total; body+='<tr class="tot"><td colspan="'+(nC-1)+'">إجمالي '+esc(g.sup)+'</td><td>'+fmt(g.total,0)+'</td></tr>'; }
+  });
+  if(mode==='full'&&groups.length>1) body+='<tr class="grp"><td colspan="'+(nC-1)+'">الإجمالي الكلي</td><td>'+fmt(grand,0)+' ج.م</td></tr>';
+  var title=(mode==='short'?'أمر شراء':'بيان أمر الشراء')+(_prtSup?' — '+_prtSup:'');
+  var tg='هدف الفراخ '+fmt(DB.targets.b)+' طن · هدف العجول '+fmt(DB.targets.c)+' طن';
+  var html='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>'
+    +'body{font-family:Tahoma,Arial,sans-serif;padding:20px;color:#111}'
+    +'h1{font-size:20px;margin:0 0 2px}.sub{color:#666;font-size:12px;margin-bottom:14px}'
+    +'table{width:100%;border-collapse:collapse;font-size:13px}'
+    +'th,td{border:1px solid #bbb;padding:6px 8px;text-align:center;white-space:nowrap}td.nm{text-align:right;white-space:normal}'
+    +'th{background:#eef1fb}tr.grp td{background:#dfe4fb;font-weight:800;text-align:right;font-size:14px}'
+    +'tr.tot td{background:#f6f7fb;font-weight:800}small{color:#888;font-size:10px}'
+    +'.sig{display:flex;justify-content:space-between;margin-top:40px;font-size:13px}.sig div{width:30%;border-top:1px solid #999;padding-top:6px;text-align:center}'
+    +'@media print{body{padding:0}}</style></head><body>'
+    +'<h1>🌾 '+esc(title)+'</h1><div class="sub">التاريخ: '+today()+(mode!=='short'?' · '+tg:'')+'</div>'
+    +'<table><thead><tr>'+cols.map(function(c){return '<th>'+c[0]+'</th>'}).join('')+'</tr></thead><tbody>'+body+'</tbody></table>'
+    +'<div class="sig"><div>المشتريات</div><div>المخزن</div><div>الاعتماد</div></div>'
+    +'<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>';
+  var w=window.open('','_blank'); if(!w){ toast('امنع حظر النوافذ المنبثقة للموقع','⚠️'); return; }
+  w.document.write(html); w.document.close();
+}
 function expPO(){
   var groups=buildPO(true);
   var rows=[['المورد','الصنف','الكمية','الوحدة','السعر','التكلفة']];
