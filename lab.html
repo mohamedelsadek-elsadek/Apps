@@ -708,7 +708,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 <script>
 "use strict";
 /* Build metadata - single source of truth for version display + update checks */
-const BUILD={version:"2.14.0",date:"2026-09-27",label:"v2.14.0 (2026-09-27)"};
+const BUILD={version:"2.14.1",date:"2026-09-27",label:"v2.14.1 (2026-09-27)"};
 /* Geography data: Egypt (governorate -> cities) + Saudi Arabia (region -> governorate -> cities)
    Postal codes: Egypt uses per-governorate representative codes; KSA uses region-level short codes.
    Compiled offline. Not exhaustive to every village; covers governorates/regions and major cities. */
@@ -990,7 +990,7 @@ const Store=(()=>{
     db:()=>DB, cfg:()=>CONFIG, audit:()=>AUDIT, tomb:()=>TOMB, flock:()=>FLOCK,
     setDB(v){DB=v;}, setCfg(v){CONFIG=Object.assign({},DEFAULT_CONFIG,v);}, setFlock(v){FLOCK=Array.isArray(v)?v:[];},
     tombstone(id){TOMB[id]=Date.now();},
-    save(action,detail){if(action)log(action,detail);persist();},
+    save(action,detail){if(action)log(action,detail);persist();if(action&&typeof window.__plsAfterSave==="function")window.__plsAfterSave();},
     DEFAULT_CONFIG
   };
 })();
@@ -1260,7 +1260,7 @@ const Sync=(()=>{
       if(remote.cfg.extraTests)Object.assign(c.extraTests,remote.cfg.extraTests);}
     // merge manual flock records (union by id)
     if(remote.flock){const fl=Store.flock(),haveId={};fl.forEach(x=>haveId[x.id]=1);
-      Object.values(remote.flock).forEach(rec=>{if(rec&&rec.id&&!haveId[rec.id]){fl.push(rec);haveId[rec.id]=1;}});}
+      Object.values(remote.flock).forEach(rec=>{if(rec&&rec.id&&!haveId[rec.id]&&!byId[rec.id]&&!lTomb[rec.id]){fl.push(rec);haveId[rec.id]=1;}});}
     return{added,updated,removed};
   }
   function buildPayload(){
@@ -1279,14 +1279,22 @@ const Sync=(()=>{
       renderMy&&renderMy();renderDash&&renderDash();renderSettings&&renderSettings();
       status((Lang.current()==="ar"?"تمت المزامنة":"Synced")+" \u00b7 "+new Date().toLocaleTimeString(),"ok");
       if(!silent)Toast.show((Lang.current()==="ar"?`تمت المزامنة: +${res.added} جديد، ${res.updated} محدّث، ${res.removed} محذوف`:`Synced: +${res.added} new, ${res.updated} updated, ${res.removed} removed`),"ok");
-    }catch(e){status((Lang.current()==="ar"?"فشل المزامنة: ":"Sync failed: ")+e.message,"err");if(!silent)Toast.show((Lang.current()==="ar"?"فشل المزامنة: ":"Sync failed: ")+e.message,"err");}
+    }catch(e){if(typeof dirty!=="undefined")dirty=true;status((Lang.current()==="ar"?"فشل المزامنة: ":"Sync failed: ")+e.message,"err");if(!silent)Toast.show((Lang.current()==="ar"?"فشل المزامنة: ":"Sync failed: ")+e.message,"err");}
     busy=false;
   }
   function schedulePush(){ // debounced auto-push after local changes
     if(!enabled())return;clearTimeout(pushTimer);
     pushTimer=setTimeout(()=>{pushAll(buildPayload()).then(()=>status((Lang.current()==="ar"?"محفوظ سحابيًا":"Cloud saved")+" \u00b7 "+new Date().toLocaleTimeString(),"ok")).catch(e=>status((Lang.current()==="ar"?"تعذّر الرفع":"Push failed")+": "+e.message,"err"));},2500);
   }
-  return{init(){cfg=loadCfg();},enabled,saveCfg,getCfg:()=>cfg,syncNow,schedulePush,status};
+  /* every local change is pushed automatically: pull + merge first, then push (never a blind overwrite of the cloud) */
+  let dirty=false,autoT=null;
+  function markDirty(){if(!enabled())return;dirty=true;setTopSync("busy");clearTimeout(autoT);autoT=setTimeout(flush,2500);}
+  async function flush(){if(!dirty||!enabled())return;if(busy){autoT=setTimeout(flush,1500);return;}dirty=false;await syncNow(true);}
+  window.__plsAfterSave=markDirty;
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&dirty)flush();if(document.visibilityState==="visible"&&enabled())setTimeout(()=>syncNow(true),400);});
+  window.addEventListener("online",()=>{if(enabled())syncNow(true);});
+  window.addEventListener("pagehide",()=>{if(dirty)flush();});
+  return{init(){cfg=loadCfg();},enabled,saveCfg,getCfg:()=>cfg,syncNow,schedulePush,status,isDirty:()=>dirty};
 })();
 const VIEWS=["dash","new","my","flock","reports","deventer","settings"];
 function go(v){
@@ -2426,7 +2434,8 @@ function flockRecords(){return Store.flock();}
 /* One-time migration: convert old separate flock records into real submissions */
 function migrateFlockRecords(){
   const old=Store.flock();if(!old||!old.length)return;
-  old.forEach(m=>{
+  const have={};DB().forEach(x=>have[x.id]=1);
+  old.forEach(m=>{if(m&&m.id&&have[m.id])return;
     const lab=Object.keys(allLabs())[0];const ty=m.type||"FeedWater";let tid,result;
     if(ty==="Serology"){const dis=m.param||"Other",assay=m.assay||"HI";
       tid=ensureManualTest(lab,dis+" "+assay,"Serology",dis,"Serology");
@@ -2975,6 +2984,7 @@ function saRecords(){
         type,disease:t.d||"Other",name:t.n||tid,assay:r.assay||(type==="Serology"?(/ELISA/i.test(t.n||"")?"ELISA":"HI"):""),
         titres:tit,stats:r.stats||(tit.length?statsOf(tit):null),detected:r.detected||"",ct:r.ct||"",typing:r.typing||r.serotyping||"",
         value:r.value||"",vacc:(s.vaccProgram||"").trim()});
+      const L=out[out.length-1];L.tkey=L.type==="Serology"?((L.disease||"Other")+" · "+(L.assay||"HI")):L.name;
     });
   });
   return out;
@@ -2990,16 +3000,16 @@ function initSA(){
   const cyc=fkUniq(fr.map(r=>r.cycle));const hasNone=fr.some(r=>!r.cycle);
   SA.cycle=saFill("sa_cycle",[["__all",saT("كل الدورات","All cycles")]].concat(cyc.map(c=>[c,c])).concat(hasNone?[["__none",saT("(بدون دورة)","(no cycle)")]]:[]),SA.cycle);
   const cr=fr.filter(r=>SA.cycle==="__all"||(SA.cycle==="__none"?!r.cycle:r.cycle===SA.cycle));
-  const tests=fkUniq(cr.map(r=>r.name));
-  SA.test=saFill("sa_test",tests.map(t=>[t,t+" ("+cr.filter(r=>r.name===t).length+")"]),SA.test);
-  const hs=fkUniq(cr.filter(r=>r.name===SA.test).map(r=>r.house));
+  const tests=fkUniq(cr.map(r=>r.tkey));
+  SA.test=saFill("sa_test",tests.map(t=>{const q=cr.filter(r=>r.tkey===t);const nm=fkUniq(q.map(r=>r.name));return [t,t+" ("+q.length+")"+(nm.length>1||nm[0]!==t?" — "+nm.join(" / "):"")];}),SA.test);
+  const hs=fkUniq(cr.filter(r=>r.tkey===SA.test).map(r=>r.house));
   SA.house=saFill("sa_house",[["",saT("كل العنابر","All houses")]].concat(hs.map(h=>[h,saT("عنبر ","House ")+h])),SA.house);
-  const birds=cr.filter(r=>r.name===SA.test).map(r=>birdKey(r.bird));
+  const birds=cr.filter(r=>r.tkey===SA.test).map(r=>birdKey(r.bird));
   const guess=birds.length?Object.entries(birds.reduce((a,b)=>(a[b]=(a[b]||0)+1,a),{})).sort((a,b)=>b[1]-a[1])[0][0]:"broiler";
   SA.bird=saFill("sa_bird",[["broiler",saT("تسمين","Broiler")],["layer",saT("بياض","Layer")],["breeder",saT("أمهات","Breeder")]],SA.bird||guess);
 }
 function saScope(){
-  return saRecords().filter(r=>r.farm===SA.farm&&r.name===SA.test&&(SA.cycle==="__all"||(SA.cycle==="__none"?!r.cycle:r.cycle===SA.cycle))&&(!SA.house||r.house===SA.house));
+  return saRecords().filter(r=>r.farm===SA.farm&&r.tkey===SA.test&&(SA.cycle==="__all"||(SA.cycle==="__none"?!r.cycle:r.cycle===SA.cycle))&&(!SA.house||r.house===SA.house));
 }
 /* pooled stats for a list of records (uses individual titres when present) */
 function saPool(rs){
@@ -3236,7 +3246,14 @@ function renderSA(){
   if(all)h+=`<tr class="sa-total"><td colspan="3">${saT("إجمالي الدورة","Cycle total")}</td><td>${all.n}</td><td>${saN(all.mean)}</td><td>${saN(all.gmt)}</td><td>${saN(all.cv,1)}</td><td>${saN(all.min)}</td><td>${saN(all.max)}</td><td colspan="4"></td></tr>`;
   h+=`</tbody></table></div>
     <div class="hint" style="margin-top:6px">${E?saT(`المراجع (${b}): حد الحماية ${pr??"-"}${unit} · المستهدف ${tg?tg[0]+"–"+tg[1]:"-"}${unit} · اشتباه تحدي ≥ ${kbPick(E.challenge,b)??"-"}${unit} · نافذة المناعة الأمية حتى يوم ${kbPick(E.mda&&E.mda.windowDays,b)??"-"} · نص العمر ${kbPick(E.mda&&E.mda.halfLife,b)??"-"} يوم. الحدود قابلة للاختلاف حسب الأنتيجين/الكيت والبرنامج.`,"References are indicative and vary by antigen/kit/program."):""}</div></div>`;
-  host.innerHTML=h;saWire();
+  host.innerHTML=h+saPendingHint(r0);saWire();
+}
+/* samples of this farm/disease that are registered but have no result yet */
+function saPendingHint(r0){
+  let n=0;DB().forEach(s=>{if(s.farm!==SA.farm)return;const cat=labTests(s.lab);
+    (s.tests||[]).forEach(tid=>{const t=cat.find(x=>x.id===tid);if(!t||t.d!==r0.disease)return;const r=(s.results||{})[tid];
+      if(!r||(!r.stats&&!(r.titres||[]).length&&!r.detected&&!r.value))n++;});});
+  return n?`<div class="sa-f sa-warn" style="margin-top:4px">⏳ ${saT(`فيه ${n} عينة ${r0.disease} للمزرعة دي متسجلة لكن لسه من غير نتيجة — مش داخلة في التحليل. افتحها من «عيناتي» وأدخل النتيجة.`,`${n} ${r0.disease} sample(s) for this farm have no result yet — not included.`)}</div>`:"";
 }
 function renderSAPcr(rs,KB,K){
   const P=KB.PCR||(SERO_KB._generic||{}).PCR||{};const cs=P.ctStrong||30,cw=P.ctWeak||35;
