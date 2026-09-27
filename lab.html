@@ -334,6 +334,39 @@ html[dir="rtl"] .kbd{direction:ltr}
 html[dir="rtl"] .code,html[dir="rtl"] input[dir="ltr"]{direction:ltr;text-align:left}
 html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 </style>
+<style id="sa_css">
+.sa-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.sa-hero{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 18px;border-radius:14px;background:linear-gradient(135deg,#1c2431,#2b3a55);color:#fff;margin-bottom:12px}
+.sa-hero h2{font-size:22px;margin:2px 0 0;color:#fff}.sa-hero h2 span{font-size:13px;font-weight:600;opacity:.75;margin-inline-start:6px}
+.sa-kick{font-size:12px;opacity:.75;letter-spacing:.3px}
+.sa-verdict{font-weight:800;padding:8px 16px;border-radius:30px;font-size:14px;white-space:nowrap}
+.sa-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.sa-kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.sa-kpi b{display:block;font-size:22px;line-height:1.2}.sa-kpi span{font-size:11px;color:var(--muted)}
+.sa-sec{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;background:var(--surface)}
+.sa-sec h3{font-size:14.5px;margin:0 0 10px}.sa-sech{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sa-experts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.sa-exp{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px}
+.sa-exh{font-weight:800;margin-bottom:6px;font-size:13px}
+.sa-f{font-size:12.5px;line-height:1.7;padding:6px 8px;border-radius:8px;margin-bottom:5px;border-inline-start:3px solid #94a3b8;background:var(--surface)}
+.sa-good{border-color:#16a34a}.sa-warn{border-color:#f59e0b}.sa-bad{border-color:#dc2626;background:#dc26260d}.sa-info{border-color:#0ea5e9}
+.sa-exp details{margin-top:6px;font-size:12px}.sa-exp summary{cursor:pointer;color:var(--muted);font-weight:700}.sa-rule{padding:3px 0;color:var(--ink-2);line-height:1.6}
+.sa-grid2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px}@media(max-width:900px){.sa-grid2{grid-template-columns:1fr}}
+.sa-svg{width:100%;height:auto;display:block}
+.sa-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}.sa-leg{font-size:11.5px;display:inline-flex;align-items:center;gap:5px}.sa-leg i{width:14px;height:4px;border-radius:2px;display:inline-block}
+.sa-heat{width:100%;border-collapse:separate;border-spacing:4px}.sa-heat th{font-size:11px;color:var(--muted);font-weight:700}
+.sa-heat td{text-align:center;border-radius:8px;padding:6px 2px;font-size:14px;min-width:46px}.sa-heat td small{display:block;font-size:9.5px;color:var(--muted)}.sa-heat td.sa-e{color:var(--line)}
+.sa-keys{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:11px;color:var(--muted)}.sa-keys i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:middle}
+.sa-hist{display:flex;align-items:flex-end;gap:4px;height:130px;padding-top:6px}.sa-hb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;font-size:10px;color:var(--muted)}.sa-hb div{width:100%;border-radius:4px 4px 0 0}.sa-hn{font-weight:700;color:var(--ink)}
+.sa-tbl{width:100%;border-collapse:collapse;font-size:12.5px}.sa-tbl th{background:var(--surface-2);font-size:11px;color:var(--muted);padding:6px;white-space:nowrap}.sa-tbl td{padding:6px;border-top:1px solid var(--line);text-align:center;white-space:nowrap}
+.sa-tbl tr.sa-total td{background:var(--surface-2);font-weight:800}
+.sa-chips{white-space:normal!important;max-width:260px}.sa-t{display:inline-block;font-style:normal;font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin:1px}
+.sa-pill{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.sa-dot{display:inline-block;width:10px;height:10px;border-radius:50%}
+.sa-house{border:1px dashed var(--line);background:var(--surface-2);border-radius:8px;padding:2px 10px;font-weight:800;cursor:pointer;color:var(--ink);min-width:34px}
+.sa-houses{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.sa-hcard{border:1px solid var(--line);border-radius:12px;padding:8px;overflow-x:auto}.sa-hh{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:4px 4px 8px}
+</style>
 </head>
 <body>
 <div id="splash"><div class="spin"></div><div class="st">Loading Poultry Lab System...</div></div>
@@ -542,6 +575,18 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
       <!-- REPORTS -->
       <section id="v-reports" class="view">
         <div class="page-h"><h2 data-i18n="reports.title">Reports</h2><p data-i18n="reports.sub">Group and analyse submissions &amp; results by different dimensions.</p></div>
+        <div class="card sa-card">
+          <h3 data-i18n="sa.title">Flock analysis report (farm · cycle · test)</h3>
+          <div class="sa-filters">
+            <div class="fld"><label data-i18n="sa.farm">Farm</label><select id="sa_farm"></select></div>
+            <div class="fld"><label data-i18n="sa.cycle">Cycle</label><select id="sa_cycle"></select></div>
+            <div class="fld"><label data-i18n="sa.test">Test</label><select id="sa_test"></select></div>
+            <div class="fld"><label data-i18n="sa.house">House</label><select id="sa_house"></select></div>
+            <div class="fld"><label data-i18n="sa.bird">Bird type</label><select id="sa_bird"></select></div>
+            <div class="fld" style="display:flex;align-items:flex-end"><button class="btn" id="sa_print" data-i18n="sa.print">Print / PDF</button></div>
+          </div>
+          <div id="sa_out"></div>
+        </div>
         <div class="toolbar">
           <label style="font-size:12px;font-weight:600;color:var(--ink-2)" data-i18n="reports.viewBy">View by</label>
           <select id="rGroup"><option value="lab" data-i18n="reports.byLab">Laboratory</option><option value="company" data-i18n="reports.byCompany">Company</option><option value="farm" data-i18n="reports.byFarm">Farm</option><option value="disease" data-i18n="reports.byDisease">Disease / Pathogen</option><option value="method" data-i18n="reports.byMethod">Analysis type (PCR / Serology)</option><option value="status" data-i18n="reports.byStatus">Status</option></select>
@@ -575,7 +620,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
         <div class="card"><h3 data-i18n="set.addLab">Add a custom laboratory</h3>
           <div class="row3">
             <div class="fld"><label data-i18n="set.labName">Lab name</label><input id="nlName" placeholder="e.g. BioCheck Lab"></div>
-            <div class="fld"><label data-i18n="set.shortCode">Short code</label><input id="nlAbbr" placeholder="e.g. BC" maxlength="3"></div>
+            <div class="fld"><label data-i18n="set.shortCode">Short code</label><input id="nlAbbr" placeholder="e.g. EPC" maxlength="6"></div>
             <div class="fld"><label data-i18n="set.formFields">Form fields (comma separated)</label><input id="nlFields" placeholder="Veterinarian, Case History, Notes"></div>
           </div><button class="btn sm" id="nlAdd" data-i18n="set.addLabBtn">Add laboratory</button><div id="nlList" style="margin-top:12px"></div></div>
         <div class="card"><h3 data-i18n="set.backup">Backup &amp; restore</h3>
@@ -663,7 +708,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 <script>
 "use strict";
 /* Build metadata - single source of truth for version display + update checks */
-const BUILD={version:"2.13.0",date:"2026-09-26",label:"v2.13.0 (2026-09-26)"};
+const BUILD={version:"2.14.0",date:"2026-09-27",label:"v2.14.0 (2026-09-27)"};
 /* Geography data: Egypt (governorate -> cities) + Saudi Arabia (region -> governorate -> cities)
    Postal codes: Egypt uses per-governorate representative codes; KSA uses region-level short codes.
    Compiled offline. Not exhaustive to every village; covers governorates/regions and major cities. */
@@ -956,7 +1001,10 @@ function CONFIG(){return Store.cfg();}
 
 /* Lab helpers (merge base + custom) */
 function allLabs(){return Object.assign({},LABS,CONFIG().customLabs||{});}
-function getLab(k){return allLabs()[k]||{name:k,full:k,abbr:"??",fields:[],tests:[]};}
+function labAutoAbbr(L){const w=String(L.name||L.full||"LAB").trim().split(/\s+/)[0]||"LAB";return w.slice(0,6).toUpperCase();}
+/* a short code that is only digits/symbols (e.g. "1") is meaningless on screen - derive it from the lab name */
+function getLab(k){const L=allLabs()[k];if(!L)return{name:k,full:k,abbr:"??",fields:[],tests:[]};
+  if(!/[A-Za-z\u0600-\u06FF]/.test(L.abbr||""))return Object.assign({},L,{abbr:labAutoAbbr(L)});return L;}
 function labTests(k){const base=(getLab(k).tests||[]);const extra=(CONFIG().extraTests&&CONFIG().extraTests[k])||[];return base.concat(extra);}
 function testNames(s){const cat=labTests(s.lab);return s.tests.map(id=>(cat.find(t=>t.id===id)||{n:id}).n);}
 function labelStatus(s){
@@ -1047,7 +1095,7 @@ const Lang=(()=>{
       "flock.disease":"المرض / البيان","flock.build":"بناء الملف","flock.print":"طباعة",
       "flock.manualTitle":"إضافة نتيجة يدوية (علف / مياه / بكتريولوجي / سيرولوجي سريع)",
       "flock.manualHint":"للنتائج اللي مش مدخّلة كعينات معمل - تحاليل العلف والمياه، عزلات البكتريا، أو ملخص titre سريع. بتنضم لنفس ملف المزرعة.",
-      "flock.mCompany":"الشركة","flock.mHouse":"العنبر (اختياري)","flock.mVacc":"تحصين العنبر (لو مختلف)","flock.house":"العنبر","flock.allHouses":"- كل العنابر -","flock.mFarm":"المزرعة","flock.mCycle":"الدورة","flock.mLab":"المعمل","flock.mType":"النوع","flock.mDate":"التاريخ","flock.mAge":"العمر (يوم)",
+      "sa.title":"تقرير التحليل التفصيلي (مزرعة · دورة · اختبار)","sa.farm":"المزرعة","sa.cycle":"الدورة","sa.test":"الاختبار","sa.house":"العنبر","sa.bird":"نوع الطيور","sa.print":"طباعة / PDF","flock.mCompany":"الشركة","flock.mHouse":"العنبر (اختياري)","flock.mVacc":"تحصين العنبر (لو مختلف)","flock.house":"العنبر","flock.allHouses":"- كل العنابر -","flock.mFarm":"المزرعة","flock.mCycle":"الدورة","flock.mLab":"المعمل","flock.mType":"النوع","flock.mDate":"التاريخ","flock.mAge":"العمر (يوم)",
       "flock.mParam":"البيان / المرض / العزلة","flock.mValue":"القيمة / النتيجة","flock.mUnit":"الوحدة / ملاحظة","flock.mAdd":"إضافة سجل",
       "flock.mCancel":"إلغاء التعديل","flock.listTitle":"السجلات اليدوية (تعديل / حذف)",
       "search.everything":"ابحث عن أي شيء...",
@@ -1248,7 +1296,7 @@ function go(v){
   el("v-"+v).classList.add("active");
   if(v==="dash")renderDash();
   if(v==="my")renderMy();
-  if(v==="reports")renderReports();
+  if(v==="reports"){renderReports();renderSA();}
   if(v==="settings")renderSettings();
   if(v==="new")initNewForm();
   if(v==="deventer")initDeventerView();
@@ -2896,6 +2944,345 @@ function renderDash(){
    REPORTS
    ============================================================================ */
 let REPORT_CACHE=null;
+/* ============================================================================
+   SEROLOGY / PCR ANALYSIS REPORT  (farm · cycle · test)
+   Expert panel knowledge base (vet · serology lab · farm manager · virologist)
+   ============================================================================ */
+const SERO_KB={"_meta":{"version":"1.0","ar":"قاعدة معرفة لتفسير نتائج السيرولوجي وPCR في قطعان الدواجن التجارية بمصر والشرق الأوسط","notes":["قيم HI بوحدة log2 للطائر الفردي (6 = 1:64)، ومعامل الاختلاف CV% محسوب على قيم log2.","قيم ELISA بوحدات الكيت (IDEXX غالباً)، وتختلف القيم المرجعية بين IDEXX وIDvet وBioChek؛ يجب معايرة الحدود حسب الكيت المستخدم.","mode يحدد منطق التفسير: vaccine = تقييم استجابة التحصين، exposure = أي تحول مصلي بعد نافذة المناعة الأمية يعني تعرضاً حقلياً، mixed = حسب برنامج القطيع.","القيمة null تعني أن الحد غير قابل للتطبيق لهذا النوع من الطيور أو لهذا المرض."]},"ND":{"ar":"نيوكاسل","mode":{"broiler":"vaccine","layer":"vaccine","breeder":"vaccine"},"HI":{"scale":"log2","antigen":"LaSota","protect":{"broiler":4,"layer":6,"breeder":6},"target":{"broiler":[5,8],"layer":[8,11],"breeder":[8,11]},"challenge":{"broiler":10,"layer":12,"breeder":12},"indivHigh":12,"mda":{"doa":[6,9],"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":14,"layer":21,"breeder":21},"interfere":5},"cv":{"good":15,"ok":25},"protectPctOk":85,"rise":2,"drop":2},"ELISA":{"scale":"titre","posCut":993,"protect":{"broiler":1000,"layer":3000,"breeder":3000},"target":{"broiler":[2000,6000],"layer":[8000,15000],"breeder":[8000,16000]},"challenge":{"broiler":12000,"layer":20000,"breeder":20000},"cv":{"good":35,"ok":50},"mda":{"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":14,"layer":21,"breeder":21}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود حمض نووي لفيروس نيوكاسل؛ قد يكون فيروساً لقاحياً إذا تم التحصين الحي خلال 2-3 أسابيع. شدد الأمن الحيوي فوراً واطلب التنميط قبل الحكم.","neg":"لم يُكتشف الفيروس في العينة؛ لا ينفي الإصابة إذا كانت العينات قليلة أو متأخرة، فكرر مع أعراض واضحة.","typing":"اطلب تسلسل موقع انشطار بروتين F أو PCR نوعي للتفرقة بين الطراز السابع VII.1.1 الضاري المنتشر في مصر والسلالات اللقاحية (LaSota/Clone30 طراز II)."},"experts":{"vet":["متوسط HI أقل من 4 log2 بعد انتهاء المناعة الأمية يعني قطيعاً معرضاً للخطر، ويلزم إعادة التحصين.","ارتفاع مفاجئ للمتوسط بأكثر من 2 log2 دون تحصين، مع أعراض تنفسية أو عصبية أو نزيف معوي، يرجح عدوى حقلية.","في البياض، أي نزول في الإنتاج مع هبوط الأجسام المناعية تحت 6 log2 يستوجب تحصيناً فورياً."],"sero":["استخدم 4 وحدات تلازن (4HAU) وتأكد من معايرة الأنتيجين في كل تشغيلة، فخطأ الأنتيجين يغير النتيجة بمقدار 1-2 log2.","CV أعلى من 25% على log2 يشير لضعف تجانس التحصين أو خلط أعمار أو أخطاء معمل.","القيم قبل عمر 14 يوماً في التسمين تعكس المناعة الأمية وليس استجابة اللقاح."],"farm":["راجع طريقة التحصين: جودة الماء ونسبة الكلور ووقت الشرب وسلسلة التبريد عند ضعف النتائج.","عند الاشتباه في العدوى: أوقف حركة العمال والمعدات بين العنابر وارفع مستوى التطهير.","كرر السحب بعد 10-14 يوماً لمتابعة اتجاه الأجسام المناعية."],"viro":["المناعة الأمية تنخفض للنصف كل 4.5 يوم تقريباً في التسمين؛ المستوى فوق 5 log2 يعطل اللقاح الحي الرشاش.","HI بأنتيجين LaSota لا يميز بين الأجسام الناتجة عن اللقاح والعدوى بالطراز VII.","السلالات اللقاحية الجينية المماثلة للطراز VII تعطي حماية أفضل ضد تفريغ الفيروس."]},"vaccineNote":"التسمين: لقاح حي (Hitchner/LaSota أو VII) في المفقس أو 5-7 أيام مع لقاح ميت زيتي ND+AI، ثم تنشيط حي 14-18 يوماً."},"H9":{"ar":"إنفلونزا الطيور H9N2","mode":{"broiler":"vaccine","layer":"vaccine","breeder":"vaccine"},"HI":{"scale":"log2","antigen":"H9N2 (G1-like)","protect":{"broiler":5,"layer":6,"breeder":6},"target":{"broiler":[6,8],"layer":[8,11],"breeder":[8,11]},"challenge":{"broiler":10,"layer":12,"breeder":12},"indivHigh":12,"mda":{"doa":[8,10],"halfLife":{"broiler":5,"layer":6,"breeder":6},"windowDays":{"broiler":16,"layer":24,"breeder":24},"interfere":7},"cv":{"good":15,"ok":25},"protectPctOk":85,"rise":2,"drop":2},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"إصابة نشطة بـ H9N2 (لا يوجد لقاح حي)؛ توقع مضاعفات تنفسية ثانوية. ابدأ علاج البكتيريا الثانوية وحسّن التهوية وأبلغ الطبيب المشرف.","neg":"لم يُكتشف الفيروس؛ الفيروس يفرز لفترة قصيرة، فاسحب مسحات قصبة وفتحة زرق من طيور في بداية الأعراض.","typing":"اطلب تسلسل جين HA لمعرفة مدى التطابق مع سلالة اللقاح المستخدم، وافحص وجود عدوى مشتركة مع ND وIB وMG."},"experts":{"vet":["H9N2 منخفض الضراوة لكنه يسبب نفوقاً عالياً مع IB أو MG أو E. coli، فعالج المضاعفات.","ارتفاع المتوسط فوق 10 log2 بعد 21 يوماً في التسمين مع أعراض تنفسية يرجح عدوى حقلية.","في البياض، هبوط الإنتاج مع ارتفاع الأجسام المناعية بعد استقرارها علامة تعرض."],"sero":["استخدم أنتيجين H9 مطابقاً لسلالة اللقاح أو للسلالة الحقلية؛ عدم التطابق يخفض القيم بمقدار 1-3 log2.","لا تحكم على التعرض قبل انتهاء المناعة الأمية العالية (8-10 log2 عند الفقس).","عالج السيرم بالحرارة أو بإنزيم RDE عند ظهور تلازن غير نوعي."],"farm":["اللقاح الميت يحتاج 2-3 أسابيع لتكوين المناعة؛ لا تنتظر حماية قبل ذلك.","حافظ على تهوية جيدة وقلل الأمونيا والغبار لتقليل المضاعفات.","امنع دخول الطيور البرية والحمام وتحكم في القوارض."],"viro":["المناعة الأمية عالية ونصف عمرها حوالي 5 أيام في التسمين، وتعطل اللقاح الميت المبكر فوق 7 log2.","لا يوجد لقاح حي لـ H9 في مصر، لذا أي PCR موجب يعني فيروساً حقلياً.","الفيروس يتطور وراثياً باستمرار، فتابع تطابق سلالة اللقاح مع السلالات المنتشرة."]},"vaccineNote":"لقاح ميت زيتي H9 منفرد أو مركب (ND+H9 أو ND+H5+H9) للتسمين عند 7-10 أيام، وجرعات متكررة للبياض والأمهات."},"H5":{"ar":"إنفلونزا الطيور H5","mode":{"broiler":"vaccine","layer":"vaccine","breeder":"vaccine"},"HI":{"scale":"log2","antigen":"H5 (سلالة اللقاح أو 2.3.4.4b)","protect":{"broiler":5,"layer":6,"breeder":6},"target":{"broiler":[5,8],"layer":[7,10],"breeder":[7,10]},"challenge":{"broiler":10,"layer":12,"breeder":12},"indivHigh":12,"mda":{"doa":[6,9],"halfLife":{"broiler":5,"layer":6,"breeder":6},"windowDays":{"broiler":16,"layer":24,"breeder":24},"interfere":6},"cv":{"good":15,"ok":25},"protectPctOk":90,"rise":2,"drop":2},"PCR":{"ctStrong":30,"ctWeak":36,"pos":"اشتباه إنفلونزا عالية الضراوة ومرض واجب الإبلاغ؛ أبلغ الخدمات البيطرية فوراً، واعزل العنبر وأوقف الحركة والبيع.","neg":"لم يُكتشف H5؛ مع نفوق عالٍ مفاجئ كرر الفحص على طيور نافقة حديثاً واستبعد ND.","typing":"اطلب تحديد الكليد (2.3.4.4b أو 2.2.1.2) وتسلسل موقع انشطار HA لتأكيد الضراوة، فهي ضرورية للإبلاغ واختيار اللقاح."},"experts":{"vet":["نفوق مفاجئ عالٍ مع تورم الرأس وزرقة العرف ونزيف الأرجل يستوجب PCR فورياً.","الحماية تحتاج 90% على الأقل من الطيور فوق 5 log2 بأنتيجين متطابق.","القطيع المحصن قد يصاب بأعراض خفيفة مع تفريغ للفيروس، فلا تعتمد على غياب الأعراض."],"sero":["القيم تعتمد بشدة على الأنتيجين؛ اختبر بأنتيجين سلالة اللقاح وبأنتيجين حقلي حديث عند الإمكان.","ارتفاع مفاجئ في قطيع محصن مستقر يوحي بتعرض حقلي، ويلزم تأكيده بـ PCR.","في القطعان غير المحصنة، أي نتيجة HI موجبة بعد نافذة المناعة الأمية تعني تعرضاً."],"farm":["طبق أعلى مستوى أمن حيوي: ملابس خاصة وتطهير المركبات ومنع الزيارات.","تخلص من النافق بطريقة آمنة ولا تبع الطيور من عنبر مشتبه.","سجل تاريخ ودفعة اللقاح لمراجعتها مع النتائج."],"viro":["الكليد 2.3.4.4b هو الأحدث انتشاراً، وضعف التطابق مع اللقاحات القديمة يقلل الحماية.","المناعة الأمية تتداخل مع اللقاح الميت المبكر فوق 6 log2 تقريباً.","التحصين يقلل الأعراض ولا يمنع العدوى تماماً، فالمراقبة بـ PCR ضرورية."]},"vaccineNote":"لقاح ميت H5 (منفرد أو مع ND/H9) للتسمين عند 7-10 أيام في المناطق عالية الخطورة، وبرنامج متكرر للبياض والأمهات."},"IB":{"ar":"الالتهاب الشعبي المعدي","mode":{"broiler":"vaccine","layer":"vaccine","breeder":"vaccine"},"HI":{"scale":"log2","antigen":"M41","protect":{"broiler":5,"layer":6,"breeder":6},"target":{"broiler":[5,8],"layer":[8,11],"breeder":[8,11]},"challenge":{"broiler":10,"layer":12,"breeder":12},"indivHigh":12,"mda":{"doa":[8,11],"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":18,"layer":24,"breeder":24},"interfere":8},"cv":{"good":15,"ok":25},"protectPctOk":80,"rise":2,"drop":2},"ELISA":{"scale":"titre","posCut":396,"protect":{"broiler":400,"layer":3000,"breeder":3000},"target":{"broiler":[500,3000],"layer":[5000,12000],"breeder":[6000,14000]},"challenge":{"broiler":6000,"layer":18000,"breeder":18000},"cv":{"good":40,"ok":60},"mda":{"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":18,"layer":24,"breeder":24}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود فيروس IB؛ قد يكون لقاحياً حتى 3-4 أسابيع بعد اللقاح الحي. عالج المضاعفات البكتيرية واطلب التنميط.","neg":"لم يُكتشف الفيروس؛ للأعراض الكلوية أو التناسلية اسحب كلى وقصبة ولوزتين أعوريتين.","typing":"اطلب تسلسل S1 للتفرقة بين المتحور المصري GI-23 (Var2) وVar1 والسلالات اللقاحية Mass (GI-1) و4/91 (GI-13)."},"experts":{"vet":["النفوق مع تورم الكلى وتراكم اليوريا يرجح المتحور المصري (Var2) حتى مع نتائج HI جيدة.","ارتفاع متوسط ELISA فوق 6000 في التسمين عند التسويق يوحي بعدوى حقلية.","في البياض، بيض رقيق القشرة ومشوه مع ارتفاع الأجسام المناعية علامة تعرض."],"sero":["HI بأنتيجين M41 نوعي للسلالة، ويقيس ضعيفاً الأجسام ضد Var2 أو 4/91؛ النتيجة المنخفضة لا تعني غياب التعرض.","ELISA يقيس كل السلالات دون تمييز، فاستخدمه لتقييم الاتجاه العام.","المناعة الموضعية في الجهاز التنفسي لا تظهر في السيرم، لذا ارتباط HI بالحماية ضعيف."],"farm":["تجنب الإجهاد الحراري والبرودة وارتفاع الأمونيا فهي تزيد شدة المرض.","وفر ماء نظيفاً وأملاح إلكتروليت عند ظهور أعراض كلوية.","التزم بالتحصين في موعده وبجرعة كاملة، واستخدم تركيبة Mass + متحور."],"viro":["المناعة الأمية لا تمنع كثيراً اللقاح الحي الرشاش لأن الحماية موضعية، لكن تقلل الاستجابة المصلية.","الحماية المتقاطعة بين الأنماط محدودة، والتركيبة Mass + 4/91 أو Mass + Var2 تعطي أوسع حماية.","إعادة التحور بين السلالات اللقاحية والحقلية ممكنة، فالتنميط مهم قبل تغيير البرنامج."]},"vaccineNote":"التسمين: H120 أو Mass في المفقس مع Var2 أو 4/91 عند 10-14 يوماً؛ البياض والأمهات برامج حية متكررة ثم ميت قبل الإنتاج."},"IBD":{"ar":"الجمبورو","mode":{"broiler":"vaccine","layer":"vaccine","breeder":"vaccine"},"ELISA":{"scale":"titre","posCut":396,"protect":{"broiler":1000,"layer":3000,"breeder":5000},"target":{"broiler":[2000,6000],"layer":[6000,14000],"breeder":[8000,16000]},"challenge":{"broiler":10000,"layer":20000,"breeder":20000},"cv":{"good":30,"ok":45},"mda":{"doa":[4000,10000],"halfLife":{"broiler":3,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":21,"layer":28,"breeder":28},"deventer":{"mild":125,"intermediate":125,"intermediatePlus":500,"hot":500,"doaAgeDays":1,"targetPctBirds":75}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود فيروس الجمبورو في غدة فابريشيوس؛ قد يكون لقاحياً خلال 2-3 أسابيع من اللقاح الحي. افحص الغدة واطلب التنميط.","neg":"لم يُكتشف الفيروس؛ اسحب غدد فابريشيوس من طيور مريضة حديثاً بين 3 و6 أسابيع.","typing":"اطلب تسلسل VP2 وVP1 للتفرقة بين vvIBDV (A3) والمتحور (A2) والسلالات اللقاحية الكلاسيكية وسلالات Immune-complex."},"experts":{"vet":["نفوق مفاجئ في عمر 3-6 أسابيع مع تضخم أو نزيف غدة فابريشيوس يرجح vvIBD.","ضمور الغدة مع ضعف الاستجابة للقاحات الأخرى يدل على كبت مناعي بالجمبورو.","ارتفاع ELISA فوق 10000 في التسمين مع CV عالٍ بعد 28 يوماً يوحي بعدوى حقلية."],"sero":["استخدم معادلة Deventer لتحديد موعد اللقاح: اختر العمر الذي يصل فيه 75% من الطيور لمستوى الاختراق.","CV أعلى من 30% عند الفقس يعني عدم تجانس المناعة الأمية، وقد يحتاج جرعتين من اللقاح.","ELISA لا يميز بين الأجسام اللقاحية والحقلية؛ اعتمد على الاتجاه وPCR وفحص الغدة."],"farm":["اسحب 18-20 عينة عند عمر 1-3 أيام لحساب موعد اللقاح بدقة.","نظف وطهر العنابر جيداً فالفيروس مقاوم جداً ويبقى في الفرشة شهوراً.","قدم ماء اللقاح في وقت قصير بعد تعطيش كافٍ لضمان شرب كل الطيور."],"viro":["نصف عمر المناعة الأمية حوالي 3-3.5 أيام في التسمين و5.5 يوم في البياض والأمهات.","اللقاحات الوسطية بلس تخترق مستوى 500 تقريباً، والوسطية 125 (IDEXX).","لقاحات Immune-complex وHVT-IBD تعطى في المفقس ولا تحتاج حساب موعد."]},"vaccineNote":"التسمين: لقاح Immune-complex أو HVT-IBD في المفقس، أو لقاح وسطي بلس في الماء عند 12-18 يوماً حسب Deventer؛ الأمهات لقاح ميت قبل الإنتاج."},"EDS":{"ar":"متلازمة هبوط إنتاج البيض","mode":{"broiler":"exposure","layer":"vaccine","breeder":"vaccine"},"HI":{"scale":"log2","antigen":"EDS-76 (DAdV-1)","protect":{"broiler":null,"layer":6,"breeder":6},"target":{"broiler":[0,3],"layer":[7,10],"breeder":[7,10]},"challenge":{"broiler":4,"layer":12,"breeder":12},"indivHigh":11,"mda":{"doa":[5,8],"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":21,"layer":28,"breeder":28},"interfere":null},"cv":{"good":15,"ok":25},"protectPctOk":85,"rise":2,"drop":2},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود أدينوفيروس EDS؛ يسبب هبوط إنتاج وبيضاً بلا قشرة أو فاتح اللون. راجع التحصين قبل الإنتاج وشدد الأمن الحيوي.","neg":"لم يُكتشف الفيروس؛ استبعد IB وAI وND ومشاكل التغذية كأسباب لهبوط الإنتاج.","typing":"لا يحتاج عادة لتنميط؛ PCR لجين الهيكسون يكفي للتأكيد، ويفضل عينات من قناة البيض."},"experts":{"vet":["بيض بلا قشرة أو رقيق وفاتح اللون مع قطيع بحالة صحية جيدة يرجح EDS.","المرض يظهر عادة عند قمة الإنتاج (25-35 أسبوعاً) في القطعان غير المحصنة.","في التسمين لا أهمية إكلينيكية، والأجسام المناعية تكون أمية فقط."],"sero":["في البياض المحصن، متوسط أقل من 6 log2 قبل الإنتاج يعني تحصيناً ضعيفاً.","في القطيع غير المحصن، أي تحول مصلي يعني عدوى حقلية.","الفيروس قد يبقى كامناً ويظهر التحول المصلي عند بدء الإنتاج فقط."],"farm":["حصن البياض والأمهات بلقاح ميت عند 16-18 أسبوعاً.","امنع اختلاط البط والإوز والطيور المائية بالمزرعة.","طهر أطباق البيض والصواني فهي وسيلة انتقال مهمة."],"viro":["الفيروس أدينوفيروس بط وينتقل رأسياً وأفقياً، والانتقال الرأسي قد يبقى كامناً حتى النضج.","لا يوجد لقاح حي، لذا الأجسام العالية المفاجئة بعد الاستقرار تعني تعرضاً.","HI للمرض نوعي وموثوق، ويفضل إجراؤه بأنتيجين EDS-76 القياسي."]},"vaccineNote":"البياض والأمهات: لقاح ميت EDS منفرد أو مركب (ND+IB+EDS) عند 16-18 أسبوعاً؛ لا تحصين للتسمين."},"MG":{"ar":"الميكوبلازما جاليسبتكم","mode":{"broiler":"exposure","layer":"mixed","breeder":"exposure"},"HI":{"scale":"log2","antigen":"MG S6","protect":{"broiler":null,"layer":null,"breeder":null},"target":{"broiler":[0,3],"layer":[0,3],"breeder":[0,3]},"challenge":{"broiler":4,"layer":4,"breeder":4},"indivHigh":6,"mda":{"doa":[0,4],"halfLife":{"broiler":4,"layer":5,"breeder":5},"windowDays":{"broiler":14,"layer":21,"breeder":21},"interfere":null},"cv":{"good":20,"ok":35},"protectPctOk":null,"rise":2,"drop":2},"ELISA":{"scale":"titre","posCut":1076,"protect":{"broiler":null,"layer":null,"breeder":null},"target":{"broiler":[0,1076],"layer":[0,1076],"breeder":[0,1076]},"challenge":{"broiler":1076,"layer":1076,"breeder":1076},"positivePctFlag":10,"cv":{"good":40,"ok":60},"mda":{"halfLife":{"broiler":4,"layer":5,"breeder":5},"windowDays":{"broiler":14,"layer":21,"breeder":21}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود MG؛ في الأمهات والبياض غير المحصن يعني عدوى تنتقل رأسياً. ابدأ علاجاً مناسباً (تايلوزين أو تيلميكوسين أو دوكسي) وأبلغ مصدر الكتاكيت.","neg":"لم يُكتشف MG؛ مسحات القصبة والشق الحنكي من 10-20 طائراً مطلوبة لنتيجة موثوقة.","typing":"اطلب PCR نوعياً أو تسلسل جين mgc2 للتفرقة بين العدوى الحقلية والسلالات اللقاحية (ts-11 و6/85 وF)."},"experts":{"vet":["في التسمين غير المحصن، أي تحول مصلي بعد 14 يوماً يعني تعرضاً حقلياً، خاصة مع التهاب أكياس هوائية.","MG يزيد شدة IB وH9 وE. coli، فعالج القطيع ككل وليس المرض منفرداً.","القطيع الإيجابي من الأمهات ينقل العدوى للكتاكيت عبر البيض."],"sero":["ELISA وRSA قد يعطيان نتائج موجبة كاذبة بعد لقاحات زيتية أو مع MS، فأكد بـ HI أو PCR.","HI فردي 1:80 أو أكثر (≥6 log2) يعتبر موجباً، و1:40 مشتبهاً.","الأجسام الأمية الموجبة في الكتاكيت تعني أن قطيع الأمهات مصاب أو محصن."],"farm":["اشترِ كتاكيت من أمهات خالية من MG وبشهادة فحص.","طبق نظام الدخول والخروج الكامل (All-in/All-out) وامنع تعدد الأعمار.","راقب الأعراض التنفسية وتورم الجيوب الأنفية وضعف معدل التحويل."],"viro":["لقاحات ts-11 و6/85 تعطي أجساماً ضعيفة في ELISA، ولقاح F يعطي أجساماً أعلى.","العلاج بالمضادات يقلل الأعراض ولا يزيل العدوى من القطيع.","التمييز بين اللقاح والعدوى يحتاج PCR نوعياً للسلالة وليس السيرولوجي."]},"vaccineNote":"غالباً بدون تحصين في التسمين والأمهات مع برامج خلو؛ بعض البياض متعدد الأعمار يحصن بلقاح حي (ts-11 أو 6/85) أو ميت."},"MS":{"ar":"الميكوبلازما سينوفيا","mode":{"broiler":"exposure","layer":"mixed","breeder":"exposure"},"HI":{"scale":"log2","antigen":"MS WVU1853","protect":{"broiler":null,"layer":null,"breeder":null},"target":{"broiler":[0,3],"layer":[0,3],"breeder":[0,3]},"challenge":{"broiler":4,"layer":4,"breeder":4},"indivHigh":6,"mda":{"doa":[0,4],"halfLife":{"broiler":4,"layer":5,"breeder":5},"windowDays":{"broiler":14,"layer":21,"breeder":21},"interfere":null},"cv":{"good":20,"ok":35},"protectPctOk":null,"rise":2,"drop":2},"ELISA":{"scale":"titre","posCut":1076,"protect":{"broiler":null,"layer":null,"breeder":null},"target":{"broiler":[0,1076],"layer":[0,1076],"breeder":[0,1076]},"challenge":{"broiler":1076,"layer":1076,"breeder":1076},"positivePctFlag":10,"cv":{"good":40,"ok":60},"mda":{"halfLife":{"broiler":4,"layer":5,"breeder":5},"windowDays":{"broiler":14,"layer":21,"breeder":21}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود MS؛ يسبب التهاب مفاصل وعرج وتشوه قمة القشرة في البياض. عالج القطيع وراجع مصدر الكتاكيت.","neg":"لم يُكتشف MS؛ للعرج اسحب سائل مفاصل وأوتار بجانب مسحات القصبة.","typing":"اطلب تسلسل جين vlhA للتفرقة بين العدوى الحقلية ولقاح MS-H."},"experts":{"vet":["العرج وتورم المفاصل ومفصل العرقوب مع أجسام موجبة يرجح MS، فاستبعد REO.","في البياض، تشوه قمة البيض (EAA) علامة مميزة للعدوى.","في التسمين غير المحصن، أي تحول مصلي بعد 14 يوماً يعني تعرضاً."],"sero":["توجد تفاعلات متقاطعة بين MG وMS في RSA وELISA، فأكد بـ HI نوعي أو PCR.","HI فردي ≥6 log2 يعتبر موجباً.","قد يتأخر التحول المصلي 3-4 أسابيع بعد العدوى."],"farm":["اعزل الطيور العرجاء وحسن الفرشة لتقليل الإصابات.","اشترِ كتاكيت من أمهات خالية من MS.","طبق النظافة بين الدورات وامنع تعدد الأعمار."],"viro":["لقاح MS-H حي حساس للحرارة ويعطي أجساماً منخفضة.","MS ينتقل رأسياً، والأجسام الأمية في الكتاكيت تشير لحالة الأمهات.","التمييز بين اللقاح والعدوى يحتاج PCR نوعياً."]},"vaccineNote":"لا تحصين عادة في التسمين؛ بعض البياض والأمهات يحصن بلقاح MS-H الحي."},"aMPV":{"ar":"الميتانيومو فيروس (TRT/SHS)","mode":{"broiler":"exposure","layer":"vaccine","breeder":"vaccine"},"ELISA":{"scale":"titre","posCut":396,"protect":{"broiler":null,"layer":1000,"breeder":1000},"target":{"broiler":[0,396],"layer":[2000,8000],"breeder":[2000,10000]},"challenge":{"broiler":1000,"layer":12000,"breeder":14000},"positivePctFlag":20,"cv":{"good":40,"ok":60},"mda":{"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":18,"layer":24,"breeder":24}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود aMPV؛ يسبب تورم الرأس وأعراضاً تنفسية تزيد مع E. coli. عالج المضاعفات وحسن التهوية.","neg":"لم يُكتشف الفيروس؛ يفرز لأيام قليلة فقط، فاسحب مسحات أنف وشق حنكي في بداية الأعراض.","typing":"اطلب تحديد النمط (A أو B)؛ النمط B هو الأكثر انتشاراً في مصر، ويفرق التسلسل بين اللقاح والحقلي."},"experts":{"vet":["تورم الرأس والجيوب تحت العين مع نفوق بـ E. coli في التسمين الكبير يرجح aMPV.","في التسمين غير المحصن، أي تحول مصلي بعد نافذة المناعة الأمية يعني تعرضاً حقلياً.","في البياض، هبوط الإنتاج وسوء جودة القشرة قد يرتبط بالمرض."],"sero":["PCR أفضل للتشخيص المبكر، والسيرولوجي يؤكد التعرض بعد 2-3 أسابيع.","حدود الإيجابية تختلف كثيراً بين الكيتات، فراجع تعليمات الكيت.","الاستجابة المصلية للقاح الحي ضعيفة ومتفاوتة، فلا تحكم على الحماية بالأرقام وحدها."],"farm":["خفض الكثافة والأمونيا والغبار لتقليل المضاعفات.","طبق الأمن الحيوي فالفيروس ينتشر بسرعة بين المزارع المتجاورة.","راجع الحاجة للتحصين إذا تكررت الحالات في المنطقة."],"viro":["المناعة الأمية لا تمنع العدوى، فالحماية موضعية بشكل أساسي.","اللقاح الحي قد يرتد للضراوة، فاحذر التحصين غير المتجانس.","النمط B هو الأكثر انتشاراً في الشرق الأوسط."]},"vaccineNote":"لقاح حي نمط B للأمهات والبياض ثم ميت قبل الإنتاج؛ التسمين أحياناً لقاح حي في المفقس في المناطق عالية الخطورة."},"REO":{"ar":"الريوفيروس","mode":{"broiler":"exposure","layer":"mixed","breeder":"vaccine"},"ELISA":{"scale":"titre","posCut":396,"protect":{"broiler":null,"layer":1000,"breeder":5000},"target":{"broiler":[0,1000],"layer":[2000,8000],"breeder":[8000,16000]},"challenge":{"broiler":1500,"layer":14000,"breeder":20000},"positivePctFlag":20,"cv":{"good":35,"ok":50},"mda":{"halfLife":{"broiler":5,"layer":6,"breeder":6},"windowDays":{"broiler":21,"layer":28,"breeder":28}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود ريوفيروس؛ مع العرج أو ضعف النمو يشير لإصابة. قيّم نسبة العرج واحسب الخسائر.","neg":"لم يُكتشف الفيروس؛ اسحب أوتار العرقوب وسائل المفاصل من طيور عرجاء.","typing":"اطلب تسلسل جين σC لتحديد الجينوتيب (I-VI) ومدى تطابقه مع سلالات لقاح الأمهات (S1133 وغيرها)."},"experts":{"vet":["العرج وتمزق الأوتار وضعف النمو غير المتجانس في التسمين يرجح REO، فاستبعد MS.","الإصابة المبكرة في أول أسبوعين أخطر، والمناعة الأمية تحمي خلالها.","تحول مصلي في التسمين بعد 21 يوماً يعني تعرضاً حقلياً."],"sero":["الأجسام في الكتاكيت أمية حتى 3 أسابيع، فلا تفسرها كتعرض.","ELISA يقيس كل السلالات، ولا يعكس الحماية ضد المتحورات.","CV منخفض في الأمهات بعد اللقاح الميت يعني مناعة أمية متجانسة للكتاكيت."],"farm":["اعزل الطيور العرجاء واستبعد غير القادرة على الوصول للأكل.","نظف وطهر العنابر جيداً، فالفيروس مقاوم في البيئة.","أبلغ مصدر الكتاكيت عند تكرر المشكلة لمراجعة تحصين الأمهات."],"viro":["السلالات المتحورة لا تتطابق جيداً مع لقاحات S1133 التقليدية.","تحصين الأمهات بلقاح ميت يحمي الكتاكيت خلال الأسابيع الأولى الحرجة.","لقاحات ذاتية من السلالات المحلية أفضل عند فشل اللقاحات التجارية."]},"vaccineNote":"الأمهات: لقاحات حية مبكرة ثم ميت قبل الإنتاج لنقل المناعة الأمية؛ لا تحصين عادة في التسمين."},"CAV":{"ar":"أنيميا الدجاج المعدية","mode":{"broiler":"exposure","layer":"exposure","breeder":"mixed"},"ELISA":{"scale":"titre","posCut":1000,"protect":{"broiler":null,"layer":null,"breeder":1000},"target":{"broiler":[0,1000],"layer":[1000,8000],"breeder":[2000,10000]},"challenge":{"broiler":1000,"layer":null,"breeder":null},"positivePctFlag":20,"cv":{"good":40,"ok":60},"mda":{"halfLife":{"broiler":6,"layer":7,"breeder":7},"windowDays":{"broiler":21,"layer":28,"breeder":28}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود CAV؛ مع أنيميا وضمور الغدة التيموسية ونزيف تحت الجلد يعني إصابة إكلينيكية وكبتاً مناعياً.","neg":"لم يُكتشف الفيروس؛ اسحب نخاع عظم وغدة تيموسية من طيور شاحبة.","typing":"اطلب تسلسل جين VP1 للتفرقة بين سلالات اللقاح (Cux-1/26P4) والسلالات الحقلية."},"experts":{"vet":["الإصابة الإكلينيكية في الكتاكيت تحت 3 أسابيع من أمهات بلا أجسام مناعية.","في التسمين بعد 21 يوماً، التحول المصلي شائع ويعني تعرضاً تحت إكلينيكي مع كبت مناعي.","قطيع أمهات سالب قبل الإنتاج معرض لنقل الفيروس رأسياً، فيجب تحصينه."],"sero":["كيت IDEXX لهذا المرض تنافسي (Blocking): S/N ≤0.6 موجب، ولا يصح تفسيره كأرقام titre عادية.","حدود الإيجابية تختلف كثيراً بين الكيتات، فتأكد من الكيت المستخدم.","الأمهات يجب أن تكون موجبة 100% تقريباً قبل الإنتاج."],"farm":["افحص الأمهات عند 16-18 أسبوعاً وحصن القطعان السالبة قبل الإنتاج بـ 6 أسابيع على الأقل.","الفيروس مقاوم جداً للمطهرات، فاستخدم مطهرات قوية (كلور أو فورمالين).","راقب الأمراض الثانوية كالتهاب الجلد الغنغريني وضعف الاستجابة للقاحات."],"viro":["المناعة الأمية طويلة نسبياً وتحمي الكتاكيت حتى 3 أسابيع تقريباً.","الفيروس ينتقل رأسياً في القطعان غير المحصنة عند التعرض الأول أثناء الإنتاج.","اللقاح الحي للأمهات لا يستخدم خلال الإنتاج لتجنب الانتقال الرأسي."]},"vaccineNote":"الأمهات: لقاح حي في الماء عند 10-16 أسبوعاً أو الاعتماد على التعرض الطبيعي المُتحقق منه مصلياً؛ لا تحصين للتسمين."},"AE":{"ar":"التهاب الدماغ والنخاع الوبائي","mode":{"broiler":"exposure","layer":"vaccine","breeder":"vaccine"},"ELISA":{"scale":"titre","posCut":396,"protect":{"broiler":null,"layer":1000,"breeder":1000},"target":{"broiler":[0,396],"layer":[2000,8000],"breeder":[3000,10000]},"challenge":{"broiler":1000,"layer":14000,"breeder":14000},"positivePctFlag":20,"cv":{"good":40,"ok":60},"mda":{"halfLife":{"broiler":5,"layer":6,"breeder":6},"windowDays":{"broiler":21,"layer":28,"breeder":28}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود فيروس AE؛ في الكتاكيت يعني ارتعاشاً ورنحاً وغالباً انتقالاً رأسياً من أمهات غير محصنة. أبلغ مصدر الكتاكيت.","neg":"لم يُكتشف الفيروس؛ اسحب مخاً من كتاكيت مصابة حديثاً.","typing":"لا يحتاج عادة لتنميط؛ PCR يكفي، ويمكن التفرقة بين سلالة اللقاح (Calnek 1143) والحقلية بالتسلسل."},"experts":{"vet":["ارتعاش الرأس والرقبة ورنح في كتاكيت 1-3 أسابيع يرجح AE من أمهات غير محصنة.","في البياض، هبوط بسيط مؤقت في الإنتاج مع تحول مصلي علامة تعرض.","في التسمين بعد نافذة المناعة الأمية، أي تحول مصلي يعني تعرضاً."],"sero":["الأمهات يجب أن تكون موجبة بنسبة 100% تقريباً قبل الإنتاج.","حدود الإيجابية تختلف بين الكيتات، فراجع تعليمات الكيت.","قطيع سالب قبل الإنتاج يعني فشل التحصين أو عدم إجرائه."],"farm":["حصن الأمهات والبياض قبل 4 أسابيع على الأقل من بدء الإنتاج.","لا تحصن أثناء الإنتاج لتجنب الانتقال الرأسي وهبوط الإنتاج.","افحص عينة من القطيع بعد التحصين للتأكد من التحول المصلي."],"viro":["المناعة الأمية تحمي الكتاكيت في الأسابيع الأولى الحرجة.","لقاح حي في الماء عند 10-14 أسبوعاً وينتشر بين الطيور.","المرض ينتقل رأسياً من الأمهات المصابة لأول مرة خلال الإنتاج."]},"vaccineNote":"البياض والأمهات: لقاح حي AE (غالباً مع جدري) عند 10-14 أسبوعاً؛ لا تحصين للتسمين."},"ILT":{"ar":"الالتهاب الحنجري الرغامي المعدي","mode":{"broiler":"exposure","layer":"mixed","breeder":"mixed"},"ELISA":{"scale":"titre","posCut":1000,"protect":{"broiler":null,"layer":null,"breeder":null},"target":{"broiler":[0,1000],"layer":[1000,5000],"breeder":[1000,5000]},"challenge":{"broiler":1000,"layer":8000,"breeder":8000},"positivePctFlag":20,"cv":{"good":40,"ok":70},"mda":{"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":14,"layer":21,"breeder":21}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود فيروس ILT؛ مع سعال دموي وصعوبة تنفس. شدد الأمن الحيوي وفكر في تحصين طارئ للعنابر غير المصابة بتوجيه الطبيب.","neg":"لم يُكتشف الفيروس؛ اسحب حنجرة وقصبة من طيور في بداية الأعراض.","typing":"اطلب PCR-RFLP أو تسلسل للتفرقة بين لقاح CEO ولقاح TCO والسلالات الحقلية، لأن لقاح CEO قد يرتد للضراوة."},"experts":{"vet":["سعال بدم ومخاط دموي في القصبة ونفوق بالاختناق يرجح ILT، فاستبعد الجدري الرطب.","في التسمين غير المحصن، أي تحول مصلي يعني تعرضاً.","المناعة ضد المرض خلوية أساساً، فالأجسام في السيرم لا تعكس الحماية."],"sero":["الاستجابة المصلية للقاحات ضعيفة ومتفاوتة، فلا تحكم على جودة التحصين بـ ELISA وحده.","PCR والفحص النسيجي أهم من السيرولوجي في التشخيص.","CV عالٍ متوقع بعد التحصين بالتقطير في العين."],"farm":["امنع حركة الطيور والمعدات بين المزارع، فالطيور المتعافية حاملة للفيروس مدى الحياة.","لا تستخدم لقاح CEO في مناطق غير موبوءة أو في التسمين دون توجيه بيطري.","تخلص من الفرشة والنافق بطريقة آمنة بعد الإصابة."],"viro":["الفيروس هربس يبقى كامناً في العقد العصبية ويعاود الإفراز مع الإجهاد.","لقاح CEO ينتشر بين الطيور وقد يرتد للضراوة، ولقاح TCO أكثر أماناً.","لقاحات الفيكتور (HVT-ILT وFP-ILT) لا تنتج إفرازاً ولا تتعارض مع PCR التشخيصي."]},"vaccineNote":"البياض والأمهات في المناطق الموبوءة: لقاح حي (TCO/CEO) بالتقطير في العين أو لقاح فيكتور؛ التسمين غالباً بدون تحصين."},"_generic":{"ar":"مرض عام","mode":{"broiler":"vaccine","layer":"vaccine","breeder":"vaccine"},"HI":{"scale":"log2","antigen":"حسب المرض","protect":{"broiler":4,"layer":5,"breeder":6},"target":{"broiler":[5,8],"layer":[7,10],"breeder":[7,10]},"challenge":{"broiler":10,"layer":12,"breeder":12},"indivHigh":12,"mda":{"doa":[6,10],"halfLife":{"broiler":4.5,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":14,"layer":21,"breeder":21},"interfere":6},"cv":{"good":15,"ok":25},"protectPctOk":80,"rise":2,"drop":2},"ELISA":{"scale":"titre","posCut":396,"protect":{"broiler":400,"layer":1000,"breeder":1000},"target":{"broiler":[1000,5000],"layer":[4000,12000],"breeder":[5000,15000]},"challenge":{"broiler":10000,"layer":20000,"breeder":20000},"cv":{"good":35,"ok":50},"mda":{"halfLife":{"broiler":4,"layer":5.5,"breeder":5.5},"windowDays":{"broiler":14,"layer":21,"breeder":21}}},"PCR":{"ctStrong":30,"ctWeak":35,"pos":"وجود المسبب في العينة؛ تحقق من تاريخ آخر لقاح حي، وشدد الأمن الحيوي، واستشر الطبيب المشرف.","neg":"لم يُكتشف المسبب؛ تأكد من نوع العينة وتوقيت السحب وعدد الطيور.","typing":"اطلب التنميط الجيني عند الشك للتفرقة بين السلالة اللقاحية والحقلية."},"experts":{"vet":["اربط النتائج دائماً بالأعراض والصفة التشريحية والنفوق ومعدل التحويل.","الارتفاع المفاجئ دون تحصين حديث يوحي بتعرض حقلي ويحتاج تأكيداً.","المتوسط المنخفض بعد التحصين يعني فشلاً في التحصين أو كبتاً مناعياً."],"sero":["القيم قبل انتهاء نافذة المناعة الأمية لا تعكس استجابة اللقاح.","CV عالٍ يعني عدم تجانس، وقد يكون سببه خطأ في السحب أو المعمل.","قارن دائماً بنتائج نفس المعمل ونفس الكيت ونفس الأنتيجين."],"farm":["اسحب 10-20 عينة عشوائية من أماكن مختلفة بالعنبر.","سجل تاريخ اللقاح ونوعه وطريقة إعطائه مع كل سحب.","كرر السحب بعد 10-14 يوماً لمتابعة الاتجاه."],"viro":["المناعة الأمية تنخفض للنصف كل 4-5.5 يوم حسب المرض ونوع الطائر.","المناعة الأمية العالية قد تعطل اللقاحات الحية المبكرة.","السيرولوجي لا يميز عادة بين اللقاح والعدوى، وPCR مع التنميط هو الحكم."]},"vaccineNote":"راجع برنامج التحصين الخاص بالقطيع وتوقيت آخر لقاح قبل التفسير."}};
+function saT(ar,en){return Lang.current()==="ar"?ar:en;}
+function kbKeyOf(disease,name){
+  const d=(disease||"").toUpperCase(),n=(name||"").toUpperCase();
+  if(/H9/.test(n)||d==="H9")return "H9";
+  if(/H5/.test(n)||d==="H5")return "H5";
+  if(/EDS/.test(n))return "EDS";
+  const map={ND:"ND",IB:"IB",IBD:"IBD",MG:"MG",MS:"MS",ART:"aMPV",AMPV:"aMPV",TRT:"aMPV",REOVIRUS:"REO",REO:"REO",CAV:"CAV",AE:"AE",ILT:"ILT",EDS:"EDS",AI:"H5"};
+  if(d==="AI"&&!/H5/.test(n))return SERO_KB.H5?"H5":"_generic";
+  return map[d]&&SERO_KB[map[d]]?map[d]:"_generic";
+}
+function birdKey(b){b=(b||"").toLowerCase();if(/breeder/.test(b))return "breeder";if(/layer/.test(b))return "layer";return "broiler";}
+function kbPick(obj,b){if(obj==null)return null;if(typeof obj!=="object"||Array.isArray(obj))return obj;return obj[b]!=null?obj[b]:(obj.broiler!=null?obj.broiler:null);}
+/* one flat record per (submission, test) with titres */
+function saRecords(){
+  const out=[];
+  DB().forEach(s=>{
+    const cat=labTests(s.lab);
+    Object.keys(s.results||{}).forEach(tid=>{
+      const t=cat.find(x=>x.id===tid)||{n:tid,m:"PCR",d:"Other"};const r=s.results[tid]||{};
+      const type=flockTypeOf(t);
+      const tit=(r.titres||[]).map(Number).filter(v=>!isNaN(v));
+      out.push({sid:s.id,tid,company:s.company||"",farm:s.farm||"",cycle:s.cycle||"",house:(s.house||"").trim(),
+        date:s.created||"",age:(s.ageDays===""||s.ageDays==null)?null:+s.ageDays,bird:s.birdType||"",lab:s.lab,code:s.code,
+        type,disease:t.d||"Other",name:t.n||tid,assay:r.assay||(type==="Serology"?(/ELISA/i.test(t.n||"")?"ELISA":"HI"):""),
+        titres:tit,stats:r.stats||(tit.length?statsOf(tit):null),detected:r.detected||"",ct:r.ct||"",typing:r.typing||r.serotyping||"",
+        value:r.value||"",vacc:(s.vaccProgram||"").trim()});
+    });
+  });
+  return out;
+}
+const SA={farm:"",cycle:"__all",test:"",house:"",bird:""};
+function saFill(id,opts,cur){const s=el(id);if(!s)return;s.innerHTML=opts.map(o=>`<option value="${esc(o[0])}">${esc(o[1])}</option>`).join("");
+  if([...s.options].some(o=>o.value===cur))s.value=cur;else if(s.options.length)s.value=s.options[0].value;return s.value;}
+function initSA(){
+  const recs=saRecords();if(!el("sa_farm"))return;
+  const farms=fkUniq(recs.map(r=>r.farm));
+  SA.farm=saFill("sa_farm",farms.map(f=>[f,f+" ("+recs.filter(r=>r.farm===f).length+")"]),SA.farm);
+  const fr=recs.filter(r=>r.farm===SA.farm);
+  const cyc=fkUniq(fr.map(r=>r.cycle));const hasNone=fr.some(r=>!r.cycle);
+  SA.cycle=saFill("sa_cycle",[["__all",saT("كل الدورات","All cycles")]].concat(cyc.map(c=>[c,c])).concat(hasNone?[["__none",saT("(بدون دورة)","(no cycle)")]]:[]),SA.cycle);
+  const cr=fr.filter(r=>SA.cycle==="__all"||(SA.cycle==="__none"?!r.cycle:r.cycle===SA.cycle));
+  const tests=fkUniq(cr.map(r=>r.name));
+  SA.test=saFill("sa_test",tests.map(t=>[t,t+" ("+cr.filter(r=>r.name===t).length+")"]),SA.test);
+  const hs=fkUniq(cr.filter(r=>r.name===SA.test).map(r=>r.house));
+  SA.house=saFill("sa_house",[["",saT("كل العنابر","All houses")]].concat(hs.map(h=>[h,saT("عنبر ","House ")+h])),SA.house);
+  const birds=cr.filter(r=>r.name===SA.test).map(r=>birdKey(r.bird));
+  const guess=birds.length?Object.entries(birds.reduce((a,b)=>(a[b]=(a[b]||0)+1,a),{})).sort((a,b)=>b[1]-a[1])[0][0]:"broiler";
+  SA.bird=saFill("sa_bird",[["broiler",saT("تسمين","Broiler")],["layer",saT("بياض","Layer")],["breeder",saT("أمهات","Breeder")]],SA.bird||guess);
+}
+function saScope(){
+  return saRecords().filter(r=>r.farm===SA.farm&&r.name===SA.test&&(SA.cycle==="__all"||(SA.cycle==="__none"?!r.cycle:r.cycle===SA.cycle))&&(!SA.house||r.house===SA.house));
+}
+/* pooled stats for a list of records (uses individual titres when present) */
+function saPool(rs){
+  const all=[];rs.forEach(r=>{if(r.titres&&r.titres.length)all.push(...r.titres);});
+  if(all.length&&rs.every(r=>r.titres&&r.titres.length))return Object.assign(statsOf(all),{titres:all});
+  const ok=rs.filter(r=>r.stats);if(!ok.length)return null;
+  const n=ok.reduce((a,r)=>a+(r.stats.n||1),0);
+  const w=f=>ok.reduce((a,r)=>a+f(r.stats)*(r.stats.n||1),0)/n;
+  return{n,mean:w(s=>s.mean),gmt:w(s=>s.gmt),cv:w(s=>s.cv),min:Math.min(...ok.map(r=>r.stats.min)),max:Math.max(...ok.map(r=>r.stats.max)),titres:all};
+}
+function saN(x,d){if(x==null||isNaN(x))return "-";x=+x;if(d!=null)return x.toFixed(d);return Number.isInteger(x)?String(x):(Math.abs(x)>=100?String(Math.round(x)):x.toFixed(1));}
+/* status of a value vs KB thresholds */
+function saStatus(v,ctx,age){
+  const {E,b}=ctx;if(v==null||!E)return{k:"na",c:"#94a3b8",l:"-"};
+  const win=kbPick(E.mda&&E.mda.windowDays,b);
+  const pr=kbPick(E.protect,b),tg=kbPick(E.target,b),ch=kbPick(E.challenge,b);
+  if(win!=null&&age!=null&&age<=win&&ctx.mode!=="exposure")return{k:"mda",c:"#0ea5e9",l:saT("مناعة أمية","Maternal")};
+  if(ctx.mode==="exposure"){const cut=E.posCut!=null?E.posCut:(pr!=null?pr:null);
+    if(cut!=null&&v>=cut)return{k:"exp",c:"#b91c1c",l:saT("تعرّض حقلي","Exposure")};return{k:"ok",c:"#16a34a",l:saT("سلبي","Negative")};}
+  if(ch!=null&&v>=ch)return{k:"chal",c:"#7c3aed",l:saT("اشتباه تحدي","Challenge?")};
+  if(pr!=null&&v<pr)return{k:"low",c:"#dc2626",l:saT("غير محمي","Unprotected")};
+  if(tg&&v<tg[0])return{k:"sub",c:"#f59e0b",l:saT("أقل من المستهدف","Below target")};
+  return{k:"ok",c:"#16a34a",l:saT("جيد","Good")};
+}
+function saCv(cv,E){const g=E&&E.cv?E.cv.good:15,o=E&&E.cv?E.cv.ok:25;
+  if(cv==null)return{c:"#94a3b8",l:"-"};if(cv<=g)return{c:"#16a34a",l:saT("ممتاز","Excellent")};if(cv<=o)return{c:"#f59e0b",l:saT("مقبول","Fair")};return{c:"#dc2626",l:saT("ضعيف","Poor")};}
+/* ============== ENGINE: expert findings ============== */
+function saAnalyze(rs,ctx){
+  const {E,b,K,isLog}=ctx;const F={vet:[],sero:[],farm:[],viro:[]};const push=(who,lvl,txt)=>F[who].push({lvl,txt});
+  if(!E){push("sero","info",saT("مفيش قواعد مرجعية لهذا الاختبار — العرض إحصائي فقط.","No reference rules for this test — statistics only."));return F;}
+  const m=s=>isLog?s.mean:s.gmt;
+  const ages=[...new Set(rs.filter(r=>r.age!=null).map(r=>r.age))].sort((a,b)=>a-b);
+  const byAge=ages.map(a=>({age:a,st:saPool(rs.filter(r=>r.age===a)),rs:rs.filter(r=>r.age===a)})).filter(x=>x.st);
+  const pr=kbPick(E.protect,b),tg=kbPick(E.target,b),ch=kbPick(E.challenge,b),win=kbPick(E.mda&&E.mda.windowDays,b),hl=kbPick(E.mda&&E.mda.halfLife,b);
+  const intf=E.mda?E.mda.interfere:null;const unit=isLog?" log2":"";
+  // data quality
+  const small=rs.filter(r=>r.stats&&r.stats.n<10);
+  if(small.length)push("sero","warn",saT(`${small.length} سحبة فيها أقل من ١٠ عينات — الثقة في النتيجة أقل (المستحب ١٠–٢٠ عينة/عنبر).`,`${small.length} round(s) with <10 birds — lower confidence (10–20/house recommended).`));
+  const flat=rs.filter(r=>r.stats&&r.stats.n>=5&&r.stats.cv===0);
+  flat.forEach(r=>push("sero","warn",saT(`عنبر ${r.house||"-"} عمر ${r.age??"-"}: كل القراءات متطابقة (CV=0) — راجع الإدخال أو احتمال الوصول لآخر تخفيف في اللوحة.`,`House ${r.house||"-"} age ${r.age??"-"}: all readings identical (CV=0) — check entry or plate end-point.`)));
+  const noAge=rs.filter(r=>r.age==null).length;if(noAge)push("sero","warn",saT(`${noAge} سحبة من غير عمر — اكتب العمر عشان التحليل الزمني يبقى صح.`,`${noAge} round(s) without age.`));
+  if(!byAge.length)return F;
+  const last=byAge[byAge.length-1],first=byAge[0];
+  // per-age evaluation (latest)
+  const lv=m(last.st);const ls=saStatus(lv,ctx,last.age);const cvR=saCv(last.st.cv,E);
+  if(!(last.st.cv===0&&last.st.n>=5))push("sero",cvR.l===saT("ضعيف","Poor")?"bad":cvR.l===saT("مقبول","Fair")?"warn":"good",
+    saT(`التجانس في آخر سحبة (عمر ${last.age}): CV ${saN(last.st.cv,1)}% — ${cvR.l} (المرجع ≤${E.cv?E.cv.good:"-"}% ممتاز، ≤${E.cv?E.cv.ok:"-"}% مقبول).`,`Uniformity at last round (age ${last.age}): CV ${saN(last.st.cv,1)}% — ${cvR.l}.`));
+  if(pr!=null&&last.st.titres&&last.st.titres.length){
+    const pct=last.st.titres.filter(v=>v>=pr).length/last.st.titres.length*100;const need=E.protectPctOk||80;
+    if(ls.k!=="mda")push("vet",pct>=need?"good":"bad",saT(`${saN(pct,0)}% من الطيور ≥ ${pr}${unit} (حد الحماية) في آخر سحبة — المطلوب ≥${need}%.`,`${saN(pct,0)}% of birds ≥ ${pr}${unit}; need ≥${need}%.`));
+  }
+  if(ctx.mode==="exposure"){
+    const pos=byAge.filter(x=>win==null||x.age>win).filter(x=>{const cut=E.posCut!=null?E.posCut:pr;return cut!=null&&m(x.st)>=cut;});
+    if(pos.length)push("vet","bad",saT(`تحوّل مصلي بعد نافذة المناعة الأمية عند عمر ${pos.map(x=>x.age).join("، ")} — يدل على تعرض حقلي لو القطيع مش متحصّن.`,`Seroconversion after MDA window at age ${pos.map(x=>x.age).join(", ")} — field exposure if unvaccinated.`));
+    else push("vet","good",saT("مفيش دليل على تعرض حقلي في السحبات دي.","No evidence of field exposure."));
+  }else if(ls.k==="mda"){
+    push("vet","info",saT(`المتوسط ${saN(lv)}${unit} عند عمر ${last.age} = مناعة أمية؛ الحكم على حماية القطيع يكون بسحبة بعد يوم ${win} وبعد التحصين بـ ١٠–١٤ يوم.`,`Mean ${saN(lv)}${unit} at age ${last.age} is maternal; judge protection after day ${win}.`));
+    push("viro","info",saT(`السحبة الأخيرة (عمر ${last.age}) داخل نافذة المناعة الأمية (حتى يوم ${win}) — القيم دي مناعة من الأمهات مش استجابة لقاح.`,`Last round (age ${last.age}) is within the maternal window (≤ day ${win}).`));
+  }else if(ls.k==="low")push("vet","bad",saT(`المتوسط ${saN(lv)}${unit} تحت حد الحماية (${pr}${unit}) بعد انتهاء المناعة الأمية — القطيع معرض للخطر.`,`Mean ${saN(lv)}${unit} below protective level ${pr}${unit}.`));
+  else if(ls.k==="sub")push("vet","warn",saT(`المتوسط ${saN(lv)}${unit} أقل من المستهدف (${tg[0]}–${tg[1]}${unit}) — استجابة لقاح ضعيفة.`,`Mean below target ${tg[0]}–${tg[1]}.`));
+  else if(ls.k==="chal")push("vet","bad",saT(`المتوسط ${saN(lv)}${unit} ≥ ${ch}${unit} بعد نافذة المناعة الأمية — اشتباه تحدي حقلي، اربطه بالأعراض واعمل PCR.`,`Mean ≥ challenge level — suspect field challenge; confirm with PCR.`));
+  else if(ls.k==="ok")push("vet","good",saT(`المتوسط ${saN(lv)}${unit} في المدى المستهدف (${tg?tg[0]+"–"+tg[1]:"-"}${unit}).`,`Mean within target.`));
+  // individual high titres
+  if(E.indivHigh!=null){const hi=rs.filter(r=>(win==null||(r.age||0)>win)&&r.titres&&r.titres.some(v=>v>=E.indivHigh));
+    if(hi.length)push("viro","warn",saT(`قراءات فردية ≥ ${E.indivHigh}${unit} في ${hi.map(r=>"عنبر "+(r.house||"-")+"/عمر "+r.age).join("، ")} — طيور عالية بشكل غير طبيعي، ممكن تعرض حقلي.`,`Individual titres ≥ ${E.indivHigh} — possible field exposure.`));}
+  // MDA decay projection
+  if(isLog&&hl&&ctx.mode!=="exposure"){
+    const mdaPts=byAge.filter(x=>win==null||x.age<=win);
+    if(mdaPts.length){
+      const p=mdaPts[mdaPts.length-1];const mv=p.st.mean;const sd=p.st.sd!=null?p.st.sd:(p.st.cv*mv/100);
+      const est0=mv+p.age/hl;
+      if(E.mda&&E.mda.doa)push("viro",est0<E.mda.doa[0]?"warn":"info",saT(`المناعة الأمية المقدّرة يوم الفقس ≈ ${saN(est0,1)} log2 (المعتاد ${E.mda.doa[0]}–${E.mda.doa[1]}) — نص العمر ${hl} يوم.`,`Estimated day-old MDA ≈ ${saN(est0,1)} log2 (typical ${E.mda.doa[0]}–${E.mda.doa[1]}).`));
+      if(intf!=null){const dAvg=p.age+(mv-intf)*hl,dWeak=p.age+((mv+0.67*sd)-intf)*hl;
+        if(mv>intf)push("farm","info",saT(`اللقاح الحي: المناعة الأمية هتنزل تحت ${intf} log2 (حد التداخل) عند المتوسط حوالي يوم ${Math.round(dAvg)}، ولأقوى ٢٥٪ من الطيور حوالي يوم ${Math.round(dWeak)} — ده أنسب توقيت للتحصين الحي/التنشيط.`,`Live vaccine: MDA falls below ${intf} log2 ≈ day ${Math.round(dAvg)} (strongest 25%: day ${Math.round(dWeak)}).`));
+        else push("farm","info",saT(`المناعة الأمية (${saN(mv,1)} log2 عند عمر ${p.age}) أقل من حد التداخل ${intf} — اللقاح الحي ممكن ياخد دلوقتي.`,`MDA already below interference level — live vaccine can take now.`));}
+      if(pr!=null&&mv>pr){const dP=p.age+(mv-pr)*hl;push("farm","warn",saT(`من غير تحصين فعّال، المتوسط هيوصل لحد الحماية (${pr} log2) تقريبًا يوم ${Math.round(dP)} — لازم تكون المناعة النشطة بدأت قبلها.`,`Without active immunity the mean reaches protective level ≈ day ${Math.round(dP)}.`));}
+      if(mdaPts.length>=2){const a=mdaPts[mdaPts.length-2];const dl=a.st.mean-p.st.mean,dd=p.age-a.age;
+        if(dd>0){if(dl<=0.2)push("viro","warn",saT(`من عمر ${a.age} لعمر ${p.age} الأجسام المناعية ما نزلتش (${saN(a.st.mean,1)}→${saN(p.st.mean,1)}) — المتوقع نزول ≈ ${saN(dd/hl,1)} log2؛ يا إما اللقاح بدأ ياخد، يا إما تعرض حقلي، يا إما فرق عينات.`,`No MDA decline between ages ${a.age}→${p.age} (expected −${saN(dd/hl,1)}).`));
+          else{const ohl=dd/dl;push("viro","info",saT(`نص العمر المحسوب من بياناتك ≈ ${saN(ohl,1)} يوم (المرجعي ${hl}).`,`Observed half-life ≈ ${saN(ohl,1)} d (reference ${hl}).`));}}}
+    }
+  }
+  // trend after window
+  const act=byAge.filter(x=>win==null||x.age>win);
+  for(let i=1;i<act.length;i++){const a=act[i-1],c=act[i];const d=isLog?(m(c.st)-m(a.st)):(m(a.st)>0?m(c.st)/m(a.st):0);
+    if(isLog&&E.rise!=null&&d>=E.rise)push("viro",m(c.st)>=(ch||99)?"bad":"warn",saT(`ارتفاع ${saN(d,1)} log2 من عمر ${a.age} لعمر ${c.age} — استجابة لقاح (لو فيه تحصين قبلها بـ ١٠–١٤ يوم) أو عدوى حقلية.`,`Rise of ${saN(d,1)} log2 between ${a.age}→${c.age}.`));
+    if(isLog&&E.drop!=null&&-d>=E.drop)push("farm","warn",saT(`نزول ${saN(-d,1)} log2 من عمر ${a.age} لعمر ${c.age} — المناعة بتضعف، راجع موعد التنشيط.`,`Drop of ${saN(-d,1)} log2 — waning, review booster.`));
+    if(!isLog&&d>=4)push("viro","warn",saT(`الـ GMT اتضاعف ×${saN(d,1)} من عمر ${a.age} لعمر ${c.age} — استجابة لقاح أو تحدي حقلي.`,`GMT ×${saN(d,1)} rise.`));}
+  // house spread
+  const hs=[...new Set(rs.map(r=>r.house).filter(Boolean))];
+  if(hs.length>=2){byAge.forEach(x=>{const hv=hs.map(h=>{const s=saPool(x.rs.filter(r=>r.house===h));return s?{h,v:m(s)}:null}).filter(Boolean);
+      if(hv.length>=2){const mx=hv.reduce((a,b)=>b.v>a.v?b:a),mn=hv.reduce((a,b)=>b.v<a.v?b:a);const sp=isLog?mx.v-mn.v:(mn.v>0?mx.v/mn.v:0);
+        if(sp>=2)push("farm","warn",saT(`عمر ${x.age}: فرق ${isLog?saN(sp,1)+" log2":"×"+saN(sp,1)} بين عنبر ${mx.h} (الأعلى) وعنبر ${mn.h} (الأقل) — راجع تطبيق التحصين في عنبر ${mn.h} (مياه/كلور/مدة الشرب/السلسلة الباردة).`,`Age ${x.age}: spread ${saN(sp,1)} between house ${mx.h} and ${mn.h}.`));}});}
+  else if(rs.filter(r=>!r.house).length>1){const dup=byAge.filter(x=>x.rs.length>1);if(dup.length)push("sero","info",saT("فيه أكتر من سحبة لنفس العمر من غير رقم عنبر — حدّد العنبر من الجدول التفصيلي (اضغط على خانة العنبر) عشان المقارنة بين العنابر تظهر.","Several rounds at the same age without house — assign houses in the detailed table."));}
+  // next sampling
+  push("farm","info",saT(`السحبة الجاية: بعد ٧–١٠ أيام من آخر سحبة (≈ يوم ${last.age+7}–${last.age+10})، ويفضّل قبل وبعد ١٠–١٤ يوم من أي تحصين.`,`Next sampling ≈ day ${last.age+7}–${last.age+10}.`));
+  return F;
+}
+function saVerdict(F){const all=[].concat(F.vet,F.sero,F.farm,F.viro);
+  if(all.some(x=>x.lvl==="bad"))return{c:"#dc2626",bg:"#fee2e2",i:"🚨",l:saT("يحتاج تدخل","Action needed")};
+  if(all.some(x=>x.lvl==="warn"))return{c:"#b45309",bg:"#fef3c7",i:"⚠️",l:saT("يحتاج متابعة","Monitor")};
+  return{c:"#15803d",bg:"#dcfce7",i:"✅",l:saT("مطمئن","Reassuring")};}
+/* ============== CHARTS ============== */
+const SA_COLORS=["#2563eb","#16a34a","#f59e0b","#db2777","#7c3aed","#0891b2","#65a30d","#b45309","#dc2626","#475569"];
+function saLineChart(rs,ctx){
+  const {E,b,isLog}=ctx;const m=s=>isLog?s.mean:s.gmt;
+  const hs=[...new Set(rs.map(r=>r.house||"—"))];const ages=[...new Set(rs.filter(r=>r.age!=null).map(r=>r.age))].sort((a,b)=>a-b);
+  if(!ages.length)return "";
+  const series=hs.map((h,i)=>({h,c:SA_COLORS[i%SA_COLORS.length],pts:ages.map(a=>{const s=saPool(rs.filter(r=>(r.house||"—")===h&&r.age===a));return s?{a,v:m(s)}:null}).filter(Boolean)}));
+  const pooled=ages.map(a=>{const s=saPool(rs.filter(r=>r.age===a));return s?{a,v:m(s)}:null}).filter(Boolean);
+  const pr=E?kbPick(E.protect,b):null,tg=E?kbPick(E.target,b):null,ch=E?kbPick(E.challenge,b):null,hl=E?kbPick(E.mda&&E.mda.halfLife,b):null,win=E?kbPick(E.mda&&E.mda.windowDays,b):null;
+  const vals=[].concat(...series.map(s=>s.pts.map(p=>p.v)),pooled.map(p=>p.v),[pr,ch,tg&&tg[0],tg&&tg[1]].filter(v=>v!=null));
+  let ymin=Math.min(...vals),ymax=Math.max(...vals);if(isLog){ymin=Math.max(0,Math.floor(ymin-1));ymax=Math.ceil(ymax+1);}else{ymin=0;ymax=ymax*1.1;}
+  const amin=Math.max(0,ages[0]-2),amax=Math.max(ages[ages.length-1]+(hl?10:3),amin+7);
+  const W=760,H=300,L=44,R=14,T=24,B=34;
+  const x=a=>L+(a-amin)/(amax-amin)*(W-L-R),y=v=>T+(1-(v-ymin)/(ymax-ymin||1))*(H-T-B);
+  let g="";
+  // bands
+  if(tg)g+=`<rect x="${L}" y="${y(Math.min(tg[1],ymax))}" width="${W-L-R}" height="${Math.max(0,y(Math.max(tg[0],ymin))-y(Math.min(tg[1],ymax)))}" fill="#16a34a" opacity=".08"/>`;
+  if(win!=null&&win>amin)g+=`<rect x="${L}" y="${T}" width="${Math.max(0,x(Math.min(win,amax))-L)}" height="${H-T-B}" fill="#0ea5e9" opacity=".06"/><text x="${L+4}" y="${T-8}" font-size="10" fill="#0284c7">${saT("نافذة المناعة الأمية","Maternal window")}</text>`;
+  // grid
+  const step=isLog?1:Math.pow(10,Math.floor(Math.log10((ymax-ymin)/5||1)));
+  for(let v=Math.ceil(ymin/step)*step;v<=ymax;v+=step*(isLog?1:Math.ceil((ymax-ymin)/step/6))){g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+3}" font-size="10" text-anchor="end" fill="var(--muted)">${saN(v)}</text>`;}
+  for(let a=Math.ceil(amin/7)*7;a<=amax;a+=7)g+=`<line x1="${x(a)}" x2="${x(a)}" y1="${T}" y2="${H-B}" stroke="var(--line)" stroke-dasharray="2 3"/><text x="${x(a)}" y="${H-B+14}" font-size="10" text-anchor="middle" fill="var(--muted)">${a}</text>`;
+  g+=`<text x="${(L+W-R)/2}" y="${H-4}" font-size="10.5" text-anchor="middle" fill="var(--muted)">${saT("العمر (يوم)","Age (days)")}</text>`;
+  const hl_=(v,c,t)=>v!=null&&v>=ymin&&v<=ymax?`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-width="1.5" stroke-dasharray="6 4"/><text x="${W-R-4}" y="${y(v)-4}" font-size="10" text-anchor="end" fill="${c}">${t} ${saN(v)}</text>`:"";
+  g+=hl_(pr,"#dc2626",saT("حد الحماية","Protective"));g+=hl_(ch,"#7c3aed",saT("اشتباه تحدي","Challenge"));
+  // MDA projection
+  if(isLog&&hl&&pooled.length){const mdaP=pooled.filter(p=>win==null||p.a<=win);if(mdaP.length){const p=mdaP[mdaP.length-1];let d="";
+    for(let a=p.a;a<=amax;a+=0.5){const v=p.v-(a-p.a)/hl;if(v<ymin)break;d+=(d?"L":"M")+x(a).toFixed(1)+" "+y(v).toFixed(1);}
+    g+=`<path d="${d}" fill="none" stroke="#0ea5e9" stroke-width="1.6" stroke-dasharray="3 3"/><text x="${x(p.a)+6}" y="${y(p.v)+14}" font-size="9.5" fill="#0284c7">${saT("توقع نزول المناعة الأمية","MDA decay projection")}</text>`;}}
+  // series
+  series.forEach(s=>{if(!s.pts.length)return;g+=`<path d="${s.pts.map((p,i)=>(i?"L":"M")+x(p.a).toFixed(1)+" "+y(p.v).toFixed(1)).join("")}" fill="none" stroke="${s.c}" stroke-width="2.2"/>`;
+    s.pts.forEach(p=>g+=`<circle cx="${x(p.a)}" cy="${y(p.v)}" r="4" fill="${s.c}" stroke="var(--surface)" stroke-width="1.5"><title>${saT("عنبر","House")} ${esc(s.h)} · ${p.a}d · ${saN(p.v)}</title></circle>`);});
+  if(series.length>1&&pooled.length)g+=`<path d="${pooled.map((p,i)=>(i?"L":"M")+x(p.a).toFixed(1)+" "+y(p.v).toFixed(1)).join("")}" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-dasharray="8 4" opacity=".65"/>`;
+  const legend=series.map(s=>`<span class="sa-leg"><i style="background:${s.c}"></i>${s.h==="—"?saT("بدون عنبر","No house"):saT("عنبر ","House ")+esc(s.h)}</span>`).join("")+(series.length>1?`<span class="sa-leg"><i style="background:var(--ink);opacity:.6"></i>${saT("متوسط الدورة","Cycle average")}</span>`:"");
+  return `<div class="sa-legend">${legend}</div><svg viewBox="0 0 ${W} ${H}" class="sa-svg">${g}</svg>`;
+}
+function saHeatmap(rs,ctx){
+  const {isLog}=ctx;const m=s=>isLog?s.mean:s.gmt;
+  const hs=fkUniq(rs.map(r=>r.house||"—")).sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true}));
+  const ages=[...new Set(rs.filter(r=>r.age!=null).map(r=>r.age))].sort((a,b)=>a-b);if(!ages.length)return "";
+  let h=`<table class="sa-heat"><tr><th>${saT("العنبر \\ العمر","House \\ Age")}</th>${ages.map(a=>`<th>${a}${saT("ي","d")}</th>`).join("")}</tr>`;
+  hs.forEach(hh=>{h+=`<tr><th>${hh==="—"?saT("بدون","n/a"):saT("عنبر ","H")+esc(hh)}</th>`;
+    ages.forEach(a=>{const s=saPool(rs.filter(r=>(r.house||"—")===hh&&r.age===a));if(!s){h+=`<td class="sa-e">·</td>`;return;}
+      const st=saStatus(m(s),ctx,a);h+=`<td style="background:${st.c}1f;border-bottom:3px solid ${st.c}" title="${esc(st.l)}"><b>${saN(m(s))}</b><small>CV ${saN(s.cv,0)}%</small></td>`;});
+    h+=`</tr>`;});
+  h+=`</table><div class="sa-keys">${[["#0ea5e9",saT("مناعة أمية","Maternal")],["#16a34a",saT("جيد","Good")],["#f59e0b",saT("أقل من المستهدف","Below target")],["#dc2626",saT("غير محمي","Unprotected")],["#7c3aed",saT("اشتباه تحدي","Challenge?")]].map(k=>`<span><i style="background:${k[0]}"></i>${k[1]}</span>`).join("")}</div>`;
+  return h;
+}
+function saHist(st,ctx){
+  if(!st||!st.titres||!st.titres.length||!ctx.isLog)return "";
+  const {E,b}=ctx;const pr=E?kbPick(E.protect,b):null;
+  const lo=Math.min(0,...st.titres),hi=Math.max(12,...st.titres);const cnt={};st.titres.forEach(v=>{const k=Math.round(v);cnt[k]=(cnt[k]||0)+1;});
+  const mx=Math.max(...Object.values(cnt));let h=`<div class="sa-hist">`;
+  for(let k=lo;k<=hi;k++){const c=cnt[k]||0;const col=pr!=null&&k<pr?"#dc2626":"#16a34a";
+    h+=`<div class="sa-hb"><span class="sa-hn">${c||""}</span><div style="height:${c?Math.max(6,c/mx*90):2}px;background:${c?col:"var(--line)"}"></div><span>${k}</span></div>`;}
+  return h+`</div>`;
+}
+/* ============== RENDER ============== */
+function renderSA(){
+  const host=el("sa_out");if(!host)return;initSA();
+  const rs=saScope().sort((a,b)=>String(a.house).localeCompare(String(b.house),undefined,{numeric:true})||(a.age??-1)-(b.age??-1)||(a.date<b.date?-1:1));
+  if(!rs.length){host.innerHTML=`<div class="empty">${saT("اختار المزرعة والاختبار — مفيش نتايج مطابقة.","Choose farm and test — no matching results.")}</div>`;return;}
+  const r0=rs[0];const K=kbKeyOf(r0.disease,r0.name);const KB=SERO_KB[K]||SERO_KB._generic;const b=SA.bird||"broiler";
+  const type=r0.type;
+  if(type!=="Serology"){host.innerHTML=renderSAPcr(rs,KB,K);saWire();return;}
+  const assay=/ELISA/i.test(r0.assay||r0.name)?"ELISA":"HI";
+  const E=KB[assay]||(SERO_KB._generic||{})[assay]||null;const isLog=assay==="HI";
+  const mode=KB.mode?kbPick(KB.mode,b):"vaccine";
+  const ctx={E,b,K,isLog,mode};const m=s=>isLog?s.mean:s.gmt;const unit=isLog?" log2":"";
+  const F=saAnalyze(rs,ctx);const V=saVerdict(F);
+  const ages=[...new Set(rs.filter(r=>r.age!=null).map(r=>r.age))].sort((a,b)=>a-b);
+  const houses=fkUniq(rs.map(r=>r.house));
+  const lastAge=ages[ages.length-1];const lastSt=lastAge!=null?saPool(rs.filter(r=>r.age===lastAge)):saPool(rs);
+  const pr=E?kbPick(E.protect,b):null,tg=E?kbPick(E.target,b):null;
+  const pct=(st)=>pr!=null&&st&&st.titres&&st.titres.length?st.titres.filter(v=>v>=pr).length/st.titres.length*100:null;
+  const lastPct=pct(lastSt);
+  const dname=(KB.ar||diseaseLabel(r0.disease));
+  let h=`<div class="sa-hero">
+    <div><div class="sa-kick">${esc(SA.farm)} · ${SA.cycle==="__all"?saT("كل الدورات","All cycles"):SA.cycle==="__none"?saT("بدون دورة","No cycle"):esc(SA.cycle)} · ${saT({broiler:"تسمين",layer:"بياض",breeder:"أمهات"}[b],b)}</div>
+      <h2>${esc(SA.test)} <span>${esc(dname)} · ${assay}${E&&E.antigen?" ("+esc(E.antigen)+")":""}</span></h2></div>
+    <div class="sa-verdict" style="color:${V.c};background:${V.bg}">${V.i} ${V.l}</div></div>
+  <div class="sa-kpis">
+    <div class="sa-kpi"><b>${rs.length}</b><span>${saT("سحبة","rounds")}</span></div>
+    <div class="sa-kpi"><b>${houses.length||"-"}</b><span>${saT("عنبر","houses")}</span></div>
+    <div class="sa-kpi"><b>${ages.length?ages[0]+"→"+lastAge:"-"}</b><span>${saT("الأعمار (يوم)","ages (d)")}</span></div>
+    <div class="sa-kpi"><b style="color:${saStatus(lastSt?m(lastSt):null,ctx,lastAge).c}">${lastSt?saN(m(lastSt)):"-"}</b><span>${isLog?saT("متوسط آخر عمر (log2)","last mean (log2)"):"GMT"} ${tg?`· ${saT("المستهدف","target")} ${tg[0]}–${tg[1]}`:""}</span></div>
+    <div class="sa-kpi"><b style="color:${saCv(lastSt&&lastSt.cv,E).c}">${lastSt?saN(lastSt.cv,1)+"%":"-"}</b><span>CV · ${saCv(lastSt&&lastSt.cv,E).l}</span></div>
+    <div class="sa-kpi"><b>${lastPct!=null?saN(lastPct,0)+"%":"-"}</b><span>${saT("طيور ≥ حد الحماية","birds ≥ protective")} ${pr!=null?"("+pr+unit+")":""}</span></div>
+  </div>`;
+  // Expert panel
+  const roles=[["vet","🩺",saT("الطبيب البيطري","Veterinarian")],["sero","🧪",saT("خبير السيرولوجي","Serology lab")],["farm","🐔",saT("مدير المزرعة","Farm manager")],["viro","🦠",saT("الفيرولوجي","Virologist")]];
+  const icon={good:"✅",warn:"⚠️",bad:"🚨",info:"💡"};
+  h+=`<div class="sa-sec"><h3>🧠 ${saT("التحليل الآلي — لجنة الخبراء","Automatic analysis — expert panel")}</h3><div class="sa-experts">${roles.map(([k,i,t])=>`<div class="sa-exp">
+    <div class="sa-exh">${i} ${t}</div>${(F[k].length?F[k]:[{lvl:"info",txt:saT("لا ملاحظات.","No findings.")}]).map(f=>`<div class="sa-f sa-${f.lvl}">${icon[f.lvl]||"•"} ${esc(f.txt)}</div>`).join("")}
+    ${KB.experts&&KB.experts[k]?`<details><summary>${saT("قواعد المرض","Disease rules")}</summary>${KB.experts[k].map(x=>`<div class="sa-rule">• ${esc(x)}</div>`).join("")}</details>`:""}</div>`).join("")}</div>
+    ${KB.vaccineNote?`<div class="hint" style="margin-top:8px">💉 ${esc(KB.vaccineNote)}</div>`:""}</div>`;
+  // charts
+  h+=`<div class="sa-grid2"><div class="sa-sec"><h3>📈 ${saT("منحنى الأجسام المناعية بالعمر","Antibody curve by age")}</h3>${saLineChart(rs,ctx)}</div>
+    <div class="sa-sec"><h3>🗺️ ${saT("خريطة حرارية: العنبر × العمر","Heatmap: house × age")}</h3>${saHeatmap(rs,ctx)}
+    ${isLog&&lastSt&&lastSt.titres&&lastSt.titres.length?`<h3 style="margin-top:14px">📊 ${saT("توزيع القراءات — آخر عمر","Titre distribution — latest age")} (${lastAge}${saT("ي","d")})</h3>${saHist(lastSt,ctx)}`:""}</div></div>`;
+  // Table 1 detailed
+  h+=`<div class="sa-sec"><div class="sa-sech"><h3>📋 ${saT("١) النتايج التفصيلية — كل سحبة","1) Detailed results — every round")}</h3>
+    <button class="btn ghost sm" id="sa_setCycle">${saT("تعيين دورة للكل","Set cycle for all")}</button></div><div class="tablewrap"><table class="sa-tbl">
+    <thead><tr><th>${saT("العنبر","House")}</th><th>${saT("التاريخ","Date")}</th><th>${saT("العمر","Age")}</th><th>n</th><th>${saT("القراءات","Readings")}</th><th>${saT("المتوسط","Mean")}</th><th>GMT</th><th>CV%</th><th>Min</th><th>Max</th><th>${saT("% محمي","% prot.")}</th><th>${saT("الحالة","Status")}</th><th>${saT("المعمل","Lab")}</th></tr></thead><tbody>`;
+  rs.forEach(r=>{const s=r.stats;const st=saStatus(s?m(s):null,ctx,r.age);const p=pct(s&&{titres:r.titres});
+    const chipsH=r.titres.length?r.titres.map(v=>`<i class="sa-t" style="background:${pr!=null&&v<pr?"#dc262622":"#16a34a1c"};color:${pr!=null&&v<pr?"#b91c1c":"#15803d"}">${saN(v)}</i>`).join(""):`<span class="hint">-</span>`;
+    h+=`<tr><td><button class="sa-house" data-sid="${r.sid}" title="${saT("اضغط لتحديد/تعديل العنبر","Click to set house")}">${r.house?esc(r.house):"＋"}</button></td><td>${esc(r.date||"-")}</td><td><b>${r.age??"-"}</b></td><td>${s?s.n:"-"}</td>
+      <td class="sa-chips">${chipsH}</td><td><b>${s?saN(s.mean):"-"}</b></td><td>${s?saN(s.gmt):"-"}</td><td style="color:${saCv(s&&s.cv,E).c}">${s?saN(s.cv,1):"-"}</td><td>${s?saN(s.min):"-"}</td><td>${s?saN(s.max):"-"}</td>
+      <td>${p!=null?saN(p,0)+"%":"-"}</td><td><span class="sa-pill" style="background:${st.c}22;color:${st.c}">${esc(st.l)}</span></td><td><span class="labtag">${esc(getLab(r.lab).abbr)}</span></td></tr>`;});
+  h+=`</tbody></table></div></div>`;
+  // Table 2 per house by age
+  const hs2=fkUniq(rs.map(r=>r.house||"—")).sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true}));
+  h+=`<div class="sa-sec"><h3>🏠 ${saT("٢) كل عنبر — عيناته بالعمر","2) Each house by age")}</h3><div class="sa-houses">`;
+  hs2.forEach((hh,hi)=>{const hr=rs.filter(r=>(r.house||"—")===hh);const ag=[...new Set(hr.map(r=>r.age))].sort((a,b)=>(a??-1)-(b??-1));
+    const vac=(hr.find(r=>r.vacc)||{}).vacc;let prev=null;
+    h+=`<div class="sa-hcard" style="border-top:4px solid ${SA_COLORS[hi%SA_COLORS.length]}"><div class="sa-hh"><b>${hh==="—"?saT("بدون عنبر","No house"):saT("عنبر ","House ")+esc(hh)}</b>${vac?`<span class="hint">💉 ${esc(vac)}</span>`:""}</div>
+      <table class="sa-tbl"><thead><tr><th>${saT("العمر","Age")}</th><th>n</th><th>${saT("المتوسط","Mean")}</th><th>CV%</th><th>Min</th><th>Max</th><th>Δ</th><th></th></tr></thead><tbody>`;
+    ag.forEach(a=>{const s=saPool(hr.filter(r=>r.age===a));if(!s)return;const v=m(s);const st=saStatus(v,ctx,a);
+      const d=prev!=null?(isLog?v-prev:(prev>0?v/prev:null)):null;prev=v;
+      h+=`<tr><td><b>${a??"-"}</b></td><td>${s.n}</td><td><b>${saN(v)}</b></td><td style="color:${saCv(s.cv,E).c}">${saN(s.cv,1)}</td><td>${saN(s.min)}</td><td>${saN(s.max)}</td>
+        <td>${d==null?"":isLog?`<span style="color:${d>=0?"#16a34a":"#dc2626"}">${d>=0?"▲":"▼"} ${saN(Math.abs(d),1)}</span>`:`×${saN(d,1)}`}</td><td><i class="sa-dot" style="background:${st.c}" title="${esc(st.l)}"></i></td></tr>`;});
+    h+=`</tbody></table></div>`;});
+  h+=`</div></div>`;
+  // Table 3 cycle summary
+  h+=`<div class="sa-sec"><h3>🧾 ${saT("٣) الدورة كاملة — كل العنابر مجمّعة","3) Whole cycle — all houses pooled")}</h3><div class="tablewrap"><table class="sa-tbl">
+    <thead><tr><th>${saT("العمر","Age")}</th><th>${saT("التاريخ","Date")}</th><th>${saT("عنابر","Houses")}</th><th>${saT("طيور","Birds")}</th><th>${saT("المتوسط","Mean")}</th><th>GMT</th><th>CV%</th><th>Min</th><th>Max</th><th>${saT("% محمي","% prot.")}</th><th>${saT("فرق العنابر","House spread")}</th><th>${saT("الأعلى / الأقل","Best / worst")}</th><th>${saT("الحالة","Status")}</th></tr></thead><tbody>`;
+  ages.forEach(a=>{const ar_=rs.filter(r=>r.age===a);const s=saPool(ar_);if(!s)return;const st=saStatus(m(s),ctx,a);
+    const hv=fkUniq(ar_.map(r=>r.house)).map(hh=>{const q=saPool(ar_.filter(r=>r.house===hh));return q?{hh,v:m(q)}:null}).filter(Boolean);
+    let spread="-",bw="-";if(hv.length>=2){const mx=hv.reduce((x,y)=>y.v>x.v?y:x),mn=hv.reduce((x,y)=>y.v<x.v?y:x);spread=isLog?saN(mx.v-mn.v,1)+" log2":"×"+saN(mn.v>0?mx.v/mn.v:0,1);bw=`<span style="color:#16a34a">${esc(mx.hh)}</span> / <span style="color:#dc2626">${esc(mn.hh)}</span>`;}
+    const p=pct(s);const dates=fkUniq(ar_.map(r=>r.date)).join("، ");
+    h+=`<tr><td><b>${a}</b></td><td>${esc(dates)}</td><td>${hv.length||ar_.length}</td><td>${s.n}</td><td><b>${saN(s.mean)}</b></td><td>${saN(s.gmt)}</td><td style="color:${saCv(s.cv,E).c}">${saN(s.cv,1)}</td><td>${saN(s.min)}</td><td>${saN(s.max)}</td><td>${p!=null?saN(p,0)+"%":"-"}</td><td>${spread}</td><td>${bw}</td><td><span class="sa-pill" style="background:${st.c}22;color:${st.c}">${esc(st.l)}</span></td></tr>`;});
+  const all=saPool(rs);
+  if(all)h+=`<tr class="sa-total"><td colspan="3">${saT("إجمالي الدورة","Cycle total")}</td><td>${all.n}</td><td>${saN(all.mean)}</td><td>${saN(all.gmt)}</td><td>${saN(all.cv,1)}</td><td>${saN(all.min)}</td><td>${saN(all.max)}</td><td colspan="4"></td></tr>`;
+  h+=`</tbody></table></div>
+    <div class="hint" style="margin-top:6px">${E?saT(`المراجع (${b}): حد الحماية ${pr??"-"}${unit} · المستهدف ${tg?tg[0]+"–"+tg[1]:"-"}${unit} · اشتباه تحدي ≥ ${kbPick(E.challenge,b)??"-"}${unit} · نافذة المناعة الأمية حتى يوم ${kbPick(E.mda&&E.mda.windowDays,b)??"-"} · نص العمر ${kbPick(E.mda&&E.mda.halfLife,b)??"-"} يوم. الحدود قابلة للاختلاف حسب الأنتيجين/الكيت والبرنامج.`,"References are indicative and vary by antigen/kit/program."):""}</div></div>`;
+  host.innerHTML=h;saWire();
+}
+function renderSAPcr(rs,KB,K){
+  const P=KB.PCR||(SERO_KB._generic||{}).PCR||{};const cs=P.ctStrong||30,cw=P.ctWeak||35;
+  const pos=rs.filter(r=>r.detected==="pos"),tested=rs.filter(r=>r.detected);
+  const rate=tested.length?pos.length/tested.length*100:0;
+  const V=pos.length?{c:"#dc2626",bg:"#fee2e2",i:"🚨",l:saT("موجب","Detected")}:{c:"#15803d",bg:"#dcfce7",i:"✅",l:saT("سلبي","Not detected")};
+  const ctTxt=ct=>{const c=parseFloat(ct);if(isNaN(c))return "";return c<cs?saT("حمل فيروسي عالي/عدوى نشطة","high load / active"):c<=cw?saT("حمل متوسط","moderate"):saT("ضعيف — بقايا/لقاح؟","weak — residual/vaccine?");};
+  let h=`<div class="sa-hero"><div><div class="sa-kick">${esc(SA.farm)} · PCR</div><h2>${esc(SA.test)} <span>${esc(KB.ar||"")}</span></h2></div><div class="sa-verdict" style="color:${V.c};background:${V.bg}">${V.i} ${V.l}</div></div>
+    <div class="sa-kpis"><div class="sa-kpi"><b>${rs.length}</b><span>${saT("عينة","samples")}</span></div><div class="sa-kpi"><b style="color:${pos.length?"#dc2626":"#16a34a"}">${pos.length}/${tested.length}</b><span>${saT("موجب","positive")}</span></div><div class="sa-kpi"><b>${saN(rate,0)}%</b><span>${saT("نسبة الإيجابية","positivity")}</span></div></div>
+    <div class="sa-sec"><h3>🧠 ${saT("التحليل الآلي","Automatic analysis")}</h3><div class="sa-experts">
+      <div class="sa-exp"><div class="sa-exh">🦠 ${saT("الفيرولوجي","Virologist")}</div><div class="sa-f sa-${pos.length?"bad":"good"}">${esc(pos.length?(P.pos||""):(P.neg||""))}</div>${P.typing?`<div class="sa-f sa-info">💡 ${esc(P.typing)}</div>`:""}</div>
+      ${["vet","farm","sero"].map(k=>KB.experts&&KB.experts[k]?`<div class="sa-exp"><div class="sa-exh">${{vet:"🩺",farm:"🐔",sero:"🧪"}[k]} ${{vet:saT("الطبيب البيطري","Vet"),farm:saT("مدير المزرعة","Farm manager"),sero:saT("خبير المعمل","Lab expert")}[k]}</div>${KB.experts[k].map(x=>`<div class="sa-rule">• ${esc(x)}</div>`).join("")}</div>`:"").join("")}</div></div>
+    <div class="sa-sec"><h3>📋 ${saT("النتايج التفصيلية","Detailed results")}</h3><div class="tablewrap"><table class="sa-tbl"><thead><tr><th>${saT("العنبر","House")}</th><th>${saT("التاريخ","Date")}</th><th>${saT("العمر","Age")}</th><th>${saT("النتيجة","Result")}</th><th>Ct</th><th>${saT("قراءة Ct","Ct reading")}</th><th>${saT("التنميط","Typing")}</th><th>${saT("المعمل","Lab")}</th></tr></thead><tbody>
+    ${rs.map(r=>`<tr><td><button class="sa-house" data-sid="${r.sid}">${r.house?esc(r.house):"＋"}</button></td><td>${esc(r.date||"-")}</td><td><b>${r.age??"-"}</b></td><td>${r.detected==="pos"?`<span class="sa-pill" style="background:#dc262622;color:#dc2626">${saT("موجب","Detected")}</span>`:r.detected==="neg"?`<span class="sa-pill" style="background:#16a34a22;color:#16a34a">${saT("سلبي","Negative")}</span>`:esc(r.value||"-")}</td><td>${esc(r.ct||"-")}</td><td class="hint">${esc(ctTxt(r.ct))}</td><td>${esc(r.typing||"-")}</td><td><span class="labtag">${esc(getLab(r.lab).abbr)}</span></td></tr>`).join("")}</tbody></table></div></div>`;
+  const hs=fkUniq(rs.map(r=>r.house||"—"));
+  h+=`<div class="sa-sec"><h3>🏠 ${saT("ملخص العنابر","Houses summary")}</h3><div class="tablewrap"><table class="sa-tbl"><thead><tr><th>${saT("العنبر","House")}</th><th>${saT("عينات","Samples")}</th><th>${saT("موجب","Positive")}</th><th>%</th><th>${saT("أقل Ct","Min Ct")}</th><th>${saT("الأعمار الموجبة","Positive ages")}</th></tr></thead><tbody>
+    ${hs.map(hh=>{const q=rs.filter(r=>(r.house||"—")===hh);const p=q.filter(r=>r.detected==="pos");const cts=p.map(r=>parseFloat(r.ct)).filter(v=>!isNaN(v));
+      return `<tr><td><b>${hh==="—"?saT("بدون","n/a"):esc(hh)}</b></td><td>${q.length}</td><td style="color:${p.length?"#dc2626":"#16a34a"}">${p.length}</td><td>${q.length?saN(p.length/q.length*100,0):0}%</td><td>${cts.length?saN(Math.min(...cts),1):"-"}</td><td>${fkUniq(p.map(r=>r.age)).join("، ")||"-"}</td></tr>`}).join("")}</tbody></table></div></div>`;
+  return h;
+}
+function saWire(){
+  $$("#sa_out .sa-house").forEach(b=>b.onclick=()=>{const s=DB().find(x=>x.id===b.dataset.sid);if(!s)return;
+    const v=window.prompt(saT("رقم/اسم العنبر لهذه العينة:","House for this sample:"),s.house||"");if(v==null)return;
+    s.house=v.trim();s.updatedAt=Date.now();Store.save("house","Set house "+s.code);renderSA();});
+  const sc=el("sa_setCycle");if(sc)sc.onclick=()=>{const rs=saScope();const v=window.prompt(saT(`اسم الدورة لـ ${rs.length} سحبة الظاهرة:`,`Cycle name for ${rs.length} rounds:`),SA.cycle.startsWith("__")?"":SA.cycle);if(v==null||!v.trim())return;
+    const ids=new Set(rs.map(r=>r.sid));DB().forEach(s=>{if(ids.has(s.id)){s.cycle=v.trim();s.updatedAt=Date.now();}});
+    const cfg=CONFIG();if(!(cfg.cycles||(cfg.cycles=[])).includes(v.trim()))cfg.cycles.push(v.trim());
+    Store.save("cycle","Set cycle "+v.trim());SA.cycle=v.trim();renderSA();};
+}
+function printSA(){
+  const host=el("sa_out");if(!host||!host.innerHTML.trim()){Toast.show(saT("اعرض التقرير الأول.","Show the report first."),"warn");return;}
+  const ar=Lang.current()==="ar";const w=window.open("","_blank");if(!w){Toast.show(saT("اسمح بالنوافذ المنبثقة.","Allow pop-ups."),"warn");return;}
+  const css=el("sa_css")?el("sa_css").textContent:"";
+  w.document.open();w.document.write(`<!DOCTYPE html><html lang="${ar?"ar":"en"}" dir="${ar?"rtl":"ltr"}"><head><meta charset="UTF-8"><title>${esc(SA.farm+" - "+SA.test)}</title><style>
+    :root{--line:#e5e7eb;--muted:#6b7280;--ink:#1f2733;--ink-2:#4b5563;--surface:#fff;--surface-2:#f8fafc}
+    *{font-family:Tahoma,Arial,sans-serif;box-sizing:border-box}body{margin:0;padding:22px;color:#1f2733;font-size:12px}
+    table{width:100%;border-collapse:collapse}th,td{border:1px solid #e5e7eb;padding:4px 6px;text-align:center}th{background:#f3f4f6}
+    .labtag{font-size:10px}.hint{color:#888;font-size:10.5px}.btn,.sa-sech button{display:none}details{display:block}details>summary{font-weight:700}
+    ${css}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .sa-exp,.sa-hcard,.sa-kpi,.sa-hero,tr{break-inside:avoid;page-break-inside:avoid}.sa-grid2{grid-template-columns:1fr}@page{size:A4;margin:12mm}</style></head><body>${host.innerHTML}
+    <div class="hint" style="margin-top:16px;border-top:1px solid #eee;padding-top:6px">Poultry Lab System ${BUILD.label} · ${today()}</div>
+    <script>document.querySelectorAll("details").forEach(d=>d.open=true);window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`);
+  w.document.close();
+}
+
 function reportFiltered(){const from=el("rFrom").value,to=el("rTo").value;
   return DB().filter(s=>{if(from&&s.created<from)return false;if(to&&s.created>to)return false;return true;});}
 function renderReports(){
@@ -3051,7 +3438,11 @@ function addCustomLab(){
 }
 function renderCustomLabs(){
   const cl=CONFIG().customLabs||{},ents=Object.entries(cl);
-  el("nlList").innerHTML=ents.length?`<div class="chips">${ents.map(([k,v])=>`<span class="chip">${esc(v.abbr)} - ${esc(v.name)} <span class="x" data-rml="${k}" role="button">&times;</span></span>`).join("")}</div>`:'<div class="hint">No custom labs yet.</div>';
+  el("nlList").innerHTML=ents.length?`<div class="chips">${ents.map(([k,v])=>`<span class="chip">${esc(getLab(k).abbr)} - ${esc(v.name)} <span class="x" data-edl="${k}" role="button" title="Edit">&#9998;</span> <span class="x" data-rml="${k}" role="button">&times;</span></span>`).join("")}</div>`:'<div class="hint">No custom labs yet.</div>';
+  $$("[data-edl]").forEach(b=>b.onclick=()=>{const L=CONFIG().customLabs[b.dataset.edl];if(!L)return;const ar=Lang.current()==="ar";
+    const nm=window.prompt(ar?"اسم المعمل:":"Lab name:",L.name||"");if(nm==null)return;
+    const ab=window.prompt(ar?"الاختصار (حروف، مثل EPC):":"Short code (letters, e.g. EPC):",getLab(b.dataset.edl).abbr);if(ab==null)return;
+    L.name=nm.trim()||L.name;L.full=L.name;L.abbr=(ab.trim()||labAutoAbbr(L)).toUpperCase();Store.save("lab","Edited lab "+L.abbr);el("myLab").dataset.init="";renderSettings();Toast.show(ar?"تم التعديل.":"Updated.","ok");});
   $$("[data-rml]").forEach(b=>b.onclick=async()=>{if(!await Dialog.confirm("Remove this custom lab?"))return;delete CONFIG().customLabs[b.dataset.rml];delete CONFIG().extraTests[b.dataset.rml];Store.save("lab","Removed custom lab");el("myLab").dataset.init="";initNewForm();renderSettings();});
 }
 
@@ -3278,6 +3669,8 @@ function bindEvents(){
   // reports
   el("rGroup").onchange=renderReports;el("rFrom").onchange=renderReports;el("rTo").onchange=renderReports;el("rExport").onclick=exportReport;
   el("rAggPdf")&&(el("rAggPdf").onclick=aggregateSerologyPDF);
+  ["sa_farm","sa_cycle","sa_test","sa_house","sa_bird"].forEach(id=>{const e=el(id);if(e)e.onchange=()=>{SA[id.slice(3)]=e.value;if(id==="sa_farm"){SA.cycle="__all";SA.test="";SA.house="";SA.bird="";}if(id==="sa_cycle"||id==="sa_test"){SA.house="";}if(id==="sa_test")SA.bird="";renderSA();};});
+  el("sa_print")&&(el("sa_print").onclick=printSA);
   // settings
   el("ctAdd").onclick=addCustomTest;el("nlAdd").onclick=addCustomLab;
   el("backupBtn").onclick=backupData;el("importBtn").onclick=()=>el("importFile").click();
