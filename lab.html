@@ -630,6 +630,8 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
             <button class="btn ghost" id="importBtn" data-i18n="set.import">Import backup</button>
             <input type="file" id="importFile" accept="application/json,.json" style="display:none">
             <button class="btn ghost" id="csvBtn" data-i18n="set.exportCsv">Export CSV</button>
+            <button class="btn ghost" id="csvRestoreBtn" data-i18n="set.csvRestore">Restore from CSV</button>
+            <input type="file" id="csvRestoreFile" accept=".csv,text/csv" style="display:none">
             <button class="btn danger" id="clearAllBtn" data-i18n="set.eraseAll">Erase all data</button>
           </div></div>
         <div class="card"><h3 data-i18n="sync.title">Cloud sync (Firebase - optional)</h3>
@@ -708,7 +710,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 <script>
 "use strict";
 /* Build metadata - single source of truth for version display + update checks */
-const BUILD={version:"2.14.1",date:"2026-09-27",label:"v2.14.1 (2026-09-27)"};
+const BUILD={version:"2.15.0",date:"2026-10-05",label:"v2.15.0 (2026-10-05)"};
 /* Geography data: Egypt (governorate -> cities) + Saudi Arabia (region -> governorate -> cities)
    Postal codes: Egypt uses per-governorate representative codes; KSA uses region-level short codes.
    Compiled offline. Not exhaustive to every village; covers governorates/regions and major cities. */
@@ -1095,7 +1097,7 @@ const Lang=(()=>{
       "flock.disease":"المرض / البيان","flock.build":"بناء الملف","flock.print":"طباعة",
       "flock.manualTitle":"إضافة نتيجة يدوية (علف / مياه / بكتريولوجي / سيرولوجي سريع)",
       "flock.manualHint":"للنتائج اللي مش مدخّلة كعينات معمل - تحاليل العلف والمياه، عزلات البكتريا، أو ملخص titre سريع. بتنضم لنفس ملف المزرعة.",
-      "sa.title":"تقرير التحليل التفصيلي (مزرعة · دورة · اختبار)","sa.farm":"المزرعة","sa.cycle":"الدورة","sa.test":"الاختبار","sa.house":"العنبر","sa.bird":"نوع الطيور","sa.print":"طباعة / PDF","flock.mCompany":"الشركة","flock.mHouse":"العنبر (اختياري)","flock.mVacc":"تحصين العنبر (لو مختلف)","flock.house":"العنبر","flock.allHouses":"- كل العنابر -","flock.mFarm":"المزرعة","flock.mCycle":"الدورة","flock.mLab":"المعمل","flock.mType":"النوع","flock.mDate":"التاريخ","flock.mAge":"العمر (يوم)",
+      "set.csvRestore":"استيراد / استرجاع من CSV","sa.title":"تقرير التحليل التفصيلي (مزرعة · دورة · اختبار)","sa.farm":"المزرعة","sa.cycle":"الدورة","sa.test":"الاختبار","sa.house":"العنبر","sa.bird":"نوع الطيور","sa.print":"طباعة / PDF","flock.mCompany":"الشركة","flock.mHouse":"العنبر (اختياري)","flock.mVacc":"تحصين العنبر (لو مختلف)","flock.house":"العنبر","flock.allHouses":"- كل العنابر -","flock.mFarm":"المزرعة","flock.mCycle":"الدورة","flock.mLab":"المعمل","flock.mType":"النوع","flock.mDate":"التاريخ","flock.mAge":"العمر (يوم)",
       "flock.mParam":"البيان / المرض / العزلة","flock.mValue":"القيمة / النتيجة","flock.mUnit":"الوحدة / ملاحظة","flock.mAdd":"إضافة سجل",
       "flock.mCancel":"إلغاء التعديل","flock.listTitle":"السجلات اليدوية (تعديل / حذف)",
       "search.everything":"ابحث عن أي شيء...",
@@ -3018,7 +3020,7 @@ function saPool(rs){
   const ok=rs.filter(r=>r.stats);if(!ok.length)return null;
   const n=ok.reduce((a,r)=>a+(r.stats.n||1),0);
   const w=f=>ok.reduce((a,r)=>a+f(r.stats)*(r.stats.n||1),0)/n;
-  return{n,mean:w(s=>s.mean),gmt:w(s=>s.gmt),cv:w(s=>s.cv),min:Math.min(...ok.map(r=>r.stats.min)),max:Math.max(...ok.map(r=>r.stats.max)),titres:all};
+  return{n,mean:w(s=>s.mean),gmt:w(s=>s.gmt),cv:w(s=>s.cv),min:Math.min(...ok.map(r=>r.stats.min)),max:Math.max(...ok.map(r=>r.stats.max)),titres:[],partial:true};
 }
 function saN(x,d){if(x==null||isNaN(x))return "-";x=+x;if(d!=null)return x.toFixed(d);return Number.isInteger(x)?String(x):(Math.abs(x)>=100?String(Math.round(x)):x.toFixed(1));}
 /* status of a value vs KB thresholds */
@@ -3389,6 +3391,79 @@ function exportAll(){
     lines.push([s.code,s.company,s.farm,s.birdType||"",s.ageDays||"",s.region||"",getLab(s.lab).name,labelStatus(s.status),s.created,tn,res].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(","));});
   download("\ufeff"+lines.join("\n"),"poultry-lab-submissions.csv","text/csv");Toast.show("CSV exported.","ok");
 }
+
+/* ============================================================================
+   RESTORE from an exported submissions CSV (Sample Code, ..., Tests, Results)
+   - stats-only serology ("GMT= CV= mean= max= min= n=") and PCR ("Detected Ct=")
+   - deterministic ids (rst_<code>) + skip existing codes => safe to run on every device
+   ============================================================================ */
+function parseCsvRows(t){const rows=[];let row=[],f="",q=false;t=t.replace(/^﻿/,"");
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+    else if(c==='"')q=true;else if(c===","){row.push(f);f="";}else if(c==="\n"||c==="\r"){if(c==="\r"&&t[i+1]==="\n")i++;row.push(f);f="";if(row.some(x=>x!==""))rows.push(row);row=[];}else f+=c;}
+  row.push(f);if(row.some(x=>x!==""))rows.push(row);return rows;}
+function labKeyByName(name){const s=String(name||"").trim().toLowerCase();if(!s)return Object.keys(allLabs())[0];
+  const all=allLabs();for(const k in all){const L=all[k];if([L.name,L.full,L.abbr,getLab(k).abbr].some(v=>(v||"").toLowerCase()===s))return k;}
+  try{const k=labKeyFromText(name);if(k&&all[k]&&labKeyFromText("__none__")!==k)return k;}catch(e){}
+  const cfg=CONFIG();cfg.customLabs=cfg.customLabs||{};const key="lab_"+s.replace(/[^a-z0-9]+/g,"").slice(0,12)||("lab_"+uid());
+  cfg.customLabs[key]={name:String(name).trim(),full:String(name).trim(),abbr:labAutoAbbr({name:String(name)}),fields:[],tests:[]};return key;}
+function restoreFromExportCsv(text){
+  const rows=parseCsvRows(text);if(rows.length<2)return{added:0,skipped:0};
+  const H=rows[0].map(h=>h.trim().toLowerCase());const ix=n=>H.indexOf(n.toLowerCase());
+  if(H.includes("titres"))return importLongCsv(rows,H);
+  const I={code:ix("Sample Code"),company:ix("Company"),farm:ix("Farm"),bird:ix("Bird Type"),age:ix("Age (days)"),region:ix("Region"),lab:ix("Lab"),status:ix("Status"),created:ix("Created"),tests:ix("Tests"),results:ix("Results")};
+  const have={};DB().forEach(x=>{have[x.code]=1;have[x.id]=1;});
+  const stRev={};STATUSES.forEach(k=>{stRev[String(labelStatus(k)).trim()]=k;stRev[k]=k;});
+  const dis=CONFIG().diseases||[];let added=0,skipped=0;
+  rows.slice(1).forEach(r=>{const g=k=>I[k]>=0?(r[I[k]]||"").trim():"";const code=g("code");
+    if(!code||have[code]||have["rst_"+code]||Store.tomb()["rst_"+code]){skipped++;return;}
+    const lab=labKeyByName(g("lab"));const tests=[],results={};
+    g("results").split(/\s;\s|\s\|\s/).forEach(part=>{part=part.trim();if(!part)return;
+      let m=part.match(/^(.+?)\((\w+)(?:\/[^)]*)?\):GMT=([\d.]+)\s+CV=([\d.]+)%\s+mean=([\d.]+)\s+max=([\d.]+)\s+min=([\d.]+)(?:\s+n=(\d+))?/);
+      if(m){const name=m[1].trim(),assay=m[2];const first=name.split(/[\s-]+/)[0].toUpperCase();const d=dis.find(x=>x.toUpperCase()===first)||"Other";
+        const tid=ensureManualTest(lab,name,"Serology",d,"Serology");const mean=+m[5],cv=+m[4];
+        tests.push(tid);results[tid]={assay,n:+(m[8]||0),titres:[],stats:{gmt:+m[3],cv,mean,max:+m[6],min:+m[7],n:+(m[8]||0),sd:cv*mean/100},note:"restored from CSV"};return;}
+      m=part.match(/^(.+?):(Detected|Not Detected)(?:\s+Ct=([^\s]+))?(?:\s+type=(.+))?/);
+      if(m){const name=m[1].trim();const first=name.split(/[\s-]+/)[0].toUpperCase();const d=dis.find(x=>x.toUpperCase()===first)||"Other";
+        const tid=ensureManualTest(lab,name,"PCR",d,"PCR");tests.push(tid);results[tid]={detected:m[2]==="Detected"?"pos":"neg",ct:m[3]&&m[3]!=="?"?m[3]:"",typing:m[4]||"",serotyping:""};}});
+    if(!tests.length){skipped++;return;}
+    DB().unshift({id:"rst_"+code,origin:"manual",company:g("company"),farm:g("farm"),cycle:"",lab,code,sample:"",cmethod:"",cvalue:"",location:"",
+      birdType:g("bird"),ageDays:g("age"),region:g("region"),manager:"",tests,results,status:stRev[g("status")]||"Complete",created:g("created")||today(),reportLink:"",updatedAt:Date.now()});
+    have[code]=1;added++;
+    const c=CONFIG();if(g("company")&&!c.companies.includes(g("company")))c.companies.push(g("company"));if(g("farm")&&!c.farms.includes(g("farm")))c.farms.push(g("farm"));});
+  return{added,skipped};
+}
+/* Long format: one row per house/test with individual titres.
+   Columns: Sample Code, Company, Farm, Cycle, Placement Date, House, Date, Age (days), Bird Type, Lab, Disease, Assay, Test, Titres, Vaccination, Replaces, Notes
+   - same Sample Code again => the sample is UPDATED (safe to re-import a corrected file)
+   - Replaces => codes of old samples this row supersedes (they are removed everywhere via tombstone) */
+function importLongCsv(rows,H){
+  const ix=n=>H.indexOf(n.toLowerCase());
+  const I={code:ix("Sample Code"),company:ix("Company"),farm:ix("Farm"),cycle:ix("Cycle"),place:ix("Placement Date"),house:ix("House"),date:ix("Date"),age:ix("Age (days)"),
+    bird:ix("Bird Type"),lab:ix("Lab"),dis:ix("Disease"),assay:ix("Assay"),test:ix("Test"),tit:ix("Titres"),vacc:ix("Vaccination"),rep:ix("Replaces"),note:ix("Notes")};
+  let added=0,updated=0,removed=0,skipped=0;const cfg=CONFIG();cfg.diseases=cfg.diseases||[];cfg.cycles=cfg.cycles||[];
+  rows.slice(1).forEach(r=>{const g=k=>I[k]>=0?String(r[I[k]]||"").trim():"";
+    const tit=g("tit").split(/[\s,;]+/).map(Number).filter(v=>!isNaN(v)&&g("tit")!=="");
+    const code=g("code");if(!code||!tit.length){skipped++;return;}
+    g("rep").split(/[\s,;]+/).filter(Boolean).forEach(rc=>{Store.tombstone("rst_"+rc);const arr=DB();for(let i=arr.length-1;i>=0;i--){if(arr[i].code===rc&&arr[i].code!==code){Store.tombstone(arr[i].id);arr.splice(i,1);removed++;}}});
+    const lab=labKeyByName(g("lab")||"EPC LAB");const dis=g("dis")||"Other";if(!cfg.diseases.includes(dis))cfg.diseases.push(dis);
+    const assay=g("assay")||"HI";const tname=g("test")||(dis+" "+assay);
+    const tid=ensureManualTest(lab,tname,"Serology",dis,"Serology");
+    let age=g("age");if(age===""&&g("place")&&g("date")){const d=(new Date(g("date")+"T00:00:00")-new Date(g("place")+"T00:00:00"))/864e5;if(!isNaN(d))age=String(Math.round(d));}
+    const data={origin:"manual",company:g("company"),farm:g("farm"),cycle:g("cycle"),house:g("house"),vaccProgram:g("vacc"),lab,code,birdType:g("bird")||"Broiler",ageDays:age,
+      tests:[tid],results:{[tid]:{assay,n:tit.length,titres:tit.map(String),stats:statsOf(tit),note:g("note")}},status:"Complete",created:g("date")||today(),updatedAt:Date.now()};
+    const cur=DB().find(x=>x.code===code||x.id==="imp_"+code);
+    if(cur){Object.assign(cur,data);updated++;}else{DB().unshift(Object.assign({id:"imp_"+code,sample:"",cmethod:"",cvalue:"",location:"",region:"",manager:"",reportLink:""},data));added++;}
+    if(data.company&&!cfg.companies.includes(data.company))cfg.companies.push(data.company);
+    if(data.farm&&!cfg.farms.includes(data.farm))cfg.farms.push(data.farm);
+    if(data.cycle&&!cfg.cycles.includes(data.cycle))cfg.cycles.push(data.cycle);});
+  return{added,updated,removed,skipped,long:true};
+}
+const RESTORE_0927="Sample Code,Company,Farm,Bird Type,Age (days),Region,Lab,Status,Created,Tests,Results\n\"1-el_Gedida-260827-013\",\"Elmasrya\",\"el Gedida\",\"\",\"11\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-27\",\"IB HI\",\"IB HI(HI):GMT=10.0 CV=0.0% mean=10.0 max=10 min=10 n=10\"\n\"1-el_Gedida-260827-012\",\"Elmasrya\",\"el Gedida\",\"\",\"11\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-27\",\"H9 HI\",\"H9 HI(HI):GMT=9.4 CV=5.5% mean=9.4 max=10 min=9 n=10\"\n\"1-el_Gedida-260827-011\",\"Elmasrya\",\"el Gedida\",\"\",\"11\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-27\",\"H9 HI\",\"H9 HI(HI):GMT=9.3 CV=8.9% mean=9.3 max=10 min=8 n=10\"\n\"1-el_Gedida-260825-010\",\"Elmasrya\",\"el Gedida\",\"\",\"8\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-25\",\"H9 HI\",\"H9 HI(HI):GMT=9.5 CV=5.5% mean=9.5 max=10 min=9 n=10\"\n\"1-el_Gedida-260825-009\",\"Elmasrya\",\"el Gedida\",\"\",\"8\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-25\",\"H9 HI\",\"H9 HI(HI):GMT=9.3 CV=10.2% mean=9.3 max=10 min=8 n=10\"\n\"1-el_Gedida-260825-008\",\"Elmasrya\",\"el Gedida\",\"\",\"8\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-25\",\"H9 HI\",\"H9 HI(HI):GMT=8.5 CV=12.5% mean=8.6 max=10 min=7 n=10\"\n\"1-el_Gedida-260727-007\",\"Elmasrya\",\"el Gedida\",\"\",\"11\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-27\",\"ND HI\",\"ND HI(HI):GMT=6.3 CV=18.3% mean=6.4 max=9 min=5 n=10\"\n\"1-el_Gedida-260727-006\",\"Elmasrya\",\"el Gedida\",\"\",\"11\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-27\",\"ND HI\",\"ND HI(HI):GMT=6.7 CV=7.2% mean=6.7 max=7 min=6 n=10\"\n\"1-el_Gedida-260825-005\",\"Elmasrya\",\"el Gedida\",\"\",\"11\",\"\",\"EPC LAB\",\"مكتملة\",\"2026-08-27\",\"ND HI\",\"ND HI(HI):GMT=6.6 CV=14.2% mean=6.7 max=8 min=5 n=10\"\n\"VB-el_Gedida-260927-004\",\"Elmasrya\",\"el Gedida\",\"\",\"8\",\"\",\"Vetbio Global\",\"مكتملة\",\"2026-08-25\",\"ND HI\",\"ND HI(HI):GMT=6.5 CV=17.8% mean=6.6 max=9 min=5 n=10\"\n\"VB-el_Gedida-260927-003\",\"Elmasrya\",\"el Gedida\",\"\",\"8\",\"\",\"Vetbio Global\",\"مكتملة\",\"2026-08-25\",\"ND HI\",\"ND HI(HI):GMT=6.1 CV=18.3% mean=6.2 max=8 min=5 n=10\"\n\"VB-el_Gedida-260927-002\",\"Elmasrya\",\"el Gedida\",\"\",\"8\",\"\",\"Vetbio Global\",\"مكتملة\",\"2026-08-25\",\"ND HI\",\"ND HI(HI):GMT=5.9 CV=15.7% mean=6.0 max=7 min=4 n=10\"";
+function autoRestore0927(){const c=CONFIG();if(c._rst0927)return;
+  try{const r=restoreFromExportCsv(RESTORE_0927);c._rst0927=Date.now();Store.save(r.added?"restore":null,"Restored "+r.added+" samples from CSV (27/9)");
+    if(r.added)setTimeout(()=>Toast.show((Lang.current()==="ar"?"تم استرجاع ":"Restored ")+r.added+(Lang.current()==="ar"?" عينة من ملف الـ CSV":" samples from CSV"),"ok"),1200);}catch(e){console.warn("restore",e);}}
+
 function download(content,name,type){const blob=new Blob([content],{type:type||"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 function backupData(){
   const payload={app:"poultry-lab-system",version:2,exported:new Date().toISOString(),data:DB(),config:CONFIG(),audit:Store.audit(),flock:Store.flock()};
@@ -3686,6 +3761,11 @@ function bindEvents(){
   // reports
   el("rGroup").onchange=renderReports;el("rFrom").onchange=renderReports;el("rTo").onchange=renderReports;el("rExport").onclick=exportReport;
   el("rAggPdf")&&(el("rAggPdf").onclick=aggregateSerologyPDF);
+  el("csvRestoreBtn")&&(el("csvRestoreBtn").onclick=()=>el("csvRestoreFile").click());
+  el("csvRestoreFile")&&(el("csvRestoreFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+    rd.onload=()=>{const r=restoreFromExportCsv(String(rd.result||""));Store.save("restore","Restored "+r.added+" from CSV");renderMy&&renderMy();renderDash&&renderDash();
+      const ar=Lang.current()==="ar";Toast.show(r.long?(ar?`تم الاستيراد: ${r.added} جديدة، ${r.updated} اتحدّثت، ${r.removed} قديمة اتشالت (اتبدلت)${r.skipped?`، ${r.skipped} صف من غير قراءات`:""}.`:`Imported: ${r.added} new, ${r.updated} updated, ${r.removed} replaced.`)
+        :(ar?`تمت إضافة ${r.added} عينة، وتخطّي ${r.skipped} موجودة بالفعل.`:`Added ${r.added}, skipped ${r.skipped} existing.`),"ok");e.target.value="";};rd.readAsText(f);});
   ["sa_farm","sa_cycle","sa_test","sa_house","sa_bird"].forEach(id=>{const e=el(id);if(e)e.onchange=()=>{SA[id.slice(3)]=e.value;if(id==="sa_farm"){SA.cycle="__all";SA.test="";SA.house="";SA.bird="";}if(id==="sa_cycle"||id==="sa_test"){SA.house="";}if(id==="sa_test")SA.bird="";renderSA();};});
   el("sa_print")&&(el("sa_print").onclick=printSA);
   // settings
@@ -3746,7 +3826,7 @@ function setTopSync(state){
 }
 function boot(){
   try{
-    Theme.init();Lang.init();Store.init();migrateFlockRecords();Sync.init();bindEvents();Role.init();initNewForm();renderDash();
+    Theme.init();Lang.init();Store.init();migrateFlockRecords();autoRestore0927();Sync.init();bindEvents();Role.init();initNewForm();renderDash();
     const vl=el("verLabel");if(vl)vl.textContent="Version "+BUILD.version;
     if(el("verChipV"))el("verChipV").textContent="v"+BUILD.version;
     setTopSync(Sync.enabled()?"busy":"local");
