@@ -710,7 +710,7 @@ html[dir="rtl"] .interp-tbl th,html[dir="rtl"] .interp-tbl td{text-align:right}
 <script>
 "use strict";
 /* Build metadata - single source of truth for version display + update checks */
-const BUILD={version:"2.15.0",date:"2026-10-05",label:"v2.15.0 (2026-10-05)"};
+const BUILD={version:"2.15.1",date:"2026-10-06",label:"v2.15.1 (2026-10-06)"};
 /* Geography data: Egypt (governorate -> cities) + Saudi Arabia (region -> governorate -> cities)
    Postal codes: Egypt uses per-governorate representative codes; KSA uses region-level short codes.
    Compiled offline. Not exhaustive to every village; covers governorates/regions and major cities. */
@@ -1296,7 +1296,9 @@ const Sync=(()=>{
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&dirty)flush();if(document.visibilityState==="visible"&&enabled())setTimeout(()=>syncNow(true),400);});
   window.addEventListener("online",()=>{if(enabled())syncNow(true);});
   window.addEventListener("pagehide",()=>{if(dirty)flush();});
-  return{init(){cfg=loadCfg();},enabled,saveCfg,getCfg:()=>cfg,syncNow,schedulePush,status,isDirty:()=>dirty};
+  /* default cloud (same Firebase project as the other apps in the hub) — every device syncs without manual setup */
+  const DEFAULT_URL="https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app";
+  return{init(){cfg=loadCfg();if(!cfg||!cfg.url){cfg={url:DEFAULT_URL,path:"poultryLab",auto:true};try{localStorage.setItem(CFGK,JSON.stringify(cfg));}catch(e){}}},enabled,saveCfg,getCfg:()=>cfg,syncNow,schedulePush,status,isDirty:()=>dirty};
 })();
 const VIEWS=["dash","new","my","flock","reports","deventer","settings"];
 function go(v){
