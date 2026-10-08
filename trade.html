@@ -441,6 +441,50 @@ table.linetbl td.nm{text-align:right;font-weight:600}
   </div>
 </div>
 
+<!-- ===== FULL STOCK COUNT (جرد شامل) ===== -->
+<div class="page" id="p-count">
+  <div class="section">
+    <h2><span class="ic">📋</span> الجرد الشامل</h2>
+    <div class="hint">اكتب الكمية الفعلية اللي عددتها في المخزن لكل صنف. النظام يقارنها بالرصيد الدفتري ويوريك الفرق. اللي تسيبه فاضي مش هيتحسب. بعد المراجعة اضغط "تسجيل فروقات الجرد" فيتسجّل كل فرق كتسوية موثّقة.</div>
+    <label>تاريخ الجرد</label><input type="date" id="count-date">
+    <div class="tw" style="margin-top:10px"><table id="countTbl"><thead><tr><th>الصنف</th><th>الدفتري</th><th>الفعلي</th><th>الفرق</th></tr></thead><tbody></tbody></table></div>
+    <div class="bal" style="margin-top:12px"><span>عدد الأصناف فيها فرق</span><strong id="count-diffs">0</strong></div>
+    <button class="btn danger" onclick="saveCount()">💾 تسجيل فروقات الجرد</button>
+  </div>
+</div>
+
+<!-- ===== OPENING / PERIOD START (بداية فترة) ===== -->
+<div class="page" id="p-opening">
+  <div class="section">
+    <h2><span class="ic">🟢</span> رصيد أول المدة — المخزون</h2>
+    <div class="hint">حدد الكمية والتكلفة الافتتاحية لكل صنف (البضاعة اللي موجودة عندك بداية الفترة). بتتسجّل كرصيد أول مدة بتاريخ تحدده، من غير فاتورة شراء.</div>
+    <label>تاريخ أول المدة</label><input type="date" id="op-date">
+    <div class="tw" style="margin-top:10px"><table id="opStockTbl"><thead><tr><th>الصنف</th><th>الكمية</th><th>تكلفة الوحدة</th></tr></thead><tbody></tbody></table></div>
+    <button class="btn" onclick="saveOpeningStock()">💾 حفظ أرصدة المخزون الافتتاحية</button>
+  </div>
+  <div class="section">
+    <h2><span class="ic">👥</span> أرصدة أول المدة — عملاء وموردين</h2>
+    <div class="hint">الديون القديمة قبل ما تبدأ على النظام. "عليه" = العميل مدين لك. "له" = أنت مدين للمورد.</div>
+    <div class="tw" style="margin-top:10px"><table id="opPartyTbl"><thead><tr><th>الطرف</th><th>النوع</th><th>رصيد افتتاحي</th></tr></thead><tbody></tbody></table></div>
+    <button class="btn" onclick="saveOpeningParties()">💾 حفظ أرصدة العملاء والموردين</button>
+  </div>
+  <div class="section">
+    <h2><span class="ic">💵</span> رصيد الخزنة الافتتاحي</h2>
+    <div class="row">
+      <div><label>💵 كاش</label><input type="number" id="op-cash" placeholder="0"></div>
+      <div><label>🏦 بنك</label><input type="number" id="op-bank" placeholder="0"></div>
+    </div>
+    <button class="btn" onclick="saveOpeningCash()">💾 حفظ رصيد الخزنة</button>
+  </div>
+  <div class="section" style="border:1px solid var(--red)">
+    <h2><span class="ic">♻️</span> بداية فترة جديدة (تصفير)</h2>
+    <div class="hint">بيعمل أرشيف كامل للبيانات الحالية (نسخة احتياطية)، وبيبدأ فترة نضيفة: بيحوّل المخزون الموجود حاليًا + أرصدة العملاء والموردين + رصيد الخزنة إلى "رصيد أول مدة"، ويمسح كل الفواتير والحركات القديمة. التكاليف والأرباح بتبدأ من جديد.</div>
+    <label>تاريخ بداية الفترة الجديدة</label><input type="date" id="reset-date">
+    <button class="btn danger" onclick="startNewPeriod()">♻️ تصفير وبدء فترة جديدة</button>
+    <div class="hint" style="margin-top:8px">⚠️ خطوة كبيرة — هتتطلب تأكيد. النسخة الاحتياطية بتتعمل تلقائي قبلها، وتقدر ترجعها من الضبط ← النسخ الاحتياطية.</div>
+  </div>
+</div>
+
 <!-- ===== TREASURY (الخزنة) ===== -->
 <div class="page" id="p-cash">
   <div class="exportbar noprint"><button onclick="exportPDF('cash-print','سجل الخزنة')">🖨 طباعة / PDF</button><button onclick="exportPNG('cash-print','treasury')">🖼 صورة PNG</button><button onclick="exportExcel('cash')">📊 Excel</button></div>
@@ -716,13 +760,13 @@ const DB={items:[],suppliers:[],customers:[],projects:[],branches:['الفرع �
 let fb={url:'',ws:'',on:false};
 let ACTIVE_BRANCH='__all__'; // filter view
 let CURRENT=null; // logged-in user
-const VERSION='v22 — 2026-07-01';
+const VERSION='v23 — 2026-10-08';
 
-const PAGES=['home','insights','buy','po','sell','returns','adjust','cash','ledger','proj','reports','set'];
-const PERM_LABELS={home:'لوحة التحكم',insights:'المتابعة',buy:'استلام بضاعة',po:'طلبيات الشراء',sell:'بيع',returns:'المرتجعات',adjust:'تسوية المخزون',cash:'الخزنة',ledger:'كشوف الحساب',proj:'المشاريع',reports:'التقارير',set:'الضبط (إدارة)'};
+const PAGES=['home','insights','buy','po','sell','returns','adjust','count','cash','ledger','proj','reports','opening','set'];
+const PERM_LABELS={home:'لوحة التحكم',insights:'المتابعة',buy:'استلام بضاعة',po:'طلبيات الشراء',sell:'بيع',returns:'المرتجعات',adjust:'تسوية المخزون',count:'الجرد الشامل',cash:'الخزنة',ledger:'كشوف الحساب',proj:'المشاريع',reports:'التقارير',opening:'بداية فترة',set:'الضبط (إدارة)'};
 const ROLE_PERMS={
-  manager:['home','insights','buy','po','sell','returns','adjust','cash','ledger','proj','reports','set'],
-  accountant:['home','insights','buy','po','sell','returns','adjust','cash','ledger','proj','reports'],
+  manager:['home','insights','buy','po','sell','returns','adjust','count','cash','ledger','proj','reports','opening','set'],
+  accountant:['home','insights','buy','po','sell','returns','adjust','count','cash','ledger','proj','reports'],
   employee:['home','buy','sell']
 };
 const ROLE_NAMES={manager:'مدير',accountant:'محاسب',employee:'موظف'};
@@ -1114,7 +1158,7 @@ function realizedProfit(){
 }
 
 /* ============ NAV ============ */
-const TABS=[['home','لوحة التحكم'],['insights','متابعة'],['buy','استلام'],['po','طلبيات'],['sell','بيع'],['returns','مرتجعات'],['adjust','تسوية'],['cash','الخزنة'],['ledger','الحسابات'],['proj','المشاريع'],['reports','التقارير'],['set','الضبط']];
+const TABS=[['home','لوحة التحكم'],['insights','متابعة'],['buy','استلام'],['po','طلبيات'],['sell','بيع'],['returns','مرتجعات'],['adjust','تسوية'],['count','جرد شامل'],['cash','الخزنة'],['ledger','الحسابات'],['proj','المشاريع'],['reports','التقارير'],['opening','بداية فترة'],['set','الضبط']];
 function buildNav(){
   $('nav').innerHTML=TABS.map((t,i)=>`<button class="${i===0?'active':''}" onclick="go('${t[0]}',this)">${t[1]}</button>`).join('');
 }
@@ -1544,6 +1588,149 @@ function renderAdjustments(){
   body.innerHTML=as.length?as.map(a=>`<tr><td>${a.date}</td><td>${esc(a.item)}</td><td>${a.before.toLocaleString()}</td><td>${a.after.toLocaleString()}</td><td class="${a.diff>0?'pos':'neg'}">${a.diff>0?'+':''}${a.diff.toLocaleString()}</td><td>${esc(a.reason)||'—'}</td><td><span class="del" onclick="delAdjustment('${a.id}')">×</span></td></tr>`).join(''):'<tr><td colspan="7" class="empty">لا توجد تسويات</td></tr>';
 }
 
+/* ============ FULL STOCK COUNT (جرد شامل) ============ */
+function renderCount(){
+  const body=$('countTbl')?$('countTbl').querySelector('tbody'):null;if(!body)return;
+  const stock={};stockSummary().forEach(s=>stock[s.item]=s.qty);
+  const items=[...DB.items].sort((a,b)=>a.localeCompare(b,'ar'));
+  body.innerHTML=items.length?items.map(it=>{
+    const book=stock[it]||0;
+    return `<tr data-item="${esc(it)}"><td class="nm" style="text-align:right">${esc(it)}</td><td class="book">${book.toLocaleString()}</td><td><input type="number" class="count-actual" style="width:90px;padding:6px" oninput="calcCountRow(this)"></td><td class="cdiff">—</td></tr>`;
+  }).join(''):'<tr><td colspan="4" class="empty">لا توجد أصناف</td></tr>';
+  $('count-diffs').textContent='0';
+}
+function calcCountRow(inp){
+  const tr=inp.closest('tr');const book=+tr.querySelector('.book').textContent.replace(/,/g,'')||0;
+  const cell=tr.querySelector('.cdiff');
+  if(inp.value===''){cell.textContent='—';cell.className='cdiff';}
+  else{const d=(+inp.value)-book;cell.textContent=(d>0?'+':'')+d.toLocaleString();cell.className='cdiff '+(d>0?'pos':(d<0?'neg':''));}
+  let n=0;document.querySelectorAll('#countTbl .count-actual').forEach(i=>{if(i.value!==''){const r=i.closest('tr');const b=+r.querySelector('.book').textContent.replace(/,/g,'')||0;if((+i.value)-b!==0)n++;}});
+  $('count-diffs').textContent=n;
+}
+function saveCount(){
+  const date=$('count-date').value||today();
+  if(guardLocked&&guardLocked(date))return;
+  const stock={};stockSummary().forEach(s=>stock[s.item]=s.qty);
+  const toSave=[];
+  document.querySelectorAll('#countTbl tr[data-item]').forEach(tr=>{
+    const inp=tr.querySelector('.count-actual');if(!inp||inp.value==='')return;
+    const item=tr.getAttribute('data-item');const before=stock[item]||0;const actual=+inp.value;const diff=actual-before;
+    if(diff!==0)toSave.push({item,before,actual,diff});
+  });
+  if(!toSave.length){toast('مفيش فروقات لتسجيلها','err');return;}
+  askConfirm('هيتسجّل '+toSave.length+' تسوية جرد. متأكد؟',()=>{
+    DB.adjustments=DB.adjustments||[];
+    let i=0;
+    toSave.forEach(x=>{
+      DB.adjustments.push({id:uid(),created:Date.now()+(i++),date,item:x.item,before:x.before,after:x.actual,diff:x.diff,cost:lastPurchasePrice(x.item),reason:'جرد شامل '+date,branch:currentBranch()});
+    });
+    logAction('جرد شامل',toSave.length+' فرق');
+    recomputeProfits();save();renderAll();
+    toast('✅ تم تسجيل '+toSave.length+' فرق جرد');
+  });
+}
+
+/* ============ OPENING BALANCES & PERIOD RESET ============ */
+function renderOpening(){
+  // opening stock table
+  const sb=$('opStockTbl')?$('opStockTbl').querySelector('tbody'):null;
+  if(sb){
+    const items=[...DB.items].sort((a,b)=>a.localeCompare(b,'ar'));
+    sb.innerHTML=items.length?items.map(it=>`<tr data-item="${esc(it)}"><td class="nm" style="text-align:right">${esc(it)}</td><td><input type="number" class="op-qty" style="width:90px;padding:6px" placeholder="0"></td><td><input type="number" class="op-cost" style="width:90px;padding:6px" placeholder="0"></td></tr>`).join(''):'<tr><td colspan="3" class="empty">لا توجد أصناف</td></tr>';
+  }
+  // opening party table
+  const pb=$('opPartyTbl')?$('opPartyTbl').querySelector('tbody'):null;
+  if(pb){
+    const rows=[];
+    DB.customers.forEach(c=>rows.push({name:c,type:'customer',lbl:'عميل (عليه)'}));
+    DB.suppliers.forEach(sp=>rows.push({name:sp,type:'supplier',lbl:'مورد (له)'}));
+    pb.innerHTML=rows.length?rows.map(r=>`<tr data-name="${esc(r.name)}" data-type="${r.type}"><td class="nm" style="text-align:right">${esc(r.name)}</td><td>${r.lbl}</td><td><input type="number" class="op-bal" style="width:100px;padding:6px" placeholder="0"></td></tr>`).join(''):'<tr><td colspan="3" class="empty">لا يوجد</td></tr>';
+  }
+}
+function saveOpeningStock(){
+  const date=$('op-date').value||today();
+  if(guardLocked&&guardLocked(date))return;
+  const items=[];
+  document.querySelectorAll('#opStockTbl tr[data-item]').forEach(tr=>{
+    const q=+tr.querySelector('.op-qty').value||0;const c=+tr.querySelector('.op-cost').value||0;
+    if(q>0)items.push({item:tr.getAttribute('data-item'),qty:q,cost:c});
+  });
+  if(!items.length){toast('أدخل كمية لصنف واحد على الأقل','err');return;}
+  askConfirm('تسجيل رصيد أول مدة لـ '+items.length+' صنف؟',()=>{
+    DB.adjustments=DB.adjustments||[];let i=0;
+    items.forEach(x=>{
+      DB.adjustments.push({id:uid(),created:Date.now()+(i++),date,item:x.item,before:0,after:x.qty,diff:x.qty,cost:x.cost,reason:'رصيد أول مدة',opening:true,branch:currentBranch()});
+    });
+    logAction('رصيد أول مدة مخزون',items.length+' صنف');
+    recomputeProfits();save();renderAll();
+    toast('✅ تم حفظ أرصدة المخزون الافتتاحية');
+  });
+}
+function saveOpeningParties(){
+  const date=$('op-date').value||today();
+  const parties=[];
+  document.querySelectorAll('#opPartyTbl tr[data-name]').forEach(tr=>{
+    const bal=+tr.querySelector('.op-bal').value||0;
+    if(bal>0)parties.push({name:tr.getAttribute('data-name'),type:tr.getAttribute('data-type'),bal});
+  });
+  if(!parties.length){toast('أدخل رصيد لطرف واحد على الأقل','err');return;}
+  askConfirm('تسجيل أرصدة افتتاحية لـ '+parties.length+' طرف؟',()=>{
+    let i=0;const br=currentBranch();
+    parties.forEach(x=>{
+      if(x.type==='customer')DB.sales.push({id:uid(),created:Date.now()+(i++),date,customer:x.name,inv:'',lines:[],total:x.bal,profit:0,opening:true,branch:br});
+      else DB.purchases.push({id:uid(),created:Date.now()+(i++),date,supplier:x.name,inv:'',lines:[],total:x.bal,opening:true,branch:br});
+    });
+    logAction('أرصدة أول مدة',parties.length+' طرف');
+    save();renderAll();
+    toast('✅ تم حفظ أرصدة العملاء والموردين');
+  });
+}
+function saveOpeningCash(){
+  const date=$('op-date').value||today();
+  const cash=+$('op-cash').value||0;const bank=+$('op-bank').value||0;
+  if(cash<=0&&bank<=0){toast('أدخل رصيد كاش أو بنك','err');return;}
+  askConfirm('تسجيل رصيد الخزنة الافتتاحي؟',()=>{
+    const br=currentBranch();let i=0;
+    if(cash>0)DB.cash.push({id:uid(),created:Date.now()+(i++),date,type:'in',party:'',amt:cash,note:'رصيد أول مدة',till:'cash',opening:true,branch:br});
+    if(bank>0)DB.cash.push({id:uid(),created:Date.now()+(i++),date,type:'in',party:'',amt:bank,note:'رصيد أول مدة',till:'bank',opening:true,branch:br});
+    logAction('رصيد خزنة أول مدة',money(cash+bank));
+    save();renderAll();$('op-cash').value='';$('op-bank').value='';
+    toast('✅ تم حفظ رصيد الخزنة الافتتاحي');
+  });
+}
+function startNewPeriod(){
+  const date=$('reset-date').value||today();
+  askConfirm('⚠️ ده هيعمل أرشيف كامل للبيانات، وبعدين يبدأ فترة جديدة: يحوّل المخزون والأرصدة الحالية لأول مدة، ويمسح كل الفواتير والحركات القديمة.\n\nمتأكد تمامًا؟',()=>{
+    askConfirm('تأكيد أخير: هتبدأ من الصفر بتاريخ '+date+'. البيانات القديمة هتتأرشف في نسخة احتياطية. نكمّل؟',()=>{
+      doResetPeriod(date);
+    },{title:'تأكيد نهائي',yes:'نعم، ابدأ فترة جديدة'});
+  },{title:'بداية فترة جديدة'});
+}
+function doResetPeriod(date){
+  // 1) full backup first
+  makeAutoBackup(true);
+  // 2) snapshot current state (within current branch view = all branches since reset is global)
+  const prevBranch=ACTIVE_BRANCH;ACTIVE_BRANCH='__all__';
+  const stock=stockSummary(); // {item,qty,avg,val}
+  const custBal={};DB.customers.forEach(c=>{const b=customerBalance(c);if(Math.abs(b)>0.001)custBal[c]=b;});
+  const supBal={};DB.suppliers.forEach(sp=>{const b=supplierBalance(sp);if(Math.abs(b)>0.001)supBal[sp]=b;});
+  const cashBal=treasuryBalance('cash');const bankBal=treasuryBalance('bank');
+  const br=DB.branches[0]||'الفرع الرئيسي';
+  // 3) clear transactional data (keep catalogs, users, settings, company)
+  DB.purchases=[];DB.sales=[];DB.cash=[];DB.returns=[];DB.adjustments=[];DB.purchaseOrders=[];
+  // 4) re-seed openings
+  let i=0;
+  stock.forEach(s=>{if(s.qty>0.001)DB.adjustments.push({id:uid(),created:Date.now()+(i++),date,item:s.item,before:0,after:s.qty,diff:s.qty,cost:s.avg,reason:'رصيد أول مدة (ترحيل)',opening:true,branch:br});});
+  Object.keys(custBal).forEach(c=>{const b=custBal[c];if(b>0)DB.sales.push({id:uid(),created:Date.now()+(i++),date,customer:c,inv:'',lines:[],total:b,profit:0,opening:true,branch:br});else DB.cash.push({id:uid(),created:Date.now()+(i++),date,type:'collect',party:c,amt:-b,note:'رصيد أول مدة (رصيد دائن)',till:'cash',opening:true,branch:br});});
+  Object.keys(supBal).forEach(sp=>{const b=supBal[sp];if(b>0)DB.purchases.push({id:uid(),created:Date.now()+(i++),date,supplier:sp,inv:'',lines:[],total:b,opening:true,branch:br});else DB.cash.push({id:uid(),created:Date.now()+(i++),date,type:'pay',party:sp,amt:-b,note:'رصيد أول مدة (رصيد مدين)',till:'cash',opening:true,branch:br});});
+  if(Math.abs(cashBal)>0.001)DB.cash.push({id:uid(),created:Date.now()+(i++),date,type:cashBal>0?'in':'out',party:'',amt:Math.abs(cashBal),note:'رصيد أول مدة',till:'cash',opening:true,branch:br});
+  if(Math.abs(bankBal)>0.001)DB.cash.push({id:uid(),created:Date.now()+(i++),date,type:bankBal>0?'in':'out',party:'',amt:Math.abs(bankBal),note:'رصيد أول مدة',till:'bank',opening:true,branch:br});
+  ACTIVE_BRANCH=prevBranch;
+  logAction('بداية فترة جديدة','تصفير بتاريخ '+date);
+  recomputeProfits();save();renderAll();
+  toast('✅ تم بدء فترة جديدة — البيانات القديمة متأرشفة',null,5000);
+}
+
 /* ============ CASH ============ */
 const CASH_LABELS={pay:'دفع لمورد',collect:'تحصيل من عميل',loan:'سلفة لمشروع',expense:'مصروف لمشروع',return:'استرجاع سلفة',in:'إيداع',out:'سحب'};
 function cashTypeChange(){
@@ -1894,7 +2081,7 @@ function renderBuyTable(){
   let ps=[...DB.purchases].filter(inBranch).sort((a,b)=>b.created-a.created);
   if(q)ps=ps.filter(p=>(p.supplier||'').toLowerCase().includes(q)||(p.date||'').includes(q)||(p.inv||'').toLowerCase().includes(q)||p.lines.some(l=>(l.item||'').toLowerCase().includes(q)));
   tb.innerHTML=ps.length?ps.map(p=>{
-    return `<tr><td>${p.date}</td><td>${esc(p.supplier)}</td><td>${money(p.total)}</td><td>${linesLabel(p.lines)}</td><td class="flx noprint"><button class="btn sm sec" onclick="printInvoice('buy','${p.id}')">🖨</button><button class="btn sm sec" onclick="editTxn('buy','${p.id}')">✎</button><span class="del" onclick="delPurchase('${p.id}')">×</span></td></tr>`+invLinesDetail(p.lines,5);
+    return `<tr><td>${p.date}</td><td>${esc(p.supplier)}</td><td>${money(p.total)}</td><td>${p.opening?'رصيد أول مدة':linesLabel(p.lines)}</td><td class="flx noprint"><button class="btn sm sec" onclick="printInvoice('buy','${p.id}')">🖨</button><button class="btn sm sec" onclick="editTxn('buy','${p.id}')">✎</button><span class="del" onclick="delPurchase('${p.id}')">×</span></td></tr>`+invLinesDetail(p.lines,5);
   }).join(''):'<tr><td colspan="5" class="empty">لا توجد نتائج</td></tr>';
 }
 function renderSellTable(){
@@ -1902,7 +2089,7 @@ function renderSellTable(){
   const q=($('sellSearch')?$('sellSearch').value:'').trim().toLowerCase();
   let ss=[...DB.sales].filter(inBranch).sort((a,b)=>b.created-a.created);
   if(q)ss=ss.filter(s=>(s.customer||'').toLowerCase().includes(q)||(s.date||'').includes(q)||(s.inv||'').toLowerCase().includes(q)||s.lines.some(l=>(l.item||'').toLowerCase().includes(q)));
-  tb.innerHTML=ss.length?ss.map(s=>`<tr><td>${s.date}</td><td>${esc(s.customer)}</td><td>${money(s.total)}</td><td class="pos prof-col">${money(s.profit)}</td><td>${linesLabel(s.lines)}</td><td class="flx noprint"><button class="btn sm sec" onclick="printInvoice('sale','${s.id}')">🖨</button><button class="btn sm sec" onclick="editTxn('sell','${s.id}')">✎</button><span class="del" onclick="delSale('${s.id}')">×</span></td></tr>`+invLinesDetail(s.lines,6)).join(''):'<tr><td colspan="6" class="empty">لا توجد نتائج</td></tr>';
+  tb.innerHTML=ss.length?ss.map(s=>`<tr><td>${s.date}</td><td>${esc(s.customer)}</td><td>${money(s.total)}</td><td class="pos prof-col">${money(s.profit)}</td><td>${s.opening?'رصيد أول مدة':linesLabel(s.lines)}</td><td class="flx noprint"><button class="btn sm sec" onclick="printInvoice('sale','${s.id}')">🖨</button><button class="btn sm sec" onclick="editTxn('sell','${s.id}')">✎</button><span class="del" onclick="delSale('${s.id}')">×</span></td></tr>`+invLinesDetail(s.lines,6)).join(''):'<tr><td colspan="6" class="empty">لا توجد نتائج</td></tr>';
 }
 function renderCash(){
   $('c-bal').textContent=money(treasuryBalance());
@@ -1931,11 +2118,11 @@ function fillLedgerSelect(){
 function ledgerRows(kind,name){
   const rows=[];
   if(kind==='sup'){
-    DB.purchases.forEach(p=>{if(p.supplier===name&&inBranch(p))rows.push({d:p.date,o:p.created,desc:'فاتورة شراء'+(p.inv?' #'+p.inv:''),debit:0,credit:p.total,lines:p.lines});});
+    DB.purchases.forEach(p=>{if(p.supplier===name&&inBranch(p))rows.push({d:p.date,o:p.created,desc:p.opening?'رصيد أول مدة':('فاتورة شراء'+(p.inv?' #'+p.inv:'')),debit:0,credit:p.total,lines:p.lines});});
     DB.cash.forEach(c=>{if(c.type==='pay'&&c.party===name&&inBranch(c))rows.push({d:c.date,o:c.created,desc:'سداد'+(c.note?' - '+c.note:''),debit:c.amt,credit:0});});
     (DB.returns||[]).forEach(r=>{if(r.kind==='purchase'&&r.party===name&&inBranch(r))rows.push({d:r.date,o:r.created,desc:'مرتجع شراء'+(r.reason?' - '+r.reason:''),debit:r.total,credit:0,lines:r.lines});});
   }else{
-    DB.sales.forEach(s2=>{if(s2.customer===name&&inBranch(s2))rows.push({d:s2.date,o:s2.created,desc:'فاتورة بيع'+(s2.inv?' #'+s2.inv:''),debit:s2.total,credit:0,lines:s2.lines});});
+    DB.sales.forEach(s2=>{if(s2.customer===name&&inBranch(s2))rows.push({d:s2.date,o:s2.created,desc:s2.opening?'رصيد أول مدة':('فاتورة بيع'+(s2.inv?' #'+s2.inv:'')),debit:s2.total,credit:0,lines:s2.lines});});
     DB.cash.forEach(c=>{if(c.type==='collect'&&c.party===name&&inBranch(c))rows.push({d:c.date,o:c.created,desc:'تحصيل'+(c.note?' - '+c.note:''),debit:0,credit:c.amt});});
     (DB.returns||[]).forEach(r=>{if(r.kind==='sale'&&r.party===name&&inBranch(r))rows.push({d:r.date,o:r.created,desc:'مرتجع بيع'+(r.reason?' - '+r.reason:''),debit:0,credit:r.total,lines:r.lines});});
   }
@@ -2029,7 +2216,7 @@ function renderProj(){
 }
 function renderAll(){
   fillSelects();renderChips();renderHome();renderBuyTable();renderSellTable();renderCash();renderProj();fillLedgerSelect();
-  renderUsers();renderReturns();fillRetSrc();renderAdjustments();fillAdjSelect();renderCredit();renderLocked();renderAudit();renderBranchesSettings();renderBranchBar();renderInsights();renderPo();
+  renderUsers();renderReturns();fillRetSrc();renderAdjustments();fillAdjSelect();renderCredit();renderLocked();renderAudit();renderBranchesSettings();renderBranchBar();renderInsights();renderPo();renderCount();renderOpening();
   if($('co-name')){$('co-name').value=DB.company.name||'';$('co-addr').value=DB.company.addr||'';$('co-phone').value=DB.company.phone||'';
     $('co-tag').value=DB.company.tag||'';$('co-email').value=DB.company.email||'';$('co-terms').value=DB.company.terms||'';
     if(DB.company.logo){$('co-logo-prev').src=DB.company.logo;$('co-logo-prev').style.display='';}}
@@ -2937,6 +3124,7 @@ function init(){
   $('loginVer').textContent=VERSION;
   $('buy-date').value=today();$('sell-date').value=today();$('cash-date').value=today();$('ret-date').value=today();$('adj-date').value=today();
   if($('po-date'))$('po-date').value=today();
+  ['count-date','op-date','reset-date'].forEach(id=>{if($(id))$(id).value=today();});
   $('r-to').value=today();
   $('fb-url').value=fb.url||'';$('fb-ws').value=fb.ws||'';
   if(getAiKey()){$('ai-key').value=getAiKey();$('ai-key-status').textContent='✅ مفتاح محفوظ محليًا';}
