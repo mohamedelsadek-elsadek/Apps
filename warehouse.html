@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1e3a5f">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="المخزن">
-<title>المخزن</title>
+<meta name="apple-mobile-web-app-title" content="مخزن سطيح">
+<title>مخزن سطيح</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -116,7 +116,7 @@ tr.tot td{font-weight:800;background:var(--pri-soft)}
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <script>
 "use strict";
-var APP_VER='v1';
+var APP_VER='v2';
 var FB_CFG={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",storageBucket:"my-app-sync-11ad9.firebasestorage.app",messagingSenderId:"177039534756",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
 var FB_PATH='warehouse/docs';
 var LS_KEY='warehouse.state.v1',LS_ON='warehouse.sync.on',LS_BK='warehouse.bk.',LS_THEME='warehouse.theme';
@@ -189,8 +189,8 @@ var page='bal',EDIT=null,CAT='',Q='';
 function go(k){if(EDIT&&S.docs[EDIT]&&S.docs[EDIT].t!==k)EDIT=null;page=k;render();window.scrollTo(0,0)}
 function render(){
   var p=PAGES.filter(function(x){return x[0]===page})[0];
-  $('app').innerHTML='<header class="hero"><div class="hero-top"><div><h1>🏬 المخزن</h1><div class="meta"><span class="dot" id="syncDot"></span><span id="syncTxt"></span> · '+APP_VER+'</div></div><div style="display:flex;gap:6px"><button class="hbtn" onclick="toggleTheme()" aria-label="الوضع الليلي">🌓</button><button class="hbtn" onclick="window.print()" aria-label="طباعة">🖨️</button></div></div></header>'+
-  '<main class="wrap" id="wrap"><div class="print-head"><h2>🏬 المخزن — '+p[2]+'</h2><p>'+arDate(today())+'</p></div>'+VIEWS[page]()+'</main>'+
+  $('app').innerHTML='<header class="hero"><div class="hero-top"><div><h1>🏬 مخزن سطيح</h1><div class="meta"><span class="dot" id="syncDot"></span><span id="syncTxt"></span> · '+APP_VER+'</div></div><div style="display:flex;gap:6px"><button class="hbtn" onclick="toggleTheme()" aria-label="الوضع الليلي">🌓</button><button class="hbtn" onclick="window.print()" aria-label="طباعة">🖨️</button></div></div></header>'+
+  '<main class="wrap" id="wrap"><div class="print-head"><h2>🏬 مخزن سطيح — '+p[2]+'</h2><p>'+arDate(today())+'</p></div>'+VIEWS[page]()+'</main>'+
   '<nav class="bnav">'+PAGES.map(function(x){return '<button class="'+(x[0]===page?'on':'')+'" onclick="go(\''+x[0]+'\')"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join('')+'</nav>';
   syncUI(syncState.s,syncState.t);
   if(POST[page])POST[page]();
@@ -371,11 +371,11 @@ VIEWS.data=function(){
   return '<h2 class="sec">💾 البيانات والمزامنة</h2>'+
   '<div class="card"><h3>☁️ المزامنة</h3><p style="margin-bottom:8px"><span class="dot '+syncState.s+'"></span> '+esc(syncState.t)+'</p><p class="hint" style="margin-bottom:10px">كل حركة بتترفع لوحدها — جهازين يسجّلوا في نفس الوقت من غير ما حد يمسح شغل التاني.</p><button class="btn '+(off?'pri':'ghost')+' block" onclick="toggleSync()">'+(off?'▶️ شغّل المزامنة':'⏸️ وقّف المزامنة على الجهاز ده')+'</button></div>'+
   '<div class="card"><h3>📦 نسخ وتصدير</h3><div class="btnrow"><button class="btn ghost" onclick="exportJSON()">⬇️ نسخة JSON</button><button class="btn ghost" onclick="exportExcel()">📊 Excel</button><button class="btn ghost" onclick="$(\'impF\').click()">⬆️ استيراد/دمج</button></div><input type="file" id="impF" accept=".json" style="display:none" onchange="if(this.files[0])importJSON(this.files[0]);this.value=\'\'"><p class="hint" style="margin-top:8px">الاستيراد بيدمج بس — مش بيمسح حاجة.</p></div>'+
-  '<div class="card"><h3>🗓️ نسخ يومية تلقائية</h3>'+(bks.length?bks.map(function(k){return '<div class="li"><span class="nm">'+arDate(k.slice(LS_BK.length))+'</span><button class="btn ghost sm" onclick="download(\'المخزن_'+k.slice(LS_BK.length)+'.json\',lsGet(\''+k+'\'))">تنزيل</button></div>'}).join(''):'<p class="hint">لسه مفيش</p>')+'</div>'+
+  '<div class="card"><h3>🗓️ نسخ يومية تلقائية</h3>'+(bks.length?bks.map(function(k){return '<div class="li"><span class="nm">'+arDate(k.slice(LS_BK.length))+'</span><button class="btn ghost sm" onclick="download(\'مخزن_سطيح_'+k.slice(LS_BK.length)+'.json\',lsGet(\''+k+'\'))">تنزيل</button></div>'}).join(''):'<p class="hint">لسه مفيش</p>')+'</div>'+
   '<p class="hint" style="text-align:center">المخزن · '+APP_VER+'</p>';
 };
 function download(name,text,type){var b=new Blob([text],{type:type||'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
-function exportJSON(){download('المخزن_'+today()+'.json',JSON.stringify({app:'warehouse',ver:APP_VER,docs:S.docs}))}
+function exportJSON(){download('مخزن_سطيح_'+today()+'.json',JSON.stringify({app:'warehouse',ver:APP_VER,docs:S.docs}))}
 function importJSON(file){var r=new FileReader();r.onload=function(){var o=null;try{o=JSON.parse(r.result)}catch(e){}if(!o||!o.docs){toast('الملف مش نسخة من البرنامج ده',1);return}
   var n=0,ids=[];for(var k in o.docs){var d=o.docs[k];if(!validDoc(d,k))continue;var l=S.docs[k];if(!l||d.u>l.u){S.docs[k]=d;n++;ids.push(k)}}persist();pushDocs(ids);toast('اتدمج '+n+' سجل');render()};r.readAsText(file)}
 function exportExcel(){
@@ -384,7 +384,7 @@ function exportExcel(){
   T('الرصيد',['الصنف','القسم','الوحدة','الرصيد','متوسط التكلفة','القيمة'],items().map(function(i){var r=L[i.id];return [i.name,catOf(i.cat)[2],nm(i.unit),r3(r.qty),r3(r.avg),r3(r.val)]}));
   T('الوارد',['التاريخ','الصنف','الكمية','سعر الشراء','الإجمالي','المورد','ملاحظة'],moves('in').map(function(m){return [m.date,nm(m.item),m.qty,m.price,r3(m.qty*m.price),m.party||'',m.note||'']}));
   T('المنصرف',['التاريخ','الصنف','الكمية','سعر البيع','الإجمالي','الربح','العميل','ملاحظة'],moves('out').map(function(m){return [m.date,nm(m.item),m.qty,m.price,r3(m.qty*m.price),m.price?r3((m.price-(cm[m.id]||0))*m.qty):'',m.party||'',m.note||'']}));
-  download('المخزن_'+today()+'.xls','﻿'+h+'</body></html>','application/vnd.ms-excel');
+  download('مخزن_سطيح_'+today()+'.xls','﻿'+h+'</body></html>','application/vnd.ms-excel');
 }
 function dailyBackup(){var k=LS_BK+today();if(lsGet(k)||!all('in').length)return;lsSet(k,JSON.stringify({docs:S.docs}));lsKeys().filter(function(x){return x&&x.indexOf(LS_BK)===0}).sort().slice(0,-10).forEach(lsDel)}
 
