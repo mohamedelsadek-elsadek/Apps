@@ -160,7 +160,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 </head>
 <body>
 <header>
-  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.6</span></div>
+  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.7</span></div>
   <div class="hright"><div id="syncState">💾 محفوظ على الجهاز</div><button class="sm" id="themeBtn" title="الوضع الليلي">🌙</button></div>
 </header>
 <nav id="tabs">
@@ -276,7 +276,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 
 <script>
 'use strict';
-const VERSION='1.6';
+const VERSION='1.7';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const KEY='eggs_db_v1';
 const DEF_FB='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
@@ -880,8 +880,9 @@ function openSheet(m,i){const g=CFG[m],isNew=i<0,r=isNew?{id:uid()}:Object.assig
   h+=fl('notes','ملاحظات',r.notes);
   h+=`<div class="tot" id="shTot"></div><div class="acts"><button class="on" id="shSave">💾 حفظ</button>${isNew?'':'<button id="shDel" style="color:#dc2626">🗑️ حذف</button>'}<button id="shCancel">إلغاء</button></div>`;
   $('#shBox').innerHTML=h;$('#sheet').classList.remove('hide');document.body.style.overflow='hidden';shTot();
+  try{if(!(history.state&&history.state.sheet))history.pushState({sheet:1},'');}catch(e){}
   if(isNew)setTimeout(()=>{const f=$('#shBox input');if(f)f.focus();},80);}
-function closeSheet(){$('#sheet').classList.add('hide');document.body.style.overflow='';SH=null;acHide();if(pendingRefresh){pendingRefresh=false;setTimeout(refreshAll,50);}}
+function closeSheet(fromBack){if(!fromBack&&history.state&&history.state.sheet){try{history.back();}catch(e){}}$('#sheet').classList.add('hide');document.body.style.overflow='';SH=null;acHide();if(pendingRefresh){pendingRefresh=false;setTimeout(refreshAll,50);}}
 function shRead(){const g=CFG[SH.m];$$('#shBox input[data-sk]').forEach(inp=>{const k=inp.dataset.sk;const n=k===g.party||k==='town'||k==='notes';SH.r[k]=n?inp.value:parseNum(inp.value);});}
 function shTot(){if(!SH)return;shRead();const g=CFG[SH.m],r=SH.r,t=recTotal(r);
   $('#shTot').innerHTML=`<span>الإجمالي: ${money(t)}</span>${g.paid?`<span>${recRem(r)>0.001?'الباقي: '+money(recRem(r)):'✓ مدفوع'}</span>`:''}`;}
@@ -904,6 +905,8 @@ function bindCards(){
     shTot();});
   $('#shBox').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&$('#ac').classList.contains('hide')){e.preventDefault();const ins=$$('#shBox input[data-sk]'),i=ins.indexOf(e.target);if(i<ins.length-1)ins[i+1].focus();else shSave();}});
   window.addEventListener('resize',applyMode);
+  /* زرار الرجوع في أندرويد يقفل الشاشة بدل ما يخرج من البرنامج */
+  window.addEventListener('popstate',()=>{if(SH)closeSheet(true);else if(!$('#modal').classList.contains('hide')&&$('#mActs').children.length)hideModal();});
   const hd=document.querySelector('header');const setH=()=>document.documentElement.style.setProperty('--hh',hd.offsetHeight+'px');setH();window.addEventListener('resize',setH);
   applyMode();}
 
