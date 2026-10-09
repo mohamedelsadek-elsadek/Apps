@@ -161,7 +161,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 </head>
 <body>
 <header>
-  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.9</span></div>
+  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v2.0</span></div>
   <div class="hright"><div id="syncState">💾 محفوظ على الجهاز</div><button class="sm" id="themeBtn" title="الوضع الليلي">🌙</button></div>
 </header>
 <nav id="tabs">
@@ -232,7 +232,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
     </div>
     <div class="seg" id="views">
       <button data-v="sum" class="on">ملخص وأرباح</button><button data-v="cust">العملاء</button><button data-v="type">نوع البيض</button>
-      <button data-v="town">البلاد</button><button data-v="farm">مشتريات المزارع</button><button data-v="debt">💰 المديونيات</button><button data-v="custSt">كشف عميل</button><button data-v="farmSt">كشف مزرعة</button>
+      <button data-v="town">البلاد</button><button data-v="farm">مشتريات المزارع</button><button data-v="stock">📦 المخزون</button><button data-v="debt">💰 المديونيات</button><button data-v="custSt">كشف عميل</button><button data-v="farmSt">كشف مزرعة</button>
     </div>
     <div class="bar hide" id="pickBox"><select id="pick" style="min-width:200px"></select></div>
     <div class="bar tools"><button class="sm" id="btnCsv">⬇️ تصدير Excel</button><button class="sm" id="btnPrint">🖨️ طباعة</button><button class="sm pdf" id="btnPdf">📄 PDF</button><button class="sm wa" id="btnWa">🟢 إرسال واتساب</button></div>
@@ -277,7 +277,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 
 <script>
 'use strict';
-const VERSION='1.9';
+const VERSION='2.0';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const KEY='eggs_db_v1';
 const DEF_FB='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
@@ -418,12 +418,12 @@ function saveGrid(m){const g=G[m],c=CFG[m],cols=colsOf(m);
     cols.forEach(col=>{if(col.ty==='calc')return;let v=r[col.k];if(col.ty==='t')o[col.k]=String(v||'').trim();else o[col.k]=isBlank(v)?null:v;});
     T.forEach(t=>{const pk=t.k+'p',ak=t.k+'a';if(num(o[t.k])>0&&isBlank(o[pk])){const p=defPrice(m,t.k,o[c.party]);if(!isBlank(p)){o[pk]=p;r[pk]=p;r[ak]=1;}}if(r[ak]&&!isBlank(o[pk]))o[ak]=1;});return o;});
   DB[c.store]=DB[c.store].filter(x=>x.date!==g.date).concat(recs);DB.dayU[c.store+'|'+g.date]=Date.now();m==='sale'?seedLists(DB,recs,[]):seedLists(DB,[],recs);persist();renderLists();
-  $('#sv-'+m).textContent='✓ اتحفظ '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});}
+  $('#sv-'+m).textContent='✓ اتحفظ '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});daySum(m);}
 
 function daySum(m){const rows=filled(m);let h='';
-  if(m==='sale'){const cost=costBasis(G[m].date,G[m].date);
+  if(m==='sale'){
     T.forEach(t=>{const q=sum(rows,r=>num(r[t.k]));if(q)h+=chip(t.n,fmt(q,2)+' · '+money(sum(rows,r=>num(r[t.k])*num(r[t.k+'p']))));});
-    const rev=sum(rows,recTotal),cg=sum(rows,r=>T.reduce((s,x)=>s+num(r[x.k])*cost[x.k],0));
+    const rev=sum(rows,recTotal),cg=sum(rows,r=>recCost(Object.assign({},r)));
     h+=chip('مبيعات اليوم',money(rev))+chip('المحصل',money(sum(rows,recPaid)))+chip('الآجل',money(sum(rows,recRem)));
     if(rev)h+=chip('ربح تقديري',money(rev-cg)+' ('+pct(rev-cg,rev)+')');}
   else{T.forEach(t=>{const q=sum(rows,r=>num(r[t.k]));if(q){const v=sum(rows,r=>num(r[t.k])*num(r[t.k+'p']));h+=chip(t.n,fmt(q,2)+' · م '+money(v/q));}});
@@ -449,13 +449,43 @@ function buildLists(){const u=a=>[...new Set(a.map(x=>String(x||'').trim()).filt
   const st=$('#stats');if(st)st.textContent=`عدد قيود البيع: ${DB.sales.length} · الشراء: ${DB.buys.length} · آخر تعديل: ${DB.updatedAt?new Date(DB.updatedAt).toLocaleString('ar-EG'):'—'}`;}
 
 /* ---------- reports engine ---------- */
+/* ---------- المخزون: متوسط مرجّح متحرك بالترتيب الزمني ----------
+   كل شراء بيتخلط بسعره مع الموجود في المخزن، وكل بيعة بتاخد تكلفة اللي في المخزن يوم البيع.
+   لما المخزون يخلص (صفر أو أقل) السعر القديم مالوش علاقة — أول شراء بعدها بيبدأ بسعره هو. */
+let LEDC=null,LEDK='';
+function ledger(){
+  const key=DB.updatedAt+'|'+DB.sales.length+'|'+DB.buys.length;if(LEDC&&LEDK===key)return LEDC;
+  const UC={},EST={},DAYS={},NEG={};
+  T.forEach(x=>{const k=x.k;
+    const ev=[];DB.buys.forEach(b=>{const q=num(b[k]);if(q>0)ev.push({d:b.date,o:0,q,p:num(b[k+'p']),r:b});});
+    DB.sales.forEach(s=>{const q=num(s[k]);if(q>0)ev.push({d:s.date,o:1,q,r:s});});
+    ev.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.o-b.o);
+    let qty=0,avg=0,last=0;const days=[];let cur=null;
+    const nextBuyP=i=>{for(let j=i+1;j<ev.length;j++)if(ev[j].o===0&&ev[j].p>0)return ev[j].p;return 0;};
+    ev.forEach((e,i)=>{
+      if(!cur||cur.date!==e.d){cur={date:e.d,open:qty,inQ:0,inV:0,out:0,outV:0,close:0,avg:0};days.push(cur);}
+      if(e.o===0){let p=e.p;if(!p)p=qty>0.0001?avg:(num(((DB.dp.buy||{})[e.d]||{})[k])||last);
+        if(qty<=0.0001){qty+=e.q;avg=p;}else{avg=(qty*avg+e.q*p)/(qty+e.q);qty+=e.q;}
+        cur.inQ+=e.q;cur.inV+=e.q*p;}
+      else{let uc,est=false;
+        if(qty>0.0001)uc=avg;else{uc=num(((DB.dp.buy||{})[e.d]||{})[k])||last||nextBuyP(i);est=true;}
+        (UC[e.r.id]=UC[e.r.id]||{})[k]=uc;if(est||e.q-qty>0.0001)(EST[e.r.id]=EST[e.r.id]||{})[k]=1;
+        qty-=e.q;cur.out+=e.q;cur.outV+=e.q*uc;
+        if(qty<=0.0001){last=avg||last;if(qty<-0.0001)NEG[k]=NEG[k]||e.d;}}
+      cur.close=qty;cur.avg=qty>0.0001?avg:0;});
+    DAYS[k]=days;});
+  LEDC={UC,EST,DAYS,NEG};LEDK=key;return LEDC;}
+function stockAt(k,t){const ds=ledger().DAYS[k]||[];let st={qty:0,avg:0};for(const d of ds){if(d.date>t)break;st={qty:d.close,avg:d.avg};}return st;}
+const recCost=r=>{const u=ledger().UC[r.id]||{};return T.reduce((s,x)=>s+num(r[x.k])*(u[x.k]||0),0);};
+const recCostK=(r,k)=>num(r[k])*((ledger().UC[r.id]||{})[k]||0);
 function costBasis(f,t){const res={};
   T.forEach(x=>{let q=0,v=0;DB.buys.forEach(b=>{if(b.date>=f&&b.date<=t){q+=num(b[x.k]);v+=num(b[x.k])*num(b[x.k+'p']);}});
     if(q<=0){q=0;v=0;DB.buys.forEach(b=>{if(b.date<=t){q+=num(b[x.k]);v+=num(b[x.k])*num(b[x.k+'p']);}});}
     if(q<=0){q=0;v=0;DB.buys.forEach(b=>{q+=num(b[x.k]);v+=num(b[x.k])*num(b[x.k+'p']);});}
     res[x.k]=q>0?v/q:0;});return res;}
-function compute(f,t){const S=DB.sales.filter(r=>r.date>=f&&r.date<=t),B=DB.buys.filter(r=>r.date>=f&&r.date<=t),cost=costBasis(f,t);
-  const cg=r=>T.reduce((s,x)=>s+num(r[x.k])*cost[x.k],0);return {S,B,cost,cg};}
+function compute(f,t){const S=DB.sales.filter(r=>r.date>=f&&r.date<=t),B=DB.buys.filter(r=>r.date>=f&&r.date<=t),cost={};
+  T.forEach(x=>{const q=sum(S,r=>num(r[x.k]));cost[x.k]=q?sum(S,r=>recCostK(r,x.k))/q:0;});
+  const cg=recCost;return {S,B,cost,cg};}
 function group(recs,keyFn,cgFn,setFn){const mp=new Map();
   recs.forEach(r=>{const k=keyFn(r);let g=mp.get(k);
     if(!g){g={key:k,q:{w:0,r:0,b:0},v:{w:0,r:0,b:0},rev:0,cogs:0,paid:0,n:0,set:new Set(),dates:new Set()};mp.set(k,g);}
@@ -468,19 +498,21 @@ function table(head,rows,foot,title){
     :`<tr><td colspan="${head.length}" class="hint" style="text-align:center">لا توجد بيانات في الفترة دي</td></tr>`;
   return `<div class="repwrap"><table class="rep" data-title="${esc(title||'')}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody>${foot?`<tfoot><tr>${foot.map(c=>`<td>${c}</td>`).join('')}</tr></tfoot>`:''}</table></div>`;}
 const kpis=a=>'<div class="kpis">'+a.map(k=>`<div class="kpi ${k[2]||''}"><span class="l">${k[0]}</span><span class="v">${k[1]}</span></div>`).join('')+'</div>';
-function warnCost(S,cost){const miss=T.filter(x=>sum(S,r=>num(r[x.k]))>0&&!cost[x.k]).map(x=>x.n);
-  return miss.length?`<div class="warn">⚠️ مفيش مشتريات مسجلة للـ${miss.join(' / ')} — الربح محسوب من غير تكلفة للنوع ده.</div>`:'';}
+function warnCost(S,cost){const E=ledger().EST,est=T.filter(x=>S.some(r=>num(r[x.k])>0&&(E[r.id]||{})[x.k])).map(x=>x.n);
+  const ew=est.length?`<div class="warn">⚠️ فيه ${est.join(' / ')} اتباع والمخزون صفر — التكلفة تقديرية (سعر شراء اليوم أو آخر سعر). سجّل الشراء عشان الربح يبقى مظبوط.</div>`:'';
+  const miss=T.filter(x=>sum(S,r=>num(r[x.k]))>0&&!cost[x.k]).map(x=>x.n);
+  return ew+(miss.length?`<div class="warn">⚠️ مفيش مشتريات مسجلة للـ${miss.join(' / ')} — الربح محسوب من غير تكلفة للنوع ده.</div>`:'');}
 const plusSign=n=>n>0?'pos':(n<0?'neg':'');
 
 function typeTable(S,B,cost,t,share){const rows=[];const tot={q:0,rev:0,bq:0,bv:0,cogs:0,st:0};
-  const totRev=sum(S,recTotal),totPr=totRev-sum(S,r=>T.reduce((s,x)=>s+num(r[x.k])*cost[x.k],0));
+  const totRev=sum(S,recTotal),totPr=totRev-sum(S,recCost);
   const bUp=DB.buys.filter(r=>r.date<=t),sUp=DB.sales.filter(r=>r.date<=t);
   T.forEach(x=>{const q=sum(S,r=>num(r[x.k])),rev=sum(S,r=>num(r[x.k])*num(r[x.k+'p'])),bq=sum(B,r=>num(r[x.k])),bv=sum(B,r=>num(r[x.k])*num(r[x.k+'p']));
-    const cogs=q*cost[x.k],pr=rev-cogs,st=sum(bUp,r=>num(r[x.k]))-sum(sUp,r=>num(r[x.k]));
+    const cogs=sum(S,r=>recCostK(r,x.k)),pr=rev-cogs,st=stockAt(x.k,t).qty;
     tot.q+=q;tot.rev+=rev;tot.bq+=bq;tot.bv+=bv;tot.cogs+=cogs;tot.st+=st;
     const row=[`<b class="${x.c}">${x.n}</b>`,fmt(q,2),q?money(rev/q):'—',money(rev),fmt(bq,2),cost[x.k]?money(cost[x.k]):'—',money(cogs),cls(pr),pct(pr,rev),pct(pr,cogs),q?money(pr/q):'—',fmt(st,2)];
     if(share)row.push(bar(rev,totRev),bar(Math.max(pr,0),Math.max(totPr,0)));rows.push(row);});
-  const head=['النوع','المباع','متوسط سعر البيع','المبيعات','المشترى','متوسط تكلفة الشراء','تكلفة المباع','الربح','هامش من البيع','ربح على التكلفة','ربح / '+unit(),'المخزون آخر الفترة'];
+  const head=['النوع','المباع','متوسط سعر البيع','المبيعات','المشترى','تكلفة الوحدة المباعة','تكلفة المباع','الربح','هامش من البيع','ربح على التكلفة','ربح / '+unit(),'المخزون آخر الفترة'];
   if(share)head.push('حصة المبيعات','حصة الربح');
   const pr=tot.rev-tot.cogs;const foot=['الإجمالي',fmt(tot.q,2),tot.q?money(tot.rev/tot.q):'—',money(tot.rev),fmt(tot.bq,2),tot.bq?money(tot.bv/tot.bq):'—',money(tot.cogs),cls(pr),pct(pr,tot.rev),pct(pr,tot.cogs),tot.q?money(pr/tot.q):'—',fmt(tot.st,2)];
   if(share)foot.push('100%','100%');
@@ -539,7 +571,7 @@ function vCustSt(f,t){const n=R.pick;if(!n)return '<p class="hint">مفيش عم
   const open=sum(all.filter(r=>r.date<f),recRem)-sum(P.filter(p=>p.date<f),p=>num(p.amt));
   const S=all.filter(r=>r.date>=f&&r.date<=t),PP=P.filter(p=>p.date>=f&&p.date<=t);
   const ev=S.map(r=>({d:r.date,o:0,r})).concat(PP.map(p=>({d:p.date,o:1,p}))).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.o-b.o);
-  const cost=costBasis(f,t),cg=r=>T.reduce((s,x)=>s+num(r[x.k])*cost[x.k],0);let bal=open;
+  const cg=recCost;let bal=open;
   const rows=[{a:'class="op"',c:['رصيد أول المدة','','','','','','',`<b>${money(open)}</b>`,'']}].concat(ev.map(e=>{
     if(e.p){bal-=num(e.p.amt);return {a:'class="payrow"',c:[dayName(e.d)+' '+nice(e.d),'💵 تحصيل','','','',money(e.p.amt),'',`<b>${money(bal)}</b>`,{nt:1,v:esc(e.p.note||'')+` <button class="sm no-print" data-delpay="${e.p.id}">🗑️</button>`}]};}
     const r=e.r;bal+=recRem(r);
@@ -551,6 +583,16 @@ function vCustSt(f,t){const n=R.pick;if(!n)return '<p class="hint">مفيش عم
       ...T.map(x=>[x.n,fmt(sum(S,r=>num(r[x.k])),2)+' '+unit()])])
     +table(['التاريخ','أبيض','أحمر','بلدي','الإجمالي','المدفوع','الباقي','الرصيد','ملاحظات'],rows,
       ['الإجمالي',fmt(sum(S,r=>num(r.w)),2),fmt(sum(S,r=>num(r.r)),2),fmt(sum(S,r=>num(r.b)),2),money(rev),money(paid+col),money(rev-paid-col),money(bal),''],'كشف حساب '+n);}
+function vStock(f,t){if(t>today())t=today();const L=ledger();
+  const cur=T.map(x=>({x,st:stockAt(x.k,t)}));const val=sum(cur,c=>Math.max(0,c.st.qty)*c.st.avg);
+  let h=kpis(cur.map(c=>[c.x.n+' في المخزن',fmt(c.st.qty,2)+' '+unit()+(c.st.qty>0.0001?' · تكلفة '+money(c.st.avg):''),c.st.qty<-0.0001?'bad':'']).concat([['قيمة المخزون بالتكلفة',money(val)]]));
+  const neg=T.filter(x=>L.NEG[x.k]).map(x=>x.n+' (من '+nice(L.NEG[x.k])+')');
+  if(neg.length)h+=`<div class="warn">⚠️ المخزون نزل تحت الصفر في: ${neg.join('، ')} — يعني فيه بيع اتسجل قبل الشراء بتاعه. راجع المشتريات.</div>`;
+  h+='<p class="hint">التكلفة = متوسط مرجّح متحرك: كل شراء بيتخلط بسعره مع الموجود، والبيع بياخد تكلفة اللي في المخزن يومها. لما المخزون يخلص، أول شراء بعده بيبدأ بسعره هو.</p>';
+  T.forEach(x=>{const ds=(L.DAYS[x.k]||[]).filter(d=>d.date>=f&&d.date<=t);if(!ds.length)return;
+    const rows=ds.map(d=>[dayName(d.date)+' '+nice(d.date),fmt(d.open,2),d.inQ?fmt(d.inQ,2)+' × '+money(d.inV/d.inQ):'',d.out?fmt(d.out,2):'',d.out?money(d.outV/d.out):'',`<b class="${d.close<-0.0001?'neg':''}">${fmt(d.close,2)}</b>`,d.close>0.0001?money(d.avg):'—',d.close>0.0001?money(d.close*d.avg):'—']);
+    h+=`<h3 class="${x.c}">${x.n}</h3>`+table(['اليوم','أول اليوم','وارد (كمية × سعر)','منصرف','تكلفة المنصرف','آخر اليوم','متوسط التكلفة','القيمة'],rows,null,'حركة مخزون '+x.n);});
+  return h;}
 /* ---------- المديونيات والتحصيل ---------- */
 function custDebt(n,t){return sum(DB.sales.filter(r=>custOf(r)===n&&(!t||r.date<=t)),recRem)-sum(DB.pays.filter(p=>custOf(p)===n&&(!t||p.date<=t)),p=>num(p.amt));}
 /* الفواتير المفتوحة: التحصيلات بتتخصم من أقدم فاتورة الأول */
@@ -606,7 +648,7 @@ function vFarmSt(f,t){const n=R.pick;if(!n)return '<p class="hint">مفيش مز
 
 /* ---------- report UI ---------- */
 const R={kind:'month',ref:today(),from:'',to:'',view:'sum',pick:''};
-const VIEWS={sum:['ملخص وأرباح',vSum],cust:['تقرير العملاء',vCust],type:['تقرير نوع البيض',vType],town:['تقرير البلاد',vTown],farm:['مشتريات المزارع',vFarm],debt:['مديونيات العملاء',vDebt],custSt:['كشف عميل',vCustSt],farmSt:['كشف مزرعة',vFarmSt]};
+const VIEWS={sum:['ملخص وأرباح',vSum],cust:['تقرير العملاء',vCust],type:['تقرير نوع البيض',vType],town:['تقرير البلاد',vTown],farm:['مشتريات المزارع',vFarm],stock:['المخزون',vStock],debt:['مديونيات العملاء',vDebt],custSt:['كشف عميل',vCustSt],farmSt:['كشف مزرعة',vFarmSt]};
 function range(){const d=parseD(R.ref),y=d.getFullYear(),mo=d.getMonth();
   switch(R.kind){case 'day':return [R.ref,R.ref];
     case 'week':{const off=(d.getDay()+1)%7,f=addDays(R.ref,-off);return [f,addDays(f,6)];}
