@@ -160,7 +160,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 </head>
 <body>
 <header>
-  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.7</span></div>
+  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.8</span></div>
   <div class="hright"><div id="syncState">💾 محفوظ على الجهاز</div><button class="sm" id="themeBtn" title="الوضع الليلي">🌙</button></div>
 </header>
 <nav id="tabs">
@@ -276,7 +276,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 
 <script>
 'use strict';
-const VERSION='1.7';
+const VERSION='1.8';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const KEY='eggs_db_v1';
 const DEF_FB='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
@@ -429,8 +429,9 @@ function daySum(m){const rows=filled(m);let h='';
   $('#sum-'+m).innerHTML=h;}
 const chip=(l,v)=>`<div class="chip"><span class="l">${l}</span><span class="v">${v}</span></div>`;
 
-function fillDp(m){const dp=(DB.dp[m]||{})[G[m].date]||{};$$(`.dp[data-m="${m}"] input`).forEach(i=>{const v=dp[i.dataset.dp];i.value=isBlank(v)?'':v;});}
-function bindDp(m){$$(`.dp[data-m="${m}"] input`).forEach(inp=>inp.addEventListener('change',()=>{
+function fillDp(m){const dp=(DB.dp[m]||{})[G[m].date]||{};$$(`.dp[data-m="${m}"] input`).forEach(i=>{if(i===document.activeElement&&i._dirty)return;const v=dp[i.dataset.dp];i.value=isBlank(v)?'':v;});}
+function bindDp(m){$$(`.dp[data-m="${m}"] input`).forEach(inp=>inp.addEventListener('input',()=>{inp._dirty=1;clearTimeout(inp._t);inp._t=setTimeout(()=>inp.dispatchEvent(new Event('change')),600);}));
+  $$(`.dp[data-m="${m}"] input`).forEach(inp=>inp.addEventListener('change',()=>{clearTimeout(inp._t);inp._dirty=0;
   const k=inp.dataset.dp,v=parseNum(inp.value),d=G[m].date;DB.dp[m]=DB.dp[m]||{};DB.dp[m][d]=Object.assign({},DB.dp[m][d]);
   if(v===null)delete DB.dp[m][d][k];else DB.dp[m][d][k]=v;DB.dpU[m+'|'+d]=Date.now();
   if(v!==null){let ch=false;G[m].rows.forEach(r=>{if(num(r[k])>0&&isBlank(r[k+'p'])){r[k+'p']=v;ch=true;}});if(ch){renderGrid(m);schedSave(m);return;}}
@@ -686,7 +687,7 @@ async function cloudSync(){
     const merged=remote?mergeDB(DB,remote):DB;
     const changedLocal=sig(merged)!==sig(DB);
     if(changedLocal){
-      const editing=SH||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('table.grid, .grid'));
+      const editing=SH||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('table.grid, .grid, .dp'));
       DB=merged;saveLocal();
       if(editing)pendingRefresh=true;else refreshAll();
     }
@@ -912,7 +913,7 @@ function bindCards(){
 
 function init(){buildLists();bindAc();bindLists();bindPdf();['sale','buy'].forEach(m=>{bindGrid(m);bindDate(m);bindDp(m);setDate(m,today());});
   bindTabs();bindReport();bindSettings();bindCards();
-  const fl=()=>{flush('sale');flush('buy');};window.addEventListener('pagehide',fl);document.addEventListener('visibilitychange',()=>{if(document.hidden)fl();});
+  const fl=()=>{$$('.dp input').forEach(i=>{if(i._dirty)i.dispatchEvent(new Event('change'));});flush('sale');flush('buy');};window.addEventListener('pagehide',fl);document.addEventListener('visibilitychange',()=>{if(document.hidden)fl();});
   if(DB.settings.fbUrl)cloudSync();
   setInterval(()=>{if(!document.hidden)cloudSync();},20000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)cloudSync();});
