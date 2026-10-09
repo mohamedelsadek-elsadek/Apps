@@ -208,7 +208,7 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
       <h3>المزامنة (Firebase Realtime Database)</h3>
       <input class="f" id="sFb" dir="ltr" style="width:100%" placeholder="https://xxxx-default-rtdb.firebaseio.com">
       <div class="bar" style="margin-top:8px"><button class="sm" id="bPush">⬆️ رفع للسحابة</button><button class="sm" id="bPull">⬇️ تحميل من السحابة</button></div>
-      <p class="hint">البيانات بتتحفظ على الجهاز دايمًا. لو حطيت رابط القاعدة هتتزامن تلقائي تحت المسار <span dir="ltr">/eggs_app</span> والأحدث هو اللي بيكسب.</p>
+      <p class="hint">البيانات بتتحفظ على الجهاز دايمًا. المزامنة شغالة تلقائي على قاعدة برامجك (المسار <span dir="ltr">/eggs_app</span>). كل يوم بيتزامن لوحده — لو جهازين سجّلوا في أيام مختلفة أو نفس الوقت الاتنين بيتحفظوا. زراير الرفع/التحميل للطوارئ بس.</p>
     </div>
     <div class="card">
       <h3>القوايم المنسدلة</h3>
@@ -234,19 +234,21 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
 
 <script>
 'use strict';
-const VERSION='1.3';
+const VERSION='1.4';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const KEY='eggs_db_v1';
+const DEF_FB='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
 const T=[{k:'w',n:'أبيض',c:'tw'},{k:'r',n:'أحمر',c:'tr'},{k:'b',n:'بلدي',c:'tb'}];
 const DAYS=['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'];
 const MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 
 /* ---------- data ---------- */
-function blankDB(){return {v:1,sales:[],buys:[],lists:{cust:[],town:[],farm:[]},dp:{sale:{},buy:{}},settings:{unit:'كرتونة',fbUrl:''},updatedAt:0};}
+function blankDB(){return {v:1,sales:[],buys:[],lists:{cust:[],town:[],farm:[]},dp:{sale:{},buy:{}},settings:{unit:'كرتونة',fbUrl:DEF_FB},updatedAt:0,dayU:{},listsU:0,dpU:{},setU:0};}
 function arr(x){return Array.isArray(x)?x.filter(Boolean):(x&&typeof x==='object'?Object.values(x).filter(Boolean):[]);}
 function normalize(d){const b=blankDB();d=d||{};b.sales=arr(d.sales);b.buys=arr(d.buys);
   b.dp={sale:Object.assign({},(d.dp||{}).sale),buy:Object.assign({},(d.dp||{}).buy)};
-  b.settings=Object.assign(b.settings,d.settings||{});b.updatedAt=d.updatedAt||0;
+  b.settings=Object.assign(b.settings,d.settings||{});if(!b.settings.fbUrl)b.settings.fbUrl=DEF_FB;b.updatedAt=d.updatedAt||0;
+  b.dayU=Object.assign({},d.dayU);b.listsU=d.listsU||0;b.dpU=Object.assign({},d.dpU);b.setU=d.setU||0;
   const L=d.lists;b.lists={cust:arr(L&&L.cust).map(x=>typeof x==='string'?{n:x,town:''}:{n:String(x.n||'').trim(),town:String(x.town||'').trim()}).filter(x=>x.n),
     town:arr(L&&L.town).map(x=>String(x).trim()).filter(Boolean),farm:arr(L&&L.farm).map(x=>String(x).trim()).filter(Boolean)};
   if(!L)seedLists(b,b.sales,b.buys);return b;}
@@ -371,7 +373,7 @@ function flush(m){if(timers[m]){clearTimeout(timers[m]);timers[m]=null;saveGrid(
 function saveGrid(m){const g=G[m],c=CFG[m],cols=colsOf(m);
   const recs=g.rows.filter(r=>!isEmpty(m,r)).map(r=>{if(!r.id)r.id=uid();const o={id:r.id,date:g.date};
     cols.forEach(col=>{if(col.ty==='calc')return;let v=r[col.k];if(col.ty==='t')o[col.k]=String(v||'').trim();else o[col.k]=isBlank(v)?null:v;});return o;});
-  DB[c.store]=DB[c.store].filter(x=>x.date!==g.date).concat(recs);m==='sale'?seedLists(DB,recs,[]):seedLists(DB,[],recs);persist();renderLists();
+  DB[c.store]=DB[c.store].filter(x=>x.date!==g.date).concat(recs);DB.dayU[c.store+'|'+g.date]=Date.now();m==='sale'?seedLists(DB,recs,[]):seedLists(DB,[],recs);persist();renderLists();
   $('#sv-'+m).textContent='✓ اتحفظ '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});}
 
 function daySum(m){const rows=filled(m);let h='';
@@ -388,7 +390,7 @@ const chip=(l,v)=>`<div class="chip"><span class="l">${l}</span><span class="v">
 function fillDp(m){const dp=(DB.dp[m]||{})[G[m].date]||{};$$(`.dp[data-m="${m}"] input`).forEach(i=>{const v=dp[i.dataset.dp];i.value=isBlank(v)?'':v;});}
 function bindDp(m){$$(`.dp[data-m="${m}"] input`).forEach(inp=>inp.addEventListener('change',()=>{
   const k=inp.dataset.dp,v=parseNum(inp.value),d=G[m].date;DB.dp[m]=DB.dp[m]||{};DB.dp[m][d]=Object.assign({},DB.dp[m][d]);
-  if(v===null)delete DB.dp[m][d][k];else DB.dp[m][d][k]=v;
+  if(v===null)delete DB.dp[m][d][k];else DB.dp[m][d][k]=v;DB.dpU[m+'|'+d]=Date.now();
   if(v!==null){let ch=false;G[m].rows.forEach(r=>{if(num(r[k])>0&&isBlank(r[k+'p'])){r[k+'p']=v;ch=true;}});if(ch){renderGrid(m);schedSave(m);return;}}
   persist();}));}
 function setDate(m,d){if(!d)return;flush(m);G[m].date=d;$('#date-'+m).value=d;
@@ -552,27 +554,74 @@ function exportCsv(){const out=[[$('#printTitle').textContent]];
   const csv='\ufeff'+out.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const [f,t]=range();download(csv,'text/csv;charset=utf-8',`بيض_${R.view}_${f}_${t}.csv`);}
 
-/* ---------- cloud sync (Firebase REST) ---------- */
-let pushT=null;
+/* ---------- cloud sync (Firebase REST) — دمج يوم بيوم ---------- */
+/* كل يوم في البيع والشراء له ختم وقت؛ عند المزامنة الأحدث لكل يوم بيكسب، فجهازين يسجلوا أيام مختلفة أو في نفس الوقت من غير ما حد يمسح شغل التاني. */
+let pushT=null,syncing=false,syncAgain=false;
 const setSync=s=>{$('#syncState').textContent=s;};
 const fbPath=()=>String(DB.settings.fbUrl||'').trim().replace(/\/+$/,'')+'/eggs_app.json';
-function schedPush(){if(!DB.settings.fbUrl)return;clearTimeout(pushT);pushT=setTimeout(cloudPush,1500);}
-async function cloudPush(){if(!DB.settings.fbUrl)return;try{setSync('⏫ جاري الرفع…');const r=await fetch(fbPath(),{method:'PUT',body:JSON.stringify(DB)});if(!r.ok)throw new Error(r.status);setSync('☁️ متزامن');}catch(e){setSync('⚠️ غير متصل – محفوظ على الجهاز');}}
-async function cloudPull(force){if(!DB.settings.fbUrl)return;try{setSync('⏬ جاري التحميل…');const r=await fetch(fbPath());if(!r.ok)throw new Error(r.status);const d=await r.json();
-  if(d&&(force||(d.updatedAt||0)>(DB.updatedAt||0))){flush('sale');flush('buy');const url=DB.settings.fbUrl;DB=normalize(d);DB.settings.fbUrl=url;saveLocal();refreshAll();setSync('☁️ اتحدّث من السحابة');}
-  else if(!d||(d.updatedAt||0)<(DB.updatedAt||0)){await cloudPush();}else setSync('☁️ متزامن');}catch(e){setSync('⚠️ غير متصل – محفوظ على الجهاز');}}
+function stampAll(){const t=Date.now();['sales','buys'].forEach(st=>DB[st].forEach(r=>{DB.dayU[st+'|'+r.date]=t;}));Object.keys(DB.dp).forEach(m=>Object.keys(DB.dp[m]||{}).forEach(d=>{DB.dpU[m+'|'+d]=t;}));DB.listsU=t;DB.setU=t;}
+function mergeDB(L,R){
+  R=normalize(R);const o=normalize(JSON.parse(JSON.stringify(L)));
+  ['sales','buys'].forEach(st=>{
+    const byL={},byR={};L[st].forEach(r=>{(byL[r.date]=byL[r.date]||[]).push(r)});R[st].forEach(r=>{(byR[r.date]=byR[r.date]||[]).push(r)});
+    const dates=new Set(Object.keys(byL).concat(Object.keys(byR)));
+    Object.keys(L.dayU||{}).concat(Object.keys(R.dayU||{})).forEach(k=>{if(k.indexOf(st+'|')===0)dates.add(k.slice(st.length+1))});
+    let out=[];
+    dates.forEach(d=>{const k=st+'|'+d,lu=(L.dayU||{})[k]||0,ru=(R.dayU||{})[k]||0;
+      if(!lu&&!ru){const m=new Map();(byL[d]||[]).concat(byR[d]||[]).forEach(r=>{if(!m.has(r.id))m.set(r.id,r)});out=out.concat([...m.values()]);}
+      else{out=out.concat(ru>lu?(byR[d]||[]):(byL[d]||[]));o.dayU[k]=Math.max(lu,ru);}});
+    o[st]=JSON.parse(JSON.stringify(out));
+  });
+  if((R.listsU||0)>(L.listsU||0)){o.lists=JSON.parse(JSON.stringify(R.lists));o.listsU=R.listsU;}
+  else if(!L.listsU&&!R.listsU){seedLists(o,R.sales,R.buys);R.lists.cust.forEach(x=>{if(!o.lists.cust.find(y=>y.n===x.n))o.lists.cust.push(x)});['town','farm'].forEach(k=>R.lists[k].forEach(x=>{if(!o.lists[k].includes(x))o.lists[k].push(x)}));}
+  {const lu=o.listsU||0,ns=o.sales.filter(r=>((o.dayU||{})['sales|'+r.date]||0)>lu),nb=o.buys.filter(r=>((o.dayU||{})['buys|'+r.date]||0)>lu);seedLists(o,ns,nb);}
+  ['sale','buy'].forEach(m=>{const ds=new Set(Object.keys(L.dp[m]||{}).concat(Object.keys(R.dp[m]||{})));o.dp[m]={};
+    ds.forEach(d=>{const k=m+'|'+d,lu=(L.dpU||{})[k]||0,ru=(R.dpU||{})[k]||0;const src=ru>lu?R:L;const v=(src.dp[m]||{})[d]||((ru>lu?L:R).dp[m]||{})[d];if(v)o.dp[m][d]=v;if(lu||ru)o.dpU[k]=Math.max(lu,ru);});});
+  if((R.setU||0)>(L.setU||0)){o.settings.unit=R.settings.unit;o.setU=R.setU;}
+  o.settings.fbUrl=L.settings.fbUrl;o.updatedAt=Math.max(L.updatedAt||0,R.updatedAt||0);
+  return o;
+}
+function sig(d){const x=Object.assign({},d);delete x.settings;delete x.updatedAt;x.unit=d.settings&&d.settings.unit;
+  ['sales','buys'].forEach(k=>{x[k]=d[k].slice().sort((a,b)=>a.id<b.id?-1:1)});return JSON.stringify(x);}
+function schedPush(){if(!DB.settings.fbUrl)return;clearTimeout(pushT);pushT=setTimeout(cloudSync,1200);}
+async function cloudSync(){
+  if(!DB.settings.fbUrl)return;if(syncing){syncAgain=true;return;}syncing=true;
+  try{
+    setSync('🔄 بيزامن…');
+    const r=await fetch(fbPath(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);
+    const remote=await r.json();
+    flush('sale');flush('buy');
+    const merged=remote?mergeDB(DB,remote):DB;
+    const changedLocal=sig(merged)!==sig(DB);
+    if(changedLocal){
+      const editing=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('table.grid, .grid');
+      DB=merged;saveLocal();
+      if(editing)pendingRefresh=true;else refreshAll();
+    }
+    if(!remote||sig(normalize(remote))!==sig(DB)){
+      const w=await fetch(fbPath(),{method:'PUT',body:JSON.stringify(DB)});if(!w.ok)throw new Error(w.status);
+    }
+    setSync(changedLocal?'☁️ اتحدّث من جهاز تاني':'☁️ متزامن');
+  }catch(e){console.warn(e);setSync(navigator.onLine?'⚠️ مشكلة في السحابة – محفوظ على الجهاز':'📴 أوفلاين – محفوظ على الجهاز');}
+  finally{syncing=false;if(syncAgain){syncAgain=false;setTimeout(cloudSync,300);}}
+}
+let pendingRefresh=false;
+document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRefresh&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('table.grid, .grid'))){pendingRefresh=false;refreshAll();}},400));
+async function cloudPush(){if(!DB.settings.fbUrl)return;try{setSync('⏫ جاري الرفع…');flush('sale');flush('buy');stampAll();saveLocal();const r=await fetch(fbPath(),{method:'PUT',body:JSON.stringify(DB)});if(!r.ok)throw new Error(r.status);setSync('☁️ متزامن');}catch(e){setSync('⚠️ غير متصل – محفوظ على الجهاز');}}
+async function cloudPull(force){if(!DB.settings.fbUrl)return;if(!force)return cloudSync();try{setSync('⏬ جاري التحميل…');const r=await fetch(fbPath(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);const d=await r.json();
+  if(d){flush('sale');flush('buy');const url=DB.settings.fbUrl;DB=normalize(d);DB.settings.fbUrl=url;saveLocal();refreshAll();setSync('☁️ اتحمّلت نسخة السحابة');}}catch(e){setSync('⚠️ غير متصل – محفوظ على الجهاز');}}
 function refreshAll(){buildLists();renderLists();$('#sUnit').value=unit();$('#sFb').value=DB.settings.fbUrl||'';['sale','buy'].forEach(m=>{fillDp(m);loadGrid(m);});if($('#tab-rep').classList.contains('on'))renderReport();}
 
 /* ---------- settings & tabs ---------- */
 function bindSettings(){$('#sUnit').value=unit();$('#sFb').value=DB.settings.fbUrl||'';
-  $('#sUnit').addEventListener('change',e=>{DB.settings.unit=e.target.value.trim()||'كرتونة';persist();});
+  $('#sUnit').addEventListener('change',e=>{DB.settings.unit=e.target.value.trim()||'كرتونة';DB.setU=Date.now();persist();});
   $('#sFb').addEventListener('change',e=>{DB.settings.fbUrl=e.target.value.trim();saveLocal();if(DB.settings.fbUrl)cloudPull(false);else setSync('💾 محفوظ على الجهاز');});
   $('#bPush').onclick=()=>{if(!DB.settings.fbUrl)return alert('حط رابط القاعدة الأول');if(confirm('رفع بيانات الجهاز واستبدال اللي على السحابة؟'))cloudPush();};
   $('#bPull').onclick=()=>{if(!DB.settings.fbUrl)return alert('حط رابط القاعدة الأول');if(confirm('تحميل بيانات السحابة واستبدال اللي على الجهاز؟'))cloudPull(true);};
   $('#bExp').onclick=()=>{flush('sale');flush('buy');download(JSON.stringify(DB,null,1),'application/json','eggs_backup_'+today()+'.json');};
   $('#bImp').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();
     rd.onload=()=>{try{const d=normalize(JSON.parse(rd.result));if(!confirm(`استيراد ${d.sales.length} قيد بيع و ${d.buys.length} قيد شراء واستبدال البيانات الحالية؟`))return;
-      const url=DB.settings.fbUrl;DB=d;if(!DB.settings.fbUrl)DB.settings.fbUrl=url;persist();refreshAll();alert('تم الاستيراد');}catch(x){alert('الملف مش سليم');}e.target.value='';};rd.readAsText(file);});}
+      const url=DB.settings.fbUrl;DB=d;if(!DB.settings.fbUrl)DB.settings.fbUrl=url;stampAll();persist();refreshAll();alert('تم الاستيراد');}catch(x){alert('الملف مش سليم');}e.target.value='';};rd.readAsText(file);});}
 function bindTabs(){$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;flush('sale');flush('buy');
   $$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='rep')renderReport();if(b.dataset.tab==='set')buildLists();});
@@ -635,19 +684,19 @@ function renderLists(){const tb=$('#lsTable');if(!tb)return;const q=normAr($('#l
 function lsAdd(){const n=$('#lsName').value.trim(),t=$('#lsTown').value.trim();if(!n)return $('#lsName').focus();
   if(LS==='cust'){const e=DB.lists.cust.find(x=>x.n===n);if(e){if(t)e.town=t;else return alert('الاسم موجود');}else DB.lists.cust.push({n,town:t});if(t&&!DB.lists.town.includes(t))DB.lists.town.push(t);}
   else{if(DB.lists[LS].includes(n))return alert('الاسم موجود');DB.lists[LS].push(n);}
-  $('#lsName').value='';$('#lsTown').value='';persist();renderLists();$('#lsName').focus();}
+  $('#lsName').value='';$('#lsTown').value='';DB.listsU=Date.now();persist();renderLists();$('#lsName').focus();}
 function lsRename(old){const isC=LS==='cust',e=isC?DB.lists.cust.find(x=>x.n===old):null;
   const n=(prompt('الاسم الجديد:',old)||'').trim();if(!n)return;
   if(isC){const t=prompt('البلد:',e.town||'');if(t!==null){e.town=t.trim();if(e.town&&!DB.lists.town.includes(e.town))DB.lists.town.push(e.town);}}
   if(n!==old){const lst=isC?DB.lists.cust.map(x=>x.n):DB.lists[LS];
     if(lst.includes(n)&&!confirm(`"${n}" موجود بالفعل — دمج الاتنين في اسم واحد؟`))return;
     const fld=isC?'cust':LS==='town'?'town':'farm',store=LS==='farm'?'buys':'sales';
-    DB[store].forEach(r=>{if(String(r[fld]||'').trim()===old)r[fld]=n;});
+    DB[store].forEach(r=>{if(String(r[fld]||'').trim()===old){r[fld]=n;DB.dayU[store+'|'+r.date]=Date.now();}});
     if(isC){const ex=DB.lists.cust.find(x=>x.n===n);if(ex&&ex!==e){if(!ex.town)ex.town=e.town;DB.lists.cust=DB.lists.cust.filter(x=>x!==e);}else e.n=n;}
     else{DB.lists[LS]=[...new Set(DB.lists[LS].map(x=>x===old?n:x))];if(LS==='town')DB.lists.cust.forEach(x=>{if(x.town===old)x.town=n;});}}
-  persist();renderLists();['sale','buy'].forEach(loadGrid);}
+  DB.listsU=Date.now();persist();renderLists();['sale','buy'].forEach(loadGrid);}
 function lsDel(n){if(!confirm(`حذف "${n}" من القايمة؟ (الحركات القديمة مش هتتمسح)`))return;
-  if(LS==='cust')DB.lists.cust=DB.lists.cust.filter(x=>x.n!==n);else DB.lists[LS]=DB.lists[LS].filter(x=>x!==n);persist();renderLists();}
+  if(LS==='cust')DB.lists.cust=DB.lists.cust.filter(x=>x.n!==n);else DB.lists[LS]=DB.lists[LS].filter(x=>x!==n);DB.listsU=Date.now();persist();renderLists();}
 function bindLists(){$('#lsTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;LS=b.dataset.l;$('#lsSearch').value='';renderLists();});
   $('#lsAdd').onclick=lsAdd;[$('#lsName'),$('#lsTown')].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('#ac').classList.contains('hide')){e.preventDefault();lsAdd();}}));
   $('#lsSearch').addEventListener('input',renderLists);
@@ -719,7 +768,10 @@ function bindPdf(){$('#btnPdf').onclick=async()=>{if(await makePdf())pdfReady(fa
 function init(){buildLists();bindAc();bindLists();bindPdf();['sale','buy'].forEach(m=>{bindGrid(m);bindDate(m);bindDp(m);setDate(m,today());});
   bindTabs();bindReport();bindSettings();
   const fl=()=>{flush('sale');flush('buy');};window.addEventListener('pagehide',fl);document.addEventListener('visibilitychange',()=>{if(document.hidden)fl();});
-  if(DB.settings.fbUrl)cloudPull(false);}
+  if(DB.settings.fbUrl)cloudSync();
+  setInterval(()=>{if(!document.hidden)cloudSync();},20000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)cloudSync();});
+  window.addEventListener('online',cloudSync);}
 init();
 </script>
 </body>
