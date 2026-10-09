@@ -110,6 +110,7 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
 @media (max-width:600px){.chips,.kpis{grid-template-columns:repeat(2,1fr)}nav button{padding:8px 6px}.chip .v,.kpi .v{font-size:17px}}
 
 /* ---------- موبايل (v1.6) ---------- */
+.autop{color:var(--mu)!important;font-style:italic}
 button,a,input,select{touch-action:manipulation}
 header{position:sticky;top:0;z-index:60}
 nav#tabs{position:sticky;top:var(--hh,58px);z-index:59}
@@ -160,7 +161,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 </head>
 <body>
 <header>
-  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.8</span></div>
+  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.9</span></div>
   <div class="hright"><div id="syncState">💾 محفوظ على الجهاز</div><button class="sm" id="themeBtn" title="الوضع الليلي">🌙</button></div>
 </header>
 <nav id="tabs">
@@ -276,7 +277,7 @@ body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
 
 <script>
 'use strict';
-const VERSION='1.8';
+const VERSION='1.9';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const KEY='eggs_db_v1';
 const DEF_FB='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
@@ -359,7 +360,7 @@ function calcVal(k,r){if(k==='total'){const t=recTotal(r);return t?money(t):'';}
 function rowHtml(m,cols,r,i){return `<tr data-i="${i}"><td class="rn">${i+1}</td>`+cols.map(c=>{
     if(c.ty==='calc')return `<td class="calc" data-k="${c.k}">${calcVal(c.k,r)}</td>`;
     const v=r[c.k];
-    return `<td class="${c.cls}"><input data-k="${c.k}" value="${esc(isBlank(v)?'':v)}"${c.ty==='n'?' inputmode="decimal"':''}${c.list?` data-ac="${c.list}" class="acin"`:''}${c.ph?` placeholder="${c.ph}"`:''} autocomplete="off" autocorrect="off" spellcheck="false"></td>`;
+    return `<td class="${c.cls}"><input${/^[wrb]p$/.test(c.k)&&r[c.k[0]+'a']?' class="autop"':''} data-k="${c.k}" value="${esc(isBlank(v)?'':v)}"${c.ty==='n'?' inputmode="decimal"':''}${c.list?` data-ac="${c.list}" class="acin"`:''}${c.ph?` placeholder="${c.ph}"`:(/^[wrb]p$/.test(c.k)?(()=>{const p=((DB.dp[m]||{})[G[m].date]||{})[c.k[0]];return isBlank(p)?'':` placeholder="${p}"`;})():'')} autocomplete="off" autocorrect="off" spellcheck="false"></td>`;
   }).join('')+`<td class="dc"><button class="del" title="حذف الصف" tabindex="-1">×</button></td></tr>`;}
 function renderGrid(m){const cols=colsOf(m),g=G[m];
   let h='<thead><tr><th class="rn">#</th>'+cols.map(c=>`<th class="${c.cls}">${c.t}</th>`).join('')+'<th class="dc"></th></tr></thead><tbody>';
@@ -390,13 +391,13 @@ function defPrice(m,k,party){const dp=(DB.dp[m]||{})[G[m].date]||{};if(!isBlank(
 function bindGrid(m){const tb=$('#grid-'+m);
   tb.addEventListener('input',e=>{const inp=e.target;if(inp.tagName!=='INPUT')return;
     const tr=inp.closest('tr'),i=+tr.dataset.i,r=G[m].rows[i],k=inp.dataset.k;
-    const c=colsOf(m).find(x=>x.k===k);r[k]=c.ty==='n'?parseNum(inp.value):inp.value;
+    const c=colsOf(m).find(x=>x.k===k);r[k]=c.ty==='n'?parseNum(inp.value):inp.value;if(/^[wrb]p$/.test(k)){delete r[k[0]+'a'];inp.classList.remove('autop');}
     refreshRow(tr,r);if(i===G[m].rows.length-1&&!isEmpty(m,r))appendRow(m);
     updateFoot(m);daySum(m);schedSave(m);});
   tb.addEventListener('change',e=>{const inp=e.target;if(inp.tagName!=='INPUT')return;
     const tr=inp.closest('tr'),r=G[m].rows[+tr.dataset.i],k=inp.dataset.k,g=CFG[m];let ch=false;
     if(k===g.party&&g.town&&!String(r.town||'').trim()){const tw=acTown(r[g.party]);if(tw){r.town=tw;setInput(tr,'town',tw);ch=true;}}
-    if(T.some(t=>t.k===k)&&num(r[k])>0&&isBlank(r[k+'p'])){const p=defPrice(m,k,r[g.party]);if(!isBlank(p)){r[k+'p']=p;setInput(tr,k+'p',p);ch=true;}}
+    if(T.some(t=>t.k===k)&&num(r[k])>0&&isBlank(r[k+'p'])){const p=defPrice(m,k,r[g.party]);if(!isBlank(p)){r[k+'p']=p;r[k+'a']=1;setInput(tr,k+'p',p);const pe=tr.querySelector(`input[data-k="${k}p"]`);if(pe)pe.classList.add('autop');ch=true;}}
     if(ch){refreshRow(tr,r);updateFoot(m);daySum(m);schedSave(m);}});
   tb.addEventListener('keydown',e=>{const inp=e.target;if(inp.tagName!=='INPUT')return;
     const tr=inp.closest('tr'),i=+tr.dataset.i,ins=[...tr.querySelectorAll('input')],ci=ins.indexOf(inp);
@@ -414,7 +415,8 @@ function schedSave(m){clearTimeout(timers[m]);$('#sv-'+m).textContent='… جا�
 function flush(m){if(timers[m]){clearTimeout(timers[m]);timers[m]=null;saveGrid(m);}}
 function saveGrid(m){const g=G[m],c=CFG[m],cols=colsOf(m);
   const recs=g.rows.filter(r=>!isEmpty(m,r)).map(r=>{if(!r.id)r.id=uid();const o={id:r.id,date:g.date};
-    cols.forEach(col=>{if(col.ty==='calc')return;let v=r[col.k];if(col.ty==='t')o[col.k]=String(v||'').trim();else o[col.k]=isBlank(v)?null:v;});return o;});
+    cols.forEach(col=>{if(col.ty==='calc')return;let v=r[col.k];if(col.ty==='t')o[col.k]=String(v||'').trim();else o[col.k]=isBlank(v)?null:v;});
+    T.forEach(t=>{const pk=t.k+'p',ak=t.k+'a';if(num(o[t.k])>0&&isBlank(o[pk])){const p=defPrice(m,t.k,o[c.party]);if(!isBlank(p)){o[pk]=p;r[pk]=p;r[ak]=1;}}if(r[ak]&&!isBlank(o[pk]))o[ak]=1;});return o;});
   DB[c.store]=DB[c.store].filter(x=>x.date!==g.date).concat(recs);DB.dayU[c.store+'|'+g.date]=Date.now();m==='sale'?seedLists(DB,recs,[]):seedLists(DB,[],recs);persist();renderLists();
   $('#sv-'+m).textContent='✓ اتحفظ '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});}
 
@@ -434,7 +436,7 @@ function bindDp(m){$$(`.dp[data-m="${m}"] input`).forEach(inp=>inp.addEventListe
   $$(`.dp[data-m="${m}"] input`).forEach(inp=>inp.addEventListener('change',()=>{clearTimeout(inp._t);inp._dirty=0;
   const k=inp.dataset.dp,v=parseNum(inp.value),d=G[m].date;DB.dp[m]=DB.dp[m]||{};DB.dp[m][d]=Object.assign({},DB.dp[m][d]);
   if(v===null)delete DB.dp[m][d][k];else DB.dp[m][d][k]=v;DB.dpU[m+'|'+d]=Date.now();
-  if(v!==null){let ch=false;G[m].rows.forEach(r=>{if(num(r[k])>0&&isBlank(r[k+'p'])){r[k+'p']=v;ch=true;}});if(ch){renderGrid(m);schedSave(m);return;}}
+  {let ch=false;G[m].rows.forEach(r=>{if(num(r[k])>0&&(isBlank(r[k+'p'])||r[k+'a'])){const nv=v!==null?v:defPrice(m,k,r[CFG[m].party]);if(r[k+'p']!==nv){r[k+'p']=isBlank(nv)?null:nv;r[k+'a']=1;ch=true;}}});if(ch){renderGrid(m);saveGrid(m);return;}}
   persist();}));}
 function setDate(m,d){if(!d)return;flush(m);G[m].date=d;$('#date-'+m).value=d;
   $('#dn-'+m).textContent=dayName(d)+(d===today()?' (النهارده)':'');$('#sv-'+m).textContent='';fillDp(m);loadGrid(m);}
@@ -876,7 +878,7 @@ function openSheet(m,i){const g=CFG[m],isNew=i<0,r=isNew?{id:uid()}:Object.assig
   let h=`<h4>${isNew?(m==='sale'?'➕ بيع جديد':'➕ شراء جديد'):'✎ تعديل'} <span class="hint">${nice(G[m].date)}</span></h4>`;
   h+=fl(g.party,g.pn,r[g.party],` class="acin" data-ac="${g.list}"`);
   if(g.town)h+=fl('town','البلد',r.town,' class="acin" data-ac="dlTown"');
-  T.forEach(t=>{h+=`<div class="typ" style="background:var(--${t.c})"><div class="two">${fl(t.k,t.n+' ('+unit()+')',r[t.k],' inputmode="decimal"')}${fl(t.k+'p','سعر '+t.n,r[t.k+'p'],' inputmode="decimal"')}</div></div>`;});
+  T.forEach(t=>{h+=`<div class="typ" style="background:var(--${t.c})"><div class="two">${fl(t.k,t.n+' ('+unit()+')',r[t.k],' inputmode="decimal"')}${fl(t.k+'p','سعر '+t.n,r[t.k+'p'],' inputmode="decimal"'+(r[t.k+'a']?' class="autop"':'')+(()=>{const p=defPrice(m,t.k,r[g.party]);return isBlank(p)?'':` placeholder="تلقائي ${p}"`;})())}</div></div>`;});
   if(g.paid)h+=fl('paid','المدفوع (فاضي = دفع كامل)',r.paid,' inputmode="decimal" placeholder="كاش"');
   h+=fl('notes','ملاحظات',r.notes);
   h+=`<div class="tot" id="shTot"></div><div class="acts"><button class="on" id="shSave">💾 حفظ</button>${isNew?'':'<button id="shDel" style="color:#dc2626">🗑️ حذف</button>'}<button id="shCancel">إلغاء</button></div>`;
@@ -885,7 +887,7 @@ function openSheet(m,i){const g=CFG[m],isNew=i<0,r=isNew?{id:uid()}:Object.assig
   if(isNew)setTimeout(()=>{const f=$('#shBox input');if(f)f.focus();},80);}
 function closeSheet(fromBack){if(!fromBack&&history.state&&history.state.sheet){try{history.back();}catch(e){}}$('#sheet').classList.add('hide');document.body.style.overflow='';SH=null;acHide();if(pendingRefresh){pendingRefresh=false;setTimeout(refreshAll,50);}}
 function shRead(){const g=CFG[SH.m];$$('#shBox input[data-sk]').forEach(inp=>{const k=inp.dataset.sk;const n=k===g.party||k==='town'||k==='notes';SH.r[k]=n?inp.value:parseNum(inp.value);});}
-function shTot(){if(!SH)return;shRead();const g=CFG[SH.m],r=SH.r,t=recTotal(r);
+function shTot(){if(!SH)return;shRead();const g=CFG[SH.m],r=Object.assign({},SH.r);T.forEach(x=>{if(num(r[x.k])>0&&isBlank(r[x.k+'p'])){const p=defPrice(SH.m,x.k,r[g.party]);if(!isBlank(p))r[x.k+'p']=p;}});const t=recTotal(r);
   $('#shTot').innerHTML=`<span>الإجمالي: ${money(t)}</span>${g.paid?`<span>${recRem(r)>0.001?'الباقي: '+money(recRem(r)):'✓ مدفوع'}</span>`:''}`;}
 function shSave(){shRead();const m=SH.m,g=CFG[m],r=SH.r;
   if(isEmpty(m,r))return alert('اكتب البيانات الأول');
@@ -898,12 +900,13 @@ function bindCards(){
     const c=e.target.closest('.rc');if(c){openSheet(c.dataset.m,+c.dataset.ci);return;}
     const v=e.target.closest('.vt');if(v){localStorage.setItem('eggs_view',cardMode()?'grid':'cards');applyMode();return;}
     if(e.target.id==='shSave')shSave();else if(e.target.id==='shDel')shDel();else if(e.target.id==='shCancel'||e.target.id==='sheet')closeSheet();});
-  $('#shBox').addEventListener('input',e=>{if(e.target.dataset.sk)shTot();});
+  $('#shBox').addEventListener('input',e=>{const k=e.target.dataset.sk;if(!k)return;if(SH&&/^[wrb]p$/.test(k)){delete SH.r[k[0]+'a'];e.target.classList.remove('autop');}shTot();});
   $('#shBox').addEventListener('change',e=>{const k=e.target.dataset.sk;if(!SH||!k)return;shRead();const g=CFG[SH.m],r=SH.r;
     const set=(kk,v)=>{const el=$(`#shBox input[data-sk="${kk}"]`);if(el)el.value=v;};
     if(k===g.party&&g.town&&!String(r.town||'').trim()){const tw=acTown(r[g.party]);if(tw)set('town',tw);}
-    if(T.some(t=>t.k===k)&&num(r[k])>0&&isBlank(r[k+'p'])){const p=defPrice(SH.m,k,r[g.party]);if(!isBlank(p))set(k+'p',p);}
+    if(k===g.party||T.some(t=>t.k===k)){T.forEach(t=>{const pe=$(`#shBox input[data-sk="${t.k}p"]`);if(!pe)return;const p=defPrice(SH.m,t.k,r[g.party]);pe.placeholder=isBlank(p)?'':'تلقائي '+p;if(r[t.k+'a']&&!isBlank(p)&&pe.value!==String(p)){pe.value=p;}});}
     shTot();});
+  $('#shBox').addEventListener('focusin',e=>{const t=e.target;if(t.tagName==='INPUT'&&t.getAttribute('inputmode')==='decimal'&&t.value)setTimeout(()=>{try{t.select();t.setSelectionRange(0,t.value.length);}catch(x){}},0);});
   $('#shBox').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&$('#ac').classList.contains('hide')){e.preventDefault();const ins=$$('#shBox input[data-sk]'),i=ins.indexOf(e.target);if(i<ins.length-1)ins[i+1].focus();else shSave();}});
   window.addEventListener('resize',applyMode);
   /* زرار الرجوع في أندرويد يقفل الشاشة بدل ما يخرج من البرنامج */
