@@ -108,6 +108,47 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
 #pdfWrap{position:fixed;top:0;left:-30000px}
 #pdfStage{width:1120px;background:#fff;color:#1e2433;padding:24px;direction:rtl}
 @media (max-width:600px){.chips,.kpis{grid-template-columns:repeat(2,1fr)}nav button{padding:8px 6px}.chip .v,.kpi .v{font-size:17px}}
+
+/* ---------- موبايل (v1.6) ---------- */
+button,a,input,select{touch-action:manipulation}
+header{position:sticky;top:0;z-index:60}
+nav#tabs{position:sticky;top:var(--hh,58px);z-index:59}
+.viewbar{display:flex;justify-content:flex-start;margin:0 0 8px}
+.cards{display:none}
+body.cardmode .cards{display:block}
+body.cardmode .gridwrap,body.cardmode .gridwrap+.bar{display:none}
+.rc{background:var(--p);border:1px solid var(--ln);border-radius:14px;padding:11px 13px;margin-bottom:9px;box-shadow:var(--sh);display:flex;gap:10px;align-items:center;cursor:pointer}
+.rc:active{transform:scale(.99)}
+.rc .who{flex:1;min-width:0}.rc .who b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc .who small{color:var(--mu);font-size:12.5px}
+.rc .amt{text-align:left;white-space:nowrap}.rc .amt b{display:block;font-size:17px;color:var(--ac)}
+.rc .amt small{font-size:12px}.rc .rem{color:#dc2626;font-weight:700}
+.addcard{width:100%;padding:14px;font-size:16px;font-weight:800;border-radius:14px;margin-bottom:10px}
+#sheet{position:fixed;inset:0;z-index:250;background:rgba(15,20,32,.45);display:flex;align-items:flex-end;justify-content:center}
+#sheet.hide{display:none}
+#sheet .sh{background:var(--p);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+#sheet h4{margin:0 0 12px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+#sheet .fl{display:block;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--mu)}
+#sheet .fl input{display:block;width:100%;margin-top:4px;padding:11px 12px;border:1.5px solid var(--ln);border-radius:11px;background:var(--p2);color:var(--tx);font-size:16px;font-family:inherit;box-sizing:border-box}
+#sheet .fl input:focus{outline:none;border-color:var(--ac);background:var(--p)}
+#sheet .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#sheet .typ{border-radius:12px;padding:8px 10px 2px;margin-bottom:8px}
+#sheet .tot{background:var(--ac2);color:var(--ac);border-radius:12px;padding:10px 12px;font-weight:800;margin:4px 0 12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+#sheet .acts{display:flex;gap:8px}#sheet .acts button{flex:1;padding:13px;font-size:15px}
+@media (max-width:700px){
+  html,body{font-size:15px}
+  input,select,textarea,.f{font-size:16px!important}
+  header{padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top))}
+  .brand{font-size:16px}
+  #syncState{max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+  .seg{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{flex-shrink:0;white-space:nowrap}
+  .dp span{flex:1 1 40%}.dp input{width:100%}
+  #modal .box{align-self:flex-end;border-radius:18px 18px 0 0;width:100%;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+  #modal{padding:0;align-items:flex-end}
+  #ac{z-index:400}
+}
 @media print{
  :root,:root[data-theme="dark"]{color-scheme:light;--bg:#fff;--p:#fff;--p2:#f3f4f8;--ln:#cfd4de;--tx:#000;--mu:#444;--sh:none;--ac2:#eef0ff}
  header,nav,.seg,.tools,#pickBox,.bar,.no-print,#ac,#modal{display:none!important}
@@ -119,7 +160,7 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
 </head>
 <body>
 <header>
-  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.5</span></div>
+  <div class="brand">🥚 بيع وشراء البيض<span class="ver">v1.6</span></div>
   <div class="hright"><div id="syncState">💾 محفوظ على الجهاز</div><button class="sm" id="themeBtn" title="الوضع الليلي">🌙</button></div>
 </header>
 <nav id="tabs">
@@ -146,7 +187,7 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
       <span>بلدي <input class="f" data-dp="b" inputmode="decimal"></span>
       <span class="hint">بتتحط تلقائي لما تكتب الكمية · الكميات بالـ<span class="unitName"></span></span>
     </div>
-    <div class="gridwrap"><table class="grid" id="grid-sale"></table></div>
+    <div class="viewbar"><button class="sm vt" data-vt="sale"></button></div><div class="cards" id="cards-sale"></div><div class="gridwrap"><table class="grid" id="grid-sale"></table></div>
     <div class="bar" style="margin-top:8px"><button class="sm" data-add="sale">+ صف جديد</button><span class="hint">Enter = الخانة اللي بعدها · المدفوع فاضي = كاش (اتدفع كامل) · لتسجيل سداد فقط: اكتب اسم العميل والمبلغ في المدفوع</span></div>
     <div class="chips" id="sum-sale"></div>
   </section>
@@ -168,7 +209,7 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
       <span>بلدي <input class="f" data-dp="b" inputmode="decimal"></span>
       <span class="hint">الكميات بالـ<span class="unitName"></span></span>
     </div>
-    <div class="gridwrap"><table class="grid" id="grid-buy"></table></div>
+    <div class="viewbar"><button class="sm vt" data-vt="buy"></button></div><div class="cards" id="cards-buy"></div><div class="gridwrap"><table class="grid" id="grid-buy"></table></div>
     <div class="bar" style="margin-top:8px"><button class="sm" data-add="buy">+ صف جديد</button></div>
     <div class="chips" id="sum-buy"></div>
   </section>
@@ -231,11 +272,11 @@ h3::before{content:'';display:inline-block;width:4px;height:14px;background:var(
   </section>
 </main>
 
-<div id="ac" class="hide"></div><div id="modal" class="hide"><div class="box"><h4 id="mTitle"></h4><div class="hint" id="mSub"></div><div class="acts" id="mActs"></div></div></div><datalist id="dlCust"></datalist><datalist id="dlTown"></datalist><datalist id="dlFarm"></datalist>
+<div id="sheet" class="hide"><div class="sh" id="shBox"></div></div><div id="ac" class="hide"></div><div id="modal" class="hide"><div class="box"><h4 id="mTitle"></h4><div class="hint" id="mSub"></div><div class="acts" id="mActs"></div></div></div><datalist id="dlCust"></datalist><datalist id="dlTown"></datalist><datalist id="dlFarm"></datalist>
 
 <script>
 'use strict';
-const VERSION='1.5';
+const VERSION='1.6';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const KEY='eggs_db_v1';
 const DEF_FB='https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app';
@@ -324,7 +365,7 @@ function renderGrid(m){const cols=colsOf(m),g=G[m];
   let h='<thead><tr><th class="rn">#</th>'+cols.map(c=>`<th class="${c.cls}">${c.t}</th>`).join('')+'<th class="dc"></th></tr></thead><tbody>';
   g.rows.forEach((r,i)=>{h+=rowHtml(m,cols,r,i);});
   h+='</tbody><tfoot><tr><td class="rn">∑</td>'+cols.map(c=>`<td class="${c.cls==='c-party'?'c-party':''}" data-f="${c.k}"></td>`).join('')+'<td></td></tr></tfoot>';
-  $('#grid-'+m).innerHTML=h;updateFoot(m);daySum(m);}
+  $('#grid-'+m).innerHTML=h;updateFoot(m);daySum(m);renderCards(m);}
 function filled(m){return G[m].rows.filter(r=>!isEmpty(m,r));}
 function updateFoot(m){const rows=filled(m),ft=$('#grid-'+m+' tfoot');if(!ft)return;
   const set=(k,v)=>{const td=ft.querySelector(`[data-f="${k}"]`);if(td)td.textContent=v;};
@@ -645,7 +686,7 @@ async function cloudSync(){
     const merged=remote?mergeDB(DB,remote):DB;
     const changedLocal=sig(merged)!==sig(DB);
     if(changedLocal){
-      const editing=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('table.grid, .grid');
+      const editing=SH||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('table.grid, .grid'));
       DB=merged;saveLocal();
       if(editing)pendingRefresh=true;else refreshAll();
     }
@@ -816,8 +857,58 @@ function bindPdf(){$('#btnPdf').onclick=async()=>{if(await makePdf())pdfReady(fa
   $('#themeBtn').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
   setTheme(document.documentElement.dataset.theme==='dark'?'dark':'light');}
 
+
+/* ---------- وضع الكروت للموبايل (v1.6) ---------- */
+function cardMode(){const v=localStorage.getItem('eggs_view')||'auto';return v==='cards'||(v==='auto'&&window.innerWidth<=700);}
+function applyMode(){document.body.classList.toggle('cardmode',cardMode());$$('.vt').forEach(b=>b.textContent=cardMode()?'📋 عرض الجدول':'📱 عرض الكروت');}
+function renderCards(m){const box=$('#cards-'+m);if(!box)return;const g=CFG[m],rows=G[m].rows.map((r,i)=>({r,i})).filter(x=>!isEmpty(m,x.r));
+  const u=unit();
+  box.innerHTML=`<button class="addcard on" data-cadd="${m}">➕ ${m==='sale'?'بيع جديد':'شراء جديد'}</button>`+
+   (rows.length?rows.map(({r,i})=>{const q=T.filter(t=>num(r[t.k])).map(t=>`${t.n} ${fmt(num(r[t.k]),2)}×${money(num(r[t.k+'p']))}`).join(' · ');
+     const rem=g.paid?recRem(r):0;
+     return `<div class="rc" data-ci="${i}" data-m="${m}"><div class="who"><b>${esc(String(r[g.party]||'').trim()||'بدون اسم')}</b><small>${esc(r.town||'')}${r.town&&q?' · ':''}${q||(g.paid&&!isBlank(r.paid)?'سداد':'')}</small>${r.notes?`<small style="display:block">📝 ${esc(r.notes)}</small>`:''}</div>
+       <div class="amt"><b>${money(recTotal(r))}</b>${g.paid&&rem>0.001?`<small class="rem">باقي ${money(rem)}</small>`:g.paid&&recTotal(r)?'<small style="color:#16a34a">✓ مدفوع</small>':''}</div></div>`;}).join('')
+   :`<p class="hint" style="text-align:center;padding:14px">مفيش ${m==='sale'?'مبيعات':'مشتريات'} في اليوم ده</p>`);}
+let SH=null;
+function openSheet(m,i){const g=CFG[m],isNew=i<0,r=isNew?{id:uid()}:Object.assign({},G[m].rows[i]);SH={m,i,r};
+  const fl=(k,l,v,o)=>`<label class="fl">${l}<input data-sk="${k}" value="${esc(isBlank(v)?'':v)}"${o||''} autocomplete="off" autocorrect="off" spellcheck="false"></label>`;
+  let h=`<h4>${isNew?(m==='sale'?'➕ بيع جديد':'➕ شراء جديد'):'✎ تعديل'} <span class="hint">${nice(G[m].date)}</span></h4>`;
+  h+=fl(g.party,g.pn,r[g.party],` class="acin" data-ac="${g.list}"`);
+  if(g.town)h+=fl('town','البلد',r.town,' class="acin" data-ac="dlTown"');
+  T.forEach(t=>{h+=`<div class="typ" style="background:var(--${t.c})"><div class="two">${fl(t.k,t.n+' ('+unit()+')',r[t.k],' inputmode="decimal"')}${fl(t.k+'p','سعر '+t.n,r[t.k+'p'],' inputmode="decimal"')}</div></div>`;});
+  if(g.paid)h+=fl('paid','المدفوع (فاضي = دفع كامل)',r.paid,' inputmode="decimal" placeholder="كاش"');
+  h+=fl('notes','ملاحظات',r.notes);
+  h+=`<div class="tot" id="shTot"></div><div class="acts"><button class="on" id="shSave">💾 حفظ</button>${isNew?'':'<button id="shDel" style="color:#dc2626">🗑️ حذف</button>'}<button id="shCancel">إلغاء</button></div>`;
+  $('#shBox').innerHTML=h;$('#sheet').classList.remove('hide');document.body.style.overflow='hidden';shTot();
+  if(isNew)setTimeout(()=>{const f=$('#shBox input');if(f)f.focus();},80);}
+function closeSheet(){$('#sheet').classList.add('hide');document.body.style.overflow='';SH=null;acHide();if(pendingRefresh){pendingRefresh=false;setTimeout(refreshAll,50);}}
+function shRead(){const g=CFG[SH.m];$$('#shBox input[data-sk]').forEach(inp=>{const k=inp.dataset.sk;const n=k===g.party||k==='town'||k==='notes';SH.r[k]=n?inp.value:parseNum(inp.value);});}
+function shTot(){if(!SH)return;shRead();const g=CFG[SH.m],r=SH.r,t=recTotal(r);
+  $('#shTot').innerHTML=`<span>الإجمالي: ${money(t)}</span>${g.paid?`<span>${recRem(r)>0.001?'الباقي: '+money(recRem(r)):'✓ مدفوع'}</span>`:''}`;}
+function shSave(){shRead();const m=SH.m,g=CFG[m],r=SH.r;
+  if(isEmpty(m,r))return alert('اكتب البيانات الأول');
+  if(SH.i<0){const k=G[m].rows.findIndex(x=>isEmpty(m,x));if(k>=0)G[m].rows[k]=r;else G[m].rows.push(r);}else G[m].rows[SH.i]=r;
+  while(G[m].rows.filter(x=>isEmpty(m,x)).length<3)G[m].rows.push(blankRow());
+  closeSheet();saveGrid(m);renderGrid(m);}
+function shDel(){if(!confirm('حذف السطر ده؟'))return;const m=SH.m;G[m].rows.splice(SH.i,1);while(G[m].rows.length<10)G[m].rows.push(blankRow());closeSheet();saveGrid(m);renderGrid(m);}
+function bindCards(){
+  document.addEventListener('click',e=>{const a=e.target.closest('[data-cadd]');if(a){openSheet(a.dataset.cadd,-1);return;}
+    const c=e.target.closest('.rc');if(c){openSheet(c.dataset.m,+c.dataset.ci);return;}
+    const v=e.target.closest('.vt');if(v){localStorage.setItem('eggs_view',cardMode()?'grid':'cards');applyMode();return;}
+    if(e.target.id==='shSave')shSave();else if(e.target.id==='shDel')shDel();else if(e.target.id==='shCancel'||e.target.id==='sheet')closeSheet();});
+  $('#shBox').addEventListener('input',e=>{if(e.target.dataset.sk)shTot();});
+  $('#shBox').addEventListener('change',e=>{const k=e.target.dataset.sk;if(!SH||!k)return;shRead();const g=CFG[SH.m],r=SH.r;
+    const set=(kk,v)=>{const el=$(`#shBox input[data-sk="${kk}"]`);if(el)el.value=v;};
+    if(k===g.party&&g.town&&!String(r.town||'').trim()){const tw=acTown(r[g.party]);if(tw)set('town',tw);}
+    if(T.some(t=>t.k===k)&&num(r[k])>0&&isBlank(r[k+'p'])){const p=defPrice(SH.m,k,r[g.party]);if(!isBlank(p))set(k+'p',p);}
+    shTot();});
+  $('#shBox').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&$('#ac').classList.contains('hide')){e.preventDefault();const ins=$$('#shBox input[data-sk]'),i=ins.indexOf(e.target);if(i<ins.length-1)ins[i+1].focus();else shSave();}});
+  window.addEventListener('resize',applyMode);
+  const hd=document.querySelector('header');const setH=()=>document.documentElement.style.setProperty('--hh',hd.offsetHeight+'px');setH();window.addEventListener('resize',setH);
+  applyMode();}
+
 function init(){buildLists();bindAc();bindLists();bindPdf();['sale','buy'].forEach(m=>{bindGrid(m);bindDate(m);bindDp(m);setDate(m,today());});
-  bindTabs();bindReport();bindSettings();
+  bindTabs();bindReport();bindSettings();bindCards();
   const fl=()=>{flush('sale');flush('buy');};window.addEventListener('pagehide',fl);document.addEventListener('visibilitychange',()=>{if(document.hidden)fl();});
   if(DB.settings.fbUrl)cloudSync();
   setInterval(()=>{if(!document.hidden)cloudSync();},20000);
