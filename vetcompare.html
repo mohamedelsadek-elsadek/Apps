@@ -121,7 +121,7 @@ h1,h2,h3{margin:0}
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v20 (عرض متجاوب للشاشات الكبيرة)</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v21 (الإنزيمات بأنواعها)</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -415,6 +415,9 @@ h1,h2,h3{margin:0}
 
   <!-- ⚙️ الإنزيمات والإضافات -->
   <section id="tab-enzymes" style="display:none">
+    <div id="enzCats" class="chipbar"></div>
+    <div id="enzBody"></div>
+    <div class="card" style="margin-top:14px"><h3 style="font-size:14px;margin-bottom:8px">💡 مقترح إضافات حسب المشكلة</h3>
     <div class="field"><label>المشكلة التي تواجهك</label>
       <select id="enzymeProblem">
         <option value="">اختر المشكلة</option>
@@ -424,7 +427,7 @@ h1,h2,h3{margin:0}
       </select>
     </div>
     <button class="btn" onclick="showEnzymesSuggestions()">💡 اقترح المزيج الأمثل</button>
-    <div id="enzymesSuggestions" style="margin-top:12px"></div>
+    <div id="enzymesSuggestions" style="margin-top:12px"></div></div>
   </section>
 
   <!-- 💰 مقارن الأسعار -->
@@ -650,8 +653,8 @@ h1,h2,h3{margin:0}
 "use strict";
 var DEFAULT_FB={"apiKey":"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs","authDomain":"my-app-sync-11ad9.firebaseapp.com","databaseURL":"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app","projectId":"my-app-sync-11ad9","storageBucket":"my-app-sync-11ad9.firebasestorage.app","messagingSenderId":"177039534756","appId":"1:177039534756:web:367ecccc684c2cdfdd1431"};
 var LS_KEY="vetcompare.data.v1", LS_FB="vetcompare.fb.v1", LS_FBON="vetcompare.fbon.v1";
-var S={products:[],actives:[],protocols:[],treatments:[],vaxProducts:[],disinfectants:[],lists:{}};
-function snapshot(){return {products:S.products,actives:S.actives,protocols:S.protocols,treatments:S.treatments,vaxProducts:S.vaxProducts,disinfectants:S.disinfectants,lists:S.lists}}
+var S={products:[],actives:[],protocols:[],treatments:[],vaxProducts:[],disinfectants:[],enzymes:[],lists:{}};
+function snapshot(){return {products:S.products,actives:S.actives,protocols:S.protocols,treatments:S.treatments,vaxProducts:S.vaxProducts,disinfectants:S.disinfectants,enzymes:S.enzymes,lists:S.lists}}
 var $=function(s){return document.querySelector(s)};
 var $all=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
 function uid(){return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -663,7 +666,7 @@ function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clea
 
 /* ============ تخزين ============ */
 function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify(snapshot()))}catch(e){}}
-function load(){try{var d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.products)S.products=d.products;if(d&&d.actives)S.actives=d.actives;if(d&&d.protocols)S.protocols=d.protocols;if(d&&d.treatments)S.treatments=d.treatments;if(d&&d.vaxProducts)S.vaxProducts=d.vaxProducts;if(d&&d.disinfectants)S.disinfectants=d.disinfectants;if(d&&d.lists)S.lists=d.lists}catch(e){}
+function load(){try{var d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.products)S.products=d.products;if(d&&d.actives)S.actives=d.actives;if(d&&d.protocols)S.protocols=d.protocols;if(d&&d.treatments)S.treatments=d.treatments;if(d&&d.vaxProducts)S.vaxProducts=d.vaxProducts;if(d&&d.disinfectants)S.disinfectants=d.disinfectants;if(d&&d.enzymes)S.enzymes=d.enzymes;if(d&&d.lists)S.lists=d.lists}catch(e){}
 }
 function save(push){persist();if(push&&fbRef&&!fbApplying){try{fbRef.set(snapshot())}catch(e){}}}
 function alive(){return S.products.filter(function(p){return !p.deleted})}
@@ -890,6 +893,7 @@ function initFB(cfg){
         S.treatments=mergeColl(S.treatments||[],cloud.treatments||[]);
         S.vaxProducts=mergeColl(S.vaxProducts||[],cloud.vaxProducts||[]);
         S.disinfectants=mergeColl(S.disinfectants||[],cloud.disinfectants||[]);
+        S.enzymes=mergeColl(S.enzymes||[],cloud.enzymes||[]);
         if(cloud.lists){S.lists=S.lists||{};Object.keys(cloud.lists).forEach(function(k){S.lists[k]=normList((S.lists[k]||[]).concat(cloud.lists[k]||[]))})}
         var removed=dedupeAll();
         persist();renderAll();
@@ -1700,6 +1704,118 @@ function renderHerbs(){
   
   $("#herbList").innerHTML=html||'<div class="empty"><h3>لم أجد نتائج</h3></div>';
 }
+
+
+/* ============ الإنزيمات: أنواع وفايدة كل نوع + مقارنة المنتجات بتكلفة الطن ============ */
+var ENZ_CATS=[
+ {k:"phy",ar:"فايتيز",en:"Phytase",icon:"🦴",color:"#22c55e",
+  what:"بيكسر الفايتات (حمض الفايتيك) اللي في الذرة والصويا والردة، واللي حابسة الفوسفور والكالسيوم والزنك وجزء من البروتين والطاقة.",
+  benefit:["يحرر الفوسفور النباتي فتقلل إضافة DCP/MCP وتوفّر في تكلفة الطن","يقلل الفوسفور في الزرق (أقل تلوث)","بيحسن امتصاص الكالسيوم والزنك وجزء من الأحماض الأمينية","في الجرعات العالية (Superdosing) بيرفع الأداء ويحسن التحويل"],
+  unit:"FTU — الجرعة القياسية 500 FTU/كجم علف (= 50 جم/طن من منتج 10,000 FTU/جم). Superdosing من 1000 لـ 2000 FTU.",
+  matrix:"عند 500 FTU تقريبًا: فوسفور متاح +0.12–0.15% · كالسيوم +0.10–0.13% · صوديوم +0.03% · طاقة +30–50 ك.ك/كجم (حسب الشركة).",
+  tip:"اختار منتج ثابت حراريًا لو العلف محبب. ولما تستخدم الـ matrix لازم تقلل الفوسفور والكالسيوم فعليًا في التركيبة وإلا مش هتوفّر."},
+ {k:"xyl",ar:"زيلانيز",en:"Xylanase",icon:"🌾",color:"#f59e0b",
+  what:"بيكسر الأرابينوزيلان (ألياف NSP) في جدار خلايا الذرة والقمح والردة والـ DDGS.",
+  benefit:["بيفك النشا والبروتين المحبوسين جوه جدار الخلية → طاقة أكتر","بيقلل لزوجة محتوى الأمعاء (مهم جدًا مع القمح)","زرق أنشف وفرشة أحسن","بيغذي البكتيريا النافعة بالـ XOS (أثر بريبيوتيك)"],
+  unit:"مفيش وحدة موحدة: BXU (Econase) · EPU (Hostazym) · XU (Danisco) · U/g للمحلي — قارن بالجرعة الموصى بيها مش بالرقم.",
+  matrix:"طاقة +50–100 ك.ك/كجم (حسب الجرعة والخامات).",
+  tip:"ده أشهر إنزيم بيتباع كـ \"إنزيم طاقة\". فعاليته أعلى لما يكون في التركيبة قمح أو ردة أو DDGS."},
+ {k:"nrg",ar:"إنزيمات طاقة (مزيج)",en:"Multi-carbohydrase / NSPase",icon:"⚡",color:"#eab308",
+  what:"خليط كربوهيدرازات: زيلانيز + بيتا جلوكانيز + أميليز وأحيانًا سليوليز وبكتينيز وألفا جالاكتوزيديز.",
+  benefit:["بيهاجم أكتر من نوع ألياف ونشا في نفس الوقت","بيرفع الطاقة الممثلة فتقدر تقلل الزيت في التركيبة","مناسب للتركيبات المتنوعة الخامات"],
+  unit:"كل مكون ليه وحدته — ارجع لشهادة المنتج.",
+  matrix:"طاقة +60–120 ك.ك/كجم · وأحيانًا بروتين وأحماض أمينية +1–3%.",
+  tip:"متجمعش مزيج طاقة + زيلانيز منفرد بنفس الـ matrix — هتحسب الطاقة مرتين."},
+ {k:"pro",ar:"بروتييز",en:"Protease",icon:"🥩",color:"#ef4444",
+  what:"بيكسر البروتين ومثبطات التربسين واللكتينات في كسب الصويا والخامات البروتينية.",
+  benefit:["بيرفع هضم البروتين والأحماض الأمينية 3–5%","تقدر تقلل بروتين العليقة 0.5–1% أو تقلل الصويا","بيقلل البروتين غير المهضوم اللي بيوصل للأمعاء الخلفية → أقل نكروتك إنترايتس وأقل نشادر في العنبر","مفيد مع كسب صويا جودته متوسطة"],
+  unit:"PROT أو U/g حسب الشركة.",
+  matrix:"بروتين خام +1.5–3% من قيمته · ليسين/ميثيونين/ثريونين +2–5% هضم · طاقة +20–40 ك.ك.",
+  tip:"بيتضاف فوق الفايتيز والزيلانيز (Stacking) ونتيجته أوضح في الأعلاف عالية البروتين."},
+ {k:"man",ar:"بيتامنانيز",en:"β-Mannanase",icon:"🫘",color:"#8b5cf6",
+  what:"بيكسر البيتا مانان الموجود في كسب الصويا (ونخيل وجوز الهند).",
+  benefit:["البيتا مانان بيعمل استجابة مناعية كاذبة بتهدر طاقة — الإنزيم بيوفّرها للنمو","تحسين معامل التحويل وتجانس القطيع","زرق أنشف","فرقه أوضح في الأعلاف عالية الصويا وأوقات الإجهاد"],
+  unit:"U/g أو MU/kg حسب الشركة.",
+  matrix:"طاقة +70–100 ك.ك/كجم.",
+  tip:"أعلى أثر في البادي والنامي لأن نسبة الصويا فيهم أعلى."},
+ {k:"lip",ar:"ليبيز",en:"Lipase",icon:"🧈",color:"#06b6d4",
+  what:"بيهضم الدهون والزيوت (الدهون الثلاثية) لأحماض دهنية تتمتص.",
+  benefit:["مهم للكتاكيت أول أسبوعين لأن إفراز الليبيز والصفرا عندها لسه ضعيف","بيحسن الاستفادة من الزيت والدهون المشبعة/الحيوانية","بيحسن امتصاص فيتامينات A وD وE وK والصبغات","بيستخدم كتير مع المستحلبات (ليسيثين/لايزوليسيثين)"],
+  unit:"U/g.",
+  matrix:"بيرفع طاقة الدهون المضافة نفسها (مش طاقة العليقة كلها).",
+  tip:"فايدته أكبر لو نسبة الزيت في العليقة عالية أو بتستخدم دهون رخيصة."},
+ {k:"amy",ar:"أميليز",en:"α-Amylase",icon:"🍞",color:"#f97316",
+  what:"بيكسر النشا لسكريات بسيطة.",
+  benefit:["الكتكوت الصغير إفرازه من أميليز البنكرياس قليل — الإنزيم بيعوّض","بيحسن هضم نشا الذرة خصوصًا الذرة الجديدة أو المجففة على حرارة عالية","طاقة أكتر وبداية أقوى"],
+  unit:"U/g.", matrix:"طاقة +30–60 ك.ك/كجم.", tip:"غالبًا بيكون جزء من مزيج الطاقة مش لوحده."},
+ {k:"glu",ar:"بيتا جلوكانيز",en:"β-Glucanase",icon:"🌱",color:"#84cc16",
+  what:"بيكسر البيتا جلوكان في الشعير والشوفان.",
+  benefit:["بيقلل اللزوجة والزرق المبلول جدًا لو فيه شعير","بيحسن هضم الطاقة والبروتين"],
+  unit:"U/g.", matrix:"طاقة +40–80 ك.ك مع الشعير.", tip:"ملوش لازمة كبيرة في علف ذرة وصويا بس."},
+ {k:"gal",ar:"ألفا جالاكتوزيديز",en:"α-Galactosidase",icon:"💨",color:"#64748b",
+  what:"بيكسر السكريات قليلة التعدد (رافينوز وستاكيوز) في كسب الصويا.",
+  benefit:["بيقلل الغازات والإسهال الناتج عن تخمر السكريات دي","بيحسن الطاقة من الصويا"],
+  unit:"U/g.", matrix:"طاقة +20–40 ك.ك.", tip:"غالبًا جزء من المزيجات."},
+ {k:"oth",ar:"أخرى (سليوليز، بكتينيز...)",en:"Cellulase / Pectinase",icon:"🧪",color:"#94a3b8",
+  what:"إنزيمات بتكسر السليلوز والبكتين — أهم في المجترات والأعلاف عالية الألياف.",
+  benefit:["تحسين هضم الألياف والدريس في المجترات","تحسين الاستفادة من الردة والمخلفات"],
+  unit:"حسب الشركة.", matrix:"—", tip:"في الدواجن غالبًا بتيجي ضمن مزيج."}
+];
+var ENZ_SEED=[
+ {cat:"phy",name:"أوبتي فوس 10000",en:"OptiPhos 10000",company:"Huvepharma",origin:"بلغاريا",comp:"إنزيم فايتيز (Phytase 10,000)",dMin:50,dMax:50,price:720},
+ {cat:"phy",name:"اكسترافاي 10000",en:"Axtraphy 10000",company:"Danisco",origin:"",comp:"إنزيم فايتيز (Phytase 10,000)",dMin:50,dMax:50,price:750},
+ {cat:"phy",name:"فيموزايم ان تي بي 10000",en:"Vemozyme NTP 10000",company:"Vemozyme",origin:"بلغاريا",comp:"إنزيم فايتيز (Phytase 10,000)",dMin:50,dMax:50,price:650},
+ {cat:"xyl",name:"هوستازايم X",en:"Hostazym X",company:"Huvepharma",origin:"بلغاريا",comp:"زيلانيز — معروض كمزيج إنزيمات طاقة",dMin:100,dMax:100,price:600},
+ {cat:"xyl",name:"فيموزايم X",en:"Vemozyme X",company:"Vemozyme",origin:"بلغاريا",comp:"زيلانيز — معروض كمزيج إنزيمات طاقة",dMin:50,dMax:50,price:560},
+ {cat:"pro",name:"اكسترا برو",en:"Axtrapro",company:"Danisco",origin:"",comp:"إنزيم بروتييز (Protease)",dMin:50,dMax:50,price:1650},
+ {cat:"pro",name:"فيرمودايجست",en:"Fermodigest",company:"",origin:"أمريكي",comp:"إنزيم بروتييز (Protease)",dMin:300,dMax:300,price:320},
+ {cat:"man",name:"لايسيل",en:"Lycell",company:"",origin:"هندي",comp:"إنزيم بيتامانانيز (β-Mannanase)",dMin:150,dMax:250,price:460},
+ {cat:"man",name:"سي سي زايم",en:"CCT Zyme",company:"",origin:"كوريا الجنوبية",comp:"إنزيم بيتامانانيز (β-Mannanase)",dMin:500,dMax:500,price:320}
+];
+var ENZ_OFFER="عرض KVC 2026 للشركة المصرية";
+function seedEnzymes(){S.enzymes=S.enzymes||[];var added=0;
+  ENZ_SEED.forEach(function(e){var id="enz:"+norm(e.en);if(S.enzymes.some(function(x){return x.id===id}))return;
+    S.enzymes.push(Object.assign({id:id,offer:ENZ_OFFER,updatedAt:1,deleted:false},e));added++;});
+  if(added)persist();}
+var enzCat="phy";
+function enzAlive(){return (S.enzymes||[]).filter(function(x){return !x.deleted})}
+function enzCost(e,d){return (d||e.dMin||0)*(+e.price||0)/1000}
+function renderEnzymes(){
+  seedEnzymes();
+  var cnt={};enzAlive().forEach(function(e){cnt[e.cat]=(cnt[e.cat]||0)+1});
+  $("#enzCats").innerHTML=ENZ_CATS.map(function(c){return '<button class="chip'+(enzCat===c.k?' on':'')+'" onclick="enzCat=\''+c.k+'\';renderEnzymes()">'+c.icon+' '+esc(c.ar)+(cnt[c.k]?' ('+cnt[c.k]+')':'')+'</button>'}).join("");
+  var c=ENZ_CATS.filter(function(x){return x.k===enzCat})[0];
+  var list=enzAlive().filter(function(e){return e.cat===enzCat}).sort(function(a,b){return enzCost(a)-enzCost(b)});
+  var h='<div class="card" style="border-right:4px solid '+c.color+'"><h3 style="font-size:16px;margin-bottom:6px">'+c.icon+' '+esc(c.ar)+' <span style="color:var(--muted);font-size:12px">'+esc(c.en)+'</span></h3>'+
+   '<p style="font-size:13px;line-height:1.8;margin-bottom:8px"><b>بيعمل إيه:</b> '+esc(c.what)+'</p>'+
+   '<div style="font-size:13px;font-weight:800;margin-bottom:4px">✅ الفايدة:</div><ul style="margin:0 18px 8px 0;font-size:13px;line-height:1.9">'+c.benefit.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>'+
+   '<div class="prod-meta">📏 <b>الوحدة والجرعة:</b> '+esc(c.unit)+'</div>'+
+   '<div class="prod-meta">🧮 <b>قيم الـ Matrix:</b> '+esc(c.matrix)+'</div>'+
+   '<div class="prod-meta">💡 '+esc(c.tip)+'</div></div>';
+  h+='<div class="card"><h3 style="font-size:14px;margin-bottom:8px">📊 مقارنة المنتجات — مرتبة حسب تكلفة الطن</h3>';
+  if(list.length){var best=enzCost(list[0]);
+    h+='<div style="overflow-x:auto"><table style="width:100%;font-size:12.5px;border-collapse:collapse"><thead><tr style="background:var(--bg2)">'+["#","المنتج","الشركة / المنشأ","التركيب","الجرعة (جم/طن)","السعر (ج/كجم)","تكلفة الطن علف",""].map(function(x){return '<th style="padding:8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap">'+x+'</th>'}).join("")+'</tr></thead><tbody>'+
+    list.map(function(e,i){var c1=enzCost(e,e.dMin),c2=enzCost(e,e.dMax),dose=e.dMin===e.dMax||!e.dMax?e.dMin:e.dMin+' – '+e.dMax,cost=c1===c2?c1.toFixed(1):c1.toFixed(1)+' – '+c2.toFixed(1);
+      return '<tr style="border-bottom:1px solid var(--line)'+(i===0?';background:rgba(123,200,108,.10)':'')+'"><td style="padding:8px">'+(i===0?'🏆':i+1)+'</td><td style="padding:8px"><b>'+esc(e.name)+'</b><div style="color:var(--muted);font-size:11px">'+esc(e.en||'')+'</div>'+(e.offer?'<span class="badge b-ther">'+esc(e.offer)+'</span>':'')+'</td><td style="padding:8px">'+esc(e.company||'—')+(e.origin?'<div style="color:var(--muted);font-size:11px">'+esc(e.origin)+'</div>':'')+'</td><td style="padding:8px;white-space:normal;min-width:140px">'+esc(e.comp||'')+'</td><td style="padding:8px;text-align:center">'+dose+'</td><td style="padding:8px;text-align:center"><b>'+(+e.price||0).toLocaleString('en-US')+'</b></td><td style="padding:8px;text-align:center"><b style="color:var(--acc)">'+cost+' ج</b>'+(i>0&&best?'<div style="color:var(--muted);font-size:11px">+'+((c1/best-1)*100).toFixed(0)+'%</div>':'')+'</td><td style="padding:8px;white-space:nowrap"><button class="btn sec sm" onclick="enzEdit(\''+e.id+'\')">✎</button> <button class="btn sec sm" onclick="enzDel(\''+e.id+'\')">✕</button></td></tr>'}).join("")+'</tbody></table></div>'+
+    '<p style="color:var(--muted);font-size:11.5px;margin-top:8px">تكلفة الطن = الجرعة (جم/طن) × سعر الكيلو ÷ 1000. المقارنة بالتكلفة بس — اتأكد إن الـ matrix المضمون من كل شركة متقارب قبل ما تختار الأرخص.</p>';}
+  else h+='<div class="empty"><h3>لسه مفيش منتجات في القسم ده</h3></div>';
+  h+='<button class="btn" style="margin-top:8px" onclick="enzEdit(\'\')">➕ إضافة منتج '+esc(c.ar)+'</button></div><div id="enzForm"></div>';
+  $("#enzBody").innerHTML=h;
+}
+function enzEdit(id){var e=id?enzAlive().filter(function(x){return x.id===id})[0]:{cat:enzCat};if(!e)return;
+  var f=function(k,l,v,t){return '<div class="field"><label>'+l+'</label><input class="input" id="ez_'+k+'" value="'+esc(v==null?'':v)+'"'+(t?' inputmode="decimal"':'')+'></div>'};
+  $("#enzForm").innerHTML='<div class="card" style="border:2px solid var(--acc)"><h3 style="font-size:14px;margin-bottom:8px">'+(id?'✎ تعديل منتج':'➕ منتج جديد')+'</h3>'+
+   '<div class="field"><label>القسم</label><select id="ez_cat">'+ENZ_CATS.map(function(c){return '<option value="'+c.k+'"'+(c.k===e.cat?' selected':'')+'>'+esc(c.ar)+'</option>'}).join("")+'</select></div>'+
+   '<div class="row2">'+f('name','الاسم',e.name)+f('en','الاسم بالإنجليزي',e.en)+'</div><div class="row2">'+f('company','الشركة',e.company)+f('origin','المنشأ',e.origin)+'</div>'+f('comp','التركيب',e.comp)+
+   '<div class="row3">'+f('dMin','الجرعة من (جم/طن)',e.dMin,1)+f('dMax','إلى (اختياري)',e.dMax,1)+f('price','السعر (ج/كجم)',e.price,1)+'</div>'+f('offer','المصدر / العرض',e.offer)+
+   '<div class="row2"><button class="btn sec" onclick="$(\'#enzForm\').innerHTML=\'\'">إلغاء</button><button class="btn" onclick="enzSave(\''+(id||'')+'\')">💾 حفظ</button></div></div>';
+  $("#enzForm").scrollIntoView({behavior:"smooth"});}
+function enzSave(id){var g=function(k){return ($("#ez_"+k).value||"").trim()},n=function(k){return parseFloat(String(g(k)).replace(/[٠-٩]/g,function(d){return "٠١٢٣٤٥٦٧٨٩".indexOf(d)}))||0};
+  if(!g('name')){alert("اكتب اسم المنتج");return}
+  var d={cat:$("#ez_cat").value,name:g('name'),en:g('en'),company:g('company'),origin:g('origin'),comp:g('comp'),dMin:n('dMin'),dMax:n('dMax')||n('dMin'),price:n('price'),offer:g('offer'),updatedAt:now(),deleted:false};
+  if(id){var e=S.enzymes.filter(function(x){return x.id===id})[0];Object.assign(e,d)}else{d.id=uid();S.enzymes.push(d)}
+  enzCat=d.cat;save(true);renderEnzymes();toast("اتحفظ ✓")}
+function enzDel(id){if(!confirm("حذف المنتج؟"))return;var e=S.enzymes.filter(function(x){return x.id===id})[0];if(!e)return;e.deleted=true;e.updatedAt=now();save(true);renderEnzymes()}
 
 /* ============ نظام 6: الإنزيمات والإضافات ============ */
 var ENZYMES_KB=[
@@ -2809,7 +2925,7 @@ $all(".tab").forEach(function(t){t.addEventListener("click",function(){
   try{t.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"})}catch(e){}
   var v=t.getAttribute("data-tab");
   ["compare","need","products","disease","vaccines","disinf","interact","vitarctic","antib","cocc","lab","vent","watermix","updates","dosage","diseases","vaccines2","symptoms","herbs","enzymes","prices","shuttle","alerts","flock","risk","stats","actives"].forEach(function(n){var el=$("#tab-"+n);if(el)el.style.display=n===v?"":"none"});
-  if(v==="compare")renderCompare();if(v==="products")renderProducts();if(v==="need"){fillTherSelects();renderTreatments();}if(v==="actives")renderActives();if(v==="disease")renderDisease();if(v==="vaccines"){if(vaxMode==="products")renderVaxProducts();else renderVax();}if(v==="disinf"){if(disMode==="price")renderDisinf();else renderDisCatalog();}if(v==="interact")renderInteractions();if(v==="vitarctic")renderVitamins();if(v==="antib")renderAntibiotics();if(v==="cocc")renderCoccidia();if(v==="lab")renderLab();if(v==="vent")$("#ventResult").innerHTML="";if(v==="watermix")renderWaterMix();if(v==="updates"){if(updMode==="live"){renderNewsTabs();if(!newsCache[newsSourceActive]&&!newsLoading)loadNews(newsSourceActive,false);}else renderUpdates();}if(v==="dosage"){fillDoseDrugList();$("#doseResult").innerHTML="";}if(v==="diseases")renderDiseases();if(v==="vaccines2")showVaccinationScheduleInTab();if(v==="symptoms")$("#symptomResults").innerHTML="";if(v==="herbs")renderHerbs();if(v==="enzymes")$("#enzymesSuggestions").innerHTML="";if(v==="prices")$("#priceComparison").innerHTML="";if(v==="shuttle")$("#shuttleResult").innerHTML="";if(v==="alerts")$("#alertsBox").innerHTML="";if(v==="flock")$("#flockReportBox").innerHTML="";if(v==="risk")$("#riskAssessmentResult").innerHTML="";if(v==="stats")$("#dashboardStats").innerHTML="";
+  if(v==="enzymes")renderEnzymes();if(v==="compare")renderCompare();if(v==="products")renderProducts();if(v==="need"){fillTherSelects();renderTreatments();}if(v==="actives")renderActives();if(v==="disease")renderDisease();if(v==="vaccines"){if(vaxMode==="products")renderVaxProducts();else renderVax();}if(v==="disinf"){if(disMode==="price")renderDisinf();else renderDisCatalog();}if(v==="interact")renderInteractions();if(v==="vitarctic")renderVitamins();if(v==="antib")renderAntibiotics();if(v==="cocc")renderCoccidia();if(v==="lab")renderLab();if(v==="vent")$("#ventResult").innerHTML="";if(v==="watermix")renderWaterMix();if(v==="updates"){if(updMode==="live"){renderNewsTabs();if(!newsCache[newsSourceActive]&&!newsLoading)loadNews(newsSourceActive,false);}else renderUpdates();}if(v==="dosage"){fillDoseDrugList();$("#doseResult").innerHTML="";}if(v==="diseases")renderDiseases();if(v==="vaccines2")showVaccinationScheduleInTab();if(v==="symptoms")$("#symptomResults").innerHTML="";if(v==="herbs")renderHerbs();if(v==="enzymes")$("#enzymesSuggestions").innerHTML="";if(v==="prices")$("#priceComparison").innerHTML="";if(v==="shuttle")$("#shuttleResult").innerHTML="";if(v==="alerts")$("#alertsBox").innerHTML="";if(v==="flock")$("#flockReportBox").innerHTML="";if(v==="risk")$("#riskAssessmentResult").innerHTML="";if(v==="stats")$("#dashboardStats").innerHTML="";
 })});
 $("#cmpActive").addEventListener("change",function(){
   var a=activeById(this.value);
@@ -2959,6 +3075,7 @@ $("#impFile").addEventListener("change",function(e){
     if(d.actives)S.actives=mergeColl(S.actives||[],d.actives);
     if(d.vaxProducts)S.vaxProducts=mergeColl(S.vaxProducts||[],d.vaxProducts);
     if(d.disinfectants)S.disinfectants=mergeColl(S.disinfectants||[],d.disinfectants);
+    if(d.enzymes)S.enzymes=mergeColl(S.enzymes||[],d.enzymes);
     dedupeAll();save(true);renderAll();toast("اتستوردت ✓")
   }catch(err){toast("ملف غلط")}};
   r.readAsText(f);e.target.value="";
