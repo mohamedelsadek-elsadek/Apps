@@ -122,7 +122,7 @@ h1,h2,h3{margin:0}
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v23 (كتالوج بوسطن)</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v24 (تصنيف بالشركة)</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -208,6 +208,8 @@ h1,h2,h3{margin:0}
   <!-- تبويب الأدوية -->
   <section id="tab-products" style="display:none">
     <input class="input" id="prodSearch" placeholder="🔍 دوّر باسم المنتج أو المادة الفعالة…" style="margin-bottom:10px">
+    <div class="chipbar" id="prodSups"></div>
+    <div id="supFix"></div>
     <div class="chipbar" id="prodThers"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span class="mini" id="prodCount"></span>
@@ -2725,25 +2727,32 @@ function saveActive(){
   save(true);$("#ovActive").classList.remove("open");renderAll();toast("اتحفظت ✓");
 }
 
-var prodTherFilter="";
+var prodTherFilter="",prodSupFilter="";
 function renderProducts(){
   var q=norm($("#prodSearch").value||"");
   var list=alive();
+  var SG=supGroups(),supName=function(p){return SG.disp[supKey(p.supplier)]};
+  var supCnt={};Object.keys(SG.cnt).forEach(function(k){supCnt[SG.disp[k]]=SG.cnt[k]});
+  $("#prodSups").innerHTML='<span class="mini" style="align-self:center;white-space:nowrap">🏪 الشركة:</span><button class="chip'+(prodSupFilter===""?" on":"")+'" data-ps="">الكل</button>'+
+    Object.keys(supCnt).sort(function(a,b){return supCnt[b]-supCnt[a]||(a<b?-1:1)}).map(function(k){return '<button class="chip'+(prodSupFilter===k?" on":"")+'" data-ps="'+esc(k)+'">'+esc(k)+' ('+supCnt[k]+')</button>'}).join("")+'<button class="chip" onclick="openSupFix()">✏️ توحيد الأسماء</button>';
+  if(prodSupFilter)list=list.filter(function(p){return supName(p)===prodSupFilter});
   if(prodTherFilter)list=list.filter(function(p){return (p.ther||"")===prodTherFilter});
   if(q)list=list.filter(function(p){return norm(p.name).indexOf(q)>-1||norm(p.active).indexOf(q)>-1||norm(p.supplier).indexOf(q)>-1||norm(p.en||"").indexOf(q)>-1||norm(p.comp||"").indexOf(q)>-1});
-  list.sort(function(a,b){return norm(a.name)<norm(b.name)?-1:1});
+  list.sort(function(a,b){var sa=supName(a),sb=supName(b);if(!prodSupFilter&&sa!==sb)return sa<sb?-1:1;return norm(a.name)<norm(b.name)?-1:1});
   try{updMissBadge();var ae=document.activeElement;if($("#missWrap").innerHTML&&!(ae&&ae.classList&&ae.classList.contains("miss-in")))renderMissing()}catch(e){}
-  $("#prodCount").textContent=list.length+" منتج"+(prodTherFilter?(" · "+prodTherFilter):"");
+  $("#prodCount").textContent=list.length+" منتج"+(prodSupFilter?(" · "+prodSupFilter):"")+(prodTherFilter?(" · "+prodTherFilter):"");
   /* شيبس التصنيفات */
   var thers=allThers();
   $("#prodThers").innerHTML='<button class="chip'+(prodTherFilter===""?" on":"")+'" data-pt="">الكل</button>'+
     thers.map(function(t){return '<button class="chip'+(prodTherFilter===t?" on":"")+'" data-pt="'+esc(t)+'">'+esc(t)+'</button>'}).join("");
   var el=$("#prodList");
   if(!list.length){el.innerHTML='<div class="empty"><div class="em">💊</div><h3>مفيش منتجات</h3><p>ضيف منتج أو أعد تحميل أدوية المخزن من ☁️</p></div>';return}
+  var grpCnt={};list.forEach(function(p){var k=supName(p);grpCnt[k]=(grpCnt[k]||0)+1});var lastSup=null;
   el.innerHTML=list.map(function(p){
+    var hdr="";if(!prodSupFilter&&supName(p)!==lastSup){lastSup=supName(p);hdr='<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 2px 6px;padding:6px 10px;border-radius:10px;background:var(--bg2);font-weight:800"><span>🏪 '+esc(lastSup)+'</span><span class="mini">'+grpCnt[lastSup]+' منتج</span></div>'}
     var hasConc=Number(p.conc)>0;
     var priceUnit=(Number(p.price)&&Number(p.pkg))?(" · "+fmt(p.price/p.pkg,2)+" ج/"+esc(p.unit||"وحدة")):"";
-    return '<div class="prod" data-pedit="'+p.id+'"><div class="prod-h">'+
+    return hdr+'<div class="prod" data-pedit="'+p.id+'"><div class="prod-h">'+
       '<b>'+esc(p.name)+'</b>'+
       (p.origin==="import"?'<span class="badge b-import">مستورد</span>':'<span class="badge b-local">محلي</span>')+
       (p.fromWarehouse?'<span class="badge" style="background:rgba(74,158,255,.1);color:var(--acc)">🔗 مخزن</span>':'')+
@@ -2956,6 +2965,7 @@ $("#mixRun").addEventListener("click",function(){
   $("#mixResult").innerHTML='<div class="result-box"><div class="lbl">تحط في التانك</div><div class="big">'+fmt(total,1)+' <span style="font-size:16px">جم/مل</span></div><div class="lbl">'+fmt(tank)+' لتر × '+fmt(dose,2)+' = '+fmt(total,1)+'</div></div>';
 });
 $("#prodSearch").addEventListener("input",renderProducts);
+$("#prodSups").addEventListener("click",function(e){var c=e.target.closest("[data-ps]");if(c){prodSupFilter=c.getAttribute("data-ps");renderProducts()}});
 $("#prodThers").addEventListener("click",function(e){var c=e.target.closest("[data-pt]");if(c){prodTherFilter=c.getAttribute("data-pt");renderProducts()}});
 $("#missWrap").addEventListener("click",function(e){var c=e.target.closest("[data-pedit]");if(c){var p=S.products.find(function(x){return x.id===c.getAttribute("data-pedit")});if(p)openProd(p)}});
 $("#prodList").addEventListener("click",function(e){var c=e.target.closest("[data-pedit]");if(c){var p=S.products.find(function(x){return x.id===c.getAttribute("data-pedit")});if(p)openProd(p)}});
@@ -3090,6 +3100,24 @@ $("#reseedBtn").addEventListener("click",function(){
   var n=seedProducts(false);renderAll();toast(n?("اتضاف "+n+" صنف"):"كل الأصناف موجودة بالفعل");
 });
 
+
+/* ============ الشركات الموردة: تجميع وتوحيد الأسماء ============ */
+function supKey(s){s=norm(s).replace(/ی/g,"ي").replace(/ک/g,"ك");return s||"—"}
+function supGroups(){var raw={},cnt={};alive().forEach(function(p){var k=supKey(p.supplier),r=(p.supplier||"").trim()||"بدون شركة";cnt[k]=(cnt[k]||0)+1;raw[k]=raw[k]||{};raw[k][r]=(raw[k][r]||0)+1});
+  var disp={};Object.keys(raw).forEach(function(k){disp[k]=Object.keys(raw[k]).sort(function(a,b){return raw[k][b]-raw[k][a]})[0]});return {cnt:cnt,disp:disp,raw:raw}}
+function openSupFix(){var G=supGroups(),keys=Object.keys(G.cnt).filter(function(k){return k!=="—"}).sort(function(a,b){return G.disp[a]<G.disp[b]?-1:1});
+  var h='<div class="card" style="border:2px solid var(--acc)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="font-size:15px">✏️ توحيد أسماء الشركات</h3><button class="btn sec sm" onclick="$(\'#supFix\').innerHTML=\'\'">إغلاق</button></div>'+
+   '<div class="mini" style="margin-bottom:8px">لو نفس الشركة مكتوبة بأكتر من اسم، اكتب نفس الاسم في الخانتين وهيتدمجوا. التغيير بيتطبق على كل منتجاتها.</div>'+
+   keys.map(function(k){var vars=Object.keys(G.raw[k]);return '<div style="display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)"><input class="input" style="flex:1;padding:7px" data-supk="'+esc(k)+'" value="'+esc(G.disp[k])+'" list="supDL"><span class="mini" style="white-space:nowrap">'+G.cnt[k]+' منتج'+(vars.length>1?' · '+vars.length+' كتابات':'')+'</span></div>'}).join("")+
+   '<datalist id="supDL">'+keys.map(function(k){return '<option value="'+esc(G.disp[k])+'">'}).join("")+'</datalist></div>';
+  $("#supFix").innerHTML=h;$("#supFix").scrollIntoView({behavior:"smooth"});}
+function renameSup(k,v){v=(v||"").trim();if(!v)return;var n=0,t=now();
+  S.products.forEach(function(p){if(!p.deleted&&supKey(p.supplier)===k&&p.supplier!==v){p.supplier=v;p.updatedAt=t;n++}});
+  (S.disinfectants||[]).forEach(function(d){if(!d.deleted&&d.company&&supKey(d.company)===k&&d.company!==v){d.company=v;d.updatedAt=t}});
+  (S.vaxProducts||[]).forEach(function(d){if(!d.deleted&&d.company&&supKey(d.company)===k&&d.company!==v){d.company=v;d.updatedAt=t}});
+  if(prodSupFilter&&supKey(prodSupFilter)===k)prodSupFilter=v;
+  if(n){seedLists();save(true);renderProducts();openSupFix();toast("اتعدّل "+n+" منتج ✓")}}
+document.addEventListener("change",function(e){var k=e.target&&e.target.getAttribute&&e.target.getAttribute("data-supk");if(k)renameSup(k,e.target.value)});
 /* ============ كتالوج بوسطن (Boston Pharmaceutical) — منتجات المزرعة والبريمكس والعلف والمطهرات ============ */
 var BST_SUP="بوسطن";
 var BST_PRODUCTS=[
