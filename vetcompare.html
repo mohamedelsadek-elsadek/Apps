@@ -115,13 +115,14 @@ h1,h2,h3{margin:0}
 .warn{background:rgba(232,201,79,.1);border:1px solid rgba(232,201,79,.3);border-radius:11px;padding:10px 12px;font-size:12px;color:var(--lemon);font-weight:700;margin:8px 0}
 .del{background:transparent;border:0;color:var(--muted2);font-size:15px;cursor:pointer;padding:4px}
 @media print{.tabs,.fab,.top .iconbtn,.chipbar{display:none}body{background:#fff;color:#000}.card,.rank,.prod{border-color:#ccc}}
+.miss-red{border-color:var(--danger)!important;background:rgba(224,85,85,.08)!important}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v22 (الإنزيمات في قسم واحد)</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v23 (كتالوج بوسطن)</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -210,8 +211,9 @@ h1,h2,h3{margin:0}
     <div class="chipbar" id="prodThers"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span class="mini" id="prodCount"></span>
-      <button class="btn sm sec" id="prodAdd">➕ منتج جديد</button>
+      <span style="display:flex;gap:6px"><button class="btn sm sec" id="prodMissBtn" onclick="var w=$('#missWrap');if(w.innerHTML){w.innerHTML=''}else{renderMissing();w.scrollIntoView({behavior:'smooth'})}">⚠️ الناقص</button><button class="btn sm sec" id="prodAdd">➕ منتج جديد</button></span>
     </div>
+    <div id="missWrap"></div>
     <div id="prodList"></div>
   </section>
 
@@ -2443,7 +2445,7 @@ function renderDisinf(){
     return '<div class="prod" data-dedit="'+d.id+'"'+(best?' style="border-right:3px solid var(--green2)"':'')+'>'+
       '<div class="prod-h"><b>'+esc(d.name)+(d.company?(' <span style="color:var(--muted);font-weight:700">— '+esc(d.company)+'</span>'):'')+'</b>'+
       (best?'<span class="badge b-local" style="background:rgba(123,200,108,.15);color:var(--green2)">✓ الأرخص</span>':'')+'</div>'+
-      '<div class="prod-meta">📦 '+fmt(d.pkg)+' لتر · 💰 '+fmt(d.price)+' ج · 💧 تخفيف ١:'+fmt(d.dilution)+'</div>'+
+      '<div class="prod-meta">📦 '+fmt(d.pkg)+' لتر · 💰 '+fmt(d.price)+' ج · 💧 تخفيف ١:'+fmt(d.dilution)+'</div>'+(d.bst&&d.note?'<div class="prod-meta" style="white-space:normal">📋 '+esc(d.note)+'</div>':'')+
       '<div class="prod-meta">'+(c!=null?('🎯 <b style="color:var(--txt)">'+fmt(c,3)+' ج/لتر محلول جاهز</b>'+(perL?(' · '+perL):'')):'<span style="color:var(--danger)">⚠️ اكتب الحجم والسعر ونسبة التخفيف</span>')+(d.note?(' · '+esc(d.note)):'')+'</div>'+
     '</div>';
   }).join("");
@@ -2728,8 +2730,9 @@ function renderProducts(){
   var q=norm($("#prodSearch").value||"");
   var list=alive();
   if(prodTherFilter)list=list.filter(function(p){return (p.ther||"")===prodTherFilter});
-  if(q)list=list.filter(function(p){return norm(p.name).indexOf(q)>-1||norm(p.active).indexOf(q)>-1||norm(p.supplier).indexOf(q)>-1});
+  if(q)list=list.filter(function(p){return norm(p.name).indexOf(q)>-1||norm(p.active).indexOf(q)>-1||norm(p.supplier).indexOf(q)>-1||norm(p.en||"").indexOf(q)>-1||norm(p.comp||"").indexOf(q)>-1});
   list.sort(function(a,b){return norm(a.name)<norm(b.name)?-1:1});
+  try{updMissBadge();var ae=document.activeElement;if($("#missWrap").innerHTML&&!(ae&&ae.classList&&ae.classList.contains("miss-in")))renderMissing()}catch(e){}
   $("#prodCount").textContent=list.length+" منتج"+(prodTherFilter?(" · "+prodTherFilter):"");
   /* شيبس التصنيفات */
   var thers=allThers();
@@ -2749,7 +2752,8 @@ function renderProducts(){
         (p.active?('🧪 '+esc(p.active)+(hasConc?(" "+fmt(p.conc,1)+(p.concUnit==="pct"?"%":p.concUnit)):"")):(hasConc?"":'<span style="color:var(--danger)">⚠️ ناقص المادة الفعالة والتركيز</span>'))+
         (p.ther?(' · '+esc(p.ther)):"")+
       '</div>'+
-      '<div class="prod-meta">📦 '+fmt(p.pkg)+' '+esc(p.unit||"")+' · 💰 '+fmt(p.price)+' ج'+priceUnit+(p.supplier?(' · 🏪 '+esc(p.supplier)):"")+'</div>'+
+      '<div class="prod-meta">📦 '+fmt(p.pkg)+' '+esc(p.unit||"")+' · 💰 '+(Number(p.price)?fmt(p.price)+' ج':'<span style="color:var(--danger)">⚠️ بدون سعر</span>')+priceUnit+(p.supplier?(' · 🏪 '+esc(p.supplier)):"")+'</div>'+
+      (p.comp||p.dose?'<div class="prod-meta" style="white-space:normal">'+(p.en?'<b>'+esc(p.en)+'</b> · ':'')+(p.form?esc(p.form)+' · ':'')+(p.dose?'💧 '+esc(p.dose):'')+(p.comp?'<div>📋 '+esc(p.comp)+'</div>':'')+(p.ind?'<div>🩺 '+esc(p.ind)+'</div>':'')+'</div>':'')+
     '</div>';
   }).join("");
 }
@@ -2953,6 +2957,7 @@ $("#mixRun").addEventListener("click",function(){
 });
 $("#prodSearch").addEventListener("input",renderProducts);
 $("#prodThers").addEventListener("click",function(e){var c=e.target.closest("[data-pt]");if(c){prodTherFilter=c.getAttribute("data-pt");renderProducts()}});
+$("#missWrap").addEventListener("click",function(e){var c=e.target.closest("[data-pedit]");if(c){var p=S.products.find(function(x){return x.id===c.getAttribute("data-pedit")});if(p)openProd(p)}});
 $("#prodList").addEventListener("click",function(e){var c=e.target.closest("[data-pedit]");if(c){var p=S.products.find(function(x){return x.id===c.getAttribute("data-pedit")});if(p)openProd(p)}});
 $("#cmpResults").addEventListener("click",function(e){var c=e.target.closest("[data-pedit]");if(c){var p=S.products.find(function(x){return x.id===c.getAttribute("data-pedit")});if(p)openProd(p)}});
 $("#prodAdd").addEventListener("click",function(){openProd(null)});
@@ -3085,6 +3090,165 @@ $("#reseedBtn").addEventListener("click",function(){
   var n=seedProducts(false);renderAll();toast(n?("اتضاف "+n+" صنف"):"كل الأصناف موجودة بالفعل");
 });
 
+/* ============ كتالوج بوسطن (Boston Pharmaceutical) — منتجات المزرعة والبريمكس والعلف والمطهرات ============ */
+var BST_SUP="بوسطن";
+var BST_PRODUCTS=[
+ /* ---- منتجات المزرعة (ماء الشرب) ---- */
+ {n:"رايتوسبكتين",en:"Righto-spectin",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل 150 جم: لينكومايسين قاعدة 33.3 جم + سبكتينومايسين قاعدة 66.7 جم",a:"لينكو-سبكتين",k:66.7,d:"100 جم/طن وزن حي (ماء شرب)",i:"CRD (ميكوبلازما وإي كولاي وباستريلا) · الجيوب الأنفية · المفاصل · كوليرا · كوريزا",m:"رايدو اسبكتين A1",pk:150,un:"150 جرام"},
+ {n:"نايل سبيراسول",en:"Nilespirasol",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل 100 جم: سبيرامايسين أديبات 150 م.و.د = سبيرامايسين قاعدة 46.875 جم",a:"سبيرامايسين",k:46.9,d:"100 جم/طن وزن حي",i:"CRD · التهاب الأكياس الهوائية · كوليرا · كوريزا",m:"تایل اسبرايسول A1"},
+ {n:"نايل ستريت",en:"Nilestrept",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: ستربتومايسين قاعدة 500 مجم",a:"ستربتومايسين",k:50,d:"50–100 جم/طن وزن حي",i:"CRD · الأكياس الهوائية · كوليرا · كوريزا · الالتهاب المعوي التنكرزي (بالفم)",m:"ديل استریت A1"},
+ {n:"ويديفلوكس",en:"Widiflox",t:"مضاد حيوي",f:"محلول للشرب",c:"كل مل: دايفلوكساسين قاعدة 100 مجم",act:"دايفلوكساسين",k:100,u:"mgml",d:"100–200 مل/طن وزن حي",i:"CRD · الأكياس الهوائية · الجيوب الأنفية · كوليرا · إي كولاي"},
+ {n:"فيتيلوجارد 75%",en:"Vetylogurd 75%",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: تايلوزين قاعدة 750 مجم",a:"تايلوزين",k:75,d:"50–100 جم/طن وزن حي",i:"ميكوبلازما · المفاصل · الأكياس الهوائية · كلوستريديا · العدوى الثانوية بعد التحصين"},
+ {n:"بيوتيلمي راو",en:"Biotilmirao",t:"مضاد حيوي",f:"محلول",c:"كل مل: تيلميكوزين قاعدة 300 مجم",a:"تيلمايكوسين",k:300,u:"mgml",d:"50 مل/طن وزن حي (ماء شرب)",i:"ميكوبلازما · المفاصل · الأكياس الهوائية · كلوستريديا · كوليرا · كوريزا"},
+ {n:"تيلمي تريت",en:"Tilmitreat",t:"مضاد حيوي",f:"محلول للشرب",c:"كل مل: تيلميكوزين فوسفات 250 مجم",a:"تيلمايكوسين",k:250,u:"mgml",d:"60–80 مل/طن وزن حي",i:"ميكوبلازما · المفاصل · الأكياس الهوائية · كلوستريديا · كوليرا · كوريزا",m:"تيلمي تريت A1"},
+ {n:"إريثروموند 16.5%",en:"Erythromond 16.5%",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل 100 جم: إريثرومايسين قاعدة 16.5 جم",a:"إريثرومايسين",k:16.5,d:"200 جم/طن وزن حي",i:"ميكوبلازما · الأكياس الهوائية · كوليرا · كوريزا · المفاصل",m:"ريرو موند A1"},
+ {n:"جرين دوكس 35%",en:"Greendox 35%",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: دوكسيسيكلين قاعدة 346.6 مجم",a:"دوكسيسيكلين",k:34.7,d:"50 جم/طن وزن حي",i:"ميكوبلازما · الأكياس الهوائية · الجيوب الأنفية · المفاصل · كوليرا · كوريزا",m:"جرين دوكس A1"},
+ {n:"برونكودوكس",en:"Bronchodox",t:"مضاد حيوي",f:"محلول للشرب",c:"كل مل: دوكسيسيكلين قاعدة 100 مجم + برومهيكسين قاعدة 9.1 مجم",a:"دوكسيسيكلين",k:100,u:"mgml",d:"100–200 مل/طن وزن حي",i:"CRD · الأكياس الهوائية · المفاصل · الجيوب الأنفية"},
+ {n:"دوباكتين",en:"Dubactin",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل 100 جم: تايلوزين (طرطرات) 50 جم + دوكسيسيكلين (هيدروكلوريد) 25 جم",a:"تايلوزين",k:50,d:"50–100 جم/طن وزن حي",i:"CRD · الأكياس الهوائية · المفاصل"},
+ {n:"أوكسي لارج",en:"Oxilarg",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: أوكسي تتراسيكلين قاعدة 500 مجم",a:"أوكسي تتراسيكلين",k:50,d:"50–100 جم/طن وزن حي (ماء) · 400 جم/طن علف",i:"إي كولاي وسالمونيلا · CRD · كوريزا · الجيوب الأنفية · المفاصل · كوليرا"},
+ {n:"هايبركلوروأكت",en:"Hyperchloroact",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل 100 جم: كلورتتراسيكلين قاعدة 18.6 جم",a:"كلورتتراسيكلين",k:18.6,d:"100–200 جم/طن وزن حي (ماء) · 1 كجم/طن علف",i:"إي كولاي · كوريزا · CRD · الأكياس الهوائية · المفاصل"},
+ {n:"أوروتام",en:"Orotam WSP",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: تيامولين قاعدة 364.2 مجم — ممنوع مع الأيونوفورات (سالينومايسين، مونينسين، ناراسين)",a:"تيامولين",k:36.4,d:"50 جم/طن وزن حي (ماء) · 500 جم/طن علف",i:"CRD · الأكياس الهوائية · المفاصل · الجيوب الأنفية",pk:10000,un:"10 كيلو"},
+ {n:"فارما فلور",en:"Pharmaflor",t:"مضاد حيوي",f:"محلول للشرب",c:"كل 100 مل: فلورفينيكول 10 جم",a:"فلورفينيكول",k:10,d:"200 مل/طن وزن حي",i:"سالمونيلا · إي كولاي · المفاصل · كوريزا · كوليرا",m:"فارما فلور A1"},
+ {n:"بيولينكو فورت",en:"Biolinco Forte",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: لينكومايسين قاعدة 800 مجم",a:"لينكومايسين",k:80,d:"25–50 جم/طن وزن حي",i:"كلوستريديا · ميكوبلازما · المفاصل · الأكياس الهوائية · العدوى الثانوية"},
+ {n:"جروث أموكسي",en:"Growthamoxy",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: أموكسيسيلين قاعدة 697 مجم",a:"أموكسيسيلين",k:69.7,d:"25 جم/طن وزن حي",i:"كلوستريديا · كوليرا · كوريزا",m:"جروس اموکسی A1"},
+ {n:"موكسي لينافيت",en:"Moxillinavet",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل 100 جم: أموكسيسيلين قاعدة 30 جم",a:"أموكسيسيلين",k:30,d:"50–70 جم/طن وزن حي",i:"كلوستريديا · كوليرا · كوريزا"},
+ {n:"فيتوكسيسيلين",en:"Vetoxicillin",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: فينوكسي ميثيل بنسلين قاعدة 293 مجم",act:"فينوكسي ميثيل بنسلين",k:29.3,d:"50–70 جم/طن وزن حي",i:"الالتهاب المعوي التنكرزي (كلوستريديا)"},
+ {n:"أمبي-هيدراو 50%",en:"Ambihydroa 50%",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: أمبيسيلين (تراي هيدرات) قاعدة 500 مجم",a:"أمبيسيلين",k:50,d:"40 جم/طن وزن حي",i:"الالتهاب المعوي التنكرزي · التسمم الدموي بإي كولاي · كوليرا · كوريزا",m:"امبيهدراو ! A1"},
+ {n:"أبرابيوفار",en:"Aprabiophar",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: أبراميسين قاعدة 550 مجم",a:"أباراميسين",k:55,d:"50–100 جم/طن وزن حي (ماء)",i:"الالتهابات المعوية والإسهال (إي كولاي – سالمونيلا)"},
+ {n:"أنتيسين",en:"Anticin",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: نيومايسين قاعدة 490 مجم",a:"نيومايسين",k:49,d:"25–50 جم/طن وزن حي",i:"الالتهابات المعوية (إي كولاي وسالمونيلا)"},
+ {n:"بيوفاركولي",en:"Biopharcoli",t:"مضاد حيوي",f:"بودرة ذوابة WSP",c:"كل جم: كوليستين قاعدة 9.5 مليون وحدة دولية",a:"كولستين",d:"100 جم/طن وزن حي",i:"إسهالات وعدوى معوية: إي كولاي · سالمونيلا · سيدوموناس · كليبسيلا",chk:"التركيز بالوحدات (9.5 م.و.د/جم) — اكتب النسبة اللي بتحسب بيها"},
+ {n:"ألبيكورين",en:"Albecorin",t:"مضاد طفيليات",f:"معلق للفم",c:"كل مل: ألبندازول 200 مجم",a:"ألبيندازول",k:200,u:"mgml",d:"دواجن: 0.5 مل/10 كجم = 50 مل/طن وزن حي",i:"الديدان المعوية والرئوية والكبدية والشريطية"},
+ {n:"أوراكلوزين",en:"Oraclozin",t:"مضاد كوكسيديا",f:"بودرة ذوابة WSP",c:"كل 100 جم: سلفاكلوزين صوديوم مونوهيدرات 30 جم",a:"سلفاكلوزين",k:30,d:"100–200 جم/طن وزن حي",i:"كوكسيديا · كوليرا · كوريزا · إي كولاي · سالمونيلا"},
+ {n:"تولترا 2.5%",en:"Toltra 2.5%",t:"مضاد كوكسيديا",f:"محلول للشرب",c:"كل 100 مل: تولترازوريل 2.5 جم",a:"تولترازوريل",k:2.5,d:"280 مل/طن وزن حي",i:"وقاية وعلاج كل أنواع الكوكسيديا المعوية والأعورية"},
+ {n:"داي كلازوريل فيت بريمكس",en:"Diclazuril vit premix",t:"مضاد كوكسيديا",f:"محلول للشرب",c:"كل لتر: دايكلازوريل 10 جم",a:"ديكلازوريل",k:1,d:"1 مل/لتر ماء",i:"وقاية وعلاج الكوكسيديا في الدجاج والرومي",m:"دای کلازوريل A1"},
+ {n:"إبتي",en:"Epti",t:"مضاد كوكسيديا",f:"بودرة ذوابة WSP",c:"كل كيلو: أمبروليوم قاعدة 432 جم + إيثوبابيت 28 جم",a:"أموبروليوم",k:43.2,d:"25–50 جم/طن وزن حي (ماء) · 250 جم/طن علف",i:"الكوكسيديا الأعورية والمعوية (تينيلا وأسيرفيولينا)"},
+ {n:"إنتيروفار فورت",en:"Enteropharorte",t:"مضاد كوكسيديا",f:"بودرة ذوابة WSP",c:"كل كيلو: أمبروليوم قاعدة 432 جم + إيثوبابيت 28 جم",a:"أموبروليوم",k:43.2,d:"25–50 جم/طن وزن حي",i:"الكوكسيديا الأعورية والمعوية (تينيلا وأسيرفيولينا)"},
+ /* ---- بريمكس سائل ومنتجات نباتية ---- */
+ {n:"بوسط أد3هـ",en:"Bost AD3E",t:"فيتامينات",f:"سائل لماء الشرب",c:"كل لتر: فيتامين أ 100 م.و.د + د3 20 م.و.د + هـ 20 جم",d:"1 مل/5 لتر ماء",pk:5000,un:"5 لتر"},
+ {n:"بوسط هـ سيل 10%",en:"Bost E Sel 10%",t:"فيتامينات",f:"سائل لماء الشرب",c:"كل لتر: فيتامين هـ 100 جم + سيلينيوم 500 مجم",d:"1 مل/لتر"},
+ {n:"بوسط هـ سيل سوبر",en:"Bost E Sel Super",t:"فيتامينات",f:"سائل لماء الشرب",c:"كل لتر: فيتامين هـ 200 جم + سيلينيوم 800 مجم",d:"0.5 مل/لتر"},
+ {n:"نيولايف ك3 بلس",en:"Newlife K3 Plus",t:"فيتامينات",f:"سائل لماء الشرب",c:"كل لتر: فيتامين ك3 100 جم + بيتايين 50 جم",d:"1 مل/لتر"},
+ {n:"بوسط ك3 20%",en:"Bost K3 20%",t:"فيتامينات",f:"بودرة ذوابة",c:"كل كيلو: فيتامين ك3 200 جم",d:"1 جم/لتر"},
+ {n:"بوسط ب ك كولين",en:"Bost B K Choline",t:"فيتامينات",f:"سائل لماء الشرب",c:"كل لتر: ك3 15 جم · ب1 5 جم · ب2 5 جم · ب6 3.5 جم · ب12 25 مجم · نياسين 30 جم · فوليك 1 جم · كولين 25 جم",d:"1 مل/لتر",pk:1000,un:"لتر"},
+ {n:"بوسط سي 100%",en:"Bost-C 100%",t:"فيتامينات",f:"بودرة ذوابة",c:"فيتامين ج 1000 جم/كجم",d:"0.1–0.25 جم/لتر"},
+ {n:"لايف سي 50%",en:"life C 50%",t:"فيتامينات",f:"بودرة ذوابة",c:"فيتامين ج 500 جم/كجم",d:"0.25–0.5 جم/لتر"},
+ {n:"نيوتري لايف بلس",en:"Nutri Life plus",t:"فيتامينات",f:"بودرة ذوابة",c:"فيتامينات أ، د3، هـ، ك3، ب المركب، ج + ميثيونين ولايسين + عناصر نادرة وأملاح",d:"0.5–1 جم/لتر"},
+ {n:"بوسط ماجنيتو",en:"Bost Magneto",t:"أملاح",f:"سائل لماء الشرب",c:"منجنيز · زنك · حديد · نحاس · كوبالت · سيلينيوم · كالسيوم · فوسفور · ماغنسيوم · صوديوم",d:"0.5–1 مل/لتر"},
+ {n:"بوسط أكتف",en:"Bost-Active",t:"منشط كبد",f:"سائل لماء الشرب",c:"كل لتر: د.ل ميثيونين 60 جم · بيتايين 50 · كولين 25 · سوربيتول 300",d:"0.1–0.25 مل/لتر"},
+ {n:"بوسط رينهانس",en:"Bost Renhance",t:"غسيل كلى",f:"سائل لماء الشرب",c:"ل-كارنيتين · ميثيونين · لايسين · بيتايين · كولين · سينارين · سوربيتول · ب1 ب2 ب3 ب6 · سترات وبنزوات صوديوم وسوربيت بوتاسيوم",d:"0.5–1 مل/لتر",m:"پوست زينهاتس A1"},
+ {n:"بوسط لايف",en:"Bost life",t:"أملاح",f:"بودرة ذوابة",c:"كل كيلو: فيتامين ج 50 جم · بيتايين 100 · كبريتات صوديوم 212 · كبريتات ماغنسيوم 212 · سوربيتول 50",d:"1 جم/لتر"},
+ {n:"بيوتا بوسط",en:"Buta Bost",t:"إضافات",f:"إضافات علفية",c:"كل كيلو: صوديوم بيوتريت 350 جم · سينمالدهيد 10.2 · كارفاكرول 15 · ثيمول 1.2 · فورميك 250 · بروبيونيك 200",d:"1–2 كجم/طن علف"},
+ {n:"بوسط اكس اول",en:"Bost Ex All",t:"منظم حموضة",f:"سائل لماء الشرب",c:"مانان أوليجو سكاريد · بيتا جلوكان · بيتايين · ل-كارنيتين · أحماض ستريك وفورميك وبروبيونيك ولاكتيك وأسيتيك",d:"1–2 مل/لتر"},
+ {n:"باي توكس",en:"By-Tox",t:"مضاد سموم",f:"سائل لماء الشرب",c:"خميرة سكاروميسيز 200 جم · MOS · بيتا جلوكان · جلوكوز أوكسيديز · لاكتوباسيلس · سيليمارين · فيتامينات ب · أحماض عضوية",d:"1 مل/لتر"},
+ {n:"وينر توكس",en:"Winner-Tox",t:"مضاد سموم",f:"سائل لماء الشرب",c:"خميرة سكاروميسيز 400 جم · FOS · زيلانيز · لاكتوباسيلس · بيتايين · كارنيتين · سوربيتول · سيليمارين · أحماض عضوية",d:"1 مل/لتر"},
+ {n:"فينتو بوسط",en:"Vento Bost",t:"مذيب بلغم",f:"سائل لماء الشرب",c:"يوكاليبتول 27.7 جم · زيت النعناع 26.6 · كارفاكرول 49.65 · ثيمول · سينمالدهيد · فيتامينات هـ ك3 ب أ د3",d:"0.25–0.5 مل/لتر"},
+ {n:"أورجا بوسط",en:"Orga Bost",t:"منظم حموضة",f:"سائل لماء الشرب",c:"أحماض بروبيونيك وفورميك وأسيتيك 300 جم/لتر لكل منها · ستريك · لاكتيك · سترات صوديوم وبوتاسيوم",d:"1 مل/لتر ماء · 2–2.5 لتر/طن علف"},
+ {n:"بوسط ثيمونان",en:"Bost Thymonan",t:"رافع مناعة",f:"سائل لماء الشرب",c:"MOS 28 جم · بيتا جلوكان 35 · سينمالدهيد 5 · كارفاكرول 49.65 · ثيمول 14 · فيتامين هـ 10 · ج 50",d:"1 مل/لتر"},
+ {n:"فيتولايف",en:"VitoLife",t:"منشط نمو",f:"سائل لماء الشرب",c:"زيت أوريجانو 550 جم · كارفاكرول 80 · فيتامين هـ 25 · ثيمول · سينمالدهيد · كابساسين",d:"0.5–1 مل/لتر"},
+ {n:"فايتو لايف",en:"Phyto Life",t:"رافع مناعة",f:"سائل لماء الشرب",c:"سكاروميسيز 500 جم · MOS · بيتا جلوكان · زيت أوريجانو · كارفاكرول · فيتامينات أ هـ ج · زنك · سيلينيوم",d:"1–2 مل/لتر"},
+ {n:"بوسط برو",en:"Bost Pro",t:"مذيب بلغم",f:"سائل لماء الشرب",c:"مستخلص يوكاليبتول 31.7 جم · منثول 30.4 · كارفاكرول 69.5 · ثيمول 7 · كابساسين · سينمالدهيد · فيتامين هـ · سيلينيوم",d:"0.3–0.5 مل/لتر"},
+ {n:"ميجا لايف",en:"Mega Life",t:"رافع مناعة",f:"سائل لماء الشرب",c:"يوكاليبتوس · منثول · زيت أوريجانو · كارفاكرول · ثيمول · باسيلس ساتلس وليشنيفورمس · فيتامينات · ميثيونين · لايسين · زنك منجنيز نحاس سيلينيوم",d:"0.5–1 مل/لتر"},
+ /* ---- منتجات العلف (بريمكس) ---- */
+ {n:"كلاتيوفال",en:"Klatioval",t:"مضاد حيوي",f:"بريمكس علف",c:"كل كيلو: تيلفالوزين قاعدة 170 جم (طرطرات)",a:"تيلفالوزين",k:17,d:"300–500 جم/طن علف",i:"ميكوبلازما · المفاصل · الأكياس الهوائية · كلوستريديا · العدوى الثانوية",pk:5000,un:"5 كيلو"},
+ {n:"سينتلينكو",en:"Centlinco",t:"مضاد حيوي",f:"بريمكس علف",c:"كل كيلو: لينكومايسين قاعدة 44 جم (هيدروكلوريد)",a:"لينكومايسين",k:4.4,d:"حسب الكتالوج «100–200» لكل طن علف",i:"كلوستريديا · ميكوبلازما · المفاصل · الأكياس الهوائية",pk:25000,un:"25 كيلو",chk:"الجرعة في الكتالوج مكتوبة 100–200 كجم/طن — غالبًا جم أو 1–2 كجم، راجعها"},
+ {n:"باكتيسيز",en:"Bacticease",t:"مضاد حيوي",f:"بريمكس علف",c:"تايلوزين فوسفات 1000 مجم = تايلوزين قاعدة 903 مجم (الكتالوج بيقول «كل جرام»)",a:"تايلوزين",d:"حسب الكتالوج «150–200» لكل طن علف",i:"ميكوبلازما · كلوستريديا",chk:"التركيز والجرعة مش واضحين في الكتالوج — اكتب التركيز الصح"},
+ {n:"مادوراتست",en:"Madura test",t:"مضاد كوكسيديا",f:"بريمكس علف",c:"كل كيلو: مادورامايسين أمونيوم 7.5 جم + نيكاربازين 80 جم",a:"مادورامايسين",k:0.75,d:"500 جم/طن علف",i:"وقاية دجاج التسمين من الكوكسيديا"},
+ {n:"فاروستات",en:"Pharostate",t:"مضاد كوكسيديا",f:"بريمكس علف",c:"كل كيلو: مادورامايسين أمونيوم 7.5 جم + نيكاربازين 80 جم",a:"مادورامايسين",k:0.75,d:"500 جم/طن علف",i:"وقاية التسمين والاستبدال من كل أنواع الأيميريا"},
+ {n:"أوبي كوكس",en:"Opicox",t:"مضاد كوكسيديا",f:"بريمكس علف",c:"كل 100 جم: دايكلازوريل 0.5 جم",a:"ديكلازوريل",k:0.5,d:"200 جم/طن علف",i:"وقاية وعلاج الكوكسيديا في الدجاج والرومي"},
+ {n:"كلوبي",en:"Clopi",t:"مضاد كوكسيديا",f:"بريمكس علف",c:"كل كيلو: كلوبيدول 250 جم",a:"كلوبيدول",k:25,d:"500 جم/طن علف",i:"وقاية التسمين والرومي وقطعان التربية من الكوكسيديا"}
+];
+/* مطهرات بوسطن — التخفيف (١:X) محسوب من الجرعة الأساسية في البروشور */
+var BST_DIS=[
+ {n:"إكسترا كلين",en:"Extra Clean",dil:200,note:"منظف رغوي قلوي (CIP) — هيدروكسيد صوديوم 5–15% + هيدروكسيد بوتاسيوم 5–15% + هيبوكلوريت صوديوم 1–5% · الجرعة 0.5% · تلامس 15 دقيقة · 50–65°م"},
+ {n:"سكيل فري",en:"Scale free",dil:200,note:"(قريبًا) منظف حمضي لإزالة رواسب الكالسيوم والحديد — فوسفوريك <30% + كبريتيك 5–15% · 0.5% (50 مل/10 لتر)"},
+ {n:"إكسترا كلين F",en:"Extra Clean F",dil:100,note:"ممهد تطهير رغوي قلوي بالكلور — هيدروكسيد صوديوم وبوتاسيوم + هيبوكلوريت · 1–4% حسب الاتساخ (المحسوب 1%)"},
+ {n:"إكسترا شاين",en:"Extra Shine",dil:33,note:"منظف رغوي حمضي لإزالة الرواسب المعدنية — فوسفوريك 20–40% · 3% · تلامس 10–15 دقيقة"},
+ {n:"إكسترا سان بلس",en:"Extra San Plus",dil:50,note:"هيدروجين بيروكسيد 20–30% + حمض أسيتيك 10–20% · غسيل خطوط المياه 2–3% (المحسوب 2%) · تطهير المياه 0.25–0.5 مل/لتر · البيض 0.5–1 مل/لتر"},
+ {n:"أوبتي باد",en:"Opti-pad",dil:100,note:"لورق التبريد — فوسفوريك 15–30% + كبريتيك 5–15% + أمونيوم رباعي 1–5% · عادي 10–20 مل/لتر (المحسوب 10) · شديد 20–40 مل/لتر"},
+ {n:"فيروسيف فورت",en:"Virosafe Forte",dil:200,note:"مطهر عام — أمونيوم رباعي (ADBAC 15–30% + DDAC 5–15%) + جلوتارالدهيد 5–15% · 0.25–0.5% (المحسوب 0.5%) · تبخير 1–2 لتر + 4 لتر ماء/1000م³"},
+ {n:"نوفيرا",en:"Novira",dil:200,note:"مطهر عام — ADBAC 5–15% + جلوتارالدهيد 5–15% + فورمالدهيد 5–15% + جليوكسال · 0.25–0.5% (المحسوب 0.5%) · تبخير 1.5 لتر + 3 لتر ماء/1000م³"},
+ {n:"أيودو جولد",en:"Iodo Gold",dil:200,note:"أيودوفور 2.8% يود متاح · التطهير العام 5 مل/لتر · ماء الشرب 0.5 مل/لتر · المعدات 2 مل/لتر · المغاطس 4 مل/لتر"},
+ {n:"كوكس كيل بلس",en:"Cox-Kill+",dil:50,pk:1,price:550,m:"كوكس كيل A1",note:"ضد بويضات الكوكسيديا — ألكيل تراي أمين 20–30% + ADBAC 1–5% · 1–2% (المحسوب 2%) بمعدل 0.2 لتر/م² · تلامس ساعتين · فرشة 1:4"}
+];
+function seedBoston(){
+  var ch=0;
+  BST_PRODUCTS.forEach(function(b){
+    var data={en:b.en,form:b.f,comp:b.c,dose:b.d,ind:b.i||"",ther:b.t};
+    if(b.chk)data.chk=b.chk;
+    var act=b.a?activeByName(b.a):null;
+    var ex=b.m?alive().find(function(p){return norm(p.name)===norm(b.m)}):null;
+    if(ex){ if(ex.bst)return;
+      Object.keys(data).forEach(function(k){ex[k]=data[k]});
+      if(act&&!ex.activeId){ex.activeId=act.id;ex.active=act.name}
+      else if(!ex.active&&b.act){ex.active=b.act}
+      if(ex.conc==null&&b.k!=null){ex.conc=b.k;ex.concUnit=b.u||"pct"}
+      if(!ex.supplier)ex.supplier=BST_SUP;
+      ex.bst=1;ex.updatedAt=now();ch++;return;}
+    var id="prd:bst:"+norm(b.en);
+    if(S.products.some(function(p){return p.id===id}))return;
+    if(alive().some(function(p){return norm(p.name)===norm(b.n)}))return;
+    S.products.push(Object.assign({id:id,name:b.n,activeId:act?act.id:"",active:act?act.name:(b.act||""),
+      conc:b.k!=null?b.k:null,concUnit:b.u||"pct",pkg:b.pk||0,unit:b.un||"",price:0,supplier:BST_SUP,origin:"local",stock:0,
+      bst:1,updatedAt:now(),deleted:false},data));ch++;
+  });
+  S.disinfectants=S.disinfectants||[];
+  BST_DIS.forEach(function(b){
+    var id="dis:bst:"+norm(b.en);
+    if(S.disinfectants.some(function(d){return d.id===id||(!d.deleted&&norm(d.name)===norm(b.n))}))return;
+    S.disinfectants.push({id:id,name:b.n,en:b.en,pkg:b.pk||0,price:b.price||0,dilution:b.dil,company:BST_SUP,note:b.note,bst:1,updatedAt:now(),deleted:false});ch++;
+  });
+  if(ch){save(true)}
+  return ch;
+}
+
+/* ============ قايمة البيانات الناقصة (تتظبط من مكانها) ============ */
+var missSup="بوسطن";
+function prodMissing(p){var m=[];if(!(+p.price))m.push("السعر");if(!(+p.pkg))m.push("العبوة");if(!p.unit)m.push("الوحدة");if(p.activeId&&!(+p.conc))m.push("التركيز");if(p.chk)m.push("مراجعة");return m}
+function disMissing(d){var m=[];if(!(+d.price))m.push("السعر");if(!(+d.pkg))m.push("العبوة");if(!(+d.dilution))m.push("التخفيف");return m}
+function missCount(){var f=function(x){return !missSup||norm(x.supplier||x.company||"")===norm(missSup)};
+  return alive().filter(function(p){return f(p)&&prodMissing(p).length}).length+aliveDis().filter(function(d){return f(d)&&disMissing(d).length}).length}
+function renderMissing(){
+  var box=$("#missWrap");if(!box)return;
+  var sups={};alive().forEach(function(p){if(p.supplier)sups[p.supplier]=1});aliveDis().forEach(function(d){if(d.company)sups[d.company]=1});
+  var f=function(x){return !missSup||norm(x.supplier||x.company||"")===norm(missSup)};
+  var ps=alive().filter(function(p){return f(p)&&prodMissing(p).length}).sort(function(a,b){return (a.ther||"")<(b.ther||"")?-1:(a.ther||"")>(b.ther||"")?1:norm(a.name)<norm(b.name)?-1:1});
+  var ds=aliveDis().filter(function(d){return f(d)&&disMissing(d).length});
+  var inp=function(kind,id,k,v,w,ph,miss){return '<input class="input miss-in'+(miss?' miss-red':'')+'" style="width:'+w+'px;padding:6px 7px;font-size:13px" data-mk="'+kind+'" data-mid="'+esc(id)+'" data-mf="'+k+'" value="'+esc(v==null||v===0?'':v)+'" placeholder="'+ph+'"'+(k==='unit'?'':' inputmode="decimal"')+'>'};
+  var h='<div class="card" style="border:2px solid var(--warn,#f59e0b)"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><h3 style="font-size:15px">⚠️ بيانات ناقصة — كمّلها من هنا</h3>'+
+    '<select id="missSup" class="input" style="width:auto;padding:6px 8px"><option value="">كل الشركات</option>'+Object.keys(sups).sort().map(function(s){return '<option'+(s===missSup?' selected':'')+'>'+esc(s)+'</option>'}).join("")+'</select></div>'+
+    '<div class="mini" style="margin-bottom:8px">اكتب في الخانة الحمرا وهي بتتحفظ لوحدها. المنتج بيختفي من هنا لما يكمل. العبوة بالجرام أو المل (كيلو = 1000).</div>';
+  if(!ps.length&&!ds.length)h+='<div class="empty"><div class="em">✅</div><h3>كله كامل</h3></div>';
+  var fld=function(lbl,html){return '<label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted)">'+lbl+html+'</label>'};
+  if(ps.length){h+='<div style="font-weight:800;margin:6px 0">💊 منتجات ('+ps.length+')</div>'+
+    ps.map(function(p){var m=prodMissing(p),cu=p.concUnit==="mgml"?"مجم/مل":p.concUnit==="mgg"?"مجم/جم":"%";
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px">'+
+        '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><b>'+esc(p.name)+'</b>'+(p.en?' <span class="mini">'+esc(p.en)+'</span>':'')+
+        '<div class="mini">'+esc(p.ther||"")+(p.active?' · 🧪 '+esc(p.active):'')+(p.dose?' · 💧 '+esc(p.dose):'')+'</div></div><button class="btn sec sm" data-pedit="'+esc(p.id)+'">✎</button></div>'+
+        (p.chk?'<div style="color:var(--danger);font-size:12px;margin-top:5px">🔎 '+esc(p.chk)+' <button class="btn sec sm" style="padding:2px 8px" data-mok="'+esc(p.id)+'">✓ تمام</button></div>':'')+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+        (p.activeId||p.conc!=null?fld('التركيز ('+cu+')',inp("p",p.id,"conc",p.conc,74,"",m.indexOf("التركيز")>-1)):'')+
+        fld('العبوة (جم/مل)',inp("p",p.id,"pkg",p.pkg,80,"",m.indexOf("العبوة")>-1))+
+        fld('الوحدة',inp("p",p.id,"unit",p.unit,84,"كيلو / لتر",m.indexOf("الوحدة")>-1))+
+        fld('السعر (ج)',inp("p",p.id,"price",p.price,84,"",m.indexOf("السعر")>-1))+'</div></div>'}).join("");}
+  if(ds.length){h+='<div style="font-weight:800;margin:12px 0 6px">🧴 مطهرات ('+ds.length+')</div>'+
+    ds.map(function(d){var m=disMissing(d);
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px"><b>'+esc(d.name)+'</b>'+(d.en?' <span class="mini">'+esc(d.en)+'</span>':'')+(d.note?'<div class="mini" style="white-space:normal">'+esc(d.note)+'</div>':'')+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+fld('العبوة (لتر)',inp("d",d.id,"pkg",d.pkg,74,"",m.indexOf("العبوة")>-1))+fld('السعر (ج)',inp("d",d.id,"price",d.price,84,"",m.indexOf("السعر")>-1))+fld('التخفيف ١:',inp("d",d.id,"dilution",d.dilution,74,"",m.indexOf("التخفيف")>-1))+'</div></div>'}).join("");}
+  h+='</div>';
+  box.innerHTML=h;
+}
+function missSaveField(el){
+  var kind=el.getAttribute("data-mk"),id=el.getAttribute("data-mid"),k=el.getAttribute("data-mf"),v=(el.value||"").trim();
+  var o=kind==="p"?S.products.find(function(x){return x.id===id}):S.disinfectants.find(function(x){return x.id===id});if(!o)return;
+  if(k!=="unit"){v=v.replace(/[٠-٩]/g,function(d){return "٠١٢٣٤٥٦٧٨٩".indexOf(d)}).replace(/[٫,]/g,".");v=v===""?(k==="conc"?null:0):Number(v);if(v!=null&&isNaN(v))return}
+  if(o[k]===v)return;o[k]=v;o.updatedAt=now();save(true);
+  el.classList.toggle("miss-red",v===""||v===0||v==null);
+  updMissBadge();
+}
+function updMissBadge(){var b=$("#prodMissBtn");if(b){var n=missCount();b.textContent="⚠️ الناقص"+(n?" ("+n+")":"");}}
+document.addEventListener("change",function(e){if(e.target&&e.target.classList&&e.target.classList.contains("miss-in"))missSaveField(e.target);if(e.target&&e.target.id==="missSup"){missSup=e.target.value;renderMissing();updMissBadge()}});
+document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-mok]");if(t){var p=S.products.find(function(x){return x.id===t.getAttribute("data-mok")});if(p){delete p.chk;p.updatedAt=now();save(true);renderMissing();updMissBadge()}}});
+
 /* ============ الإقلاع ============ */
 (function(){
   try{var th=localStorage.getItem("vetcompare.theme");if(th==="light"){document.documentElement.setAttribute("data-theme","light");$("#themeBtn").textContent="☀️"}}catch(e){}
@@ -3092,6 +3256,7 @@ $("#reseedBtn").addEventListener("click",function(){
   if(dedupeAll()>0)persist();
   if(!aliveActives().length)seedActives();
   if(!alive().length)seedProducts(false);
+  try{seedBoston()}catch(e){}
   seedLists();
   try{renderAllNow()}catch(e){}
   restoreFB();
