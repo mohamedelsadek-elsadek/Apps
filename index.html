@@ -314,6 +314,44 @@ body{
 .bk-btn:active{transform:scale(.93)}
 .bk-btn.res{color:var(--warn)}
 
+
+/* ===== v5: أقسام + أيقونات ===== */
+.hsec{margin-top:18px}
+.hsec-h{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:14.5px;color:var(--txt);padding:2px 4px 8px;border-bottom:1px solid var(--line)}
+.hsec-h.tap{cursor:pointer;user-select:none}
+.hsec-n{font-size:12px;color:var(--muted2);font-weight:800}
+.hsec .grid{margin-top:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:12px}
+@media(min-width:900px){.tiles{grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px}}
+.tile{position:relative;border-radius:16px;background:var(--surface);border:1px solid var(--line);transition:.15s}
+.tile:hover{border-color:var(--cardc);transform:translateY(-2px)}
+.tile-main{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 6px 11px;text-align:center}
+.tile-main:active{transform:scale(.95)}
+.tile-ico{position:relative;width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:27px;flex:0 0 auto;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--cardc) 34%,transparent),color-mix(in srgb,var(--cardc) 12%,transparent));
+  border:1px solid color-mix(in srgb,var(--cardc) 40%,transparent);box-shadow:0 4px 14px color-mix(in srgb,var(--cardc) 22%,transparent)}
+.tile-fav{position:absolute;top:-6px;left:-6px;font-size:13px;font-style:normal}
+.tile-t{font-size:12.5px;font-weight:800;line-height:1.3;color:var(--txt);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+.tile-p{font-size:10px;color:var(--warn,#fbbf24);font-weight:700}
+.tile-more{position:absolute;top:3px;left:3px;width:26px;height:26px;border:0;border-radius:8px;background:transparent;color:var(--muted2);font-size:16px;cursor:pointer;line-height:1}
+.tile-more:hover{background:var(--surface2);color:var(--txt)}
+.recent{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none}
+.recent::-webkit-scrollbar{display:none}
+.rchip{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:7px 12px 7px 8px;border-radius:999px;cursor:pointer;font-family:inherit;font-weight:800;font-size:13px;color:var(--txt);
+  background:var(--surface);border:1px solid color-mix(in srgb,var(--cardc) 45%,var(--line))}
+.rchip .ri{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:15px;background:color-mix(in srgb,var(--cardc) 22%,transparent)}
+.vtog{display:flex;gap:4px;margin-inline-start:auto;flex:0 0 auto}
+.vtog .sbchip{padding:5px 10px;font-size:14px}
+.actsheet{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:60}
+.actsheet.open{display:flex}
+.act-in{width:100%;max-width:480px;background:var(--surface);border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;animation:pop .2s ease}
+@media(min-width:640px){.actsheet{align-items:center}.act-in{border-radius:22px}}
+.act-h{display:flex;gap:12px;align-items:center}
+.act-h b{font-size:17px}
+.act-c{font-size:12px;color:var(--muted);margin-top:3px}
+.act-d{margin:0;color:var(--muted);font-size:13.5px;line-height:1.7}
+.act-row{display:flex;gap:8px}
+.act-b{flex:1;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-family:inherit;font-weight:800;font-size:13px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -346,7 +384,8 @@ body{
     <div class="sortbar" id="sortbar"></div>
   </div>
 
-  <main id="grid" class="grid"></main>
+  <main id="grid"></main>
+  <div id="actSheet" class="actsheet" onclick="closeActs()"></div>
   <div id="empty" class="empty" style="display:none"></div>
 </div>
 
@@ -659,6 +698,7 @@ function renderSortbar(){
   SORTS.forEach(function(s){
     html+='<button class="sbchip'+(sortMode===s.id?" active":"")+'" data-sort="'+s.id+'">'+s.ar+'</button>';
   });
+  html+='<span class="vtog"><button class="sbchip'+(viewMode==="tiles"?" active":"")+'" onclick="setView(\'tiles\')" title="أيقونات">▦</button><button class="sbchip'+(viewMode==="cards"?" active":"")+'" onclick="setView(\'cards\')" title="كروت">☰</button></span>';
   $("#sortbar").innerHTML=html;
 }
 /* تحريك رابط لفوق/لتحت في الوضع اليدوي */
@@ -682,7 +722,7 @@ window.moveLink=function(id,dir){
 function render(){
   var list=sortList(visibleLinks().filter(matches));
   var total=visibleLinks().length;
-  $("#subCount").textContent = total? (total+" رابط محفوظ · v4") : "لسه مفيش روابط · v4";
+  $("#subCount").textContent = total? (total+" رابط محفوظ · v5") : "لسه مفيش روابط · v5";
   renderChips();
   renderSortbar();
 
@@ -697,7 +737,26 @@ function render(){
     return;
   }
   empty.style.display="none";
-  grid.innerHTML=list.map(function(l,idx){
+  var grouped=(activeCat==="الكل"&&!searchTxt&&sortMode!=="manual");
+  var tiles=(viewMode==="tiles"&&sortMode!=="manual");
+  var block=function(arr){return '<div class="'+(tiles?'tiles':'grid')+'">'+arr.map(function(l,i){return tiles?tileHTML(l):cardHTML(l,i,arr)}).join("")+'</div>'};
+  var sec=function(t,n,arr,extra){return '<section class="hsec"><div class="hsec-h"><span>'+t+'</span><span class="hsec-n">'+n+'</span></div>'+(extra||block(arr))+'</section>'};
+  var html="";
+  if(grouped){
+    var favs=list.filter(function(l){return l.fav});
+    var rec=visibleLinks().filter(function(l){return l.lastUsed&&l.url}).sort(function(x,y){return y.lastUsed-x.lastUsed}).slice(0,8);
+    if(rec.length)html+=sec("🕐 آخر ما فتحته","",null,'<div class="recent">'+rec.map(function(l){return '<button class="rchip" style="--cardc:'+esc(l.color||"#22d3ee")+'" onclick="openLink(\''+l.id+'\')"><span class="ri">'+esc(l.emoji||"🔗")+'</span><span>'+esc(l.title)+'</span></button>'}).join("")+'</div>');
+    if(favs.length)html+=sec("⭐ المفضلة",favs.length,favs);
+    var cats={};list.forEach(function(l){var c=l.cat||"بدون تصنيف";(cats[c]=cats[c]||[]).push(l)});
+    Object.keys(cats).sort(function(x,y){return cats[y].length-cats[x].length||x.localeCompare(y,"ar")}).forEach(function(c){
+      if(collapsed[c])html+='<section class="hsec"><div class="hsec-h tap" onclick="toggleSec(\''+esc(c)+'\')"><span>▸ '+esc(c)+'</span><span class="hsec-n">'+cats[c].length+'</span></div></section>';
+      else html+='<section class="hsec"><div class="hsec-h tap" onclick="toggleSec(\''+esc(c)+'\')"><span>▾ '+esc(c)+'</span><span class="hsec-n">'+cats[c].length+'</span></div>'+block(cats[c])+'</section>';
+    });
+  } else html=block(list);
+  grid.innerHTML=html;
+}
+function cardHTML(l,idx,list){
+
     var c=esc(l.color||"#22d3ee");
     var hasUrl=!!(l.url && l.url.trim());
     return ''+
@@ -711,7 +770,7 @@ function render(){
         '</div>'+
       '</div>'+
       (l.desc?'<p class="card-desc">'+esc(l.desc)+'</p>':'')+
-      (hasUrl?'<div class="card-url">'+esc(absUrl(l.url))+'</div>':'')+
+      
       (sortMode==="manual"
         ? '<div class="ordbtns" style="margin-bottom:8px">'+
             '<button class="ordbtn" title="فوق" onclick="moveLink(\''+l.id+'\',-1)"'+(idx===0?' disabled':'')+'>▲</button>'+
@@ -723,12 +782,30 @@ function render(){
         (hasUrl
           ? '<button class="openbtn" onclick="openLink(\''+l.id+'\')">↗ فتح'+((l.uses||0)>0&&sortMode==="uses"?' <span class="usetag">('+l.uses+')</span>':'')+'</button>'
           : '<button class="openbtn addurl" onclick="openLinkModal(\''+l.id+'\')">＋ أضف الرابط</button>')+
+        '<button class="sbtn" title="مفضلة" onclick="toggleFav(\''+l.id+'\')">'+(l.fav?'⭐':'☆')+'</button>'+
         '<button class="sbtn" title="مشاركة" onclick="openShare(\''+l.id+'\')">📤</button>'+
         '<button class="sbtn" title="تعديل" onclick="openLinkModal(\''+l.id+'\')">✏️</button>'+
       '</div>'+
     '</article>';
-  }).join("");
 }
+function tileHTML(l){
+  var c=esc(l.color||"#22d3ee"),hasUrl=!!(l.url&&l.url.trim());
+  return '<div class="tile" style="--cardc:'+c+'" title="'+esc(l.desc||"")+'">'+
+    '<button class="tile-main" onclick="'+(hasUrl?'openLink':'openLinkModal')+'(\''+l.id+'\')"><span class="tile-ico">'+esc(l.emoji||"🔗")+(l.fav?'<i class="tile-fav">⭐</i>':'')+'</span><span class="tile-t">'+esc(l.title)+'</span>'+(hasUrl?'':'<span class="tile-p">بدون رابط</span>')+'</button>'+
+    '<button class="tile-more" onclick="openActs(\''+l.id+'\')" aria-label="خيارات">⋯</button></div>';
+}
+var viewMode="tiles",collapsed={};
+try{viewMode=localStorage.getItem("appHub.view")||"tiles";collapsed=JSON.parse(localStorage.getItem("appHub.collapsed")||"{}")||{}}catch(e){}
+window.setView=function(v){viewMode=v;try{localStorage.setItem("appHub.view",v)}catch(e){}render()};
+window.toggleSec=function(c){collapsed[c]=!collapsed[c];if(!collapsed[c])delete collapsed[c];try{localStorage.setItem("appHub.collapsed",JSON.stringify(collapsed))}catch(e){}render()};
+window.toggleFav=function(id){var l=links.find(function(x){return x.id===id});if(!l)return;l.fav=!l.fav;l.updatedAt=now();persist();if(fbRef&&!fbApplying){try{fbRef.set(links)}catch(e){}}closeActs();render()};
+window.openActs=function(id){var l=links.find(function(x){return x.id===id});if(!l)return;var box=$("#actSheet");
+  box.innerHTML='<div class="act-in" onclick="event.stopPropagation()"><div class="act-h" style="--cardc:'+esc(l.color||"#22d3ee")+'"><span class="tile-ico">'+esc(l.emoji||"🔗")+'</span><div><b>'+esc(l.title)+'</b>'+(l.cat?'<div class="act-c">'+esc(l.cat)+'</div>':'')+'</div></div>'+
+   (l.desc?'<p class="act-d">'+esc(l.desc)+'</p>':'')+
+   (l.url?'<button class="openbtn" onclick="openLink(\''+l.id+'\')">↗ فتح</button>':'')+
+   '<div class="act-row"><button class="act-b" onclick="toggleFav(\''+l.id+'\')">'+(l.fav?'⭐ شيل من المفضلة':'☆ للمفضلة')+'</button><button class="act-b" onclick="closeActs();openShare(\''+l.id+'\')">📤 مشاركة</button><button class="act-b" onclick="closeActs();openLinkModal(\''+l.id+'\')">✏️ تعديل</button></div></div>';
+  box.classList.add("open")};
+window.closeActs=function(){var b=$("#actSheet");if(b)b.classList.remove("open")};
 
 /* ================= فتح رابط ================= */
 window.openLink=function(id){
