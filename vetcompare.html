@@ -121,7 +121,7 @@ h1,h2,h3{margin:0}
 <div class="wrap">
   <div class="top">
     <div class="logo">💊</div>
-    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v21 (الإنزيمات بأنواعها)</div></div>
+    <div style="flex:1;min-width:0"><h1>مقارنة الأدوية البيطرية</h1><div class="sub">محرك تكلفة علاج طن اللحم — دواجن · v22 (الإنزيمات في قسم واحد)</div></div>
     <button class="iconbtn" id="themeBtn" title="الوضع">🌙</button>
   </div>
 
@@ -1773,13 +1773,18 @@ function seedEnzymes(){S.enzymes=S.enzymes||[];var added=0;S.enzymes.forEach(fun
   if(added)save(true);}
 var enzCat="phy";
 function enzAlive(){return (S.enzymes||[]).filter(function(x){return !x.deleted})}
+/* منتجات الإنزيمات القديمة من قايمة المنتجات (ther = إنزيمات) — بتظهر هنا مربوطة بالمنتج نفسه */
+function enzGuess(n){n=norm(n||"");if(/ف[اي]?ت[اي]ز|فيتيز|فايتيز|phyt/.test(n))return "phy";if(/بروت|prote/.test(n))return "pro";if(/مان[ا]?ن|منانيز|منان|mann/.test(n))return "man";if(/طاق|زيلان|xyl/.test(n))return "xyl";if(/ليب|lipa/.test(n))return "lip";if(/اميلاز|amyl/.test(n))return "amy";return "oth"}
+function enzProdRows(){return alive().filter(function(p){return p.ther==="إنزيمات"}).map(function(p){var d=+p.enzDose||0;
+  return {id:"P:"+p.id,pid:p.id,src:"prod",cat:p.enzCat||enzGuess(p.name),name:p.name,en:"",company:p.supplier||p.maker||"",origin:"",comp:p.enzComp||"",dMin:d,dMax:+p.enzDoseMax||d,price:p.pkg&&p.pkg!==1000?(+p.price||0)*1000/p.pkg:(+p.price||0),offer:"من قايمة المنتجات"}})}
+function enzRows(){return enzAlive().concat(enzProdRows())}
 function enzCost(e,d){return (d||e.dMin||0)*(+e.price||0)/1000}
 function renderEnzymes(){
   seedEnzymes();
-  var cnt={};enzAlive().forEach(function(e){cnt[e.cat]=(cnt[e.cat]||0)+1});
+  var cnt={};enzRows().forEach(function(e){cnt[e.cat]=(cnt[e.cat]||0)+1});
   $("#enzCats").innerHTML=ENZ_CATS.map(function(c){return '<button class="chip'+(enzCat===c.k?' on':'')+'" onclick="enzCat=\''+c.k+'\';renderEnzymes()">'+c.icon+' '+esc(c.ar)+(cnt[c.k]?' ('+cnt[c.k]+')':'')+'</button>'}).join("");
   var c=ENZ_CATS.filter(function(x){return x.k===enzCat})[0];
-  var list=enzAlive().filter(function(e){return e.cat===enzCat}).sort(function(a,b){return enzCost(a)-enzCost(b)});
+  var list=enzRows().filter(function(e){return e.cat===enzCat}).sort(function(a,b){if(!a.dMin!==!b.dMin)return a.dMin?-1:1;return enzCost(a)-enzCost(b)});
   var h='<div class="card" style="border-right:4px solid '+c.color+'"><h3 style="font-size:16px;margin-bottom:6px">'+c.icon+' '+esc(c.ar)+' <span style="color:var(--muted);font-size:12px">'+esc(c.en)+'</span></h3>'+
    '<p style="font-size:13px;line-height:1.8;margin-bottom:8px"><b>بيعمل إيه:</b> '+esc(c.what)+'</p>'+
    '<div style="font-size:13px;font-weight:800;margin-bottom:4px">✅ الفايدة:</div><ul style="margin:0 18px 8px 0;font-size:13px;line-height:1.9">'+c.benefit.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>'+
@@ -1789,14 +1794,14 @@ function renderEnzymes(){
   h+='<div class="card"><h3 style="font-size:14px;margin-bottom:8px">📊 مقارنة المنتجات — مرتبة حسب تكلفة الطن</h3>';
   if(list.length){var best=enzCost(list[0]);
     h+='<div style="overflow-x:auto"><table style="width:100%;font-size:12.5px;border-collapse:collapse"><thead><tr style="background:var(--bg2)">'+["#","المنتج","الشركة / المنشأ","التركيب","الجرعة (جم/طن)","السعر (ج/كجم)","تكلفة الطن علف",""].map(function(x){return '<th style="padding:8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap">'+x+'</th>'}).join("")+'</tr></thead><tbody>'+
-    list.map(function(e,i){var c1=enzCost(e,e.dMin),c2=enzCost(e,e.dMax),dose=e.dMin===e.dMax||!e.dMax?e.dMin:e.dMin+' – '+e.dMax,cost=c1===c2?c1.toFixed(1):c1.toFixed(1)+' – '+c2.toFixed(1);
-      return '<tr style="border-bottom:1px solid var(--line)'+(i===0?';background:rgba(123,200,108,.10)':'')+'"><td style="padding:8px">'+(i===0?'🏆':i+1)+'</td><td style="padding:8px"><b>'+esc(e.name)+'</b><div style="color:var(--muted);font-size:11px">'+esc(e.en||'')+'</div>'+(e.offer?'<span class="badge b-ther">'+esc(e.offer)+'</span>':'')+'</td><td style="padding:8px">'+esc(e.company||'—')+(e.origin?'<div style="color:var(--muted);font-size:11px">'+esc(e.origin)+'</div>':'')+'</td><td style="padding:8px;white-space:normal;min-width:140px">'+esc(e.comp||'')+'</td><td style="padding:8px;text-align:center">'+dose+'</td><td style="padding:8px;text-align:center"><b>'+(+e.price||0).toLocaleString('en-US')+'</b></td><td style="padding:8px;text-align:center"><b style="color:var(--acc)">'+cost+' ج</b>'+(i>0&&best?'<div style="color:var(--muted);font-size:11px">+'+((c1/best-1)*100).toFixed(0)+'%</div>':'')+'</td><td style="padding:8px;white-space:nowrap"><button class="btn sec sm" onclick="enzEdit(\''+e.id+'\')">✎</button> <button class="btn sec sm" onclick="enzDel(\''+e.id+'\')">✕</button></td></tr>'}).join("")+'</tbody></table></div>'+
+    list.map(function(e,i){var c1=enzCost(e,e.dMin),c2=enzCost(e,e.dMax),dose=!e.dMin?'<span style="color:var(--warn,#f59e0b)">؟</span>':e.dMin===e.dMax||!e.dMax?e.dMin:e.dMin+' – '+e.dMax,cost=!e.dMin?'حدد الجرعة ✎':c1===c2?c1.toFixed(1):c1.toFixed(1)+' – '+c2.toFixed(1);
+      return '<tr style="border-bottom:1px solid var(--line)'+(i===0&&e.dMin?';background:rgba(123,200,108,.10)':'')+'"><td style="padding:8px">'+(i===0&&e.dMin?'🏆':i+1)+'</td><td style="padding:8px"><b>'+esc(e.name)+'</b><div style="color:var(--muted);font-size:11px">'+esc(e.en||'')+'</div>'+(e.offer?'<span class="badge b-ther">'+esc(e.offer)+'</span>':'')+'</td><td style="padding:8px">'+esc(e.company||'—')+(e.origin?'<div style="color:var(--muted);font-size:11px">'+esc(e.origin)+'</div>':'')+'</td><td style="padding:8px;white-space:normal;min-width:140px">'+esc(e.comp||'')+'</td><td style="padding:8px;text-align:center">'+dose+'</td><td style="padding:8px;text-align:center"><b>'+(+e.price||0).toLocaleString('en-US')+'</b></td><td style="padding:8px;text-align:center"><b style="color:var(--acc)">'+cost+(e.dMin?' ج':'')+'</b>'+(i>0&&best&&e.dMin?'<div style="color:var(--muted);font-size:11px">+'+((c1/best-1)*100).toFixed(0)+'%</div>':'')+'</td><td style="padding:8px;white-space:nowrap"><button class="btn sec sm" onclick="enzEdit(\''+e.id+'\')">✎</button> <button class="btn sec sm" onclick="enzDel(\''+e.id+'\')">✕</button></td></tr>'}).join("")+'</tbody></table></div>'+
     '<p style="color:var(--muted);font-size:11.5px;margin-top:8px">تكلفة الطن = الجرعة (جم/طن) × سعر الكيلو ÷ 1000. المقارنة بالتكلفة بس — اتأكد إن الـ matrix المضمون من كل شركة متقارب قبل ما تختار الأرخص.</p>';}
   else h+='<div class="empty"><h3>لسه مفيش منتجات في القسم ده</h3></div>';
   h+='<button class="btn" style="margin-top:8px" onclick="enzEdit(\'\')">➕ إضافة منتج '+esc(c.ar)+'</button></div><div id="enzForm"></div>';
   $("#enzBody").innerHTML=h;
 }
-function enzEdit(id){var e=id?enzAlive().filter(function(x){return x.id===id})[0]:{cat:enzCat};if(!e)return;
+function enzEdit(id){var e=id?enzRows().filter(function(x){return x.id===id})[0]:{cat:enzCat};if(!e)return;
   var f=function(k,l,v,t){return '<div class="field"><label>'+l+'</label><input class="input" id="ez_'+k+'" value="'+esc(v==null?'':v)+'"'+(t?' inputmode="decimal"':'')+'></div>'};
   $("#enzForm").innerHTML='<div class="card" style="border:2px solid var(--acc)"><h3 style="font-size:14px;margin-bottom:8px">'+(id?'✎ تعديل منتج':'➕ منتج جديد')+'</h3>'+
    '<div class="field"><label>القسم</label><select id="ez_cat">'+ENZ_CATS.map(function(c){return '<option value="'+c.k+'"'+(c.k===e.cat?' selected':'')+'>'+esc(c.ar)+'</option>'}).join("")+'</select></div>'+
@@ -1807,9 +1812,11 @@ function enzEdit(id){var e=id?enzAlive().filter(function(x){return x.id===id})[0
 function enzSave(id){var g=function(k){return ($("#ez_"+k).value||"").trim()},n=function(k){return parseFloat(String(g(k)).replace(/[٠-٩]/g,function(d){return "٠١٢٣٤٥٦٧٨٩".indexOf(d)}))||0};
   if(!g('name')){alert("اكتب اسم المنتج");return}
   var d={cat:$("#ez_cat").value,name:g('name'),en:g('en'),company:g('company'),origin:g('origin'),comp:g('comp'),dMin:n('dMin'),dMax:n('dMax')||n('dMin'),price:n('price'),offer:g('offer'),updatedAt:now(),deleted:false};
-  if(id){var e=S.enzymes.filter(function(x){return x.id===id})[0];Object.assign(e,d)}else{d.id=uid();S.enzymes.push(d)}
+  if(id&&id.indexOf("P:")===0){var p=S.products.filter(function(x){return x.id===id.slice(2)})[0];if(!p)return;
+    p.name=d.name;p.supplier=d.company;p.enzCat=d.cat;p.enzComp=d.comp;p.enzDose=d.dMin;p.enzDoseMax=d.dMax;p.price=p.pkg&&p.pkg!==1000?d.price*p.pkg/1000:d.price;p.updatedAt=now();}
+  else if(id){var e=S.enzymes.filter(function(x){return x.id===id})[0];Object.assign(e,d)}else{d.id=uid();S.enzymes.push(d)}
   enzCat=d.cat;save(true);renderEnzymes();toast("اتحفظ ✓")}
-function enzDel(id){if(!confirm("حذف المنتج؟"))return;var e=S.enzymes.filter(function(x){return x.id===id})[0];if(!e)return;e.deleted=true;e.updatedAt=now();save(true);renderEnzymes()}
+function enzDel(id){if(id.indexOf("P:")===0){if(!confirm("المنتج ده من قايمة المنتجات — حذفه هيشيله من هناك كمان. متأكد؟"))return;var p=S.products.filter(function(x){return x.id===id.slice(2)})[0];if(p){p.deleted=true;p.updatedAt=now();save(true);renderEnzymes()}return}if(!confirm("حذف المنتج؟"))return;var e=S.enzymes.filter(function(x){return x.id===id})[0];if(!e)return;e.deleted=true;e.updatedAt=now();save(true);renderEnzymes()}
 
 /* ============ نظام 6: الإنزيمات والإضافات ============ */
 var ENZYMES_KB=[
