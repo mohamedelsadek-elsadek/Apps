@@ -215,6 +215,25 @@ tbody tr:last-child td{border-bottom:none}
   .modal-body{grid-template-columns:1fr}
   .content{padding:18px 14px 50px}
 }
+
+.u-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.u-k{background:var(--panel,#111a2e);border:1px solid var(--line,#22304d);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.u-k span{font-size:12px;color:var(--muted)}.u-k b{font-size:17px}
+.u-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;padding:14px}
+.u-card{border:1px solid var(--line,#22304d);border-radius:16px;padding:14px;background:rgba(59,130,246,.04);display:flex;flex-direction:column;gap:10px}
+.u-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.u-co{font-weight:800;font-size:15px;line-height:1.4}.u-pr{font-size:12.5px;color:var(--muted);margin-top:3px}
+.u-code{font-family:monospace;font-weight:800;font-size:13px;background:rgba(59,130,246,.15);color:#93c5fd;padding:5px 9px;border-radius:9px;white-space:nowrap;direction:ltr}
+.u-chips{display:flex;flex-wrap:wrap;gap:6px}
+.u-chip{display:flex;flex-direction:column;align-items:center;min-width:62px;padding:6px 9px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line,#22304d)}
+.u-chip span{font-size:10.5px;color:var(--muted)}.u-chip b{font-size:14px}
+.u-miss{font-size:12px;color:#fcd34d}
+.u-rows{display:flex;flex-direction:column;gap:5px;font-size:13px}
+.u-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(255,255,255,.06);padding-bottom:4px}.u-row span{color:var(--muted)}
+.u-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}.u-bar i{display:block;height:100%;background:linear-gradient(90deg,#10b981,#3b82f6)}
+.u-pct{font-size:12px;color:var(--muted)}.u-notes{font-size:12.5px;color:var(--muted);line-height:1.7}
+.u-acts{display:flex;gap:6px;flex-wrap:wrap}
+@media(max-width:520px){.u-grid{grid-template-columns:1fr;padding:10px}}
 </style>
 </head>
 <body>
@@ -232,6 +251,7 @@ tbody tr:last-child td{border-bottom:none}
     <a class="nav-item" data-page="calendar"><span class="ico">📅</span> التقويم</a>
     <a class="nav-item" data-page="reports"><span class="ico">📊</span> التقارير</a>
     <a class="nav-item" data-page="customers"><span class="ico">👥</span> العملاء</a>
+    <a class="nav-item" data-page="units"><span class="ico">🏢</span> الوحدات</a>
     <div class="nav-sep">النظام</div>
     <a class="nav-item" data-page="settings"><span class="ico">⚙️</span> الإعدادات</a>
     <a class="nav-item" id="btnBackup"><span class="ico">💾</span> نسخ احتياطي</a>
@@ -254,6 +274,7 @@ tbody tr:last-child td{border-bottom:none}
       <section class="page" id="page-calendar"></section>
       <section class="page" id="page-reports"></section>
       <section class="page" id="page-customers"></section>
+      <section class="page" id="page-units"></section>
       <section class="page" id="page-settings"></section>
     </div>
   </div>
@@ -417,7 +438,7 @@ function applyCloudData(val){
   const page=active?active.dataset.page:'dashboard';
   ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
     statement:renderStatement,calendar:renderCalendar,reports:renderReports,
-    customers:renderCustomers,settings:renderSettings}[page]||renderDashboard)();
+    customers:renderCustomers,units:renderUnits,settings:renderSettings}[page]||renderDashboard)();
   toast('🔄 تم تحديث البيانات من جهاز آخر','ok');
 }
 
@@ -448,10 +469,22 @@ function migratePerla2026b(){
   DB._mig2='perlaDiff';
   return true;
 }
+function migrateUnits(){
+  if(!DB||DB._mig3==='units1') return false;
+  DB.units=Array.isArray(DB.units)?DB.units:[];
+  const seed=[
+    {id:'u_perla',company:'بيرلا للاستثمار والتطوير العقاري (Perla Properties)',project:'Perla Heights',location:'الزقازيق',building:'B2',floor:'6',unitNo:'A1',code:'R-B2-F6-A1',type:'سكني',area:220,meterPrice:22500,price:5300000,maint:424000,extras:'2 جراج',cust:'C-PR001',contract:'',delivery:'',notes:'المقدم 1,597,500 على 6 أجزاء + 16 قسط ربع سنوي (3,702,500) + صيانة 424,000'},
+    {id:'u_r8',company:'New Event Developments',project:'المشروع السكني R8',location:'القاهرة الجديدة',building:'',floor:'',unitNo:'',code:'QR29-53',type:'سكني',area:'',meterPrice:'',price:'',maint:'',extras:'',cust:'C-NE001',contract:'',delivery:'',notes:'شيكات بنك الإسكندرية'},
+    {id:'u_md1',company:'موداد المتحدة للمقاولات (MODAD)',project:'',location:'',building:'',floor:'',unitNo:'',code:'S1.1/518',type:'',area:'',meterPrice:'',price:'',maint:'',extras:'',cust:'C-MD001',contract:'',delivery:'',notes:'شيكات بنك الإسكندرية'},
+    {id:'u_md2',company:'MODAD — التجمع',project:'',location:'التجمع',building:'',floor:'',unitNo:'',code:'BR/114',type:'',area:'',meterPrice:'',price:'',maint:'',extras:'',cust:'C-MD002',contract:'',delivery:'',notes:'شيكات بنك مصر'}];
+  seed.forEach(u=>{ if(!DB.units.some(x=>x.id===u.id)) DB.units.push(u); });
+  DB._mig3='units1'; return true;
+}
 function migratePerla2026(){
   const b=migratePerla2026_a();
   const c=migratePerla2026b();
-  return b||c;
+  const d=migrateUnits();
+  return b||c||d;
 }
 function migratePerla2026_a(){
   if(!DB||!Array.isArray(DB.checks)||DB._mig==='perla2026') return false;
@@ -521,10 +554,77 @@ function stats(){
           total:DB.checks.length,instRemain,instOverdue,debt:dueTotal};
 }
 
+
+/* ---------- 🏢 الوحدات: تفاصيل كل وحدة + موقف السداد من الشيكات ---------- */
+function unitChecks(u){ return DB.checks.filter(c=>u.cust&&c.cust===u.cust&&(!u.match||((c.ref||'')+' '+(c.notes||'')).indexOf(u.match)>-1)); }
+function unitStats(u){
+  const L=unitChecks(u),paid=L.filter(c=>c.status==='تم التحصيل').reduce((a,c)=>a+(+c.amount||0),0);
+  const open=L.filter(c=>c.status==='تحت التحصيل').sort((a,b)=>a.due<b.due?-1:1);
+  const rem=open.reduce((a,c)=>a+(+c.amount||0),0),tot=L.reduce((a,c)=>a+(+c.amount||0),0);
+  const ret=L.filter(c=>c.status==='مرتجع').length;
+  return {n:L.length,paid,rem,tot,next:open[0]||null,last:open[open.length-1]||null,ret,nOpen:open.length};
+}
+function renderUnits(){
+  DB.units=DB.units||[];
+  const T={paid:0,rem:0,tot:0};DB.units.forEach(u=>{const s=unitStats(u);T.paid+=s.paid;T.rem+=s.rem;T.tot+=s.tot});
+  const chip=(l,v)=>v===''||v==null?'':`<div class="u-chip"><span>${l}</span><b>${esc(v)}</b></div>`;
+  const row=(l,v,c)=>`<div class="u-row"><span>${l}</span><b${c?` style="color:${c}"`:''}>${v}</b></div>`;
+  $('#page-units').innerHTML=`
+  <div class="u-kpis"><div class="u-k"><span>عدد الوحدات</span><b>${DB.units.length}</b></div><div class="u-k"><span>إجمالي الشيكات</span><b>${fmtMoney(T.tot)}</b></div>
+   <div class="u-k"><span>المدفوع</span><b style="color:#6ee7b7">${fmtMoney(T.paid)}</b></div><div class="u-k"><span>الباقي</span><b style="color:#fcd34d">${fmtMoney(T.rem)}</b></div></div>
+  <div class="panel"><div class="panel-head"><h3>🏢 الوحدات (${DB.units.length})</h3><span style="flex:1"></span><button class="btn primary" id="addUnit">＋ وحدة جديدة</button></div>
+  <div class="u-grid">${DB.units.map(u=>{const s=unitStats(u),pct=s.tot?Math.round(s.paid/s.tot*100):0,cu=DB.customers.find(c=>c.code===u.cust);
+    const missing=['building','floor','unitNo','area','price'].filter(k=>u[k]===''||u[k]==null).length;
+    return `<div class="u-card" data-id="${u.id}">
+      <div class="u-head"><div><div class="u-co">${esc(u.company||'—')}</div><div class="u-pr">${esc(u.project||'')}${u.location?` · 📍 ${esc(u.location)}`:''}</div></div>
+        <div class="u-code">${esc(u.code||'')}</div></div>
+      <div class="u-chips">${chip('العمارة',u.building)}${chip('الدور',u.floor)}${chip('الوحدة',u.unitNo)}${chip('المساحة',u.area?u.area+' م²':'')}${chip('النوع',u.type)}${chip('إضافات',u.extras)}</div>
+      ${missing?`<div class="u-miss">⚠️ ناقص ${missing} بيانات — اضغط ✏️ وكمّلها</div>`:''}
+      <div class="u-rows">
+        ${u.price?row('سعر الوحدة',fmtMoney(u.price)):''}${u.meterPrice?row('سعر المتر',fmtMoney(u.meterPrice)):''}${u.maint?row('الصيانة',fmtMoney(u.maint)):''}
+        ${row('إجمالي الشيكات ('+s.n+')',fmtMoney(s.tot))}${row('المدفوع',fmtMoney(s.paid),'#6ee7b7')}${row('الباقي ('+s.nOpen+' شيك)',fmtMoney(s.rem),'#fcd34d')}
+        ${s.next?row('الشيك الجاي',esc(s.next.due)+' · '+fmtMoney(s.next.amount)):''}${s.last?row('آخر شيك',esc(s.last.due)):''}${s.ret?row('مرتجع',s.ret+' شيك','#fca5a5'):''}
+        ${u.contract?row('تاريخ التعاقد',esc(u.contract)):''}${u.delivery?row('الاستلام',esc(u.delivery)):''}
+      </div>
+      <div class="u-bar"><i style="width:${pct}%"></i></div><div class="u-pct">اتدفع ${pct}%${cu?` · العميل: ${esc(cu.name)}`:''}</div>
+      ${u.notes?`<div class="u-notes">📝 ${esc(u.notes)}</div>`:''}
+      <div class="u-acts"><button class="btn sm" data-act="s">📋 كشف الشيكات</button><button class="btn sm" data-act="e">✏️ تعديل</button><button class="btn sm danger" data-act="d">🗑</button></div>
+    </div>`}).join('')||'<div style="padding:30px;text-align:center;color:var(--muted)">مفيش وحدات — اضغط «وحدة جديدة»</div>'}</div></div>`;
+  $('#addUnit').onclick=()=>unitModal();
+  $$('#page-units .u-card').forEach(el=>{const id=el.dataset.id;
+    el.querySelector('[data-act="e"]').onclick=()=>unitModal(id);
+    el.querySelector('[data-act="d"]').onclick=()=>{const u=DB.units.find(x=>x.id===id);if(confirm('حذف وحدة '+(u.code||u.project||'')+'؟ (الشيكات مش هتتمسح)')){DB.units=DB.units.filter(x=>x.id!==id);save();renderUnits();toast('اتحذفت الوحدة')}};
+    el.querySelector('[data-act="s"]').onclick=()=>{const u=DB.units.find(x=>x.id===id);if(u.cust){UI.stmtCustomer=u.cust;go('statement')}else toast('اربط الوحدة بعميل الأول','err')};
+  });
+}
+function unitModal(id){
+  const u=id?DB.units.find(x=>x.id===id):{company:'',project:'',location:'',building:'',floor:'',unitNo:'',code:'',type:'سكني',area:'',meterPrice:'',price:'',maint:'',extras:'',cust:'',match:'',contract:'',delivery:'',notes:''};
+  const f=(k,l,t,full)=>`<div class="field${full?' full':''}"><label>${l}</label><input class="input" id="u_${k}" ${t==='n'?'inputmode="decimal"':t==='d'?'type="date"':''} value="${esc(u[k]==null?'':u[k])}"></div>`;
+  openModal(`<div class="modal-head"><h3>${id?'✏️ تعديل وحدة':'＋ وحدة جديدة'}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      ${f('company','اسم الشركة','',1)}${f('project','اسم المشروع')}${f('location','المكان / المدينة')}
+      ${f('building','رقم العمارة')}${f('floor','الدور')}${f('unitNo','رقم الوحدة / الشقة')}${f('code','كود الوحدة')}
+      ${f('type','النوع (سكني/تجاري/إداري)')}${f('area','المساحة (م²)','n')}${f('meterPrice','سعر المتر','n')}${f('price','سعر الوحدة','n')}
+      ${f('maint','الصيانة','n')}${f('extras','إضافات (جراج/حديقة...)')}${f('contract','تاريخ التعاقد','d')}${f('delivery','ميعاد الاستلام','d')}
+      <div class="field"><label>العميل المرتبط (الشيكات)</label><select class="input" id="u_cust"><option value="">—</option>${DB.customers.map(c=>`<option value="${esc(c.code)}" ${c.code===u.cust?'selected':''}>${esc(c.code)} — ${esc(c.name)}</option>`).join('')}</select></div>
+      ${f('match','لو العميل ليه أكتر من وحدة: كلمة في مرجع الشيكات')}
+      <div class="field full"><label>ملاحظات</label><textarea class="input" id="u_notes" rows="2">${esc(u.notes||'')}</textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn primary" id="u_save">💾 حفظ</button><button class="btn" onclick="closeModal()">إلغاء</button></div>`);
+  $('#u_save').onclick=()=>{
+    const g=k=>($('#u_'+k).value||'').trim(),n=k=>{const v=g(k).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/,/g,'');return v===''?'':Number(v)||0};
+    const d={company:g('company'),project:g('project'),location:g('location'),building:g('building'),floor:g('floor'),unitNo:g('unitNo'),code:g('code'),type:g('type'),
+      area:n('area'),meterPrice:n('meterPrice'),price:n('price'),maint:n('maint'),extras:g('extras'),contract:g('contract'),delivery:g('delivery'),cust:g('cust'),match:g('match'),notes:g('notes')};
+    if(!d.company&&!d.project&&!d.code){toast('اكتب اسم الشركة أو المشروع','err');return}
+    if(id)Object.assign(u,d);else DB.units.push(Object.assign({id:uid()},d));
+    save();closeModal();renderUnits();toast('اتحفظت الوحدة ✓');
+  };
+}
+
 /* ---------- تنقل ---------- */
 const PAGE_TITLES={dashboard:'لوحة التحكم',checks:'سجل الشيكات',installments:'الأقساط والمديونيات',
   statement:'كشف حساب عميل',calendar:'تقويم الاستحقاقات',reports:'التقارير والتحليلات',
-  customers:'قاعدة بيانات العملاء',settings:'الإعدادات'};
+  customers:'قاعدة بيانات العملاء',units:'تفاصيل الوحدات',settings:'الإعدادات'};
 function go(page){
   $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
   $$('.page').forEach(p=>p.classList.remove('active'));
@@ -532,7 +632,7 @@ function go(page){
   $('#pageTitle').textContent=PAGE_TITLES[page]||'';
   ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
     statement:renderStatement,calendar:renderCalendar,reports:renderReports,
-    customers:renderCustomers,settings:renderSettings}[page]||(()=>{}))();
+    customers:renderCustomers,units:renderUnits,settings:renderSettings}[page]||(()=>{}))();
   closeSidebar();
   window.scrollTo(0,0);
 }
@@ -1126,7 +1226,7 @@ function renderSettings(){
   $$('[data-add]').forEach(b=>b.onclick=()=>{ const k=b.dataset.add; const v=$('#add_'+k).value.trim();
     if(v&&!DB[k].includes(v)){ DB[k].push(v); save(); renderSettings(); toast('تمت الإضافة'); } });
   $$('[data-del]').forEach(b=>b.onclick=()=>{ const k=b.dataset.del; DB[k].splice(+b.dataset.i,1); save(); renderSettings(); });
-  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; DB._mig2=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
+  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; DB._mig2=''; DB._mig3=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
   $('#wipeAll').onclick=()=>{ if(confirm('سيتم مسح كل البيانات نهائياً. متأكد؟')){ DB={checks:[],customers:[],banks:[],methods:[],reps:[],statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']}; save(); go('dashboard'); toast('تم مسح كل البيانات'); } };
 }
 
