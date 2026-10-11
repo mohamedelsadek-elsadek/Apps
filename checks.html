@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الشيكات والأقساط</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e1a; --bg2:#0e1424; --panel:#121a2e; --panel2:#161f38;
+  --line:#1f2c47; --line2:#2a3a5c;
+  --primary:#3b82f6; --primary-d:#2563eb; --primary-soft:rgba(59,130,246,.12);
+  --text:#e6edf7; --muted:#8497b8; --muted2:#5e6f8f;
+  --green:#22c55e; --green-soft:rgba(34,197,94,.13);
+  --red:#ef4444; --red-soft:rgba(239,68,68,.13);
+  --amber:#f59e0b; --amber-soft:rgba(245,158,11,.13);
+  --cyan:#06b6d4; --violet:#8b5cf6;
+  --radius:16px; --radius-sm:11px;
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+  --font:'Readex Pro',system-ui,sans-serif; --display:'Cairo',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font); background:var(--bg); color:var(--text);
+  font-size:14px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(900px 500px at 100% -5%, rgba(59,130,246,.10), transparent 60%),
+    radial-gradient(700px 500px at -10% 110%, rgba(139,92,246,.08), transparent 55%);
+}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#243456;border-radius:20px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#314770}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:14px}
+a{color:inherit;text-decoration:none}
+
+/* ===== Layout ===== */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:248px;flex-shrink:0;background:linear-gradient(180deg,var(--bg2),var(--bg));
+  border-inline-end:1px solid var(--line);padding:22px 14px;
+  display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:40;
+}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 8px 20px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.brand .logo{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--primary),var(--violet));
+  display:grid;place-items:center;font-size:22px;box-shadow:0 6px 18px rgba(59,130,246,.4);
+}
+.brand h1{font-family:var(--display);font-size:15px;font-weight:800;line-height:1.3}
+.brand span{font-size:11px;color:var(--muted2);font-weight:500}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--radius-sm);
+  color:var(--muted);font-weight:600;font-size:13.5px;transition:.18s;position:relative;
+}
+.nav-item .ico{font-size:18px;width:22px;text-align:center}
+.nav-item:hover{background:var(--panel);color:var(--text)}
+.nav-item.active{background:var(--primary-soft);color:#fff}
+.nav-item.active::before{content:"";position:absolute;inset-inline-start:0;top:18%;height:64%;width:3px;border-radius:4px;background:var(--primary)}
+.nav-item .badge{margin-inline-start:auto;background:var(--red);color:#fff;font-size:11px;padding:1px 7px;border-radius:20px;font-weight:700}
+.nav-sep{font-size:10.5px;color:var(--muted2);font-weight:700;letter-spacing:.5px;padding:14px 13px 6px;text-transform:uppercase}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{
+  height:62px;display:flex;align-items:center;gap:14px;padding:0 26px;
+  border-bottom:1px solid var(--line);background:rgba(10,14,26,.7);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:30;
+}
+.topbar .menu-btn{display:none;font-size:22px;background:none;color:var(--text)}
+.topbar h2{font-family:var(--display);font-size:18px;font-weight:800;flex:1}
+.topbar .date{font-size:12.5px;color:var(--muted);font-weight:500}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;
+  font-weight:700;font-size:13px;background:var(--panel2);color:var(--text);border:1px solid var(--line);transition:.16s;
+}
+.btn:hover{border-color:var(--primary);background:var(--panel)}
+.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary-d));border-color:transparent;box-shadow:0 4px 14px rgba(59,130,246,.35)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:#fca5a5}
+.btn.danger:hover{border-color:var(--red);background:var(--red-soft)}
+.btn.sm{padding:6px 11px;font-size:12px;border-radius:9px}
+.content{padding:24px 26px 60px;flex:1}
+.page{display:none;animation:fade .35s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ===== Cards / KPIs ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:15px;margin-bottom:22px}
+.kpi{
+  background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:.2s;
+}
+.kpi:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:var(--shadow)}
+.kpi::after{content:"";position:absolute;top:-30px;inset-inline-start:-30px;width:90px;height:90px;border-radius:50%;background:var(--accent,var(--primary));opacity:.13;filter:blur(8px)}
+.kpi .ico{font-size:21px;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft,var(--primary-soft));margin-bottom:13px}
+.kpi .label{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.kpi .val{font-family:var(--display);font-size:23px;font-weight:800;letter-spacing:-.5px}
+.kpi .sub{font-size:11.5px;color:var(--muted2);margin-top:4px}
+
+.section-title{font-family:var(--display);font-size:16px;font-weight:800;margin:26px 0 14px;display:flex;align-items:center;gap:9px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.panel-head{display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel-head h3{font-family:var(--display);font-size:15px;font-weight:700;flex:1}
+
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+@media(max-width:1100px){.grid2{grid-template-columns:1fr}}
+
+/* ===== Table ===== */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+thead th{
+  background:var(--bg2);color:var(--muted);font-weight:700;font-size:12px;text-align:right;
+  padding:11px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;
+}
+tbody td{padding:11px 14px;border-bottom:1px solid rgba(31,44,71,.55)}
+tbody tr{transition:.12s}
+tbody tr:hover{background:var(--panel2)}
+tbody tr:last-child td{border-bottom:none}
+.num{font-variant-numeric:tabular-nums;font-weight:600}
+.cell-edit{cursor:text;border-radius:6px;padding:3px 6px;margin:-3px -6px;transition:.12s}
+.cell-edit:hover{background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary)}
+.cell-edit-input{background:var(--bg);border:1px solid var(--primary);border-radius:6px;padding:5px 8px;color:var(--text);width:100%;min-width:90px}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill.green{background:var(--green-soft);color:#86efac}
+.pill.red{background:var(--red-soft);color:#fca5a5}
+.pill.amber{background:var(--amber-soft);color:#fcd34d}
+.pill.blue{background:var(--primary-soft);color:#93c5fd}
+.pill.gray{background:rgba(132,151,184,.13);color:var(--muted)}
+.pill.violet{background:rgba(139,92,246,.14);color:#c4b5fd}
+
+/* ===== Forms / Filters ===== */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11.5px;color:var(--muted);font-weight:600;padding-inline-start:2px}
+.input,select.input,textarea.input{
+  background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);width:100%;transition:.15s;
+}
+.input:focus,select.input:focus,textarea.input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);background:var(--bg2)}
+
+/* ===== Modal ===== */
+.modal-bg{position:fixed;inset:0;background:rgba(4,7,15,.74);backdrop-filter:blur(5px);display:none;place-items:center;z-index:100;padding:20px}
+.modal-bg.show{display:grid;animation:fade .2s}
+.modal{background:var(--panel);border:1px solid var(--line2);border-radius:20px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-head{display:flex;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.modal-head h3{font-family:var(--display);font-size:17px;font-weight:800;flex:1}
+.modal-head .x{font-size:24px;color:var(--muted);background:none;line-height:1;width:34px;height:34px;border-radius:9px}
+.modal-head .x:hover{background:var(--panel2);color:var(--text)}
+.modal-body{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.modal-body .full{grid-column:1/-1}
+.modal-foot{display:flex;gap:10px;justify-content:flex-start;padding:16px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--panel)}
+
+/* ===== Bars / charts ===== */
+.bar-row{display:flex;align-items:center;gap:12px;padding:9px 0}
+.bar-row .lbl{width:80px;font-size:12.5px;color:var(--muted);font-weight:600;flex-shrink:0}
+.bar-track{flex:1;height:11px;background:var(--bg2);border-radius:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--primary),var(--cyan));transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.bar-row .amt{font-size:12px;font-weight:700;width:118px;text-align:left;flex-shrink:0;font-variant-numeric:tabular-nums}
+
+.month-chart{display:flex;align-items:flex-end;gap:6px;height:200px;padding:16px 18px}
+.mc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.mc-bars{display:flex;gap:2px;align-items:flex-end;width:100%;justify-content:center;height:100%}
+.mc-bar{width:42%;border-radius:5px 5px 0 0;min-height:2px;transition:height .6s}
+.mc-bar.due{background:linear-gradient(180deg,var(--amber),#b45309)}
+.mc-bar.col{background:linear-gradient(180deg,var(--green),#15803d)}
+.mc-lbl{font-size:10.5px;color:var(--muted2);font-weight:600}
+
+.donut-wrap{display:flex;align-items:center;gap:22px;padding:20px;flex-wrap:wrap;justify-content:center}
+.legend{display:flex;flex-direction:column;gap:9px}
+.legend-item{display:flex;align-items:center;gap:9px;font-size:13px}
+.legend-item .dot{width:11px;height:11px;border-radius:3px}
+.legend-item b{margin-inline-start:auto;font-variant-numeric:tabular-nums;padding-inline-start:14px}
+
+.empty{text-align:center;padding:50px 20px;color:var(--muted2)}
+.empty .big{font-size:42px;margin-bottom:10px;opacity:.6}
+
+.toast{position:fixed;bottom:24px;inset-inline-start:50%;transform:translateX(50%) translateY(120px);
+  background:var(--panel2);border:1px solid var(--line2);padding:13px 20px;border-radius:12px;
+  font-weight:600;box-shadow:var(--shadow);z-index:200;transition:.35s cubic-bezier(.2,.8,.2,1);display:flex;gap:9px;align-items:center}
+.toast.show{transform:translateX(50%) translateY(0)}
+.toast.ok{border-color:var(--green)}
+.toast.err{border-color:var(--red)}
+
+.tabs{display:flex;gap:6px;padding:4px;background:var(--bg2);border-radius:12px;width:fit-content}
+.tab{padding:8px 16px;border-radius:9px;font-weight:700;font-size:13px;color:var(--muted);background:none;transition:.15s}
+.tab.active{background:var(--primary);color:#fff}
+
+.search-box{position:relative;flex:1;max-width:340px}
+.search-box input{padding-inline-start:38px}
+.search-box .si{position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:15px}
+
+.overlay-m{display:none}
+
+/* ===== Lock screen ===== */
+#lockScreen{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px;
+  background:radial-gradient(800px 500px at 50% 0%,rgba(59,130,246,.14),transparent 60%),var(--bg)}
+.lock-card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line2);
+  border-radius:22px;padding:38px 32px;width:100%;max-width:380px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.lock-logo{width:70px;height:70px;border-radius:20px;margin:0 auto 18px;display:grid;place-items:center;font-size:34px;
+  background:linear-gradient(135deg,var(--primary),var(--violet));box-shadow:0 10px 30px rgba(59,130,246,.45)}
+.lock-card h2{font-family:var(--display);font-size:20px;font-weight:800;margin-bottom:6px}
+.lock-card p{color:var(--muted);font-size:13px;margin-bottom:20px}
+.lock-card .input{margin-bottom:6px;text-align:center;font-size:16px;letter-spacing:2px}
+@media(max-width:860px){
+  .sidebar{position:fixed;inset-inline-start:-260px;transition:.28s;box-shadow:0 0 40px rgba(0,0,0,.5)}
+  .sidebar.open{inset-inline-start:0}
+  .topbar .menu-btn{display:block}
+  .overlay-m{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:35;opacity:0;pointer-events:none;transition:.25s}
+  .overlay-m.show{opacity:1;pointer-events:auto}
+  .grid2{grid-template-columns:1fr}
+  .modal-body{grid-template-columns:1fr}
+  .content{padding:18px 14px 50px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">🧾</div>
+      <div><h1>إدارة الشيكات</h1><span>والأقساط — ERP</span></div>
+    </div>
+    <a class="nav-item active" data-page="dashboard"><span class="ico">🏠</span> لوحة التحكم</a>
+    <a class="nav-item" data-page="checks"><span class="ico">🧾</span> الشيكات <span class="badge" id="navChecksBadge" style="display:none"></span></a>
+    <a class="nav-item" data-page="installments"><span class="ico">💰</span> الأقساط</a>
+    <a class="nav-item" data-page="statement"><span class="ico">📋</span> كشف حساب</a>
+    <a class="nav-item" data-page="calendar"><span class="ico">📅</span> التقويم</a>
+    <a class="nav-item" data-page="reports"><span class="ico">📊</span> التقارير</a>
+    <a class="nav-item" data-page="customers"><span class="ico">👥</span> العملاء</a>
+    <div class="nav-sep">النظام</div>
+    <a class="nav-item" data-page="settings"><span class="ico">⚙️</span> الإعدادات</a>
+    <a class="nav-item" id="btnBackup"><span class="ico">💾</span> نسخ احتياطي</a>
+  </aside>
+  <div class="overlay-m" id="overlayM"></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn">☰</button>
+      <h2 id="pageTitle">لوحة التحكم</h2>
+      <span class="pill gray" id="cloudBadge">💾 وضع محلي</span>
+      <span class="date" id="todayStr"></span>
+    </header>
+    <div class="content">
+      <section class="page active" id="page-dashboard"></section>
+      <section class="page" id="page-checks"></section>
+      <section class="page" id="page-installments"></section>
+      <section class="page" id="page-statement"></section>
+      <section class="page" id="page-calendar"></section>
+      <section class="page" id="page-reports"></section>
+      <section class="page" id="page-customers"></section>
+      <section class="page" id="page-settings"></section>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<input type="file" id="importFile" accept="application/json" style="display:none">
+
+<script>
+window.SEED={"checks":[{"num":"CHK-2340","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2024-09-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":"2024-09-01","notes":null},{"num":"CHK-2341","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2024-12-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":"2024-12-01","notes":null},{"num":"CHK-2342","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2025-03-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":"2025-03-01","notes":null},{"num":"CHK-2343","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2025-06-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":"2025-06-01","notes":null},{"num":"CHK-2344","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2025-09-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":"2025-09-01","notes":null},{"num":"CHK-2345","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2025-12-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":"2025-12-01","notes":null},{"num":"CHK-2346","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2026-03-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":"2026-03-01","notes":null},{"num":"CHK-2347","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2026-06-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2348","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2026-09-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2349","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2026-12-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2350","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2027-03-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2351","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2027-06-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2352","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2027-09-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2353","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2027-12-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2354","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2028-03-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2355","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2028-06-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2356","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2028-09-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2357","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2028-12-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2358","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2029-03-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2359","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2029-06-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2360","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2029-09-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2361","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2029-12-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2362","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2030-03-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2363","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2030-06-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2364","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2030-09-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2365","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2030-12-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2366","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2031-03-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2367","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":194858,"issue":null,"due":"2031-06-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2368","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":606225,"issue":null,"due":"2027-05-18","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"CHK-2369","bank":"بنك الإسكندرية","cust":"C-NE001","custName":"new event","amount":200000,"issue":null,"due":"2028-08-15","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"المشروع السكنى R8 - وحدة QR29-53","collectDate":null,"notes":null},{"num":"MODAD-2311220058834","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2024-07-01","due":"2024-07-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2024-07-01","notes":null},{"num":"MODAD-2311220058835","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2024-10-01","due":"2024-10-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2024-10-01","notes":null},{"num":"MODAD-2311220058836","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2025-01-01","due":"2025-01-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2025-01-01","notes":null},{"num":"MODAD-2311220058837","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2025-04-01","due":"2025-04-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2025-04-01","notes":null},{"num":"MODAD-2311220058838","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2025-07-01","due":"2025-07-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2025-07-01","notes":null},{"num":"MODAD-2311220058839","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2025-10-01","due":"2025-10-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2025-10-01","notes":null},{"num":"MODAD-2311220058840","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2026-01-01","due":"2026-01-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2026-01-01","notes":null},{"num":"MODAD-2311220058841","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2026-04-01","due":"2026-04-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2026-04-01","notes":null},{"num":"MODAD-2311220058842","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":506465,"issue":"2026-04-01","due":"2026-04-01","status":"تم التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":"2026-04-01","notes":"قسط صيانة"},{"num":"MODAD-2311220058843","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2026-07-01","due":"2026-07-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002339","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2026-10-01","due":"2026-10-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2311220058844","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2027-01-01","due":"2027-01-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2311220058845","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2027-04-01","due":"2027-04-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2311220058846","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2027-07-01","due":"2027-07-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2311220058847","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2027-10-01","due":"2027-10-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2311220058848","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2028-01-01","due":"2028-01-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2311220058849","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2028-04-01","due":"2028-04-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2311220058850","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2028-07-01","due":"2028-07-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002328","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2028-10-01","due":"2028-10-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002329","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2029-01-01","due":"2029-01-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002330","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2029-04-01","due":"2029-04-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002331","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2029-07-01","due":"2029-07-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002332","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2029-10-01","due":"2029-10-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002333","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2030-01-01","due":"2030-01-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002334","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2030-04-01","due":"2030-04-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002335","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2030-07-01","due":"2030-07-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002336","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2030-10-01","due":"2030-10-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002337","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2031-01-01","due":"2031-01-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"MODAD-2403100002338","bank":"بنك الإسكندرية","cust":"C-MD001","custName":"MODAD","amount":162792,"issue":"2031-04-01","due":"2031-04-01","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"كود الوحدة S1.1/518","collectDate":null,"notes":null},{"num":"BR114-BOOKING","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":113981.02,"issue":null,"due":"2025-11-22","status":"تم التحصيل","rep":null,"method":"تحويل بنكي","ref":"مشروع [brackets] - وحدة BR/114","collectDate":"2025-11-22","notes":null},{"num":"BR114-DP","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":279253.5,"issue":null,"due":"2025-11-22","status":"تم التحصيل","rep":null,"method":"تحويل بنكي","ref":"مشروع [brackets] - وحدة BR/114","collectDate":"2025-11-22","notes":null},{"num":"BR114-INST-01","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2026-02-22","status":"تم التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-02","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2026-05-22","status":"تم التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-03","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2026-08-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-04","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2026-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-05","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2027-02-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-06","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2027-05-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-07","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2027-08-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-08","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2027-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-09","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2028-02-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-10","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2028-05-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-11","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2028-08-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-12","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2028-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-13","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2029-02-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-14","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2029-05-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-15","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2029-08-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-16","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2029-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-17","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2030-02-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-18","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2030-05-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-19","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2030-08-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-20","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2030-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-21","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2031-02-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-22","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2031-05-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-23","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2031-08-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-24","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2031-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-25","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2032-02-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-26","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2032-05-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-27","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2032-08-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-INST-28","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":393030.98,"issue":null,"due":"2032-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"BR114-MAINT","bank":"بنك مصر","cust":"C-MD002","custName":"MODAD tagamo3","amount":1169036.1,"issue":null,"due":"2028-11-22","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"مشروع [brackets] - وحدة BR/114","collectDate":null,"notes":null},{"num":"9785044963","bank":"بنك البركة","cust":"C-PR001","custName":"بيرلا للاستثمار والتطوير العقاري","amount":452000,"issue":null,"due":"2026-05-15","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"شيكات بنك البركة - فرع الزقازيق","collectDate":null,"notes":null},{"num":"9785044964","bank":"بنك البركة","cust":"C-PR001","custName":"بيرلا للاستثمار والتطوير العقاري","amount":452000,"issue":null,"due":"2026-05-09","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"شيكات بنك البركة - فرع الزقازيق","collectDate":null,"notes":null},{"num":"9785044965","bank":"بنك البركة","cust":"C-PR001","custName":"بيرلا للاستثمار والتطوير العقاري","amount":452000,"issue":null,"due":"2026-07-09","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"شيكات بنك البركة - فرع الزقازيق","collectDate":null,"notes":null},{"num":"9785044966","bank":"بنك البركة","cust":"C-PR001","custName":"بيرلا للاستثمار والتطوير العقاري","amount":452000,"issue":null,"due":"2026-12-29","status":"تحت التحصيل","rep":null,"method":"شيك","ref":"شيكات بنك البركة - فرع الزقازيق","collectDate":null,"notes":null}],"customers":[{"code":"C001","name":"مزرعة الأمل للدواجن","phone":"01012345678","address":"الشرقية - الزقازيق","region":"الشرقية","rep":"أحمد محمد","joined":"2024-01-15","notes":"عميل ممتاز"},{"code":"C002","name":"شركة النهضة للإنتاج الداجني","phone":"01098765432","address":"البحيرة - دمنهور","region":"البحيرة","rep":"محمود علي","joined":"2024-03-22","notes":null},{"code":"C003","name":"مزارع الوادي الأخضر","phone":"01155667788","address":"المنوفية - شبين الكوم","region":"المنوفية","rep":"كريم سامي","joined":"2023-11-10","notes":"يفضل الدفع بالشيكات"},{"code":"C004","name":"صيدلية البيطري الحديث","phone":"01233445566","address":"القاهرة - مدينة نصر","region":"القاهرة","rep":"هاني فاروق","joined":"2024-05-05","notes":null},{"code":"C005","name":"مجموعة الفجر للدواجن","phone":"01099887766","address":"الدقهلية - المنصورة","region":"الدقهلية","rep":"إسلام رضا","joined":"2024-02-18","notes":"يطلب فاتورة ضريبية"},{"code":"C006","name":"مزرعة بركة الخير","phone":"01277889900","address":"الفيوم","region":"الفيوم","rep":"أحمد محمد","joined":"2024-06-01","notes":null},{"code":"C007","name":"شركة الريف الأخضر","phone":"01533221100","address":"بني سويف","region":"بني سويف","rep":"محمود علي","joined":"2023-09-12","notes":"يدفع نقداً"},{"code":"C008","name":"مزارع المستقبل","phone":"01066778899","address":"كفر الشيخ","region":"كفر الشيخ","rep":"كريم سامي","joined":"2024-04-07","notes":null},{"code":"C-NE001","name":"محمد اسماعيل محمد محمد الصادق","phone":"01000000000","address":"مشروع R8","region":"القاهرة الجديدة","rep":"أحمد محمد","joined":"2024-09-01","notes":"مشروع سكنى R8 - وحدة QR29-53"},{"code":"C-MD001","name":"شركة موداد المتحدة للمقاولات","phone":"01100000000","address":"-","region":"-","rep":"محمود علي","joined":"2024-09-01","notes":"شركة مقاولات"},{"code":"C-PR001","name":"بيرلا للاستثمار والتطوير العقاري والمقاولات العامة والتوريدات","phone":"-","address":"فرع الزقازيق","region":"الشرقية","rep":"أحمد محمد","joined":"2026-05-09","notes":"شيكات بنك البركة - حساب محمد اسماعيل محمد الصادق 8370211504466985001"}],"banks":["البنك الأهلي المصري","بنك مصر","البنك التجاري الدولي CIB","بنك القاهرة","بنك الإسكندرية","البنك العربي الأفريقي","بنك QNB الأهلي","بنك HSBC","بنك أبو ظبي الأول FAB","بنك الكويت الوطني NBK","بنك التعمير والإسكان","البنك الزراعي المصري","بنك التنمية الصناعية","بنك ADIB","البنك المصري الخليجي","بنك الإمارات دبي الوطني","بنك CRÉDIT AGRICOLE","بنك البركة","البنك المركزي المصري"],"methods":["نقدًا","تحويل بنكي","شيك","فيزا","محفظة إلكترونية","كاش"],"reps":["أحمد محمد","محمود علي","كريم سامي","هاني فاروق","إسلام رضا"],"checkStatus":["تحت التحصيل","تم التحصيل","مرتجع","مؤجل"]};
+</script>
+<script>
+/* ============ طبقة Firebase — التزامن اللحظي + قفل بكلمة سر + نسخ سحابية ============ */
+/* تُحمَّل قبل app.js. توفّر: FB.init / FB.push / FB.onChange / القفل / إعدادات الاتصال */
+
+const FB_CFG_KEY = 'cheques_erp_fbcfg_v1';   // إعدادات Firebase (تُحفظ محلياً بالمتصفح)
+const FB_PIN_KEY = 'cheques_erp_pin_v1';     // كلمة السر (مُجزّأة hash) — للقفل البسيط
+const FB_UNLOCK = 'cheques_erp_unlocked';    // علامة فتح الجلسة (sessionStorage)
+
+const FB = {
+  app:null, db:null, ready:false, ref:null, bkRef:null,
+  suppress:false,          // لمنع حلقة التزامن عند الكتابة الذاتية
+  onData:null,             // callback يُستدعى عند وصول بيانات من السحابة
+};
+
+/* ---------- أدوات تشفير بسيطة لكلمة السر ---------- */
+async function sha256(txt){
+  const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ---------- إعدادات الاتصال ---------- */
+const FB_DEFAULT_CFG={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",appId:"1:177039534756:web:367ecccc684c2cdfdd1431",workspace:"checks"};
+function fbGetConfig(){ try{ var c=JSON.parse(localStorage.getItem(FB_CFG_KEY)); if(c&&c.off) return null; return c||FB_DEFAULT_CFG; }catch(e){ return FB_DEFAULT_CFG; } }
+function fbSaveConfig(cfg){ localStorage.setItem(FB_CFG_KEY, JSON.stringify(cfg)); }
+function fbClearConfig(){ localStorage.setItem(FB_CFG_KEY, JSON.stringify({off:1})); }
+function fbIsConfigured(){ const c=fbGetConfig(); return c && c.apiKey && c.databaseURL && c.projectId; }
+
+/* ---------- تحميل مكتبات Firebase ديناميكياً (modular v10) ---------- */
+let _fbLib=null;
+async function fbLoadLib(){
+  if(_fbLib) return _fbLib;
+  const appMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+  const dbMod  = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+  _fbLib = {...appMod, ...dbMod};
+  return _fbLib;
+}
+
+/* ---------- تهيئة الاتصال والاشتراك في التحديثات اللحظية ---------- */
+async function fbInit(onData){
+  const cfg=fbGetConfig(); if(!cfg) throw new Error('لا توجد إعدادات Firebase');
+  const L=await fbLoadLib();
+  FB.app = L.initializeApp({
+    apiKey:cfg.apiKey, authDomain:cfg.authDomain||(cfg.projectId+'.firebaseapp.com'),
+    databaseURL:cfg.databaseURL, projectId:cfg.projectId,
+    storageBucket:cfg.storageBucket||'', appId:cfg.appId||''
+  });
+  FB.db = L.getDatabase(FB.app);
+  const root = cfg.workspace || 'main';
+  FB.ref   = L.ref(FB.db, 'erp/'+root+'/data');
+  FB.bkRef = L.ref(FB.db, 'erp/'+root+'/backups');
+  FB._L = L;
+  FB.onData = onData;
+  FB.ready = true;
+
+  // الاشتراك في التحديثات اللحظية من كل الأجهزة
+  L.onValue(FB.ref, (snap)=>{
+    if(FB.suppress) return;                 // تجاهل صدى كتابتنا
+    const val=snap.val();
+    if(val && FB.onData){ FB.onData(val); }
+  });
+  return true;
+}
+
+/* ---------- رفع البيانات للسحابة (يُستدعى بعد كل تعديل) ---------- */
+let _pushT;
+function fbPush(dbObj){
+  if(!FB.ready) return;
+  clearTimeout(_pushT);
+  _pushT=setTimeout(async ()=>{
+    try{
+      FB.suppress=true;
+      await FB._L.set(FB.ref, {...dbObj, _updatedAt:Date.now()});
+      setTimeout(()=>FB.suppress=false, 400);
+    }catch(e){ FB.suppress=false; toast('تعذّر الرفع للسحابة','err'); }
+  }, 250);
+}
+
+/* ---------- نسخة احتياطية سحابية ---------- */
+async function fbWriteBackups(arr){
+  if(!FB.ready) return;
+  try{ await FB._L.set(FB.bkRef, arr); }catch(e){}
+}
+async function fbReadBackups(){
+  if(!FB.ready) return [];
+  try{ const s=await FB._L.get(FB.bkRef); return s.exists()? (s.val()||[]) : []; }catch(e){ return []; }
+}
+
+/* ---------- القفل بكلمة سر ---------- */
+function pinIsSet(){ return !!localStorage.getItem(FB_PIN_KEY); }
+async function pinSet(pin){ localStorage.setItem(FB_PIN_KEY, await sha256(pin)); }
+async function pinCheck(pin){ return localStorage.getItem(FB_PIN_KEY) === await sha256(pin); }
+function pinClear(){ localStorage.removeItem(FB_PIN_KEY); }
+function isUnlocked(){ return sessionStorage.getItem(FB_UNLOCK)==='1'; }
+function setUnlocked(){ sessionStorage.setItem(FB_UNLOCK,'1'); }
+
+</script>
+<script type="module">
+/* ============ نظام إدارة الشيكات والأقساط — ERP (HTML/LocalStorage) ============ */
+'use strict';
+
+const LS_KEY = 'cheques_erp_v1';
+const BK_KEY = 'cheques_erp_backups_v1';
+const BK_KEEP_DAYS = 30;
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+/* ---------- الحالة ---------- */
+let DB = { checks:[], customers:[], banks:[], methods:[], reps:[], statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل'] };
+let UI = { stmtCustomer:'', calMonth:TODAY.getMonth(), calYear:TODAY.getFullYear(), repFrom:'', repTo:'', repPreset:'all' };
+
+/* ---------- أدوات ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const esc = s => (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const fmtMoney = n => (n==null||n==='')?'—':Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})+' ج.م';
+const fmtNum = n => (n==null||n==='')?'—':Number(n).toLocaleString('en-US');
+function parseDate(s){ if(!s) return null; const d=new Date(s); return isNaN(d)?null:(d.setHours(0,0,0,0),d); }
+function fmtDate(s){ const d=parseDate(s); if(!d) return '—'; return d.toLocaleDateString('en-CA'); }
+const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const DAYS_AR=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+function daysToDue(c){ const d=parseDate(c.due); if(!d||c.status==='تم التحصيل'||c.status==='مؤجل') return null; return Math.round((d-TODAY)/86400000); }
+function dueClass(c){
+  if(!c.due) return {t:'—',cls:'gray'};
+  if(c.status==='تم التحصيل') return {t:'✅ محصل',cls:'green'};
+  if(c.status==='مرتجع')     return {t:'❌ مرتجع',cls:'red'};
+  if(c.status==='مؤجل')      return {t:'⏸ مؤجل',cls:'gray'};
+  const dt=daysToDue(c);
+  if(dt<0) return {t:'🔴 متأخر',cls:'red'};
+  if(dt===0) return {t:'⚠️ مستحق اليوم',cls:'amber'};
+  if(dt<=7) return {t:'🟡 خلال أسبوع',cls:'amber'};
+  if(dt<=30) return {t:'🔵 خلال شهر',cls:'blue'};
+  return {t:'🟢 قادم',cls:'green'};
+}
+const isInstallment = c => c.method && c.method.indexOf('قسط')>-1;
+const custName = code => { const c=DB.customers.find(x=>x.code===code); return c?c.name:(code||'—'); };
+
+/* ---------- التخزين ---------- */
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(DB)); if(typeof fbPush==='function') fbPush(DB); }
+function applyCloudData(val){
+  // بيانات وصلت من جهاز آخر عبر التزامن اللحظي
+  if(!val) return;
+  delete val._updatedAt;
+  DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},val);
+  if(migratePerla2026()) setTimeout(()=>fbPush(DB),500);
+  localStorage.setItem(LS_KEY, JSON.stringify(DB));
+  const active=document.querySelector('.nav-item.active');
+  const page=active?active.dataset.page:'dashboard';
+  ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
+    statement:renderStatement,calendar:renderCalendar,reports:renderReports,
+    customers:renderCustomers,settings:renderSettings}[page]||renderDashboard)();
+  toast('🔄 تم تحديث البيانات من جهاز آخر','ok');
+}
+
+/* ---------- تحديث 2026-10: شيكات بيرلا الصحيحة (بنك البركة) + تحصيل كل الشيكات اللي فات ميعادها ---------- */
+const PERLA_REF='Perla Heights — وحدة R-B2-F6-A1 · بنك البركة فرع الزقازيق';
+function perlaRows(){
+  const C={cust:'C-PR001',custName:'بيرلا للاستثمار والتطوير العقاري',bank:'بنك البركة',method:'شيك',rep:'',issue:'',ref:PERLA_REF};
+  const r=[
+    ['9785044963','2026-05-15',250000,'الجزء الثاني من المقدم'],
+    ['9785044964','2026-05-29',250000,'الجزء الثالث من المقدم'],
+    ['9785044965','2026-07-29',250000,'الجزء الرابع من المقدم'],
+    ['9785044967','2026-09-30',260000,'الجزء الخامس من المقدم (خطة السداد 310,000)'],
+    ['9785044966','2026-12-29',250000,'الجزء الأخير من المقدم (خطة السداد 287,500)']];
+  const q=[['2027-03-29',252500,1],['2027-06-29',252500,2],['2027-09-29',252500,3],['2027-12-29',252500,4],['2028-03-29',252500,5],['2028-06-29',252500,6],
+    ['2028-06-29',424000,'م'],['2028-09-29',252500,7],['2028-12-29',215000,8],['2029-03-29',215000,9],['2029-06-29',215000,10],['2029-09-29',215000,11],
+    ['2029-12-29',215000,12],['2030-03-29',215000,13],['2030-06-29',215000,14],['2030-09-29',215000,15],['2030-12-29',215000,16]];
+  const out=r.map(x=>Object.assign({},C,{id:'perla_'+x[0],num:x[0],due:x[1],amount:x[2],status:'تحت التحصيل',collectDate:'',notes:x[3]}));
+  q.forEach(x=>{const m=x[2]==='م';out.push(Object.assign({},C,{id:'perla_'+(m?'maint':'q'+x[2]),num:m?'بيرلا-صيانة':'بيرلا-ق'+String(x[2]).padStart(2,'0'),due:x[0],amount:x[1],status:'تحت التحصيل',collectDate:'',
+    notes:(m?'وديعة الصيانة':'القسط '+x[2])+' — اكتب رقم الشيك'}))});
+  return out;
+}
+function migratePerla2026(){
+  if(!DB||!Array.isArray(DB.checks)||DB._mig==='perla2026') return false;
+  if(Array.isArray(DB.banks)&&DB.banks.indexOf('بنك البركة')<0) DB.banks.push('بنك البركة');
+  DB.checks=DB.checks.filter(c=>c.cust!=='C-PR001');
+  DB.checks=DB.checks.concat(perlaRows());
+  const cutoff='2026-10-11';
+  DB.checks.forEach(c=>{ if(c.due&&c.due<=cutoff&&c.status==='تحت التحصيل'){ c.status='تم التحصيل'; if(!c.collectDate) c.collectDate=c.due; } });
+  DB._mig='perla2026';
+  return true;
+}
+function load(){
+  const raw=localStorage.getItem(LS_KEY);
+  if(raw){ try{ DB=JSON.parse(raw); }catch(e){ seedFromExcel(); } }
+  else seedFromExcel();
+  DB.statuses = DB.statuses||['تحت التحصيل','تم التحصيل','مرتجع','مؤجل'];
+  if(migratePerla2026()) localStorage.setItem(LS_KEY, JSON.stringify(DB));
+}
+function seedFromExcel(){
+  const S=window.SEED;
+  DB.checks = S.checks.map(c=>({
+    id:uid(), num:c.num, bank:c.bank||'', cust:c.cust||'', custName:c.custName||'',
+    amount:Number(c.amount)||0, issue:c.issue||'', due:c.due||'', status:c.status||'تحت التحصيل',
+    rep:c.rep||'', method:c.method||'شيك', ref:c.ref||'', collectDate:c.collectDate||'', notes:c.notes||''
+  }));
+  DB.customers = S.customers.map(c=>({
+    id:uid(), code:c.code, name:c.name, phone:c.phone||'', address:c.address||'',
+    region:c.region||'', rep:c.rep||'', joined:c.joined||'', notes:c.notes||''
+  }));
+  DB.banks=[...S.banks]; DB.methods=[...S.methods]; DB.reps=[...S.reps];
+  DB.statuses=[...S.checkStatus];
+  if(!UI.stmtCustomer && DB.customers[0]) UI.stmtCustomer=DB.customers[0].code;
+  save();
+}
+
+/* ---------- Toast ---------- */
+let toastT;
+function toast(msg,type='ok'){
+  const t=$('#toast'); t.className='toast show '+type;
+  t.innerHTML=(type==='ok'?'✅ ':type==='err'?'⚠️ ':'')+esc(msg);
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ---------- Modal ---------- */
+function openModal(html){ $('#modalBox').innerHTML=html; $('#modalBg').classList.add('show'); }
+function closeModal(){ $('#modalBg').classList.remove('show'); }
+$('#modalBg').addEventListener('click',e=>{ if(e.target.id==='modalBg') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+/* ---------- إحصائيات مشتقة ---------- */
+function stats(){
+  let dueTotal=0, collected=0, returned=0, deferred=0, cntDue=0, cntCol=0, cntRet=0, cntDef=0;
+  let week=0, overdue=0, todayDue=0;
+  DB.checks.forEach(c=>{
+    const a=Number(c.amount)||0;
+    if(c.status==='تحت التحصيل'){ dueTotal+=a; cntDue++;
+      const dt=daysToDue(c);
+      if(dt!=null){ if(dt<0) overdue++; else if(dt===0) todayDue++; else if(dt<=7) week++; }
+    }
+    else if(c.status==='تم التحصيل'){ collected+=a; cntCol++; }
+    else if(c.status==='مرتجع'){ returned+=a; cntRet++; }
+    else if(c.status==='مؤجل'){ deferred+=a; cntDef++; }
+  });
+  const inst = DB.checks.filter(isInstallment);
+  let instRemain=0, instOverdue=0;
+  inst.forEach(c=>{ if(c.status==='تحت التحصيل'){ instRemain+=Number(c.amount)||0; if((daysToDue(c)||0)<0) instOverdue+=Number(c.amount)||0; }});
+  return {dueTotal,collected,returned,deferred,cntDue,cntCol,cntRet,cntDef,week,overdue,todayDue,
+          total:DB.checks.length,instRemain,instOverdue,debt:dueTotal};
+}
+
+/* ---------- تنقل ---------- */
+const PAGE_TITLES={dashboard:'لوحة التحكم',checks:'سجل الشيكات',installments:'الأقساط والمديونيات',
+  statement:'كشف حساب عميل',calendar:'تقويم الاستحقاقات',reports:'التقارير والتحليلات',
+  customers:'قاعدة بيانات العملاء',settings:'الإعدادات'};
+function go(page){
+  $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
+  $$('.page').forEach(p=>p.classList.remove('active'));
+  const el=$('#page-'+page); if(el) el.classList.add('active');
+  $('#pageTitle').textContent=PAGE_TITLES[page]||'';
+  ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
+    statement:renderStatement,calendar:renderCalendar,reports:renderReports,
+    customers:renderCustomers,settings:renderSettings}[page]||(()=>{}))();
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+/* ---------- لوحة التحكم ---------- */
+function renderDashboard(){
+  const s=stats();
+  const kpi=(ico,acc,accSoft,label,val,sub)=>`<div class="kpi" style="--accent:${acc};--accent-soft:${accSoft}">
+    <div class="ico">${ico}</div><div class="label">${label}</div>
+    <div class="val">${val}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+
+  // ملخص العملاء
+  const custRows=DB.customers.map(cu=>{
+    const cs=DB.checks.filter(c=>c.cust===cu.code);
+    const due=cs.filter(c=>c.status==='تحت التحصيل').reduce((a,c)=>a+(+c.amount||0),0);
+    const col=cs.filter(c=>c.status==='تم التحصيل').reduce((a,c)=>a+(+c.amount||0),0);
+    const ret=cs.filter(c=>c.status==='مرتجع').reduce((a,c)=>a+(+c.amount||0),0);
+    const ov=cs.some(c=>c.status==='تحت التحصيل'&&(daysToDue(c)||0)<0);
+    return {cu,due,col,ret,state:ov?'<span class="pill red">⚠️ متأخر</span>':due>0?'<span class="pill blue">قيد التحصيل</span>':'<span class="pill green">✅ منتظم</span>'};
+  }).sort((a,b)=>b.due-a.due);
+
+  // الرسم الشهري (السنة الحالية)
+  const yr=TODAY.getFullYear(); const mDue=Array(12).fill(0),mCol=Array(12).fill(0);
+  DB.checks.forEach(c=>{
+    if(c.status==='تحت التحصيل'){ const d=parseDate(c.due); if(d&&d.getFullYear()===yr) mDue[d.getMonth()]+=(+c.amount||0); }
+    if(c.status==='تم التحصيل'){ const d=parseDate(c.collectDate||c.due); if(d&&d.getFullYear()===yr) mCol[d.getMonth()]+=(+c.amount||0); }
+  });
+  const mMax=Math.max(1,...mDue,...mCol);
+  const monthBars=MONTHS_AR.map((m,i)=>`<div class="mc-col" title="${m}: مستحق ${fmtMoney(mDue[i])} | محصل ${fmtMoney(mCol[i])}">
+    <div class="mc-bars">
+      <div class="mc-bar col" style="height:${mCol[i]/mMax*100}%"></div>
+      <div class="mc-bar due" style="height:${mDue[i]/mMax*100}%"></div>
+    </div><div class="mc-lbl">${m.slice(0,3)}</div></div>`).join('');
+
+  // دونات الحالات
+  const tot=s.dueTotal+s.collected+s.returned+s.deferred||1;
+  const seg=[['تحت التحصيل',s.dueTotal,'var(--amber)'],['تم التحصيل',s.collected,'var(--green)'],
+             ['مرتجع',s.returned,'var(--red)'],['مؤجل',s.deferred,'var(--muted)']];
+  let acc=0; const grad=seg.map(([,v,c])=>{ const a=acc/tot*360,b=(acc+v)/tot*360; acc+=v; return `${c} ${a}deg ${b}deg`; }).join(',');
+  const legend=seg.map(([n,v,c])=>`<div class="legend-item"><span class="dot" style="background:${c}"></span>${n}<b>${fmtMoney(v)}</b></div>`).join('');
+
+  $('#page-dashboard').innerHTML=`
+    <div class="kpi-grid">
+      ${kpi('💰','var(--amber)','var(--amber-soft)','إجمالي الشيكات المستحقة',fmtMoney(s.dueTotal),`${s.cntDue} شيك تحت التحصيل`)}
+      ${kpi('✅','var(--green)','var(--green-soft)','إجمالي المحصّل',fmtMoney(s.collected),`${s.cntCol} شيك تم تحصيله`)}
+      ${kpi('📊','var(--primary)','var(--primary-soft)','إجمالي المديونية الحالية',fmtMoney(s.debt),'القيمة القائمة على العملاء')}
+      ${kpi('🧾','var(--violet)','rgba(139,92,246,.13)','إجمالي عدد الشيكات',fmtNum(s.total),`${DB.customers.length} عميل`)}
+    </div>
+    <div class="kpi-grid">
+      ${kpi('🟡','var(--amber)','var(--amber-soft)','مستحقة خلال 7 أيام',fmtNum(s.week),'تتطلب متابعة')}
+      ${kpi('🔴','var(--red)','var(--red-soft)','شيكات متأخرة',fmtNum(s.overdue),'تجاوزت الاستحقاق')}
+      ${kpi('⚠️','var(--cyan)','rgba(6,182,212,.13)','مستحقة اليوم',fmtNum(s.todayDue),'')}
+      ${kpi('❌','var(--red)','var(--red-soft)','شيكات مرتجعة',fmtNum(s.cntRet),fmtMoney(s.returned))}
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-head"><h3>📈 الشيكات شهرياً (${yr})</h3>
+          <span class="pill green">● محصّل</span><span class="pill amber">● مستحق</span></div>
+        <div class="month-chart">${monthBars}</div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>🍩 توزيع حالة الشيكات</h3></div>
+        <div class="donut-wrap">
+          <div style="width:150px;height:150px;border-radius:50%;background:conic-gradient(${grad});
+               display:grid;place-items:center;position:relative">
+            <div style="width:92px;height:92px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center">
+              <div><div style="font-size:11px;color:var(--muted)">الإجمالي</div>
+              <div style="font-family:var(--display);font-weight:800;font-size:15px">${fmtNum(s.total)}</div></div>
+            </div>
+          </div>
+          <div class="legend">${legend}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">👥 ملخص مالي لكل عميل</div>
+    <div class="panel"><div class="tbl-wrap"><table>
+      <thead><tr><th>كود</th><th>اسم العميل</th><th>شيكات مستحقة</th><th>محصّلة</th><th>مرتجعة</th><th>الحالة</th></tr></thead>
+      <tbody>${custRows.map(r=>`<tr>
+        <td><span class="pill gray">${esc(r.cu.code)}</span></td>
+        <td style="white-space:normal;max-width:280px">${esc(r.cu.name)}</td>
+        <td class="num">${fmtMoney(r.due)}</td>
+        <td class="num" style="color:#86efac">${fmtMoney(r.col)}</td>
+        <td class="num" style="color:#fca5a5">${r.ret?fmtMoney(r.ret):'—'}</td>
+        <td>${r.state}</td></tr>`).join('')}</tbody>
+    </table></div></div>`;
+
+  const badge=$('#navChecksBadge'); const alert=s.week+s.overdue+s.todayDue;
+  badge.style.display=alert?'inline-block':'none'; badge.textContent=alert;
+}
+/* ---------- صفحة الشيكات ---------- */
+let CHK_F = {q:'',bank:'',status:'',rep:'',type:''};
+
+function filteredChecks(){
+  return DB.checks.filter(c=>{
+    if(CHK_F.q){ const q=CHK_F.q.toLowerCase();
+      const hay=[c.num,c.cust,c.custName,custName(c.cust),c.ref,c.bank].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false; }
+    if(CHK_F.bank && c.bank!==CHK_F.bank) return false;
+    if(CHK_F.status && c.status!==CHK_F.status) return false;
+    if(CHK_F.rep && c.rep!==CHK_F.rep) return false;
+    if(CHK_F.type==='check' && isInstallment(c)) return false;
+    if(CHK_F.type==='inst' && !isInstallment(c)) return false;
+    return true;
+  });
+}
+
+function renderChecks(){
+  const opt=(arr,sel)=>arr.map(v=>`<option ${v===sel?'selected':''}>${esc(v)}</option>`).join('');
+  $('#page-checks').innerHTML=`
+  <div class="panel">
+    <div class="panel-head">
+      <div class="search-box"><span class="si">🔍</span>
+        <input class="input" id="chkSearch" placeholder="بحث برقم الشيك / العميل / المشروع..." value="${esc(CHK_F.q)}"></div>
+      <span style="flex:1"></span>
+      <button class="btn primary" id="addCheck">＋ إضافة شيك</button>
+    </div>
+    <div class="filters">
+      <div class="field"><label>البنك</label><select class="input" id="fBank"><option value="">الكل</option>${opt(DB.banks,CHK_F.bank)}</select></div>
+      <div class="field"><label>الحالة</label><select class="input" id="fStatus"><option value="">الكل</option>${opt(DB.statuses,CHK_F.status)}</select></div>
+      <div class="field"><label>المندوب</label><select class="input" id="fRep"><option value="">الكل</option>${opt(DB.reps,CHK_F.rep)}</select></div>
+      <div class="field"><label>النوع</label><select class="input" id="fType">
+        <option value="">الكل</option><option value="check" ${CHK_F.type==='check'?'selected':''}>شيكات</option>
+        <option value="inst" ${CHK_F.type==='inst'?'selected':''}>أقساط</option></select></div>
+      <div class="field" style="justify-content:flex-end"><button class="btn sm" id="clearF">✕ مسح الفلاتر</button></div>
+    </div>
+    <div id="checksTbl"></div>
+  </div>`;
+
+  $('#chkSearch').addEventListener('input',e=>{CHK_F.q=e.target.value;drawChecksTable();});
+  $('#fBank').onchange=e=>{CHK_F.bank=e.target.value;drawChecksTable();};
+  $('#fStatus').onchange=e=>{CHK_F.status=e.target.value;drawChecksTable();};
+  $('#fRep').onchange=e=>{CHK_F.rep=e.target.value;drawChecksTable();};
+  $('#fType').onchange=e=>{CHK_F.type=e.target.value;drawChecksTable();};
+  $('#clearF').onclick=()=>{CHK_F={q:'',bank:'',status:'',rep:'',type:''};renderChecks();};
+  $('#addCheck').onclick=()=>checkModal();
+  drawChecksTable();
+}
+
+function drawChecksTable(){
+  const rows=filteredChecks();
+  const totVal=rows.reduce((a,c)=>a+(+c.amount||0),0);
+  if(!rows.length){ $('#checksTbl').innerHTML=`<div class="empty"><div class="big">🔍</div>لا توجد شيكات مطابقة</div>`; return; }
+  $('#checksTbl').innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>م</th><th>رقم الشيك</th><th>البنك المسحوب منه</th><th>العميل</th>
+      <th>قيمة الشيك</th><th>الاستحقاق</th><th>أيام</th><th>الحالة</th>
+      <th>التصنيف</th><th>المرجع / المشروع</th><th></th></tr></thead>
+    <tbody>${rows.map((c,i)=>{
+      const dc=dueClass(c); const dt=daysToDue(c);
+      const sp={'تحت التحصيل':'amber','تم التحصيل':'green','مرتجع':'red','مؤجل':'gray'}[c.status]||'gray';
+      return `<tr data-id="${c.id}">
+        <td class="num">${i+1}</td>
+        <td><b>${esc(c.num)}</b></td>
+        <td><span class="cell-edit" data-f="bank">${esc(c.bank||'—')}</span></td>
+        <td style="white-space:normal;max-width:200px">${esc(custName(c.cust))}<div style="font-size:11px;color:var(--muted2)">${esc(c.cust||'')}</div></td>
+        <td class="num" style="font-weight:700">${fmtMoney(c.amount)}</td>
+        <td class="num"><span class="cell-edit" data-f="due">${fmtDate(c.due)}</span></td>
+        <td class="num">${dt==null?'—':dt}</td>
+        <td><span class="pill ${sp} cell-edit" data-f="status">${esc(c.status)}</span></td>
+        <td><span class="pill ${dc.cls}">${dc.t}</span></td>
+        <td style="white-space:normal;max-width:200px;font-size:12px;color:var(--muted)">${esc(c.ref||'—')}</td>
+        <td><button class="btn sm" data-act="edit">✏️</button> <button class="btn sm danger" data-act="del">🗑</button></td>
+      </tr>`;}).join('')}</tbody>
+    <tfoot><tr style="background:var(--bg2)"><td colspan="4" style="font-weight:700">الإجمالي (${rows.length} شيك)</td>
+      <td class="num" style="font-weight:800;color:var(--primary)">${fmtMoney(totVal)}</td><td colspan="6"></td></tr></tfoot>
+  </table></div>`;
+
+  $$('#checksTbl tr[data-id]').forEach(tr=>{
+    const id=tr.dataset.id;
+    tr.querySelector('[data-act="edit"]').onclick=()=>checkModal(id);
+    tr.querySelector('[data-act="del"]').onclick=()=>delCheck(id);
+    tr.querySelectorAll('.cell-edit').forEach(el=>el.onclick=ev=>inlineEdit(ev.currentTarget,id,el.dataset.f));
+  });
+}
+
+/* ---------- تعديل مباشر بالضغط على الخانة ---------- */
+function inlineEdit(el,id,field){
+  if(el.querySelector('input,select')) return;
+  const c=DB.checks.find(x=>x.id===id); if(!c) return;
+  const old=el.innerHTML; let inp;
+  if(field==='status'){
+    inp=document.createElement('select'); inp.className='cell-edit-input';
+    inp.innerHTML=DB.statuses.map(s=>`<option ${s===c.status?'selected':''}>${esc(s)}</option>`).join('');
+  }else if(field==='bank'){
+    inp=document.createElement('select'); inp.className='cell-edit-input';
+    inp.innerHTML='<option value=""></option>'+DB.banks.map(s=>`<option ${s===c.bank?'selected':''}>${esc(s)}</option>`).join('');
+  }else if(field==='due'){
+    inp=document.createElement('input'); inp.type='date'; inp.className='cell-edit-input'; inp.value=c.due||'';
+  }else{ inp=document.createElement('input'); inp.className='cell-edit-input'; inp.value=c[field]||''; }
+  el.innerHTML=''; el.appendChild(inp); inp.focus();
+  const commit=()=>{
+    let v=inp.value;
+    if(c[field]!==v){
+      c[field]=v;
+      if(field==='status'&&v==='تم التحصيل'&&!c.collectDate) c.collectDate=new Date().toLocaleDateString('en-CA');
+      if(field==='status'&&v!=='تم التحصيل') c.collectDate='';
+      save(); toast('تم تحديث الشيك'); drawChecksTable();
+    } else { el.innerHTML=old; }
+  };
+  inp.onblur=commit;
+  inp.onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){inp.onblur=null;el.innerHTML=old;} };
+  if(inp.tagName==='SELECT') inp.onchange=()=>inp.blur();
+}
+
+/* ---------- نموذج إضافة/تعديل شيك ---------- */
+function checkModal(id){
+  const c=id?DB.checks.find(x=>x.id===id):{num:'',bank:DB.banks[0]||'',cust:DB.customers[0]?.code||'',
+    amount:'',issue:'',due:'',status:'تحت التحصيل',rep:'',method:'شيك',ref:'',collectDate:'',notes:''};
+  const o=(arr,sel)=>arr.map(v=>`<option ${v===sel?'selected':''}>${esc(v)}</option>`).join('');
+  openModal(`
+    <div class="modal-head"><h3>${id?'✏️ تعديل شيك':'＋ إضافة شيك جديد'}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>رقم الشيك *</label><input class="input" id="m_num" value="${esc(c.num)}"></div>
+      <div class="field"><label>البنك المسحوب منه</label><select class="input" id="m_bank"><option value=""></option>${o(DB.banks,c.bank)}</select></div>
+      <div class="field"><label>العميل</label><select class="input" id="m_cust">${DB.customers.map(cu=>`<option value="${esc(cu.code)}" ${cu.code===c.cust?'selected':''}>${esc(cu.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>قيمة الشيك *</label><input class="input" id="m_amount" type="number" step="0.01" value="${c.amount}"></div>
+      <div class="field"><label>تاريخ الإصدار</label><input class="input" id="m_issue" type="date" value="${esc(c.issue)}"></div>
+      <div class="field"><label>تاريخ الاستحقاق</label><input class="input" id="m_due" type="date" value="${esc(c.due)}"></div>
+      <div class="field"><label>الحالة</label><select class="input" id="m_status">${o(DB.statuses,c.status)}</select></div>
+      <div class="field"><label>طريقة السداد / النوع</label><select class="input" id="m_method">${o(DB.methods,c.method)}</select></div>
+      <div class="field"><label>المندوب</label><select class="input" id="m_rep"><option value=""></option>${o(DB.reps,c.rep)}</select></div>
+      <div class="field"><label>تاريخ التحصيل</label><input class="input" id="m_collect" type="date" value="${esc(c.collectDate)}"></div>
+      <div class="field full"><label>المرجع / المشروع / رقم الفاتورة</label><input class="input" id="m_ref" value="${esc(c.ref)}"></div>
+      <div class="field full"><label>ملاحظات</label><textarea class="input" id="m_notes" rows="2">${esc(c.notes)}</textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn primary" id="m_save">💾 حفظ</button>
+      <button class="btn" onclick="closeModal()">إلغاء</button>
+    </div>`);
+  $('#m_save').onclick=()=>{
+    const num=$('#m_num').value.trim(); const amount=parseFloat($('#m_amount').value);
+    if(!num){ toast('أدخل رقم الشيك','err'); return; }
+    if(isNaN(amount)){ toast('أدخل قيمة الشيك','err'); return; }
+    const data={num,bank:$('#m_bank').value,cust:$('#m_cust').value,custName:custName($('#m_cust').value),
+      amount,issue:$('#m_issue').value,due:$('#m_due').value,status:$('#m_status').value,
+      method:$('#m_method').value,rep:$('#m_rep').value,collectDate:$('#m_collect').value,
+      ref:$('#m_ref').value,notes:$('#m_notes').value};
+    if(id){ Object.assign(c,data); toast('تم تحديث الشيك'); }
+    else { DB.checks.push({id:uid(),...data}); toast('تمت إضافة الشيك'); }
+    save(); closeModal(); drawChecksTable(); 
+  };
+}
+function delCheck(id){
+  const c=DB.checks.find(x=>x.id===id);
+  openModal(`<div class="modal-head"><h3>🗑 حذف شيك</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div style="padding:24px">هل تريد حذف الشيك <b>${esc(c.num)}</b> بقيمة <b>${fmtMoney(c.amount)}</b>؟<br><span style="color:var(--muted)">لا يمكن التراجع.</span></div>
+    <div class="modal-foot"><button class="btn danger" id="cd">نعم، احذف</button><button class="btn" onclick="closeModal()">إلغاء</button></div>`);
+  $('#cd').onclick=()=>{ DB.checks=DB.checks.filter(x=>x.id!==id); save(); closeModal(); drawChecksTable(); toast('تم حذف الشيك'); };
+}
+/* ---------- الأقساط والمديونيات ---------- */
+function renderInstallments(){
+  const inst=DB.checks.filter(isInstallment);
+  // تجميع حسب العميل/المشروع
+  const groups={};
+  inst.forEach(c=>{ const k=c.cust+'|'+(c.ref||''); (groups[k]=groups[k]||{cust:c.cust,ref:c.ref,items:[]}).items.push(c); });
+  const cards=Object.values(groups).map(g=>{
+    const total=g.items.reduce((a,c)=>a+(+c.amount||0),0);
+    const paid=g.items.filter(c=>c.status==='تم التحصيل').reduce((a,c)=>a+(+c.amount||0),0);
+    const remain=total-paid; const pct=total?paid/total*100:0;
+    const overdue=g.items.filter(c=>c.status==='تحت التحصيل'&&(daysToDue(c)||0)<0).length;
+    return `<div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <div><h3 style="margin-bottom:2px">${esc(custName(g.cust))}</h3>
+          <span style="font-size:12px;color:var(--muted)">${esc(g.ref||'—')}</span></div>
+        <span style="flex:1"></span>
+        ${overdue?`<span class="pill red">🔴 ${overdue} قسط متأخر</span>`:''}
+        <span class="pill blue">${g.items.length} قسط</span>
+      </div>
+      <div style="padding:16px 18px">
+        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px">
+          <div><div style="font-size:11.5px;color:var(--muted)">إجمالي القيمة</div><div class="num" style="font-family:var(--display);font-weight:800;font-size:18px">${fmtMoney(total)}</div></div>
+          <div><div style="font-size:11.5px;color:var(--muted)">المسدّد</div><div class="num" style="font-weight:800;font-size:18px;color:#86efac">${fmtMoney(paid)}</div></div>
+          <div><div style="font-size:11.5px;color:var(--muted)">المتبقي</div><div class="num" style="font-weight:800;font-size:18px;color:#fcd34d">${fmtMoney(remain)}</div></div>
+        </div>
+        <div class="bar-track" style="height:9px"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
+        <div style="font-size:11.5px;color:var(--muted2);margin-top:5px">${pct.toFixed(1)}% مكتمل</div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>#</th><th>مرجع القسط</th><th>البنك</th><th>القيمة</th><th>الاستحقاق</th><th>الحالة</th><th>التصنيف</th></tr></thead>
+        <tbody>${g.items.sort((a,b)=>(parseDate(a.due)||0)-(parseDate(b.due)||0)).map((c,i)=>{
+          const dc=dueClass(c); const sp={'تحت التحصيل':'amber','تم التحصيل':'green','مرتجع':'red','مؤجل':'gray'}[c.status]||'gray';
+          return `<tr><td class="num">${i+1}</td><td>${esc(c.num)}</td><td>${esc(c.bank||'—')}</td>
+            <td class="num" style="font-weight:700">${fmtMoney(c.amount)}</td><td class="num">${fmtDate(c.due)}</td>
+            <td><span class="pill ${sp}">${esc(c.status)}</span></td><td><span class="pill ${dc.cls}">${dc.t}</span></td></tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+  const s=stats();
+  $('#page-installments').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi" style="--accent:var(--amber);--accent-soft:var(--amber-soft)"><div class="ico">💵</div><div class="label">إجمالي الأقساط المتبقية</div><div class="val">${fmtMoney(s.instRemain)}</div></div>
+      <div class="kpi" style="--accent:var(--red);--accent-soft:var(--red-soft)"><div class="ico">🔴</div><div class="label">أقساط متأخرة</div><div class="val">${fmtMoney(s.instOverdue)}</div></div>
+      <div class="kpi" style="--accent:var(--violet);--accent-soft:rgba(139,92,246,.13)"><div class="ico">📑</div><div class="label">عدد خطط التقسيط</div><div class="val">${fmtNum(Object.keys(groups).length)}</div></div>
+    </div>
+    ${cards||`<div class="empty"><div class="big">💰</div>لا توجد أقساط مسجلة</div>`}`;
+}
+
+/* ---------- كشف حساب عميل ---------- */
+function renderStatement(){
+  if(!UI.stmtCustomer && DB.customers[0]) UI.stmtCustomer=DB.customers[0].code;
+  const sel=`<select class="input" id="stmtSel" style="max-width:320px">${DB.customers.map(c=>`<option value="${esc(c.code)}" ${c.code===UI.stmtCustomer?'selected':''}>${esc(c.name)}</option>`).join('')}</select>`;
+  const cu=DB.customers.find(c=>c.code===UI.stmtCustomer);
+  const cs=DB.checks.filter(c=>c.cust===UI.stmtCustomer).sort((a,b)=>(parseDate(a.due)||0)-(parseDate(b.due)||0));
+  const due=cs.filter(c=>c.status==='تحت التحصيل').reduce((a,c)=>a+(+c.amount||0),0);
+  const col=cs.filter(c=>c.status==='تم التحصيل').reduce((a,c)=>a+(+c.amount||0),0);
+  const ret=cs.filter(c=>c.status==='مرتجع').reduce((a,c)=>a+(+c.amount||0),0);
+  const tot=cs.reduce((a,c)=>a+(+c.amount||0),0);
+
+  $('#page-statement').innerHTML=`
+    <div class="panel" style="margin-bottom:18px"><div class="panel-head">
+      <h3>📋 اختر العميل:</h3>${sel}
+      <span style="flex:1"></span><button class="btn" id="printStmt">🖨 طباعة</button></div>
+      ${cu?`<div style="padding:16px 18px;display:flex;gap:30px;flex-wrap:wrap;font-size:13px">
+        <div><span style="color:var(--muted)">الكود:</span> <b>${esc(cu.code)}</b></div>
+        <div><span style="color:var(--muted)">الهاتف:</span> ${esc(cu.phone||'—')}</div>
+        <div><span style="color:var(--muted)">المنطقة:</span> ${esc(cu.region||'—')}</div>
+        <div><span style="color:var(--muted)">المندوب:</span> ${esc(cu.rep||'—')}</div>
+        ${cu.notes?`<div style="width:100%;color:var(--muted)">📝 ${esc(cu.notes)}</div>`:''}
+      </div>`:''}
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi" style="--accent:var(--primary);--accent-soft:var(--primary-soft)"><div class="ico">📊</div><div class="label">إجمالي التعاملات</div><div class="val">${fmtMoney(tot)}</div><div class="sub">${cs.length} شيك</div></div>
+      <div class="kpi" style="--accent:var(--amber);--accent-soft:var(--amber-soft)"><div class="ico">💰</div><div class="label">مستحق (متبقي)</div><div class="val">${fmtMoney(due)}</div></div>
+      <div class="kpi" style="--accent:var(--green);--accent-soft:var(--green-soft)"><div class="ico">✅</div><div class="label">محصّل</div><div class="val">${fmtMoney(col)}</div></div>
+      <div class="kpi" style="--accent:var(--red);--accent-soft:var(--red-soft)"><div class="ico">❌</div><div class="label">مرتجع</div><div class="val">${fmtMoney(ret)}</div></div>
+    </div>
+    <div class="panel"><div class="panel-head"><h3>حركة الحساب</h3></div>
+      ${cs.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>#</th><th>رقم الشيك</th><th>البنك</th><th>النوع</th><th>القيمة</th><th>الاستحقاق</th><th>التحصيل</th><th>الحالة</th><th>المرجع</th></tr></thead>
+        <tbody>${cs.map((c,i)=>{const sp={'تحت التحصيل':'amber','تم التحصيل':'green','مرتجع':'red','مؤجل':'gray'}[c.status]||'gray';
+          return `<tr><td class="num">${i+1}</td><td><b>${esc(c.num)}</b></td><td>${esc(c.bank||'—')}</td>
+          <td><span class="pill ${isInstallment(c)?'violet':'blue'}">${isInstallment(c)?'قسط':'شيك'}</span></td>
+          <td class="num" style="font-weight:700">${fmtMoney(c.amount)}</td><td class="num">${fmtDate(c.due)}</td>
+          <td class="num">${fmtDate(c.collectDate)}</td><td><span class="pill ${sp}">${esc(c.status)}</span></td>
+          <td style="white-space:normal;max-width:200px;font-size:12px;color:var(--muted)">${esc(c.ref||'—')}</td></tr>`;}).join('')}</tbody>
+      </table></div>`:`<div class="empty"><div class="big">📭</div>لا توجد حركات لهذا العميل</div>`}
+    </div>`;
+  $('#stmtSel').onchange=e=>{UI.stmtCustomer=e.target.value;renderStatement();};
+  $('#printStmt').onclick=()=>window.print();
+}
+
+/* ---------- التقويم ---------- */
+function renderCalendar(){
+  const y=UI.calYear,m=UI.calMonth;
+  const first=new Date(y,m,1); const startDay=first.getDay(); const days=new Date(y,m+1,0).getDate();
+  const byDay={};
+  DB.checks.forEach(c=>{ const d=parseDate(c.due); if(d&&d.getFullYear()===y&&d.getMonth()===m){ (byDay[d.getDate()]=byDay[d.getDate()]||[]).push(c); }});
+  let cells='';
+  for(let i=0;i<startDay;i++) cells+=`<div class="cal-cell empty-c"></div>`;
+  for(let d=1;d<=days;d++){
+    const items=byDay[d]||[]; const isToday=(y===TODAY.getFullYear()&&m===TODAY.getMonth()&&d===TODAY.getDate());
+    const sum=items.reduce((a,c)=>a+(+c.amount||0),0);
+    const hasOver=items.some(c=>c.status==='تحت التحصيل'&&(new Date(y,m,d)<TODAY));
+    cells+=`<div class="cal-cell${isToday?' today':''}${items.length?' has':''}">
+      <div class="cd">${d}</div>
+      ${items.length?`<div class="cev ${hasOver?'over':''}">${items.length} شيك<br>${fmtMoney(sum)}</div>`:''}
+      ${items.slice(0,2).map(c=>`<div class="cdetail" title="${esc(c.num)} - ${esc(custName(c.cust))}">• ${esc(c.num)}</div>`).join('')}
+      ${items.length>2?`<div class="cmore">+${items.length-2}</div>`:''}
+    </div>`;
+  }
+  const monthDue=Object.values(byDay).flat().reduce((a,c)=>a+(+c.amount||0),0);
+  $('#page-calendar').innerHTML=`
+  <style>
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px}
+    .cal-head div{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:6px}
+    .cal-cell{background:var(--bg2);border:1px solid var(--line);border-radius:11px;min-height:88px;padding:8px;position:relative;transition:.15s}
+    .cal-cell.empty-c{background:transparent;border:none}
+    .cal-cell.has{border-color:var(--line2)}
+    .cal-cell.today{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-soft)}
+    .cal-cell .cd{font-weight:700;font-size:13px;margin-bottom:5px}
+    .cal-cell.today .cd{color:var(--primary)}
+    .cev{font-size:10.5px;font-weight:700;color:#fcd34d;background:var(--amber-soft);border-radius:7px;padding:3px 6px;line-height:1.4;margin-bottom:4px}
+    .cev.over{color:#fca5a5;background:var(--red-soft)}
+    .cdetail{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cmore{font-size:10px;color:var(--muted2);margin-top:2px}
+  </style>
+  <div class="panel">
+    <div class="panel-head">
+      <button class="btn sm" id="calPrev">‹ السابق</button>
+      <h3 style="text-align:center;flex:1">${MONTHS_AR[m]} ${y}</h3>
+      <button class="btn sm" id="calNext">التالي ›</button>
+      <button class="btn sm" id="calToday">اليوم</button>
+    </div>
+    <div style="padding:8px 18px;font-size:13px;color:var(--muted)">إجمالي استحقاقات الشهر: <b style="color:var(--text)">${fmtMoney(monthDue)}</b></div>
+    <div style="padding:8px 18px 20px">
+      <div class="cal-head">${DAYS_AR.map(d=>`<div>${d}</div>`).join('')}</div>
+      <div class="cal-grid">${cells}</div>
+    </div>
+  </div>`;
+  $('#calPrev').onclick=()=>{ if(--UI.calMonth<0){UI.calMonth=11;UI.calYear--;} renderCalendar(); };
+  $('#calNext').onclick=()=>{ if(++UI.calMonth>11){UI.calMonth=0;UI.calYear++;} renderCalendar(); };
+  $('#calToday').onclick=()=>{ UI.calMonth=TODAY.getMonth();UI.calYear=TODAY.getFullYear(); renderCalendar(); };
+}
+/* ---------- التقارير ---------- */
+function renderReports(){
+  const presets=[['all','الكل'],['week','هذا الأسبوع'],['month','هذا الشهر'],['quarter','هذا الربع'],['year','هذه السنة'],['custom','مخصص']];
+  $('#page-reports').innerHTML=`
+  <div class="panel" style="margin-bottom:18px">
+    <div class="panel-head"><h3>📊 نطاق التقرير</h3></div>
+    <div style="padding:14px 18px">
+      <div class="tabs" id="repTabs">${presets.map(([k,l])=>`<button class="tab ${UI.repPreset===k?'active':''}" data-p="${k}">${l}</button>`).join('')}</div>
+      <div id="customRange" style="display:${UI.repPreset==='custom'?'flex':'none'};gap:12px;margin-top:14px;flex-wrap:wrap">
+        <div class="field"><label>من</label><input class="input" type="date" id="repFrom" value="${UI.repFrom}"></div>
+        <div class="field"><label>إلى</label><input class="input" type="date" id="repTo" value="${UI.repTo}"></div>
+      </div>
+    </div>
+  </div>
+  <div id="repBody"></div>`;
+  $$('#repTabs .tab').forEach(t=>t.onclick=()=>{UI.repPreset=t.dataset.p;renderReports();});
+  if(UI.repPreset==='custom'){
+    $('#repFrom').onchange=e=>{UI.repFrom=e.target.value;drawReport();};
+    $('#repTo').onchange=e=>{UI.repTo=e.target.value;drawReport();};
+  }
+  drawReport();
+}
+function reportRange(){
+  const t=new Date(TODAY); let from=null,to=null;
+  if(UI.repPreset==='week'){ from=new Date(t); from.setDate(t.getDate()-t.getDay()); to=new Date(from); to.setDate(from.getDate()+6); }
+  else if(UI.repPreset==='month'){ from=new Date(t.getFullYear(),t.getMonth(),1); to=new Date(t.getFullYear(),t.getMonth()+1,0); }
+  else if(UI.repPreset==='quarter'){ const q=Math.floor(t.getMonth()/3); from=new Date(t.getFullYear(),q*3,1); to=new Date(t.getFullYear(),q*3+3,0); }
+  else if(UI.repPreset==='year'){ from=new Date(t.getFullYear(),0,1); to=new Date(t.getFullYear(),11,31); }
+  else if(UI.repPreset==='custom'){ from=parseDate(UI.repFrom); to=parseDate(UI.repTo); }
+  if(from) from.setHours(0,0,0,0); if(to) to.setHours(0,0,0,0);
+  return {from,to};
+}
+function drawReport(){
+  const {from,to}=reportRange();
+  const inRange=c=>{ if(!from&&!to) return true; const d=parseDate(c.due); if(!d) return false;
+    if(from&&d<from) return false; if(to&&d>to) return false; return true; };
+  const rows=DB.checks.filter(inRange);
+  const sum=st=>rows.filter(c=>c.status===st).reduce((a,c)=>a+(+c.amount||0),0);
+  const cnt=st=>rows.filter(c=>c.status===st).length;
+
+  // حسب البنك
+  const byBank={}; rows.forEach(c=>{ const k=c.bank||'غير محدد'; byBank[k]=(byBank[k]||0)+(+c.amount||0); });
+  const bankMax=Math.max(1,...Object.values(byBank));
+  // حسب المندوب
+  const byRep={}; rows.forEach(c=>{ const k=c.rep||'غير محدد'; byRep[k]=(byRep[k]||0)+(+c.amount||0); });
+
+  const bar=(obj,max,color)=>Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="bar-row"><span class="lbl" style="width:130px">${esc(k)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%;background:${color}"></div></div>
+      <span class="amt">${fmtMoney(v)}</span></div>`).join('')||'<div class="empty">لا بيانات</div>';
+
+  $('#repBody').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi" style="--accent:var(--primary);--accent-soft:var(--primary-soft)"><div class="ico">🧾</div><div class="label">عدد الشيكات بالفترة</div><div class="val">${fmtNum(rows.length)}</div></div>
+      <div class="kpi" style="--accent:var(--amber);--accent-soft:var(--amber-soft)"><div class="ico">💰</div><div class="label">مستحق</div><div class="val">${fmtMoney(sum('تحت التحصيل'))}</div><div class="sub">${cnt('تحت التحصيل')} شيك</div></div>
+      <div class="kpi" style="--accent:var(--green);--accent-soft:var(--green-soft)"><div class="ico">✅</div><div class="label">محصّل</div><div class="val">${fmtMoney(sum('تم التحصيل'))}</div><div class="sub">${cnt('تم التحصيل')} شيك</div></div>
+      <div class="kpi" style="--accent:var(--red);--accent-soft:var(--red-soft)"><div class="ico">❌</div><div class="label">مرتجع</div><div class="val">${fmtMoney(sum('مرتجع'))}</div><div class="sub">${cnt('مرتجع')} شيك</div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="panel-head"><h3>🏦 التوزيع حسب البنك</h3></div><div style="padding:14px 18px">${bar(byBank,bankMax,'linear-gradient(90deg,var(--primary),var(--cyan))')}</div></div>
+      <div class="panel"><div class="panel-head"><h3>🧑‍💼 التوزيع حسب المندوب</h3></div><div style="padding:14px 18px">${bar(byRep,Math.max(1,...Object.values(byRep)),'linear-gradient(90deg,var(--violet),var(--primary))')}</div></div>
+    </div>
+    <div class="section-title">📄 تفاصيل الشيكات بالفترة</div>
+    <div class="panel"><div class="tbl-wrap"><table>
+      <thead><tr><th>رقم الشيك</th><th>العميل</th><th>البنك</th><th>القيمة</th><th>الاستحقاق</th><th>الحالة</th></tr></thead>
+      <tbody>${rows.sort((a,b)=>(parseDate(a.due)||0)-(parseDate(b.due)||0)).map(c=>{const sp={'تحت التحصيل':'amber','تم التحصيل':'green','مرتجع':'red','مؤجل':'gray'}[c.status]||'gray';
+        return `<tr><td><b>${esc(c.num)}</b></td><td>${esc(custName(c.cust))}</td><td>${esc(c.bank||'—')}</td>
+        <td class="num" style="font-weight:700">${fmtMoney(c.amount)}</td><td class="num">${fmtDate(c.due)}</td>
+        <td><span class="pill ${sp}">${esc(c.status)}</span></td></tr>`;}).join('')||'<tr><td colspan="6"><div class="empty">لا توجد شيكات في هذه الفترة</div></td></tr>'}</tbody>
+    </table></div></div>`;
+}
+
+/* ---------- العملاء ---------- */
+function renderCustomers(){
+  $('#page-customers').innerHTML=`
+  <div class="panel"><div class="panel-head"><h3>👥 العملاء (${DB.customers.length})</h3>
+    <span style="flex:1"></span><button class="btn primary" id="addCust">＋ إضافة عميل</button></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>الكود</th><th>الاسم</th><th>الهاتف</th><th>المنطقة</th><th>المندوب</th><th>المديونية الحالية</th><th></th></tr></thead>
+      <tbody>${DB.customers.map(cu=>{
+        const debt=DB.checks.filter(c=>c.cust===cu.code&&c.status==='تحت التحصيل').reduce((a,c)=>a+(+c.amount||0),0);
+        return `<tr data-id="${cu.id}"><td><span class="pill gray">${esc(cu.code)}</span></td>
+          <td style="white-space:normal;max-width:260px"><b>${esc(cu.name)}</b></td>
+          <td>${esc(cu.phone||'—')}</td><td>${esc(cu.region||'—')}</td><td>${esc(cu.rep||'—')}</td>
+          <td class="num" style="font-weight:700;color:${debt>0?'#fcd34d':'var(--muted)'}">${debt>0?fmtMoney(debt):'—'}</td>
+          <td><button class="btn sm" data-act="e">✏️</button> <button class="btn sm danger" data-act="d">🗑</button></td></tr>`;
+      }).join('')}</tbody>
+    </table></div></div>`;
+  $('#addCust').onclick=()=>custModal();
+  $$('#page-customers tr[data-id]').forEach(tr=>{
+    tr.querySelector('[data-act="e"]').onclick=()=>custModal(tr.dataset.id);
+    tr.querySelector('[data-act="d"]').onclick=()=>delCust(tr.dataset.id);
+  });
+}
+function custModal(id){
+  const cu=id?DB.customers.find(x=>x.id===id):{code:'',name:'',phone:'',address:'',region:'',rep:DB.reps[0]||'',joined:'',notes:''};
+  const o=(arr,sel)=>arr.map(v=>`<option ${v===sel?'selected':''}>${esc(v)}</option>`).join('');
+  openModal(`<div class="modal-head"><h3>${id?'✏️ تعديل عميل':'＋ إضافة عميل'}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>كود العميل *</label><input class="input" id="c_code" value="${esc(cu.code)}"></div>
+      <div class="field"><label>الاسم *</label><input class="input" id="c_name" value="${esc(cu.name)}"></div>
+      <div class="field"><label>الهاتف</label><input class="input" id="c_phone" value="${esc(cu.phone)}"></div>
+      <div class="field"><label>المنطقة / المحافظة</label><input class="input" id="c_region" value="${esc(cu.region)}"></div>
+      <div class="field"><label>المندوب</label><select class="input" id="c_rep"><option value=""></option>${o(DB.reps,cu.rep)}</select></div>
+      <div class="field"><label>تاريخ الانضمام</label><input class="input" type="date" id="c_joined" value="${esc(cu.joined)}"></div>
+      <div class="field full"><label>العنوان</label><input class="input" id="c_address" value="${esc(cu.address)}"></div>
+      <div class="field full"><label>ملاحظات</label><textarea class="input" id="c_notes" rows="2">${esc(cu.notes)}</textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn primary" id="c_save">💾 حفظ</button><button class="btn" onclick="closeModal()">إلغاء</button></div>`);
+  $('#c_save').onclick=()=>{
+    const code=$('#c_code').value.trim(),name=$('#c_name').value.trim();
+    if(!code||!name){ toast('أدخل الكود والاسم','err'); return; }
+    const data={code,name,phone:$('#c_phone').value,region:$('#c_region').value,rep:$('#c_rep').value,
+      joined:$('#c_joined').value,address:$('#c_address').value,notes:$('#c_notes').value};
+    if(id){ Object.assign(cu,data); toast('تم تحديث العميل'); }
+    else { DB.customers.push({id:uid(),...data}); toast('تمت إضافة العميل'); }
+    save(); closeModal(); renderCustomers();
+  };
+}
+function delCust(id){
+  const cu=DB.customers.find(x=>x.id===id);
+  const n=DB.checks.filter(c=>c.cust===cu.code).length;
+  openModal(`<div class="modal-head"><h3>🗑 حذف عميل</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div style="padding:24px">حذف <b>${esc(cu.name)}</b>؟${n?`<br><span style="color:#fca5a5">⚠️ مرتبط بـ ${n} شيك (لن تُحذف الشيكات).</span>`:''}</div>
+    <div class="modal-foot"><button class="btn danger" id="cdd">نعم، احذف</button><button class="btn" onclick="closeModal()">إلغاء</button></div>`);
+  $('#cdd').onclick=()=>{ DB.customers=DB.customers.filter(x=>x.id!==id); save(); closeModal(); renderCustomers(); toast('تم حذف العميل'); };
+}
+
+/* ---------- الإعدادات ---------- */
+function renderSettings(){
+  const listBox=(title,key,icon)=>`<div class="panel" style="margin-bottom:16px">
+    <div class="panel-head"><h3>${icon} ${title}</h3><span style="flex:1"></span>
+      <div style="display:flex;gap:8px"><input class="input" id="add_${key}" placeholder="إضافة..." style="width:170px">
+      <button class="btn sm primary" data-add="${key}">＋</button></div></div>
+    <div style="padding:14px 18px;display:flex;flex-wrap:wrap;gap:8px">
+      ${DB[key].map((v,i)=>`<span class="pill blue" style="padding:6px 10px">${esc(v)} <button data-del="${key}" data-i="${i}" style="background:none;color:#fca5a5;font-weight:800;margin-inline-start:4px">×</button></span>`).join('')||'<span style="color:var(--muted2)">لا عناصر</span>'}
+    </div></div>`;
+  $('#page-settings').innerHTML=`
+    <div style="background:var(--primary-soft);border:1px solid var(--line2);border-radius:14px;padding:14px 18px;margin-bottom:18px;font-size:13px">
+      💡 القوائم المرجعية تُستخدم في النماذج. لتفعيل <b>التزامن اللحظي بين الأجهزة</b> والنسخ السحابية، اضبط اتصال Firebase بالأسفل.
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><h3>☁️ السحابة والتزامن اللحظي</h3><span style="flex:1"></span><span id="cfgState"></span></div>
+      <div style="padding:16px 18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="cfgBtn">⚙️ إعداد اتصال Firebase</button>
+        <button class="btn" id="cloudGuide">📖 دليل الإعداد خطوة بخطوة</button>
+        ${typeof fbIsConfigured==='function'&&fbIsConfigured()?'<button class="btn danger" id="cfgClear">قطع الاتصال</button>':''}
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><h3>🔒 الأمان — قفل بكلمة سر</h3><span style="flex:1"></span>
+        <span class="pill ${pinIsSet()?'green':'gray'}">${pinIsSet()?'مُفعّل':'غير مفعّل'}</span></div>
+      <div style="padding:16px 18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="pinSetBtn">${pinIsSet()?'🔑 تغيير كلمة السر':'🔑 تعيين كلمة سر'}</button>
+        ${pinIsSet()?'<button class="btn danger" id="pinClearBtn">إلغاء القفل</button>':''}
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><h3>🔔 التذكير التلقائي قبل الشيكات</h3></div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">تذكير تلقائي على <b>الإيميل + واتساب</b> قبل استحقاق الشيك بـ<b> 10 و3 أيام ويوم الاستحقاق</b>، يعمل على مدار الساعة عبر Google Apps Script (مجاني).</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" id="remGuide">📖 دليل التفعيل + السكربت</button>
+          <button class="btn" id="remExport">⬇️ تصدير شيكاتي للتذكير (JSON)</button>
+        </div>
+      </div>
+    </div>
+    ${listBox('البنوك','banks','🏦')}
+    ${listBox('طرق السداد / الأنواع','methods','💳')}
+    ${listBox('المندوبون','reps','🧑‍💼')}
+    ${listBox('حالات الشيكات','statuses','🚥')}
+    <div class="panel"><div class="panel-head"><h3>⚠️ منطقة الخطر</h3></div>
+      <div style="padding:16px 18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="resetSeed">🔄 إعادة تحميل البيانات الأصلية</button>
+        <button class="btn danger" id="wipeAll">🗑 مسح كل البيانات</button>
+      </div></div>`;
+  // حالة الاتصال
+  const cfgSt=$('#cfgState');
+  if(cfgSt) cfgSt.innerHTML=(typeof fbIsConfigured==='function'&&fbIsConfigured())
+    ?'<span class="pill green">مضبوط</span>':'<span class="pill gray">غير مضبوط</span>';
+  $('#cfgBtn').onclick=fbConfigModal;
+  $('#cloudGuide').onclick=cloudGuideModal;
+  if($('#cfgClear')) $('#cfgClear').onclick=()=>{ if(confirm('سيتم قطع الاتصال بالسحابة والعودة للوضع المحلي. متأكد؟')){ fbClearConfig(); location.reload(); } };
+  $('#pinSetBtn').onclick=pinSetModal;
+  if($('#pinClearBtn')) $('#pinClearBtn').onclick=()=>{ if(confirm('إلغاء القفل بكلمة السر؟')){ pinClear(); renderSettings(); toast('تم إلغاء القفل'); } };
+  $('#remExport').onclick=()=>{
+    const payload={checks:DB.checks,customers:DB.customers,_exportedAt:new Date().toISOString()};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='checks_for_reminder.json'; a.click();
+    toast('تم التصدير — ارفعه حيث يقرأه السكربت');
+  };
+  $('#remGuide').onclick=reminderGuideModal;
+  $$('[data-add]').forEach(b=>b.onclick=()=>{ const k=b.dataset.add; const v=$('#add_'+k).value.trim();
+    if(v&&!DB[k].includes(v)){ DB[k].push(v); save(); renderSettings(); toast('تمت الإضافة'); } });
+  $$('[data-del]').forEach(b=>b.onclick=()=>{ const k=b.dataset.del; DB[k].splice(+b.dataset.i,1); save(); renderSettings(); });
+  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
+  $('#wipeAll').onclick=()=>{ if(confirm('سيتم مسح كل البيانات نهائياً. متأكد؟')){ DB={checks:[],customers:[],banks:[],methods:[],reps:[],statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']}; save(); go('dashboard'); toast('تم مسح كل البيانات'); } };
+}
+
+/* ---------- إعداد اتصال Firebase ---------- */
+function fbConfigModal(){
+  const c=fbGetConfig()||{};
+  openModal(`<div class="modal-head"><h3>⚙️ إعداد اتصال Firebase</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="full" style="background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:11px 14px;font-size:12.5px;line-height:1.7">
+        انسخ القيم من إعدادات مشروعك في Firebase (Project settings ← Your apps ← Config). محتاج أساساً: <b>apiKey</b> و <b>databaseURL</b> و <b>projectId</b>. مش متأكد إزاي؟ اضغط «دليل الإعداد».
+      </div>
+      <div class="field full"><label>apiKey *</label><input class="input" id="f_api" value="${esc(c.apiKey||'')}" placeholder="AIza..."></div>
+      <div class="field full"><label>databaseURL * (رابط Realtime Database)</label><input class="input" id="f_db" value="${esc(c.databaseURL||'')}" placeholder="https://xxxx-default-rtdb.firebaseio.com"></div>
+      <div class="field"><label>projectId *</label><input class="input" id="f_pid" value="${esc(c.projectId||'')}" placeholder="my-erp-app"></div>
+      <div class="field"><label>appId</label><input class="input" id="f_app" value="${esc(c.appId||'')}" placeholder="1:xxxx:web:xxxx"></div>
+      <div class="field"><label>authDomain</label><input class="input" id="f_auth" value="${esc(c.authDomain||'')}" placeholder="my-erp-app.firebaseapp.com"></div>
+      <div class="field"><label>اسم مساحة العمل (workspace)</label><input class="input" id="f_ws" value="${esc(c.workspace||'main')}" placeholder="main"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn primary" id="f_save">💾 حفظ والاتصال</button>
+      <button class="btn" onclick="closeModal()">إلغاء</button>
+    </div>`);
+  $('#f_save').onclick=()=>{
+    const cfg={ apiKey:$('#f_api').value.trim(), databaseURL:$('#f_db').value.trim(),
+      projectId:$('#f_pid').value.trim(), appId:$('#f_app').value.trim(),
+      authDomain:$('#f_auth').value.trim(), workspace:$('#f_ws').value.trim()||'main' };
+    if(!cfg.apiKey||!cfg.databaseURL||!cfg.projectId){ toast('املأ الحقول الأساسية (apiKey, databaseURL, projectId)','err'); return; }
+    fbSaveConfig(cfg); closeModal();
+    toast('تم الحفظ — جارٍ إعادة التشغيل للاتصال...');
+    setTimeout(()=>location.reload(),800);
+  };
+}
+
+function cloudGuideModal(){
+  openModal(`<div class="modal-head"><h3>📖 دليل تفعيل السحابة (Firebase)</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div style="padding:22px;font-size:13.5px;line-height:1.9">
+      <p style="color:var(--muted);margin-bottom:14px">مرة واحدة فقط، خطوات مجانية بالكامل (الخطة المجانية تكفي):</p>
+      <ol style="padding-inline-start:20px;display:flex;flex-direction:column;gap:11px">
+        <li>افتح <b>console.firebase.google.com</b> وسجّل دخول بحساب Google.</li>
+        <li>اضغط <b>Add project</b> ← اكتب اسم (مثلاً <code>checks-erp</code>) ← Continue ← أنشئ المشروع.</li>
+        <li>من القائمة الجانبية: <b>Build ← Realtime Database</b> ← <b>Create Database</b> ← اختر منطقة ← ابدأ في وضع <b>Locked/Test</b>.</li>
+        <li>في تبويب <b>Rules</b> اكتب القاعدة دي ثم Publish:<br>
+          <code style="display:block;background:var(--bg);padding:10px;border-radius:8px;margin-top:6px;direction:ltr;text-align:left;font-size:12px">{ "rules": { ".read": true, ".write": true } }</code>
+          <span style="color:#fcd34d;font-size:12px">⚠️ ده يفتح القاعدة للجميع — لكن القفل بكلمة السر في البرنامج بيحميك. للأمان الأعلى لاحقاً نضيف Firebase Auth.</span></li>
+        <li>اضغط على أيقونة الترس ⚙️ ← <b>Project settings</b> ← انزل لـ <b>Your apps</b> ← اضغط أيقونة الويب <b>&lt;/&gt;</b> ← سجّل التطبيق.</li>
+        <li>هيظهرلك كود فيه <code>firebaseConfig</code> — انسخ منه القيم والصقها في زر <b>«إعداد اتصال Firebase»</b>.</li>
+        <li>تأكد إن <b>databaseURL</b> موجود (لو مش ظاهر، خده من صفحة Realtime Database فوق).</li>
+      </ol>
+      <p style="margin-top:16px;color:var(--muted)">بعد الحفظ، افتح نفس الملف على أي جهاز تاني والصق نفس الإعدادات ونفس اسم الـ workspace → هيتزامنوا لحظياً. 🎉</p>
+    </div>
+    <div class="modal-foot"><button class="btn primary" id="guideCfg">⚙️ افتح شاشة الإعداد</button><button class="btn" onclick="closeModal()">إغلاق</button></div>`);
+  $('#guideCfg').onclick=fbConfigModal;
+}
+
+/* ---------- تعيين كلمة السر ---------- */
+function pinSetModal(){
+  openModal(`<div class="modal-head"><h3>🔑 ${pinIsSet()?'تغيير':'تعيين'} كلمة السر</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field full"><label>كلمة السر الجديدة *</label><input class="input" type="password" id="p_new"></div>
+      <div class="field full"><label>تأكيد كلمة السر *</label><input class="input" type="password" id="p_conf"></div>
+      <div class="full" style="font-size:12.5px;color:var(--muted)">تُحفظ مشفّرة في متصفحك (SHA-256)، وتُطلب عند فتح البرنامج. لو نسيتها يمكن مسحها بمسح بيانات المتصفح.</div>
+    </div>
+    <div class="modal-foot"><button class="btn primary" id="p_save">💾 حفظ</button><button class="btn" onclick="closeModal()">إلغاء</button></div>`);
+  $('#p_save').onclick=async ()=>{
+    const a=$('#p_new').value, b=$('#p_conf').value;
+    if(!a||a.length<4){ toast('كلمة السر 4 أحرف على الأقل','err'); return; }
+    if(a!==b){ toast('كلمتا السر غير متطابقتين','err'); return; }
+    await pinSet(a); setUnlocked(); closeModal(); renderSettings(); toast('تم تعيين كلمة السر');
+  };
+}
+
+/* ---------- دليل التذكير التلقائي ---------- */
+function reminderGuideModal(){
+  openModal(`<div class="modal-head"><h3>🔔 تفعيل التذكير التلقائي (إيميل + واتساب)</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div style="padding:22px;font-size:13px;line-height:1.85">
+      <div style="background:var(--green-soft);border:1px solid var(--green);border-radius:12px;padding:12px 15px;margin-bottom:16px">
+        ✅ مجاني تماماً، تلقائي على مدار الساعة، يبعتلك قبل الشيك بـ<b> 10 و3 أيام ويوم الاستحقاق</b>، ويمنع التكرار.
+      </div>
+
+      <b style="color:var(--primary)">الجزء الأول: تفعيل واتساب (CallMeBot)</b>
+      <ol style="padding-inline-start:20px;display:flex;flex-direction:column;gap:7px;margin:8px 0 18px">
+        <li>أضف الرقم <b dir="ltr">+34 644 51 95 23</b> في جهات اتصالك.</li>
+        <li>ابعتله رسالة واتساب: <code dir="ltr">I allow callmebot to send me messages</code></li>
+        <li>هيرد عليك برسالة فيها <b>apikey</b> — احتفظ بيه ورقم تليفونك بالصيغة الدولية (مثال: <code dir="ltr">2010xxxxxxxx</code>).</li>
+      </ol>
+
+      <b style="color:var(--primary)">الجزء الثاني: رفع بيانات الشيكات</b>
+      <ol style="padding-inline-start:20px;display:flex;flex-direction:column;gap:7px;margin:8px 0 18px">
+        <li><b>الأسهل لو فعّلت Firebase:</b> السكربت يقرأ مباشرة من رابط قاعدة بياناتك (نفس الـ databaseURL). كل تعديل يظهر للتذكير فوراً.</li>
+        <li><b>بدون Firebase:</b> اضغط زر «تصدير شيكاتي للتذكير» وارفع الملف على أي مكان يعطي رابط مباشر (Google Drive بصلاحية عامة / GitHub Gist)، وحدّثه دورياً.</li>
+      </ol>
+
+      <b style="color:var(--primary)">الجزء الثالث: تركيب السكربت</b>
+      <ol style="padding-inline-start:20px;display:flex;flex-direction:column;gap:7px;margin:8px 0 10px">
+        <li>افتح <b>script.google.com</b> ← <b>New project</b>.</li>
+        <li>الصق محتوى الملف <b>reminder_script.gs</b> (المرفق مع النظام).</li>
+        <li>في أعلى الملف، املأ: <code>EMAIL</code>، <code>WHATSAPP_PHONE</code>، <code>CALLMEBOT_APIKEY</code>، و<code>DATA_URL</code>.</li>
+        <li>شغّل الدالة <b>testNow</b> مرة (للتجربة + إعطاء الأذونات).</li>
+        <li>شغّل الدالة <b>setupDailyTrigger</b> مرة واحدة → يركّب التذكير اليومي الساعة 9 صباحاً. خلاص! 🎉</li>
+      </ol>
+      <div style="color:var(--muted2);font-size:12px;margin-top:8px">السكربت يفحص شيكاتك يومياً ويبعت فقط عند 10/3/0 أيام، ومايكررش نفس التذكير.</div>
+    </div>
+    <div class="modal-foot"><button class="btn primary" id="remExp2">⬇️ تصدير شيكاتي للتذكير</button><button class="btn" onclick="closeModal()">إغلاق</button></div>`);
+  $('#remExp2').onclick=()=>{
+    const payload={checks:DB.checks,customers:DB.customers,_exportedAt:new Date().toISOString()};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='checks_for_reminder.json'; a.click(); toast('تم التصدير');
+  };
+}
+
+/* ---------- النسخ الاحتياطي التلقائي ---------- */
+function loadBackups(){ try{ return JSON.parse(localStorage.getItem(BK_KEY))||[]; }catch(e){ return []; } }
+function saveBackups(arr){ try{ localStorage.setItem(BK_KEY, JSON.stringify(arr)); }
+  catch(e){ // لو الذاكرة امتلأت، احذف الأقدم وأعد المحاولة
+    while(arr.length>5){ arr.shift(); try{ localStorage.setItem(BK_KEY,JSON.stringify(arr)); return; }catch(_){} }
+  } }
+
+// نسخة تلقائية يومية: واحدة لكل يوم، تتحدّث كل ما يُفتح البرنامج، مع الاحتفاظ بآخر 30 يوم
+function autoBackup(){
+  const today=new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  let arr=loadBackups();
+  const snap={ date:today, ts:Date.now(), auto:true,
+    counts:{checks:DB.checks.length,customers:DB.customers.length},
+    data:JSON.stringify(DB) };
+  const idx=arr.findIndex(b=>b.date===today && b.auto);
+  if(idx>-1) arr[idx]=snap;      // حدّث نسخة اليوم
+  else arr.push(snap);            // أو أنشئ نسخة جديدة لليوم
+  // احتفظ بآخر 30 يوم فقط (للنسخ التلقائية) + احذف الأقدم من 30 يوم
+  const cutoff=Date.now()-BK_KEEP_DAYS*86400000;
+  arr=arr.filter(b=> !b.auto || b.ts>=cutoff);
+  // وللأمان: لو زادت النسخ التلقائية عن 30، احذف الأقدم
+  let autos=arr.filter(b=>b.auto).sort((a,b)=>a.ts-b.ts);
+  while(autos.length>BK_KEEP_DAYS){ const old=autos.shift(); arr=arr.filter(b=>b!==old); }
+  saveBackups(arr);
+  // رفع النسخ للسحابة لو متصل (نسخ احتياطي سحابي)
+  if(typeof FB!=='undefined' && FB.ready && typeof fbWriteBackups==='function'){ fbWriteBackups(arr); }
+}
+
+function restoreBackup(b){
+  if(!confirm('سيتم استبدال البيانات الحالية بنسخة '+b.date+'. متأكد؟')) return;
+  try{ const d=JSON.parse(b.data);
+    DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},d);
+    save(); closeModal(); go('dashboard'); toast('تمت الاستعادة من نسخة '+b.date);
+  }catch(e){ toast('تعذّر استعادة النسخة','err'); }
+}
+function downloadBackup(b){
+  const blob=new Blob([b.data],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='backup_'+b.date+'.json'; a.click();
+}
+function deleteBackup(ts){ saveBackups(loadBackups().filter(b=>b.ts!==ts)); backupModal(); }
+
+function backupModal(){
+  const arr=loadBackups().sort((a,b)=>b.ts-a.ts);
+  const rows=arr.map(b=>{
+    const t=new Date(b.ts).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td><b>${esc(b.date)}</b><div style="font-size:11px;color:var(--muted2)">${b.auto?'🔄 تلقائي':'✋ يدوي'} • ${t}</div></td>
+      <td class="num">${b.counts?b.counts.checks:'—'} شيك<br><span style="color:var(--muted)">${b.counts?b.counts.customers:'—'} عميل</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn sm primary" data-r="${b.ts}">↩️ استعادة</button>
+        <button class="btn sm" data-dl="${b.ts}">⬇️</button>
+        <button class="btn sm danger" data-x="${b.ts}">🗑</button></td></tr>`;
+  }).join('');
+  openModal(`<div class="modal-head"><h3>💾 النسخ الاحتياطي والاستعادة</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+      <div style="background:var(--green-soft);border:1px solid var(--green);border-radius:12px;padding:12px 15px;font-size:12.5px;line-height:1.7">
+        ✅ <b>النسخ التلقائي مُفعّل.</b> يأخذ النظام نسخة تلقائية كل يوم عند فتح البرنامج، ويحتفظ بآخر <b>${BK_KEEP_DAYS} يوم</b>، ويحذف الأقدم تلقائياً. النسخ محفوظة داخل متصفحك.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="bkNow">💾 أخذ نسخة الآن</button>
+        <button class="btn" id="bkExport">⬇️ تصدير ملف JSON</button>
+        <button class="btn" id="bkImport">⬆️ استيراد ملف</button>
+      </div>
+      <div style="font-weight:700;font-size:13px;margin-top:4px">📚 النسخ المحفوظة (${arr.length})</div>
+      ${arr.length?`<div class="tbl-wrap" style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:12px">
+        <table><thead><tr><th>التاريخ</th><th>المحتوى</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table>
+      </div>`:`<div class="empty" style="padding:24px"><div class="big">🗂️</div>لا توجد نسخ بعد</div>`}
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">إغلاق</button></div>`);
+
+  $('#bkNow').onclick=()=>{
+    const today=new Date().toLocaleDateString('en-CA'); let a=loadBackups();
+    a.push({date:today,ts:Date.now(),auto:false,counts:{checks:DB.checks.length,customers:DB.customers.length},data:JSON.stringify(DB)});
+    saveBackups(a); toast('تم أخذ نسخة يدوية'); backupModal();
+  };
+  $('#bkExport').onclick=()=>{
+    const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='backup_checks_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+    toast('تم تصدير النسخة الاحتياطية');
+  };
+  $('#bkImport').onclick=()=>$('#importFile').click();
+  $$('[data-r]').forEach(b=>b.onclick=()=>{ const bk=loadBackups().find(x=>x.ts==b.dataset.r); if(bk) restoreBackup(bk); });
+  $$('[data-dl]').forEach(b=>b.onclick=()=>{ const bk=loadBackups().find(x=>x.ts==b.dataset.dl); if(bk) downloadBackup(bk); });
+  $$('[data-x]').forEach(b=>b.onclick=()=>deleteBackup(+b.dataset.x));
+}
+$('#importFile').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result);
+    if(!d.checks||!d.customers) throw 0;
+    DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},d); save(); closeModal(); go('dashboard'); toast('تم استيراد النسخة الاحتياطية');
+  }catch(err){ toast('ملف غير صالح','err'); } };
+  r.readAsText(f); e.target.value='';
+};
+
+/* ---------- Sidebar mobile ---------- */
+function closeSidebar(){ $('#sidebar').classList.remove('open'); $('#overlayM').classList.remove('show'); }
+$('#menuBtn').onclick=()=>{ $('#sidebar').classList.add('open'); $('#overlayM').classList.add('show'); };
+$('#overlayM').onclick=closeSidebar;
+
+/* ---------- تهيئة ---------- */
+$$('.nav-item[data-page]').forEach(n=>n.onclick=()=>go(n.dataset.page));
+$('#btnBackup').onclick=backupModal;
+$('#todayStr').textContent='📅 '+TODAY.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+/* ===== تدفق الإقلاع ===== */
+async function boot(){
+  load();
+  // 1) القفل بكلمة السر (لو مفعّل)
+  if(typeof pinIsSet==='function' && pinIsSet() && !isUnlocked()){
+    showLockScreen(startApp);
+  } else {
+    startApp();
+  }
+}
+async function startApp(){
+  setUnlocked && setUnlocked();
+  // 2) الاتصال بالسحابة لو مُعدّة
+  if(typeof fbIsConfigured==='function' && fbIsConfigured()){
+    try{
+      updateCloudBadge('connecting');
+      await fbInit(applyCloudData);
+      // ادفع نسختنا الحالية لو السحابة فاضية، وإلا onValue هيجيب الأحدث
+      const snap=await FB._L.get(FB.ref);
+      if(!snap.exists()){ fbPush(DB); }
+      updateCloudBadge('online');
+      toast('☁️ متصل بالسحابة — التزامن اللحظي مُفعّل');
+    }catch(e){
+      updateCloudBadge('offline');
+      toast('تعذّر الاتصال بالسحابة — وضع محلي','err');
+    }
+  } else {
+    updateCloudBadge('local');
+  }
+  autoBackup();
+  go('dashboard');
+}
+function updateCloudBadge(state){
+  const el=$('#cloudBadge'); if(!el) return;
+  const map={connecting:['⏳ جارٍ الاتصال...','amber'],online:['☁️ متصل — تزامن لحظي','green'],
+    offline:['⚠️ غير متصل','red'],local:['💾 وضع محلي','gray']};
+  const [t,c]=map[state]||map.local;
+  el.className='pill '+c; el.textContent=t;
+}
+
+/* ===== شاشة القفل ===== */
+function showLockScreen(onOk){
+  const ov=document.createElement('div');
+  ov.id='lockScreen';
+  ov.innerHTML=`<div class="lock-card">
+    <div class="lock-logo">🔒</div>
+    <h2>نظام إدارة الشيكات</h2>
+    <p>أدخل كلمة السر للدخول</p>
+    <input type="password" id="lockPin" class="input" placeholder="كلمة السر" autofocus>
+    <button class="btn primary" id="lockBtn" style="width:100%;justify-content:center;margin-top:6px">دخول</button>
+    <div id="lockErr" style="color:#fca5a5;font-size:12.5px;min-height:18px;margin-top:8px"></div>
+  </div>`;
+  document.body.appendChild(ov);
+  const tryUnlock=async ()=>{
+    const v=$('#lockPin').value;
+    if(await pinCheck(v)){ setUnlocked(); ov.remove(); onOk(); }
+    else { $('#lockErr').textContent='كلمة السر غير صحيحة'; $('#lockPin').value=''; $('#lockPin').focus(); }
+  };
+  $('#lockBtn').onclick=tryUnlock;
+  $('#lockPin').onkeydown=e=>{ if(e.key==='Enter') tryUnlock(); };
+}
+
+boot();
+
+</script>
+</body>
+</html>
