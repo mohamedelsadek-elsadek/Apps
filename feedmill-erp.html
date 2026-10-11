@@ -136,6 +136,10 @@ td.strong{font-weight:800}
 .rtab td,.rtab th{padding:6px}
 .rtab input{width:70px;padding:7px 4px;text-align:center;font-size:15px;border-radius:9px}
 .bttab td,.bttab th{padding:8px 9px}
+.bt-c{text-align:center!important;white-space:nowrap}
+.bt-d{font-size:10.5px;font-weight:600;opacity:.8}
+.bt-w{font-size:11px;font-weight:600;opacity:.75}
+.print-only{display:none}
 .stk{position:sticky;right:0;z-index:1;background:var(--surface)!important;box-shadow:-1px 0 0 var(--line)}
 th.stk{background:var(--surface2)!important}
 .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.06)}
@@ -169,6 +173,15 @@ th.stk{background:var(--surface2)!important}
   .tbl-wrap{overflow:visible;border-color:#bbb}
   th,td,.pill,tr.tot td,.kpi.hl{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   tr{break-inside:avoid}
+  .print-only{display:block}
+  .bt-card{break-inside:auto;page-break-inside:auto}
+  .bttab{width:100%;table-layout:fixed;font-size:9pt;border:1px solid #999}
+  .bttab tr.tot td{font-size:8pt}
+  .bttab th,.bttab td{padding:4px 3px;border:1px solid #ccc;position:static!important;box-shadow:none!important}
+  .bttab th:first-child,.bttab td:first-child{width:17%;text-align:right;white-space:normal}
+  .bttab .bt-d{font-size:7.5pt}
+  .bttab .bt-w{font-size:7.5pt}
+  .bttab thead{display:table-header-group}
 }
 </style>
 </head>
@@ -185,7 +198,7 @@ th.stk{background:var(--surface2)!important}
    - التصنيع بيحفظ الخامات المخصومة وقت التسجيل (use) → تعديل التركيبة
      بعدين مايغيّرش أرصدة الأيام اللي فاتت.
    ===================================================================== */
-var APP_VER='v42';
+var APP_VER='v43';
 var APP_NAME='مصنع الكوثر للأعلاف';
 var FB_CFG={
   apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
@@ -760,7 +773,7 @@ VIEWS.matbal=function(){
 
 
 /* ================= الأرصدة بالتاريخ (جدول: الأصناف تحت بعض والأيام جنب بعض) ================= */
-var BT={type:'mat',per:'week',from:'',to:'',step:'day',store:'',hide:true,unit:'kg'};
+var BT={type:'all',per:'week',from:'',to:'',step:'day',store:'',hide:true,unit:'kg'};
 function btDates(){
   var t=today(),from,to;
   if(BT.per==='week'){to=t;from=addDays(t,-6)}
@@ -773,9 +786,9 @@ function btDates(){
   var cut=false;if(out.length>62){out=out.slice(-62);cut=true}
   return {from:from,to:to,list:out,cut:cut};
 }
-function btRows(D){
+function btRows(D,type){
   var rows=[],prevDay=addDays(D.list[0]||D.from,BT.step==='week'?-7:-1);
-  if(BT.type==='mat'){
+  if(type==='mat'){
     var Ls=D.list.map(function(d){return matLedger(d)}),L0=matLedger(prevDay);
     list('mat').forEach(function(m){rows.push({name:m.name,sub:'',start:L0[m.id]?L0[m.id].bal:0,vals:Ls.map(function(L){return L[m.id]?L[m.id].bal:0})})});
   }else{
@@ -787,42 +800,60 @@ function btRows(D){
   return rows;
 }
 function btFmt(v){return BT.unit==='t'?fmtT(v):fmt(v)}
-function btHead(d){var p=d.split('-'),w='';try{w=new Date(+p[0],p[1]-1,+p[2]).toLocaleDateString('ar-EG',{weekday:'short'})}catch(e){}return '<div style="font-size:11px;font-weight:600;opacity:.75">'+w+'</div>'+(+p[2])+'/'+(+p[1])}
+function btDay(d){var p=d.split('-'),w='';try{w=new Date(+p[0],p[1]-1,+p[2]).toLocaleDateString('ar-EG',{weekday:'short'})}catch(e){}return {w:w,d:(+p[2])+'/'+(+p[1])}}
+/* جدول واحد لأعمدة من..لـ (idx) — بيتعاد استخدامه للشاشة وللطباعة المقسّمة */
+function btTable(type,D,rows,i0,i1,screen){
+  var dates=D.list.slice(i0,i1),tot=dates.map(function(){return 0}),tot0=0;
+  rows.forEach(function(r){tot0+=r.start;for(var i=i0;i<i1;i++)tot[i-i0]+=r.vals[i]});
+  var cell=function(v,prev,last){var cls='n bt-c';if(v<-0.0005)cls+=' c-bad strong';else if(prev!=null&&v-prev>0.0005)cls+=' c-ok';else if(prev!=null&&prev-v>0.0005)cls+=' c-warn';if(last)cls+=' strong';
+    var arrow=prev!=null&&Math.abs(v-prev)>0.0005?'<div class="bt-d">'+(v>prev?'▲ ':'▼ ')+btFmt(Math.abs(v-prev))+'</div>':'';
+    return '<td class="'+cls+'">'+btFmt(v)+arrow+'</td>'};
+  var showStart=i0===0;
+  return '<table class="bttab"><thead><tr><th class="'+(screen?'stk':'')+'">'+(type==='mat'?'الخامة':'العلف')+'</th>'+(showStart?'<th class="bt-c" style="opacity:.8">قبل الفترة</th>':'')+
+   dates.map(function(d,i){var x=btDay(d);return '<th class="bt-c"'+(i0+i===D.list.length-1?' style="color:var(--pri)"':'')+'><div class="bt-w">'+x.w+'</div>'+x.d+'</th>'}).join('')+'</tr></thead><tbody>'+
+   rows.map(function(r){return '<tr><td class="'+(screen?'stk':'')+' bt-n"><b>'+esc(r.name)+'</b>'+(r.sub?' '+formPill(r.sub):'')+'</td>'+(showStart?'<td class="n bt-c" style="opacity:.75">'+btFmt(r.start)+'</td>':'')+
+     dates.map(function(d,j){var i=i0+j;return cell(r.vals[i],i?r.vals[i-1]:r.start,i===D.list.length-1)}).join('')+'</tr>'}).join('')+
+   '<tr class="tot"><td class="'+(screen?'stk':'')+'">الإجمالي</td>'+(showStart?'<td class="n bt-c">'+btFmt(tot0)+'</td>':'')+tot.map(function(v){return '<td class="n bt-c">'+btFmt(v)+'</td>'}).join('')+'</tr></tbody></table>';
+}
+function btSection(type,D){
+  var rows=btRows(D,type),title=(type==='mat'?'📦 أرصدة الخامات':'🌾 أرصدة العلف الجاهز'+(BT.store&&S.docs[BT.store]?' — '+esc(nm(BT.store)):''));
+  var h='<div class="card bt-card"><h3>'+title+' <small class="c-sub" style="font-size:12px">('+(BT.unit==='t'?'طن':'كجم')+')</small></h3>';
+  if(!rows.length)return h+'<div class="empty">مفيش أرصدة في الفترة دي</div></div>';
+  h+='<div class="tbl-wrap no-print">'+btTable(type,D,rows,0,D.list.length,true)+'</div>';
+  /* الطباعة: نقسّم الأيام على جداول (7 أيام في الجدول) تحت بعض عشان تيجي مقروءة */
+  var per=7,parts=[];for(var i=0;i<D.list.length;i+=per)parts.push(btTable(type,D,rows,i,Math.min(i+per,D.list.length),false));
+  h+='<div class="print-only">'+parts.join('<div style="height:10px"></div>')+'</div>';
+  return h+'</div>';
+}
 VIEWS.baltl=function(){
-  var D=btDates(),rows=btRows(D),st=list('store');
+  var D=btDates(),st=list('store');
   var seg=function(key,opts){return '<div class="btnrow" style="gap:6px;flex-wrap:wrap">'+opts.map(function(o){return '<button class="btn sm '+(BT[key]===o[0]?'pri':'ghost')+'" onclick="BT.'+key+'=\''+o[0]+'\';renderView()">'+o[1]+'</button>'}).join('')+'</div>'};
-  var h='<h2 class="sec">📅 الأرصدة بالتاريخ <small>رصيد آخر كل يوم</small></h2>'+
+  var h='<h2 class="sec">📅 الأرصدة بالتاريخ <small>رصيد آخر كل يوم · من '+arDate(D.from)+' لـ '+arDate(D.to)+'</small></h2>'+
   '<div class="card no-print">'+
-   '<div class="field"><label>الصنف</label>'+seg('type',[['mat','📦 الخامات'],['feed','🌾 العلف الجاهز']])+'</div>'+
+   '<div class="field"><label>الصنف</label>'+seg('type',[['all','📦🌾 الخامات والعلف'],['mat','📦 الخامات'],['feed','🌾 العلف الجاهز']])+'</div>'+
    '<div class="field"><label>الفترة</label>'+seg('per',[['week','آخر 7 أيام'],['month','الشهر ده'],['lmonth','الشهر اللي فات'],['custom','من تاريخ لتاريخ']])+'</div>'+
    (BT.per==='custom'?'<div class="grid2"><div class="field"><label>من</label><input type="date" value="'+D.from+'" onchange="BT.from=this.value;renderView()"></div><div class="field"><label>إلى</label><input type="date" value="'+D.to+'" onchange="BT.to=this.value;renderView()"></div></div>':'')+
    '<div class="grid2"><div class="field"><label>كل عمود</label>'+seg('step',[['day','يوم'],['week','أسبوع']])+'</div><div class="field"><label>الوحدة</label>'+seg('unit',[['kg','كجم'],['t','طن']])+'</div></div>'+
-   (BT.type==='feed'&&st.length>1?'<div class="field"><label>المخزن</label><select onchange="BT.store=this.value;renderView()"><option value="">كل المخازن</option>'+st.map(function(x){return '<option value="'+x.id+'"'+(x.id===BT.store?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></div>':'')+
+   (BT.type!=='mat'&&st.length>1?'<div class="field"><label>مخزن العلف</label><select onchange="BT.store=this.value;renderView()"><option value="">كل المخازن</option>'+st.map(function(x){return '<option value="'+x.id+'"'+(x.id===BT.store?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></div>':'')+
    '<label style="display:flex;gap:8px;align-items:center;font-size:13.5px;font-weight:700;cursor:pointer"><input type="checkbox" '+(BT.hide?'checked':'')+' onchange="BT.hide=this.checked;renderView()" style="width:auto"> إخفاء الأصناف اللي رصيدها صفر طول الفترة</label>'+
-  '</div>';
-  h+='<div class="card"><h3>'+(BT.type==='mat'?'📦 الخامات':'🌾 العلف الجاهز'+(BT.store&&S.docs[BT.store]?' — '+esc(nm(BT.store)):''))+' · من '+arDate(D.from)+' لـ '+arDate(D.to)+' <small class="c-sub" style="font-size:12px">('+(BT.unit==='t'?'طن':'كجم')+')</small></h3>'+
-   (D.cut?'<div class="alert info">الفترة طويلة — ظاهر آخر 62 عمود بس. اختار "كل عمود: أسبوع" عشان تشوفها كلها.</div>':'');
-  if(!rows.length||!D.list.length){h+='<div class="empty">مفيش أرصدة في الفترة دي</div></div>';return h}
-  var tot=D.list.map(function(){return 0}),tot0=0;
-  rows.forEach(function(r){tot0+=r.start;r.vals.forEach(function(v,i){tot[i]+=v})});
-  var cell=function(v,prev,last){var cls='n';if(v<-0.0005)cls+=' c-bad strong';else if(prev!=null&&v-prev>0.0005)cls+=' c-ok';else if(prev!=null&&prev-v>0.0005)cls+=' c-warn';if(last)cls+=' strong';
-    var arrow=prev!=null&&Math.abs(v-prev)>0.0005?'<div style="font-size:10.5px;font-weight:600;opacity:.8">'+(v>prev?'▲ ':'▼ ')+btFmt(Math.abs(v-prev))+'</div>':'';
-    return '<td class="'+cls+'" style="text-align:center;white-space:nowrap">'+btFmt(v)+arrow+'</td>'};
-  h+='<div class="tbl-wrap"><table class="bttab"><thead><tr><th class="stk">'+(BT.type==='mat'?'الخامة':'العلف')+'</th><th style="text-align:center;opacity:.8">قبل الفترة</th>'+
-   D.list.map(function(d,i){return '<th style="text-align:center'+(i===D.list.length-1?';color:var(--pri)':'')+'">'+btHead(d)+'</th>'}).join('')+'</tr></thead><tbody>'+
-   rows.map(function(r){return '<tr><td class="stk"><b>'+esc(r.name)+'</b>'+(r.sub?' '+formPill(r.sub):'')+'</td><td class="n" style="text-align:center;opacity:.75">'+btFmt(r.start)+'</td>'+
-     r.vals.map(function(v,i){return cell(v,i?r.vals[i-1]:r.start,i===r.vals.length-1)}).join('')+'</tr>'}).join('')+
-   '<tr class="tot"><td class="stk">الإجمالي</td><td class="n" style="text-align:center">'+btFmt(tot0)+'</td>'+tot.map(function(v){return '<td class="n" style="text-align:center">'+btFmt(v)+'</td>'}).join('')+'</tr>'+
-   '</tbody></table></div>'+
-   '<p class="hint" style="margin-top:8px">كل خانة = الرصيد في آخر اليوم'+(BT.step==='week'?' (آخر يوم في كل أسبوع)':'')+'. ▲ أخضر زيادة (وارد/تصنيع) · ▼ برتقاني نقص (استهلاك/صرف) · الأحمر رصيد سالب.</p>'+
-   '<div class="btnrow no-print" style="margin-top:10px"><button class="btn ghost sm" onclick="btCSV()">⬇️ Excel</button><button class="btn ghost sm" onclick="printPage()">🖨️ طباعة</button></div></div>';
+   '<div class="btnrow" style="margin-top:12px"><button class="btn pri sm" onclick="printPage()">🖨️ طباعة / PDF</button><button class="btn ghost sm" onclick="btCSV()">⬇️ Excel</button></div>'+
+  '</div>'+
+  (D.cut?'<div class="alert info no-print">الفترة طويلة — ظاهر آخر 62 عمود بس. اختار "كل عمود: أسبوع" عشان تشوفها كلها.</div>':'');
+  if(!D.list.length)return h+'<div class="card"><div class="empty">اختار فترة صح</div></div>';
+  if(BT.type!=='feed')h+=btSection('mat',D);
+  if(BT.type!=='mat')h+=btSection('feed',D);
+  h+='<p class="hint">كل خانة = الرصيد في آخر اليوم'+(BT.step==='week'?' (آخر يوم في كل أسبوع)':'')+'. ▲ أخضر زيادة (وارد/تصنيع) · ▼ برتقاني نقص (استهلاك/صرف) · الأحمر رصيد سالب.</p>';
   return h;
 };
 function btCSV(){
-  var D=btDates(),rows=btRows(D),q=function(x){return '"'+String(x).replace(/"/g,'""')+'"'};
-  var lines=[[q(BT.type==='mat'?'الخامة':'العلف'),q('قبل الفترة')].concat(D.list.map(function(d){return q(d)})).join(',')];
-  rows.forEach(function(r){lines.push([q(r.name+(r.sub?' - '+r.sub:'')),r3(BT.unit==='t'?r.start/1000:r.start)].concat(r.vals.map(function(v){return r3(BT.unit==='t'?v/1000:v)})).join(','))});
-  download('ارصدة_'+(BT.type==='mat'?'خامات':'علف')+'_'+D.from+'_'+D.to+'.csv','﻿'+lines.join('\n'),'text/csv;charset=utf-8');
+  var D=btDates(),q=function(x){return '"'+String(x).replace(/"/g,'""')+'"'},lines=[];
+  (BT.type==='all'?['mat','feed']:[BT.type]).forEach(function(type){
+    var rows=btRows(D,type);
+    lines.push([q(type==='mat'?'الخامة':'العلف'),q('قبل الفترة')].concat(D.list.map(function(d){return q(d)})).join(','));
+    rows.forEach(function(r){lines.push([q(r.name+(r.sub?' - '+r.sub:'')),r3(BT.unit==='t'?r.start/1000:r.start)].concat(r.vals.map(function(v){return r3(BT.unit==='t'?v/1000:v)})).join(','))});
+    lines.push('');
+  });
+  download('ارصدة_'+D.from+'_'+D.to+'.csv','﻿'+lines.join('\n'),'text/csv;charset=utf-8');
 }
 
 /* ================= التركيبات ================= */
