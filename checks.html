@@ -234,6 +234,27 @@ tbody tr:last-child td{border-bottom:none}
 .u-pct{font-size:12px;color:var(--muted)}.u-notes{font-size:12.5px;color:var(--muted);line-height:1.7}
 .u-acts{display:flex;gap:6px;flex-wrap:wrap}
 @media(max-width:520px){.u-grid{grid-template-columns:1fr;padding:10px}}
+
+.cash-banner{border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.07);border-radius:16px;padding:12px 14px;margin-bottom:14px}
+.cash-banner.ok{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.07);font-weight:700}
+.cb-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.cb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.cb-item{border:1px solid var(--line,#22304d);border-radius:12px;padding:9px 11px;background:rgba(255,255,255,.03)}
+.cb-item.bad{border-color:#ef4444;background:rgba(239,68,68,.08)}.cb-item.good{border-color:rgba(16,185,129,.5)}
+.cb-b{font-size:12.5px;color:var(--muted)}.cb-v{font-size:16px;font-weight:800;margin:3px 0}.cb-v small{font-size:11px;color:var(--muted);font-weight:500}
+.cb-s{font-size:12px}.cb-s.mut{color:var(--muted2)}
+.bal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;padding:14px 16px}
+.cash-t td,.cash-t th{text-align:center}.cash-t td:first-child,.cash-t th:first-child{text-align:right}
+.cash-t tr.cur td{background:rgba(59,130,246,.08)}.cash-t tr.late td{background:rgba(239,68,68,.07)}
+.cash-t td.cash-c{cursor:pointer}.cash-t td.cash-c:hover{background:rgba(59,130,246,.15)}
+.cash-t td.over{color:#fca5a5;box-shadow:inset 0 0 0 2px rgba(239,68,68,.6)}
+.cc-n{font-size:10.5px;color:var(--muted);font-weight:500}
+.u-plan{font-size:12.5px;padding:7px 10px;border-radius:10px}.u-plan.bad{background:rgba(245,158,11,.1);color:#fcd34d}.u-plan.good{background:rgba(16,185,129,.1);color:#6ee7b7}
+.pl-sum{font-size:13px;margin-bottom:8px;line-height:1.8}
+.pl-row{display:grid;grid-template-columns:150px 120px 1fr auto;gap:6px;margin-bottom:6px}
+@media(max-width:560px){.pl-row{grid-template-columns:1fr 1fr}.pl-row input:nth-child(3){grid-column:1/2}}
+#pl_cmp td:nth-child(2){min-width:140px}
+tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,68,68,.08)}tr.pl-extra td{background:rgba(148,163,184,.08)}
 </style>
 </head>
 <body>
@@ -252,6 +273,7 @@ tbody tr:last-child td{border-bottom:none}
     <a class="nav-item" data-page="reports"><span class="ico">📊</span> التقارير</a>
     <a class="nav-item" data-page="customers"><span class="ico">👥</span> العملاء</a>
     <a class="nav-item" data-page="units"><span class="ico">🏢</span> الوحدات</a>
+    <a class="nav-item" data-page="cash"><span class="ico">💳</span> السيولة في البنوك</a>
     <div class="nav-sep">النظام</div>
     <a class="nav-item" data-page="settings"><span class="ico">⚙️</span> الإعدادات</a>
     <a class="nav-item" id="btnBackup"><span class="ico">💾</span> نسخ احتياطي</a>
@@ -275,6 +297,7 @@ tbody tr:last-child td{border-bottom:none}
       <section class="page" id="page-reports"></section>
       <section class="page" id="page-customers"></section>
       <section class="page" id="page-units"></section>
+      <section class="page" id="page-cash"></section>
       <section class="page" id="page-settings"></section>
     </div>
   </div>
@@ -438,7 +461,7 @@ function applyCloudData(val){
   const page=active?active.dataset.page:'dashboard';
   ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
     statement:renderStatement,calendar:renderCalendar,reports:renderReports,
-    customers:renderCustomers,units:renderUnits,settings:renderSettings}[page]||renderDashboard)();
+    customers:renderCustomers,units:renderUnits,cash:renderCash,settings:renderSettings}[page]||renderDashboard)();
   toast('🔄 تم تحديث البيانات من جهاز آخر','ok');
 }
 
@@ -478,13 +501,15 @@ function migrateUnits(){
     {id:'u_md1',company:'موداد المتحدة للمقاولات (MODAD)',project:'',location:'',building:'',floor:'',unitNo:'',code:'S1.1/518',type:'',area:'',meterPrice:'',price:'',maint:'',extras:'',cust:'C-MD001',contract:'',delivery:'',notes:'شيكات بنك الإسكندرية'},
     {id:'u_md2',company:'MODAD — التجمع',project:'',location:'التجمع',building:'',floor:'',unitNo:'',code:'BR/114',type:'',area:'',meterPrice:'',price:'',maint:'',extras:'',cust:'C-MD002',contract:'',delivery:'',notes:'شيكات بنك مصر'}];
   seed.forEach(u=>{ if(!DB.units.some(x=>x.id===u.id)) DB.units.push(u); });
+  if(Array.isArray(DB.customers)&&!DB.customers.some(c=>c.code==='C-MD002')) DB.customers.push({id:'cust_md2',code:'C-MD002',name:'موداد — التجمع (MODAD tagamo3)',phone:'',address:'',region:'التجمع',rep:'',joined:'',notes:'وحدة BR/114 — شيكات بنك مصر'});
   DB._mig3='units1'; return true;
 }
 function migratePerla2026(){
   const b=migratePerla2026_a();
   const c=migratePerla2026b();
   const d=migrateUnits();
-  return b||c||d;
+  const e=migratePlan();
+  return b||c||d||e;
 }
 function migratePerla2026_a(){
   if(!DB||!Array.isArray(DB.checks)||DB._mig==='perla2026') return false;
@@ -588,7 +613,8 @@ function renderUnits(){
       </div>
       <div class="u-bar"><i style="width:${pct}%"></i></div><div class="u-pct">اتدفع ${pct}%${cu?` · العميل: ${esc(cu.name)}`:''}</div>
       ${u.notes?`<div class="u-notes">📝 ${esc(u.notes)}</div>`:''}
-      <div class="u-acts"><button class="btn sm" data-act="s">📋 كشف الشيكات</button><button class="btn sm" data-act="e">✏️ تعديل</button><button class="btn sm danger" data-act="d">🗑</button></div>
+      ${(()=>{const P=planSummary(u);return P?`<div class="u-plan ${P.diff||P.none?'bad':'good'}">📑 الخطة: ${P.ok} مطابق${P.diff?` · ⚠️ ${P.diff} فيه فرق`:''}${P.none?` · ❌ ${P.none} مالوش شيك`:''}${P.extra?` · ➕ ${P.extra} مش في الخطة`:''}</div>`:''})()}
+      <div class="u-acts"><button class="btn sm" data-act="s">📋 كشف الشيكات</button><button class="btn sm" onclick="planModal('${u.id}')">📑 الخطة والمقارنة</button><button class="btn sm" onclick="unitPrint('${u.id}')">🖨️ PDF</button><button class="btn sm" data-act="e">✏️ تعديل</button><button class="btn sm danger" data-act="d">🗑</button></div>
     </div>`}).join('')||'<div style="padding:30px;text-align:center;color:var(--muted)">مفيش وحدات — اضغط «وحدة جديدة»</div>'}</div></div>`;
   $('#addUnit').onclick=()=>unitModal();
   $$('#page-units .u-card').forEach(el=>{const id=el.dataset.id;
@@ -621,10 +647,224 @@ function unitModal(id){
   };
 }
 
+
+/* =====================================================================
+   تطويرات أكتوبر 2026
+   1) صياغة المدفوعات (عرض بس — القيم المحفوظة زي ما هي عشان السكربت والمزامنة)
+   2) السيولة المطلوبة في كل بنك شهرياً + تنبيه
+   3) خطة السداد ومقارنتها بالشيكات
+   4) إرسال الشيكات على واتساب
+   5) صورة الشيك
+   6) كشف PDF للوحدة
+   ===================================================================== */
+const OPEN_ST='تحت التحصيل',DONE_ST='تم التحصيل';
+const MY_WA='201000363852';
+const isoToday=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const ymKey=s=>(s||'').slice(0,7);
+const ymLabel=k=>{if(!k)return '—';const [y,m]=k.split('-');return MONTHS_AR[+m-1]+' '+y};
+const money0=n=>Number(n||0).toLocaleString('en-US',{maximumFractionDigits:0});
+
+/* ---------- 1) الصياغة ---------- */
+const RELABEL=[
+  ['تحت التحصيل','لسه ماتصرفش'],['تم التحصيل','اتصرف'],['قيد التحصيل','عليه شيكات'],['تم تحصيله','اتصرف'],
+  ['تاريخ التحصيل','تاريخ الصرف'],['إجمالي المحصّل','إجمالي المصروف'],['المحصّل','المصروف'],['محصّلة','اتصرفت'],['محصّل','اتصرف'],['محصل','اتصرف'],
+  ['التحصيل','الصرف'],['تحصيل','صرف'],
+  ['إجمالي المديونية الحالية','إجمالي الباقي عليّ'],['المديونية الحالية','الباقي عليّ'],['المديونية','الباقي عليّ'],
+  ['القيمة القائمة على العملاء','لسه هتتدفع للمطوّرين'],['العملاء','المطوّرين'],['العميل','المطوّر'],['عميل','مطوّر'],
+  ['البنك المسحوب منه','البنك (حسابي)']
+];
+function relabelStr(t){ if(!t||!/[حعدمب]/.test(t)) return t; let o=t; for(const [a,b] of RELABEL){ if(o.indexOf(a)>-1) o=o.split(a).join(b); } return o; }
+function relabelNode(root){
+  if(!root) return;
+  if(root.nodeType===3){ const p=root.parentNode; if(p&&/^(SCRIPT|STYLE|TEXTAREA)$/.test(p.nodeName)) return;
+    if(p&&p.nodeName==='OPTION'&&!p.hasAttribute('value')) p.setAttribute('value',p.textContent);
+    const n=relabelStr(root.nodeValue); if(n!==root.nodeValue) root.nodeValue=n; return; }
+  if(root.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA)$/.test(root.nodeName)) return;
+  if(root.nodeName==='OPTION'&&!root.hasAttribute('value')) root.setAttribute('value',root.textContent);
+  if(root.placeholder){ const n=relabelStr(root.placeholder); if(n!==root.placeholder) root.placeholder=n; }
+  root.querySelectorAll&&root.querySelectorAll('option:not([value])').forEach(o=>o.setAttribute('value',o.textContent));
+  root.querySelectorAll&&root.querySelectorAll('[placeholder]').forEach(e=>{const n=relabelStr(e.placeholder);if(n!==e.placeholder)e.placeholder=n});
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null); let x; const arr=[]; while((x=w.nextNode())) arr.push(x); arr.forEach(relabelNode);
+}
+(function(){
+  const mo=new MutationObserver(ms=>{ ms.forEach(m=>{ if(m.type==='characterData') relabelNode(m.target); else m.addedNodes.forEach(relabelNode); }); });
+  mo.observe(document.body,{childList:true,subtree:true,characterData:true});
+  relabelNode(document.body);
+  const _toast=toast; toast=function(m,t){ return _toast(relabelStr(m),t); };
+})();
+
+/* ---------- 2) السيولة في البنوك ---------- */
+function openChecks(){ return DB.checks.filter(c=>c.status===OPEN_ST&&c.due); }
+function bankNeeds(fromIso,toIso){ const o={}; openChecks().forEach(c=>{ if((fromIso&&c.due<fromIso)||(toIso&&c.due>toIso)) return; const b=c.bank||'بدون بنك'; o[b]=o[b]||{sum:0,n:0,list:[]}; o[b].sum+=+c.amount||0; o[b].n++; o[b].list.push(c); }); return o; }
+function addDaysIso(iso,n){ const d=new Date(iso); d.setDate(d.getDate()+n); return d.toLocaleDateString('en-CA'); }
+function cashBanner(){
+  DB.bankBal=DB.bankBal||{};
+  const t=isoToday(),n30=bankNeeds(null,addDaysIso(t,30)),banks=Object.keys(n30);
+  if(!banks.length) return `<div class="cash-banner ok">✅ مفيش شيكات مطلوب تغطيتها في الـ 30 يوم الجايين</div>`;
+  return `<div class="cash-banner"><div class="cb-h"><b>💳 لازم يبقى في البنوك خلال 30 يوم</b><span style="flex:1"></span>
+    <button class="btn sm" onclick="go('cash')">التفاصيل</button><button class="btn sm primary" onclick="waModal()">📲 واتساب</button></div>
+    <div class="cb-list">${banks.map(b=>{const need=n30[b].sum,bal=DB.bankBal[b];const has=bal!==undefined&&bal!=='';const short=has?need-(+bal||0):0;
+      const late=n30[b].list.filter(c=>c.due<t).length;
+      return `<div class="cb-item ${has&&short>0?'bad':has?'good':''}"><div class="cb-b">${esc(b)}</div><div class="cb-v">${money0(need)} ج <small>(${n30[b].n} شيك)</small></div>
+      ${has?(short>0?`<div class="cb-s">⚠️ ناقص ${money0(short)} ج</div>`:`<div class="cb-s">✅ الرصيد يغطي</div>`):`<div class="cb-s mut">اكتب رصيد الحساب من صفحة السيولة</div>`}
+      ${late?`<div class="cb-s">🔴 ${late} شيك فات ميعاده</div>`:''}</div>`}).join('')}</div></div>`;
+}
+let CASH_SEL=null;
+function renderCash(){
+  DB.bankBal=DB.bankBal||{};
+  const t=isoToday(),cur=ymKey(t),open=openChecks();
+  const banks=[...new Set(open.map(c=>c.bank||'بدون بنك'))].sort();
+  const months=[];{let d=new Date(t);d.setDate(1);for(let i=0;i<12;i++){months.push(d.toLocaleDateString('en-CA').slice(0,7));d.setMonth(d.getMonth()+1);}}
+  const cell={},cnt={};open.forEach(c=>{const b=c.bank||'بدون بنك';let k=c.due<t?'late':ymKey(c.due);if(k!=='late'&&k>months[11])k='later';cell[b+'|'+k]=(cell[b+'|'+k]||0)+(+c.amount||0);cnt[b+'|'+k]=(cnt[b+'|'+k]||0)+1});
+  const rowsK=['late',...months,'later'];
+  const cum={};banks.forEach(b=>cum[b]=0);
+  const rowHtml=rowsK.map(k=>{let tot=0;const cells=banks.map(b=>{const v=cell[b+'|'+k]||0;tot+=v;cum[b]+=v;const bal=DB.bankBal[b];const has=bal!==undefined&&bal!=='';const over=has&&cum[b]>(+bal||0)&&v>0;
+      return `<td class="num ${v?'cash-c':''} ${over?'over':''}" ${v?`data-k="${k}" data-b="${esc(b)}"`:''}>${v?money0(v)+`<div class="cc-n">${cnt[b+'|'+k]} شيك</div>`:'—'}</td>`}).join('');
+    if(!tot&&k==='later')return '';
+    const lbl=k==='late'?'🔴 فات ميعادها ولسه':k==='later'?'بعد كده':ymLabel(k)+(k===cur?' (الشهر ده)':'');
+    return `<tr class="${k===cur?'cur':''} ${k==='late'?'late':''}"><td><b>${lbl}</b></td>${cells}<td class="num"><b>${tot?money0(tot):'—'}</b></td></tr>`}).join('');
+  const totB=banks.map(b=>open.filter(c=>(c.bank||'بدون بنك')===b).reduce((a,c)=>a+(+c.amount||0),0));
+  $('#page-cash').innerHTML=`
+  ${cashBanner()}
+  <div class="panel"><div class="panel-head"><h3>🏦 رصيد كل حساب دلوقتي</h3></div>
+    <div class="bal-grid">${banks.map(b=>`<div class="field"><label>${esc(b)}</label><input class="input bal-in" data-b="${esc(b)}" inputmode="decimal" placeholder="اكتب الرصيد" value="${DB.bankBal[b]!=null?DB.bankBal[b]:''}"></div>`).join('')||'<div style="padding:10px;color:var(--muted)">مفيش شيكات مفتوحة</div>'}</div>
+    <div style="font-size:12px;color:var(--muted);padding:0 16px 14px">الخانة الحمرا في الجدول = الشهر اللي الرصيد مش هيكفي فيه (بالتراكم من النهارده).</div></div>
+  <div class="panel"><div class="panel-head"><h3>📆 المطلوب في كل بنك شهرياً</h3><span style="flex:1"></span><button class="btn sm primary" onclick="waModal()">📲 ابعت على واتساب</button></div>
+    <div class="tbl-wrap"><table class="cash-t"><thead><tr><th>الشهر</th>${banks.map(b=>`<th>${esc(b)}</th>`).join('')}<th>الإجمالي</th></tr></thead>
+    <tbody>${rowHtml}</tbody><tfoot><tr><td><b>كل الباقي</b></td>${totB.map(v=>`<td class="num"><b>${money0(v)}</b></td>`).join('')}<td class="num"><b>${money0(totB.reduce((a,b)=>a+b,0))}</b></td></tr></tfoot></table></div>
+    <div id="cashList"></div></div>`;
+  $$('#page-cash .bal-in').forEach(el=>el.onchange=()=>{const v=String(el.value).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/,/g,'').trim();
+    if(v==='')delete DB.bankBal[el.dataset.b];else DB.bankBal[el.dataset.b]=Number(v)||0;save();renderCash();toast('اتحفظ الرصيد')});
+  $$('#page-cash td[data-k]').forEach(td=>td.onclick=()=>{const k=td.dataset.k,b=td.dataset.b;
+    const L=open.filter(c=>(c.bank||'بدون بنك')===b&&(k==='late'?c.due<t:k==='later'?ymKey(c.due)>months[11]:ymKey(c.due)===k&&c.due>=t)).sort((x,y)=>x.due<y.due?-1:1);
+    $('#cashList').innerHTML=`<div style="padding:12px 16px"><b>${esc(b)} — ${k==='late'?'فات ميعادها':k==='later'?'بعد كده':ymLabel(k)}</b>
+      <div class="tbl-wrap" style="margin-top:8px"><table><thead><tr><th>رقم الشيك</th><th>المطوّر</th><th>القيمة</th><th>الاستحقاق</th><th></th></tr></thead><tbody>
+      ${L.map(c=>`<tr><td><b>${esc(c.num)}</b></td><td>${esc(custName(c.cust))}</td><td class="num">${fmtMoney(c.amount)}</td><td class="num">${fmtDate(c.due)}</td><td><button class="btn sm" onclick="markPaid('${c.id}')">✅ اتصرف</button></td></tr>`).join('')}</tbody></table></div></div>`;
+    $('#cashList').scrollIntoView({behavior:'smooth'});});
+}
+function markPaid(id){ const c=DB.checks.find(x=>x.id===id); if(!c) return; c.status=DONE_ST; if(!c.collectDate) c.collectDate=isoToday(); save(); toast('اتسجل إنه اتصرف ✓'); const a=document.querySelector('.nav-item.active'); go(a?a.dataset.page:'cash'); }
+
+/* ---------- 4) واتساب ---------- */
+function waBuild(range){
+  const t=isoToday();let from=t,to=addDaysIso(t,7),title='شيكات الأسبوع الجاي';
+  if(range==='30'){to=addDaysIso(t,30);title='شيكات الـ 30 يوم الجايين'}
+  else if(range==='month'){from=t.slice(0,8)+'01';const d=new Date(t);d.setMonth(d.getMonth()+1,0);to=d.toLocaleDateString('en-CA');title='شيكات شهر '+ymLabel(ymKey(t))}
+  else if(range==='next'){const d=new Date(t);d.setDate(1);d.setMonth(d.getMonth()+1);from=d.toLocaleDateString('en-CA');d.setMonth(d.getMonth()+1,0);to=d.toLocaleDateString('en-CA');title='شيكات شهر '+ymLabel(ymKey(from))}
+  const late=openChecks().filter(c=>c.due<t).sort((a,b)=>a.due<b.due?-1:1);
+  const L=openChecks().filter(c=>c.due>=from&&c.due<=to).sort((a,b)=>a.due<b.due?-1:1);
+  const by={};L.forEach(c=>{const b=c.bank||'بدون بنك';(by[b]=by[b]||[]).push(c)});
+  let m='🧾 '+title+'\n('+from+' → '+to+')\n';
+  Object.keys(by).forEach(b=>{const s=by[b].reduce((a,c)=>a+(+c.amount||0),0);m+='\n🏦 '+b+' — '+money0(s)+' ج\n';
+    by[b].forEach(c=>{m+='• '+c.due+' | '+money0(c.amount)+' ج | '+(custName(c.cust)||'')+' | شيك '+(c.num||'—')+'\n'});
+    const bal=(DB.bankBal||{})[b];if(bal!==undefined&&bal!==''){const sh=s-(+bal||0);m+=sh>0?'⚠️ الرصيد ناقص '+money0(sh)+' ج\n':'✅ الرصيد يغطي\n'}});
+  if(!L.length)m+='\nمفيش شيكات في الفترة دي ✅\n';
+  else m+='\n💰 الإجمالي: '+money0(L.reduce((a,c)=>a+(+c.amount||0),0))+' ج ('+L.length+' شيك)';
+  if(late.length)m+='\n\n🔴 شيكات فات ميعادها ولسه متعلّمة إنها ماتصرفتش: '+late.length+' ('+money0(late.reduce((a,c)=>a+(+c.amount||0),0))+' ج)';
+  return m;
+}
+function waModal(){
+  openModal(`<div class="modal-head"><h3>📲 ابعت الشيكات على واتساب</h3><button class="x" onclick="closeModal()">×</button></div>
+   <div class="modal-body"><div class="field full"><label>الفترة</label><select class="input" id="wa_r"><option value="7">الأسبوع الجاي</option><option value="30" selected>الـ 30 يوم الجايين</option><option value="month">الشهر ده</option><option value="next">الشهر الجاي</option></select></div>
+   <div class="field full"><label>الرسالة</label><textarea class="input" id="wa_t" rows="12" style="font-size:12.5px;line-height:1.7"></textarea></div></div>
+   <div class="modal-foot"><button class="btn primary" id="wa_me">📲 ابعت لنفسي</button><button class="btn" id="wa_any">👥 اختار حد</button><button class="btn" id="wa_cp">📋 نسخ</button></div>`);
+  const upd=()=>{$('#wa_t').value=waBuild($('#wa_r').value)};upd();$('#wa_r').onchange=upd;
+  const open=ph=>{const u='https://wa.me/'+(ph||'')+'?text='+encodeURIComponent($('#wa_t').value);window.open(u,'_blank')||(location.href=u)};
+  $('#wa_me').onclick=()=>open(MY_WA);$('#wa_any').onclick=()=>open('');
+  $('#wa_cp').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText($('#wa_t').value).then(()=>toast('اتنسخت'))};
+}
+
+/* ---------- 3) خطة السداد ---------- */
+function parsePlanDate(s){ s=String(s||'').trim().replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)); let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); if(m) return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/); if(m) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'); return ''; }
+function planCompare(u){
+  const plan=(u.plan||[]).filter(p=>p.due),L=unitChecks(u).filter(c=>c.status!=='مرتجع');
+  const dates=[...new Set(plan.map(p=>p.due).concat(L.map(c=>c.due).filter(Boolean)))].sort();
+  return dates.map(d=>{const P=plan.filter(p=>p.due===d),C=L.filter(c=>c.due===d);const pa=P.reduce((a,p)=>a+(+p.amount||0),0),ca=C.reduce((a,c)=>a+(+c.amount||0),0);
+    let st='ok';if(!P.length)st='extra';else if(!C.length)st='none';else if(Math.abs(pa-ca)>0.5)st='diff';
+    return {d,P,C,pa,ca,st,paid:C.length&&C.every(c=>c.status===DONE_ST)};});
+}
+function planSummary(u){ if(!(u.plan||[]).length) return null; const r=planCompare(u); return {ok:r.filter(x=>x.st==='ok').length,diff:r.filter(x=>x.st==='diff').length,none:r.filter(x=>x.st==='none').length,extra:r.filter(x=>x.st==='extra').length,planTot:(u.plan||[]).reduce((a,p)=>a+(+p.amount||0),0)}; }
+function planModal(id){
+  const u=DB.units.find(x=>x.id===id);if(!u)return;u.plan=u.plan||[];
+  const draw=()=>{const R=planCompare(u),S=planSummary(u);
+    const badge={ok:'<span class="pill green">✅ مطابق</span>',diff:'<span class="pill amber">⚠️ فرق</span>',none:'<span class="pill red">❌ مالوش شيك</span>',extra:'<span class="pill gray">➕ مش في الخطة</span>'};
+    $('#pl_cmp').innerHTML=!u.plan.length?'<div style="padding:12px;color:var(--muted)">لسه مفيش خطة — الصقها تحت أو ضيف سطور</div>':
+     `<div class="pl-sum">${S.ok} مطابق · <b style="color:#fcd34d">${S.diff} فيه فرق</b> · <b style="color:#fca5a5">${S.none} مالوش شيك</b> · ${S.extra} شيك مش في الخطة · إجمالي الخطة ${money0(S.planTot)} ج</div>
+      <div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>البند</th><th>الخطة</th><th>الشيكات</th><th>الفرق</th><th></th></tr></thead><tbody>
+      ${R.map(r=>`<tr class="pl-${r.st}"><td class="num">${r.d}</td><td style="white-space:normal">${r.P.map(p=>esc(p.label||'')).join(' + ')||'—'}</td><td class="num">${r.P.length?money0(r.pa):'—'}</td>
+        <td class="num">${r.C.length?money0(r.ca)+`<div class="cc-n">${r.C.map(c=>esc(c.num)).join('، ')}</div>`:'—'}</td><td class="num">${r.st==='diff'?money0(r.ca-r.pa):''}</td><td>${badge[r.st]}${r.paid?' <span class="pill green">اتصرف</span>':''}</td></tr>`).join('')}</tbody></table></div>`;
+    $('#pl_rows').innerHTML=u.plan.map((p,i)=>`<div class="pl-row"><input class="input" type="date" data-i="${i}" data-k="due" value="${esc(p.due)}"><input class="input" data-i="${i}" data-k="amount" inputmode="decimal" value="${p.amount||''}" placeholder="المبلغ"><input class="input" data-i="${i}" data-k="label" value="${esc(p.label||'')}" placeholder="البند"><button class="btn sm danger" data-del="${i}">✕</button></div>`).join('');
+    $$('#pl_rows input').forEach(el=>el.onchange=()=>{const p=u.plan[+el.dataset.i];p[el.dataset.k]=el.dataset.k==='amount'?(Number(String(el.value).replace(/,/g,''))||0):el.value;u.plan.sort((a,b)=>a.due<b.due?-1:1);save();draw()});
+    $$('#pl_rows [data-del]').forEach(b=>b.onclick=()=>{u.plan.splice(+b.dataset.del,1);save();draw()});
+  };
+  openModal(`<div class="modal-head"><h3>📑 خطة السداد — ${esc(u.code||u.project||'')}</h3><button class="x" onclick="closeModal()">×</button></div>
+   <div class="modal-body" style="display:block"><div id="pl_cmp"></div>
+    <h4 style="margin:16px 0 8px">✏️ بنود الخطة</h4><div id="pl_rows"></div><button class="btn sm" id="pl_add" style="margin-top:6px">＋ سطر</button>
+    <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">📋 لصق الخطة مرة واحدة</summary>
+     <div style="font-size:12px;color:var(--muted);margin:6px 0">كل سطر: التاريخ المبلغ البند — مثال: <code>29/3/2027 252500 القسط 1</code></div>
+     <textarea class="input" id="pl_paste" rows="6"></textarea><button class="btn sm primary" id="pl_imp" style="margin-top:6px">➕ ضيف السطور</button></details></div>
+   <div class="modal-foot"><button class="btn primary" onclick="closeModal();renderUnits()">تم</button></div>`);
+  $('#pl_add').onclick=()=>{u.plan.push({due:isoToday(),amount:0,label:''});save();draw()};
+  $('#pl_imp').onclick=()=>{let n=0;$('#pl_paste').value.split('\n').forEach(line=>{const parts=line.trim().split(/[\s\t]+/);if(parts.length<2)return;const d=parsePlanDate(parts[0]);const a=Number(String(parts[1]).replace(/[٠-٩]/g,x=>'٠١٢٣٤٥٦٧٨٩'.indexOf(x)).replace(/,/g,''));if(!d||!a)return;u.plan.push({due:d,amount:a,label:parts.slice(2).join(' ')});n++});
+    u.plan.sort((a,b)=>a.due<b.due?-1:1);save();$('#pl_paste').value='';draw();toast('اتضاف '+n+' سطر')};
+  draw();
+}
+function migratePlan(){
+  if(!DB||DB._mig4==='plan1'||!Array.isArray(DB.units)) return false;
+  const u=DB.units.find(x=>x.id==='u_perla');
+  if(u&&!(u.plan||[]).length){
+    const P=[['2025-12-03',250000,'الجزء الأول من المقدم'],['2026-05-15',250000,'الجزء الثاني من المقدم'],['2026-05-29',250000,'الجزء الثالث من المقدم'],['2026-07-29',250000,'الجزء الرابع من المقدم'],
+      ['2026-09-30',310000,'الجزء الخامس من المقدم'],['2026-12-29',287500,'الجزء الأخير من المقدم']];
+    const q=[['2027-03-29',252500],['2027-06-29',252500],['2027-09-29',252500],['2027-12-29',252500],['2028-03-29',252500],['2028-06-29',252500],['2028-09-29',252500],
+      ['2028-12-29',215000],['2029-03-29',215000],['2029-06-29',215000],['2029-09-29',215000],['2029-12-29',215000],['2030-03-29',215000],['2030-06-29',215000],['2030-09-29',215000],['2030-12-29',215000]];
+    u.plan=P.map(x=>({due:x[0],amount:x[1],label:x[2]})).concat(q.map((x,i)=>({due:x[0],amount:x[1],label:'القسط '+(i+1)})));
+    u.plan.push({due:'2028-06-29',amount:424000,label:'الصيانة'});u.plan.sort((a,b)=>a.due<b.due?-1:1);
+  }
+  DB._mig4='plan1';return true;
+}
+
+/* ---------- 5) صورة الشيك (IndexedDB على الجهاز + السحابة في مسار منفصل عشان المزامنة تفضل خفيفة) ---------- */
+let _idb=null;
+function idb(){ if(_idb) return _idb; _idb=new Promise((res,rej)=>{const r=indexedDB.open('cheques_imgs',1);r.onupgradeneeded=()=>r.result.createObjectStore('i');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}); return _idb; }
+async function idbSet(k,v){ try{const d=await idb();await new Promise((res,rej)=>{const t=d.transaction('i','readwrite');t.objectStore('i').put(v,k);t.oncomplete=res;t.onerror=rej})}catch(e){} }
+async function idbGet(k){ try{const d=await idb();return await new Promise(res=>{const r=d.transaction('i').objectStore('i').get(k);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null)})}catch(e){return null} }
+function imgRef(id){ const c=fbGetConfig()||{}; return FB._L.ref(FB.db,'erp/'+(c.workspace||'main')+'/imgs/'+id); }
+async function imgPut(id,data){ await idbSet(id,data); if(FB.ready){ try{ await FB._L.set(imgRef(id),data);}catch(e){} } }
+async function imgGet(id){ let v=await idbGet(id); if(!v&&FB.ready){ try{const s=await FB._L.get(imgRef(id)); v=s.exists()?s.val():null; if(v) idbSet(id,v);}catch(e){} } return v; }
+function compressImg(file){ return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const M=1100,sc=Math.min(1,M/Math.max(im.width,im.height));const cv=document.createElement('canvas');cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);res(cv.toDataURL('image/jpeg',0.62))};im.onerror=rej;im.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)}); }
+async function showImg(id){ const c=DB.checks.find(x=>x.id===id); openModal(`<div class="modal-head"><h3>📷 شيك ${esc(c?c.num:'')}</h3><button class="x" onclick="closeModal()">×</button></div><div style="padding:14px;text-align:center" id="imgBox">جاري التحميل…</div>`);
+  const v=await imgGet(id); $('#imgBox').innerHTML=v?`<img src="${v}" style="max-width:100%;border-radius:10px">`:'الصورة مش موجودة على الجهاز ده ولسه ماوصلتش من السحابة'; }
+
+/* ---------- 6) كشف PDF للوحدة ---------- */
+function unitPrint(id){
+  const u=DB.units.find(x=>x.id===id);if(!u)return;const s=unitStats(u),L=unitChecks(u).sort((a,b)=>(a.due||'')<(b.due||'')?-1:1),S=planSummary(u);
+  const st=x=>({[OPEN_ST]:'لسه ماتصرفش',[DONE_ST]:'اتصرف'}[x]||x);
+  const info=[['الشركة',u.company],['المشروع',u.project],['المكان',u.location],['العمارة',u.building],['الدور',u.floor],['الوحدة',u.unitNo],['كود الوحدة',u.code],['المساحة',u.area?u.area+' م²':''],['سعر المتر',u.meterPrice?money0(u.meterPrice)+' ج':''],['سعر الوحدة',u.price?money0(u.price)+' ج':''],['الصيانة',u.maint?money0(u.maint)+' ج':''],['إضافات',u.extras],['التعاقد',u.contract],['الاستلام',u.delivery]].filter(x=>x[1]!==''&&x[1]!=null);
+  const html=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>كشف ${esc(u.code||'')}</title><style>
+   @page{size:A4;margin:12mm}body{font-family:Tahoma,Arial,sans-serif;color:#111;font-size:12px}h1{font-size:18px;margin:0 0 4px;color:#1e3a8a}.sub{color:#555;margin-bottom:12px}
+   .info{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 14px;border:1px solid #ccc;border-radius:8px;padding:10px;margin-bottom:12px}.info div{display:flex;justify-content:space-between;border-bottom:1px dotted #ddd;padding:3px 0}.info span{color:#666}
+   .k{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.k div{border:1px solid #ccc;border-radius:8px;padding:8px;text-align:center}.k b{display:block;font-size:14px;margin-top:3px}
+   table{width:100%;border-collapse:collapse;margin-top:6px}th,td{border:1px solid #bbb;padding:5px 6px;text-align:right}th{background:#eef2ff;-webkit-print-color-adjust:exact;print-color-adjust:exact}tr{break-inside:avoid}
+   .ok{color:#047857}.no{color:#b45309}.ft{margin-top:14px;color:#777;font-size:10.5px}</style></head><body>
+   <h1>🏢 كشف وحدة ${esc(u.code||'')} — ${esc(u.project||'')}</h1><div class="sub">${esc(u.company||'')} · طُبع ${isoToday()}</div>
+   <div class="info">${info.map(x=>`<div><span>${x[0]}</span><b>${esc(x[1])}</b></div>`).join('')}</div>
+   <div class="k"><div>إجمالي الشيكات<b>${money0(s.tot)} ج</b></div><div>اتدفع<b class="ok">${money0(s.paid)} ج</b></div><div>الباقي<b class="no">${money0(s.rem)} ج</b></div><div>النسبة<b>${s.tot?Math.round(s.paid/s.tot*100):0}%</b></div></div>
+   ${S&&(S.diff||S.none)?`<div style="border:1px solid #f59e0b;background:#fffbeb;padding:8px;border-radius:8px;margin-bottom:10px">⚠️ مقارنة بالخطة: ${S.diff} بند فيه فرق · ${S.none} بند مالوش شيك</div>`:''}
+   <table><thead><tr><th>#</th><th>رقم الشيك</th><th>البنك</th><th>الاستحقاق</th><th>المبلغ</th><th>الحالة</th><th>ملاحظات</th></tr></thead><tbody>
+   ${L.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.num)}</td><td>${esc(c.bank||'')}</td><td>${esc(c.due||'')}</td><td>${money0(c.amount)}</td><td class="${c.status===DONE_ST?'ok':'no'}">${st(c.status)}</td><td>${esc(c.notes||'')}</td></tr>`).join('')}
+   <tr><td colspan="4"><b>الإجمالي</b></td><td><b>${money0(s.tot)}</b></td><td colspan="2"></td></tr></tbody></table>
+   <div class="ft">نظام الشيكات والأقساط</div></body></html>`;
+  const fr=document.createElement('iframe');fr.style.cssText='position:fixed;width:0;height:0;border:0;left:-9999px';document.body.appendChild(fr);
+  const d=fr.contentWindow.document;d.open();d.write(html);d.close();
+  setTimeout(()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch(e){const w=window.open('');w&&(w.document.write(html),w.document.close(),w.print())}setTimeout(()=>fr.remove(),60000)},400);
+}
+
+/* الدوال اللي بتتنادى من onclick جوه الـ HTML — السكربت module فلازم تتسجل على window */
+Object.assign(window,{closeModal,openModal,go,planModal,unitPrint,waModal,showImg,markPaid,renderUnits,renderCash});
 /* ---------- تنقل ---------- */
 const PAGE_TITLES={dashboard:'لوحة التحكم',checks:'سجل الشيكات',installments:'الأقساط والمديونيات',
   statement:'كشف حساب عميل',calendar:'تقويم الاستحقاقات',reports:'التقارير والتحليلات',
-  customers:'قاعدة بيانات العملاء',units:'تفاصيل الوحدات',settings:'الإعدادات'};
+  customers:'قاعدة بيانات العملاء',units:'تفاصيل الوحدات',cash:'السيولة المطلوبة في البنوك',settings:'الإعدادات'};
 function go(page){
   $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
   $$('.page').forEach(p=>p.classList.remove('active'));
@@ -632,7 +872,7 @@ function go(page){
   $('#pageTitle').textContent=PAGE_TITLES[page]||'';
   ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
     statement:renderStatement,calendar:renderCalendar,reports:renderReports,
-    customers:renderCustomers,units:renderUnits,settings:renderSettings}[page]||(()=>{}))();
+    customers:renderCustomers,units:renderUnits,cash:renderCash,settings:renderSettings}[page]||(()=>{}))();
   closeSidebar();
   window.scrollTo(0,0);
 }
@@ -675,6 +915,7 @@ function renderDashboard(){
   const legend=seg.map(([n,v,c])=>`<div class="legend-item"><span class="dot" style="background:${c}"></span>${n}<b>${fmtMoney(v)}</b></div>`).join('');
 
   $('#page-dashboard').innerHTML=`
+    ${cashBanner()}
     <div class="kpi-grid">
       ${kpi('💰','var(--amber)','var(--amber-soft)','إجمالي الشيكات المستحقة',fmtMoney(s.dueTotal),`${s.cntDue} شيك تحت التحصيل`)}
       ${kpi('✅','var(--green)','var(--green-soft)','إجمالي المحصّل',fmtMoney(s.collected),`${s.cntCol} شيك تم تحصيله`)}
@@ -749,6 +990,7 @@ function renderChecks(){
       <div class="search-box"><span class="si">🔍</span>
         <input class="input" id="chkSearch" placeholder="بحث برقم الشيك / العميل / المشروع..." value="${esc(CHK_F.q)}"></div>
       <span style="flex:1"></span>
+      <button class="btn" onclick="waModal()">📲 واتساب</button>
       <button class="btn primary" id="addCheck">＋ إضافة شيك</button>
     </div>
     <div class="filters">
@@ -787,7 +1029,7 @@ function drawChecksTable(){
       const sp={'تحت التحصيل':'amber','تم التحصيل':'green','مرتجع':'red','مؤجل':'gray'}[c.status]||'gray';
       return `<tr data-id="${c.id}">
         <td class="num">${i+1}</td>
-        <td><b>${esc(c.num)}</b></td>
+        <td><b>${esc(c.num)}</b>${c.hasImg?` <button class="btn sm" style="padding:2px 6px" onclick="showImg('${c.id}')">📷</button>`:''}</td>
         <td><span class="cell-edit" data-f="bank">${esc(c.bank||'—')}</span></td>
         <td style="white-space:normal;max-width:200px">${esc(custName(c.cust))}<div style="font-size:11px;color:var(--muted2)">${esc(c.cust||'')}</div></td>
         <td class="num" style="font-weight:700">${fmtMoney(c.amount)}</td>
@@ -859,11 +1101,16 @@ function checkModal(id){
       <div class="field"><label>تاريخ التحصيل</label><input class="input" id="m_collect" type="date" value="${esc(c.collectDate)}"></div>
       <div class="field full"><label>المرجع / المشروع / رقم الفاتورة</label><input class="input" id="m_ref" value="${esc(c.ref)}"></div>
       <div class="field full"><label>ملاحظات</label><textarea class="input" id="m_notes" rows="2">${esc(c.notes)}</textarea></div>
+      <div class="field full"><label>📷 صورة الشيك</label><input class="input" type="file" accept="image/*" id="m_img">
+        <div id="m_imgPrev" style="margin-top:8px"></div></div>
     </div>
     <div class="modal-foot">
       <button class="btn primary" id="m_save">💾 حفظ</button>
       <button class="btn" onclick="closeModal()">إلغاء</button>
     </div>`);
+  let newImg=null;
+  if(id&&c.hasImg) imgGet(id).then(v=>{ if(v&&$('#m_imgPrev')) $('#m_imgPrev').innerHTML=`<img src="${v}" style="max-width:100%;max-height:220px;border-radius:10px">`; });
+  $('#m_img').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ newImg=await compressImg(f); $('#m_imgPrev').innerHTML=`<img src="${newImg}" style="max-width:100%;max-height:220px;border-radius:10px"><div style="font-size:11px;color:var(--muted)">هتتحفظ مع الشيك</div>`; }catch(_){ toast('مقدرتش أقرا الصورة','err'); } };
   $('#m_save').onclick=()=>{
     const num=$('#m_num').value.trim(); const amount=parseFloat($('#m_amount').value);
     if(!num){ toast('أدخل رقم الشيك','err'); return; }
@@ -872,8 +1119,11 @@ function checkModal(id){
       amount,issue:$('#m_issue').value,due:$('#m_due').value,status:$('#m_status').value,
       method:$('#m_method').value,rep:$('#m_rep').value,collectDate:$('#m_collect').value,
       ref:$('#m_ref').value,notes:$('#m_notes').value};
+    let cid=id;
+    if(newImg) data.hasImg=true;
     if(id){ Object.assign(c,data); toast('تم تحديث الشيك'); }
-    else { DB.checks.push({id:uid(),...data}); toast('تمت إضافة الشيك'); }
+    else { cid=uid(); DB.checks.push({id:cid,...data}); toast('تمت إضافة الشيك'); }
+    if(newImg) imgPut(cid,newImg);
     save(); closeModal(); drawChecksTable(); 
   };
 }
@@ -1226,7 +1476,7 @@ function renderSettings(){
   $$('[data-add]').forEach(b=>b.onclick=()=>{ const k=b.dataset.add; const v=$('#add_'+k).value.trim();
     if(v&&!DB[k].includes(v)){ DB[k].push(v); save(); renderSettings(); toast('تمت الإضافة'); } });
   $$('[data-del]').forEach(b=>b.onclick=()=>{ const k=b.dataset.del; DB[k].splice(+b.dataset.i,1); save(); renderSettings(); });
-  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; DB._mig2=''; DB._mig3=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
+  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; DB._mig2=''; DB._mig3=''; DB._mig4=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
   $('#wipeAll').onclick=()=>{ if(confirm('سيتم مسح كل البيانات نهائياً. متأكد؟')){ DB={checks:[],customers:[],banks:[],methods:[],reps:[],statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']}; save(); go('dashboard'); toast('تم مسح كل البيانات'); } };
 }
 
