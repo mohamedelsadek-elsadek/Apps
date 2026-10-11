@@ -439,7 +439,21 @@ function perlaRows(){
     notes:(m?'وديعة الصيانة':'القسط '+x[2])+' — اكتب رقم الشيك'}))});
   return out;
 }
+/* شيكين بيكمّلوا فرق المقدم: 50,000 اتدفع 30/9 و37,500 مستحق 29/12 */
+function migratePerla2026b(){
+  if(!DB||!Array.isArray(DB.checks)||DB._mig2==='perlaDiff') return false;
+  const C={cust:'C-PR001',custName:'بيرلا للاستثمار والتطوير العقاري',bank:'بنك البركة',method:'شيك',rep:'',issue:'',ref:PERLA_REF};
+  if(!DB.checks.some(c=>c.id==='perla_d1')) DB.checks.push(Object.assign({},C,{id:'perla_d1',num:'بيرلا-فرق1',due:'2026-09-30',amount:50000,status:'تم التحصيل',collectDate:'2026-09-30',notes:'تكملة الجزء الخامس من المقدم (260,000 + 50,000 = 310,000) — اكتب رقم الشيك'}));
+  if(!DB.checks.some(c=>c.id==='perla_d2')) DB.checks.push(Object.assign({},C,{id:'perla_d2',num:'بيرلا-فرق2',due:'2026-12-29',amount:37500,status:'تحت التحصيل',collectDate:'',notes:'تكملة الجزء الأخير من المقدم (250,000 + 37,500 = 287,500) — اكتب رقم الشيك'}));
+  DB._mig2='perlaDiff';
+  return true;
+}
 function migratePerla2026(){
+  const b=migratePerla2026_a();
+  const c=migratePerla2026b();
+  return b||c;
+}
+function migratePerla2026_a(){
   if(!DB||!Array.isArray(DB.checks)||DB._mig==='perla2026') return false;
   if(Array.isArray(DB.banks)&&DB.banks.indexOf('بنك البركة')<0) DB.banks.push('بنك البركة');
   DB.checks=DB.checks.filter(c=>c.cust!=='C-PR001');
@@ -1112,7 +1126,7 @@ function renderSettings(){
   $$('[data-add]').forEach(b=>b.onclick=()=>{ const k=b.dataset.add; const v=$('#add_'+k).value.trim();
     if(v&&!DB[k].includes(v)){ DB[k].push(v); save(); renderSettings(); toast('تمت الإضافة'); } });
   $$('[data-del]').forEach(b=>b.onclick=()=>{ const k=b.dataset.del; DB[k].splice(+b.dataset.i,1); save(); renderSettings(); });
-  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
+  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; DB._mig2=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
   $('#wipeAll').onclick=()=>{ if(confirm('سيتم مسح كل البيانات نهائياً. متأكد؟')){ DB={checks:[],customers:[],banks:[],methods:[],reps:[],statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']}; save(); go('dashboard'); toast('تم مسح كل البيانات'); } };
 }
 
