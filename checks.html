@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الشيكات والأقساط v3.4</title>
+<title>الشيكات والأقساط v3.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -263,7 +263,7 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="logo">🧾</div>
-      <div><h1>إدارة الشيكات</h1><span>والأقساط — <b id="appVer">v3.4</b></span></div>
+      <div><h1>إدارة الشيكات</h1><span>والأقساط — <b id="appVer">v3.5</b></span></div>
     </div>
     <a class="nav-item active" data-page="dashboard"><span class="ico">🏠</span> لوحة التحكم</a>
     <a class="nav-item" data-page="checks"><span class="ico">🧾</span> الشيكات <span class="badge" id="navChecksBadge" style="display:none"></span></a>
@@ -474,11 +474,20 @@ const custName = code => { const c=DB.customers.find(x=>x.code===code); return c
 
 /* ---------- التخزين ---------- */
 function save(){ lsSafeSet(LS_KEY, JSON.stringify(DB)); if(typeof fbPush==='function') fbPush(DB); }
+/* السحابة (Firebase) مابتحفظش القوايم الفاضية — فلازم نرجّعها قوايم بعد أي تحميل */
+function normDB(){
+  ['checks','customers','banks','methods','reps','units'].forEach(k=>{ if(!Array.isArray(DB[k])) DB[k]=DB[k]&&typeof DB[k]==='object'?Object.values(DB[k]):[]; });
+  if(!Array.isArray(DB.statuses)||!DB.statuses.length) DB.statuses=['تحت التحصيل','تم التحصيل','مرتجع','مؤجل'];
+  if(!DB.methods.length) DB.methods=['شيك','تحويل بنكي','نقدًا'];
+  DB.units.forEach(u=>{ if(u.plan&&!Array.isArray(u.plan)) u.plan=Object.values(u.plan); });
+  if(!DB.bankBal||typeof DB.bankBal!=='object') DB.bankBal={};
+}
 function applyCloudData(val){
   // بيانات وصلت من جهاز آخر عبر التزامن اللحظي
   if(!val) return;
   delete val._updatedAt;
   DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},val);
+  normDB();
   if(migratePerla2026()) setTimeout(()=>fbPush(DB),500);
   lsSafeSet(LS_KEY, JSON.stringify(DB));
   const active=document.querySelector('.nav-item.active');
@@ -576,7 +585,7 @@ function load(){
   const raw=localStorage.getItem(LS_KEY);
   if(raw){ try{ DB=JSON.parse(raw); }catch(e){ seedFromExcel(); } }
   else seedFromExcel();
-  DB.statuses = DB.statuses||['تحت التحصيل','تم التحصيل','مرتجع','مؤجل'];
+  normDB();
   if(migratePerla2026()) lsSafeSet(LS_KEY, JSON.stringify(DB));
 }
 function seedFromExcel(){
@@ -1668,7 +1677,7 @@ function autoBackup(){
 function restoreBackup(b){
   if(!confirm('سيتم استبدال البيانات الحالية بنسخة '+b.date+'. متأكد؟')) return;
   try{ const d=JSON.parse(b.data);
-    DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},d);
+    DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},d); normDB();
     save(); closeModal(); go('dashboard'); toast('تمت الاستعادة من نسخة '+b.date);
   }catch(e){ toast('تعذّر استعادة النسخة','err'); }
 }
@@ -1729,7 +1738,7 @@ $('#importFile').onchange=e=>{
   const r=new FileReader();
   r.onload=()=>{ try{ const d=JSON.parse(r.result);
     if(!d.checks||!d.customers) throw 0;
-    DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},d); save(); closeModal(); go('dashboard'); toast('تم استيراد النسخة الاحتياطية');
+    DB=Object.assign({statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']},d); normDB(); save(); closeModal(); go('dashboard'); toast('تم استيراد النسخة الاحتياطية');
   }catch(err){ toast('ملف غير صالح','err'); } };
   r.readAsText(f); e.target.value='';
 };
