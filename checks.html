@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الشيكات والأقساط</title>
+<title>الشيكات والأقساط v3.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -263,7 +263,7 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="logo">🧾</div>
-      <div><h1>إدارة الشيكات</h1><span>والأقساط — ERP</span></div>
+      <div><h1>إدارة الشيكات</h1><span>والأقساط — <b id="appVer">v3.0</b></span></div>
     </div>
     <a class="nav-item active" data-page="dashboard"><span class="ico">🏠</span> لوحة التحكم</a>
     <a class="nav-item" data-page="checks"><span class="ico">🧾</span> الشيكات <span class="badge" id="navChecksBadge" style="display:none"></span></a>
@@ -1738,6 +1738,9 @@ async function boot(){
 }
 async function startApp(){
   setUnlocked && setUnlocked();
+  /* اعرض لوحة التحكم فوراً من البيانات المحفوظة على الجهاز، والسحابة تتصل في الخلفية */
+  autoBackup();
+  go('dashboard');
   // 2) الاتصال بالسحابة لو مُعدّة
   if(typeof fbIsConfigured==='function' && fbIsConfigured()){
     try{
@@ -1755,8 +1758,6 @@ async function startApp(){
   } else {
     updateCloudBadge('local');
   }
-  autoBackup();
-  go('dashboard');
 }
 function updateCloudBadge(state){
   const el=$('#cloudBadge'); if(!el) return;
