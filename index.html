@@ -1086,7 +1086,10 @@ function mergeCloud(cloud){
   });
   links.forEach(function(l){ if(l&&l.id&&!cloudIds[l.id]) localNewer=true; });
   links=Object.keys(map).map(function(k){return map[k]});
-  persist(); render(); fbApplying=false;
+  persist(); fbApplying=false;
+  /* بعد الدمج مع السحابة: لو جهازين ضافوا نفس البرنامج قبل ما يتزامنوا، نشيل النسخة الزيادة */
+  if(dedupeLinks()) localNewer=false;
+  render();
   /* لو المحلي أحدث (ترتيب يدوي أو عدّاد استخدام اتغيّر وإحنا أوفلاين) ادفعه للسحابة */
   if(localNewer && fbRef){ try{ fbRef.set(links); }catch(e){} }
 }
@@ -1321,8 +1324,9 @@ function fileKey(u){
 function dedupeLinks(){
   var groups={}, merged=0, t=now();
   visibleLinks().forEach(function(l){
-    var k=fileKey(l.url)+"|"+String(l.title||"").trim();
-    if(!k.replace("|","")) return;
+    /* نفس الملف = نفس البرنامج، حتى لو الاسم اتغيّر (الروابط اللي من غير ملف بتتقارن بالاسم) */
+    var fk=fileKey(l.url), k=fk?("f|"+fk):("t|"+String(l.title||"").trim());
+    if(k==="t|") return;
     (groups[k]=groups[k]||[]).push(l);
   });
   Object.keys(groups).forEach(function(k){
@@ -1332,6 +1336,7 @@ function dedupeLinks(){
     var keep=g[0], uses=0;
     g.forEach(function(l){ uses+=(l.uses||0) });
     keep.uses=uses;
+    g.forEach(function(l){ if(l.fav) keep.fav=true; if((l.lastUsed||0)>(keep.lastUsed||0)) keep.lastUsed=l.lastUsed; });
     if(keep.ord==null){ for(var i=1;i<g.length;i++){ if(g[i].ord!=null){ keep.ord=g[i].ord; break; } } }
     keep.updatedAt=t;
     for(var i=1;i<g.length;i++){ g[i].deleted=true; g[i].updatedAt=t; merged++; }
