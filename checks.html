@@ -504,12 +504,43 @@ function migrateUnits(){
   if(Array.isArray(DB.customers)&&!DB.customers.some(c=>c.code==='C-MD002')) DB.customers.push({id:'cust_md2',code:'C-MD002',name:'موداد — التجمع (MODAD tagamo3)',phone:'',address:'',region:'التجمع',rep:'',joined:'',notes:'وحدة BR/114 — شيكات بنك مصر'});
   DB._mig3='units1'; return true;
 }
+/* تنظيف: 4 مطوّرين و3 بنوك بس + شيل البيانات التجريبية */
+const KEEP_DEV={'C-NE001':['نيو إيفنت (New Event)','مشروع قمري — وحدة QR29-53'],'C-MD001':['موداد بروبرتيز (MODAD Properties)','وحدة S1.1/518 — شيكات بنك الإسكندرية'],
+  'C-MD002':['موداد براكيتس (MODAD Brackets)','وحدة BR/114 — شيكات بنك مصر'],'C-PR001':['بيرلا (Perla Properties)','مشروع بيرلا الزقازيق — Perla Heights — وحدة R-B2-F6-A1']};
+function migrateClean(){
+  if(!DB||DB._mig5==='clean1') return false;
+  const used=new Set(DB.checks.map(c=>c.cust));
+  DB.customers=(DB.customers||[]).filter(c=>KEEP_DEV[c.code]||used.has(c.code));
+  Object.keys(KEEP_DEV).forEach(code=>{let c=DB.customers.find(x=>x.code===code);if(!c){c={id:'dev_'+code,code,phone:'',address:'',region:'',joined:''};DB.customers.push(c)}
+    c.name=KEEP_DEV[code][0];c.notes=KEEP_DEV[code][1];c.rep='';if(c.phone==='01000000000'||c.phone==='01100000000'||c.phone==='-')c.phone='';});
+  DB.checks.forEach(c=>{ if(KEEP_DEV[c.cust]) c.custName=KEEP_DEV[c.cust][0]; c.rep=''; });
+  const banksUsed=new Set(DB.checks.map(c=>c.bank).filter(Boolean));
+  DB.banks=['بنك مصر','بنك الإسكندرية','بنك البركة'].concat([...banksUsed].filter(b=>!['بنك مصر','بنك الإسكندرية','بنك البركة'].includes(b)));
+  DB.reps=[];
+  const U={u_r8:['نيو إيفنت (New Event)','قمري'],u_md1:['موداد (MODAD)','بروبرتيز (Properties)'],u_md2:['موداد (MODAD)','براكيتس (Brackets)'],u_perla:['بيرلا (Perla Properties)','مشروع بيرلا الزقازيق — Perla Heights']};
+  (DB.units||[]).forEach(u=>{ if(U[u.id]){ u.company=U[u.id][0]; u.project=U[u.id][1]; } });
+  DB._mig5='clean1'; return true;
+}
+/* الحذف بيتسجّل محلياً كمان، عشان لو جهاز تاني فيه نسخة قديمة رفعها، المحذوف مايرجعش */
+const RM_KEY='cheques_erp_removed_v1';
+function rmGet(){ try{ return JSON.parse(localStorage.getItem(RM_KEY))||{cust:[],checks:[]}; }catch(e){ return {cust:[],checks:[]}; } }
+function rmAdd(kind,val){ const r=rmGet(); r[kind]=r[kind]||[]; if(!r[kind].includes(val)) r[kind].push(val); localStorage.setItem(RM_KEY,JSON.stringify(r)); DB._rm=r; }
+function applyRemoved(){
+  const r=rmGet(),rc=(DB._rm&&DB._rm.cust)||[],rk=(DB._rm&&DB._rm.checks)||[];
+  const cust=[...new Set(r.cust.concat(rc))],chk=[...new Set((r.checks||[]).concat(rk))];
+  localStorage.setItem(RM_KEY,JSON.stringify({cust,checks:chk})); DB._rm={cust,checks:chk};
+  const n0=(DB.customers||[]).length+DB.checks.length;
+  DB.customers=(DB.customers||[]).filter(c=>!cust.includes(c.code)); DB.checks=DB.checks.filter(c=>!chk.includes(c.id));
+  return n0!==(DB.customers.length+DB.checks.length);
+}
 function migratePerla2026(){
   const b=migratePerla2026_a();
   const c=migratePerla2026b();
   const d=migrateUnits();
   const e=migratePlan();
-  return b||c||d||e;
+  const a0=migrateClean();
+  const a1=applyRemoved();
+  return a0||a1||b||c||d||e;
 }
 function migratePerla2026_a(){
   if(!DB||!Array.isArray(DB.checks)||DB._mig==='perla2026') return false;
@@ -1132,7 +1163,7 @@ function delCheck(id){
   openModal(`<div class="modal-head"><h3>🗑 حذف شيك</h3><button class="x" onclick="closeModal()">×</button></div>
     <div style="padding:24px">هل تريد حذف الشيك <b>${esc(c.num)}</b> بقيمة <b>${fmtMoney(c.amount)}</b>؟<br><span style="color:var(--muted)">لا يمكن التراجع.</span></div>
     <div class="modal-foot"><button class="btn danger" id="cd">نعم، احذف</button><button class="btn" onclick="closeModal()">إلغاء</button></div>`);
-  $('#cd').onclick=()=>{ DB.checks=DB.checks.filter(x=>x.id!==id); save(); closeModal(); drawChecksTable(); toast('تم حذف الشيك'); };
+  $('#cd').onclick=()=>{ rmAdd('checks',id); DB.checks=DB.checks.filter(x=>x.id!==id); save(); closeModal(); drawChecksTable(); toast('تم حذف الشيك'); };
 }
 /* ---------- الأقساط والمديونيات ---------- */
 function renderInstallments(){
@@ -1405,7 +1436,7 @@ function delCust(id){
   openModal(`<div class="modal-head"><h3>🗑 حذف عميل</h3><button class="x" onclick="closeModal()">×</button></div>
     <div style="padding:24px">حذف <b>${esc(cu.name)}</b>؟${n?`<br><span style="color:#fca5a5">⚠️ مرتبط بـ ${n} شيك (لن تُحذف الشيكات).</span>`:''}</div>
     <div class="modal-foot"><button class="btn danger" id="cdd">نعم، احذف</button><button class="btn" onclick="closeModal()">إلغاء</button></div>`);
-  $('#cdd').onclick=()=>{ DB.customers=DB.customers.filter(x=>x.id!==id); save(); closeModal(); renderCustomers(); toast('تم حذف العميل'); };
+  $('#cdd').onclick=()=>{ rmAdd('cust',cu.code); DB.customers=DB.customers.filter(x=>x.id!==id); save(); closeModal(); renderCustomers(); toast('تم حذف العميل'); };
 }
 
 /* ---------- الإعدادات ---------- */
@@ -1476,7 +1507,7 @@ function renderSettings(){
   $$('[data-add]').forEach(b=>b.onclick=()=>{ const k=b.dataset.add; const v=$('#add_'+k).value.trim();
     if(v&&!DB[k].includes(v)){ DB[k].push(v); save(); renderSettings(); toast('تمت الإضافة'); } });
   $$('[data-del]').forEach(b=>b.onclick=()=>{ const k=b.dataset.del; DB[k].splice(+b.dataset.i,1); save(); renderSettings(); });
-  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; DB._mig2=''; DB._mig3=''; DB._mig4=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
+  $('#resetSeed').onclick=()=>{ if(confirm('سيتم استبدال كل البيانات الحالية بالبيانات الأصلية من ملف الإكسل. متأكد؟')){ localStorage.removeItem(LS_KEY); seedFromExcel(); DB._mig=''; DB._mig2=''; DB._mig3=''; DB._mig4=''; DB._mig5=''; migratePerla2026(); save(); go('dashboard'); toast('تمت إعادة تحميل البيانات الأصلية'); } };
   $('#wipeAll').onclick=()=>{ if(confirm('سيتم مسح كل البيانات نهائياً. متأكد؟')){ DB={checks:[],customers:[],banks:[],methods:[],reps:[],statuses:['تحت التحصيل','تم التحصيل','مرتجع','مؤجل']}; save(); go('dashboard'); toast('تم مسح كل البيانات'); } };
 }
 
