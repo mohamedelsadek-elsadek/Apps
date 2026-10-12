@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الشيكات والأقساط v3.6</title>
+<title>الشيكات والأقساط v3.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -267,6 +267,13 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
 .tl-m{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:9px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--text);font-family:inherit}
 .tl-m.sel{outline:2px solid #60a5fa}.tl-m b{font-size:14px}.tl-mn{font-size:11.5px;opacity:.85}.tl-n{font-size:10.5px;opacity:.75}
 .tl-det{margin-top:12px;padding:12px;border-radius:12px;background:rgba(59,130,246,.08);font-size:13px}
+
+.pt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:14px}
+.pt-card{text-align:right;border:1px solid var(--line,#22304d);border-radius:14px;padding:12px;background:var(--panel,#111a2e);color:var(--text);font-family:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.pt-card.on{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.35)}.pt-n{font-weight:800;font-size:15px}
+.pt-sh{display:flex;gap:5px;flex-wrap:wrap}.pt-sh span{font-size:11px;background:rgba(59,130,246,.15);color:#93c5fd;border-radius:8px;padding:2px 7px}
+.pt-row{display:flex;justify-content:space-between;font-size:13px}.pt-row span{color:var(--muted)}
+.pt-h{margin:16px 16px 8px;font-size:14px}tr.pt-ysum td{background:rgba(59,130,246,.08);font-weight:700}
 </style>
 </head>
 <body>
@@ -275,7 +282,7 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="logo">🧾</div>
-      <div><h1>إدارة الشيكات</h1><span>والأقساط — <b id="appVer">v3.6</b></span></div>
+      <div><h1>إدارة الشيكات</h1><span>والأقساط — <b id="appVer">v3.7</b></span></div>
     </div>
     <a class="nav-item active" data-page="dashboard"><span class="ico">🏠</span> لوحة التحكم</a>
     <a class="nav-item" data-page="checks"><span class="ico">🧾</span> الشيكات <span class="badge" id="navChecksBadge" style="display:none"></span></a>
@@ -287,6 +294,7 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
     <a class="nav-item" data-page="units"><span class="ico">🏢</span> الوحدات</a>
     <a class="nav-item" data-page="cash"><span class="ico">💳</span> السيولة في البنوك</a>
     <a class="nav-item" data-page="timeline"><span class="ico">🗓️</span> الجدول الزمني</a>
+    <a class="nav-item" data-page="partners"><span class="ico">🤝</span> الشركاء</a>
     <div class="nav-sep">النظام</div>
     <a class="nav-item" data-page="settings"><span class="ico">⚙️</span> الإعدادات</a>
     <a class="nav-item" id="btnBackup"><span class="ico">💾</span> نسخ احتياطي</a>
@@ -312,6 +320,7 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
       <section class="page" id="page-units"></section>
       <section class="page" id="page-cash"></section>
       <section class="page" id="page-timeline"></section>
+      <section class="page" id="page-partners"></section>
       <section class="page" id="page-settings"></section>
     </div>
   </div>
@@ -490,7 +499,7 @@ const custName = code => { const c=DB.customers.find(x=>x.code===code); return c
 function save(){ lsSafeSet(LS_KEY, JSON.stringify(DB)); if(typeof fbPush==='function') fbPush(DB); }
 /* السحابة (Firebase) مابتحفظش القوايم الفاضية — فلازم نرجّعها قوايم بعد أي تحميل */
 function normDB(){
-  ['checks','customers','banks','methods','reps','units'].forEach(k=>{ if(!Array.isArray(DB[k])) DB[k]=DB[k]&&typeof DB[k]==='object'?Object.values(DB[k]):[]; });
+  ['checks','customers','banks','methods','reps','units','partners'].forEach(k=>{ if(!Array.isArray(DB[k])) DB[k]=DB[k]&&typeof DB[k]==='object'?Object.values(DB[k]):[]; });
   if(!Array.isArray(DB.statuses)||!DB.statuses.length) DB.statuses=['تحت التحصيل','تم التحصيل','مرتجع','مؤجل'];
   if(!DB.methods.length) DB.methods=['شيك','تحويل بنكي','نقدًا'];
   DB.units.forEach(u=>{ if(u.plan&&!Array.isArray(u.plan)) u.plan=Object.values(u.plan); });
@@ -508,7 +517,7 @@ function applyCloudData(val){
   const page=active?active.dataset.page:'dashboard';
   ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
     statement:renderStatement,calendar:renderCalendar,reports:renderReports,
-    customers:renderCustomers,units:renderUnits,cash:renderCash,timeline:renderTimeline,settings:renderSettings}[page]||renderDashboard)();
+    customers:renderCustomers,units:renderUnits,cash:renderCash,timeline:renderTimeline,partners:renderPartners,settings:renderSettings}[page]||renderDashboard)();
   toast('🔄 تم تحديث البيانات من جهاز آخر','ok');
 }
 
@@ -582,7 +591,7 @@ function applyRemoved(){
 }
 function migratePerla2026(){
   let ch=false;
-  [migratePerla2026_a,migratePerla2026b,migrateUnits,migratePlan,migrateClean,applyRemoved].forEach(f=>{ try{ if(f()) ch=true; }catch(e){ console.error(f.name,e); if(typeof showBootErr==='function') showBootErr(f.name+': '+e.message); } });
+  [migratePerla2026_a,migratePerla2026b,migrateUnits,migratePlan,migrateClean,migratePartners,applyRemoved].forEach(f=>{ try{ if(f()) ch=true; }catch(e){ console.error(f.name,e); if(typeof showBootErr==='function') showBootErr(f.name+': '+e.message); } });
   return ch;
 }
 function migratePerla2026_a(){
@@ -935,12 +944,13 @@ function unitPrint(id){
 
 
 /* ---------- 🗓️ الجدول الزمني: كل سنة × 12 شهر، ألوان حسب الضغط ---------- */
-const TL={dev:'',bank:'',sel:null};
+const TL={dev:'',bank:'',sel:null,pid:''};
 function tlLevel(v,P){ if(!v) return 0; if(v<=P[0]) return 1; if(v<=P[1]) return 2; if(v<=P[2]) return 3; return 4; }
 const TL_LV=[{c:'#065f46',bg:'rgba(16,185,129,.22)',t:'مفيش حاجة'},{c:'#bbf7d0',bg:'rgba(34,197,94,.30)',t:'خفيف'},{c:'#fef08a',bg:'rgba(234,179,8,.32)',t:'متوسط'},{c:'#fed7aa',bg:'rgba(249,115,22,.42)',t:'تقيل'},{c:'#fecaca',bg:'rgba(239,68,68,.55)',t:'أصعب شهور'}];
 function renderTimeline(){
   const t=isoToday(),curY=+t.slice(0,4),curM=+t.slice(5,7);
-  const L=openChecks().filter(c=>(!TL.dev||c.cust===TL.dev)&&(!TL.bank||(c.bank||'')===TL.bank));
+  const L=openChecks().filter(c=>(!TL.dev||c.cust===TL.dev)&&(!TL.bank||(c.bank||'')===TL.bank)&&(!TL.pid||shareOf(TL.pid,c.cust)>0))
+    .map(c=>TL.pid?Object.assign({},c,{amount:(+c.amount||0)*shareOf(TL.pid,c.cust)}):c);
   const byM={},byYD={},byMD={};
   L.forEach(c=>{const k=ymKey(c.due),a=+c.amount||0;byM[k]=(byM[k]||0)+a;const y=k.slice(0,4),d=custName(c.cust)||c.cust;
     byYD[y]=byYD[y]||{};byYD[y][d]=(byYD[y][d]||0)+a;byMD[k]=byMD[k]||[];byMD[k].push(c);});
@@ -954,6 +964,7 @@ function renderTimeline(){
   const devs=DB.customers.filter(c=>DB.checks.some(x=>x.cust===c.code)),banks=[...new Set(DB.checks.map(c=>c.bank).filter(Boolean))];
   let h=`<div class="panel"><div class="tl-filters">
     <select class="input" id="tl_dev"><option value="">كل المطوّرين</option>${devs.map(d=>`<option value="${esc(d.code)}" ${d.code===TL.dev?'selected':''}>${esc(d.name)}</option>`).join('')}</select>
+    <select class="input" id="tl_pid"><option value="">كل الحصص (المبلغ كامل)</option>${partnerList().map(p=>`<option value="${p.id}" ${p.id===TL.pid?'selected':''}>نصيب ${esc(p.name)}</option>`).join('')}</select>
     <select class="input" id="tl_bank"><option value="">كل البنوك</option>${banks.map(b=>`<option value="${esc(b)}" ${b===TL.bank?'selected':''}>${esc(b)}</option>`).join('')}</select></div>
     <div class="tl-legend">${TL_LV.map(l=>`<span><i style="background:${l.bg}"></i>${l.t}</span>`).join('')}<span><i style="background:rgba(148,163,184,.12)"></i>فات</span></div>
     ${top.length?`<div class="tl-top">🔴 أصعب شهور: ${top.map(k=>`<b data-tlk="${k}">${ymLabel(k)} (${money0(byM[k])})</b>`).join(' · ')}</div>`:''}
@@ -975,6 +986,7 @@ function renderTimeline(){
   $('#page-timeline').innerHTML=h;
   $('#tl_dev').onchange=e=>{TL.dev=e.target.value;TL.sel=null;renderTimeline()};
   $('#tl_bank').onchange=e=>{TL.bank=e.target.value;TL.sel=null;renderTimeline()};
+  $('#tl_pid').onchange=e=>{TL.pid=e.target.value;TL.sel=null;renderTimeline()};
   $$('#page-timeline [data-tlk]').forEach(b=>b.onclick=()=>{const k=b.dataset.tlk;TL.sel=TL.sel===k?null:k;renderTimeline();const el=document.querySelector('#tl_detail');el&&el.scrollIntoView({behavior:'smooth',block:'nearest'})});
 }
 function tlDetail(k,L){
@@ -986,12 +998,99 @@ function tlDetail(k,L){
    ${L.map(c=>`<tr><td class="num">${esc(c.due)}</td><td>${esc(custName(c.cust))}</td><td>${esc(c.bank||'')}</td><td>${esc(c.num)}</td><td class="num"><b>${money0(c.amount)}</b></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
+
+/* ---------- 🤝 الشركاء: حصة كل شريك في كل مطوّر، والباقي ليّا ---------- */
+const OWNER='أنا (محمد الصادق)';
+function migratePartners(){
+  if(!DB||DB._mig6==='partners1') return false;
+  DB.partners=Array.isArray(DB.partners)?DB.partners:[];
+  const seed=[{id:'p_sameh',name:'سامح سمير',shares:{'C-MD001':40,'C-MD002':25}},{id:'p_eslam',name:'إسلام أحمد',shares:{'C-MD001':20,'C-MD002':25}},{id:'p_ahmed',name:'أحمد الصادق',shares:{'C-MD002':25}}];
+  seed.forEach(p=>{ if(!DB.partners.some(x=>x.id===p.id)) DB.partners.push(p); });
+  DB._mig6='partners1'; return true;
+}
+function partnerList(){ return [{id:'__me',name:OWNER,me:true}].concat(DB.partners||[]); }
+function shareOf(pid,cust){
+  const ps=DB.partners||[];
+  if(pid==='__me'){ const others=ps.reduce((a,p)=>a+(+((p.shares||{})[cust])||0),0); return Math.max(0,100-others)/100; }
+  const p=ps.find(x=>x.id===pid); return p?(+((p.shares||{})[cust])||0)/100:0;
+}
+function partnerData(pid){
+  const L=DB.checks.filter(c=>c.status!=='مرتجع'&&shareOf(pid,c.cust)>0).map(c=>({c,sh:shareOf(pid,c.cust),part:(+c.amount||0)*shareOf(pid,c.cust)}));
+  const paid=L.filter(x=>x.c.status===DONE_ST).sort((a,b)=>(a.c.due||'')<(b.c.due||'')?-1:1);
+  const open=L.filter(x=>x.c.status===OPEN_ST).sort((a,b)=>(a.c.due||'')<(b.c.due||'')?-1:1);
+  const by={};L.forEach(x=>{const k=x.c.cust;by[k]=by[k]||{paid:0,open:0,sh:x.sh};by[k][x.c.status===DONE_ST?'paid':'open']+=x.part});
+  return {paid,open,by,paidSum:paid.reduce((a,x)=>a+x.part,0),openSum:open.reduce((a,x)=>a+x.part,0)};
+}
+let PT_SEL=null;
+function renderPartners(){
+  const devs=DB.customers.filter(c=>DB.checks.some(x=>x.cust===c.code));
+  const sel=PT_SEL||'p_sameh';
+  const cards=partnerList().map(p=>{const d=partnerData(p.id);const t=isoToday();const next=d.open.find(x=>x.c.due>=t);
+    return `<button class="pt-card ${p.id===sel?'on':''}" data-pid="${p.id}"><div class="pt-n">${p.me?'👤':'🤝'} ${esc(p.name)}</div>
+      <div class="pt-sh">${devs.map(c=>{const v=Math.round(shareOf(p.id,c.code)*100);return v?`<span>${esc(c.name.split(' (')[0])} ${v}%</span>`:''}).join('')}</div>
+      <div class="pt-row"><span>دفع لحد النهارده</span><b style="color:#6ee7b7">${money0(d.paidSum)}</b></div>
+      <div class="pt-row"><span>الباقي عليه</span><b style="color:#fcd34d">${money0(d.openSum)}</b></div>
+      ${next?`<div class="pt-row"><span>الجاي</span><b>${esc(next.c.due)} · ${money0(next.part)}</b></div>`:''}</button>`}).join('');
+  const P=partnerList().find(x=>x.id===sel)||partnerList()[0];const d=partnerData(P.id);
+  const tbl=(rows,paid)=>{ if(!rows.length) return '<div style="padding:12px;color:var(--muted)">مفيش</div>';
+    let h='<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>المطوّر / الوحدة</th><th>رقم الشيك</th><th>قيمة الشيك</th><th>الحصة</th><th>نصيبه</th></tr></thead><tbody>',y='',ys=0;
+    const flush=()=>{ if(y&&!paid) h+=`<tr class="pt-ysum"><td colspan="5">إجمالي ${y}</td><td class="num"><b>${money0(ys)}</b></td></tr>`; };
+    rows.forEach(x=>{const yy=(x.c.due||'').slice(0,4); if(!paid&&yy!==y){flush();y=yy;ys=0;} ys+=x.part;
+      h+=`<tr><td class="num">${esc(x.c.due||'')}</td><td>${esc(custName(x.c.cust))}</td><td>${esc(x.c.num)}</td><td class="num">${money0(x.c.amount)}</td><td class="num">${Math.round(x.sh*100)}%</td><td class="num"><b>${money0(x.part)}</b></td></tr>`});
+    flush(); return h+`</tbody><tfoot><tr><td colspan="5"><b>الإجمالي</b></td><td class="num"><b>${money0(rows.reduce((a,x)=>a+x.part,0))}</b></td></tr></tfoot></table></div>`; };
+  $('#page-partners').innerHTML=`<div class="pt-grid">${cards}</div>
+   <div class="panel"><div class="panel-head"><h3>${P.me?'👤':'🤝'} ${esc(P.name)}</h3><span style="flex:1"></span>
+     ${P.me?'':`<button class="btn sm" id="pt_edit">✏️ الحصص</button>`}<button class="btn sm" id="pt_wa">📲 واتساب</button><button class="btn sm" id="pt_pr">🖨️ PDF</button><button class="btn sm primary" id="pt_add">＋ شريك</button></div>
+    <div class="u-kpis" style="padding:12px 16px 0">${Object.keys(d.by).map(k=>`<div class="u-k"><span>${esc(custName(k))} · ${Math.round(d.by[k].sh*100)}%</span><b style="font-size:14px">دفع ${money0(d.by[k].paid)}</b><span>باقي ${money0(d.by[k].open)}</span></div>`).join('')}</div>
+    <h4 class="pt-h">✅ المفروض دفع لحد النهارده: ${money0(d.paidSum)} ج</h4>${tbl(d.paid,true)}
+    <h4 class="pt-h">📆 الباقي من الاستحقاقات: ${money0(d.openSum)} ج</h4>${tbl(d.open,false)}</div>`;
+  $$('#page-partners .pt-card').forEach(b=>b.onclick=()=>{PT_SEL=b.dataset.pid;renderPartners()});
+  if($('#pt_edit')) $('#pt_edit').onclick=()=>partnerModal(P.id);
+  $('#pt_add').onclick=()=>partnerModal(null);
+  $('#pt_wa').onclick=()=>{const m=partnerMsg(P,d);openModal(`<div class="modal-head"><h3>📲 ${esc(P.name)}</h3><button class="x" onclick="closeModal()">×</button></div><div class="modal-body"><div class="field full"><textarea class="input" id="pt_t" rows="14" style="font-size:12.5px;line-height:1.7">${esc(m)}</textarea></div></div><div class="modal-foot"><button class="btn primary" id="pt_go">📲 ابعت</button></div>`);$('#pt_go').onclick=()=>{const u='https://wa.me/?text='+encodeURIComponent($('#pt_t').value);window.open(u,'_blank')||(location.href=u)}};
+  $('#pt_pr').onclick=()=>partnerPrint(P,d);
+}
+function partnerMsg(P,d){
+  let m='🤝 حساب '+P.name+' في الوحدات\n';
+  Object.keys(d.by).forEach(k=>{m+='\n🏢 '+custName(k)+' — حصتك '+Math.round(d.by[k].sh*100)+'%\n   دفعت: '+money0(d.by[k].paid)+' ج\n   الباقي: '+money0(d.by[k].open)+' ج'});
+  m+='\n\n✅ إجمالي المدفوع: '+money0(d.paidSum)+' ج\n📆 إجمالي الباقي: '+money0(d.openSum)+' ج';
+  const t=isoToday(),next=d.open.filter(x=>x.c.due>=t).slice(0,6);
+  if(next.length){m+='\n\nالجاي:';next.forEach(x=>{m+='\n• '+x.c.due+' | '+custName(x.c.cust).split(' (')[0]+' | '+money0(x.part)+' ج'})}
+  return m;
+}
+function partnerPrint(P,d){
+  const row=x=>`<tr><td>${esc(x.c.due||'')}</td><td>${esc(custName(x.c.cust))}</td><td>${esc(x.c.num)}</td><td>${money0(x.c.amount)}</td><td>${Math.round(x.sh*100)}%</td><td><b>${money0(x.part)}</b></td></tr>`;
+  const th='<tr><th>التاريخ</th><th>المطوّر</th><th>رقم الشيك</th><th>قيمة الشيك</th><th>الحصة</th><th>النصيب</th></tr>';
+  const html=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${esc(P.name)}</title><style>@page{size:A4;margin:12mm}body{font-family:Tahoma,Arial;font-size:12px;color:#111}h1{font-size:18px;color:#1e3a8a;margin:0 0 4px}h2{font-size:14px;margin:16px 0 6px}
+   table{width:100%;border-collapse:collapse}th,td{border:1px solid #bbb;padding:5px;text-align:right}th{background:#eef2ff;-webkit-print-color-adjust:exact;print-color-adjust:exact}tr{break-inside:avoid}.k{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.k div{border:1px solid #ccc;border-radius:8px;padding:8px 12px}</style></head><body>
+   <h1>🤝 كشف ${esc(P.name)}</h1><div>طُبع ${isoToday()}</div>
+   <div class="k">${Object.keys(d.by).map(k=>`<div><b>${esc(custName(k))}</b> — ${Math.round(d.by[k].sh*100)}%<br>دفع ${money0(d.by[k].paid)} · باقي ${money0(d.by[k].open)}</div>`).join('')}</div>
+   <h2>✅ المدفوع لحد النهارده: ${money0(d.paidSum)} ج</h2><table>${th}${d.paid.map(row).join('')}</table>
+   <h2>📆 الباقي: ${money0(d.openSum)} ج</h2><table>${th}${d.open.map(row).join('')}</table></body></html>`;
+  const fr=document.createElement('iframe');fr.style.cssText='position:fixed;width:0;height:0;border:0;left:-9999px';document.body.appendChild(fr);
+  const doc=fr.contentWindow.document;doc.open();doc.write(html);doc.close();setTimeout(()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch(e){}setTimeout(()=>fr.remove(),60000)},400);
+}
+function partnerModal(pid){
+  DB.partners=DB.partners||[];const p=pid?DB.partners.find(x=>x.id===pid):{name:'',shares:{}};if(!p)return;
+  const devs=DB.customers;
+  openModal(`<div class="modal-head"><h3>${pid?'✏️ '+esc(p.name):'＋ شريك جديد'}</h3><button class="x" onclick="closeModal()">×</button></div>
+   <div class="modal-body"><div class="field full"><label>الاسم</label><input class="input" id="pm_n" value="${esc(p.name)}"></div>
+   ${devs.map(c=>`<div class="field"><label>${esc(c.name)} (%)</label><input class="input pm_s" data-c="${esc(c.code)}" inputmode="decimal" value="${(p.shares||{})[c.code]||''}" placeholder="0"></div>`).join('')}
+   <div class="field full" style="font-size:12px;color:var(--muted)">الباقي من كل مطوّر بعد حصص الشركاء بيتحسب ليك أوتوماتيك.</div></div>
+   <div class="modal-foot"><button class="btn primary" id="pm_save">💾 حفظ</button>${pid?'<button class="btn danger" id="pm_del">🗑 حذف</button>':''}</div>`);
+  $('#pm_save').onclick=()=>{const n=$('#pm_n').value.trim();if(!n){toast('اكتب الاسم','err');return}
+    const sh={};$$('.pm_s').forEach(i=>{const v=Number(String(i.value).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)))||0;if(v)sh[i.dataset.c]=v});
+    for(const c of devs){const tot=(DB.partners||[]).filter(x=>x!==p).reduce((a,x)=>a+(+((x.shares||{})[c.code])||0),0)+(sh[c.code]||0);if(tot>100){toast('حصص '+c.name+' عدّت 100%','err');return}}
+    p.name=n;p.shares=sh;if(!pid){p.id=uid();DB.partners.push(p);PT_SEL=p.id}save();closeModal();renderPartners();toast('اتحفظ ✓')};
+  if($('#pm_del')) $('#pm_del').onclick=()=>{if(!confirm('حذف '+p.name+'؟'))return;DB.partners=DB.partners.filter(x=>x.id!==pid);PT_SEL=null;save();closeModal();renderPartners()};
+}
+
 /* الدوال اللي بتتنادى من onclick جوه الـ HTML — السكربت module فلازم تتسجل على window */
-Object.assign(window,{closeModal,openModal,go,planModal,unitPrint,waModal,showImg,markPaid,renderUnits,renderCash,renderTimeline});
+Object.assign(window,{closeModal,openModal,go,planModal,unitPrint,waModal,showImg,markPaid,renderUnits,renderCash,renderTimeline,renderPartners});
 /* ---------- تنقل ---------- */
 const PAGE_TITLES={dashboard:'لوحة التحكم',checks:'سجل الشيكات',installments:'الأقساط والمديونيات',
   statement:'كشف حساب عميل',calendar:'تقويم الاستحقاقات',reports:'التقارير والتحليلات',
-  customers:'قاعدة بيانات العملاء',units:'تفاصيل الوحدات',cash:'السيولة المطلوبة في البنوك',timeline:'الجدول الزمني للاستحقاقات',settings:'الإعدادات'};
+  customers:'قاعدة بيانات العملاء',units:'تفاصيل الوحدات',cash:'السيولة المطلوبة في البنوك',timeline:'الجدول الزمني للاستحقاقات',partners:'الشركاء وحصصهم',settings:'الإعدادات'};
 function go(page){
   $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
   $$('.page').forEach(p=>p.classList.remove('active'));
@@ -999,7 +1098,7 @@ function go(page){
   $('#pageTitle').textContent=PAGE_TITLES[page]||'';
   ({dashboard:renderDashboard,checks:renderChecks,installments:renderInstallments,
     statement:renderStatement,calendar:renderCalendar,reports:renderReports,
-    customers:renderCustomers,units:renderUnits,cash:renderCash,timeline:renderTimeline,settings:renderSettings}[page]||(()=>{}))();
+    customers:renderCustomers,units:renderUnits,cash:renderCash,timeline:renderTimeline,partners:renderPartners,settings:renderSettings}[page]||(()=>{}))();
   closeSidebar();
   window.scrollTo(0,0);
 }
