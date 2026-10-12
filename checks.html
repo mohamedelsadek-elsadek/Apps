@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الشيكات والأقساط v3.0</title>
+<title>الشيكات والأقساط v3.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -263,7 +263,7 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="logo">🧾</div>
-      <div><h1>إدارة الشيكات</h1><span>والأقساط — <b id="appVer">v3.0</b></span></div>
+      <div><h1>إدارة الشيكات</h1><span>والأقساط — <b id="appVer">v3.2</b></span></div>
     </div>
     <a class="nav-item active" data-page="dashboard"><span class="ico">🏠</span> لوحة التحكم</a>
     <a class="nav-item" data-page="checks"><span class="ico">🧾</span> الشيكات <span class="badge" id="navChecksBadge" style="display:none"></span></a>
@@ -285,7 +285,7 @@ tr.pl-diff td{background:rgba(245,158,11,.08)}tr.pl-none td{background:rgba(239,
     <header class="topbar">
       <button class="menu-btn" id="menuBtn">☰</button>
       <h2 id="pageTitle">لوحة التحكم</h2>
-      <span class="pill gray" id="cloudBadge">💾 وضع محلي</span>
+      <span class="pill gray" id="cloudBadge" style="cursor:pointer" title="اضغط لإعادة الاتصال">⏳ جارٍ التحميل</span>
       <span class="date" id="todayStr"></span>
     </header>
     <div class="content">
@@ -340,11 +340,21 @@ function fbIsConfigured(){ const c=fbGetConfig(); return c && c.apiKey && c.data
 
 /* ---------- تحميل مكتبات Firebase ديناميكياً (modular v10) ---------- */
 let _fbLib=null;
+/* نفس مكتبة Firebase (compat 9.23) اللي باقي برامج المركز شغالة بيها — متغلّفة بنفس أسماء الدوال */
+function _loadScript(src){ return new Promise((res,rej)=>{ if(document.querySelector('script[src="'+src+'"]')) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('مقدرتش أحمّل مكتبة السحابة — اتأكد من النت')); document.head.appendChild(s); }); }
 async function fbLoadLib(){
   if(_fbLib) return _fbLib;
-  const appMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-  const dbMod  = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
-  _fbLib = {...appMod, ...dbMod};
+  await _loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+  await _loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
+  if(!window.firebase) throw new Error('مكتبة السحابة مااتحمّلتش');
+  _fbLib={
+    initializeApp:cfg=>{ try{ return firebase.app('checks'); }catch(e){ return firebase.initializeApp(cfg,'checks'); } },
+    getDatabase:app=>app.database(),
+    ref:(db,path)=>db.ref(path),
+    onValue:(r,cb)=>r.on('value',cb,err=>{ CLOUD_ERR=(err&&(err.code||err.message))||'خطأ'; updateCloudBadge('offline'); }),
+    set:(r,v)=>r.set(v),
+    get:r=>r.once('value')
+  };
   return _fbLib;
 }
 
@@ -352,7 +362,7 @@ async function fbLoadLib(){
 async function fbInit(onData){
   const cfg=fbGetConfig(); if(!cfg) throw new Error('لا توجد إعدادات Firebase');
   const L=await fbLoadLib();
-  FB.app = L.initializeApp({
+  FB.app = FB.app || L.initializeApp({
     apiKey:cfg.apiKey, authDomain:cfg.authDomain||(cfg.projectId+'.firebaseapp.com'),
     databaseURL:cfg.databaseURL, projectId:cfg.projectId,
     storageBucket:cfg.storageBucket||'', appId:cfg.appId||''
@@ -366,6 +376,7 @@ async function fbInit(onData){
   FB.ready = true;
 
   // الاشتراك في التحديثات اللحظية من كل الأجهزة
+  if(FB._sub) return true; FB._sub=true;
   L.onValue(FB.ref, (snap)=>{
     if(FB.suppress) return;                 // تجاهل صدى كتابتنا
     const val=snap.val();
@@ -1736,29 +1747,38 @@ async function boot(){
     startApp();
   }
 }
+let CLOUD_ERR='';
 async function startApp(){
-  setUnlocked && setUnlocked();
+  try{ setUnlocked && setUnlocked(); }catch(e){}
   /* اعرض لوحة التحكم فوراً من البيانات المحفوظة على الجهاز، والسحابة تتصل في الخلفية */
-  autoBackup();
-  go('dashboard');
-  // 2) الاتصال بالسحابة لو مُعدّة
-  if(typeof fbIsConfigured==='function' && fbIsConfigured()){
-    try{
-      updateCloudBadge('connecting');
-      await fbInit(applyCloudData);
-      // ادفع نسختنا الحالية لو السحابة فاضية، وإلا onValue هيجيب الأحدث
-      const snap=await FB._L.get(FB.ref);
-      if(!snap.exists()){ fbPush(DB); }
-      updateCloudBadge('online');
-      toast('☁️ متصل بالسحابة — التزامن اللحظي مُفعّل');
-    }catch(e){
-      updateCloudBadge('offline');
-      toast('تعذّر الاتصال بالسحابة — وضع محلي','err');
-    }
-  } else {
-    updateCloudBadge('local');
+  try{ autoBackup(); }catch(e){ console.warn('backup',e); }
+  try{ go('dashboard'); }catch(e){ console.error('dash',e); }
+  cloudConnect();
+}
+async function cloudConnect(){
+  if(!(typeof fbIsConfigured==='function' && fbIsConfigured())){ updateCloudBadge('local'); return; }
+  if(FB.ready){ updateCloudBadge('online'); return; }
+  updateCloudBadge('connecting');
+  const timeout=ms=>new Promise((_,rej)=>setTimeout(()=>rej(new Error('الاتصال اتأخر أكتر من '+(ms/1000)+' ثانية')),ms));
+  try{
+    await Promise.race([fbInit(applyCloudData),timeout(15000)]);
+    const snap=await Promise.race([FB._L.get(FB.ref),timeout(15000)]);
+    if(!snap.exists()){ fbPush(DB); }
+    else { const v=snap.val(); if(v) applyCloudData(v); }
+    CLOUD_ERR=''; updateCloudBadge('online');
+    toast('☁️ متصل بالسحابة — التزامن اللحظي مُفعّل');
+  }catch(e){
+    CLOUD_ERR=(e&&(e.code||e.message))||String(e); FB.ready=false;
+    updateCloudBadge('offline');
+    toast('تعذّر الاتصال بالسحابة: '+CLOUD_ERR,'err');
   }
 }
+/* الضغط على شارة الاتصال: يعيد المحاولة، ولو كان مقطوع يدوياً يرجّع الاتصال */
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#cloudBadge'); if(!b) return;
+  if(FB.ready){ toast('☁️ متصل — آخر مزامنة شغالة'); return; }
+  try{ const c=JSON.parse(localStorage.getItem(FB_CFG_KEY)||'null'); if(c&&c.off) localStorage.removeItem(FB_CFG_KEY); }catch(_){ localStorage.removeItem(FB_CFG_KEY); }
+  if(CLOUD_ERR) toast('آخر خطأ: '+CLOUD_ERR+' — بحاول تاني…','err');
+  cloudConnect(); });
 function updateCloudBadge(state){
   const el=$('#cloudBadge'); if(!el) return;
   const map={connecting:['⏳ جارٍ الاتصال...','amber'],online:['☁️ متصل — تزامن لحظي','green'],
