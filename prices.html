@@ -116,6 +116,15 @@ input[type=date]{background:var(--bg4);border:1px solid var(--br2);color:var(--t
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:50px;font-weight:700;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:9999;white-space:nowrap}
 #toast.on{opacity:1}#toast.er{background:#ef4444}
 .up{color:#34d399}.dn{color:#f87171}.fl{color:#475569}
+
+.ms{background:#0f1a2e;border:1px solid #1e3a5f;border-radius:16px;padding:12px;margin-bottom:12px}
+.ms-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:14px}.ms-h span{font-size:11px;color:#93c5fd}
+.ms-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px}
+.ms-i{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:8px}
+.ms-n{font-size:11.5px;color:#94a3b8;margin-bottom:3px}.ms-v{font-size:16px;font-weight:800;color:#34d399}.ms-v small{font-size:10.5px;color:#94a3b8;font-weight:500}
+.ms-b{width:100%;margin-top:10px;padding:9px;border-radius:10px;border:1px solid #1e3a5f;background:transparent;color:#93c5fd;font-weight:700;font-family:inherit;cursor:pointer}
+.ms-t{margin-top:10px}.ms-tt{font-weight:800;font-size:13px;margin-bottom:5px}.ms-t table{width:100%;border-collapse:collapse;font-size:12.5px}.ms-t th,.ms-t td{border-bottom:1px solid rgba(255,255,255,.07);padding:5px;text-align:right}.ms-t th{color:#94a3b8;font-weight:600}
+.ms-s{font-size:10.5px;color:#64748b;margin-top:8px}
 </style>
 </head>
 <body>
@@ -146,6 +155,7 @@ input[type=date]{background:var(--bg4);border:1px solid var(--br2);color:var(--t
     <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:3px">🐔 لوحة تحليل الدواجن</div>
     <div id="hSub" style="font-size:12px;color:#93c5fd">—</div>
   </div>
+  <div id="morshd"></div>
   <div class="kpis">
     <div class="kpi"><div class="lb">آخر سعر</div><div class="vl" id="hL" style="color:#34d399">—</div><div class="sb" id="hLD">—</div></div>
     <div class="kpi"><div class="lb">التغير</div><div class="vl" id="hD">—</div><div class="sb" id="hDP">—</div></div>
@@ -474,6 +484,42 @@ function initApp(){
   document.getElementById('nav').style.display='';
   document.getElementById('pages').style.display='';
   renderHome();updateED();
+  loadMorshd();
+}
+
+
+// ── أسعار المرشد (بتتسحب أوتوماتيك مرتين يوميًا على GitHub) ─────────
+var MORSHD=null,MORSHD_OPEN=false;
+function loadMorshd(){
+  fetch('data/elmorshd.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
+    MORSHD=j;autoFillMorshd();renderMorshd();
+  }).catch(function(){var el=document.getElementById('morshd');if(el)el.innerHTML='';});
+}
+function morshdWhite(){if(!MORSHD)return null;var it=(MORSHD.items||[]).find(function(i){return i.name.indexOf('اللحم الابيض')>-1;});return it?(it.vals['سعر']||it.vals['أعلى']||null):null;}
+/* لو سعر النهارده مش متسجّل، يتسجّل من المرشد (تقدر تعدّله من صفحة الإدخال) */
+function autoFillMorshd(){
+  var price=morshdWhite();if(!price||!MORSHD.date)return;
+  var all=allRec();if(all.some(function(e){return e.date===MORSHD.date;}))return;
+  var last=all[all.length-1];if(last&&last.date>MORSHD.date)return;
+  var d=new Date(MORSHD.date),prev=last?last.price:price,diff=+(price-prev).toFixed(2);
+  NEW_E.push({date:MORSHD.date,price:price,diff:diff,diffPct:prev?+(diff/prev*100).toFixed(1):0,dayName:DAYS[d.getDay()],year:d.getFullYear(),month:d.getMonth()+1,src:'المرشد'});
+  saveNew(NEW_E);renderHome();updateED();
+  toast('📡 اتسجل سعر النهارده من المرشد: '+price+' ج');
+}
+function renderMorshd(){
+  var el=document.getElementById('morshd');if(!el||!MORSHD)return;
+  var old=MORSHD.date!==new Date(Date.now()+3*3600e3).toISOString().slice(0,10);
+  var cell=function(i){var v=i.vals,k=Object.keys(v);var main=v['سعر']!=null?v['سعر']+(v['تنفيذ']?' <small>تنفيذ '+v['تنفيذ']+'</small>':''):(v['أعلى']!=null&&v['أقل']!=null?v['أقل']+' – '+v['أعلى']:v[k[0]]);
+    return '<div class="ms-i"><div class="ms-n">'+i.name+'</div><div class="ms-v">'+main+'</div></div>';};
+  var h='<div class="ms"><div class="ms-h"><b>📡 أسعار المرشد اليوم</b><span>'+(old?'⚠️ آخر تحديث ':'آخر تحديث ')+MORSHD.updated+'</span></div>'+
+    '<div class="ms-g">'+(MORSHD.items||[]).map(cell).join('')+'</div>';
+  if((MORSHD.tables||[]).length){
+    h+='<button class="ms-b" onclick="MORSHD_OPEN=!MORSHD_OPEN;renderMorshd()">'+(MORSHD_OPEN?'▲ إخفاء الجداول':'▼ البورصات والشركات والخامات')+'</button>';
+    if(MORSHD_OPEN)MORSHD.tables.forEach(function(t){h+='<div class="ms-t"><div class="ms-tt">'+t.title+'</div><table><tr>'+t.cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr>'+
+      t.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+(c==='0'?'—':c)+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';});
+  }
+  h+='<div class="ms-s">المصدر: elmorshdledwagn.com — بيتحدث الساعة 10:30 الصبح و4:30 العصر</div></div>';
+  el.innerHTML=h;
 }
 
 // ── NAV ──────────────────────────────────────────────────────────
