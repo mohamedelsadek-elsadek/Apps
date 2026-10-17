@@ -125,6 +125,7 @@ input[type=date]{background:var(--bg4);border:1px solid var(--br2);color:var(--t
 .ms-b{width:100%;margin-top:10px;padding:9px;border-radius:10px;border:1px solid #1e3a5f;background:transparent;color:#93c5fd;font-weight:700;font-family:inherit;cursor:pointer}
 .ms-t{margin-top:10px}.ms-tt{font-weight:800;font-size:13px;margin-bottom:5px}.ms-t table{width:100%;border-collapse:collapse;font-size:12.5px}.ms-t th,.ms-t td{border-bottom:1px solid rgba(255,255,255,.07);padding:5px;text-align:right}.ms-t th{color:#94a3b8;font-weight:600}
 .ms-s{font-size:10.5px;color:#64748b;margin-top:8px}
+.btn{background:var(--bl);border:1px solid #2563eb;color:#fff;border-radius:8px;font-weight:700;font-family:inherit;cursor:pointer}
 </style>
 </head>
 <body>
@@ -144,6 +145,7 @@ input[type=date]{background:var(--bg4);border:1px solid var(--br2);color:var(--t
     <button class="nb"     onclick="go('pa',this)">🔬 تحليل</button>
     <button class="nb"     onclick="go('pf',this)">🔮 توقعات</button>
     <button class="nb"     onclick="go('pd',this)">📋 بيانات</button>
+    <button class="nb"     onclick="go('pit',this)">🐣 كل الأصناف</button>
   </div>
 </nav>
 
@@ -386,6 +388,14 @@ input[type=date]{background:var(--bg4);border:1px solid var(--br2);color:var(--t
   <div class="card"><div class="ct">📌 توصيات</div><div id="fcRec"></div></div>
 </div>
 
+<!-- ══ كل الأصناف ══ -->
+<div id="pit" class="pg">
+  <div class="card" style="padding:12px"><div class="ct">🐣 سجلات كل الأصناف</div>
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">بتتسجل لوحدها من المرشد كل يوم — وتقدر تضيف أو تعدّل أي يوم بإيدك</div>
+    <div class="tabs" id="itChips" style="flex-wrap:wrap"></div></div>
+  <div id="itBody"></div>
+</div>
+
 <!-- ══ DATA ════════════════════════════════════════════════════════ -->
 <div id="pd" class="pg">
   <div class="card" style="padding:12px">
@@ -530,6 +540,58 @@ function renderMorshd(){
   el.innerHTML=h;
 }
 
+
+// ── سجلات كل الأصناف (من سجل المرشد اليومي + تعديلات يدوية) ────────
+var IT_KEY='pp_items_v1',IT_SEL='اللحم الساسو';
+function itManual(){try{return JSON.parse(localStorage.getItem(IT_KEY)||'{}')||{};}catch(e){return {};}}
+function itSaveManual(m){try{localStorage.setItem(IT_KEY,JSON.stringify(m));}catch(e){}}
+function itPair(v){if(!v)return null;if(v['سعر']!=null)return {lo:v['سعر'],hi:v['سعر'],ex:v['تنفيذ']||null};var hi=v['أعلى'],lo=v['أقل'];if(hi==null&&lo==null)return null;return {lo:lo!=null?lo:hi,hi:hi!=null?hi:lo};}
+function itNames(){var n={};if(MORSHD_H)Object.keys(MORSHD_H).forEach(function(d){Object.keys(MORSHD_H[d]).forEach(function(k){n[k]=1;});});Object.keys(itManual()).forEach(function(k){n[k]=1;});return Object.keys(n);}
+function itRows(name){
+  var r={};if(MORSHD_H)Object.keys(MORSHD_H).forEach(function(d){var p=itPair(MORSHD_H[d][name]);if(p)r[d]=Object.assign({src:'المرشد'},p);});
+  var m=itManual()[name]||{};Object.keys(m).forEach(function(d){if(m[d]&&m[d].del)delete r[d];else if(m[d])r[d]=Object.assign({src:'يدوي'},m[d]);});
+  return Object.keys(r).sort().map(function(d){var x=r[d];return {date:d,lo:+x.lo,hi:+x.hi,avg:+((+x.lo+ +x.hi)/2).toFixed(2),ex:x.ex,src:x.src};});
+}
+function itForecast(rows,n){
+  var pts=rows.slice(-21);if(pts.length<5)return null;
+  var xs=pts.map(function(_,i){return i;}),ys=pts.map(function(r){return r.avg;}),N=xs.length;
+  var mx=xs.reduce(function(a,b){return a+b;},0)/N,my=ys.reduce(function(a,b){return a+b;},0)/N;
+  var sxy=0,sxx=0;xs.forEach(function(x,i){sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)*(x-mx);});var sl=sxx?sxy/sxx:0,ic=my-sl*mx;
+  var res=Math.sqrt(ys.reduce(function(a,y,i){var e=y-(ic+sl*xs[i]);return a+e*e;},0)/N);
+  var out=[],last=new Date(rows[rows.length-1].date);
+  for(var k=1;k<=n;k++){var d=new Date(last);d.setDate(d.getDate()+k);var v=ic+sl*(N-1+k);out.push({date:d.toISOString().slice(0,10),v:+v.toFixed(1),lo:+(v-res*1.5).toFixed(1),hi:+(v+res*1.5).toFixed(1)});}
+  return {pts:out,slope:sl};
+}
+function rItems(){
+  var names=itNames();
+  if(!names.length){document.getElementById('itChips').innerHTML='';document.getElementById('itBody').innerHTML='<div class="card">لسه مفيش سجلات — بتبدأ من أول سحب من المرشد</div>';if(!MORSHD_H)loadMorshd();return;}
+  if(names.indexOf(IT_SEL)<0)IT_SEL=names[0];
+  document.getElementById('itChips').innerHTML=names.map(function(n){return '<button class="tab'+(n===IT_SEL?' on':'')+'" onclick="IT_SEL=this.textContent;rItems()">'+n+'</button>';}).join('');
+  var R=itRows(IT_SEL),last=R[R.length-1],prev=R[R.length-2];
+  var avgN=function(n){var x=R.slice(-n);return x.length?(x.reduce(function(a,r){return a+r.avg;},0)/x.length).toFixed(1):'—';};
+  var diff=last&&prev?+(last.avg-prev.avg).toFixed(2):null;
+  var W={};allRec().forEach(function(e){W[e.date]=e.price;});
+  var fc=itForecast(R,7);
+  var mon={};R.forEach(function(r){var k=r.date.slice(0,7);(mon[k]=mon[k]||[]).push(r);});
+  var h='<div class="kpis"><div class="kpi"><div class="lb">آخر سعر</div><div class="vl" style="color:#34d399">'+(last?(last.lo===last.hi?last.lo:last.lo+' – '+last.hi):'—')+'</div><div class="sb">'+(last?last.date:'')+'</div></div>'+
+    '<div class="kpi"><div class="lb">تغيّر عن امبارح</div><div class="vl '+(diff>0?'up':diff<0?'dn':'fl')+'">'+(diff==null?'—':(diff>0?'+':'')+diff)+'</div><div class="sb">'+R.length+' يوم مسجّل</div></div>'+
+    '<div class="kpi"><div class="lb">متوسط 7 أيام</div><div class="vl">'+avgN(7)+'</div><div class="sb">30 يوم: '+avgN(30)+'</div></div></div>';
+  h+='<div class="card"><div class="ct">📈 السعر يوم بيوم</div><div class="cw"><canvas id="cIt" height="170"></canvas></div></div>';
+  h+='<div class="card"><div class="ct">🔮 توقع 7 أيام</div>'+(fc?'<div style="font-size:12px;color:var(--tx3);margin-bottom:6px">الاتجاه: '+(fc.slope>0.05?'⬆️ صاعد':fc.slope<-0.05?'⬇️ نازل':'➡️ مستقر')+' (~'+(fc.slope>0?'+':'')+fc.slope.toFixed(2)+' يوميًا) — من آخر '+Math.min(21,R.length)+' يوم</div><div class="tbl-wrap"><table><thead><tr><th>اليوم</th><th>متوقع</th><th>من</th><th>لـ</th></tr></thead><tbody>'+fc.pts.map(function(p){return '<tr><td>'+p.date+'</td><td><b>'+p.v+'</b></td><td>'+p.lo+'</td><td>'+p.hi+'</td></tr>';}).join('')+'</tbody></table></div>':'<div style="font-size:12.5px;color:var(--tx3)">محتاج 5 أيام مسجّلة على الأقل عشان التوقع ('+R.length+' لحد دلوقتي)</div>')+'</div>';
+  h+='<div class="card"><div class="ct">📅 شهري</div><div class="tbl-wrap"><table><thead><tr><th>الشهر</th><th>متوسط</th><th>أقل</th><th>أعلى</th><th>أيام</th></tr></thead><tbody>'+Object.keys(mon).sort().reverse().map(function(k){var x=mon[k],a=x.reduce(function(s,r){return s+r.avg;},0)/x.length;return '<tr><td>'+MON[+k.slice(5)-1]+' '+k.slice(0,4)+'</td><td><b>'+a.toFixed(1)+'</b></td><td>'+Math.min.apply(null,x.map(function(r){return r.lo;}))+'</td><td>'+Math.max.apply(null,x.map(function(r){return r.hi;}))+'</td><td>'+x.length+'</td></tr>';}).join('')+'</tbody></table></div></div>';
+  h+='<div class="card"><div class="ct">📋 السجل</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><input type="date" id="itD" value="'+new Date(Date.now()+3*3600e3).toISOString().slice(0,10)+'" style="flex:1;min-width:130px;background:var(--bg4);border:1px solid var(--br2);color:var(--tx);border-radius:8px;padding:7px"><input id="itLo" inputmode="decimal" placeholder="أقل" style="width:80px;background:var(--bg4);border:1px solid var(--br2);color:var(--tx);border-radius:8px;padding:7px"><input id="itHi" inputmode="decimal" placeholder="أعلى" style="width:80px;background:var(--bg4);border:1px solid var(--br2);color:var(--tx);border-radius:8px;padding:7px"><button class="btn" onclick="itAdd()" style="padding:7px 12px">➕ حفظ</button></div>'+
+    '<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>أقل</th><th>أعلى</th><th>متوسط</th><th>تغيّر</th>'+(IT_SEL.indexOf('اللحم الابيض')<0&&IT_SEL.indexOf('اللحم')>-1?'<th>فرق عن الأبيض</th>':'')+'<th></th></tr></thead><tbody>'+
+    R.slice().reverse().map(function(r,i,arr){var pv=arr[i+1],d=pv?+(r.avg-pv.avg).toFixed(2):null;var wd=IT_SEL.indexOf('اللحم الابيض')<0&&IT_SEL.indexOf('اللحم')>-1?'<td>'+(W[r.date]?'+'+(r.avg-W[r.date]).toFixed(1):'—')+'</td>':'';
+      return '<tr><td>'+r.date+(r.src==='يدوي'?' ✏️':'')+'</td><td>'+r.lo+'</td><td>'+r.hi+'</td><td><b>'+r.avg+'</b></td><td class="'+(d>0?'up':d<0?'dn':'')+'">'+(d==null?'—':(d>0?'+':'')+d)+'</td>'+wd+'<td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="itEdit(\''+r.date+'\','+r.lo+','+r.hi+')">✏️</button></td></tr>';}).join('')+'</tbody></table></div></div>';
+  document.getElementById('itBody').innerHTML=h;
+  if(R.length)drawLine('cIt',R.map(function(r){return r.date.slice(5);}).concat(fc?fc.pts.map(function(p){return p.date.slice(5);}):[]),
+    [{d:R.map(function(r){return r.avg;}).concat(fc?fc.pts.map(function(){return null;}):[]),c:'#10b981'},{d:R.map(function(r){return r.hi;}).concat(fc?fc.pts.map(function(){return null;}):[]),c:'#f59e0b'},{d:R.map(function(r){return r.lo;}).concat(fc?fc.pts.map(function(){return null;}):[]),c:'#60a5fa'}].concat(fc?[{d:R.map(function(_,i){return i===R.length-1?R[i].avg:null;}).concat(fc.pts.map(function(p){return p.v;})),c:'#a78bfa'}]:[]),170);
+}
+function itAdd(){var d=document.getElementById('itD').value,lo=parseFloat(document.getElementById('itLo').value),hi=parseFloat(document.getElementById('itHi').value);
+  if(!d||(!lo&&!hi)){toast('❌ اكتب التاريخ والسعر',1);return}if(!lo)lo=hi;if(!hi)hi=lo;
+  var m=itManual();m[IT_SEL]=m[IT_SEL]||{};m[IT_SEL][d]={lo:lo,hi:hi};itSaveManual(m);toast('✅ '+IT_SEL+' '+d);rItems();}
+function itEdit(d,lo,hi){document.getElementById('itD').value=d;document.getElementById('itLo').value=lo;document.getElementById('itHi').value=hi;document.getElementById('itLo').focus();}
+
 // ── NAV ──────────────────────────────────────────────────────────
 function go(id,btn){
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
@@ -540,6 +602,7 @@ function go(id,btn){
     if(id==='ph')renderHome();
     else if(id==='pe')renderEntry();
     else if(id==='pm')rMonth();
+    else if(id==='pit')rItems();
     else if(id==='pdy')rDaily();
     else if(id==='pc'){rCmp1();rCmp2();rCmp3();}
     else if(id==='pa')renderAnalysis();
