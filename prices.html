@@ -490,21 +490,29 @@ function initApp(){
 
 // ── أسعار المرشد (بتتسحب أوتوماتيك مرتين يوميًا على GitHub) ─────────
 var MORSHD=null,MORSHD_OPEN=false;
+var MORSHD_H=null;
 function loadMorshd(){
-  fetch('data/elmorshd.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
+  fetch('data/elmorshd_history.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(h){MORSHD_H=h;
+  return fetch('data/elmorshd.json?t='+Date.now(),{cache:'no-store'});}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
     MORSHD=j;autoFillMorshd();renderMorshd();
   }).catch(function(){var el=document.getElementById('morshd');if(el)el.innerHTML='';});
 }
 function morshdWhite(){if(!MORSHD)return null;var it=(MORSHD.items||[]).find(function(i){return i.name.indexOf('اللحم الابيض')>-1;});return it?(it.vals['سعر']||it.vals['أعلى']||null):null;}
 /* لو سعر النهارده مش متسجّل، يتسجّل من المرشد (تقدر تعدّله من صفحة الإدخال) */
+/* أي يوم ناقص في الجدول (حتى لو البرنامج ماتفتحش يومها) بيتكمّل من سجل المرشد اليومي */
 function autoFillMorshd(){
-  var price=morshdWhite();if(!price||!MORSHD.date)return;
-  var all=allRec();if(all.some(function(e){return e.date===MORSHD.date;}))return;
-  var last=all[all.length-1];if(last&&last.date>MORSHD.date)return;
-  var d=new Date(MORSHD.date),prev=last?last.price:price,diff=+(price-prev).toFixed(2);
-  NEW_E.push({date:MORSHD.date,price:price,diff:diff,diffPct:prev?+(diff/prev*100).toFixed(1):0,dayName:DAYS[d.getDay()],year:d.getFullYear(),month:d.getMonth()+1,src:'المرشد'});
-  saveNew(NEW_E);renderHome();updateED();
-  toast('📡 اتسجل سعر النهارده من المرشد: '+price+' ج');
+  var H={};if(MORSHD_H)Object.keys(MORSHD_H).forEach(function(d){var it=MORSHD_H[d]['اللحم الابيض'];if(it)H[d]=it['سعر']||it['أعلى'];});
+  var p0=morshdWhite();if(p0&&MORSHD.date)H[MORSHD.date]=p0;
+  var all=allRec(),have={};all.forEach(function(e){have[e.date]=1;});
+  var lastDate=all.length?all[all.length-1].date:'';
+  var added=[];
+  Object.keys(H).sort().forEach(function(d){
+    if(have[d]||d<=lastDate||!H[d])return;
+    var cur=allRec(),prev=cur[cur.length-1].price,price=H[d],diff=+(price-prev).toFixed(2),dt=new Date(d);
+    NEW_E.push({date:d,price:price,diff:diff,diffPct:prev?+(diff/prev*100).toFixed(1):0,dayName:DAYS[dt.getDay()],year:dt.getFullYear(),month:dt.getMonth()+1,src:'المرشد'});
+    added.push(d);have[d]=1;
+  });
+  if(added.length){saveNew(NEW_E);renderHome();updateED();toast('📡 اتسجل من المرشد: '+added.length+' يوم (آخر سعر '+H[added[added.length-1]]+' ج)');}
 }
 function renderMorshd(){
   var el=document.getElementById('morshd');if(!el||!MORSHD)return;
