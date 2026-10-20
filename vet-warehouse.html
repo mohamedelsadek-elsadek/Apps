@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v34</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v35</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -210,7 +210,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v34</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v35</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +422,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v34 — إصلاح إضافة أصناف الفواتير';
+const APP_VERSION='v35 — تعديل أصناف الفواتير';
 let DB={};
 
 /* ====================================================================
@@ -2801,8 +2801,7 @@ function drawFarmInvoiceDetail(){
     const name=o.dataset.name;
     const qty=+$('#fi_qty').value||0,price=+$('#fi_price').value||0;
     if(qty<=0){toast('أدخل عدداً صحيحاً','red');return;}
-    const ff=curFI()||f;
-    ff.items.push({name,qty,price,src:o.value,maker:o.dataset.maker||''});saveDB();drawFarmInvoiceDetail();toast('تمت الإضافة ✓','green');};
+    fiMutate(ff=>{ff.items.push({name,qty,price,src:o.value,maker:o.dataset.maker||''});});toast('تمت الإضافة ✓','green');};
 }
 function invProductOptions(isVax){
   if(isVax){
@@ -2814,6 +2813,49 @@ function invProductOptions(isVax){
     if(!prods.length)return '<option value="">لا توجد أدوية في المخزون</option>';
     return prods.map(p=>`<option value="${p.id}" data-name="${p.name}" data-price="${p.price}" data-maker="${p.maker||''}" data-stock="${p.stock||0}">${p.name}${p.maker?' — '+p.maker:''} — ${money(p.price)} (رصيد: ${fmt(p.stock||0)})</option>`).join('');
   }
+}
+/* أي تعديل على أصناف الفاتورة يمر من هنا — لو مُرحّلة: نعكس أثر المخزون والمبيعات والدين، نعدّل، ونرحّل تاني (الخزينة متتلمسش) */
+function fiApplyStock(f,sign){const isVax=f.type==='vaccine';
+  f.items.forEach(it=>{
+    if(isVax){const vid=(it.src||'').startsWith('V-')?it.src.slice(2):null;
+      const v=vid?DB.vaccines.find(x=>x.id===vid):DB.vaccines.find(x=>x.name===it.name);if(v)v.qty=(v.qty||0)+sign*it.qty;}
+    else{const p=DB.products.find(x=>String(x.id)===String(it.src))||DB.products.find(x=>x.name===it.name);if(p)p.stock=(p.stock||0)+sign*it.qty;}
+  });}
+function fiMutate(fn){
+  const f=curFI();if(!f)return;
+  if(!f.posted){fn(f);saveDB();drawFarmInvoiceDetail();return;}
+  const cust=DB.customers.find(c=>String(c.id)===String(f.customerId));
+  const oldTotal=f.items.reduce((s,i)=>s+i.qty*i.price,0);
+  fiApplyStock(f,+1);
+  fn(f);
+  fiApplyStock(f,-1);
+  const total=f.items.reduce((s,i)=>s+i.qty*i.price,0);
+  if(cust)cust.balance=(cust.balance||0)+(total-oldTotal);
+  f.total=total;
+  const sale=DB.sales.find(x=>x.id==='FS-'+f.id);
+  if(sale){sale.items=f.items.map(it=>{const p=DB.products.find(x=>String(x.id)===String(it.src))||DB.products.find(x=>x.name===it.name);
+    return {productId:p?p.id:('FARM-'+(it.src||it.name)),name:it.name,qty:it.qty,price:it.price};});sale.total=total;}
+  saveDB();buildNav&&buildNav();drawFarmInvoiceDetail();
+}
+function editFarmItem(ix){
+  const f=curFI();if(!f)return;const it=f.items[ix];if(!it)return;const isVax=f.type==='vaccine';
+  openModal('✏️ تعديل الصنف',`<div class="form-grid">
+    <div class="field full"><label>${isVax?'اللقاح':'الدواء'} (اختياري — لتغيير الصنف)</label><select id="fe_prod"><option value="">— نفس الصنف —</option>${invProductOptions(isVax)}</select></div>
+    <div class="field full"><label>اسم الصنف</label><input id="fe_name" value="${String(it.name).replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>الشركة المنتجة</label><input id="fe_maker" value="${String(it.maker||'').replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>العدد</label><input id="fe_qty" type="number" value="${it.qty}"></div>
+    <div class="field"><label>سعر الوحدة</label><input id="fe_price" type="number" value="${it.price}"></div>
+  </div>${f.posted?'<p class="mini" style="margin-top:8px">الفاتورة مُرحّلة — التعديل هيظبط المخزون وفاتورة البيع ورصيد العميل تلقائي.</p>':''}`,()=>{
+    const qty=+$('#fe_qty').value||0;if(qty<=0){toast('أدخل عدداً صحيحاً','red');return false;}
+    const name=$('#fe_name').value.trim();if(!name){toast('اكتب اسم الصنف','red');return false;}
+    const sel=$('#fe_prod'),o=sel.options[sel.selectedIndex];
+    fiMutate(ff=>{const t=ff.items[ix];
+      if(o&&o.value){t.src=o.value;}
+      t.name=name;t.maker=$('#fe_maker').value.trim();t.qty=qty;t.price=+$('#fe_price').value||0;});
+    toast('تم التعديل ✓','green');
+  });
+  const sel=$('#fe_prod');sel.onchange=()=>{const o=sel.options[sel.selectedIndex];if(!o||!o.value)return;
+    $('#fe_name').value=o.dataset.name||'';$('#fe_maker').value=o.dataset.maker||'';$('#fe_price').value=o.dataset.price||0;};
 }
 function drawFarmItems(){
   const f=curFI();
@@ -2828,7 +2870,7 @@ function drawFarmItems(){
     <td class="fi-edit" data-ix="${ix}" data-f="price">${fmt(it.price)}</td>
     <td><b>${money(line)}</b></td>
     <td><span class="tag green">${perBird.toLocaleString('en-US',{maximumFractionDigits:3})} ج.م</span></td>
-    <td><button class="btn xs red" onclick="rmFarmItem(${ix})">✕</button></td></tr>`;}).join('')
+    <td style="white-space:nowrap"><button class="btn xs" title="تعديل" onclick="editFarmItem(${ix})">✏️</button> <button class="btn xs red" onclick="rmFarmItem(${ix})">✕</button></td></tr>`;}).join('')
     ||`<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:16px">لم تضف أصناف بعد</td></tr>`;
   bindFarmEdit();
 }
@@ -2838,11 +2880,11 @@ function bindFarmEdit(){
     const ix=+td.dataset.ix,fld=td.dataset.f,it=curFI().items[ix];
     const inp=document.createElement('input');inp.type='number';inp.value=it[fld];
     td.innerHTML='';td.appendChild(inp);inp.focus();
-    const save=()=>{it[fld]=+inp.value||0;saveDB();drawFarmInvoiceDetail();};
+    let done=false;const save=()=>{if(done)return;done=true;const v=+inp.value||0;fiMutate(ff=>{ff.items[ix][fld]=v;});};
     inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();};
   });
 }
-function rmFarmItem(ix){curFI().items.splice(ix,1);saveDB();drawFarmInvoiceDetail();toast('تم الحذف','red');}
+function rmFarmItem(ix){fiMutate(ff=>{ff.items.splice(ix,1);});toast('تم الحذف','red');}
 
 function drawFarmProgram(){
   const f=curFI();
