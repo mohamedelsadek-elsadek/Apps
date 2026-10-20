@@ -289,6 +289,7 @@ select { appearance:none; background-image:url("data:image/svg+xml;utf8,<svg fil
   <header>
     <h1>مصاريف خطوبة منى</h1>
     <div class="sub">من أول يوم لحد الجواز</div>
+    <div id="sync-badge" style="display:inline-block;margin-top:6px;font-size:12px;padding:2px 10px;border-radius:12px;background:rgba(255,255,255,.08);color:#aaa">⏳ بيتصل...</div>
     <div class="divider"></div>
   </header>
 
@@ -433,6 +434,9 @@ let snaps = load(SNAP_KEY, []);
 let feed = load(FEED_KEY, []);
 let persons = load(PERSONS_KEY, DEFAULT_PERSONS);
 let cats = load(CATS_KEY, DEFAULT_CATS);
+const TOMB_KEY='wedding_mona_tomb_v1', METAU_KEY='wedding_mona_metau_v1';
+let tomb = load(TOMB_KEY, {});      // المصاريف الممسوحة {id: سجل بـ del:1}
+let metaU = load(METAU_KEY, 0);     // آخر تعديل للأسماء والبنود
 
 function colorOf(p){ const i=persons.indexOf(p); return PALETTE[(i<0?0:i)%PALETTE.length]; }
 
@@ -443,6 +447,8 @@ function save(){
   localStorage.setItem(FEED_KEY,JSON.stringify(feed));
   localStorage.setItem(PERSONS_KEY,JSON.stringify(persons));
   localStorage.setItem(CATS_KEY,JSON.stringify(cats));
+  localStorage.setItem(TOMB_KEY,JSON.stringify(tomb));
+  localStorage.setItem(METAU_KEY,JSON.stringify(metaU));
 }
 
 function fillSelect(el,arr,keepEmpty){
@@ -493,8 +499,9 @@ function addExpense(){
   const date=document.getElementById('f-date').value;
   if(!amt||amt<=0){ toast('اكتب مبلغ صحيح'); return; }
   if(!date){ toast('اختار التاريخ'); return; }
-  const item={id:Date.now(),who,cat,desc,amt,date,added:new Date().toISOString()};
+  const item={id:Date.now(),who,cat,desc,amt,date,added:new Date().toISOString(),u:Date.now()};
   data.push(item);
+  pushItem(item);
   feed.unshift({type:'add',who,cat,amt,date,t:new Date().toISOString()});
   if(feed.length>50) feed=feed.slice(0,50);
   save();
@@ -505,9 +512,12 @@ function addExpense(){
 }
 
 function delExpense(id){
-  const it=data.find(x=>x.id===id);
-  if(it){ feed.unshift({type:'del',who:it.who,cat:it.cat,amt:it.amt,t:new Date().toISOString()}); }
-  data=data.filter(x=>x.id!==id);
+  const it=data.find(x=>String(x.id)===String(id));
+  if(it){
+    feed.unshift({type:'del',who:it.who,cat:it.cat,amt:it.amt,t:new Date().toISOString()});
+    const d={...it,del:1,u:Date.now()}; tomb[String(it.id)]=d; pushItem(d);
+  }
+  data=data.filter(x=>String(x.id)!==String(id));
   save();
   renderList();
   toast('اتمسح المصروف');
@@ -530,7 +540,7 @@ function renderList(){
       </div>
       ${x.desc?`<div class="desc">${x.desc}</div>`:''}
       <div class="date">📅 ${fmtDate(x.date)}</div>
-      <button class="del" onclick="delExpense(${x.id})">حذف</button>
+      <button class="del" onclick="delExpense('${x.id}')">حذف</button>
     </div>`).join('');
 }
 
@@ -650,7 +660,7 @@ function addCat(){
   const v=inp.value.trim();
   if(!v){ toast('اكتب اسم البند'); return; }
   if(cats.includes(v)){ toast('البند موجود بالفعل'); return; }
-  cats.push(v); save(); inp.value=''; refreshSelects(); renderManage(); toast('✓ اتضاف البند');
+  cats.push(v); touchMeta(); save(); inp.value=''; refreshSelects(); renderManage(); toast('✓ اتضاف البند');
 }
 function editCat(i){
   const old=cats[i];
@@ -659,14 +669,14 @@ function editCat(i){
   const nv=v.trim(); if(!nv) return;
   if(cats.includes(nv)&&nv!==old){ toast('الاسم موجود بالفعل'); return; }
   cats[i]=nv;
-  data.forEach(x=>{ if(x.cat===old) x.cat=nv; }); // تحديث المصاريف القديمة
-  save(); refreshSelects(); renderManage(); toast('✓ اتعدّل البند');
+  data.forEach(x=>{ if(x.cat===old){ x.cat=nv; x.u=Date.now(); pushItem(x); } }); // تحديث المصاريف القديمة
+  touchMeta(); save(); refreshSelects(); renderManage(); toast('✓ اتعدّل البند');
 }
 function delCat(i){
   const c=cats[i];
   const used=data.filter(x=>x.cat===c).length;
   if(used>0){ if(!confirm(`«${c}» فيه ${used} مصروف. لو مسحته المصاريف دي هتفضل بنفس الاسم بس مش هيظهر في القائمة. تكمل؟`)) return; }
-  cats.splice(i,1); save(); refreshSelects(); renderManage(); toast('اتمسح البند');
+  cats.splice(i,1); touchMeta(); save(); refreshSelects(); renderManage(); toast('اتمسح البند');
 }
 
 function addPerson(){
@@ -674,7 +684,7 @@ function addPerson(){
   const v=inp.value.trim();
   if(!v){ toast('اكتب الاسم'); return; }
   if(persons.includes(v)){ toast('الاسم موجود بالفعل'); return; }
-  persons.push(v); save(); inp.value=''; refreshSelects(); renderManage(); toast('✓ اتضاف الاسم');
+  persons.push(v); touchMeta(); save(); inp.value=''; refreshSelects(); renderManage(); toast('✓ اتضاف الاسم');
 }
 function editPerson(i){
   const old=persons[i];
@@ -683,15 +693,15 @@ function editPerson(i){
   const nv=v.trim(); if(!nv) return;
   if(persons.includes(nv)&&nv!==old){ toast('الاسم موجود بالفعل'); return; }
   persons[i]=nv;
-  data.forEach(x=>{ if(x.who===old) x.who=nv; });
-  save(); refreshSelects(); renderManage(); toast('✓ اتعدّل الاسم');
+  data.forEach(x=>{ if(x.who===old){ x.who=nv; x.u=Date.now(); pushItem(x); } });
+  touchMeta(); save(); refreshSelects(); renderManage(); toast('✓ اتعدّل الاسم');
 }
 function delPerson(i){
   if(persons.length<=1){ toast('لازم يفضل اسم واحد على الأقل'); return; }
   const p=persons[i];
   const used=data.filter(x=>x.who===p).length;
   if(used>0){ if(!confirm(`«${p}» سجّل ${used} مصروف. لو مسحته الاسم مش هيظهر في القوائم بس المصاريف هتفضل. تكمل؟`)) return; }
-  persons.splice(i,1); save(); refreshSelects(); renderManage(); toast('اتمسح الاسم');
+  persons.splice(i,1); touchMeta(); save(); refreshSelects(); renderManage(); toast('اتمسح الاسم');
 }
 
 function exportData(){
@@ -716,7 +726,7 @@ function importData(ev){
       // merge by id (avoid duplicates)
       const ids=new Set(data.map(x=>x.id));
       let added=0;
-      p.data.forEach(x=>{ if(!ids.has(x.id)){ data.push(x); ids.add(x.id); added++; } });
+      p.data.forEach(x=>{ if(!ids.has(x.id)){ x.u=Date.now(); data.push(x); ids.add(x.id); pushItem(x); added++; } });
       // merge feed
       if(Array.isArray(p.feed)){
         p.feed.forEach(f=>feed.push(f));
@@ -726,7 +736,7 @@ function importData(ev){
       // merge persons & cats (دمج الأسماء والبنود الجديدة)
       if(Array.isArray(p.persons)) p.persons.forEach(x=>{ if(!persons.includes(x)) persons.push(x); });
       if(Array.isArray(p.cats)) p.cats.forEach(x=>{ if(!cats.includes(x)) cats.push(x); });
-      save();
+      touchMeta(); save();
       autoSnapshot();
       refreshSelects();
       toast('✓ اتضاف '+added+' مصروف جديد');
@@ -740,9 +750,10 @@ function importData(ev){
 function resetData(){
   if(!confirm('متأكد إنك عايز تمسح كل المصاريف والنسخ؟ مفيش رجوع.')) return;
   if(!confirm('تأكيد أخير: هيتمسح كل حاجة نهائيًا.')) return;
+  data.forEach(x=>{ const d={...x,del:1,u:Date.now()}; tomb[String(x.id)]=d; pushItem(d); });
   data=[]; snaps=[]; feed=[];
   persons=[...DEFAULT_PERSONS]; cats=[...DEFAULT_CATS];
-  save();
+  touchMeta(); save();
   refreshSelects();
   renderSysInfo();
   renderManage();
@@ -764,6 +775,69 @@ function renderSysInfo(){
   document.getElementById('sys-info').innerHTML=rows.map(([k,v])=>
     `<div class="cat-line"><span class="c-name">${k}</span><span class="c-val">${v}</span></div>`).join('');
 }
+
+/* ================= مزامنة Firebase ================= */
+const FB_CFG={
+  apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
+  authDomain:"my-app-sync-11ad9.firebaseapp.com",
+  databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"my-app-sync-11ad9",
+  storageBucket:"my-app-sync-11ad9.firebasestorage.app",
+  messagingSenderId:"177039534756",
+  appId:"1:177039534756:web:367ecccc684c2cdfdd1431"
+};
+const FB_PATH='mona_engagement';   // items/<id> = مصروف {id,who,cat,desc,amt,date,added,u,del?} · meta = {persons,cats,u}
+let fbRoot=null;
+function syncBadge(state,txt){
+  const b=document.getElementById('sync-badge'); if(!b) return;
+  b.textContent=txt; b.style.color = state==='on'?'#84c9a0':state==='err'?'#e57373':'#aaa';
+}
+function cleanItem(x){ const o={}; for(const k in x){ if(x[k]!==undefined) o[k]=x[k]; } return o; }
+function pushItem(it){ if(fbRoot) fbRoot.child('items/'+String(it.id)).set(cleanItem(it)).catch(e=>console.warn(e)); }
+function pushMeta(){ if(fbRoot) fbRoot.child('meta').set({persons,cats,u:metaU}).catch(e=>console.warn(e)); }
+function touchMeta(){ metaU=Date.now(); pushMeta(); }
+function rerender(){
+  refreshSelects();
+  const a=document.querySelector('.tab.active'); const pg=a&&a.dataset.page;
+  if(pg==='list') renderList(); if(pg==='report') renderReport();
+  if(pg==='sys'){ renderSysInfo(); renderManage(); }
+}
+function mergeItems(remote){
+  const loc={};
+  data.forEach(x=>loc[String(x.id)]=x);
+  for(const k in tomb) if(!loc[k]||(tomb[k].u||0)>(loc[k].u||0)) loc[k]=tomb[k];
+  let changed=false;
+  for(const k in remote){
+    const r=remote[k]; if(!r||typeof r!=='object') continue;
+    r.amt=Number(r.amt)||0;
+    const l=loc[k];
+    if(!l||(r.u||0)>(l.u||0)){ loc[k]=r; changed=true; }
+  }
+  for(const k in loc){ const r=remote[k]; if(!r||(loc[k].u||0)>(r.u||0)) pushItem(loc[k]); }
+  if(changed){
+    data=[]; tomb={};
+    for(const k in loc){ if(loc[k].del) tomb[k]=loc[k]; else data.push(loc[k]); }
+    save(); autoSnapshot(); rerender();
+  }
+}
+function mergeMeta(m){
+  if(m&&(m.u||0)>metaU&&Array.isArray(m.persons)&&Array.isArray(m.cats)){
+    persons=m.persons; cats=m.cats; metaU=m.u; save(); rerender();
+  } else if(!m||metaU>(m.u||0)){ if(!metaU){ metaU=1; save(); } pushMeta(); }
+}
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error(src));document.head.appendChild(s);});}
+(function initSync(){
+  const V='https://www.gstatic.com/firebasejs/10.12.2/';
+  (window.firebase?Promise.resolve():loadScript(V+'firebase-app-compat.js').then(()=>loadScript(V+'firebase-database-compat.js')))
+  .then(()=>{
+    const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB_CFG);
+    const db=firebase.database(app);
+    db.ref('.info/connected').on('value',s=>syncBadge(s.val()?'on':'wait', s.val()?'☁️ متزامن':'📴 أوفلاين — هيتزامن لما النت يرجع'));
+    fbRoot=db.ref(FB_PATH);
+    fbRoot.child('items').on('value',s=>mergeItems(s.val()||{}),e=>{syncBadge('err','⚠️ خطأ مزامنة');console.warn(e);});
+    fbRoot.child('meta').on('value',s=>mergeMeta(s.val()));
+  }).catch(e=>{syncBadge('err','⚠️ مش متصل');console.warn(e);});
+})();
 </script>
 </body>
 </html>
