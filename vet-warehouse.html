@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v33</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v34</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -210,7 +210,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v33</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v34</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +422,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v33 — تحسين المرتجعات';
+const APP_VERSION='v34 — إصلاح إضافة أصناف الفواتير';
 let DB={};
 
 /* ====================================================================
@@ -499,7 +499,7 @@ function attachRealtime(){
       const typing=document.activeElement&&['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
       suppressPush=true;
       DB=val;
-      localStorage.setItem(DB_KEY,JSON.stringify(DB));
+      lsPut(DB_KEY,JSON.stringify(DB));
       ensureTables();
       if(fbUser&&!modalOpen&&!typing){buildNav&&buildNav();if(currentPage)renderPage(currentPage);}
       suppressPush=false;
@@ -574,9 +574,22 @@ function ensureTables(){
     if(!DB.settings)DB.settings={company:'',currency:'ج.م',reorderDefault:5};
   }
 }
+/* كتابة آمنة في التخزين المحلي — لو المساحة اتملت نخفف النسخ الاحتياطية ونكمل، والسحابة تفضل شغالة */
+function lsPut(k,v){
+  try{localStorage.setItem(k,v);return true;}catch(e){}
+  try{ /* شيل نسخ "قبل التحديث من السحابة" القديمة وسيب آخر 2 */
+    const raw=localStorage.getItem(BK_KEY);if(raw){let l=JSON.parse(raw)||[];
+      const auto=l.filter(b=>b.type==='auto');const keep=new Set(auto.slice(-2).map(b=>b.id));
+      l=l.filter(b=>b.type!=='auto'||keep.has(b.id));localStorage.setItem(BK_KEY,JSON.stringify(l));}
+    Object.keys(localStorage).forEach(x=>{if(x.indexOf(DB_KEY+'_corrupt_')===0||x.indexOf(DB_KEY+'_broken_')===0||x==='vw_conflict')localStorage.removeItem(x);});
+    localStorage.setItem(k,v);return true;
+  }catch(e){console.warn('التخزين المحلي ممتلئ — الحفظ على السحابة بس',e);return false;}
+}
+/* الفاتورة المفتوحة دايمًا من DB الحالي (بعد أي تحديث من السحابة) */
+function curFI(){if(currentFarmInv){currentFarmInv=DB.farmInvoices.find(f=>f.id===currentFarmInv.id)||null;}return currentFarmInv;}
 function saveDB(){
   DB.updatedAt=Date.now();                                  /* ختم زمني — أساس كل القرارات */
-  localStorage.setItem(DB_KEY,JSON.stringify(DB));
+  lsPut(DB_KEY,JSON.stringify(DB));
   try{localStorage.setItem('vw_dirty','1')}catch(e){}       /* فيه شغل لسه ماوصلش السحابة */
   pushToCloud();
 }
@@ -1149,7 +1162,7 @@ async function onLoggedIn(){
   if(cloud&&cloud.products&&cloud.products.length && !dirty && cloudTs>=localTs){
     /* السحابة أحدث فعلاً ومفيش شغل محلي معلّق → طبّقها، بس خُد نسخة الأول */
     snapshotBeforeCloud();
-    suppressPush=true;DB=cloud;localStorage.setItem(DB_KEY,JSON.stringify(DB));ensureTables();suppressPush=false;
+    suppressPush=true;DB=cloud;lsPut(DB_KEY,JSON.stringify(DB));ensureTables();suppressPush=false;
     setSync('online');
   }else if(cloud&&cloud.products&&cloud.products.length){
     /* المحلي أحدث أو فيه شغل لسه ماترفعش → المحلي يكسب ويترفع */
@@ -2626,7 +2639,7 @@ function renderFarmInvoices(page){
     <div id="fiDetail"></div>
   </div>`;
   drawFarmList(list);
-  if(currentFarmInv)drawFarmInvoiceDetail();
+  if(curFI())drawFarmInvoiceDetail();
   else $('#fiDetail').innerHTML=`<div class="panel" style="margin:0;height:100%"><div class="empty" style="padding:80px 20px">
     <span class="ico">${farmInvType==='vaccine'?'💉':'💊'}</span>اختر مزرعة من القائمة لعرض فاتورتها<br>أو أنشئ فاتورة جديدة</div></div>`;
 }
@@ -2717,7 +2730,7 @@ function quickAddCustomer(){
 
 /* ---------- تفاصيل فاتورة المزرعة ---------- */
 function drawFarmInvoiceDetail(){
-  const f=currentFarmInv;const isVax=f.type==='vaccine';
+  const f=curFI();const isVax=f.type==='vaccine';
   const total=f.items.reduce((s,i)=>s+i.qty*i.price,0);
   const perBird=f.birds>0?total/f.birds:0;
   const remaining=total-(f.paid||0);
@@ -2788,7 +2801,8 @@ function drawFarmInvoiceDetail(){
     const name=o.dataset.name;
     const qty=+$('#fi_qty').value||0,price=+$('#fi_price').value||0;
     if(qty<=0){toast('أدخل عدداً صحيحاً','red');return;}
-    f.items.push({name,qty,price,src:o.value,maker:o.dataset.maker||''});saveDB();drawFarmInvoiceDetail();toast('تمت الإضافة ✓','green');};
+    const ff=curFI()||f;
+    ff.items.push({name,qty,price,src:o.value,maker:o.dataset.maker||''});saveDB();drawFarmInvoiceDetail();toast('تمت الإضافة ✓','green');};
 }
 function invProductOptions(isVax){
   if(isVax){
@@ -2802,7 +2816,7 @@ function invProductOptions(isVax){
   }
 }
 function drawFarmItems(){
-  const f=currentFarmInv;
+  const f=curFI();
   const birds=f.birds||0;
   $('#fiItems').innerHTML=f.items.map((it,ix)=>{
     const line=it.qty*it.price;
@@ -2821,17 +2835,17 @@ function drawFarmItems(){
 function bindFarmEdit(){
   $$('#fiItems .fi-edit').forEach(td=>td.onclick=()=>{
     if(td.querySelector('input'))return;
-    const ix=+td.dataset.ix,fld=td.dataset.f,it=currentFarmInv.items[ix];
+    const ix=+td.dataset.ix,fld=td.dataset.f,it=curFI().items[ix];
     const inp=document.createElement('input');inp.type='number';inp.value=it[fld];
     td.innerHTML='';td.appendChild(inp);inp.focus();
     const save=()=>{it[fld]=+inp.value||0;saveDB();drawFarmInvoiceDetail();};
     inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();};
   });
 }
-function rmFarmItem(ix){currentFarmInv.items.splice(ix,1);saveDB();drawFarmInvoiceDetail();toast('تم الحذف','red');}
+function rmFarmItem(ix){curFI().items.splice(ix,1);saveDB();drawFarmInvoiceDetail();toast('تم الحذف','red');}
 
 function drawFarmProgram(){
-  const f=currentFarmInv;
+  const f=curFI();
   $('#fiProgram').innerHTML=f.program.map((p,ix)=>`<tr>
     <td class="fp-edit" data-ix="${ix}" data-f="age">${p.age}</td>
     <td class="fp-edit" data-ix="${ix}" data-f="name">${p.name}</td>
@@ -2841,15 +2855,15 @@ function drawFarmProgram(){
     ||`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">لا يوجد برنامج</td></tr>`;
   $$('#fiProgram .fp-edit').forEach(td=>td.onclick=()=>{
     if(td.querySelector('input'))return;
-    const ix=+td.dataset.ix,fld=td.dataset.f,row=currentFarmInv.program[ix];
+    const ix=+td.dataset.ix,fld=td.dataset.f,row=curFI().program[ix];
     const inp=document.createElement('input');inp.value=row[fld];
     td.innerHTML='';td.appendChild(inp);inp.focus();
     const save=()=>{row[fld]=inp.value;saveDB();drawFarmProgram();};
     inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();};
   });
 }
-function addProgramRow(id){currentFarmInv.program.push({age:'',name:'',route:'مياه الشرب',dose:''});saveDB();drawFarmProgram();}
-function rmProgramRow(ix){currentFarmInv.program.splice(ix,1);saveDB();drawFarmProgram();}
+function addProgramRow(id){curFI().program.push({age:'',name:'',route:'مياه الشرب',dose:''});saveDB();drawFarmProgram();}
+function rmProgramRow(ix){curFI().program.splice(ix,1);saveDB();drawFarmProgram();}
 
 /* ---------- نسخ لمزرعة تانية ---------- */
 function copyFarmInvoice(id){
@@ -3135,7 +3149,7 @@ function snapshotBeforeCloud(){
 function loadBackups(){
   try{return JSON.parse(localStorage.getItem(BK_KEY))||[];}catch(e){return [];}
 }
-function saveBackups(list){localStorage.setItem(BK_KEY,JSON.stringify(list));}
+function saveBackups(list){try{localStorage.setItem(BK_KEY,JSON.stringify(list));}catch(e){console.warn('مساحة النسخ الاحتياطية ممتلئة',e);}}
 
 /* نسخة احتياطية تلقائية يومية: تتأكد إن في نسخة لتاريخ اليوم، وإلا تنشئها */
 function autoDailyBackup(){
