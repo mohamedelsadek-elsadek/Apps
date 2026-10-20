@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v35</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v36</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -210,7 +210,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v35</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v36</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +422,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v35 — تعديل أصناف الفواتير';
+const APP_VERSION='v36 — تعديل تاريخ وعدد الفاتورة';
 let DB={};
 
 /* ====================================================================
@@ -2739,8 +2739,8 @@ function drawFarmInvoiceDetail(){
     <div class="panel-h">
       <h3>🏠 ${f.customerName||f.farm} <span class="tag blue" style="margin-inline-start:8px">${f.cycleCode||'—'}</span></h3>
       <div class="tools">
-        <span class="chip">📅 دخول: <b>${f.entryDate}</b></span>
-        <span class="chip">🐔 <b>${fmt(f.birds)}</b> طائر</span>
+        <span class="chip" style="cursor:pointer" title="تعديل" onclick="editFarmHead()">📅 دخول: <b>${f.entryDate}</b> ✏️</span>
+        <span class="chip" style="cursor:pointer" title="تعديل" onclick="editFarmHead()">🐔 <b>${fmt(f.birds)}</b> طائر ✏️</span>
         ${f.posted?'<span class="tag green">✓ مُرحّلة</span>':'<span class="tag amber">غير مُرحّلة</span>'}
         <button class="btn sm green" onclick="printFarmInvoiceChoose('${f.id}')">🖨️ طباعة</button>
         <button class="btn sm" style="background:#25d366;color:#04310f" onclick="shareFarmInvoiceWA('${f.id}')">📱 واتساب</button>
@@ -2836,6 +2836,18 @@ function fiMutate(fn){
   if(sale){sale.items=f.items.map(it=>{const p=DB.products.find(x=>String(x.id)===String(it.src))||DB.products.find(x=>x.name===it.name);
     return {productId:p?p.id:('FARM-'+(it.src||it.name)),name:it.name,qty:it.qty,price:it.price};});sale.total=total;}
   saveDB();buildNav&&buildNav();drawFarmInvoiceDetail();
+}
+function editFarmHead(){
+  const f=curFI();if(!f)return;
+  openModal('✏️ تعديل بيانات الفاتورة',`<div class="form-grid">
+    <div class="field"><label>تاريخ دخول القطيع</label><input id="fh_date" type="date" value="${f.entryDate||''}"></div>
+    <div class="field"><label>عدد الطيور</label><input id="fh_birds" type="number" value="${f.birds||0}"></div>
+  </div>`,()=>{
+    const d=$('#fh_date').value;if(!d){toast('اختار التاريخ','red');return false;}
+    const ff=curFI();ff.entryDate=d;ff.birds=+$('#fh_birds').value||0;
+    const sale=DB.sales.find(x=>x.id==='FS-'+ff.id);if(sale)sale.date=d;
+    saveDB();renderPage('farmInvoices');toast('تم التعديل ✓','green');
+  });
 }
 function editFarmItem(ix){
   const f=curFI();if(!f)return;const it=f.items[ix];if(!it)return;const isVax=f.type==='vaccine';
