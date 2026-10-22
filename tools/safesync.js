@@ -11,8 +11,13 @@
   function recTs(r){if(!isObj(r))return 0;for(var i=0;i<TS_FIELDS.length;i++){var v=r[TS_FIELDS[i]];if(typeof v==='number'&&v>1e11)return v;if(typeof v==='string'&&/^\d{4}-\d\d-\d\dT/.test(v)){var p=Date.parse(v);if(p)return p;}}return 0;}
   /* Firebase بيحوّل الأراي اللي فيها فراغات لأوبجكت بمفاتيح أرقام */
   function asArr(x){if(Array.isArray(x))return x;if(isObj(x)){var ks=Object.keys(x);if(ks.length&&ks.every(function(k){return /^\d+$/.test(k);})){return ks.sort(function(a,b){return a-b;}).map(function(k){return x[k];});}}return x;}
-  function idOf(r){return isObj(r)&&(r.id!==undefined&&r.id!==null&&r.id!=='')?String(r.id):null;}
-  function keyedArr(a){if(!Array.isArray(a))return false;var n=0;for(var i=0;i<a.length;i++){if(a[i]==null)continue;if(idOf(a[i])===null)return false;n++;}return n>0;}
+  /* مفتاح السجل: id، ولو مش موجود نجرب uid/code/date (لازم يكون موجود في كل العناصر ومايتكررش) */
+  var KEYS=['id','uid','code','date'];
+  function keyOf(a){if(!Array.isArray(a))return null;var items=a.filter(function(x){return x!=null;});if(!items.length||!items.every(isObj))return null;
+    for(var k=0;k<KEYS.length;k++){var f=KEYS[k],seen={},ok=true;for(var i=0;i<items.length;i++){var v=items[i][f];if(v===undefined||v===null||v===''||typeof v==='object'){ok=false;break;}v=String(v);if(seen[v]){ok=false;break;}seen[v]=1;}if(ok)return f;}return null;}
+  var CUR_KEY='id';
+  function idOf(r){var v=isObj(r)?r[CUR_KEY]:undefined;return (v!==undefined&&v!==null&&v!=='')?String(v):null;}
+  function keyedArr(a){return keyOf(a)!==null;}
   function emptyArr(a){return Array.isArray(a)&&a.every(function(v){return v==null;});}
   function primArr(a){return Array.isArray(a)&&a.every(function(v){return v===null||typeof v!=='object';});}
   /* قرار قيمة واحدة: لو اتغيرت عند طرف واحد بس خد التغيير؛ لو الاتنين غيروا: الأحدث بالختم، وإلا المحلي (لو فيه base) أو السحابة (لو مفيش) */
@@ -41,13 +46,16 @@
       if(lRec!==undefined)TS_FIELDS.forEach(function(f){if(typeof l[f]==='number'&&typeof r[f]==='number'&&l[f]>1e11&&r[f]>1e11)out[f]=Math.max(l[f],r[f]);});
       return out;
     }
-    if((keyedArr(l)||emptyArr(l))&&(keyedArr(r)||emptyArr(r))&&(keyedArr(l)||keyedArr(r))&&(b===undefined||b===null||keyedArr(b)||emptyArr(b))){
+    var kl=keyOf(l),kr=keyOf(r),kb=keyOf(b),kk=kl||kr;
+    if(kk&&(kl===kk||emptyArr(l))&&(kr===kk||emptyArr(r))&&(b===undefined||b===null||emptyArr(b)||kb===kk||(Array.isArray(b)&&b.every(function(x){return x==null||(isObj(x)&&x[kk]!=null);})))){
+      var _saveKey=CUR_KEY;CUR_KEY=kk;
       var bm={},lm={},rm={},order=[],seen={};
       if(Array.isArray(b))b.forEach(function(x){var i=idOf(x);if(i!==null)bm[i]=x;});
       l.forEach(function(x){var i=idOf(x);if(i!==null)lm[i]=x;});
       r.forEach(function(x){var i=idOf(x);if(i!==null){rm[i]=x;if(!seen[i]){seen[i]=1;order.push(i);}}});
       l.forEach(function(x){var i=idOf(x);if(i!==null&&!seen[i]){seen[i]=1;order.push(i);}});
       var hb=hasBase&&Array.isArray(b),res=[];
+      CUR_KEY=_saveKey;
       order.forEach(function(i){
         var v=merge3(hb?bm[i]:undefined,lm[i],rm[i],hb&&(i in bm),lm[i],rm[i]);
         /* سجل جديد عند طرف واحد ومش في الـbase → يتضاف؛ موجود في base واتمسح عند طرف ومتغيرش عند التاني → يتشال */
@@ -107,7 +115,79 @@
   /* ---------- base ---------- */
   function getBase(name){return idbGet('base:'+name);}
   function setBase(name,val){return idbSet('base:'+name,clone(val));}
+  /* ---------- مساعدات التكامل ---------- */
+  var BASES={},BASE_P={};
+  function loadBase(name){if(!BASE_P[name])BASE_P[name]=getBase(name).then(function(b){if(BASES[name]===undefined)BASES[name]=b;return BASES[name];});return BASE_P[name];}
+  function commitBase(name,v){BASES[name]=clone(v);setBase(name,v);}
+  function resetBase(name){BASES[name]=null;idbDel('base:'+name);}
+  function countRecs(x,d){d=d||0;if(d>3||!x||typeof x!=='object')return 0;var n=0;x=asArr(x);
+    if(Array.isArray(x)){if(keyedArr(x))return x.length;x.forEach(function(v){n+=countRecs(v,d+1);});return n;}
+    Object.keys(x).forEach(function(k){n+=countRecs(x[k],d+1);});return n;}
+  /* حارس الحذف الجماعي: الدمج مايشيلش أكتر من 30% من السجلات من غير ما يسأل */
+  function massDelete(m,cur){var a=countRecs(m),b=countRecs(cur);if(b>10&&a<b*0.7){warn('⚠️ التحديث ده كان هيمسح سجلات كتير ('+b+' ← '+a+') — اتوقف تلقائياً. راجع البيانات قبل ما تكمل.');return true;}return false;}
+  /* دمج بيانات جاية من السحابة مع المحلي. بيرجّع {data, push}: push=true لو المحلي فيه شغل لسه ماترفعش */
+  function mergeRemote(name,local,remote,opt){
+    opt=opt||{};
+    if(remote===null||remote===undefined)return{data:local,push:true};
+    if(opt.localEmpty||local===null||local===undefined){commitBase(name,remote);return{data:remote,push:false};}
+    var m=merge3(BASES[name]==null?undefined:clone(BASES[name]),clone(local),clone(remote),BASES[name]!=null);
+    if(sameFb(m,remote)){commitBase(name,remote);return{data:remote,push:false};}
+    if(massDelete(m,remote))return{data:local,push:false,blocked:true};
+    return{data:m,push:true};
+  }
+  /* كتابة آمنة بـ transaction (Firebase SDK): بندمج على آخر نسخة فعلية في السحابة */
+  function txSet(ref,name,local,opt){
+    opt=opt||{};
+    return loadBase(name).then(function(){return new Promise(function(res,rej){
+      var blocked=false;
+      function fn(cur){
+        if(cur===null||cur===undefined){var c=clone(local);if(opt.stamp)opt.stamp(c);return c;}
+        var m=merge3(BASES[name]==null?undefined:clone(BASES[name]),clone(local),cur,BASES[name]!=null);
+        if(massDelete(m,cur)){blocked=true;return;}
+        if(opt.stamp)opt.stamp(m);
+        return m;
+      }
+      function done(err,committed,snap){
+        if(err)return rej(err);
+        if(!committed)return res(blocked?{blocked:true}:null);
+        var v=snap.val();commitBase(name,v);res({data:v,changed:!sameFb(v,local)});
+      }
+      if(typeof ref.transaction==='function')ref.transaction(fn,done,false);          /* compat SDK */
+      else if(opt.runTransaction)opt.runTransaction(ref,fn,{applyLocally:false})       /* modular SDK */
+        .then(function(r){done(null,r.committed,r.snapshot);},function(e){done(e);});
+      else rej(new Error('SafeSync: no transaction support'));
+    });});
+  }
+  /* نفس الفكرة بالـREST (للبرامج اللي بتستخدم fetch): GET بـETag ← دمج ← PUT مشروط، ولو حد كتب في النص نعيد */
+  function restSync(url,name,local,opt){
+    opt=opt||{};var tries=0;
+    return loadBase(name).then(function attempt(){
+      tries++;
+      return fetch(url,{headers:{'X-Firebase-ETag':'true'},cache:'no-store'}).then(function(r){
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        var et=r.headers.get('ETag');return r.json().then(function(cur){return{cur:cur,et:et};});
+      }).then(function(o){
+        var m;
+        if(o.cur===null||o.cur===undefined){m=clone(local);}
+        else{
+          if(opt.localEmpty){commitBase(name,o.cur);return{data:o.cur,changed:true};}
+          m=merge3(BASES[name]==null?undefined:clone(BASES[name]),clone(local),o.cur,BASES[name]!=null);
+          if(massDelete(m,o.cur))return{blocked:true,data:o.cur};
+          if(sameFb(m,o.cur)){commitBase(name,o.cur);return{data:o.cur,changed:!sameFb(o.cur,local)};}
+        }
+        if(opt.stamp)opt.stamp(m);
+        var h={'Content-Type':'application/json'};if(o.et)h['if-match']=o.et;
+        return fetch(url,{method:'PUT',headers:h,body:JSON.stringify(m)}).then(function(r){
+          if(r.status===412){if(tries<6)return attempt();throw new Error('conflict');}
+          if(!r.ok)throw new Error('HTTP '+r.status);
+          commitBase(name,m);return{data:m,changed:!sameFb(m,local)};
+        },function(e){ /* ردود 412 من Firebase مالهاش CORS فبتيجي كخطأ شبكة — نعيد */ if(tries<6&&navigator.onLine!==false)return new Promise(function(r){setTimeout(r,300+Math.random()*500);}).then(attempt);throw e;});
+      });
+    });
+  }
   G.SafeSync={merge3:function(b,l,r){var hb=b!==undefined&&b!==null;return merge3(hb?clone(b):undefined,clone(l),clone(r),hb);},
     same:sameFb,sameStrict:same,fbNorm:fbNorm,clone:clone,recTs:recTs,asArr:asArr,idbGet:idbGet,idbSet:idbSet,idbDel:idbDel,
-    lsSet:lsSet,lsGet:lsGet,getBase:getBase,setBase:setBase,warn:warn};
+    lsSet:lsSet,lsGet:lsGet,getBase:getBase,setBase:setBase,warn:warn,
+    loadBase:loadBase,commitBase:commitBase,resetBase:resetBase,base:function(n){return BASES[n];},countRecs:countRecs,massDelete:massDelete,
+    mergeRemote:mergeRemote,txSet:txSet,restSync:restSync};
 })(typeof window!=='undefined'?window:globalThis);
