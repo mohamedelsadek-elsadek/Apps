@@ -10,7 +10,8 @@ def inject(path,anchor=None):
         if anchor:
             i=s.index(anchor)+len(anchor); s=s[:i]+'\n'+BLOCK+s[i:]
         else:
-            i=s.index('</head>'); s=s[:i]+BLOCK+s[i:]
+            m=re.search(r'<head[^>]*>',s,flags=re.I)
+            i=m.end(); s=s[:i]+'\n'+BLOCK+s[i:]
     open(path,'w',encoding='utf-8').write(s)
 if __name__=='__main__':
     inject(sys.argv[1], sys.argv[2] if len(sys.argv)>2 else None)
