@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v37</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v38</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -413,7 +413,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v37</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v38</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -625,7 +625,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v37 — مزامنة آمنة سجل بسجل';
+const APP_VERSION='v38 — إصلاح اختفاء الفاتورة الجديدة';
 let DB={};
 
 /* ====================================================================
@@ -825,7 +825,9 @@ function ensureTables(){
     DB.vaccines=DB.vaccines.filter(v=>v&&typeof v==='object');
     DB.vaccines.forEach(v=>{if(v.maker===undefined)v.maker='';});
     /* نضّف فواتير المزارع المعطوبة قبل الهجرة */
-    DB.farmInvoices=DB.farmInvoices.filter(f=>f&&typeof f==='object'&&Array.isArray(f.items));
+    /* Firebase مابيخزنش القوايم الفاضية: فاتورة لسه مالهاش أصناف بترجع من غير items — نرجّعها [] بدل ما نشيل الفاتورة */
+    DB.farmInvoices=DB.farmInvoices.filter(f=>f&&typeof f==='object');
+    DB.farmInvoices.forEach(f=>{ if(!Array.isArray(f.items)) f.items=f.items&&typeof f.items==='object'?Object.values(f.items).filter(Boolean):[]; if(f.program&&!Array.isArray(f.program)) f.program=Object.values(f.program).filter(Boolean); });
     if(!DB.payments)DB.payments=[];
     try{ migrateCycleCodes(); }catch(e){ console.error('migrateCycleCodes تخطّت:',e); }
   }catch(e){
@@ -1324,7 +1326,7 @@ function dataHealthCheck(){
   try{
     if(!Array.isArray(DB.products))issues++;
     if(!Array.isArray(DB.farmInvoices))issues++;
-    (DB.farmInvoices||[]).forEach(function(f){ if(!f||!Array.isArray(f.items))issues++; });
+    (DB.farmInvoices||[]).forEach(function(f){ if(!f||typeof f!=='object')issues++; });
   }catch(e){ issues++; }
   return issues;
 }
