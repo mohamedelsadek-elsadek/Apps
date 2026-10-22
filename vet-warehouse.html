@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>نظام إدارة مخازن الأدوية البيطرية - ERP v36</title>
+<title>نظام إدارة مخازن الأدوية البيطرية - ERP v37</title>
 <style>
 /* ============ المتغيرات والثيم ============ */
 :root{
@@ -193,6 +193,122 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>/*SAFESYNC BEGIN*/
+/* ===== SafeSync v1 — حماية البيانات المشتركة لكل البرامج =====
+   1) merge3(base, local, remote): دمج ثلاثي سجل بسجل (حسب id) — جهاز قديم مايقدرش يمسح شغل جهاز تاني.
+   2) lsSet(key, str): حفظ محلي؛ لو التخزين مليان يحفظ في IndexedDB ويظهر تحذير أحمر بدل الفشل الصامت.
+   3) base: آخر نسخة اتفق عليها الجهاز مع السحابة (في IndexedDB) — أساس معرفة "مين اتغير".
+   الكود ده بيتنسخ جوه كل برنامج (single-file) بين علامتي SAFESYNC BEGIN/END. */
+(function(G){
+  if(G.SafeSync) return;
+  var TS_FIELDS=['u','updatedAt','_updatedAt','updated','_u','ts','_ts','t'];
+  function isObj(x){return x!==null&&typeof x==='object'&&!Array.isArray(x);}
+  function same(a,b){if(a===b)return true;try{return JSON.stringify(a)===JSON.stringify(b);}catch(e){return false;}}
+  function recTs(r){if(!isObj(r))return 0;for(var i=0;i<TS_FIELDS.length;i++){var v=r[TS_FIELDS[i]];if(typeof v==='number'&&v>1e11)return v;if(typeof v==='string'&&/^\d{4}-\d\d-\d\dT/.test(v)){var p=Date.parse(v);if(p)return p;}}return 0;}
+  /* Firebase بيحوّل الأراي اللي فيها فراغات لأوبجكت بمفاتيح أرقام */
+  function asArr(x){if(Array.isArray(x))return x;if(isObj(x)){var ks=Object.keys(x);if(ks.length&&ks.every(function(k){return /^\d+$/.test(k);})){return ks.sort(function(a,b){return a-b;}).map(function(k){return x[k];});}}return x;}
+  function idOf(r){return isObj(r)&&(r.id!==undefined&&r.id!==null&&r.id!=='')?String(r.id):null;}
+  function keyedArr(a){if(!Array.isArray(a))return false;var n=0;for(var i=0;i<a.length;i++){if(a[i]==null)continue;if(idOf(a[i])===null)return false;n++;}return n>0;}
+  function emptyArr(a){return Array.isArray(a)&&a.every(function(v){return v==null;});}
+  function primArr(a){return Array.isArray(a)&&a.every(function(v){return v===null||typeof v!=='object';});}
+  /* قرار قيمة واحدة: لو اتغيرت عند طرف واحد بس خد التغيير؛ لو الاتنين غيروا: الأحدث بالختم، وإلا المحلي (لو فيه base) أو السحابة (لو مفيش) */
+  function pick(b,l,r,hasBase,lRec,rRec){
+    if(same(l,r))return l;
+    if(hasBase){if(same(l,b))return r;if(same(r,b))return l;}
+    var lt=recTs(lRec),rt=recTs(rRec);
+    if(lt&&rt&&lt!==rt)return lt>rt?l:r;
+    return hasBase?l:r;
+  }
+  function merge3(b,l,r,hasBase,lRec,rRec){
+    if(hasBase===undefined)hasBase=(b!==undefined&&b!==null);
+    l=asArr(l);r=asArr(r);b=asArr(b);
+    if(l===undefined)return hasBase&&same(r,b)?undefined:r;   /* اتمسح محلياً أو جديد من السحابة */
+    if(r===undefined)return hasBase&&same(l,b)?undefined:l;   /* اتمسح في السحابة أو جديد محلي */
+    if(same(l,r))return l;
+    if(isObj(l)&&isObj(r)){
+      var out={},keys={},k;
+      for(k in r)keys[k]=1;for(k in l)keys[k]=1;
+      for(k in keys){
+        /* سياق "السجل" (للختم الزمني) بيتورث من الأراي المفهرسة بس — مش من جذر البيانات */
+        var v=merge3(isObj(b)?b[k]:undefined,l[k],r[k],hasBase&&isObj(b),lRec,rRec);
+        if(v!==undefined)out[k]=v;
+      }
+      /* ختم السجل = الأكبر */
+      if(lRec!==undefined)TS_FIELDS.forEach(function(f){if(typeof l[f]==='number'&&typeof r[f]==='number'&&l[f]>1e11&&r[f]>1e11)out[f]=Math.max(l[f],r[f]);});
+      return out;
+    }
+    if((keyedArr(l)||emptyArr(l))&&(keyedArr(r)||emptyArr(r))&&(keyedArr(l)||keyedArr(r))&&(b===undefined||b===null||keyedArr(b)||emptyArr(b))){
+      var bm={},lm={},rm={},order=[],seen={};
+      if(Array.isArray(b))b.forEach(function(x){var i=idOf(x);if(i!==null)bm[i]=x;});
+      l.forEach(function(x){var i=idOf(x);if(i!==null)lm[i]=x;});
+      r.forEach(function(x){var i=idOf(x);if(i!==null){rm[i]=x;if(!seen[i]){seen[i]=1;order.push(i);}}});
+      l.forEach(function(x){var i=idOf(x);if(i!==null&&!seen[i]){seen[i]=1;order.push(i);}});
+      var hb=hasBase&&Array.isArray(b),res=[];
+      order.forEach(function(i){
+        var v=merge3(hb?bm[i]:undefined,lm[i],rm[i],hb&&(i in bm),lm[i],rm[i]);
+        /* سجل جديد عند طرف واحد ومش في الـbase → يتضاف؛ موجود في base واتمسح عند طرف ومتغيرش عند التاني → يتشال */
+        if(v!==undefined)res.push(v);
+      });
+      return res;
+    }
+    if(primArr(l)&&primArr(r)&&(b===undefined||primArr(b))){
+      var bs=Array.isArray(b)?b.map(String):null,ls=l.map(String),rs=r.map(String),out2=[],s2={};
+      function add(v){var k=String(v);if(!s2[k]){s2[k]=1;out2.push(v);}}
+      r.forEach(function(v){var k=String(v);if(bs&&hasBase&&bs.indexOf(k)>=0&&ls.indexOf(k)<0)return;add(v);});
+      l.forEach(function(v){var k=String(v);if(bs&&hasBase&&bs.indexOf(k)>=0&&rs.indexOf(k)<0)return;add(v);});
+      return out2;
+    }
+    return pick(b,l,r,hasBase,lRec,rRec);
+  }
+  /* شكل البيانات زي ما Firebase بيخزنها (بيشيل الأراي/الأوبجكت الفاضية والـnull) — للمقارنة بس */
+  function fbNorm(x){
+    x=asArr(x);
+    if(Array.isArray(x)){var o=[];x.forEach(function(v){v=fbNorm(v);if(v!==undefined)o.push(v);});return o.length?o:undefined;}
+    if(isObj(x)){var r={},n=0;Object.keys(x).sort().forEach(function(k){var v=fbNorm(x[k]);if(v!==undefined){r[k]=v;n++;}});return n?r:undefined;}
+    if(x===null||x===undefined||(typeof x==='number'&&!isFinite(x)))return undefined;
+    return x;
+  }
+  function sameFb(a,b){return JSON.stringify(fbNorm(a))===JSON.stringify(fbNorm(b));}
+  function clone(x){return x===undefined?undefined:JSON.parse(JSON.stringify(x));}
+  /* ---------- IndexedDB صغير ---------- */
+  var _db=null;
+  function idb(){if(_db)return _db;_db=new Promise(function(res,rej){try{var q=indexedDB.open('safesync',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv');};q.onsuccess=function(){res(q.result);};q.onerror=function(){rej(q.error);};}catch(e){rej(e);}});return _db;}
+  function idbGet(k){return idb().then(function(d){return new Promise(function(res){try{var t=d.transaction('kv').objectStore('kv').get(k);t.onsuccess=function(){res(t.result===undefined?null:t.result);};t.onerror=function(){res(null);};}catch(e){res(null);}});}).catch(function(){return null;});}
+  function idbSet(k,v){return idb().then(function(d){return new Promise(function(res){try{var t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=function(){res(true);};t.onerror=function(){res(false);};}catch(e){res(false);}});}).catch(function(){return false;});}
+  function idbDel(k){return idb().then(function(d){return new Promise(function(res){try{var t=d.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=function(){res(true);};}catch(e){res(false);}});}).catch(function(){return false;});}
+  /* ---------- تحذير أحمر ---------- */
+  function warn(msg){
+    try{var el=document.getElementById('ss-warn');
+      if(!el){el=document.createElement('div');el.id='ss-warn';el.setAttribute('dir','rtl');
+        el.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;background:#b91c1c;color:#fff;font:600 13px/1.5 system-ui,Tahoma,sans-serif;padding:10px 14px;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.35);display:flex;gap:10px;align-items:center';
+        var s=document.createElement('span');s.style.flex='1';el.appendChild(s);
+        var x=document.createElement('button');x.textContent='✕';x.style.cssText='background:none;border:0;color:#fff;font-size:16px;cursor:pointer';x.onclick=function(){el.remove();};el.appendChild(x);
+        (document.body||document.documentElement).appendChild(el);}
+      el.firstChild.textContent=msg;}catch(e){}
+  }
+  /* ---------- حفظ محلي آمن ---------- */
+  function lsSet(key,str){
+    try{localStorage.setItem(key,str);idbDel('ls:'+key);return true;}
+    catch(e){
+      idbSet('ls:'+key,{v:str,t:Date.now()});
+      warn('⚠️ مساحة التخزين على الجهاز ده مليانة — بياناتك محفوظة على السحابة وفي مخزن احتياطي، بس فضّي مساحة (امسح نسخ احتياطية قديمة).');
+      return false;
+    }
+  }
+  /* يرجّع النسخة المحلية الأحدث (localStorage أو المخزن الاحتياطي لو الحفظ فشل قبل كده) */
+  function lsGet(key){
+    var v=null;try{v=localStorage.getItem(key);}catch(e){}
+    return idbGet('ls:'+key).then(function(f){return f&&f.v?f.v:v;});
+  }
+  /* ---------- base ---------- */
+  function getBase(name){return idbGet('base:'+name);}
+  function setBase(name,val){return idbSet('base:'+name,clone(val));}
+  G.SafeSync={merge3:function(b,l,r){var hb=b!==undefined&&b!==null;return merge3(hb?clone(b):undefined,clone(l),clone(r),hb);},
+    same:sameFb,sameStrict:same,fbNorm:fbNorm,clone:clone,recTs:recTs,asArr:asArr,idbGet:idbGet,idbSet:idbSet,idbDel:idbDel,
+    lsSet:lsSet,lsGet:lsGet,getBase:getBase,setBase:setBase,warn:warn};
+})(typeof window!=='undefined'?window:globalThis);
+
+/*SAFESYNC END*/</script>
 </head>
 <body>
 <div id="loginScreen">
@@ -210,7 +326,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   <aside id="sidebar">
     <div class="brand">
       <div class="logo">💊</div>
-      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v36</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
+      <div><h1>مخازن الأدوية البيطرية <span style="font-size:10px;color:#2ea043;font-weight:800;vertical-align:super">v37</span></h1><p>نظام ERP متكامل — حماية البيانات المطوّرة</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
@@ -422,7 +538,7 @@ function toast(msg,type=''){const t=document.createElement('div');t.className='t
 
 /* ---------- إدارة الحالة والتخزين ---------- */
 const DB_KEY='vetpharm_erp_v1';
-const APP_VERSION='v36 — تعديل تاريخ وعدد الفاتورة';
+const APP_VERSION='v37 — مزامنة آمنة سجل بسجل';
 let DB={};
 
 /* ====================================================================
@@ -463,6 +579,45 @@ function initFirebase(){
   }catch(e){console.error('Firebase init error',e);return false;}
 }
 let lastCloudJSON='';
+/* ===== SafeSync: base = آخر نسخة متفق عليها مع السحابة ===== */
+let SS_BASE=null, BK_CACHE=[], vwPushing=false, vwPushAgain=false;
+const SS_READY=(function(){
+  if(!window.SafeSync) return Promise.resolve();
+  const pBase=SafeSync.getBase('erp_data').then(b=>{SS_BASE=b;});
+  /* النسخ الاحتياطية تتنقل من localStorage (المليان) لـ IndexedDB */
+  const pBk=SafeSync.idbGet('vw_backups').then(list=>{
+    let ls=[];try{ls=JSON.parse(localStorage.getItem('vetpharm_backups_v1'))||[];}catch(e){}
+    const seen={},all=[];(list||[]).concat(ls).forEach(b=>{if(b&&b.id&&!seen[b.id]){seen[b.id]=1;all.push(b);}});
+    BK_CACHE=all;
+    if(ls.length) return SafeSync.idbSet('vw_backups',all).then(ok=>{ if(ok){try{localStorage.removeItem('vetpharm_backups_v1');}catch(e){}} });
+  });
+  /* لو الحفظ المحلي فشل قبل كده، النسخة الأحدث هتكون في المخزن الاحتياطي */
+  const pFallback=SafeSync.idbGet('ls:vetpharm_erp_v1').then(f=>{
+    if(f&&f.v){try{const d=JSON.parse(f.v);if(d&&d.products&&(d.updatedAt||0)>(DB.updatedAt||0)){DB=d;ensureTables();}}catch(e){}}
+  });
+  return Promise.all([pBase,pBk,pFallback]).catch(e=>console.warn('SafeSync init',e));
+})();
+function vwSetBase(v){SS_BASE=SafeSync.clone(v);SafeSync.setBase('erp_data',v);}
+/* جهاز جديد فيه بيانات افتراضية (seed) ومااتزامنش قبل كده = مالوش بيانات حقيقية → ياخد السحابة زي ما هي */
+function vwLocalHasData(){return !!(DB&&Array.isArray(DB.products)&&DB.products.length&&!(DB._seeded&&!SS_BASE));}
+function vwApplyMerged(m,rerender){
+  suppressPush=true;DB=m;lsPut(DB_KEY,JSON.stringify(DB));ensureTables();suppressPush=false;
+  if(rerender&&fbUser){
+    const modalOpen=document.querySelector('.modal-bg[style*="flex"],.modal-bg.open');
+    const typing=document.activeElement&&['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
+    if(!modalOpen&&!typing){buildNav&&buildNav();if(currentPage)renderPage(currentPage);}
+  }
+}
+/* حارس الحذف الجماعي: لو الدمج هيشيل أكتر من 30% من السجلات، وقّف واسأل */
+function vwMassDeleteGuard(merged,cloud){
+  const a=vwRecCount(merged),b=vwRecCount(cloud);
+  if(b>10&&a<b*0.7){
+    try{localStorage.setItem('vw_conflict',JSON.stringify({t:Date.now(),myCount:a,rCount:b,data:cloud}));}catch(e){}
+    SafeSync.warn('⚠️ التحديث ده هيمسح سجلات كتير ('+b+' ← '+a+') — اتوقف للمراجعة. افتح لوحة التحكم.');
+    return true;
+  }
+  return false;
+}
 
 function vwRecCount(d){
   var n=0;
@@ -477,34 +632,29 @@ function attachRealtime(){
   dbRef=fbDB.ref('erp_data');
   dbRef.on('value',snap=>{
     const val=snap.val();
-    if(val&&val.products){
-      const incoming=JSON.stringify(val);
-      setSync('online');
-      // تجاهل لو البيانات نفسها (صدى الكتابة بتاعتنا) — يمنع الوميض
-      if(incoming===JSON.stringify(DB)||incoming===lastCloudJSON){lastCloudJSON=incoming;return;}
-      lastCloudJSON=incoming;
-      /* حماية الختم الزمني: سحابة أقدم من شغلي؟ تتجاهل ويترفع بتاعي */
-      const _inTs=val.updatedAt||0, _myTs=DB.updatedAt||0;
-      if(_inTs<_myTs||localStorage.getItem('vw_dirty')){ pushToCloud(); return; }
-      /* حارس التراجع: تحديث "أحدث" بس فيه سجلات أقل بوضوح = خطر، يوقف ويسأل بدل الدهس الصامت */
-      const _myCount=vwRecCount(DB), _rCount=vwRecCount(val);
-      if(_myCount>0 && _rCount<_myCount*0.8){
-        try{ localStorage.setItem('vw_conflict', JSON.stringify({t:Date.now(),myCount:_myCount,rCount:_rCount,data:val})); }catch(e){}
-        toast&&toast('⚠️ تحديث فيه بيانات أقل بوضوح اتوقف — راجع لوحة التحكم','red');
-        return;
-      }
-      snapshotBeforeCloud();
-      // لا تقاطع المستخدم أثناء فتح نافذة أو الكتابة في حقل
-      const modalOpen=document.querySelector('.modal-bg[style*="flex"],.modal-bg.open');
-      const typing=document.activeElement&&['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
-      suppressPush=true;
-      DB=val;
-      lsPut(DB_KEY,JSON.stringify(DB));
-      ensureTables();
-      if(fbUser&&!modalOpen&&!typing){buildNav&&buildNav();if(currentPage)renderPage(currentPage);}
-      suppressPush=false;
-    }
+    if(!val||!val.products)return;
+    setSync('online');
+    vwOnRemote(val);
   },err=>{console.error(err);setSync('offline');});
+}
+let vwLastRemote=null,vwRemoteWhilePushing=false;
+function vwOnRemote(val){
+  {
+    vwLastRemote=val;
+    if(vwPushing){vwRemoteWhilePushing=true;return;}   /* هنرجعله بعد ما الرفع يخلص */
+    const incoming=JSON.stringify(val);
+    if(incoming===lastCloudJSON)return;           /* صدى الكتابة بتاعتنا */
+    lastCloudJSON=incoming;
+    if(SafeSync.same(val,DB)){vwSetBase(val);return;}
+    /* دمج ثلاثي: اللي اتغير عندي بس يفضل، اللي اتغير في السحابة بس ييجي، ومفيش مسح بالغلط */
+    const m=vwLocalHasData()?SafeSync.merge3(SS_BASE,DB,val):val;
+    snapshotBeforeCloud();
+    if(SafeSync.same(m,val)){vwApplyMerged(val,true);vwSetBase(val);try{localStorage.removeItem('vw_dirty')}catch(e){}}
+    else{
+      if(vwMassDeleteGuard(m,val))return;
+      vwApplyMerged(m,true);pushNow();
+    }
+  }
 }
 function pushToCloud(){
   if(!fbReady||suppressPush||!fbUser)return;
@@ -513,9 +663,32 @@ function pushToCloud(){
 }
 function pushNow(){
   if(!fbReady||!fbUser)return;
-  fbDB.ref('erp_data').set(DB)
-    .then(()=>{ setSync('online'); try{localStorage.removeItem('vw_dirty')}catch(e){} })
-    .catch(e=>{ console.error(e); setSync('offline'); setTimeout(pushNow,5000); });  /* بيعيد المحاولة */
+  if(vwPushing){vwPushAgain=true;return;}
+  vwPushing=true;
+  const localAtStart=JSON.stringify(DB);
+  let guardHit=false;
+  /* transaction: السحابة بتدينا آخر نسخة فعلية، ندمج عليها، ولو حد كتب في نفس اللحظة بتتعاد تلقائي */
+  fbDB.ref('erp_data').transaction(cur=>{
+    if(!cur||!cur.products)return JSON.parse(localAtStart);
+    const local=JSON.parse(localAtStart);
+    const m=(local.products&&local.products.length)?SafeSync.merge3(SS_BASE,local,cur):cur;
+    if(vwMassDeleteGuard(m,cur)){guardHit=true;return;}   /* undefined = إلغاء */
+    m.updatedAt=Date.now();
+    return m;
+  },(err,committed,snap)=>{
+    vwPushing=false;
+    const _pend=vwRemoteWhilePushing;vwRemoteWhilePushing=false;
+    if((err||!committed)&&_pend&&vwLastRemote)setTimeout(()=>vwOnRemote(vwLastRemote),0);
+    if(err){console.error(err);setSync('offline');setTimeout(pushNow,5000);return;}
+    if(!committed){if(!guardHit)setTimeout(pushNow,3000);return;}
+    const val=snap.val();
+    vwSetBase(val);lastCloudJSON=JSON.stringify(val);
+    if(JSON.stringify(DB)!==localAtStart){vwPushAgain=true;}       /* اتعدل حاجة أثناء الرفع */
+    else{ if(!SafeSync.same(val,JSON.parse(localAtStart)))vwApplyMerged(val,true); try{localStorage.removeItem('vw_dirty')}catch(e){} }
+    setSync('online');
+    if(vwPushAgain){vwPushAgain=false;pushNow();return;}
+    if(_pend&&vwLastRemote&&!SafeSync.same(vwLastRemote,val))vwOnRemote(vwLastRemote);
+  },false);
 }
 /* لو المستخدم قفل أو سويتش والرفع لسه في الطابور — ارفع فورًا */
 document.addEventListener('visibilitychange',function(){
@@ -560,6 +733,8 @@ function ensureTables(){
       if(p.wdMeat===undefined)p.wdMeat=0;
       if(p.wdEgg===undefined)p.wdEgg=0;
     });
+    /* الأرصدة لازم تبقى أرقام (كانت بتتخزن نص وتتلزق بدل ما تتجمع) */
+    ['customers','suppliers'].forEach(t=>DB[t].forEach(c=>{if(c&&typeof c.balance==='string')c.balance=Number(c.balance)||0;}));
     DB.vaccines=DB.vaccines.filter(v=>v&&typeof v==='object');
     DB.vaccines.forEach(v=>{if(v.maker===undefined)v.maker='';});
     /* نضّف فواتير المزارع المعطوبة قبل الهجرة */
@@ -578,12 +753,10 @@ function ensureTables(){
 function lsPut(k,v){
   try{localStorage.setItem(k,v);return true;}catch(e){}
   try{ /* شيل نسخ "قبل التحديث من السحابة" القديمة وسيب آخر 2 */
-    const raw=localStorage.getItem(BK_KEY);if(raw){let l=JSON.parse(raw)||[];
-      const auto=l.filter(b=>b.type==='auto');const keep=new Set(auto.slice(-2).map(b=>b.id));
-      l=l.filter(b=>b.type!=='auto'||keep.has(b.id));localStorage.setItem(BK_KEY,JSON.stringify(l));}
+
     Object.keys(localStorage).forEach(x=>{if(x.indexOf(DB_KEY+'_corrupt_')===0||x.indexOf(DB_KEY+'_broken_')===0||x==='vw_conflict')localStorage.removeItem(x);});
     localStorage.setItem(k,v);return true;
-  }catch(e){console.warn('التخزين المحلي ممتلئ — الحفظ على السحابة بس',e);return false;}
+  }catch(e){console.warn('التخزين المحلي ممتلئ — بنحفظ في المخزن الاحتياطي',e);return window.SafeSync?SafeSync.lsSet(k,v):false;}
 }
 /* الفاتورة المفتوحة دايمًا من DB الحالي (بعد أي تحديث من السحابة) */
 function curFI(){if(currentFarmInv){currentFarmInv=DB.farmInvoices.find(f=>f.id===currentFarmInv.id)||null;}return currentFarmInv;}
@@ -600,6 +773,7 @@ function seedAll(){
   DB.vaccines=SEED_VACCINES.slice();
   DB.purchases=[];DB.sales=[];DB.treasury=[];DB.storeDocs=[];DB.returns=[];DB.stockAdjust=[];
   DB.users=SEED_USERS.slice();
+  DB._seeded=true;
 }
 function seedSuppliers(){
   const names=[...new Set(SEED_PRODUCTS.map(p=>p.supplier).filter(Boolean))];
@@ -866,7 +1040,7 @@ function bindEdit(sel,table){
       if(td.querySelector('input,select'))return;
       const id=td.closest('tr').dataset.id;const f=td.dataset.f;
       const rec=DB[table].find(r=>String(r.id)===String(id));if(!rec)return;
-      const numeric=['pkg','dose','doseMeat','doseWater','price','cost','stock','reorder','qty','wdMeat','wdEgg'].includes(f);
+      const numeric=['pkg','dose','doseMeat','doseWater','price','cost','stock','reorder','qty','wdMeat','wdEgg','balance'].includes(f);
       const old=td.innerHTML;
       let inp;
       if(f==='cat'){inp=document.createElement('select');
@@ -1053,6 +1227,7 @@ function repairData(){
     if(bad)localStorage.setItem(DB_KEY+'_broken_'+Date.now(), bad);
   }catch(e){}
   try{ localStorage.removeItem(DB_KEY); localStorage.removeItem('vw_dirty'); }catch(e){}
+  try{ SafeSync.idbDel('base:erp_data'); SafeSync.idbDel('ls:'+DB_KEY); }catch(e){}
   toast('🔄 اتمسح المعطوب — بيعيد التحميل من السحابة...','green');
   setTimeout(function(){ location.reload(); }, 1200);
 }
@@ -1074,7 +1249,7 @@ function boot(){
   if(ls)ls.style.display='none';
   if(ap)ap.style.display='none';
   try{ loadDB(); }catch(e){ console.error('loadDB:',e); DB={}; ensureTables(); }
-  try{ autoDailyBackup(); }catch(e){ console.error('autoBackup:',e); }
+  SS_READY.then(()=>{ try{ autoDailyBackup(); if(currentPage==='backups')renderPage('backups'); }catch(e){ console.error('autoBackup:',e); } });
   $('#curDate').textContent=new Date().toLocaleDateString('ar-EG');
   if($('#verChip'))$('#verChip').textContent=APP_VERSION;
   if(fbConfigured()&&initFirebase()){
@@ -1154,32 +1329,25 @@ async function onLoggedIn(){
   }catch(e){currentUserRole='مشاهد';}
   $('#curRole').textContent=currentUserRole;
 
-  // حمّل بيانات السحابة — بس القرار بالختم الزمني، مش دهس أعمى
+  // حمّل بيانات السحابة وادمجها ثلاثياً مع المحلي — ولا جهاز يمسح شغل جهاز تاني
+  await SS_READY;
   const snap=await fbDB.ref('erp_data').once('value');
   const cloud=snap.val();
-  const localTs=DB.updatedAt||0, cloudTs=(cloud&&cloud.updatedAt)||0;
-  const dirty=!!localStorage.getItem('vw_dirty');
-  if(cloud&&cloud.products&&cloud.products.length && !dirty && cloudTs>=localTs){
-    /* السحابة أحدث فعلاً ومفيش شغل محلي معلّق → طبّقها، بس خُد نسخة الأول */
+  if(cloud&&cloud.products&&cloud.products.length){
     snapshotBeforeCloud();
-    suppressPush=true;DB=cloud;lsPut(DB_KEY,JSON.stringify(DB));ensureTables();suppressPush=false;
+    const m=vwLocalHasData()?SafeSync.merge3(SS_BASE,DB,cloud):cloud;
+    if(SafeSync.same(m,cloud)){
+      vwApplyMerged(cloud,false);vwSetBase(cloud);lastCloudJSON=JSON.stringify(cloud);
+      try{localStorage.removeItem('vw_dirty')}catch(e){}
+    }else if(!vwMassDeleteGuard(m,cloud)){
+      vwApplyMerged(m,false);pushNow();
+      toast&&toast('اتدمج شغلك المحلي مع السحابة ✓','green');
+    }
     setSync('online');
-  }else if(cloud&&cloud.products&&cloud.products.length){
-    /* المحلي أحدث أو فيه شغل لسه ماترفعش → المحلي يكسب ويترفع */
-    ensureTables();
-    if(!DB.updatedAt)DB.updatedAt=Date.now();
-    await fbDB.ref('erp_data').set(DB);
-    try{localStorage.removeItem('vw_dirty')}catch(e){}
-    setSync('online');
-    toast&&toast('شغلك المحلي كان أحدث — اترفع للسحابة ✓','green');
   }else{
-    // السحابة فاضية: ارفع بياناتك المحلية
-    ensureTables();
+    ensureTables();delete DB._seeded;
     if(!DB.updatedAt)DB.updatedAt=Date.now();
-    await fbDB.ref('erp_data').set(DB);
-    try{localStorage.removeItem('vw_dirty')}catch(e){}
-    setSync('online');
-    toast&&toast('تم رفع بياناتك المحلية إلى Firebase ✓','green');
+    pushNow();
   }
   attachRealtime();
   applyRolePermissions();
@@ -3200,10 +3368,8 @@ function snapshotBeforeCloud(){
     saveBackups(list);
   }catch(e){}
 }
-function loadBackups(){
-  try{return JSON.parse(localStorage.getItem(BK_KEY))||[];}catch(e){return [];}
-}
-function saveBackups(list){try{localStorage.setItem(BK_KEY,JSON.stringify(list));}catch(e){console.warn('مساحة النسخ الاحتياطية ممتلئة',e);}}
+function loadBackups(){return BK_CACHE.slice();}
+function saveBackups(list){BK_CACHE=list.slice();if(window.SafeSync)SafeSync.idbSet('vw_backups',BK_CACHE);}
 
 /* نسخة احتياطية تلقائية يومية: تتأكد إن في نسخة لتاريخ اليوم، وإلا تنشئها */
 function autoDailyBackup(){
@@ -3262,7 +3428,7 @@ function importBackupFile(){
 /* ---------- موديول النسخ الاحتياطية ---------- */
 function renderBackups(page){
   const list=loadBackups().slice().reverse();
-  const sizeKB=Math.round((localStorage.getItem(BK_KEY)||'').length/1024);
+  const sizeKB=Math.round(JSON.stringify(BK_CACHE).length/1024);
   page.innerHTML=`
   <div class="cards">
     <div class="stat" style="--accent:var(--primary)"><span class="ico">💾</span><div class="lbl">عدد النسخ المحفوظة</div><div class="val">${fmt(list.length)}</div><div class="meta">آخر ${BK_MAX_DAYS} يوم تلقائياً</div></div>
