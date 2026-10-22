@@ -208,7 +208,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
   /* Firebase بيحوّل الأراي اللي فيها فراغات لأوبجكت بمفاتيح أرقام */
   function asArr(x){if(Array.isArray(x))return x;if(isObj(x)){var ks=Object.keys(x);if(ks.length&&ks.every(function(k){return /^\d+$/.test(k);})){return ks.sort(function(a,b){return a-b;}).map(function(k){return x[k];});}}return x;}
   /* مفتاح السجل: id، ولو مش موجود نجرب uid/code/date (لازم يكون موجود في كل العناصر ومايتكررش) */
-  var KEYS=['id','uid','code','date'];
+  var KEYS=['id','uid','code','date','name'];
   function keyOf(a){if(!Array.isArray(a))return null;var items=a.filter(function(x){return x!=null;});if(!items.length||!items.every(isObj))return null;
     for(var k=0;k<KEYS.length;k++){var f=KEYS[k],seen={},ok=true;for(var i=0;i<items.length;i++){var v=items[i][f];if(v===undefined||v===null||v===''||typeof v==='object'){ok=false;break;}v=String(v);if(seen[v]){ok=false;break;}seen[v]=1;}if(ok)return f;}return null;}
   var CUR_KEY='id';
@@ -321,12 +321,19 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
     Object.keys(x).forEach(function(k){n+=countRecs(x[k],d+1);});return n;}
   /* حارس الحذف الجماعي: الدمج مايشيلش أكتر من 30% من السجلات من غير ما يسأل */
   function massDelete(m,cur){var a=countRecs(m),b=countRecs(cur);if(b>10&&a<b*0.7){warn('⚠️ التحديث ده كان هيمسح سجلات كتير ('+b+' ← '+a+') — اتوقف تلقائياً. راجع البيانات قبل ما تكمل.');return true;}return false;}
+  /* حقول ختم/عدّاد في الجذر: لو البرنامج بيشيلها محلياً متتفهمش إنها "اتمسحت" (كانت بتعمل رفع لا نهائي بين جهازين) */
+  var META_RE=/^(_+updatedAt|updatedAt|_localStamp|_+ts|_+seq|_+u|_+by|_+mt|device)$/;
+  function fillMeta(local,remote){
+    if(!isObj(local)||!isObj(remote))return local;
+    Object.keys(remote).forEach(function(k){if(META_RE.test(k)&&local[k]===undefined)local[k]=remote[k];});
+    return local;
+  }
   /* دمج بيانات جاية من السحابة مع المحلي. بيرجّع {data, push}: push=true لو المحلي فيه شغل لسه ماترفعش */
   function mergeRemote(name,local,remote,opt){
     opt=opt||{};
     if(remote===null||remote===undefined)return{data:local,push:true};
     if(opt.localEmpty||local===null||local===undefined){commitBase(name,remote);return{data:remote,push:false};}
-    var m=merge3(BASES[name]==null?undefined:clone(BASES[name]),clone(local),clone(remote),BASES[name]!=null);
+    var m=merge3(BASES[name]==null?undefined:clone(BASES[name]),fillMeta(clone(local),remote),clone(remote),BASES[name]!=null);
     if(sameFb(m,remote)){commitBase(name,remote);return{data:remote,push:false};}
     if(massDelete(m,remote))return{data:local,push:false,blocked:true};
     return{data:m,push:true};
@@ -336,17 +343,22 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
     opt=opt||{};
     return loadBase(name).then(function(){return new Promise(function(res,rej){
       var blocked=false;
-      ref.transaction(function(cur){
+      function fn(cur){
         if(cur===null||cur===undefined){var c=clone(local);if(opt.stamp)opt.stamp(c);return c;}
-        var m=merge3(BASES[name]==null?undefined:clone(BASES[name]),clone(local),cur,BASES[name]!=null);
+        var m=merge3(BASES[name]==null?undefined:clone(BASES[name]),fillMeta(clone(local),cur),cur,BASES[name]!=null);
         if(massDelete(m,cur)){blocked=true;return;}
         if(opt.stamp)opt.stamp(m);
         return m;
-      },function(err,committed,snap){
+      }
+      function done(err,committed,snap){
         if(err)return rej(err);
         if(!committed)return res(blocked?{blocked:true}:null);
         var v=snap.val();commitBase(name,v);res({data:v,changed:!sameFb(v,local)});
-      },false);
+      }
+      if(typeof ref.transaction==='function')ref.transaction(fn,done,false);          /* compat SDK */
+      else if(opt.runTransaction)opt.runTransaction(ref,fn,{applyLocally:false})       /* modular SDK */
+        .then(function(r){done(null,r.committed,r.snapshot);},function(e){done(e);});
+      else rej(new Error('SafeSync: no transaction support'));
     });});
   }
   /* نفس الفكرة بالـREST (للبرامج اللي بتستخدم fetch): GET بـETag ← دمج ← PUT مشروط، ولو حد كتب في النص نعيد */
@@ -362,7 +374,7 @@ td input,td select{padding:5px 7px;font-size:12px;border-radius:6px}
         if(o.cur===null||o.cur===undefined){m=clone(local);}
         else{
           if(opt.localEmpty){commitBase(name,o.cur);return{data:o.cur,changed:true};}
-          m=merge3(BASES[name]==null?undefined:clone(BASES[name]),clone(local),o.cur,BASES[name]!=null);
+          m=merge3(BASES[name]==null?undefined:clone(BASES[name]),fillMeta(clone(local),o.cur),o.cur,BASES[name]!=null);
           if(massDelete(m,o.cur))return{blocked:true,data:o.cur};
           if(sameFb(m,o.cur)){commitBase(name,o.cur);return{data:o.cur,changed:!sameFb(o.cur,local)};}
         }
@@ -753,6 +765,7 @@ function pushNow(){
   },(err,committed,snap)=>{
     vwPushing=false;
     const _pend=vwRemoteWhilePushing;vwRemoteWhilePushing=false;
+    /* لو الرفع فشل: نرجع للقطة اللي وصلت. لو نجح: اللقطات اللي وصلت قبله أقدم منه فمتتعادش */
     if((err||!committed)&&_pend&&vwLastRemote)setTimeout(()=>vwOnRemote(vwLastRemote),0);
     if(err){console.error(err);setSync('offline');setTimeout(pushNow,5000);return;}
     if(!committed){if(!guardHit)setTimeout(pushNow,3000);return;}
@@ -762,7 +775,6 @@ function pushNow(){
     else{ if(!SafeSync.same(val,JSON.parse(localAtStart)))vwApplyMerged(val,true); try{localStorage.removeItem('vw_dirty')}catch(e){} }
     setSync('online');
     if(vwPushAgain){vwPushAgain=false;pushNow();return;}
-    if(_pend&&vwLastRemote&&!SafeSync.same(vwLastRemote,val))vwOnRemote(vwLastRemote);
   },false);
 }
 /* لو المستخدم قفل أو سويتش والرفع لسه في الطابور — ارفع فورًا */

@@ -1284,10 +1284,11 @@ const Sync=(()=>{
     }catch(e){if(typeof dirty!=="undefined")dirty=true;status((Lang.current()==="ar"?"فشل المزامنة: ":"Sync failed: ")+e.message,"err");if(!silent)Toast.show((Lang.current()==="ar"?"فشل المزامنة: ":"Sync failed: ")+e.message,"err");}
     busy=false;
   }
-  function schedulePush(){ // debounced auto-push after local changes
+  function schedulePush(){ // debounced auto-push: pull + merge + push (SafeSync — never a blind overwrite)
     if(!enabled())return;clearTimeout(pushTimer);
-    pushTimer=setTimeout(()=>{pushAll(buildPayload()).then(()=>status((Lang.current()==="ar"?"محفوظ سحابيًا":"Cloud saved")+" \u00b7 "+new Date().toLocaleTimeString(),"ok")).catch(e=>status((Lang.current()==="ar"?"تعذّر الرفع":"Push failed")+": "+e.message,"err"));},2500);
+    pushTimer=setTimeout(function again(){ if(busy){pushTimer=setTimeout(again,1500);return;} syncNow(true); },1500);
   }
+
   /* every local change is pushed automatically: pull + merge first, then push (never a blind overwrite of the cloud) */
   let dirty=false,autoT=null;
   function markDirty(){if(!enabled())return;dirty=true;setTopSync("busy");clearTimeout(autoT);autoT=setTimeout(flush,2500);}
