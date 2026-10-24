@@ -91,6 +91,7 @@ tr.tot td{font-weight:800;background:var(--pri-soft)}
 .search{margin-bottom:10px}
 .st .ic2{width:100%;padding:8px 6px;border-radius:7px;font-size:15px;border:1px solid var(--line);background:var(--surface);text-align:center}
 .st .ic2:focus{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-soft)}
+.st .ic2.auto{color:var(--sub,#8a93a6);font-style:italic}
 .st .ic2.pman{color:var(--bad);border-color:var(--bad);font-weight:800;background:var(--bad-soft)}
 .st tr.st-bad td{background:var(--bad-soft)}
 .st tr.st-miss td:nth-child(6){background:var(--warn-soft)}
@@ -122,7 +123,7 @@ tr.tot td{font-weight:800;background:var(--pri-soft)}
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <script>
 "use strict";
-var APP_VER='v2';
+var APP_VER='v3';
 var FB_CFG={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",storageBucket:"my-app-sync-11ad9.firebasestorage.app",messagingSenderId:"177039534756",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
 var FB_PATH='provision_wh/docs';
 var LS_KEY='provwh.state.v1',LS_ON='provwh.sync.on',LS_BK='provwh.bk.',LS_THEME='provwh.theme';
@@ -536,15 +537,27 @@ function invPDF(share){if(LASTINV)makePDF(invDocHTML(LASTINV),'فاتورة_'+(L
 
 
 /* ===== تسوية فواتير بروفيجن (زي الإكسيل) =====
-   المبلغ ثابت من الشيت. أول ما تكتب العدد السعر بيتحسب = المبلغ ÷ العدد.
-   لو غيّرت السعر بإيدك بيتعلم بالأحمر، ولو الإجمالي مختلف عن المبلغ بيظهر الفرق. */
+   المبلغ ثابت من الشيت. اكتب العدد ← السعر يتحسب (المبلغ ÷ العدد)، أو اكتب السعر ← العدد يتحسب (المبلغ ÷ السعر).
+   الخانة اللي اتحسبت لوحدها بتبان باهتة ومايلة وتقدر تعدّلها؛ لو الاتنين مكتوبين بإيدك والإجمالي مختلف بيظهر الفرق بالأحمر.
+   qman/pman = الخانة مكتوبة بإيد المستخدم (السطور القديمة: العدد الموجود يعتبر مكتوب بإيد). */
 var SF='all';
 function stRows(){return all('out').filter(function(m){return m.src}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.c||0)-(b.c||0)})}
+function qMan(m){return m.qman!==undefined?!!m.qman:+m.qty>0}
+function pMan(m){return !!m.pman}
+function stCls(m,f){var man=f==='qty'?qMan(m):pMan(m),v=f==='qty'?+m.qty:+m.price;if(!v)return '';if(!man)return ' auto';return (qMan(m)&&pMan(m)&&Math.abs(stDiff(m))>0.01)?' pman':''}
+function stCalc(d,f,raw){d=Object.assign({},d);var v=r3(num(raw)),a=+d.amt||0,empty=String(raw).trim()==='';
+  if(f==='qty'){d.qty=v;d.qman=(!empty&&v>0)?1:0;
+    if(!pMan(d)){d.price=(a&&v>0)?Math.round(a/v*10000)/10000:0;d.pman=0}
+    else if(!d.qman&&a&&+d.price>0)d.qty=r3(a/d.price);}
+  else{d.price=v;d.pman=(!empty&&v>0)?1:0;
+    if(!qMan(d)){d.qty=(a&&v>0)?r3(a/v):0;d.qman=0}
+    else if(!d.pman&&a&&+d.qty>0)d.price=Math.round(a/d.qty*10000)/10000;}
+  return d}
 function stDiff(m){return (+m.qty&&+m.price&&+m.amt)?m.qty*m.price-m.amt:0}
 function stRowHtml(m,i){var it=S.docs[m.item]||{},df=stDiff(m),bad=Math.abs(df)>0.01,miss=!(+m.qty);
   return '<tr data-id="'+m.id+'" class="'+(bad?'st-bad':miss?'st-miss':'')+'"><td class="c-sub">'+(i+1)+'</td><td>'+sd(m.date)+'</td><td class="b">'+esc(nm(m.item))+'</td><td>'+esc(nm(it.unit))+'</td><td class="n">'+(+m.amt?money(m.amt):'<span class="c-sub">بدون قيمة</span>')+'</td>'+
-  '<td style="padding:3px"><input class="sq ic2" data-id="'+m.id+'" data-f="qty" inputmode="decimal" value="'+(+m.qty?r3(m.qty):'')+'" placeholder="العدد"></td>'+
-  '<td style="padding:3px"><input class="sq ic2'+(m.pman?' pman':'')+'" data-id="'+m.id+'" data-f="price" inputmode="decimal" value="'+(+m.price?Math.round(m.price*100)/100:'')+'" placeholder="السعر"></td>'+
+  '<td style="padding:3px"><input class="sq ic2'+stCls(m,'qty')+'" data-id="'+m.id+'" data-f="qty" inputmode="decimal" value="'+(+m.qty?r3(m.qty):'')+'" placeholder="العدد"></td>'+
+  '<td style="padding:3px"><input class="sq ic2'+stCls(m,'price')+'" data-id="'+m.id+'" data-f="price" inputmode="decimal" value="'+(+m.price?Math.round(m.price*100)/100:'')+'" placeholder="السعر"></td>'+
   '<td class="n b st-tot">'+(+m.qty&&+m.price?money(m.qty*m.price):'—')+'</td><td class="n st-df '+(bad?'c-bad b':'')+'">'+(bad?money(df):'')+'</td></tr>'}
 VIEWS.settle=function(){
   var rows=stRows(),done=rows.filter(function(m){return +m.qty}).length,bad=rows.filter(function(m){return Math.abs(stDiff(m))>0.01}).length;
@@ -555,19 +568,23 @@ VIEWS.settle=function(){
   '<div class="chips no-print"><div class="chip'+(SF==='all'?' on':'')+'" onclick="SF=\'all\';render()">الكل</div><div class="chip'+(SF==='miss'?' on':'')+'" onclick="SF=\'miss\';render()">ناقص العدد ('+(rows.length-done)+')</div><div class="chip'+(SF==='bad'?' on':'')+'" onclick="SF=\'bad\';render()">فيه فرق ('+bad+')</div></div>'+
   '<div class="card" style="padding:10px"><div class="tbl-wrap"><table class="xl st"><thead><tr><th>#</th><th>التاريخ</th><th>الصنف</th><th>الوحدة</th><th class="n">المبلغ</th><th style="min-width:90px">العدد</th><th style="min-width:90px">السعر</th><th class="n">الإجمالي</th><th class="n">الفرق</th></tr></thead><tbody id="stBody">'+
   (show.length?show.map(stRowHtml).join(''):'<tr><td colspan="9" class="empty">مفيش سطور</td></tr>')+'</tbody></table></div>'+
-  '<p class="hint" style="margin-top:8px">⌨️ اكتب العدد والسعر بيتحسب لوحده من المبلغ. لو غيّرت السعر بيتعلم <b class="c-bad">بالأحمر</b>، ولو الإجمالي مختلف عن المبلغ بيظهر الفرق. <b>Enter</b> للخانة اللي بعدها، والأسهم للتنقل. الوحدة بتتغير من صفحة الأصناف.</p></div>'+shareBar('out');
+  '<p class="hint" style="margin-top:8px">⌨️ اكتب العدد والسعر بيتحسب لوحده من المبلغ — أو اكتب السعر والعدد بيتحسب. الخانة المحسوبة بتبان <i>باهتة</i> وتقدر تعدّلها، ولو الاتنين مكتوبين بإيدك والإجمالي مختلف عن المبلغ بيتعلم <b class="c-bad">بالأحمر</b> ويظهر الفرق. <b>Enter</b> للخانة اللي بعدها، والأسهم للتنقل. الوحدة بتتغير من صفحة الأصناف.</p></div>'+shareBar('out');
 };
 function stCommit(el){
-  var d=S.docs[el.getAttribute('data-id')];if(!d)return;d=Object.assign({},d);var f=el.getAttribute('data-f'),v=r3(num(el.value));
-  if(f==='qty'){d.qty=v;if(!d.pman&&+d.amt&&v>0)d.price=Math.round(d.amt/v*10000)/10000;if(!v&&!d.pman)d.price=0;}
-  else{d.price=v;var auto=(+d.amt&&+d.qty)?Math.round(d.amt/d.qty*100)/100:null;d.pman=(auto===null||Math.abs(v-auto)>0.005)&&v>0?1:0;if(!v)d.pman=0;}
-  put(d);stPaint(d);
+  var d=S.docs[el.getAttribute('data-id')];if(!d)return;var f=el.getAttribute('data-f');
+  var cur=f==='qty'?(+d.qty?String(r3(d.qty)):''):(+d.price?String(Math.round(d.price*100)/100):'');
+  if(String(el.value).trim()===cur)return;
+  d=stCalc(d,f,el.value);put(d);stPaint(d);
 }
 function stPaint(d){var tr=document.querySelector('#stBody tr[data-id="'+d.id+'"]');if(!tr)return;var df=stDiff(d),bad=Math.abs(df)>0.01;
   tr.className=bad?'st-bad':(!(+d.qty)?'st-miss':'');
-  var pq=tr.querySelector('[data-f="price"]');if(pq&&document.activeElement!==pq)pq.value=+d.price?Math.round(d.price*100)/100:'';if(pq)pq.classList.toggle('pman',!!d.pman);
+  var qq=tr.querySelector('[data-f="qty"]'),pq=tr.querySelector('[data-f="price"]');
+  if(qq&&document.activeElement!==qq)qq.value=+d.qty?r3(d.qty):'';
+  if(pq&&document.activeElement!==pq)pq.value=+d.price?Math.round(d.price*100)/100:'';
+  [qq,pq].forEach(function(x){if(!x)return;var c=stCls(d,x.getAttribute('data-f'));x.classList.toggle('auto',c===' auto');x.classList.toggle('pman',c===' pman')});
   tr.querySelector('.st-tot').textContent=+d.qty&&+d.price?money(d.qty*d.price):'—';var c=tr.querySelector('.st-df');c.textContent=bad?money(df):'';c.className='n st-df '+(bad?'c-bad b':'');}
 document.addEventListener('change',function(e){var el=e.target;if(el.classList&&el.classList.contains('sq'))stCommit(el)});
+document.addEventListener('input',function(e){var el=e.target;if(!el.classList||!el.classList.contains('sq'))return;var d=S.docs[el.getAttribute('data-id')];if(!d)return;stPaint(stCalc(d,el.getAttribute('data-f'),el.value))});
 document.addEventListener('keydown',function(e){var el=e.target;if(!el.classList||!el.classList.contains('sq'))return;
   var ins=Array.prototype.slice.call(document.querySelectorAll('#stBody .sq')),i=ins.indexOf(el),go=function(j){var t=ins[j];if(t){t.focus();try{t.select()}catch(x){}}};
   if(e.key==='Enter'){e.preventDefault();stCommit(el);go(i+(e.shiftKey?-1:1));}
