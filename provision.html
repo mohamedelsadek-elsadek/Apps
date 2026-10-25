@@ -123,7 +123,7 @@ tr.tot td{font-weight:800;background:var(--pri-soft)}
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <script>
 "use strict";
-var APP_VER='v3';
+var APP_VER='v4';
 var FB_CFG={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",storageBucket:"my-app-sync-11ad9.firebasestorage.app",messagingSenderId:"177039534756",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
 var FB_PATH='provision_wh/docs';
 var LS_KEY='provwh.state.v1',LS_ON='provwh.sync.on',LS_BK='provwh.bk.',LS_THEME='provwh.theme';
@@ -584,7 +584,13 @@ function stPaint(d){var tr=document.querySelector('#stBody tr[data-id="'+d.id+'"
   [qq,pq].forEach(function(x){if(!x)return;var c=stCls(d,x.getAttribute('data-f'));x.classList.toggle('auto',c===' auto');x.classList.toggle('pman',c===' pman')});
   tr.querySelector('.st-tot').textContent=+d.qty&&+d.price?money(d.qty*d.price):'—';var c=tr.querySelector('.st-df');c.textContent=bad?money(df):'';c.className='n st-df '+(bad?'c-bad b':'');}
 document.addEventListener('change',function(e){var el=e.target;if(el.classList&&el.classList.contains('sq'))stCommit(el)});
-document.addEventListener('input',function(e){var el=e.target;if(!el.classList||!el.classList.contains('sq'))return;var d=S.docs[el.getAttribute('data-id')];if(!d)return;stPaint(stCalc(d,el.getAttribute('data-f'),el.value))});
+/* الحفظ كان بيحصل بس لما تخرج من الخانة (change) — لو عملت refresh وانت لسه فيها كان الرقم بيضيع. دلوقتي بيتحفظ وانت بتكتب */
+var stT=null;
+document.addEventListener('input',function(e){var el=e.target;if(!el.classList||!el.classList.contains('sq'))return;var d=S.docs[el.getAttribute('data-id')];if(!d)return;stPaint(stCalc(d,el.getAttribute('data-f'),el.value));
+  clearTimeout(stT);stT=setTimeout(function(){stCommit(el)},500)});
+function stFlush(){var el=document.activeElement;if(el&&el.classList&&el.classList.contains('sq')){clearTimeout(stT);stCommit(el)}}
+window.addEventListener('pagehide',stFlush);window.addEventListener('beforeunload',stFlush);
+document.addEventListener('visibilitychange',function(){if(document.hidden)stFlush()});
 document.addEventListener('keydown',function(e){var el=e.target;if(!el.classList||!el.classList.contains('sq'))return;
   var ins=Array.prototype.slice.call(document.querySelectorAll('#stBody .sq')),i=ins.indexOf(el),go=function(j){var t=ins[j];if(t){t.focus();try{t.select()}catch(x){}}};
   if(e.key==='Enter'){e.preventDefault();stCommit(el);go(i+(e.shiftKey?-1:1));}
