@@ -123,7 +123,7 @@ tr.tot td{font-weight:800;background:var(--pri-soft)}
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <script>
 "use strict";
-var APP_VER='v4';
+var APP_VER='v5';
 var FB_CFG={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",storageBucket:"my-app-sync-11ad9.firebasestorage.app",messagingSenderId:"177039534756",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
 var FB_PATH='provision_wh/docs';
 var LS_KEY='provwh.state.v1',LS_ON='provwh.sync.on',LS_BK='provwh.bk.',LS_THEME='provwh.theme';
@@ -184,14 +184,15 @@ function ledger(upTo){
   all('item').forEach(function(i){L[i.id]={inQ:0,inV:0,outQ:0,outV:0,cogs:0,qty:0,avg:0}});
   var mv=[].concat(all('in'),all('out')).filter(function(m){return L[m.item]&&(!upTo||m.date<=upTo)}).sort(mvCmp);
   mv.forEach(function(m){var r=L[m.item],q=+m.qty||0,p=+m.price||0;
-    if(m.t==='in'){var v=r.qty*r.avg+q*p;r.qty+=q;r.avg=r.qty>0?v/r.qty:p;r.inQ+=q;r.inV+=q*p}
-    else{r.cogs+=q*r.avg;r.qty-=q;r.outQ+=q;r.outV+=q*p}
+    /* cq = رصيد التكلفة: لو المبيعات سبقت الوارد المسجل (رصيد بالسالب) بيتصفّر بدل ما يبوظ متوسط التكلفة؛ الرصيد المعروض (qty) زي ما هو */
+    if(m.t==='in'){var pq=Math.max(r.cq||0,0),v=pq*r.avg+q*p;r.cq=pq+q;r.qty+=q;r.avg=r.cq>0?v/r.cq:p;r.inQ+=q;r.inV+=q*p}
+    else{r.cogs+=q*r.avg;r.qty-=q;r.cq=(r.cq||0)-q;r.outQ+=q;r.outV+=q*p}
     m._cost=m.t==='out'?r.avg:p});
   for(var k in L)L[k].val=Math.max(0,L[k].qty)*L[k].avg;
   return L;
 }
 function costMap(){var m={};var mv=[].concat(all('in'),all('out')).sort(mvCmp);var q={},a={};
-  mv.forEach(function(x){var k=x.item;q[k]=q[k]||0;a[k]=a[k]||0;var qq=+x.qty||0,p=+x.price||0;if(x.t==='in'){var v=q[k]*a[k]+qq*p;q[k]+=qq;a[k]=q[k]>0?v/q[k]:p}else{m[x.id]=a[k];q[k]-=qq}});return m}
+  mv.forEach(function(x){var k=x.item;q[k]=q[k]||0;a[k]=a[k]||0;var qq=+x.qty||0,p=+x.price||0;if(x.t==='in'){var pq=Math.max(q[k],0),v=pq*a[k]+qq*p;q[k]=pq+qq;a[k]=q[k]>0?v/q[k]:p}else{m[x.id]=a[k];q[k]-=qq}});return m}
 
 /* ===== التنقل ===== */
 var PAGES=[['bal','📊','الرصيد'],['in','📥','وارد'],['out','📤','منصرف'],['settle','✍️','تسوية'],['acct','💵','الحساب'],['inv','🧾','فاتورة'],['items','🗂️','الأصناف'],['rep','📈','التقارير'],['data','💾','البيانات']];
