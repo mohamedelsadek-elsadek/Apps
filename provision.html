@@ -123,7 +123,7 @@ tr.tot td{font-weight:800;background:var(--pri-soft)}
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <script>
 "use strict";
-var APP_VER='v5';
+var APP_VER='v6';
 var FB_CFG={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",storageBucket:"my-app-sync-11ad9.firebasestorage.app",messagingSenderId:"177039534756",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
 var FB_PATH='provision_wh/docs';
 var LS_KEY='provwh.state.v1',LS_ON='provwh.sync.on',LS_BK='provwh.bk.',LS_THEME='provwh.theme';
@@ -195,7 +195,7 @@ function costMap(){var m={};var mv=[].concat(all('in'),all('out')).sort(mvCmp);v
   mv.forEach(function(x){var k=x.item;q[k]=q[k]||0;a[k]=a[k]||0;var qq=+x.qty||0,p=+x.price||0;if(x.t==='in'){var pq=Math.max(q[k],0),v=pq*a[k]+qq*p;q[k]=pq+qq;a[k]=q[k]>0?v/q[k]:p}else{m[x.id]=a[k];q[k]-=qq}});return m}
 
 /* ===== التنقل ===== */
-var PAGES=[['bal','📊','الرصيد'],['in','📥','وارد'],['out','📤','منصرف'],['settle','✍️','تسوية'],['acct','💵','الحساب'],['inv','🧾','فاتورة'],['items','🗂️','الأصناف'],['rep','📈','التقارير'],['data','💾','البيانات']];
+var PAGES=[['bal','📊','الرصيد'],['in','📥','وارد'],['out','📤','منصرف'],['settle','✍️','تسوية'],['acct','💵','الحساب'],['coll','💰','التحصيل'],['inv','🧾','فاتورة'],['items','🗂️','الأصناف'],['rep','📈','التقارير'],['data','💾','البيانات']];
 var page='settle',EDIT=null,CAT='',Q='';
 function go(k){if(EDIT&&S.docs[EDIT]&&S.docs[EDIT].t!==k)EDIT=null;page=k;render();window.scrollTo(0,0)}
 function render(){
@@ -628,6 +628,39 @@ function addPay(){var d=$('pyD').value,a=num($('pyA').value),m=$('pyM').value,n=
   if(!d||a<=0){toast('اكتب التاريخ والمبلغ',1);return}
   put({id:uid(),t:'pay',date:d,party:ACP,amt:a,pm:m==='نقدي'?'':m,note:n});toast('اتسجلت دفعة '+money(a));render()}
 function delPay(id){var p=S.docs[id];ask('حذف الدفعة؟',arDate(p.date)+' — '+money(p.amt),function(){removeDoc(id);toast('اتحذفت');render()},true,'حذف')}
+
+/* ===== التحصيل: كل الدفعات اللي اتحصّلت (القديمة والجديدة) في مكان واحد ===== */
+var CPF='';
+function collRows(){return all('pay').filter(function(x){return !CPF||x.party===CPF}).sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:(b.c||0)-(a.c||0)})}
+VIEWS.coll=function(){
+  var ps=acctParties(),rows=collRows(),tot=0,byM={},byPm={};
+  rows.forEach(function(x){var a=+x.amt||0;tot+=a;var m=x.date.slice(0,7);byM[m]=(byM[m]||0)+a;var k=x.pm||'نقدي';byPm[k]=(byPm[k]||0)+a});
+  var bal=CPF?acctBal(CPF):ps.reduce(function(s,p){return s+acctBal(p)},0),last=rows[0];
+  var months=Object.keys(byM).sort().reverse();
+  return '<h2 class="sec">💰 التحصيل</h2>'+
+  (ps.length>1?'<div class="chips no-print"><div class="chip'+(!CPF?' on':'')+'" onclick="CPF=\'\';render()">الكل</div>'+ps.map(function(p){return '<div class="chip'+(p===CPF?' on':'')+'" onclick="CPF=\''+esc(p)+'\';render()">'+esc(p)+'</div>'}).join('')+'</div>':'')+
+  '<div class="kpis"><div class="kpi hl"><div class="l">إجمالي المحصّل</div><div class="v c-ok">'+money(tot)+'<small>ج</small></div></div>'+
+  '<div class="kpi"><div class="l">عدد التحصيلات</div><div class="v">'+rows.length+'</div></div>'+
+  '<div class="kpi"><div class="l">آخر تحصيل</div><div class="v" style="font-size:15px">'+(last?arDate(last.date)+'<small> · '+money(last.amt)+'</small>':'—')+'</div></div>'+
+  '<div class="kpi"><div class="l">المتبقي على العميل</div><div class="v'+(bal>0?' c-bad':'')+'">'+money(bal)+'<small>ج</small></div></div></div>'+
+  '<div class="card no-print"><h3>➕ تحصيل جديد</h3><div class="grid2"><div class="field"><label>التاريخ</label><input type="date" id="clD" value="'+today()+'"></div><div class="field"><label>المبلغ</label><input id="clA" inputmode="decimal" placeholder="0"></div></div>'+
+  '<div class="grid2"><div class="field"><label>العميل</label><select id="clP">'+ps.map(function(p){return '<option'+(p===(CPF||ACP)?' selected':'')+'>'+esc(p)+'</option>'}).join('')+'</select></div><div class="field"><label>طريقة الدفع</label><select id="clM">'+PMS.map(function(x){return '<option>'+x+'</option>'}).join('')+'</select></div></div>'+
+  '<div class="field"><label>ملاحظة</label><input id="clN" placeholder="اختياري"></div><button class="btn pri block" onclick="addColl()">💾 تسجيل التحصيل</button></div>'+
+  '<div class="card"><h3>📋 سجل التحصيل</h3><div class="tbl-wrap"><table><thead><tr><th>#</th><th>التاريخ</th><th>العميل</th><th class="n">المبلغ</th><th>الطريقة</th><th>ملاحظة</th><th class="no-print"></th></tr></thead><tbody>'+
+  (rows.length?rows.map(function(x,i){return '<tr><td class="c-sub">'+(rows.length-i)+'</td><td>'+arDate(x.date)+'</td><td>'+esc(x.party||'')+'</td><td class="n b c-ok">'+money(x.amt)+'</td><td>'+esc(x.pm||'نقدي')+'</td><td class="c-sub">'+esc(x.note||'')+'</td><td class="no-print" style="white-space:nowrap"><button class="btn ghost sm" onclick="editColl(\''+x.id+'\')">✎</button> <button class="btn ghost sm" onclick="delPay(\''+x.id+'\')">🗑</button></td></tr>'}).join(''):'<tr><td colspan="7" class="empty">لسه مفيش تحصيلات</td></tr>')+
+  (rows.length?'<tr class="tot"><td colspan="3">الإجمالي</td><td class="n">'+money(tot)+'</td><td colspan="3"></td></tr>':'')+'</tbody></table></div></div>'+
+  (months.length?'<div class="card"><h3>🗓️ حسب الشهر</h3><div class="tbl-wrap"><table><thead><tr><th>الشهر</th><th class="n">المحصّل</th></tr></thead><tbody>'+months.map(function(m){var p=m.split('-');return '<tr><td>'+new Date(+p[0],p[1]-1,1).toLocaleDateString('ar-EG',{month:'long',year:'numeric'})+'</td><td class="n b">'+money(byM[m])+'</td></tr>'}).join('')+'</tbody></table></div>'+
+  '<p class="hint" style="margin-top:8px">'+Object.keys(byPm).map(function(k){return esc(k)+': '+money(byPm[k])}).join(' · ')+'</p></div>':'');
+};
+function addColl(){var d=$('clD').value,a=num($('clA').value),p=$('clP').value,m=$('clM').value,n=$('clN').value.trim();
+  if(!d||a<=0){toast('اكتب التاريخ والمبلغ',1);return}
+  put({id:uid(),t:'pay',date:d,party:p||ACP,amt:a,pm:m==='نقدي'?'':m,note:n});toast('اتسجل تحصيل '+money(a));render()}
+function editColl(id){var x=S.docs[id];if(!x)return;
+  openModal('<h3>✎ تعديل التحصيل</h3><div class="grid2"><div class="field"><label>التاريخ</label><input type="date" id="ecD" value="'+esc(x.date)+'"></div><div class="field"><label>المبلغ</label><input id="ecA" inputmode="decimal" value="'+(+x.amt||'')+'"></div></div>'+
+  '<div class="grid2"><div class="field"><label>طريقة الدفع</label><select id="ecM">'+PMS.map(function(k){return '<option'+((x.pm||'نقدي')===k?' selected':'')+'>'+k+'</option>'}).join('')+'</select></div><div class="field"><label>ملاحظة</label><input id="ecN" value="'+esc(x.note||'')+'"></div></div>'+
+  '<div class="btnrow"><button class="btn ghost" onclick="closeModal()">إلغاء</button><button class="btn pri" onclick="saveColl(\''+id+'\')">💾 حفظ</button></div>')}
+function saveColl(id){var x=Object.assign({},S.docs[id]),a=num($('ecA').value);if(!$('ecD').value||a<=0){toast('اكتب التاريخ والمبلغ',1);return}
+  x.date=$('ecD').value;x.amt=a;var m=$('ecM').value;x.pm=m==='نقدي'?'':m;x.note=$('ecN').value.trim();put(x);closeModal();toast('اتعدّل');render()}
 
 /* ===== الأصناف ===== */
 VIEWS.items=function(){
