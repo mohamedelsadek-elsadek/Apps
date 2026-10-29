@@ -80,7 +80,7 @@ nav.tabs button.on{color:var(--acc)}
 </head>
 <body>
 <header>
-  <h1>🏠 مصاريف البيت <span class="ver">v3</span></h1>
+  <h1>🏠 مصاريف البيت <span class="ver">v4</span></h1>
   <span id="syncTxt" class="mut">—</span><span id="syncDot" class="dot"></span>
 </header>
 
@@ -124,6 +124,36 @@ nav.tabs button.on{color:var(--acc)}
     <div class="row" style="margin-top:8px" id="pickWrap"></div>
   </div>
   <div id="repBody"></div>
+</section>
+
+<!-- ============ خزنة البيت ============ -->
+<section class="page" id="pg-safe">
+  <div class="card" style="text-align:center">
+    <div class="mut">رصيد خزنة البيت</div>
+    <div id="safeBal" style="font-size:32px;font-weight:700;margin:6px 0"></div>
+    <div class="mut" id="safeSub"></div>
+  </div>
+  <div class="card">
+    <h2 id="sfTitle">حركة جديدة</h2>
+    <div class="seg" id="sfKind">
+      <button data-k="in" class="on">إيداع ➕</button>
+      <button data-k="out">سحب ➖</button>
+      <button data-k="set">جرد (الرصيد الفعلي)</button>
+    </div>
+    <div class="grid">
+      <div><label>التاريخ</label><input type="date" id="sfDate"></div>
+      <div><label id="sfAmtL">المبلغ</label><input type="text" inputmode="decimal" id="sfAmt" placeholder="0"></div>
+      <div class="full"><label>ملاحظة (اختياري)</label><input type="text" id="sfNote" placeholder="مثلاً: من مرتب / لمصاريف الشهر"></div>
+      <div class="full row">
+        <button class="btn" style="flex:1" id="sfSave">حفظ</button>
+        <button class="btn sec" id="sfCancel" style="display:none">إلغاء</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>حركات الخزنة</h2>
+    <div id="safeList"></div>
+  </div>
 </section>
 
 <!-- ============ السجل / الفلترة ============ -->
@@ -187,6 +217,7 @@ nav.tabs button.on{color:var(--acc)}
 <nav class="tabs">
   <button data-p="add" class="on"><b>＋</b>تسجيل</button>
   <button data-p="rep"><b>📊</b>التقارير</button>
+  <button data-p="safe"><b>🔐</b>الخزنة</button>
   <button data-p="list"><b>🔎</b>السجل</button>
   <button data-p="set"><b>⚙️</b>الإعدادات</button>
 </nav>
@@ -195,7 +226,7 @@ nav.tabs button.on{color:var(--acc)}
 <script>
 "use strict";
 /* ================= ثوابت ================= */
-var APP_VER = 3;
+var APP_VER = 4;
 var DEFAULT_FB = {
   apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
   authDomain:"my-app-sync-11ad9.firebaseapp.com",
@@ -222,7 +253,14 @@ var MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','ي
      c : {key:{n,o,u,del}}   البنود
      pp: {key:{n,o,u,del}}   الأشخاص
      b : {key:{n,v,u}}       ميزانية شهرية للبند (v=0 يعني مفيش)            */
-var S = {items:{}, meta:{c:{}, pp:{}, b:{}}};
+var S = {items:{}, meta:{c:{}, pp:{}, b:{}}, safe:{}};
+/* safe (خزنة البيت): {id:{id,d,k:'in'|'out'|'set',a,n,u}} أو شاهد حذف {id,del:1,u}
+   set = جرد: الرصيد الفعلي في التاريخ ده (بيلغي اللي قبله) */
+function validSafe(k,x){
+  if(!x||typeof x!=='object'||x.id!==k||!/^s[a-z0-9]{4,30}$/.test(k)||typeof x.u!=='number') return false;
+  if(x.del) return true;
+  return typeof x.d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.d)&&typeof x.a==='number'&&x.a>=0&&isFinite(x.a)&&(x.k==='in'||x.k==='out'||x.k==='set');
+}
 
 function $(id){return document.getElementById(id)}
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -282,6 +320,7 @@ function load(){
   var raw = lsGet(LS_KEY), o=null;
   if(raw){try{o=JSON.parse(raw)}catch(e){}}
   if(o && o.items){ for(var k in o.items){ if(validItem(k,o.items[k])) S.items[k]=o.items[k]; } }
+  if(o && o.safe){ for(var ks in o.safe){ if(validSafe(ks,o.safe[ks])) S.safe[ks]=o.safe[ks]; } }
   var m = o && migrateMeta(o.meta);
   S.meta = m || defaultMeta();
   homeDefaults();
@@ -439,6 +478,57 @@ function renderToday(){
   $('todayList').innerHTML = arr.length ? arr.map(function(x){return itemHtml(x,false)}).join('') : '<div class="empty">مفيش مصاريف مسجلة يوم '+nice(d)+'</div>';
   $('todayTitle').textContent = d===today()?'مصاريف اليوم':'مصاريف '+nice(d);
   $('saveBtn').textContent = editId?'حفظ التعديل':(d===today()?'حفظ':'حفظ على '+short(d));
+}
+
+/* ================= خزنة البيت ================= */
+var sfK='in', sfEdit=null;
+var SF_LBL={in:'إيداع',out:'سحب',set:'جرد'};
+function safeRows(){ /* بالترتيب الزمني ومعاها الرصيد بعد كل حركة */
+  var arr=[]; for(var k in S.safe){var x=S.safe[k]; if(x&&!x.del) arr.push(x)}
+  arr.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.u-b.u)});
+  var bal=0; arr.forEach(function(x){ if(x.k==='set'){x._diff=x.a-bal; bal=x.a;} else bal+= x.k==='in'?x.a:-x.a; x._bal=bal; });
+  return arr;
+}
+function sfSetKind(k){
+  sfK=k; Array.prototype.forEach.call(document.querySelectorAll('#sfKind button'),function(b){b.classList.toggle('on',b.getAttribute('data-k')===k)});
+  $('sfAmtL').textContent = k==='set'?'المبلغ اللي في الخزنة فعلاً':'المبلغ';
+}
+function sfReset(){ sfEdit=null; $('sfAmt').value=''; $('sfNote').value=''; $('sfTitle').textContent='حركة جديدة'; $('sfSave').textContent='حفظ'; $('sfCancel').style.display='none'; }
+function sfSave(){
+  var a=parseAmt($('sfAmt').value), d=$('sfDate').value;
+  if(!d){toast('اختار التاريخ',true);return}
+  if(!(a>0)&&!(sfK==='set'&&a===0)){toast('اكتب المبلغ',true);$('sfAmt').focus();return}
+  if(sfEdit&&(!S.safe[sfEdit]||S.safe[sfEdit].del)) sfEdit=null;
+  var id=sfEdit||('s'+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+  S.safe[id]={id:id,d:d,k:sfK,a:Math.round(a*100)/100,n:$('sfNote').value.trim().slice(0,200),u:stamp(S.safe[id])};
+  persist(); pushSafe(S.safe[id]); toast(sfEdit?'اتعدل ✓':'اتسجل ✓'); sfReset(); renderSafe();
+}
+function sfEditRow(id){
+  var x=S.safe[id]; if(!x||x.del) return;
+  sfEdit=id; sfSetKind(x.k); $('sfDate').value=x.d; $('sfAmt').value=x.a; $('sfNote').value=x.n||'';
+  $('sfTitle').textContent='تعديل حركة'; $('sfSave').textContent='حفظ التعديل'; $('sfCancel').style.display=''; window.scrollTo(0,0);
+}
+function sfDel(id){
+  var x=S.safe[id]; if(!x||x.del) return;
+  if(!confirm('حذف '+SF_LBL[x.k]+' '+money(x.a)+'؟')) return;
+  S.safe[id]={id:id,del:1,u:stamp(x)}; if(sfEdit===id) sfReset();
+  persist(); pushSafe(S.safe[id]); renderSafe(); toast('اتحذف');
+}
+function renderSafe(){
+  if(!$('sfDate').value) $('sfDate').value=today();
+  var rows=safeRows(), bal=rows.length?rows[rows.length-1]._bal:0;
+  $('safeBal').textContent=money(bal); $('safeBal').style.color=bal<0?'var(--bad)':'var(--ok)';
+  var ms=monthStart(today()), tin=0, tout=0;
+  rows.forEach(function(x){ if(x.d>=ms){ if(x.k==='in') tin+=x.a; else if(x.k==='out') tout+=x.a; } });
+  $('safeSub').textContent = rows.length ? ('الشهر ده: إيداع '+money(tin)+' · سحب '+money(tout)) : 'ابدأ بـ "جرد" واكتب المبلغ اللي في الخزنة دلوقتي';
+  $('safeList').innerHTML = rows.length ? rows.slice().reverse().map(function(x){
+    var sign = x.k==='in'?'+':x.k==='out'?'−':'=';
+    var col = x.k==='in'?'var(--ok)':x.k==='out'?'var(--bad)':'var(--acc)';
+    var extra = x.k==='set' && x._diff ? ' (فرق '+(x._diff>0?'+':'')+fmt(x._diff)+')' : '';
+    return '<div class="item"><div class="m"><div>'+SF_LBL[x.k]+extra+'</div><div>'+nice(x.d)+(x.n?' — '+esc(x.n):'')+' · الرصيد '+money(x._bal)+'</div></div>'+
+      '<div class="a" style="color:'+col+'">'+sign+' '+money(x.a)+'</div>'+
+      '<button data-act="sfedit" data-id="'+esc(x.id)+'" aria-label="تعديل">✎</button><button data-act="sfdel" data-id="'+esc(x.id)+'" aria-label="حذف">🗑</button></div>';
+  }).join('') : '<div class="empty">لسه مفيش حركات</div>';
 }
 
 /* ================= التقارير ================= */
@@ -615,7 +705,7 @@ function removeFrom(kind,name){
 
 /* ================= نسخ احتياطي ================= */
 function download(name,text,type){var b=new Blob([text],{type:type});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
-function exportJSON(){download('expenses-backup-'+today()+'.json',JSON.stringify({app:'expenses',ver:APP_VER,at:Date.now(),items:S.items,meta:S.meta}),'application/json')}
+function exportJSON(){download('expenses-backup-'+today()+'.json',JSON.stringify({app:'expenses',ver:APP_VER,at:Date.now(),items:S.items,meta:S.meta,safe:S.safe}),'application/json')}
 function exportCSV(){
   var f=qf(), arr=query(f);
   var rows=[['التاريخ','المبلغ','البند','الشخص','ملاحظة']].concat(arr.map(function(x){return [x.d,x.a,x.c,x.p,x.n||'']}));
@@ -626,6 +716,7 @@ function exportCSV(){
 function mergeData(o){
   if(!o||typeof o.items!=='object') return -1;
   var n=0, batch={};
+  if(o.safe&&typeof o.safe==='object'){ for(var sk in o.safe){var sx=o.safe[sk]; if(!validSafe(sk,sx)) continue; var sl=S.safe[sk]; if(!sl||sx.u>sl.u){S.safe[sk]=sx;n++;batch['safe/'+sk]=sx}} }
   for(var k in o.items){var it=o.items[k]; if(!validItem(k,it)) continue; var l=S.items[k];
     if(!l||it.u>l.u){S.items[k]=it;n++;batch['items/'+k]=it}}
   var m=migrateMeta(o.meta);
@@ -645,7 +736,7 @@ function importJSON(file){
 }
 function dailyBackup(){
   var k=LS_BK+today();
-  if(!lsGet(k) && live().length) lsSet(k,JSON.stringify({items:S.items,meta:S.meta,at:Date.now()}));
+  if(!lsGet(k) && live().length) lsSet(k,JSON.stringify({items:S.items,meta:S.meta,safe:S.safe,at:Date.now()}));
   lsKeys().filter(function(x){return x&&x.indexOf(LS_BK)===0}).sort().slice(0,-BK_KEEP).forEach(lsDel);
 }
 function renderBackups(){
@@ -697,6 +788,9 @@ function mergeCloud(c){
   var ci=c.items||{}, before=JSON.stringify(S.meta), changed=false, toPush={};
   for(var k in ci){var it=ci[k],l=S.items[k]; if(!validItem(k,it)) continue; if(!l||it.u>l.u){S.items[k]=it;changed=true}}
   for(var k2 in S.items){var li=S.items[k2],cl=ci[k2]; if(!cl||li.u>(cl.u||0)) toPush['items/'+k2]=li}
+  var cs=c.safe||{};
+  for(var s1 in cs){var sx=cs[s1],sl=S.safe[s1]; if(!validSafe(s1,sx)) continue; if(!sl||sx.u>sl.u){S.safe[s1]=sx;changed=true}}
+  for(var s2 in S.safe){var ls=S.safe[s2],cl2=cs[s2]; if(!cl2||ls.u>(cl2.u||0)) toPush['safe/'+s2]=ls}
   var cm=migrateMeta(c.meta)||{c:{},pp:{},b:{}};
   ['c','pp','b'].forEach(function(kind){
     mergeMetaMap(kind,cm[kind]).forEach(function(k){toPush['meta/'+kind+'/'+k]=S.meta[kind][k]});
@@ -708,6 +802,7 @@ function mergeCloud(c){
   if(changed){persist(); refreshSelects(); renderAll();}
 }
 function pushItem(it){ if(fbRoot){ var u={}; u['items/'+it.id]=it; u['lastDevice']=devId(); fbRoot.update(u).catch(warn); } }
+function pushSafe(x){ if(fbRoot){ var u={}; u['safe/'+x.id]=x; u['lastDevice']=devId(); fbRoot.update(u).catch(warn); } }
 function pushMetaKey(kind,k){ if(fbRoot){ var u={}; u['meta/'+kind+'/'+k]=S.meta[kind][k]; fbRoot.update(u).catch(warn); } }
 function toggleSync(){
   if(lsGet(LS_ON)==='OFF'){ lsSet(LS_ON,'1'); initSync(); }
@@ -727,6 +822,7 @@ function renderAll(){
   if(curPage==='add') renderToday();
   else if(curPage==='rep') renderReport();
   else if(curPage==='list') renderList();
+  else if(curPage==='safe') renderSafe();
   else renderSettings();
 }
 function quickFilter(k){
@@ -743,6 +839,8 @@ function onAction(e){
   var act=b.getAttribute('data-act');
   if(act==='edit') editItem(b.getAttribute('data-id'));
   else if(act==='del') delItem(b.getAttribute('data-id'));
+  else if(act==='sfedit') sfEditRow(b.getAttribute('data-id'));
+  else if(act==='sfdel') sfDel(b.getAttribute('data-id'));
   else if(act==='rm') removeFrom(b.getAttribute('data-kind'),b.getAttribute('data-n'));
   else if(act==='openlist') openList(b.getAttribute('data-f'),b.getAttribute('data-t'));
   else if(act==='day'){ R.type='day'; R.anchor=b.getAttribute('data-d'); Array.prototype.forEach.call(document.querySelectorAll('#repSeg button'),function(x){x.classList.toggle('on',x.getAttribute('data-r')==='day')}); renderReport(); window.scrollTo(0,0); }
@@ -759,6 +857,9 @@ function boot(){
   onNewOpt($('fCat'),'c','اسم البند الجديد:');
   onNewOpt($('fPer'),'pp','اسم الشخص:');
   $('saveBtn').onclick=save;
+  $('sfSave').onclick=sfSave; $('sfCancel').onclick=function(){sfReset();renderSafe()};
+  $('sfAmt').addEventListener('keydown',function(e){if(e.key==='Enter')sfSave()});
+  Array.prototype.forEach.call(document.querySelectorAll('#sfKind button'),function(b){b.onclick=function(){sfSetKind(b.getAttribute('data-k'))}});
   $('fAmt').addEventListener('keydown',function(e){if(e.key==='Enter')save()});
   $('cancelEdit').onclick=function(){resetForm();renderToday()};
   $('fDate').onchange=renderToday;
@@ -780,7 +881,7 @@ function boot(){
   $('impFile').onchange=function(){if(this.files[0])importJSON(this.files[0]);this.value=''};
   window.addEventListener('online',function(){if(fbDb&&lsGet(LS_ON)!=='OFF')fbDb.goOnline()});
   /* تابين مفتوحين على نفس الجهاز: خليهم متطابقين */
-  window.addEventListener('storage',function(e){ if(e.key===LS_KEY){ S.items={}; load(); refreshSelects(); renderAll(); } });
+  window.addEventListener('storage',function(e){ if(e.key===LS_KEY){ S.items={}; S.safe={}; load(); refreshSelects(); renderAll(); } });
   /* لو البرنامج فضل مفتوح لليوم اللي بعده */
   var bootDay=today();
   document.addEventListener('visibilitychange',function(){ if(document.hidden) return; var t=today(); if(t!==bootDay){ if($('fDate').value===bootDay && !editId) $('fDate').value=t; bootDay=t; dailyBackup(); } renderAll(); });
