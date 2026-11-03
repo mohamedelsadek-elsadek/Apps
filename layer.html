@@ -227,6 +227,9 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
+/* v3.7: يمنع الصفحة تتحرك يمين وشمال على الموبايل (عناصر ثابتة برّه الشاشة كانت بتوسّعها) */
+html,body{overflow-x:hidden;max-width:100%}
+@supports (overflow-x:clip){html,body{overflow-x:clip}}
 body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-thumb{background:#c3ccd9;border-radius:20px;border:2px solid var(--bg)}
