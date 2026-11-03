@@ -207,7 +207,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة مزرعة الدجاج البياض v3.6</title>
+<title>نظام إدارة مزرعة الدجاج البياض v3.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -427,6 +427,52 @@ tbody tr:last-child td{border-bottom:none}
 .kpi-box .kl{font-size:11px;color:var(--muted2);margin-bottom:3px}
 .kpi-box .kv{font-size:21px;font-weight:800}
 .kpi-box .ks{font-size:11px;color:var(--muted);margin-top:2px}
+/* 👑 لوحة المالك — الواجهة الحيّة */
+.ow-wrap{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
+.ow-hero{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:stretch;padding:22px 24px;border-radius:18px;color:#fff;
+  background:radial-gradient(500px 220px at 0% 0%,rgba(255,255,255,.18),transparent 60%),linear-gradient(135deg,#9a3412 0%,#c2410c 45%,#d97706 100%);
+  box-shadow:0 14px 34px rgba(194,65,12,.25);position:relative;overflow:hidden;animation:owPop .5s ease-out both}
+.ow-hero h2{margin:4px 0 8px;font-family:var(--display);font-size:24px;font-weight:800;color:#fff}
+.ow-hi{font-size:13px;opacity:.92}
+.ow-live{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;background:rgba(255,255,255,.18);padding:7px 14px;border-radius:999px;font-size:13px}
+.ow-dot{width:9px;height:9px;border-radius:50%;background:#bef264;box-shadow:0 0 0 0 rgba(190,242,100,.8);animation:owPulse 1.8s infinite}
+.ow-hero-side{min-width:200px;flex:0 1 260px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px}
+.ow-mut2{font-size:12px;opacity:.85}
+.ow-price{font-family:var(--display);font-size:22px;font-weight:800}.ow-price span{font-size:12px;font-weight:600;opacity:.85}
+.ow-sec-t{font-family:var(--display);font-weight:800;font-size:15px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:4px}
+.ow-mut{font-size:12px;color:var(--muted2);font-weight:500}
+.ow-houses{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
+.ow-house{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:owPop .5s ease-out both;transition:transform .2s,box-shadow .2s}
+.ow-house:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,23,42,.08)}
+.ow-house-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ow-house-b{display:flex;gap:12px;align-items:center}
+.ow-ring{flex:none}.ow-ring-arc{transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)}
+.ow-house-g{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0}
+.ow-house-g>div{display:flex;flex-direction:column;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 8px;min-width:0}
+.ow-house-g span{font-size:11px;color:var(--muted2)}
+.ow-house-g b{font-size:15px;font-variant-numeric:tabular-nums}
+.ow-house-g em{font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ow-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.ow-pill.ok{background:var(--green-soft);color:#15803d}.ow-pill.warn{background:#fef3c7;color:#b45309}.ow-pill.bad{background:var(--red-soft);color:#b91c1c}.ow-pill.gray{background:var(--panel2);color:var(--muted)}
+.ow-eff{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:10px}
+.ow-eff-i{background:linear-gradient(180deg,#fff7ed,var(--panel));border:1px solid #fed7aa;border-radius:14px;padding:12px;text-align:center;display:flex;flex-direction:column;gap:2px;animation:owPop .5s ease-out both}
+.ow-eff-i .ic{font-size:24px}
+.ow-eff-i b{font-family:var(--display);font-size:21px;font-weight:800;color:#c2410c;font-variant-numeric:tabular-nums}
+.ow-eff-i span{font-size:12px;color:var(--muted)}
+.ow-heat-p{margin:0}
+.ow-heat{overflow-x:auto;direction:ltr;padding:12px 16px 14px}
+.ow-cell{transition:opacity .15s}.ow-cell:hover{opacity:.6}
+.ow-legend{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted2)}.ow-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-inline-start:6px}
+.ow-ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+.ow-ach-i{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);animation:owPop .5s ease-out both}
+.ow-ach-i .ic{font-size:26px;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#fff7ed;flex:none}
+.ow-ach-i>div:last-child{display:flex;flex-direction:column;min-width:0}
+.ow-ach-i span{font-size:12px;color:var(--muted2)}.ow-ach-i b{font-size:16px;font-variant-numeric:tabular-nums}.ow-ach-i em{font-style:normal;font-size:11px;color:var(--muted)}
+@keyframes owPop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes owPulse{0%{box-shadow:0 0 0 0 rgba(190,242,100,.8)}70%{box-shadow:0 0 0 10px rgba(190,242,100,0)}100%{box-shadow:0 0 0 0 rgba(190,242,100,0)}}
+@media (max-width:520px){.ow-house-b{flex-direction:column;align-items:stretch}.ow-ring{align-self:center}.ow-hero{padding:18px}}
+@media (prefers-reduced-motion:reduce){.ow-hero,.ow-house,.ow-eff-i,.ow-ach-i,.ow-dot{animation:none}.ow-ring-arc{transition:none}}
+
 </style>
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D9%86%D8%B8%D8%A7%D9%85%20%D9%85%D8%B2%D8%A7%D8%B1%D8%B9%20%D8%A7%D9%84%D8%A8%D9%8A%D8%A7%D8%B6%22%2C%22short_name%22%3A%22%D8%A7%D9%84%D8%A8%D9%8A%D8%A7%D8%B6%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23e07a3f%22%2C%22dir%22%3A%22rtl%22%2C%22lang%22%3A%22ar%22%7D">
 <meta name="theme-color" content="#e07a3f">
@@ -3470,6 +3516,135 @@ function drawLifetime(){
 
 /* ============ 👑 لوحة المالك ============ */
 let _ownCharts={};
+/* ============ 👑 لوحة المالك — الواجهة الحيّة (حائط المجهود، العنابر لحظياً، خريطة الإنتاج، الإنجازات) ============ */
+function _owAgeDays(h,dateISO){ const s=parseDate(h.startDate), d=parseDate(dateISO); if(!s||!d) return 0; return Math.round((d-s)/864e5)+(n0(h.startAge)); }
+function _owHouseNow(h){
+  const days=(h.days||[]).filter(d=>d&&d.date).slice().sort((a,b)=>(a.date<b.date?-1:1));
+  let dead=0; days.forEach(d=>dead+=n0(d.dead)+n0(d.cull));
+  const alive=Math.max(0,n0(h.initial)-dead);
+  const last=days[days.length-1]||null;
+  const wk=days.slice(-7); const wkEggs=wk.reduce((a,d)=>a+n0(d.eggs),0);
+  const hd=last&&alive?n0(last.eggs)/alive*100:0, hd7=wk.length&&alive?wkEggs/wk.length/alive*100:0;
+  const ageW=last?_owAgeDays(h,last.date)/7:0; const std=lohmannAt(ageW);
+  const prev=days.slice(-14,-7); const prevHd=prev.length&&alive?prev.reduce((a,d)=>a+n0(d.eggs),0)/prev.length/alive*100:0;
+  const g=wk.length&&alive?wk.reduce((a,d)=>a+n0(d.feedBags),0)*(DB.feedBagKg||50)*1000/wk.length/alive:0;
+  return {h,days,last,alive,dead,hd,hd7,prevHd,ageW,std,g,deadWk:wk.reduce((a,d)=>a+n0(d.dead),0)};
+}
+function _owRing(pct,std,color){
+  const r=34,c=2*Math.PI*r,v=Math.max(0,Math.min(100,pct));
+  const sa=std?Math.max(0,Math.min(100,std))/100*360-90:null;
+  const sx=sa!=null?44+r*Math.cos(sa*Math.PI/180):0, sy=sa!=null?44+r*Math.sin(sa*Math.PI/180):0;
+  return `<svg viewBox="0 0 88 88" width="88" height="88" class="ow-ring" aria-hidden="true">
+    <circle cx="44" cy="44" r="${r}" fill="none" stroke="var(--line)" stroke-width="9"/>
+    <circle cx="44" cy="44" r="${r}" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c}" data-off="${c*(1-v/100)}" transform="rotate(-90 44 44)" class="ow-ring-arc"/>
+    ${sa!=null?`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="4.5" fill="#fff" stroke="#111827" stroke-width="2"><title>المعيار ${std.toFixed(1)}٪</title></circle>`:''}
+    <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="var(--text)">${v.toFixed(1)}</text></svg>`;
+}
+function ownerPlusHTML(){
+  const dishSize=DB.dishSize||30, farm=(typeof getActiveFarm==='function'&&getActiveFarm())||{};
+  const H=DB.houses.map(_owHouseNow);
+  const alive=H.reduce((a,x)=>a+x.alive,0);
+  const lastDate=H.map(x=>x.last&&x.last.date).filter(Boolean).sort().pop()||'';
+  const lastEggs=H.reduce((a,x)=>a+(x.last&&x.last.date===lastDate?n0(x.last.eggs):0),0);
+  const S=[]; DB.houses.forEach(h=>(h.sales||[]).forEach(s=>{ if(s&&s.date) S.push(s); }));
+  const salesByDist={}; S.forEach(s=>{ const k=s.dist||(s.date+'|'+s.dishPrice+'|'+s.trader); (salesByDist[k]=salesByDist[k]||{date:s.date,price:n0(s.dishPrice),dishes:0}).dishes+=n0(s.dishes); });
+  const deals=Object.values(salesByDist).sort((a,b)=>a.date<b.date?-1:1);
+  const lastPrice=deals.length?deals[deals.length-1].price:0;
+  const totEggs=H.reduce((a,x)=>a+x.days.reduce((b,d)=>b+n0(d.eggs),0),0);
+  const houseDays=H.reduce((a,x)=>a+x.days.length,0);
+  const feedT=H.reduce((a,x)=>a+x.days.reduce((b,d)=>b+n0(d.feedBags),0),0)*(DB.feedBagKg||50)/1000;
+  const henDays=(()=>{ let t=0; H.forEach(x=>{ let dc=0; x.days.forEach(d=>{ dc+=n0(d.dead); t+=Math.max(0,n0(x.h.initial)-dc); }); }); return t; })();
+  const vax=DB.houses.reduce((a,h)=>a+(h.vaccines||[]).length+(h.meds||[]).length,0);
+  const revenue=S.reduce((a,s)=>a+n0(s.dishes)*n0(s.dishPrice),0);
+  const firstDay=H.map(x=>x.days[0]&&x.days[0].date).filter(Boolean).sort()[0]||'';
+  const runDays=firstDay?Math.round((TODAY-parseDate(firstDay))/864e5)+1:0;
+  const hr=new Date().getHours(), hi=hr<12?'صباح الخير':hr<18?'مساء الخير':'مساء النور';
+  const fmtD=k=>k?(+k.slice(8,10))+'/'+(+k.slice(5,7)):'—';
+  const lag=lastDate?Math.round((TODAY-parseDate(lastDate))/864e5):null;
+  // ===== كروت العنابر
+  const cards=H.map((x,i)=>{
+    const col=x.std?(x.hd7>=x.std.hd-2?'#16a34a':x.hd7>=x.std.hd-7?'#d97706':'#dc2626'):'#2f80c3';
+    const diff=x.std?x.hd7-x.std.hd:null, tr=x.prevHd?x.hd7-x.prevHd:0;
+    const st=diff==null?['gray','—']:diff>=-2?['ok','على المعيار']:diff>=-7?['warn','أقل شوية']:['bad','محتاج متابعة'];
+    return `<div class="ow-house" style="animation-delay:${i*90}ms">
+      <div class="ow-house-h"><div><b>${esc(x.h.name)}</b><div class="ow-mut">${esc(x.h.breed||'')} · ${x.ageW?x.ageW.toFixed(0)+' أسبوع':''}</div></div><span class="ow-pill ${st[0]}">${st[1]}</span></div>
+      <div class="ow-house-b">${_owRing(x.hd7,x.std&&x.std.hd,col)}
+        <div class="ow-house-g">
+          <div><span>نسبة الإنتاج (٧ أيام)</span><b>${x.hd7.toFixed(1)}٪</b><em>${x.std?'المعيار '+x.std.hd.toFixed(1)+'٪ ('+(diff>=0?'+':'')+diff.toFixed(1)+')':''}</em></div>
+          <div><span>آخر يوم</span><b>${x.last?fmtN(n0(x.last.eggs)/dishSize)+' طبق':'—'}</b><em>${x.last?fmtD(x.last.date)+' · '+x.hd.toFixed(1)+'٪':''}</em></div>
+          <div><span>الطيور</span><b>${fmtN(x.alive)}</b><em>نافق الأسبوع ${fmtN(x.deadWk)}</em></div>
+          <div><span>العلف</span><b>${x.g?x.g.toFixed(0)+' جم':'—'}</b><em>${tr?(tr>0?'▲ ':'▼ ')+Math.abs(tr).toFixed(1)+' عن الأسبوع اللي فات':''}</em></div>
+        </div></div></div>`;}).join('');
+  // ===== حائط المجهود
+  const E=[['🥚','بيضة اتجمعت',totEggs],['🧺','طبق اتعبّى',Math.round(totEggs/dishSize)],['📋','يوم اتسجل في العنابر',houseDays],
+    ['🤝','صفقة بيع',deals.length],['🌾','طن علف اتوزع',Math.round(feedT)],['🐔','يوم رعاية طائر',henDays],['💉','تحصين وعلاج',vax],['💰','جنيه مبيعات',Math.round(revenue)]].filter(e=>e[2]>0);
+  // ===== خريطة الإنتاج (آخر ٢٦ أسبوع)
+  const daily=periodAgg(DB.houses,'day'); const byKey={}; daily.forEach(r=>byKey[r.key]=r);
+  const end=lastDate?parseDate(lastDate):new Date(TODAY); const start=new Date(end); start.setDate(start.getDate()-181);
+  start.setDate(start.getDate()-start.getDay()); // يبدأ من الأحد
+  let cells='',col=0,x0=0; const cw=13; const months=[];
+  for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+    const k=d.toLocaleDateString('en-CA'), r=byKey[k], dow=d.getDay();
+    if(dow===0&&d>start) col++;
+    if(d.getDate()===1) months.push([col,MONTHS[d.getMonth()]]);
+    const hd=r&&r.henDays?r.eggs/r.henDays*100:null;
+    const fill=hd==null?'var(--line)':hd>=88?'#15803d':hd>=84?'#22c55e':hd>=78?'#86efac':hd>=70?'#fde68a':'#fca5a5';
+    cells+=`<rect x="${col*cw}" y="${dow*cw+14}" width="11" height="11" rx="2.5" fill="${fill}" class="ow-cell"><title>${k}${hd!=null?` — ${hd.toFixed(1)}٪ · ${fmtN(Math.round(r.eggs/dishSize))} طبق`:' — مفيش تسجيل'}</title></rect>`;
+  }
+  const W=(col+1)*cw;
+  const monthTxt=months.map(([c,m])=>`<text x="${c*cw}" y="9" font-size="9" fill="var(--muted2)">${m}</text>`).join('');
+  // ===== الإنجازات
+  const prodDays=daily.filter(r=>r.eggs>0);
+  const bestDay=prodDays.slice().sort((a,b)=>b.eggs-a.eggs)[0];
+  const weeks=periodAgg(DB.houses,'week').filter(r=>r.henDays>0&&r.eggs>0);
+  const bestWeek=weeks.slice().sort((a,b)=>b.hd-a.hd)[0];
+  const months2=periodAgg(DB.houses,'month').filter(r=>r.money>0);
+  const bestMonth=months2.slice().sort((a,b)=>b.money-a.money)[0];
+  const topPrice=deals.filter(d=>d.price>0&&d.price<=500&&d.dishes>=1).sort((a,b)=>b.price-a.price||(a.date<b.date?1:-1))[0]; /* بنتجاهل الأسعار الشاذة (غلط إدخال) */
+  let streak=0,best=0; daily.forEach(r=>{ if(r.eggs>0&&r.dead===0){streak++;best=Math.max(best,streak);} else if(r.eggs>0) streak=0; });
+  const A=[
+    bestDay&&['🏆','أعلى يوم إنتاج',fmtN(Math.round(bestDay.eggs/dishSize))+' طبق',fmtD(bestDay.key)],
+    bestWeek&&['📈','أعلى أسبوع إنتاج',bestWeek.hd.toFixed(1)+'٪','أسبوع '+fmtD(bestWeek.key)],
+    bestMonth&&['💰','أعلى شهر مبيعات',fmtMoney(bestMonth.money),periodLabel(bestMonth.key,'month')],
+    topPrice&&['💵','أعلى سعر طبق',fmtN(topPrice.price)+' ج',fmtD(topPrice.date)],
+    best>0&&['🛡️','أطول فترة من غير نافق',best+' يوم','على مستوى المزرعة'],
+    runDays>0&&['📆','أيام شغل متواصل',fmtN(runDays)+' يوم','من '+fmtD(firstDay)+' '+firstDay.slice(0,4)]
+  ].filter(Boolean);
+  // سعر البيع شهرياً (سباركلاين)
+  const mp=periodAgg(DB.houses,'month').filter(r=>r.dishSold>0).map(r=>({k:r.key,p:r.money/r.dishSold}));
+  let spark='';
+  if(mp.length>1){ const mx=Math.max(...mp.map(m=>m.p)),mn=Math.min(...mp.map(m=>m.p)); const sw=220,sh=46;
+    const pts=mp.map((m,i)=>[i*(sw-8)/(mp.length-1)+4, sh-6-(mx>mn?(m.p-mn)/(mx-mn):.5)*(sh-14)]);
+    spark=`<svg viewBox="0 0 ${sw} ${sh}" width="100%" height="${sh}" style="direction:ltr" aria-hidden="true"><polyline fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}"/>${pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i===pts.length-1?4:2.4}" fill="#fff"><title>${periodLabel(mp[i].k,'month')}: ${mp[i].p.toFixed(1)} ج/طبق</title></circle>`).join('')}</svg>`; }
+  return `<div class="ow-wrap">
+   <div class="ow-hero">
+     <div class="ow-hero-main">
+       <div class="ow-hi">${hi} 👋 · ${new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'})}</div>
+       <h2>👑 ${esc(farm.name||'المزرعة')}</h2>
+       <div class="ow-live"><span class="ow-dot"></span><b class="cup" data-to="${alive}">${fmtN(alive)}</b> دجاجة بتبيض · آخر يوم <b>${fmtN(Math.round(lastEggs/dishSize))}</b> طبق (${fmtD(lastDate)})${lag!=null&&lag>=2?` · <b style="color:#fde68a">التسجيل متأخر ${lag} أيام</b>`:''}</div>
+     </div>
+     <div class="ow-hero-side"><div class="ow-mut2">سعر الطبق شهر بشهر</div>${spark||''}<div class="ow-price">${lastPrice?fmtN(lastPrice)+' ج':'—'}<span> آخر سعر</span></div></div>
+   </div>
+   <div class="ow-sec-t">🏘️ العنابر دلوقتي <span class="ow-mut">الدايرة = نسبة الإنتاج آخر ٧ أيام، والنقطة البيضا = معيار لوهمان لعمرها</span></div>
+   <div class="ow-houses">${cards}</div>
+   <div class="ow-sec-t">💪 المجهود اللي اتعمل <span class="ow-mut">من أول يوم في البرنامج</span></div>
+   <div class="ow-eff">${E.map(([ic,t,v],i)=>`<div class="ow-eff-i" style="animation-delay:${i*60}ms"><div class="ic">${ic}</div><b class="cup" data-to="${v}">0</b><span>${t}</span></div>`).join('')}</div>
+   <div class="panel ow-heat-p"><div class="panel-head"><h3>🗓️ خريطة الإنتاج — كل مربع يوم</h3><span class="ow-legend"><i style="background:#fca5a5"></i>&lt;70 <i style="background:#fde68a"></i>70 <i style="background:#86efac"></i>78 <i style="background:#22c55e"></i>84 <i style="background:#15803d"></i>88٪+</span></div>
+     <div class="ow-heat"><svg viewBox="0 0 ${W} ${14+7*cw}" width="${W}" height="${14+7*cw}" style="direction:ltr">${monthTxt}${cells}</svg></div></div>
+   <div class="ow-sec-t">🏅 أرقام قياسية</div>
+   <div class="ow-ach">${A.map(([ic,t,v,s],i)=>`<div class="ow-ach-i" style="animation-delay:${i*70}ms"><div class="ic">${ic}</div><div><span>${t}</span><b>${v}</b><em>${s}</em></div></div>`).join('')}</div>
+  </div>`;
+}
+function ownerPlusInit(){
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('#page-owner .cup').forEach(el=>{ const to=+el.dataset.to||0;
+    if(reduce||!to){ el.textContent=fmtN(to); return; }
+    const t0=performance.now(),dur=1100; (function step(t){ const p=Math.min((t-t0)/dur,1),e=1-Math.pow(1-p,3); el.textContent=fmtN(Math.round(to*e)); if(p<1) requestAnimationFrame(step); })(t0); });
+  requestAnimationFrame(()=>document.querySelectorAll('#page-owner .ow-ring-arc').forEach(a=>{ a.style.strokeDashoffset=a.dataset.off; }));
+  const hp=document.querySelector('#page-owner .ow-heat'); if(hp) hp.scrollLeft=hp.scrollWidth; // ابدأ من الأحدث
+}
+
 function destroyOwn(){ Object.values(_ownCharts).forEach(c=>{try{c.destroy()}catch(e){}}); _ownCharts={}; }
 function renderOwner(){
   destroyOwn();
@@ -3492,9 +3667,10 @@ function renderOwner(){
   const lastRow=inRange[inRange.length-1];
   const kpi=(ico,acc,label,val,sub)=>`<div class="kpi" style="--accent:${acc};--accent-soft:color-mix(in srgb,${acc} 14%,transparent)">
     <div class="ico">${ico}</div><div class="label">${label}</div><div class="val">${val}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
-  $('#page-owner').innerHTML=`
+  let _owPlus='';try{_owPlus=ownerPlusHTML();}catch(e){console.warn('ownerPlus',e);}
+  $('#page-owner').innerHTML=_owPlus+`
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-      <div style="font-family:var(--display);font-size:17px;font-weight:800">👑 نظرة المالك ${cutoff?`— آخر ${UI.ownRange} يوم`:'— كل الفترة'}</div>
+      <div style="font-family:var(--display);font-size:17px;font-weight:800">📊 نظرة المالك ${cutoff?`— آخر ${UI.ownRange} يوم`:'— كل الفترة'}</div>
       <div class="chips">${ranges.map(([v,l])=>`<button class="chip ${UI.ownRange===v?'active':''}" data-r="${v}">${l}</button>`).join('')}</div>
     </div>
     <div class="kpi-grid">
@@ -3533,6 +3709,7 @@ function renderOwner(){
         <thead><tr><th>العنبر</th><th>بيض (طبق)</th><th>إنتاج٪</th><th>الاتجاه</th><th>نافق</th><th>علف (ش)</th><th>جم/طائر</th></tr></thead>
         <tbody id="ownTbl"></tbody></table></div></div>`;
   $$('.chip',$('#page-owner')).forEach(c=>c.onclick=()=>{UI.ownRange=+c.dataset.r;renderOwner();});
+  try{ownerPlusInit();}catch(e){console.warn('ownerPlusInit',e);}
   /* ====== كفاءة العلف للبيضة (جم علف لكل بيضة) ====== */
   (function(){
     const bagKg=DB.feedBagKg||50;
