@@ -51,6 +51,10 @@ nav.tabs button.on{color:var(--acc)}
 /* ===== جدول إكسيل ===== */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 table.xg{border-collapse:collapse;width:100%;min-width:1120px;font-size:14px}
+table.xg.ev{min-width:860px}
+.xg tfoot td{background:var(--card2);padding:9px 8px;font-weight:700}
+.xl.num{text-align:left;direction:ltr}
+.lnk{background:none;border:0;color:var(--acc);font:inherit;font-size:13px;cursor:pointer;padding:0 6px;min-height:38px;white-space:nowrap}
 .xg th{position:sticky;top:0;background:var(--card2);color:var(--mut);font-weight:600;font-size:12px;padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
 .xg td{border-bottom:1px solid var(--line);border-left:1px solid rgba(42,53,80,.5);padding:0;vertical-align:middle}
 .xg tr.grp td{background:#131a29;padding:9px 10px;font-weight:700;color:var(--acc);border-left:0}
@@ -98,12 +102,23 @@ select.xl{padding-left:4px}
   <p class="mut" style="margin:8px 4px">اكتب في الخانة على طول — Enter ينزل، الأسهم بتتنقل، والحفظ تلقائي. تغيير المرحلة بيتسجل في السجل ويحدّث التاريخ للشهر الحالي.</p>
 </section>
 
+<!-- ============ صفحة الصنف ============ -->
+<section class="page" id="pg-item">
+  <div class="row" style="margin-bottom:10px"><button class="btn sec sm" data-act="back">→ رجوع للأصناف</button></div>
+  <div class="card" id="itHead"></div>
+  <div class="card" style="padding:10px">
+    <h2 style="margin:4px 4px 10px">سجل التصنيع والمصاريف <button class="btn sm" data-act="addev" style="float:left">＋ حركة</button></h2>
+    <div class="tbl-wrap"><table class="xg ev" id="evGrid"></table></div>
+    <p class="mut" style="margin:8px 4px">الإجمالي = الكمية × سعر الوحدة. لو كتبت الإجمالي على طول، سعر الوحدة بيتحسب لوحده.</p>
+  </div>
+</section>
+
 <!-- ============ اللوحة ============ -->
 <section class="page" id="pg-dash"><div id="dashBody"></div></section>
 
 <!-- ============ السجل ============ -->
 <section class="page" id="pg-log">
-  <div class="card"><h2>تحركات المراحل</h2><div id="logList"></div></div>
+  <div class="card"><h2>تحركات المراحل والتصنيع</h2><div id="logList"></div></div>
 </section>
 
 <!-- ============ الإعدادات ============ -->
@@ -143,7 +158,7 @@ select.xl{padding-left:4px}
 
 <script>
 "use strict";
-var APP_VER = '1.3';
+var APP_VER = '1.4';
 var DEFAULT_FB = {
   apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
   authDomain:"my-app-sync-11ad9.firebaseapp.com",
@@ -184,7 +199,8 @@ var SEED_PV=2;
 
 /* items: {id:{id,co,nm,ai,cc,st,sd,nt,o,u,h:[{f,s,t}]}}  أو شاهد حذف {id,del:1,u}
    meta: co/st : {key:{n,o,u,del}} */
-var S={items:{},meta:{co:{},st:{}}};
+var S={items:{},ev:{},meta:{co:{},st:{}}};
+/* ev: {id:{id,pid,d,tx,q,un,pr,am,nt,u}} حركات التصنيع والمصاريف لكل صنف */
 
 function $(id){return document.getElementById(id)}
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -249,6 +265,9 @@ function patchV2(){
     var m=/^eseed(\d+)$/.exec(k), r=m&&SEED[+m[1]-1], n=null;
     if(r&&(it.pv||0)<SEED_PV){n=JSON.parse(JSON.stringify(it));n.co=r[0];n.nm=r[1];n.ai=r[2];n.cc=r[3];n.nt=r[6];n.df=r[7]||'';n.pv=SEED_PV}
     else if(it.co==='BioVac'){n=JSON.parse(JSON.stringify(it));n.co='Bio Vac'}
+    if(k==='eseed01'&&((n||it).pv||0)<4){n=n||JSON.parse(JSON.stringify(it));
+      if(n.st!=='تصنيع'){n.h=(n.h||[]).concat([{f:n.st,s:'تصنيع',t:now()}]);n.st='تصنيع';n.sd='2026-11'}
+      n.nt='خلص كل أوراق التسجيل — في انتظار التصنيع في مارتيروس';n.pv=4}
     if(k==='eseed10'&&((n||it).pv||0)<3){n=n||JSON.parse(JSON.stringify(it));n.nt='تم عمل البايلوت';n.pv=3}
     if(n){n.u=stamp(it);S.items[k]=n;batch['items/'+k]=n;ch=true}
   }
@@ -260,6 +279,32 @@ function validItem(k,it){
   if(it.del) return true;
   return typeof it.co==='string'&&it.co!==''&&typeof it.nm==='string'&&it.nm!==''&&typeof it.st==='string';
 }
+function validEv(k,e){
+  if(!e||typeof e!=='object'||e.id!==k||!/^e[a-z0-9]{4,30}$/.test(k)||typeof e.u!=='number') return false;
+  if(e.del) return true;
+  return typeof e.pid==='string'&&typeof e.d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(e.d)&&typeof e.tx==='string';
+}
+/* أول بيانات تصنيع Unitylocare — 4 نوفمبر 2026 */
+var SEED_EV=[
+ ['eunity01','eseed01','2026-11-04','شراء خامة Tylosin tartrate — اتنقلت لمارتيروس',200,'كجم',0,0,'الخامة اتنقلت لمارتيروس النهارده'],
+ ['eunity02','eseed01','2026-11-04','عبوات نص كيلو',440,'عبوة',23,10120,''],
+ ['eunity03','eseed01','2026-11-04','ستيكر',1100,'ستيكر',0,8000,'']
+];
+function seedEv(){
+  var ch=false;
+  SEED_EV.forEach(function(r){if(S.ev[r[0]])return;
+    var pr=r[6]||(r[4]&&r[7]?Math.round(r[7]/r[4]*100)/100:0);
+    S.ev[r[0]]={id:r[0],pid:r[1],d:r[2],tx:r[3],q:r[4],un:r[5],pr:pr,am:r[7],nt:r[8],u:1};ch=true});
+  return ch;
+}
+function liveEv(pid){var o=[];for(var k in S.ev){var e=S.ev[k];if(e&&!e.del&&(!pid||e.pid===pid))o.push(e)}return o.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.u-b.u)})}
+function evTotal(pid){return liveEv(pid).reduce(function(s,e){return s+(+e.am||0)},0)}
+function parseNum(v){
+  v=String(v||'').replace(/[٠-٩]/g,function(d){return d.charCodeAt(0)-1632}).replace(/[۰-۹]/g,function(d){return d.charCodeAt(0)-1776})
+    .replace(/[,،]/g,'').replace(/٫/g,'.').replace(/[^\d.]/g,'');
+  var n=parseFloat(v); return isFinite(n)?n:NaN;
+}
+function fmt(n){return (Math.round((+n||0)*100)/100).toLocaleString('en-US',{maximumFractionDigits:2})}
 function validEntry(e){return e&&typeof e==='object'&&typeof e.n==='string'&&e.n!==''&&typeof e.u==='number'}
 function seed(){
   var ch=false;
@@ -271,10 +316,12 @@ function load(){
   var raw=lsGet(LS_KEY),o=null; if(raw){try{o=JSON.parse(raw)}catch(e){}}
   S.items={};
   if(o&&o.items){for(var k in o.items){if(validItem(k,o.items[k]))S.items[k]=o.items[k]}}
+  S.ev={};
+  if(o&&o.ev){for(var ke in o.ev){if(validEv(ke,o.ev[ke]))S.ev[ke]=o.ev[ke]}}
   S.meta=(o&&o.meta&&o.meta.co&&o.meta.st)?o.meta:defaultMeta();
   if(!cos().length) mergeMetaMap('co',defaultMeta().co);
   if(!stages().length) mergeMetaMap('st',defaultMeta().st);
-  if(seed()) persist();
+  var sc=seed(); if(seedEv()) sc=true; if(sc) persist();
   migrateNames();
   if(lsGet(LS_ON)==='OFF') patchV2();
 }
@@ -322,7 +369,7 @@ function renderGrid(){
         '<td><input class="xl"'+a+' data-c="6" data-f="nt" value="'+esc(it.nt)+'" style="min-width:170px"></td>'+
         '<td><select class="xl"'+a+' data-c="7" data-f="co" style="min-width:100px">'+opts(col,it.co)+'</select></td>'+
         '<td class="prog" id="pg_'+it.id+'">'+progHTML(it)+'</td>'+
-        '<td><button class="del" data-act="del" data-id="'+it.id+'" aria-label="حذف">🗑</button></td></tr>';
+        '<td style="white-space:nowrap"><button class="lnk" data-act="open" data-id="'+it.id+'">📒 '+(liveEv(it.id).length?fmt(evTotal(it.id))+' ج':'السجل')+'</button><button class="del" data-act="del" data-id="'+it.id+'" aria-label="حذف">🗑</button></td></tr>';
       r++;
     });
   });
@@ -354,14 +401,14 @@ function saveCell(el){
   if(f==='co'){ pendingRender=true; setTimeout(flushRender,0); }
 }
 /* تنقل زي الإكسيل */
-function xlGridAttach(tbl,onSave){
+function xlGridAttach(tbl,onSave,maxC){
   function cell(r,c){return tbl.querySelector('.xl[data-r="'+r+'"][data-c="'+c+'"]')}
   function go(el,dr,dc){
     var r=+el.getAttribute('data-r'),c=+el.getAttribute('data-c'),t=null,guard=0;
-    while(guard++<40){r+=dr;c+=dc;if(c<0||c>7||r<0)break;t=cell(r,c);if(t)break;if(dr&&!tbl.querySelector('.xl[data-r="'+r+'"]'))break}
-    if(!t) return;
+    while(guard++<40){r+=dr;c+=dc;if(c<0||c>maxC||r<0)break;t=cell(r,c);if(t)break;if(dr&&!tbl.querySelector('.xl[data-r="'+r+'"]'))break}
     if(el.value!==el._last) onSave(el);
-    t.focus(); if(t.select&&t.type!=='month') try{t.select()}catch(e){}
+    if(!t) return;
+    t._nosel=1; t.focus(); if(t.select&&t.type!=='month'&&t.type!=='date') try{t.select()}catch(e){}
   }
   tbl.addEventListener('keydown',function(e){
     var el=e.target; if(!el.classList||!el.classList.contains('xl')) return;
@@ -373,7 +420,7 @@ function xlGridAttach(tbl,onSave){
     else if(e.key==='ArrowLeft'){ if(isSel||el.type==='month'||el.selectionEnd===el.value.length){e.preventDefault();go(el,0,1)} }
   });
   tbl.addEventListener('change',function(e){var el=e.target;if(el.classList&&el.classList.contains('xl')&&el.value!==el._last)onSave(el)});
-  tbl.addEventListener('focusin',function(e){var el=e.target;if(!el.classList||!el.classList.contains('xl'))return;var tr=el.closest('tr');if(tr)tr.classList.add('cur');if(el.select&&el.type!=='month')setTimeout(function(){try{el.select()}catch(x){}},0)});
+  tbl.addEventListener('focusin',function(e){var el=e.target;if(!el.classList||!el.classList.contains('xl'))return;var tr=el.closest('tr');if(tr)tr.classList.add('cur');if(el._nosel){el._nosel=0;return}if(el.select&&el.type!=='month'&&el.type!=='date')setTimeout(function(){try{el.select()}catch(x){}},0)});
   tbl.addEventListener('focusout',function(e){var tr=e.target.closest&&e.target.closest('tr');if(tr)tr.classList.remove('cur');setTimeout(flushRender,50)});
 }
 function addItem(co){
@@ -389,6 +436,64 @@ function delItem(id){
   if(!confirm('حذف "'+it.nm+'"؟')) return;
   var d={id:id,del:1,u:stamp(it)}; S.items[id]=d; persist(); pushItem(d); renderAll(); toast('اتحذف');
 }
+
+/* ================= صفحة الصنف ================= */
+var curItem=null;
+function openItem(id){curItem=id;showPage('item')}
+function renderItem(){
+  var it=S.items[curItem]; if(!it||it.del){showPage('items');return}
+  $('itHead').innerHTML='<h2 style="color:var(--tx);font-size:17px;margin-bottom:4px">'+esc(it.nm)+' <span class="mut" style="font-size:13px">'+esc(it.co)+'</span></h2>'+
+    '<div class="mut" style="font-size:13px">'+esc(it.ai)+(it.cc?' — '+esc(it.cc):'')+(it.df?' — '+esc(it.df):'')+'</div>'+
+    '<div style="margin-top:8px"><span class="st" style="background:rgba(79,140,255,.2)">'+esc(it.st)+'</span> '+(it.sd?'<span class="mut">من '+niceM(it.sd)+'</span>':'')+'</div>'+
+    (it.nt?'<div style="margin-top:6px;font-size:14px">'+esc(it.nt)+'</div>':'')+
+    '<div class="prog" style="padding:8px 0 0">'+progHTML(it)+'</div>'+
+    '<div style="margin-top:10px;font-size:15px">💰 إجمالي مصاريف التصنيع: <b id="itSum">'+fmt(evTotal(curItem))+' ج</b></div>';
+  var evs=liveEv(curItem), uns={};
+  for(var k in S.ev){var x=S.ev[k];if(x&&!x.del&&x.un)uns[x.un]=1}
+  var h='<thead><tr><th class="n">#</th><th>التاريخ</th><th>البيان</th><th>الكمية</th><th>الوحدة</th><th>سعر الوحدة</th><th>الإجمالي (ج)</th><th>ملاحظات</th><th></th></tr></thead><tbody>';
+  evs.forEach(function(e,i){var a=' data-r="'+i+'" data-id="'+e.id+'"';
+    h+='<tr><td class="n">'+(i+1)+'</td>'+
+      '<td><input class="xl"'+a+' data-c="0" data-f="d" type="date" value="'+esc(e.d)+'" style="min-width:130px"></td>'+
+      '<td><input class="xl"'+a+' data-c="1" data-f="tx" value="'+esc(e.tx)+'" style="min-width:200px"></td>'+
+      '<td><input class="xl num"'+a+' data-c="2" data-f="q" inputmode="decimal" value="'+(e.q?fmt(e.q):'')+'" style="min-width:80px"></td>'+
+      '<td><input class="xl"'+a+' data-c="3" data-f="un" list="dlUn" value="'+esc(e.un)+'" style="min-width:70px"></td>'+
+      '<td><input class="xl num"'+a+' data-c="4" data-f="pr" inputmode="decimal" value="'+(e.pr?fmt(e.pr):'')+'" style="min-width:80px"></td>'+
+      '<td><input class="xl num"'+a+' data-c="5" data-f="am" inputmode="decimal" value="'+(e.am?fmt(e.am):'')+'" style="min-width:100px;font-weight:700"></td>'+
+      '<td><input class="xl"'+a+' data-c="6" data-f="nt" value="'+esc(e.nt)+'" style="min-width:160px"></td>'+
+      '<td><button class="del" data-act="delev" data-id="'+e.id+'" aria-label="حذف">🗑</button></td></tr>';
+  });
+  if(!evs.length) h+='<tr><td colspan="9" class="empty">لسه مفيش حركات — دوس «＋ حركة»</td></tr>';
+  h+='</tbody><tfoot><tr><td colspan="6">إجمالي المصاريف</td><td id="evSum" style="text-align:left;direction:ltr">'+fmt(evTotal(curItem))+' ج</td><td colspan="2"></td></tr></tfoot>';
+  h+='<datalist id="dlUn">'+Object.keys(Object.assign(uns,{'كجم':1,'عبوة':1,'ستيكر':1,'كرتونة':1,'لتر':1})).map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist>';
+  $('evGrid').innerHTML=h;
+  Array.prototype.forEach.call($('evGrid').querySelectorAll('.xl'),function(el){el._last=el.value});
+}
+function saveEv(el){
+  var e=S.ev[el.getAttribute('data-id')],f=el.getAttribute('data-f'),v=el.value.trim();
+  if(!e||e.del){el.value=el._last;return}
+  var n=JSON.parse(JSON.stringify(e));
+  if(f==='d'){if(!/^\d{4}-\d{2}-\d{2}$/.test(v)){toast('التاريخ مش مظبوط',true);el.value=el._last;return}n.d=v}
+  else if(f==='q'||f==='pr'||f==='am'){
+    var x=v===''?0:parseNum(v); if(isNaN(x)||x<0){toast('اكتب رقم صحيح',true);el.value=el._last;return}
+    n[f]=Math.round(x*100)/100;
+    if(f!=='am'&&n.q>0&&n.pr>0) n.am=Math.round(n.q*n.pr*100)/100;
+    if(f==='am'&&n.q>0) n.pr=Math.round(n.am/n.q*100)/100;
+  } else n[f]=v;
+  n.u=stamp(e); S.ev[e.id]=n; persist(); pushEv(n);
+  var row=el.closest('tr');
+  ['q','pr','am'].forEach(function(k){var c=row.querySelector('[data-f="'+k+'"]');if(c&&c!==el){c.value=n[k]?fmt(n[k]):'';c._last=c.value}});
+  if(f==='q'||f==='pr'||f==='am'){el.value=n[f]?fmt(n[f]):''}
+  el._last=el.value; el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
+  var sm=$('evSum'); if(sm) sm.textContent=fmt(evTotal(curItem))+' ج';
+  var is=$('itSum'); if(is) is.textContent=fmt(evTotal(curItem))+' ج';
+}
+function addEv(){
+  if(!curItem) return; var id=uid(), d=new Date();
+  var e={id:id,pid:curItem,d:d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),tx:'',q:0,un:'',pr:0,am:0,nt:'',u:stamp()};
+  S.ev[id]=e; persist(); pushEv(e); renderItem();
+  var el=document.querySelector('#evGrid .xl[data-id="'+id+'"][data-f="tx"]'); if(el) el.focus();
+}
+function delEv(id){var e=S.ev[id];if(!e)return;if(!confirm('حذف الحركة «'+(e.tx||'بدون بيان')+'»؟'))return;var d={id:id,del:1,u:stamp(e)};S.ev[id]=d;persist();pushEv(d);renderItem();toast('اتحذفت')}
 
 /* ================= اللوحة ================= */
 function renderDash(){
@@ -417,13 +522,22 @@ function renderDash(){
     h+='<div class="card"><h2>'+esc(co)+' <span style="float:left;color:var(--tx)">'+g.length+' صنف — متوسط التقدم '+(nn?Math.round(avg/nn*100):0)+'%</span></h2>'+
       g.sort(function(a,b){return (a.o||0)-(b.o||0)}).map(function(x){return '<div class="bar"><div class="t"><span>'+esc(x.nm)+' <span class="mut">'+esc(x.ai)+(x.cc?' '+esc(x.cc):'')+'</span></span><span>'+esc(x.st)+(x.sd?' · '+niceM(x.sd):'')+'</span></div><div class="prog" style="padding:0">'+progHTML(x)+'</div></div>'}).join('')+'</div>';
   });
+  var mf=arr.filter(function(x){return liveEv(x.id).length}), gt=0;
+  if(mf.length){
+    h+='<div class="card"><h2>💰 مصاريف التصنيع</h2>'+mf.map(function(x){var t=evTotal(x.id);gt+=t;
+      return '<div class="bar"><div class="t"><span><button class="lnk" style="padding:0;min-height:0" data-act="open" data-id="'+x.id+'">'+esc(x.nm)+'</button> <span class="mut">'+esc(x.co)+' · '+liveEv(x.id).length+' حركة</span></span><span style="color:var(--tx);font-weight:700">'+fmt(t)+' ج</span></div></div>'}).join('')+
+      '<div class="bar"><div class="t" style="border-top:1px solid var(--line);padding-top:6px;font-weight:700"><span>الإجمالي</span><span style="color:var(--tx)">'+fmt(gt)+' ج</span></div></div></div>';
+  }
   $('dashBody').innerHTML=h;
 }
 function renderLog(){
   var ev=[];
   live().forEach(function(x){(x.h||[]).forEach(function(e){ev.push({t:e.t,f:e.f,s:e.s,nm:x.nm,co:x.co})})});
+  for(var k in S.ev){var x=S.ev[k];if(!x||x.del)continue;var it=S.items[x.pid];if(!it||it.del)continue;
+    ev.push({t:+new Date(x.d+'T12:00:00')+((x.u||0)%1000),mf:x,nm:it.nm,co:it.co,id:it.id})}
   ev.sort(function(a,b){return b.t-a.t});
   $('logList').innerHTML=ev.length?ev.slice(0,200).map(function(e){
+    if(e.mf){var m=e.mf; return '<div class="tl"><b>'+esc(e.nm)+'</b> <span class="mut" style="display:inline">('+esc(e.co)+')</span><br>🏭 '+esc(m.tx||'حركة')+(m.q?' — '+fmt(m.q)+' '+esc(m.un||''):'')+(m.am?' — <b>'+fmt(m.am)+' ج</b>':'')+'<span class="mut">'+niceT(+new Date(m.d+'T12:00:00'))+(m.nt?' · '+esc(m.nt):'')+'</span></div>'}
     return '<div class="tl"><b>'+esc(e.nm)+'</b> <span class="mut" style="display:inline">('+esc(e.co)+')</span><br><span class="st">'+esc(e.f||'—')+'</span> ← <span class="st" style="background:rgba(79,140,255,.2)">'+esc(e.s)+'</span><span class="mut">'+niceT(e.t)+'</span></div>'}).join('')
     :'<div class="empty">لسه مفيش تحركات — أول ما تغيّر مرحلة صنف هتتسجل هنا</div>';
 }
@@ -471,7 +585,7 @@ function refreshFilters(){
 
 /* ================= نسخ احتياطي ================= */
 function download(name,text,type){var b=new Blob([text],{type:type});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
-function exportJSON(){download('reg-mfg-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({app:FB_PATH,ver:APP_VER,at:Date.now(),items:S.items,meta:S.meta}),'application/json')}
+function exportJSON(){download('reg-mfg-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({app:FB_PATH,ver:APP_VER,at:Date.now(),items:S.items,ev:S.ev,meta:S.meta}),'application/json')}
 function exportCSV(){
   var rows=[['الشركة','الصنف','المادة الفعالة','التركيز','الشكل الصيدلي','المرحلة','من شهر','ملاحظات']];
   cos().forEach(function(co){live().filter(function(x){return x.co===co}).sort(function(a,b){return (a.o||0)-(b.o||0)}).forEach(function(x){rows.push([x.co,x.nm,x.ai||'',x.cc||'',x.df||'',x.st,x.sd||'',x.nt||''])})});
@@ -482,13 +596,14 @@ function mergeData(o){
   if(!o||typeof o.items!=='object') return -1;
   var n=0,batch={};
   for(var k in o.items){var it=o.items[k];if(!validItem(k,it))continue;var l=S.items[k];if(!l||it.u>l.u){S.items[k]=it;n++;batch['items/'+k]=it}}
+  if(o.ev&&typeof o.ev==='object'){for(var ke in o.ev){var ev=o.ev[ke];if(!validEv(ke,ev))continue;var le=S.ev[ke];if(!le||ev.u>le.u){S.ev[ke]=ev;n++;batch['ev/'+ke]=ev}}}
   if(o.meta){['co','st'].forEach(function(kind){mergeMetaMap(kind,o.meta[kind]).forEach(function(k){batch['meta/'+kind+'/'+k]=S.meta[kind][k]})})}
   persist(); if(fbRoot&&Object.keys(batch).length) fbRoot.update(batch).catch(warn);
   refreshFilters(); renderAll(); return n;
 }
 function dailyBackup(){
   var k=LS_BK+new Date().toISOString().slice(0,10);
-  if(!lsGet(k)&&live().length) lsSet(k,JSON.stringify({items:S.items,meta:S.meta,at:Date.now()}));
+  if(!lsGet(k)&&live().length) lsSet(k,JSON.stringify({items:S.items,ev:S.ev,meta:S.meta,at:Date.now()}));
   lsKeys().filter(function(x){return x&&x.indexOf(LS_BK)===0}).sort().slice(0,-BK_KEEP).forEach(lsDel);
 }
 
@@ -523,6 +638,9 @@ function mergeCloud(c){
   var ci=c.items||{},before=JSON.stringify(S.meta),changed=false,toPush={};
   for(var k in ci){var it=ci[k],l=S.items[k];if(!validItem(k,it))continue;if(!l||it.u>l.u){S.items[k]=it;changed=true}}
   for(var k2 in S.items){var li=S.items[k2],cl=ci[k2];if(!cl||li.u>(cl.u||0))toPush['items/'+k2]=li}
+  var ce=c.ev||{};
+  for(var e1 in ce){var x=ce[e1],le=S.ev[e1];if(!validEv(e1,x))continue;if(!le||x.u>le.u){S.ev[e1]=x;changed=true}}
+  for(var e2 in S.ev){var lx=S.ev[e2],cx=ce[e2];if(!cx||lx.u>(cx.u||0))toPush['ev/'+e2]=lx}
   var cm=c.meta||{};
   ['co','st'].forEach(function(kind){mergeMetaMap(kind,cm[kind]).forEach(function(k){toPush['meta/'+kind+'/'+k]=S.meta[kind][k]})});
   if(migrateNames()) changed=true;
@@ -533,6 +651,7 @@ function mergeCloud(c){
   if(changed){persist();pendingRender=true;flushRender()}
 }
 function pushItem(it){if(fbRoot){var u={};u['items/'+it.id]=it;u['lastDevice']=devId();fbRoot.update(u).catch(warn)}}
+function pushEv(e){if(fbRoot){var u={};u['ev/'+e.id]=e;u['lastDevice']=devId();fbRoot.update(u).catch(warn)}}
 function pushMetaKey(kind,k){if(fbRoot){var u={};u['meta/'+kind+'/'+k]=S.meta[kind][k];fbRoot.update(u).catch(warn)}}
 function toggleSync(){
   if(lsGet(LS_ON)==='OFF'){lsSet(LS_ON,'1');initSync()}
@@ -558,6 +677,7 @@ function renderAll(){
   if(curPage==='items') renderGrid();
   else if(curPage==='dash') renderDash();
   else if(curPage==='log') renderLog();
+  else if(curPage==='item') renderItem();
   else renderSettings();
 }
 function onAction(e){
@@ -566,13 +686,18 @@ function onAction(e){
   if(act==='add') addItem(b.getAttribute('data-co'));
   else if(act==='del') delItem(b.getAttribute('data-id'));
   else if(act==='rm') removeFrom(b.getAttribute('data-kind'),b.getAttribute('data-n'));
+  else if(act==='open') openItem(b.getAttribute('data-id'));
+  else if(act==='back') showPage('items');
+  else if(act==='addev') addEv();
+  else if(act==='delev') delEv(b.getAttribute('data-id'));
   else if(act==='mv') moveSt(b.getAttribute('data-n'),+b.getAttribute('data-d'));
 }
 function boot(){
   $('verTag').textContent='v'+APP_VER;
   load(); refreshFilters(); dailyBackup();
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
-  xlGridAttach($('grid'),saveCell);
+  xlGridAttach($('grid'),saveCell,7);
+  xlGridAttach($('evGrid'),saveEv,6);
   document.addEventListener('click',onAction);
   Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'),function(b){b.onclick=function(){showPage(b.getAttribute('data-p'))}});
   $('qCo').onchange=renderGrid; $('qSt').onchange=renderGrid; $('qTxt').oninput=renderGrid;
