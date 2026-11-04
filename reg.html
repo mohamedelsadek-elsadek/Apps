@@ -50,7 +50,7 @@ nav.tabs button.on{color:var(--acc)}
 .toast.show{opacity:1}
 /* ===== جدول إكسيل ===== */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--card)}
-table.xg{border-collapse:collapse;width:100%;min-width:980px;font-size:14px}
+table.xg{border-collapse:collapse;width:100%;min-width:1120px;font-size:14px}
 .xg th{position:sticky;top:0;background:var(--card2);color:var(--mut);font-weight:600;font-size:12px;padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
 .xg td{border-bottom:1px solid var(--line);border-left:1px solid rgba(42,53,80,.5);padding:0;vertical-align:middle}
 .xg tr.grp td{background:#131a29;padding:9px 10px;font-weight:700;color:var(--acc);border-left:0}
@@ -143,7 +143,7 @@ select.xl{padding-left:4px}
 
 <script>
 "use strict";
-var APP_VER = '1.1';
+var APP_VER = '1.2';
 var DEFAULT_FB = {
   apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
   authDomain:"my-app-sync-11ad9.firebaseapp.com",
@@ -156,28 +156,31 @@ var DEFAULT_FB = {
 var FB_PATH = 'reg_mfg';
 var LS_KEY='regmfg.state.v1', LS_ON='regmfg.sync.on', LS_DEV='regmfg.sync.dev', LS_BK='regmfg.bk.', BK_KEEP=15;
 var UNKNOWN='غير معروف';
-var DEF_STAGES=[UNKNOWN,'لم يبدأ','موافقة سير','لجنة إخطار','إخطار','Pilot batch','مطابقة معامل','ثبات','تسجيل نهائي','تصنيع'];
-var DEF_COS=['Unison','Nutrivit','BioVac','Elanomax'];
+var DEF_STAGES=[UNKNOWN,'لم يبدأ','سوفت فايل','موافقة سير','لجنة إخطار','إخطار','Pilot batch','مطابقة معامل','ثبات','تسجيل نهائي','تصنيع'];
+var DEF_COS=['Unison','Nutrivit','Bio Vac','Elanomax'];
 var MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 /* البيانات الأولى من الورق — أرقام ثابتة عشان لو جهازين فتحوا أول مرة مايتكررش */
 var SEED=[
- ['Unison','Unitylocare','Tylosin','','إخطار','',''],
- ['Unison','Amikastox','Amikacin','','إخطار','',''],
- ['Unison','Tilmiclesti','Tilmicosin','250 mg','موافقة سير','2024-12',''],
- ['Unison','Streptomycin Unison','Streptomycin sulfate','100 mg','موافقة سير','2025-06',''],
- ['Nutrivit','Optipencivet','Amoxicillin','400 mg','إخطار','',''],
- ['Nutrivit','Nutrohyclate','Doxycycline','200 mg','مطابقة معامل','','التالي: ثبات'],
- ['Nutrivit','Nutrohyclate 50%','Doxycycline','50%','مطابقة معامل','','التالي: ثبات'],
- ['Nutrivit','Rolitrosis','Amprolium','200 mg','مطابقة معامل','','التالي: ثبات'],
- ['Nutrivit','Tyloseptomsin','Tylosin','',UNKNOWN,'','محتاج نعرف وصل لفين'],
- ['BioVac','Tylosin BioVac','Tylosin','','Pilot batch','','تم عمل pilot batch'],
- ['BioVac','Difloxacin BioVac','Difloxacin','100 mg','موافقة سير','2025-10',''],
- ['BioVac','Lincomycin/Spectinomycin BioVac','Lincomycin / Spectinomycin','222 mg / 444.7 mg','موافقة سير','2025-05',''],
- ['Elanomax','Elanoprocoxid','Amprolium HCl','200 mg','لجنة إخطار','',''],
- ['Elanomax','Elanodiplomac','Difloxacin HCl','100 mg','لجنة إخطار','',''],
- ['Elanomax','Elanonecrobiotic','Lincomycin HCl','44 mg','لجنة إخطار','',''],
- ['Elanomax','Marbolisarvix','Marbofloxacin','100 mg','موافقة سير','2024-12','']
+ ['Unison','Unitylocare','Tylosin tartrate','945,000 IU/g','إخطار','','تم استيفاء آلية الفحص','WSP'],
+ ['Unison','Amikastax','Amikacin (as sulfate)','250 mg/ml','إخطار','','تم تقديم آلية الفحص','Injectable solution'],
+ ['Unison','Tilmiclesti','Tilmicosin (as phosphate)','250 mg/ml','موافقة سير','2024-12','مطلوب تصنيع البايلوت','Solution for use in drinking water'],
+ ['Unison','Streptomycin Unison Health Care','Streptomycin sulfate','100 g/100 g (= 80 g base)','موافقة سير','2025-06','في انتظار استلام موافقة السير','WSP'],
+ ['Nutrivit','Optipencivet','Amoxicillin','400 mg','إخطار','','',''],
+ ['Nutrivit','Nutrohyclate','Doxycycline (as hyclate)','200 mg/g','مطابقة معامل','','تم تقديم الملف للفحص','WSP'],
+ ['Nutrivit','Nutrohyclate 50%','Doxycycline hyclate','500 mg/g','مطابقة معامل','','تم تقديم الملف للفحص','WSP'],
+ ['Nutrivit','Rolitrosis','Amprolium','200 mg','مطابقة معامل','','التالي: ثبات',''],
+ ['Nutrivit','Tyloseptamin','Tylosin tartrate','1.1 g/1.1 g',UNKNOWN,'','تم تقديم الملف للفحص','WSP'],
+ ['Bio Vac','Tylosin Bio Vac Pharma','Tylosin tartrate','1000 mg/g','Pilot batch','','مطلوب تصنيع البايلوت','WSP'],
+ ['Bio Vac','Difloxacin BioVac','Difloxacin','100 mg','موافقة سير','2025-10','',''],
+ ['Bio Vac','Lincomycin/Spectinomycin Bio Vac Pharma','Lincomycin (as HCl) / Spectinomycin (as sulphate)','222 mg / 444.7 mg per g','موافقة سير','2025-05','مطلوب تصنيع البايلوت','WSP'],
+ ['Elanomax','Elanoprocoxid','Amprolium (as HCl)','200 g/kg','لجنة إخطار','','ملف المعامل في الفحص','WSP'],
+ ['Elanomax','Elanodiplomac','Difloxacin HCl','100 mg','لجنة إخطار','','تم تسليم ملف المعامل','Oral solution'],
+ ['Elanomax','Elanonecrobiotic','Lincomycin (as HCl)','44 mg/g','لجنة إخطار','','ملف المعامل أخد استيفاء وفي انتظار العينات من مارتيروس','Premix'],
+ ['Elanomax','Marbolisarvix','Marbofloxacin','100 mg/ml','موافقة سير','2024-12','مطلوب تصنيع البايلوت','Solution for injection'],
+ ['Elanomax','Elanoprojac','Amikacin (as sulfate)','250 mg/ml','موافقة سير','','مطلوب تصنيع البايلوت','Sterile aqueous solution'],
+ ['Elanomax','Drostakan','Narasin + Nicarbazin','80 g + 80 g /kg','سوفت فايل','','في انتظار استلام موافقة السير','Oral granular premix']
 ];
+var SEED_PV=2;
 
 /* items: {id:{id,co,nm,ai,cc,st,sd,nt,o,u,h:[{f,s,t}]}}  أو شاهد حذف {id,del:1,u}
    meta: co/st : {key:{n,o,u,del}} */
@@ -232,6 +235,25 @@ function migrateNames(){
   if(ch){persist();if(fbRoot)fbRoot.update(batch).catch(warn)}
   return ch;
 }
+/* v1.2: تصحيح الأسماء والمواد من شيت Follow up — مابيغيرش المرحلة.
+   بيشتغل بعد أول دمج مع السحابة عشان مايمسحش تعديل اتعمل على جهاز تاني */
+function patchV2(){
+  var batch={},ch=false;
+  function metaRen(kind,o,n){var ok=fk(o),nk=fk(n),oe=S.meta[kind][ok];if(!oe||oe.del)return;
+    if(!S.meta[kind][nk]||S.meta[kind][nk].del){S.meta[kind][nk]={n:n,o:oe.o,u:stamp(S.meta[kind][nk])};batch['meta/'+kind+'/'+nk]=S.meta[kind][nk]}
+    S.meta[kind][ok]={n:o,o:oe.o,u:stamp(oe),del:1};batch['meta/'+kind+'/'+ok]=S.meta[kind][ok];ch=true}
+  metaRen('co','BioVac','Bio Vac');
+  var sk=fk('سوفت فايل');
+  if(!S.meta.st[sk]){var ms=S.meta.st[fk('موافقة سير')];S.meta.st[sk]={n:'سوفت فايل',o:ms?ms.o-0.5:1.5,u:1};batch['meta/st/'+sk]=S.meta.st[sk];ch=true}
+  for(var k in S.items){var it=S.items[k];if(!it||it.del)continue;
+    var m=/^eseed(\d+)$/.exec(k), r=m&&SEED[+m[1]-1], n=null;
+    if(r&&(it.pv||0)<SEED_PV){n=JSON.parse(JSON.stringify(it));n.co=r[0];n.nm=r[1];n.ai=r[2];n.cc=r[3];n.nt=r[6];n.df=r[7]||'';n.pv=SEED_PV}
+    else if(it.co==='BioVac'){n=JSON.parse(JSON.stringify(it));n.co='Bio Vac'}
+    if(n){n.u=stamp(it);S.items[k]=n;batch['items/'+k]=n;ch=true}
+  }
+  if(ch){persist();if(fbRoot)fbRoot.update(batch).catch(warn)}
+  return ch;
+}
 function validItem(k,it){
   if(!it||typeof it!=='object'||it.id!==k||!/^e[a-z0-9]{4,30}$/.test(k)||typeof it.u!=='number') return false;
   if(it.del) return true;
@@ -241,7 +263,7 @@ function validEntry(e){return e&&typeof e==='object'&&typeof e.n==='string'&&e.n
 function seed(){
   var ch=false;
   SEED.forEach(function(r,i){var id='eseed'+pad(i+1); if(S.items[id]) return;
-    S.items[id]={id:id,co:r[0],nm:r[1],ai:r[2],cc:r[3],st:r[4],sd:r[5],nt:r[6],o:i,u:1,h:[]}; ch=true});
+    S.items[id]={id:id,co:r[0],nm:r[1],ai:r[2],cc:r[3],st:r[4],sd:r[5],nt:r[6],df:r[7]||'',o:i,u:1,h:[],pv:SEED_PV}; ch=true});
   return ch;
 }
 function load(){
@@ -253,6 +275,7 @@ function load(){
   if(!stages().length) mergeMetaMap('st',defaultMeta().st);
   if(seed()) persist();
   migrateNames();
+  if(lsGet(LS_ON)==='OFF') patchV2();
 }
 var warnedQuota=false;
 function persist(){if(!lsSet(LS_KEY,JSON.stringify(S))){if(!warnedQuota){warnedQuota=true;toast('⚠️ مساحة الجهاز مليانة — صدّر نسخة',true)}return false}return true}
@@ -273,38 +296,39 @@ function progHTML(it){
 var COLS=['nm','ai','cc','st','sd','nt','co'];
 function filtered(){
   var c=$('qCo').value,s=$('qSt').value,q=$('qTxt').value.trim().toLowerCase();
-  return live().filter(function(x){return (!c||x.co===c)&&(!s||x.st===s)&&(!q||(x.nm+' '+(x.ai||'')+' '+(x.nt||'')).toLowerCase().indexOf(q)>=0)});
+  return live().filter(function(x){return (!c||x.co===c)&&(!s||x.st===s)&&(!q||(x.nm+' '+(x.ai||'')+' '+(x.df||'')+' '+(x.nt||'')).toLowerCase().indexOf(q)>=0)});
 }
 function opts(list,v){var h='',has=false;list.forEach(function(n){if(n===v)has=true;h+='<option'+(n===v?' selected':'')+'>'+esc(n)+'</option>'});if(v&&!has)h='<option selected>'+esc(v)+'</option>'+h;return h}
 function renderGrid(){
   var arr=filtered(), stl=stages(), col=cos(), groups={}, order=col.slice();
   arr.forEach(function(x){(groups[x.co]=groups[x.co]||[]).push(x);if(order.indexOf(x.co)<0)order.push(x.co)});
-  var h='<thead><tr><th class="n">#</th><th>الصنف</th><th>المادة الفعالة</th><th>التركيز</th><th>المرحلة</th><th>من شهر</th><th>ملاحظات</th><th>الشركة</th><th>التقدم</th><th></th></tr></thead><tbody>';
+  var h='<thead><tr><th class="n">#</th><th>الصنف</th><th>المادة الفعالة</th><th>التركيز</th><th>الشكل الصيدلي</th><th>المرحلة</th><th>من شهر</th><th>ملاحظات</th><th>الشركة</th><th>التقدم</th><th></th></tr></thead><tbody>';
   var r=0, any=false, fc=$('qCo').value, fs=$('qSt').value, fq=$('qTxt').value.trim();
   order.forEach(function(co){
     var g=(groups[co]||[]).sort(function(a,b){return (a.o||0)-(b.o||0)});
     if(!g.length&&(fs||fq||(fc&&fc!==co)||col.indexOf(co)<0)) return;
     any=true;
-    h+='<tr class="grp"><td colspan="10">'+esc(co)+'<span class="mut">'+g.length+' صنف</span><button class="btn sec sm" data-act="add" data-co="'+esc(co)+'">＋ صنف</button></td></tr>';
+    h+='<tr class="grp"><td colspan="11">'+esc(co)+'<span class="mut">'+g.length+' صنف</span><button class="btn sec sm" data-act="add" data-co="'+esc(co)+'">＋ صنف</button></td></tr>';
     g.forEach(function(it,i){
       var a=' data-r="'+r+'" data-id="'+it.id+'"';
       h+='<tr data-id="'+it.id+'"><td class="n">'+(i+1)+'</td>'+
         '<td><input class="xl"'+a+' data-c="0" data-f="nm" value="'+esc(it.nm)+'" style="min-width:170px"></td>'+
         '<td><input class="xl"'+a+' data-c="1" data-f="ai" value="'+esc(it.ai)+'" list="dlAi" style="min-width:150px"></td>'+
-        '<td><input class="xl"'+a+' data-c="2" data-f="cc" value="'+esc(it.cc)+'" style="min-width:90px"></td>'+
-        '<td><select class="xl"'+a+' data-c="3" data-f="st" style="min-width:120px'+(it.st===UNKNOWN?';color:var(--bad)':'')+'">'+opts(stl,it.st)+'</select></td>'+
-        '<td><input class="xl"'+a+' data-c="4" data-f="sd" type="month" value="'+esc(it.sd)+'" placeholder="YYYY-MM" style="min-width:120px"></td>'+
-        '<td><input class="xl"'+a+' data-c="5" data-f="nt" value="'+esc(it.nt)+'" style="min-width:170px"></td>'+
-        '<td><select class="xl"'+a+' data-c="6" data-f="co" style="min-width:100px">'+opts(col,it.co)+'</select></td>'+
+        '<td><input class="xl"'+a+' data-c="2" data-f="cc" value="'+esc(it.cc)+'" style="min-width:110px"></td>'+
+        '<td><input class="xl"'+a+' data-c="3" data-f="df" value="'+esc(it.df)+'" list="dlDf" style="min-width:140px"></td>'+
+        '<td><select class="xl"'+a+' data-c="4" data-f="st" style="min-width:120px'+(it.st===UNKNOWN?';color:var(--bad)':'')+'">'+opts(stl,it.st)+'</select></td>'+
+        '<td><input class="xl"'+a+' data-c="5" data-f="sd" type="month" value="'+esc(it.sd)+'" placeholder="YYYY-MM" style="min-width:120px"></td>'+
+        '<td><input class="xl"'+a+' data-c="6" data-f="nt" value="'+esc(it.nt)+'" style="min-width:170px"></td>'+
+        '<td><select class="xl"'+a+' data-c="7" data-f="co" style="min-width:100px">'+opts(col,it.co)+'</select></td>'+
         '<td class="prog" id="pg_'+it.id+'">'+progHTML(it)+'</td>'+
         '<td><button class="del" data-act="del" data-id="'+it.id+'" aria-label="حذف">🗑</button></td></tr>';
       r++;
     });
   });
-  if(!any) h+='<tr><td colspan="10" class="empty">مفيش أصناف بالفلتر ده</td></tr>';
+  if(!any) h+='<tr><td colspan="11" class="empty">مفيش أصناف بالفلتر ده</td></tr>';
   h+='</tbody>';
-  var ais={};live().forEach(function(x){if(x.ai)ais[x.ai]=1});
-  h+='<datalist id="dlAi">'+Object.keys(ais).sort().map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist>';
+  var ais={},dfs={};live().forEach(function(x){if(x.ai)ais[x.ai]=1;if(x.df)dfs[x.df]=1});
+  h+='<datalist id="dlAi">'+Object.keys(ais).sort().map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist><datalist id="dlDf">'+Object.keys(dfs).sort().map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist>';
   $('grid').innerHTML=h;
   Array.prototype.forEach.call($('grid').querySelectorAll('.xl'),function(el){el._last=el.value});
 }
@@ -333,7 +357,7 @@ function xlGridAttach(tbl,onSave){
   function cell(r,c){return tbl.querySelector('.xl[data-r="'+r+'"][data-c="'+c+'"]')}
   function go(el,dr,dc){
     var r=+el.getAttribute('data-r'),c=+el.getAttribute('data-c'),t=null,guard=0;
-    while(guard++<40){r+=dr;c+=dc;if(c<0||c>6||r<0)break;t=cell(r,c);if(t)break;if(dr&&!tbl.querySelector('.xl[data-r="'+r+'"]'))break}
+    while(guard++<40){r+=dr;c+=dc;if(c<0||c>7||r<0)break;t=cell(r,c);if(t)break;if(dr&&!tbl.querySelector('.xl[data-r="'+r+'"]'))break}
     if(!t) return;
     if(el.value!==el._last) onSave(el);
     t.focus(); if(t.select&&t.type!=='month') try{t.select()}catch(e){}
@@ -353,7 +377,7 @@ function xlGridAttach(tbl,onSave){
 }
 function addItem(co){
   var id=uid(), mx=live().filter(function(x){return x.co===co}).reduce(function(m,x){return Math.max(m,x.o||0)},0);
-  var it={id:id,co:co,nm:'صنف جديد',ai:'',cc:'',st:'لم يبدأ',sd:thisMonth(),nt:'',o:mx+1,u:stamp(),h:[]};
+  var it={id:id,co:co,nm:'صنف جديد',ai:'',cc:'',df:'',st:'لم يبدأ',sd:thisMonth(),nt:'',o:mx+1,u:stamp(),h:[]};
   if(stages().indexOf('لم يبدأ')<0) it.st=stages()[0]||'';
   S.items[id]=it; persist(); pushItem(it);
   $('qSt').value='';$('qTxt').value=''; renderGrid();
@@ -448,8 +472,8 @@ function refreshFilters(){
 function download(name,text,type){var b=new Blob([text],{type:type});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
 function exportJSON(){download('reg-mfg-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({app:FB_PATH,ver:APP_VER,at:Date.now(),items:S.items,meta:S.meta}),'application/json')}
 function exportCSV(){
-  var rows=[['الشركة','الصنف','المادة الفعالة','التركيز','المرحلة','من شهر','ملاحظات']];
-  cos().forEach(function(co){live().filter(function(x){return x.co===co}).sort(function(a,b){return (a.o||0)-(b.o||0)}).forEach(function(x){rows.push([x.co,x.nm,x.ai||'',x.cc||'',x.st,x.sd||'',x.nt||''])})});
+  var rows=[['الشركة','الصنف','المادة الفعالة','التركيز','الشكل الصيدلي','المرحلة','من شهر','ملاحظات']];
+  cos().forEach(function(co){live().filter(function(x){return x.co===co}).sort(function(a,b){return (a.o||0)-(b.o||0)}).forEach(function(x){rows.push([x.co,x.nm,x.ai||'',x.cc||'',x.df||'',x.st,x.sd||'',x.nt||''])})});
   var csv='﻿'+rows.map(function(r){return r.map(function(c){c=String(c);return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')}).join('\n');
   download('reg-mfg.csv',csv,'text/csv;charset=utf-8');
 }
@@ -501,6 +525,7 @@ function mergeCloud(c){
   var cm=c.meta||{};
   ['co','st'].forEach(function(kind){mergeMetaMap(kind,cm[kind]).forEach(function(k){toPush['meta/'+kind+'/'+k]=S.meta[kind][k]})});
   if(migrateNames()) changed=true;
+  if(patchV2()) changed=true;
   if(JSON.stringify(S.meta)!==before) changed=true;
   if(Object.keys(toPush).length){toPush['lastDevice']=devId();toPush['ver']=APP_VER;fbRoot.update(toPush).catch(warn)}
   fbReady=true;
