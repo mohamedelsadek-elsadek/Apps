@@ -143,7 +143,7 @@ select.xl{padding-left:4px}
 
 <script>
 "use strict";
-var APP_VER = '1.2';
+var APP_VER = '1.3';
 var DEFAULT_FB = {
   apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
   authDomain:"my-app-sync-11ad9.firebaseapp.com",
@@ -170,7 +170,7 @@ var SEED=[
  ['Nutrivit','Nutrohyclate 50%','Doxycycline hyclate','500 mg/g','مطابقة معامل','','تم تقديم الملف للفحص','WSP'],
  ['Nutrivit','Rolitrosis','Amprolium','200 mg','مطابقة معامل','','التالي: ثبات',''],
  ['Nutrivit','Tyloseptamin','Tylosin tartrate','1.1 g/1.1 g',UNKNOWN,'','تم تقديم الملف للفحص','WSP'],
- ['Bio Vac','Tylosin Bio Vac Pharma','Tylosin tartrate','1000 mg/g','Pilot batch','','مطلوب تصنيع البايلوت','WSP'],
+ ['Bio Vac','Tylosin Bio Vac Pharma','Tylosin tartrate','1000 mg/g','Pilot batch','','تم عمل البايلوت','WSP'],
  ['Bio Vac','Difloxacin BioVac','Difloxacin','100 mg','موافقة سير','2025-10','',''],
  ['Bio Vac','Lincomycin/Spectinomycin Bio Vac Pharma','Lincomycin (as HCl) / Spectinomycin (as sulphate)','222 mg / 444.7 mg per g','موافقة سير','2025-05','مطلوب تصنيع البايلوت','WSP'],
  ['Elanomax','Elanoprocoxid','Amprolium (as HCl)','200 g/kg','لجنة إخطار','','ملف المعامل في الفحص','WSP'],
@@ -249,6 +249,7 @@ function patchV2(){
     var m=/^eseed(\d+)$/.exec(k), r=m&&SEED[+m[1]-1], n=null;
     if(r&&(it.pv||0)<SEED_PV){n=JSON.parse(JSON.stringify(it));n.co=r[0];n.nm=r[1];n.ai=r[2];n.cc=r[3];n.nt=r[6];n.df=r[7]||'';n.pv=SEED_PV}
     else if(it.co==='BioVac'){n=JSON.parse(JSON.stringify(it));n.co='Bio Vac'}
+    if(k==='eseed10'&&((n||it).pv||0)<3){n=n||JSON.parse(JSON.stringify(it));n.nt='تم عمل البايلوت';n.pv=3}
     if(n){n.u=stamp(it);S.items[k]=n;batch['items/'+k]=n;ch=true}
   }
   if(ch){persist();if(fbRoot)fbRoot.update(batch).catch(warn)}
