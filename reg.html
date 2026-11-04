@@ -158,7 +158,7 @@ select.xl{padding-left:4px}
 
 <script>
 "use strict";
-var APP_VER = '1.4';
+var APP_VER = '1.5';
 var DEFAULT_FB = {
   apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
   authDomain:"my-app-sync-11ad9.firebaseapp.com",
@@ -271,6 +271,11 @@ function patchV2(){
     if(k==='eseed10'&&((n||it).pv||0)<3){n=n||JSON.parse(JSON.stringify(it));n.nt='تم عمل البايلوت';n.pv=3}
     if(n){n.u=stamp(it);S.items[k]=n;batch['items/'+k]=n;ch=true}
   }
+  /* v1.5: سعر خامة Unitylocare + العبوات الاحتياطي */
+  [['eunity01',function(n){n.pr=2000;n.am=400000}],['eunity02',function(n){n.nt='منها 40 عبوة احتياطي'}]].forEach(function(x){
+    var e=S.ev[x[0]]; if(!e||e.del||(e.pv||0)>=2) return;
+    var n=JSON.parse(JSON.stringify(e)); x[1](n); n.pv=2; n.u=stamp(e); S.ev[x[0]]=n; batch['ev/'+x[0]]=n; ch=true;
+  });
   if(ch){persist();if(fbRoot)fbRoot.update(batch).catch(warn)}
   return ch;
 }
@@ -286,15 +291,15 @@ function validEv(k,e){
 }
 /* أول بيانات تصنيع Unitylocare — 4 نوفمبر 2026 */
 var SEED_EV=[
- ['eunity01','eseed01','2026-11-04','شراء خامة Tylosin tartrate — اتنقلت لمارتيروس',200,'كجم',0,0,'الخامة اتنقلت لمارتيروس النهارده'],
- ['eunity02','eseed01','2026-11-04','عبوات نص كيلو',440,'عبوة',23,10120,''],
+ ['eunity01','eseed01','2026-11-04','شراء خامة Tylosin tartrate — اتنقلت لمارتيروس',200,'كجم',2000,400000,'الخامة اتنقلت لمارتيروس النهارده'],
+ ['eunity02','eseed01','2026-11-04','عبوات نص كيلو',440,'عبوة',23,10120,'منها 40 عبوة احتياطي'],
  ['eunity03','eseed01','2026-11-04','ستيكر',1100,'ستيكر',0,8000,'']
 ];
 function seedEv(){
   var ch=false;
   SEED_EV.forEach(function(r){if(S.ev[r[0]])return;
     var pr=r[6]||(r[4]&&r[7]?Math.round(r[7]/r[4]*100)/100:0);
-    S.ev[r[0]]={id:r[0],pid:r[1],d:r[2],tx:r[3],q:r[4],un:r[5],pr:pr,am:r[7],nt:r[8],u:1};ch=true});
+    S.ev[r[0]]={id:r[0],pid:r[1],d:r[2],tx:r[3],q:r[4],un:r[5],pr:pr,am:r[7],nt:r[8],u:1,pv:2};ch=true});
   return ch;
 }
 function liveEv(pid){var o=[];for(var k in S.ev){var e=S.ev[k];if(e&&!e.del&&(!pid||e.pid===pid))o.push(e)}return o.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.u-b.u)})}
