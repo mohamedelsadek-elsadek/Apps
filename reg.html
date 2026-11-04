@@ -143,7 +143,7 @@ select.xl{padding-left:4px}
 
 <script>
 "use strict";
-var APP_VER = '1.0';
+var APP_VER = '1.1';
 var DEFAULT_FB = {
   apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
   authDomain:"my-app-sync-11ad9.firebaseapp.com",
@@ -156,27 +156,27 @@ var DEFAULT_FB = {
 var FB_PATH = 'reg_mfg';
 var LS_KEY='regmfg.state.v1', LS_ON='regmfg.sync.on', LS_DEV='regmfg.sync.dev', LS_BK='regmfg.bk.', BK_KEEP=15;
 var UNKNOWN='غير معروف';
-var DEF_STAGES=[UNKNOWN,'لم يبدأ','تم التقديم','لجنة إخطار','إخطار','Pilot batch','مطابقة معامل','ثبات','تسجيل نهائي','تصنيع'];
+var DEF_STAGES=[UNKNOWN,'لم يبدأ','موافقة سير','لجنة إخطار','إخطار','Pilot batch','مطابقة معامل','ثبات','تسجيل نهائي','تصنيع'];
 var DEF_COS=['Unison','Nutrivit','BioVac','Elanomax'];
 var MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 /* البيانات الأولى من الورق — أرقام ثابتة عشان لو جهازين فتحوا أول مرة مايتكررش */
 var SEED=[
  ['Unison','Unitylocare','Tylosin','','إخطار','',''],
  ['Unison','Amikastox','Amikacin','','إخطار','',''],
- ['Unison','Tilmiclesti','Tilmicosin','250 mg','تم التقديم','2024-12',''],
- ['Unison','Streptomycin Unison','Streptomycin sulfate','100 mg','تم التقديم','2025-06',''],
+ ['Unison','Tilmiclesti','Tilmicosin','250 mg','موافقة سير','2024-12',''],
+ ['Unison','Streptomycin Unison','Streptomycin sulfate','100 mg','موافقة سير','2025-06',''],
  ['Nutrivit','Optipencivet','Amoxicillin','400 mg','إخطار','',''],
  ['Nutrivit','Nutrohyclate','Doxycycline','200 mg','مطابقة معامل','','التالي: ثبات'],
  ['Nutrivit','Nutrohyclate 50%','Doxycycline','50%','مطابقة معامل','','التالي: ثبات'],
  ['Nutrivit','Rolitrosis','Amprolium','200 mg','مطابقة معامل','','التالي: ثبات'],
  ['Nutrivit','Tyloseptomsin','Tylosin','',UNKNOWN,'','محتاج نعرف وصل لفين'],
  ['BioVac','Tylosin BioVac','Tylosin','','Pilot batch','','تم عمل pilot batch'],
- ['BioVac','Difloxacin BioVac','Difloxacin','100 mg','تم التقديم','2025-10',''],
- ['BioVac','Lincomycin/Spectinomycin BioVac','Lincomycin / Spectinomycin','222 mg / 444.7 mg','تم التقديم','2025-05',''],
+ ['BioVac','Difloxacin BioVac','Difloxacin','100 mg','موافقة سير','2025-10',''],
+ ['BioVac','Lincomycin/Spectinomycin BioVac','Lincomycin / Spectinomycin','222 mg / 444.7 mg','موافقة سير','2025-05',''],
  ['Elanomax','Elanoprocoxid','Amprolium HCl','200 mg','لجنة إخطار','',''],
  ['Elanomax','Elanodiplomac','Difloxacin HCl','100 mg','لجنة إخطار','',''],
  ['Elanomax','Elanonecrobiotic','Lincomycin HCl','44 mg','لجنة إخطار','',''],
- ['Elanomax','Marbolisarvix','Marbofloxacin','100 mg','تم التقديم','2024-12','']
+ ['Elanomax','Marbolisarvix','Marbofloxacin','100 mg','موافقة سير','2024-12','']
 ];
 
 /* items: {id:{id,co,nm,ai,cc,st,sd,nt,o,u,h:[{f,s,t}]}}  أو شاهد حذف {id,del:1,u}
@@ -211,6 +211,27 @@ function names(map){
 }
 function cos(){return names(S.meta.co)}
 function stages(){return names(S.meta.st)}
+/* v1.1: «تم التقديم» اتغيرت لـ «موافقة سير» */
+var RENAMES=[['تم التقديم','موافقة سير']];
+function migrateNames(){
+  var batch={},ch=false;
+  RENAMES.forEach(function(rn){
+    var ok=fk(rn[0]),nk=fk(rn[1]),oe=S.meta.st[ok];
+    if(oe&&!oe.del){
+      if(!S.meta.st[nk]||S.meta.st[nk].del){S.meta.st[nk]={n:rn[1],o:oe.o,u:stamp(S.meta.st[nk])};batch['meta/st/'+nk]=S.meta.st[nk]}
+      S.meta.st[ok]={n:rn[0],o:oe.o,u:stamp(oe),del:1};batch['meta/st/'+ok]=S.meta.st[ok];ch=true;
+    }
+    for(var k in S.items){var it=S.items[k];if(!it||it.del)continue;
+      var hit=it.st===rn[0]||(it.h||[]).some(function(e){return e.f===rn[0]||e.s===rn[0]});
+      if(!hit)continue;
+      var n=JSON.parse(JSON.stringify(it)); if(n.st===rn[0])n.st=rn[1];
+      (n.h||[]).forEach(function(e){if(e.f===rn[0])e.f=rn[1];if(e.s===rn[0])e.s=rn[1]});
+      n.u=stamp(it);S.items[k]=n;batch['items/'+k]=n;ch=true;
+    }
+  });
+  if(ch){persist();if(fbRoot)fbRoot.update(batch).catch(warn)}
+  return ch;
+}
 function validItem(k,it){
   if(!it||typeof it!=='object'||it.id!==k||!/^e[a-z0-9]{4,30}$/.test(k)||typeof it.u!=='number') return false;
   if(it.del) return true;
@@ -231,6 +252,7 @@ function load(){
   if(!cos().length) mergeMetaMap('co',defaultMeta().co);
   if(!stages().length) mergeMetaMap('st',defaultMeta().st);
   if(seed()) persist();
+  migrateNames();
 }
 var warnedQuota=false;
 function persist(){if(!lsSet(LS_KEY,JSON.stringify(S))){if(!warnedQuota){warnedQuota=true;toast('⚠️ مساحة الجهاز مليانة — صدّر نسخة',true)}return false}return true}
@@ -478,6 +500,7 @@ function mergeCloud(c){
   for(var k2 in S.items){var li=S.items[k2],cl=ci[k2];if(!cl||li.u>(cl.u||0))toPush['items/'+k2]=li}
   var cm=c.meta||{};
   ['co','st'].forEach(function(kind){mergeMetaMap(kind,cm[kind]).forEach(function(k){toPush['meta/'+kind+'/'+k]=S.meta[kind][k]})});
+  if(migrateNames()) changed=true;
   if(JSON.stringify(S.meta)!==before) changed=true;
   if(Object.keys(toPush).length){toPush['lastDevice']=devId();toPush['ver']=APP_VER;fbRoot.update(toPush).catch(warn)}
   fbReady=true;
