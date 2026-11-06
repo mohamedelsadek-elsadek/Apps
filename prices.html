@@ -16,6 +16,7 @@
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--tx);font-family:-apple-system,'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column}
 
+.ps-wrap{display:inline-flex;align-items:center;gap:5px;padding:0 10px;white-space:nowrap}.ps-dot{width:9px;height:9px;border-radius:50%;background:#64748b;display:inline-block}.ps-dot.on{background:#10b981}.ps-dot.wait{background:#f59e0b}.ps-dot.err{background:#ef4444}.ps-txt{font-size:10px;color:var(--tx3)}
 nav{background:var(--bg2);border-bottom:1px solid var(--br2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 nav::-webkit-scrollbar{display:none}
 .ni{display:flex;min-width:max-content}
@@ -137,6 +138,7 @@ input[type=date]{background:var(--bg4);border:1px solid var(--br2);color:var(--t
 
 <nav style="display:none" id="nav">
   <div class="ni">
+    <span class="ps-wrap" title="المزامنة"><span id="psDot" class="ps-dot"></span><span id="psTxt" class="ps-txt"></span></span>
     <button class="nb on"  onclick="go('ph',this)">🏠 رئيسية</button>
     <button class="nb"     onclick="go('pe',this)">➕ إدخال</button>
     <button class="nb"     onclick="go('pm',this)">📅 شهري</button>
@@ -445,7 +447,7 @@ async function loadData(){
 }
 
 function loadNew(){try{return JSON.parse(localStorage.getItem(SK)||'[]');}catch{return[];}}
-function saveNew(a){localStorage.setItem(SK,JSON.stringify(a));}
+function saveNew(a){var t=psNow();a.forEach(function(e){if(typeof e.u!=='number'){e.u=t;}});try{localStorage.setItem(SK,JSON.stringify(a));}catch(e){}psPush();}
 var NEW_E=[];
 
 function allRec(){
@@ -495,6 +497,73 @@ function initApp(){
   document.getElementById('pages').style.display='';
   renderHome();updateED();
   loadMorshd();
+  psInit();
+}
+
+// ── المزامنة (Firebase my-app-sync — مسار poultry_prices) ────────
+// e/<التاريخ> = سعر اللحم الأبيض المُدخل، m/<الصنف>/<التاريخ> = تعديلات «كل الأصناف». كل سجل بختم u والأحدث يكسب.
+var PS_FB={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",storageBucket:"my-app-sync-11ad9.firebasestorage.app",messagingSenderId:"177039534756",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
+var PS_PATH='poultry_prices',psRoot=null,psOff=0,psCloud=null,psReady=false;
+function psNow(){return Date.now()+psOff;}
+function psKey(n){return encodeURIComponent(n).replace(/\./g,'%2E');}
+function psUnkey(k){try{return decodeURIComponent(k);}catch(e){return k;}}
+function psUI(st,txt){var el=document.getElementById('psDot');if(!el)return;el.className='ps-dot '+(st||'');el.title=txt||'';var t=document.getElementById('psTxt');if(t)t.textContent=txt||'';}
+function psLoad(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+function psInit(){
+  psUI('wait','بيتصل...');
+  var V='https://www.gstatic.com/firebasejs/10.12.2/';
+  (window.firebase?Promise.resolve():psLoad(V+'firebase-app-compat.js').then(function(){return psLoad(V+'firebase-database-compat.js');})).then(function(){
+    var app=firebase.apps.length?firebase.app():firebase.initializeApp(PS_FB),db=firebase.database(app);
+    db.ref('.info/serverTimeOffset').on('value',function(s){psOff=+s.val()||0;});
+    db.ref('.info/connected').on('value',function(s){if(s.val())psUI('on','متزامن');else psUI(psReady?'wait':'err',psReady?'أوفلاين':'مش متصل');});
+    psRoot=db.ref(PS_PATH);
+    psRoot.on('value',function(snap){psMerge(snap.val()||{});},function(){psUI('err','خطأ صلاحيات');});
+  }).catch(function(){psUI('err','مش متصل');});
+}
+function psValidE(x){return x&&typeof x==='object'&&/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')&&typeof x.price==='number'&&x.price>0&&typeof x.u==='number';}
+function psValidM(x){return x&&typeof x==='object'&&typeof x.u==='number'&&(x.del||(+x.lo>0||+x.hi>0));}
+/* دمج: السجل الأحدث (u الأكبر) يكسب في الاتجاهين — مفيش مسح لبيانات موجودة */
+function psMerge(v){
+  psCloud=v;var changed=false;
+  var ce=v.e||{},map={};NEW_E.forEach(function(e,i){map[e.date]=i;});
+  Object.keys(ce).forEach(function(d){var x=ce[d];if(!psValidE(x)||x.date!==d)return;var i=map[d];
+    if(i==null){NEW_E.push(x);map[d]=NEW_E.length-1;changed=true;}
+    else if(x.u>(NEW_E[i].u||0)){NEW_E[i]=x;changed=true;}});
+  var cm=v.m||{},m=itManual(),mc=false;
+  Object.keys(cm).forEach(function(k){var n=psUnkey(k),ds=cm[k]||{};Object.keys(ds).forEach(function(d){var x=ds[d];if(!psValidM(x))return;m[n]=m[n]||{};var l=m[n][d];
+    if(!l||x.u>(l.u||0)){m[n][d]=x;mc=true;}});});
+  if(changed){NEW_E.sort(function(a,b){return a.date.localeCompare(b.date);});try{localStorage.setItem(SK,JSON.stringify(NEW_E));}catch(e){}}
+  if(mc){try{localStorage.setItem(IT_KEY,JSON.stringify(m));}catch(e){}}
+  psReady=true;psPush();
+  if(changed||mc)psRerender();
+}
+function psPush(){
+  if(!psRoot||!psReady)return;var c=psCloud||{},ce=c.e||{},cm=c.m||{},up={};
+  NEW_E.forEach(function(e){if(!e||!e.date||!(e.price>0))return;if(typeof e.u!=='number')e.u=1;var x=ce[e.date];if(!x||e.u>(x.u||0)){var o={};Object.keys(e).forEach(function(k){if(e[k]!==undefined)o[k]=e[k];});up['e/'+e.date]=o;}});
+  var m=itManual();Object.keys(m).forEach(function(n){var k=psKey(n);Object.keys(m[n]||{}).forEach(function(d){var l=m[n][d];if(!l)return;var u=typeof l.u==='number'?l.u:1,x=(cm[k]||{})[d];
+    if(!x||u>(x.u||0)){var o={u:u};if(l.del)o.del=1;else{o.lo=+l.lo;o.hi=+l.hi;}up['m/'+k+'/'+d]=o;}});});
+  if(Object.keys(up).length){up['updated']=psNow();psRoot.update(up).catch(function(){psUI('err','الحفظ على السحابة فشل');});}
+}
+function psRerender(){var pg=document.querySelector('.pg.on');if(!pg)return;var id=pg.id;
+  if(id==='ph')renderHome();else if(id==='pe')renderEntry();else if(id==='pd')rData();else if(id==='pm')rMonth();else if(id==='pit')rItems();updateED();}
+
+// ── أسعار البيض الأحمر مباشرة من مبيعات المزرعة الرئيسية (قراءة بس) ─
+var FARM_LIVE_AT=0;
+function loadFarmLive(){
+  if(Date.now()-FARM_LIVE_AT<5*60e3)return;FARM_LIVE_AT=Date.now();
+  var base=PS_FB.databaseURL+'/farm/main/org/companies/0/farms/0/db/houses';
+  fetch(base+'.json?shallow=true',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(ks){
+    if(!ks)return null;var idx=Array.isArray(ks)?ks.map(function(_,i){return i;}):Object.keys(ks);
+    return Promise.all(idx.map(function(i){return fetch(base+'/'+i+'/sales.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});}));
+  }).then(function(all){
+    if(!all)return;var agg={};
+    all.forEach(function(s){if(!s)return;(Array.isArray(s)?s:Object.keys(s).map(function(k){return s[k];})).forEach(function(x){
+      if(!x||!x.date)return;var p=+x.dishPrice,q=+x.dishes;if(!(p>0)||!(q>0))return;agg[x.date]=agg[x.date]||{};agg[x.date][p]=(agg[x.date][p]||0)+q;});});
+    var live={};Object.keys(agg).forEach(function(d){var best=null,bq=-1;Object.keys(agg[d]).forEach(function(p){var q=agg[d][p];if(q>bq||(q===bq&&+p>+best)){bq=q;best=+p;}});if(best)live[d]=best;});
+    if(!Object.keys(live).length)return;
+    FARM_H=FARM_H||{};var cur=FARM_H['بيض احمر']||{};Object.keys(live).forEach(function(d){cur[d]=live[d];});FARM_H['بيض احمر']=cur;
+    var pg=document.querySelector('.pg.on');if(pg&&pg.id==='pit')rItems();
+  }).catch(function(){});
 }
 
 
@@ -503,7 +572,7 @@ var MORSHD=null,MORSHD_OPEN=false;
 var MORSHD_H=null;
 var FARM_H=null; /* أسعار بيع المزرعة الرئيسية (data/farm_prices.json) — بتكمّل الأيام اللي مالهاش سعر من المرشد */
 function loadMorshd(){
-  fetch('data/farm_prices.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(f){FARM_H=f;
+  fetch('data/farm_prices.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(f){FARM_H=f;loadFarmLive();
   return fetch('data/elmorshd_history.json?t='+Date.now(),{cache:'no-store'});}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(h){MORSHD_H=h;
   return fetch('data/elmorshd.json?t='+Date.now(),{cache:'no-store'});}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
     MORSHD=j;autoFillMorshd();renderMorshd();
@@ -546,7 +615,7 @@ function renderMorshd(){
 // ── سجلات كل الأصناف (من سجل المرشد اليومي + تعديلات يدوية) ────────
 var IT_KEY='pp_items_v1',IT_SEL='اللحم الساسو';
 function itManual(){try{return JSON.parse(localStorage.getItem(IT_KEY)||'{}')||{};}catch(e){return {};}}
-function itSaveManual(m){try{localStorage.setItem(IT_KEY,JSON.stringify(m));}catch(e){}}
+function itSaveManual(m){var t=psNow();Object.keys(m).forEach(function(n){Object.keys(m[n]||{}).forEach(function(d){var x=m[n][d];if(x&&typeof x.u!=='number')x.u=t;});});try{localStorage.setItem(IT_KEY,JSON.stringify(m));}catch(e){}psPush();}
 function itPair(v){if(!v)return null;if(v['سعر']!=null)return {lo:v['سعر'],hi:v['سعر'],ex:v['تنفيذ']||null};var hi=v['أعلى'],lo=v['أقل'];if(hi==null&&lo==null)return null;return {lo:lo!=null?lo:hi,hi:hi!=null?hi:lo};}
 function itNames(){var n={};if(MORSHD_H)Object.keys(MORSHD_H).forEach(function(d){Object.keys(MORSHD_H[d]).forEach(function(k){n[k]=1;});});if(FARM_H)Object.keys(FARM_H).forEach(function(k){if(k.charAt(0)!=='_')n[k]=1;});Object.keys(itManual()).forEach(function(k){n[k]=1;});return Object.keys(n);}
 function itRows(name){
@@ -566,6 +635,7 @@ function itForecast(rows,n){
   return {pts:out,slope:sl};
 }
 function rItems(){
+  loadFarmLive();
   var names=itNames();
   if(!names.length){document.getElementById('itChips').innerHTML='';document.getElementById('itBody').innerHTML='<div class="card">لسه مفيش سجلات — بتبدأ من أول سحب من المرشد</div>';if(!MORSHD_H)loadMorshd();return;}
   if(names.indexOf(IT_SEL)<0)IT_SEL=names[0];
@@ -592,7 +662,7 @@ function rItems(){
 }
 function itAdd(){var d=document.getElementById('itD').value,lo=parseFloat(document.getElementById('itLo').value),hi=parseFloat(document.getElementById('itHi').value);
   if(!d||(!lo&&!hi)){toast('❌ اكتب التاريخ والسعر',1);return}if(!lo)lo=hi;if(!hi)hi=lo;
-  var m=itManual();m[IT_SEL]=m[IT_SEL]||{};m[IT_SEL][d]={lo:lo,hi:hi};itSaveManual(m);toast('✅ '+IT_SEL+' '+d);rItems();}
+  var m=itManual();m[IT_SEL]=m[IT_SEL]||{};m[IT_SEL][d]={lo:lo,hi:hi,u:psNow()};itSaveManual(m);toast('✅ '+IT_SEL+' '+d);rItems();}
 function itEdit(d,lo,hi){document.getElementById('itD').value=d;document.getElementById('itLo').value=lo;document.getElementById('itHi').value=hi;document.getElementById('itLo').focus();}
 
 // ── NAV ──────────────────────────────────────────────────────────
@@ -668,7 +738,7 @@ function addP(){
   var date=getNext(),all=allRec(),prev=all[all.length-1].price;
   var diff=+(price-prev).toFixed(2),dp=+(diff/prev*100).toFixed(1);
   var d=new Date(date);
-  var entry={date:date,price:price,diff:diff,diffPct:dp,dayName:DAYS[d.getDay()],year:d.getFullYear(),month:d.getMonth()+1};
+  var entry={date:date,price:price,diff:diff,diffPct:dp,dayName:DAYS[d.getDay()],year:d.getFullYear(),month:d.getMonth()+1,u:psNow()};
   var xi=NEW_E.findIndex(function(e){return e.date===date;});
   if(xi>=0){if(!confirm('التاريخ موجود. تحديث؟'))return;NEW_E[xi]=entry;}
   else NEW_E.push(entry);
@@ -1131,7 +1201,7 @@ function drawSeas(id,data){
 // ── EXPORT ───────────────────────────────────────────────────────
 function xCSV(){var all=allRec(),c='\ufeffالتاريخ,اليوم,السعر,التغير,التغير%\n';all.forEach(function(e){c+=e.date+','+e.dayName+','+e.price+','+e.diff+','+e.diffPct+'\n';});dl(c,'اسعار_الدواجن.csv','text/csv');toast('✅ تصدير '+all.length+' سجل');}
 function xJSON(){dl(JSON.stringify({entries:NEW_E},null,2),'backup.json','application/json');toast('✅ نسخة احتياطية');}
-function impJSON(input){var file=input.files[0];if(!file)return;var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);var arr=d.entries||d;if(!Array.isArray(arr))throw new Error('');NEW_E=arr;saveNew(NEW_E);toast('✅ استيراد '+arr.length);var pg=document.querySelector('.pg.on');if(pg){if(pg.id==='ph')renderHome();else if(pg.id==='pe')renderEntry();else if(pg.id==='pd')rData();else if(pg.id==='pm')rMonth();}}catch(err){toast('❌ خطأ',1);};input.value='';};;r.readAsText(file);}
+function impJSON(input){var file=input.files[0];if(!file)return;var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);var arr=d.entries||d;if(!Array.isArray(arr))throw new Error('');var tI=psNow();arr.forEach(function(x,i){if(x&&x.date)x.u=tI+i;});NEW_E=arr;saveNew(NEW_E);toast('✅ استيراد '+arr.length);var pg=document.querySelector('.pg.on');if(pg){if(pg.id==='ph')renderHome();else if(pg.id==='pe')renderEntry();else if(pg.id==='pd')rData();else if(pg.id==='pm')rMonth();}}catch(err){toast('❌ خطأ',1);};input.value='';};;r.readAsText(file);}
 function dl(c,n,t){var a=document.createElement('a'),u=URL.createObjectURL(new Blob([c],{type:t}));a.href=u;a.download=n;a.click();URL.revokeObjectURL(u);}
 function toast(msg,err){var el=document.getElementById('toast');el.textContent=msg;el.className='on'+(err?' er':'');setTimeout(function(){el.className=err?'er':'';},2500);}
 function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
