@@ -501,8 +501,10 @@ function initApp(){
 // ── أسعار المرشد (بتتسحب أوتوماتيك مرتين يوميًا على GitHub) ─────────
 var MORSHD=null,MORSHD_OPEN=false;
 var MORSHD_H=null;
+var FARM_H=null; /* أسعار بيع المزرعة الرئيسية (data/farm_prices.json) — بتكمّل الأيام اللي مالهاش سعر من المرشد */
 function loadMorshd(){
-  fetch('data/elmorshd_history.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(h){MORSHD_H=h;
+  fetch('data/farm_prices.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(f){FARM_H=f;
+  return fetch('data/elmorshd_history.json?t='+Date.now(),{cache:'no-store'});}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(h){MORSHD_H=h;
   return fetch('data/elmorshd.json?t='+Date.now(),{cache:'no-store'});}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
     MORSHD=j;autoFillMorshd();renderMorshd();
   }).catch(function(){var el=document.getElementById('morshd');if(el)el.innerHTML='';});
@@ -546,9 +548,10 @@ var IT_KEY='pp_items_v1',IT_SEL='اللحم الساسو';
 function itManual(){try{return JSON.parse(localStorage.getItem(IT_KEY)||'{}')||{};}catch(e){return {};}}
 function itSaveManual(m){try{localStorage.setItem(IT_KEY,JSON.stringify(m));}catch(e){}}
 function itPair(v){if(!v)return null;if(v['سعر']!=null)return {lo:v['سعر'],hi:v['سعر'],ex:v['تنفيذ']||null};var hi=v['أعلى'],lo=v['أقل'];if(hi==null&&lo==null)return null;return {lo:lo!=null?lo:hi,hi:hi!=null?hi:lo};}
-function itNames(){var n={};if(MORSHD_H)Object.keys(MORSHD_H).forEach(function(d){Object.keys(MORSHD_H[d]).forEach(function(k){n[k]=1;});});Object.keys(itManual()).forEach(function(k){n[k]=1;});return Object.keys(n);}
+function itNames(){var n={};if(MORSHD_H)Object.keys(MORSHD_H).forEach(function(d){Object.keys(MORSHD_H[d]).forEach(function(k){n[k]=1;});});if(FARM_H)Object.keys(FARM_H).forEach(function(k){if(k.charAt(0)!=='_')n[k]=1;});Object.keys(itManual()).forEach(function(k){n[k]=1;});return Object.keys(n);}
 function itRows(name){
   var r={};if(MORSHD_H)Object.keys(MORSHD_H).forEach(function(d){var p=itPair(MORSHD_H[d][name]);if(p)r[d]=Object.assign({src:'المرشد'},p);});
+  var fh=FARM_H&&FARM_H[name];if(fh&&typeof fh==='object')Object.keys(fh).forEach(function(d){var v=+fh[d];if(!r[d]&&v>0)r[d]={src:'المزرعة',lo:v,hi:v};});
   var m=itManual()[name]||{};Object.keys(m).forEach(function(d){if(m[d]&&m[d].del)delete r[d];else if(m[d])r[d]=Object.assign({src:'يدوي'},m[d]);});
   return Object.keys(r).sort().map(function(d){var x=r[d];return {date:d,lo:+x.lo,hi:+x.hi,avg:+((+x.lo+ +x.hi)/2).toFixed(2),ex:x.ex,src:x.src};});
 }
