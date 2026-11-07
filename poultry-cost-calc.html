@@ -210,7 +210,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>حاسبة تكاليف مزرعة الدواجن</title>
+<title>تسمين الشركاء</title>
 <style>
   :root{
     --ink:#2d2a55;
@@ -649,7 +649,7 @@
     <div class="brand-mark">🐔</div>
     <div class="brand-text">
       <span class="eyebrow" id="eyebrowCycle">دورة تسمين جارية</span>
-      <h1 id="farmTitle">حاسبة تكاليف مزرعة الدواجن</h1>
+      <h1 id="farmTitle">تسمين الشركاء</h1>
       <p id="farmSub">تسجيل التكاليف · متابعة أسبوعية · نقطة تعادل · سيناريوهات ربح وخسارة</p>
       <p style="font-size:11.5px;margin:2px 0 0;opacity:.85">
         <span id="hdrVersion" style="font-weight:800"></span>
@@ -1852,7 +1852,7 @@ function tabCount(id,c){
 /* ========================= HEADER ========================= */
 function renderHeader(){
   const c = computed();
-  document.getElementById("farmTitle").textContent = state.setup.farmName ? state.setup.farmName : "حاسبة تكاليف مزرعة الدواجن";
+  document.getElementById("farmTitle").textContent = state.setup.farmName ? state.setup.farmName : "تسمين الشركاء";
   document.getElementById("farmSub").textContent = `العلف يمثل ${fmt(c.feedCostShare,0)}% من التكاليف · معامل التحويل التقديري ${fmt(c.fcr,2)}`;
   document.getElementById("eyebrowCycle").textContent = state.setup.cycleName || "دورة تسمين";
   document.getElementById("hdrTotalCost").innerHTML = fmtMoney(c.totalCost);
