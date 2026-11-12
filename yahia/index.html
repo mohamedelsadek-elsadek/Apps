@@ -110,6 +110,8 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 .confetti{position:fixed;top:-20px;font-size:26px;animation:fall 1.6s linear forwards;pointer-events:none;z-index:8}
 @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
 .err{background:#ffd0d5;border-radius:16px;padding:12px;font-family:Cairo}
+.brand{white-space:nowrap}.pill{white-space:nowrap}
+@media(max-width:430px){.brand span{display:none}.pill{font-size:15px;padding:4px 9px}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -117,8 +119,8 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 <body>
 <div class="wrap">
   <div class="top">
-    <button class="brand" onclick="route('home')">🦁 <span>عالم يحيى</span></button>
-    <div class="pills"><span class="pill">⭐ <b id="stars">0</b></span><span class="pill">🐥 <b id="eggsN">0</b></span></div>
+    <button class="brand" onclick="route('home')">🌍 <span>عالم يحيى</span></button>
+    <div class="pills"><button class="pill" id="kidPill" onclick="route('kids')"></button><span class="pill">⭐ <b id="stars">0</b></span><span class="pill">🐥 <b id="eggsN">0</b></span></div>
   </div>
   <div id="view"></div>
 </div>
@@ -131,24 +133,44 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
    الصوت: audio/<lessonId>/<key>.mp3 لو موجود في lesson.audio، وإلا صوت الجهاز. */
 const $=id=>document.getElementById(id);
 let M=null, L=null, LID=null, ACT=null, AIDX=0;
-let S={stars:0,eggs:0,done:{},miss:[]};
-try{const x=JSON.parse(localStorage.getItem("yahia-world")||"null"); if(x) S=Object.assign(S,x);}catch(e){}
-function save(local){try{localStorage.setItem("yahia-world",JSON.stringify(S))}catch(e){} $("stars").textContent=S.stars; $("eggsN").textContent=S.eggs; if(!local) pushSync();}
+/* ---------- اللاعبين (كل طفل ليه مساره) ---------- */
+const BLANK=()=>({stars:0,eggs:0,done:{},miss:[]});
+const AVATARS=["🦁","🐯","🐼","🦊","🐰","🐻","🦄","🐸","🐧","🦋","🐬","🐥"];
+let KIDS={}, KID=null, S=BLANK();
+try{KIDS=JSON.parse(localStorage.getItem("yw-kids")||"{}")||{}}catch(e){}
+try{KID=localStorage.getItem("yw-kid")}catch(e){}
+/* ترحيل التقدّم القديم (قبل الملفات الشخصية) ليحيى */
+try{ if(!Object.keys(KIDS).length){ KIDS={yahia:{id:"yahia",name:"يحيى",emoji:"🦁",u:1}}; const old=localStorage.getItem("yahia-world"); if(old) localStorage.setItem("yw-state:yahia",old); localStorage.setItem("yw-kids",JSON.stringify(KIDS)); } }catch(e){}
+const kid=()=>KIDS[KID]||{name:"",emoji:"🦁"};
+const liveKids=()=>Object.values(KIDS).filter(k=>k&&!k.del).sort((a,b)=>(a.c||0)-(b.c||0));
+function loadKidLocal(id){ let st=BLANK(); try{const x=JSON.parse(localStorage.getItem("yw-state:"+id)||"null"); if(x) st=Object.assign(st,x)}catch(e){} return st; }
+function save(local){try{localStorage.setItem("yw-state:"+KID,JSON.stringify(S))}catch(e){} $("stars").textContent=S.stars; $("eggsN").textContent=S.eggs; if(!local) pushSync();}
 /* ---------- المزامنة (Firebase — نفس قاعدة برامج محمد) ---------- */
 const FB={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
-let REF=null, SYNC="off", pushT=null;
-function mergeState(r){ if(!r) return false; let ch=false;
-  for(const lid in (r.done||{})){ S.done[lid]=S.done[lid]||{}; for(const i in r.done[lid]) if(!S.done[lid][i]){S.done[lid][i]=true;ch=true} }
-  if((r.stars||0)>S.stars){S.stars=r.stars;ch=true} if((r.eggs||0)>S.eggs){S.eggs=r.eggs;ch=true}
-  const seen=new Set(S.miss.map(m=>m.t)); (r.miss||[]).forEach(m=>{if(m&&!seen.has(m.t)){S.miss.push(m);ch=true}}); S.miss.sort((a,b)=>a.t-b.t); if(S.miss.length>80)S.miss=S.miss.slice(-80);
+let DB=null, REF=null, SYNC="off", pushT=null;
+function mergeInto(T,r){ if(!r) return false; let ch=false;
+  for(const lid in (r.done||{})){ T.done[lid]=T.done[lid]||{}; for(const i in r.done[lid]) if(!T.done[lid][i]){T.done[lid][i]=true;ch=true} }
+  if((r.stars||0)>T.stars){T.stars=r.stars;ch=true} if((r.eggs||0)>T.eggs){T.eggs=r.eggs;ch=true}
+  const seen=new Set(T.miss.map(m=>m.t)); (r.miss||[]).forEach(m=>{if(m&&!seen.has(m.t)){T.miss.push(m);ch=true}}); T.miss.sort((a,b)=>a.t-b.t); if(T.miss.length>80)T.miss=T.miss.slice(-80);
   return ch; }
-function pushSync(){ if(!REF) return; clearTimeout(pushT); pushT=setTimeout(()=>{ try{ REF.set(Object.assign({},S,{u:Date.now()})).then(()=>{SYNC="on"}).catch(()=>{SYNC="err"}) }catch(e){} },1200); }
+function pushSync(){ if(!REF) return; clearTimeout(pushT); const r=REF, snap=Object.assign({},S,{u:Date.now()}); pushT=setTimeout(()=>{ try{ r.set(snap).then(()=>{SYNC="on"}).catch(()=>{SYNC="err"}) }catch(e){} },1200); }
+function saveKids(){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} if(DB) try{DB.ref("yahia_world/kids_meta").set(KIDS)}catch(e){} }
 function initSync(){ try{ if(!window.firebase) return; const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
-  REF=firebase.database(app).ref("yahia_world/state");
-  REF.on("value",snap=>{ SYNC="on"; const r=snap.val(); const ch=mergeState(r); save(true);
-    if(ch||!r) pushSync(); if(ch){ const v=$("view"); if(v&&v.dataset.r) refreshView(); } },()=>{SYNC="err"});
+  DB=firebase.database(app);
+  DB.ref("yahia_world/kids_meta").on("value",snap=>{ const r=snap.val()||{}; let ch=false, push=false;
+    for(const id in r){ const k=r[id]; if(!KIDS[id]||(k.u||0)>(KIDS[id].u||0)){KIDS[id]=k;ch=true} }
+    for(const id in KIDS) if(!r[id]||(KIDS[id].u||0)>(r[id].u||0)) push=true;
+    if(ch){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} const v=$("view"); if(v&&(v.dataset.r==="kids"||v.dataset.r==="parent")) refreshView(); }
+    if(push) saveKids(); });
+  /* ترحيل الحالة القديمة yahia_world/state ليحيى مرة واحدة */
+  DB.ref("yahia_world/state").once("value",snap=>{ const r=snap.val(); if(!r) return; DB.ref("yahia_world/kids/yahia/state").transaction(cur=>{ const T=Object.assign(BLANK(),cur||{}); mergeInto(T,r); T.u=Date.now(); return T; }).then(()=>DB.ref("yahia_world/state").remove()).catch(()=>{}); });
+  if(KID) attachKid(KID);
  }catch(e){SYNC="err"} }
-function refreshView(){ const r=$("view").dataset.r; if(r==="home")viewHome(); else if(r==="parent")viewParent(); }
+function attachKid(id){ if(!DB) return; if(REF) REF.off(); REF=DB.ref("yahia_world/kids/"+id+"/state");
+  REF.on("value",snap=>{ if(KID!==id) return; SYNC="on"; const r=snap.val(); const ch=mergeInto(S,r); save(true);
+    if(ch||!r) pushSync(); if(ch) refreshView(); },()=>{SYNC="err"}); }
+function useKid(id){ KID=id; try{localStorage.setItem("yw-kid",id)}catch(e){} S=loadKidLocal(id); save(true); attachKid(id); $("kidPill").textContent=kid().emoji+" "+kid().name; route("home"); }
+function refreshView(){ const v=$("view"); const r=v&&v.dataset.r; if(r==="home")viewHome(); else if(r==="parent")viewParent(PKID); else if(r==="kids")viewKids(); }
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function toast(t){const x=$("toast");x.textContent=t;x.classList.add("on");setTimeout(()=>x.classList.remove("on"),650)}
@@ -179,15 +201,15 @@ async function loadLesson(id){
   return d;
 }
 function findLesson(id){for(const s of M.subjects)for(const b of (s.blocks||[]))for(const u of b.units)for(const l of u.lessons) if(l.id===id) return Object.assign({},l,{subject:s,block:b,unit:u}); return null}
-function lessonDone(id){const d=S.done[id]||{}; const n=Object.keys(d).length; return n}
+function lessonDone(id,T){const d=(T||S).done[id]||{}; return Object.keys(d).length}
 
 /* ---------- التنقّل ---------- */
 let stopGame=()=>{};
 function route(r,arg){stopGame();stopGame=()=>{};stopVoice();window.scrollTo(0,0);const v=$("view");v.style.animation="none";v.offsetHeight;v.style.animation="";
-  v.dataset.r=r; ({home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent})[r](arg);}
+  v.dataset.r=r; ({home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent,kids:viewKids})[r](arg);}
 
 function viewHome(){
-  $("view").innerHTML=`<h1>أهلًا يا ${esc(M.brand.kid)}! 👋</h1><p class="sub">${esc(M.brand.grade)} · ${esc(M.brand.school)} — اختار المادة وابدأ المغامرة!</p>
+  $("view").innerHTML=`<h1>أهلًا يا ${esc(kid().name)}! ${kid().emoji}</h1><p class="sub">اختار المادة وابدأ المغامرة! <button class="back" style="font-size:14px;padding:3px 10px" onclick="route('kids')">🔁 لاعب تاني</button></p>
   <div class="subs">${M.subjects.map(s=>`<button class="sub-t ${s.status!=="ready"?"soon":""}" style="background:${s.color}" ${s.status!=="ready"?"disabled":""} onclick="route('subject','${s.id}')">
     <span class="i">${s.ico}</span><span><b>${esc(s.title)}</b><br><small>${s.status==="ready"?countLessons(s)+" دروس جاهزة":"قريبًا 🔒"}</small></span></button>`).join("")}</div>
   <div class="farm"><b>🏡 مزرعتك</b> <span class="note">كل إجابة صح في الكويز بتفقس كتكوت</span><div class="row ${S.eggs?"":"empty"}">${S.eggs?"🐥".repeat(Math.min(S.eggs,60)):"لسه فاضية… العب وفقّس البيض!"}</div></div>
@@ -312,18 +334,38 @@ function actQuiz(){
   }; show();
 }
 
+/* ---------- اختيار اللاعب ---------- */
+let NEWAV="🐯";
+function viewKids(){
+  $("view").innerHTML=`<h1>مين بيلعب دلوقتي؟ 🎮</h1><p class="sub">كل واحد ليه نجومه ومزرعته ومستواه لوحده.</p>
+  <div class="subs">${liveKids().map(k=>`<button class="sub-t" style="background:${k.id===KID?"#2fb36d":"#8a5cf6"}" onclick="useKid('${k.id}')"><span class="i">${k.emoji}</span><span><b>${esc(k.name)}</b><br><small>${k.id===KID?"بيلعب دلوقتي ✓":"اضغط للعب"}</small></span></button>`).join("")}</div>
+  <div class="card" style="margin-top:14px"><h2>➕ لاعب جديد</h2>
+   <input id="nkName" placeholder="اسم الطفل" style="width:100%;font-family:inherit;font-size:20px;padding:10px;border-radius:14px;border:2px solid #e3def0;margin-bottom:10px">
+   <div id="nkAv" style="display:flex;flex-wrap:wrap;gap:6px;font-size:30px;margin-bottom:10px">${AVATARS.map(a=>`<button class="back" style="font-size:28px;padding:4px 8px;${a===NEWAV?"outline:3px solid #ff9f2e":""}" data-a="${a}">${a}</button>`).join("")}</div>
+   <button class="btn g big" id="nkAdd">ضيف اللاعب</button></div>`;
+  document.querySelectorAll("#nkAv [data-a]").forEach(b=>b.onclick=()=>{NEWAV=b.dataset.a;document.querySelectorAll("#nkAv [data-a]").forEach(x=>x.style.outline="");b.style.outline="3px solid #ff9f2e"});
+  $("nkAdd").onclick=()=>{const n=$("nkName").value.trim(); if(!n){$("nkName").focus();return}
+    const id="k"+Date.now().toString(36); KIDS[id]={id,name:n,emoji:NEWAV,c:Date.now(),u:Date.now()}; saveKids(); useKid(id);};
+}
 /* ---------- صفحة بابا ---------- */
-function viewParent(){
-  const rows=[];M.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const n=lessonDone(l.id);rows.push(`<tr><td>${l.ico} ${esc(l.title)}<br><span class="note">${esc(s.title)} · ${esc(b.title)}</span></td><td style="width:40%"><div class="bar"><i style="width:${Math.min(100,n/6*100)}%"></i></div><span class="note">${n} محطات</span></td></tr>`)}))));
-  const m=S.miss.slice(-20).reverse();
-  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('home')">→ الرئيسية</button><span class="pill">👨‍👦 صفحة بابا</span></div>
-  <div class="card"><h2>تقدّم يحيى</h2><p class="note">⭐ ${S.stars} نجمة · 🐥 ${S.eggs} كتكوت</p><table>${rows.join("")}</table></div>
-  <div class="card"><h2>غلط في إيه؟</h2>${m.length?`<table>${m.map(x=>`<tr><td>${esc(x.l)}<br><span class="note">${esc(x.a)}</span></td><td>${esc(x.what)}</td></tr>`).join("")}</table>`:`<p class="note">مفيش غلطات لحد دلوقتي 👏</p>`}</div>
-  <div class="card note">${SYNC==="on"?"☁️ التقدّم متزامن — أي جهاز يفتح المنصة يشوف نفس المستوى.":SYNC==="err"?"⚠️ المزامنة مش شغالة دلوقتي — التقدّم محفوظ على الجهاز ده.":"⏳ بيوصل للمزامنة…"} <button class="back" id="rst">🔄 ابدأ من الأول</button></div>`;
-  $("rst").onclick=()=>{S={stars:0,eggs:0,done:{},miss:[]};try{localStorage.setItem("yahia-world",JSON.stringify(S))}catch(e){} if(REF)REF.set(Object.assign({},S,{u:Date.now()})); route("home")};
+let PKID=null;
+function viewParent(pid){
+  PKID=pid||PKID||KID; const k=KIDS[PKID]||kid();
+  const draw=T=>{
+    const rows=[];M.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const n=lessonDone(l.id,T);rows.push(`<tr><td>${l.ico} ${esc(l.title)}<br><span class="note">${esc(s.title)} · ${esc(b.title)}</span></td><td style="width:40%"><div class="bar"><i style="width:${Math.min(100,n/6*100)}%"></i></div><span class="note">${n} محطات</span></td></tr>`)}))));
+    const m=T.miss.slice(-20).reverse();
+    $("view").innerHTML=`<div class="top"><button class="back" onclick="route('home')">→ الرئيسية</button><span class="pill">👨‍👦 صفحة بابا</span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${liveKids().map(x=>`<button class="back" style="${x.id===PKID?"background:#ffd23f":""}" onclick="viewParent('${x.id}')">${x.emoji} ${esc(x.name)}</button>`).join("")}</div>
+    <div class="card"><h2>تقدّم ${esc(k.name)}</h2><p class="note">⭐ ${T.stars} نجمة · 🐥 ${T.eggs} كتكوت</p><table>${rows.join("")}</table></div>
+    <div class="card"><h2>غلط في إيه؟</h2>${m.length?`<table>${m.map(x=>`<tr><td>${esc(x.l)}<br><span class="note">${esc(x.a)}</span></td><td>${esc(x.what)}</td></tr>`).join("")}</table>`:`<p class="note">مفيش غلطات لحد دلوقتي 👏</p>`}</div>
+    <div class="card note">${SYNC==="on"?"☁️ متزامن — كل طفل ليه مساره، وأي جهاز يشوف نفس المستوى.":SYNC==="err"?"⚠️ المزامنة مش شغالة دلوقتي — التقدّم محفوظ على الجهاز ده.":"⏳ بيوصل للمزامنة…"}</div>`;
+  };
+  if(PKID===KID) return draw(S);
+  const T=loadKidLocal(PKID); draw(T);
+  if(DB) DB.ref("yahia_world/kids/"+PKID+"/state").once("value",snap=>{ if(mergeInto(T,snap.val())&&$("view").dataset.r==="parent"&&PKID===k.id) draw(T); });
 }
 
-(async()=>{save(true);initSync();try{M=await getJSON("data/manifest.json");route("home")}catch(e){$("view").innerHTML=`<div class="err">مش قادر أحمّل المنصة. جرّب تفتحها تاني.</div>`}})();
+(async()=>{ if(KID&&KIDS[KID]){S=loadKidLocal(KID);$("kidPill").textContent=kid().emoji+" "+kid().name} else $("kidPill").textContent="👤 اختار"; save(true); initSync(); try{M=await getJSON("data/manifest.json"); route(KID&&KIDS[KID]?"home":"kids")}catch(e){$("view").innerHTML=`<div class="err">مش قادر أحمّل المنصة. جرّب تفتحها تاني.</div>`}})();
 </script>
 </body>
 </html>
