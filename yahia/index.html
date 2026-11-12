@@ -121,7 +121,7 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 <div class="wrap">
   <div class="top">
     <button class="brand" onclick="route('home')">🌍 <span>عالم يحيى</span></button>
-    <div class="pills"><button class="pill" id="kidPill" onclick="route('kids')"></button><span class="pill">⭐ <b id="stars">0</b></span><span class="pill">🐥 <b id="eggsN">0</b></span></div>
+    <div class="pills"><button class="pill" id="kidPill" onclick="route('kids')"></button><span class="pill">⭐ <b id="stars">0</b></span><span class="pill">🐥 <b id="eggsN">0</b></span><span class="pill" id="cloud" title="المزامنة مع بابا">⏳</span></div>
   </div>
   <div id="view"></div>
 </div>
@@ -178,6 +178,8 @@ function attachKid(id){ if(!DB) return; if(REF) REF.off(); REF=DB.ref("yahia_wor
   REF.on("value",snap=>{ if(KID!==id) return; SYNC="on"; const r=snap.val(); const ch=mergeInto(S,r); save(true);
     if(ch||!r) pushSync(); if(ch) refreshView(); },()=>{SYNC="err"}); }
 function useKid(id){ KID=id; try{localStorage.setItem("yw-kid",id)}catch(e){} S=loadKidLocal(id); save(true); attachKid(id); $("kidPill").textContent=kid().emoji+" "+kid().name; route("home"); }
+function setCloud(){const c=$("cloud");if(c)c.textContent=SYNC==="on"?"☁️":(!window.firebase||SYNC==="err")?"⚠️":"⏳"}
+setInterval(setCloud,1500);
 function refreshView(){ const v=$("view"); const r=v&&v.dataset.r; if(r==="home")viewHome(); else if(r==="parent")viewParent(PKID); else if(r==="kids")viewKids(); }
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -220,6 +222,7 @@ function viewHome(){
   $("view").innerHTML=`<h1>أهلًا يا ${esc(kid().name)}! ${kid().emoji}</h1><p class="sub">اختار المادة وابدأ المغامرة! <button class="back" style="font-size:14px;padding:3px 10px" onclick="route('kids')">🔁 لاعب تاني</button></p>
   <div class="subs">${M.subjects.map(s=>`<button class="sub-t ${s.status!=="ready"?"soon":""}" style="background:${s.color}" ${s.status!=="ready"?"disabled":""} onclick="route('subject','${s.id}')">
     <span class="i">${s.ico}</span><span><b>${esc(s.title)}</b><br><small>${s.status==="ready"?countLessons(s)+" دروس جاهزة":"قريبًا 🔒"}</small></span></button>`).join("")}</div>
+  ${!window.firebase?`<div class="err" style="margin:10px 0">⚠️ النسخة دي مش بتبعت التقدّم لصفحة بابا.<br><a href="https://mohamedelsadek-elsadek.github.io/Apps/yahia/" target="_blank" rel="noopener"><b>افتح «عالم يحيى» من موقع البرامج ↗</b></a></div>`:""}
   <div class="farm"><b>🏡 مزرعتك</b> <span class="note">كل إجابة صح في الكويز بتفقس كتكوت</span><div class="row ${S.eggs?"":"empty"}">${S.eggs?"🐥".repeat(Math.min(S.eggs,60)):"لسه فاضية… العب وفقّس البيض!"}</div></div>
   <p style="text-align:center;margin-top:14px"><button class="back" onclick="route('parent')">👨‍👦 صفحة بابا</button></p>`;
 }
