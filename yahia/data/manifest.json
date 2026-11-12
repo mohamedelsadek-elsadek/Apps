@@ -27,31 +27,36 @@
          "id": "ar-b1-u1-l1",
          "title": "يحيى والأهرامات",
          "ico": "🔺",
-         "file": "lessons/ar-b1-u1-l1.json"
+         "file": "lessons/ar-b1-u1-l1.json",
+         "vq": "الأهرامات للأطفال"
         },
         {
          "id": "ar-b1-u1-l2",
          "title": "حدائق بابل المعلقة",
          "ico": "🌴",
-         "file": "lessons/ar-b1-u1-l2.json"
+         "file": "lessons/ar-b1-u1-l2.json",
+         "vq": "حدائق بابل المعلقة للأطفال"
         },
         {
          "id": "ar-b1-u1-l3",
          "title": "يحيى في الإسكندرية",
          "ico": "🗼",
-         "file": "lessons/ar-b1-u1-l3.json"
+         "file": "lessons/ar-b1-u1-l3.json",
+         "vq": "منارة الإسكندرية للأطفال"
         },
         {
          "id": "ar-b1-u1-l4",
          "title": "يحيى وسور الصين العظيم",
          "ico": "🏯",
-         "file": "lessons/ar-b1-u1-l4.json"
+         "file": "lessons/ar-b1-u1-l4.json",
+         "vq": "سور الصين العظيم للأطفال"
         },
         {
          "id": "ar-b1-u1-l5",
          "title": "يحيى في تاج محل",
          "ico": "🕌",
-         "file": "lessons/ar-b1-u1-l5.json"
+         "file": "lessons/ar-b1-u1-l5.json",
+         "vq": "تاج محل للأطفال"
         }
        ]
       }
@@ -70,19 +75,22 @@
          "id": "ar-b2-u2-l1",
          "title": "عيد المعلم",
          "ico": "👩‍🏫",
-         "file": "lessons/ar-b2-u2-l1.json"
+         "file": "lessons/ar-b2-u2-l1.json",
+         "vq": "عيد المعلم للأطفال"
         },
         {
          "id": "ar-b2-u2-l2",
          "title": "عيد وفاء النيل",
          "ico": "🌊",
-         "soon": true
+         "soon": true,
+         "vq": "عيد وفاء النيل للأطفال"
         },
         {
          "id": "ar-b2-u2-l3",
          "title": "أمير وعيد العمال",
          "ico": "🛠️",
-         "file": "lessons/ar-b2-u2-l3.json"
+         "file": "lessons/ar-b2-u2-l3.json",
+         "vq": "عيد العمال للأطفال"
         }
        ]
       }

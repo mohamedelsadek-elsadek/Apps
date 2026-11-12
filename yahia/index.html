@@ -112,6 +112,7 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 .err{background:#ffd0d5;border-radius:16px;padding:12px;font-family:Cairo}
 .brand{white-space:nowrap}.pill{white-space:nowrap}
 @media(max-width:430px){.brand span{display:none}.pill{font-size:15px;padding:4px 9px}}
+.vbox{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:8px}.vbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.stop.vid{background:#ffe9e9}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -154,6 +155,11 @@ function mergeInto(T,r){ if(!r) return false; let ch=false;
   const seen=new Set(T.miss.map(m=>m.t)); (r.miss||[]).forEach(m=>{if(m&&!seen.has(m.t)){T.miss.push(m);ch=true}}); T.miss.sort((a,b)=>a.t-b.t); if(T.miss.length>80)T.miss=T.miss.slice(-80);
   return ch; }
 function pushSync(){ if(!REF) return; clearTimeout(pushT); const r=REF, snap=Object.assign({},S,{u:Date.now()}); pushT=setTimeout(()=>{ try{ r.set(snap).then(()=>{SYNC="on"}).catch(()=>{SYNC="err"}) }catch(e){} },1200); }
+/* ---------- فيديوهات الدروس (بابا بيختارها) ---------- */
+let VIDS={}; try{VIDS=JSON.parse(localStorage.getItem("yw-vids")||"{}")||{}}catch(e){}
+function ytId(s){s=String(s||"").trim();const m=s.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(s)?s:"")}
+function lessonVid(id){const v=VIDS[id];return v&&v.id&&!v.del?v.id:""}
+function setVid(lid,raw){const id=raw?ytId(raw):"";if(raw&&!id)return false;VIDS[lid]={id,del:!id,u:Date.now()};try{localStorage.setItem("yw-vids",JSON.stringify(VIDS))}catch(e){} if(DB)try{DB.ref("yahia_world/videos/"+lid).set(VIDS[lid])}catch(e){} return true}
 function saveKids(){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} if(DB) try{DB.ref("yahia_world/kids_meta").set(KIDS)}catch(e){} }
 function initSync(){ try{ if(!window.firebase) return; const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
   DB=firebase.database(app);
@@ -162,6 +168,8 @@ function initSync(){ try{ if(!window.firebase) return; const app=firebase.apps.l
     for(const id in KIDS) if(!r[id]||(KIDS[id].u||0)>(r[id].u||0)) push=true;
     if(ch){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} const v=$("view"); if(v&&(v.dataset.r==="kids"||v.dataset.r==="parent")) refreshView(); }
     if(push) saveKids(); });
+  DB.ref("yahia_world/videos").on("value",snap=>{const r=snap.val()||{};let ch=false;for(const id in r){if(!VIDS[id]||(r[id].u||0)>(VIDS[id].u||0)){VIDS[id]=r[id];ch=true}} for(const id in VIDS) if(!r[id]||(VIDS[id].u||0)>(r[id].u||0)) try{DB.ref("yahia_world/videos/"+id).set(VIDS[id])}catch(e){}
+    if(ch){try{localStorage.setItem("yw-vids",JSON.stringify(VIDS))}catch(e){} const v=$("view"); if(v&&v.dataset.r==="lesson"&&LID&&r[LID]) viewLesson(LID);} });
   /* ترحيل الحالة القديمة yahia_world/state ليحيى مرة واحدة */
   DB.ref("yahia_world/state").once("value",snap=>{ const r=snap.val(); if(!r) return; DB.ref("yahia_world/kids/yahia/state").transaction(cur=>{ const T=Object.assign(BLANK(),cur||{}); mergeInto(T,r); T.u=Date.now(); return T; }).then(()=>DB.ref("yahia_world/state").remove()).catch(()=>{}); });
   if(KID) attachKid(KID);
@@ -206,7 +214,7 @@ function lessonDone(id,T){const d=(T||S).done[id]||{}; return Object.keys(d).len
 /* ---------- التنقّل ---------- */
 let stopGame=()=>{};
 function route(r,arg){stopGame();stopGame=()=>{};stopVoice();window.scrollTo(0,0);const v=$("view");v.style.animation="none";v.offsetHeight;v.style.animation="";
-  v.dataset.r=r; ({home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent,kids:viewKids})[r](arg);}
+  v.dataset.r=r; ({video:viewVideo,home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent,kids:viewKids})[r](arg);}
 
 function viewHome(){
   $("view").innerHTML=`<h1>أهلًا يا ${esc(kid().name)}! ${kid().emoji}</h1><p class="sub">اختار المادة وابدأ المغامرة! <button class="back" style="font-size:14px;padding:3px 10px" onclick="route('kids')">🔁 لاعب تاني</button></p>
@@ -233,10 +241,15 @@ async function viewLesson(id){
   const d=S.done[id]||{};
   $("view").innerHTML=`<div class="top"><button class="back" onclick="route('subject','${meta.subject.id}')">→ الخريطة</button><span class="pill">${meta.ico} ${esc(L.title)}</span></div>
   <p class="crumb">${esc(meta.subject.title)} · ${esc(meta.block.title)} · ${esc(meta.unit.title)}</p>
-  <div class="unit"><div class="path">${L.activities.map((a,i)=>`<button class="stop ${d[i]?"done":""}" onclick="route('act',${i})">
+  <div class="unit"><div class="path">${lessonVid(id)?`<button class="stop vid" onclick="route('video')"><span class="ico">🎬</span><span><b>شوف بعينك</b><small>فيديو قصير عن الدرس</small></span><span class="st">▶️</span></button>`:""}${L.activities.map((a,i)=>`<button class="stop ${d[i]?"done":""}" onclick="route('act',${i})">
     <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||({story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير"}[a.type]||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
 }
 
+function viewVideo(){const vid=lessonVid(LID);if(!vid)return route('lesson',LID);
+  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('lesson','${LID}')">→ الدرس</button><span class="pill">🎬 شوف بعينك</span></div>
+  <div class="card"><div class="vbox"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+  <p class="note" style="text-align:center">لو الفيديو ماظهرش: <a href="https://www.youtube.com/watch?v=${vid}" target="_blank" rel="noopener">افتحه على يوتيوب ↗</a></p>
+  <div class="row2"><button class="btn g big" onclick="route('act',0)">يلا نبدأ القصة ←</button></div></div>`;}
 function shell(inner){return `<div class="top"><button class="back" onclick="route('lesson','${LID}')">→ الدرس</button><span class="pill">${ACT.ico||""} ${esc(ACT.title)}</span></div>${inner}`}
 function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz})[ACT.type]();}
 function finish(stars,title,sub,ico){
@@ -358,13 +371,24 @@ function viewParent(pid){
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${liveKids().map(x=>`<button class="back" style="${x.id===PKID?"background:#ffd23f":""}" onclick="viewParent('${x.id}')">${x.emoji} ${esc(x.name)}</button>`).join("")}</div>
     <div class="card"><h2>تقدّم ${esc(k.name)}</h2><p class="note">⭐ ${T.stars} نجمة · 🐥 ${T.eggs} كتكوت</p><table>${rows.join("")}</table></div>
     <div class="card"><h2>غلط في إيه؟</h2>${m.length?`<table>${m.map(x=>`<tr><td>${esc(x.l)}<br><span class="note">${esc(x.a)}</span></td><td>${esc(x.what)}</td></tr>`).join("")}</table>`:`<p class="note">مفيش غلطات لحد دلوقتي 👏</p>`}</div>
+    <div class="card"><h2>🎬 فيديوهات الدروس</h2><p class="note">دوّر على فيديو قصير (أقل من 4 دقايق) واتفرج عليه الأول، وبعدين انسخ اللينك هنا. هيظهر ليحيى في أول الدرس باسم «شوف بعينك».</p>
+    <table>${vidRows()}</table></div>
     <div class="card note">${SYNC==="on"?"☁️ متزامن — كل طفل ليه مساره، وأي جهاز يشوف نفس المستوى.":SYNC==="err"?"⚠️ المزامنة مش شغالة دلوقتي — التقدّم محفوظ على الجهاز ده.":"⏳ بيوصل للمزامنة…"}</div>`;
   };
-  if(PKID===KID) return draw(S);
-  const T=loadKidLocal(PKID); draw(T);
-  if(DB) DB.ref("yahia_world/kids/"+PKID+"/state").once("value",snap=>{ if(mergeInto(T,snap.val())&&$("view").dataset.r==="parent"&&PKID===k.id) draw(T); });
+  const wire=()=>document.querySelectorAll("[data-vl]").forEach(b=>b.onclick=()=>{const lid=b.dataset.vl,inp=document.getElementById("vi-"+lid);
+    if(b.dataset.x){setVid(lid,"");inp.value="";b.parentNode.querySelector(".vst").textContent="";return}
+    if(setVid(lid,inp.value)){b.parentNode.querySelector(".vst").textContent="✅ اتحفظ"}else{b.parentNode.querySelector(".vst").textContent="⚠️ اللينك مش يوتيوب"}});
+  const _d=draw; const draw2=T=>{_d(T);wire()};
+  if(PKID===KID) return draw2(S);
+  const T=loadKidLocal(PKID); draw2(T);
+  if(DB) DB.ref("yahia_world/kids/"+PKID+"/state").once("value",snap=>{ if(mergeInto(T,snap.val())&&$("view").dataset.r==="parent"&&PKID===k.id) draw2(T); });
 }
 
+function vidRows(){const r=[];M.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const v=lessonVid(l.id);
+  const q=encodeURIComponent(l.vq||l.title);
+  r.push(`<tr><td>${l.ico} ${esc(l.title)}<br><a class="note" href="https://www.youtube.com/results?search_query=${q}&sp=EgIYAQ%253D%253D" target="_blank" rel="noopener">🔎 دوّر على يوتيوب</a></td>
+  <td><input id="vi-${l.id}" placeholder="الصق لينك الفيديو" value="${v?"https://youtu.be/"+v:""}" style="width:100%;padding:6px;border-radius:8px;border:1px solid #ccc;font:inherit;direction:ltr">
+  <div style="margin-top:4px"><button class="back" data-vl="${l.id}">حفظ</button> ${v?`<button class="back" data-vl="${l.id}" data-x="1">مسح</button>`:""} <span class="vst note"></span></div></td></tr>`)}))));return r.join("")}
 (async()=>{ if(KID&&KIDS[KID]){S=loadKidLocal(KID);$("kidPill").textContent=kid().emoji+" "+kid().name} else $("kidPill").textContent="👤 اختار"; save(true); initSync(); try{M=await getJSON("data/manifest.json"); route(KID&&KIDS[KID]?"home":"kids")}catch(e){$("view").innerHTML=`<div class="err">مش قادر أحمّل المنصة. جرّب تفتحها تاني.</div>`}})();
 </script>
 </body>
