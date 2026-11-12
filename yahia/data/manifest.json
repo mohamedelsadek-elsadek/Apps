@@ -1,0 +1,122 @@
+{
+ "brand": {
+  "name": "عالم يحيى",
+  "kid": "يحيى",
+  "grade": "Grade 3",
+  "school": "مدارس النيل المصرية الدولية",
+  "year": "2026-2027"
+ },
+ "subjects": [
+  {
+   "id": "ar",
+   "title": "اللغة العربية",
+   "ico": "📚",
+   "color": "#ff9f2e",
+   "status": "ready",
+   "blocks": [
+    {
+     "id": "b1",
+     "title": "البلوك الأول",
+     "units": [
+      {
+       "id": "u1",
+       "title": "الوحدة الأولى: عجائب الدنيا السبع",
+       "ico": "🔺",
+       "lessons": [
+        {
+         "id": "ar-b1-u1-l1",
+         "title": "يحيى والأهرامات",
+         "ico": "🔺",
+         "file": "lessons/ar-b1-u1-l1.json"
+        },
+        {
+         "id": "ar-b1-u1-l2",
+         "title": "حدائق بابل المعلقة",
+         "ico": "🌴",
+         "file": "lessons/ar-b1-u1-l2.json"
+        },
+        {
+         "id": "ar-b1-u1-l3",
+         "title": "يحيى في الإسكندرية",
+         "ico": "🗼",
+         "file": "lessons/ar-b1-u1-l3.json"
+        },
+        {
+         "id": "ar-b1-u1-l4",
+         "title": "يحيى وسور الصين العظيم",
+         "ico": "🏯",
+         "file": "lessons/ar-b1-u1-l4.json"
+        },
+        {
+         "id": "ar-b1-u1-l5",
+         "title": "يحيى في تاج محل",
+         "ico": "🕌",
+         "file": "lessons/ar-b1-u1-l5.json"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b2",
+     "title": "البلوك الثاني",
+     "units": [
+      {
+       "id": "u2",
+       "title": "الوحدة الثانية: مناسبات وطنية",
+       "ico": "🇪🇬",
+       "lessons": [
+        {
+         "id": "ar-b2-u2-l1",
+         "title": "عيد المعلم",
+         "ico": "👩‍🏫",
+         "file": "lessons/ar-b2-u2-l1.json"
+        },
+        {
+         "id": "ar-b2-u2-l2",
+         "title": "عيد وفاء النيل",
+         "ico": "🌊",
+         "soon": true
+        },
+        {
+         "id": "ar-b2-u2-l3",
+         "title": "أمير وعيد العمال",
+         "ico": "🛠️",
+         "file": "lessons/ar-b2-u2-l3.json"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "en",
+   "title": "English",
+   "ico": "🔤",
+   "color": "#8a5cf6",
+   "status": "soon"
+  },
+  {
+   "id": "ma",
+   "title": "Math",
+   "ico": "➗",
+   "color": "#2fb36d",
+   "status": "soon"
+  },
+  {
+   "id": "sc",
+   "title": "Science",
+   "ico": "🔬",
+   "color": "#14a5c9",
+   "status": "soon"
+  },
+  {
+   "id": "so",
+   "title": "الدراسات",
+   "ico": "🌍",
+   "color": "#ff6fa5",
+   "status": "soon"
+  }
+ ]
+}

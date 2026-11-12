@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>عالم يحيى — منصة يحيى التعليمية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=Cairo:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--sky:#bfe6ff;--sky2:#e9f7ff;--sand:#ffe2a8;--ink:#2b2340;--soft:#6b6385;--card:#fff;--orange:#ff9f2e;--purple:#8a5cf6;--green:#2fb36d;--red:#ef4f5f;--yellow:#ffd23f;--shadow:0 6px 0 rgba(43,35,64,.15)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:'Baloo Bhaijaan 2','Cairo',system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--sky) 0%,var(--sky2) 55%,var(--sand) 100%) fixed;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{font-family:inherit;cursor:pointer;border:0;color:inherit}
+.wrap{max-width:680px;margin:0 auto;padding:14px 14px 90px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.brand{font-weight:800;font-size:24px;display:flex;align-items:center;gap:8px;background:none;padding:0}
+.pills{display:flex;gap:6px}
+.pill{background:#fff;border-radius:999px;padding:4px 12px;font-weight:700;box-shadow:var(--shadow);font-size:17px;white-space:nowrap}
+.back{background:#fff;border-radius:14px;padding:6px 14px;font-weight:700;font-size:17px;box-shadow:var(--shadow)}
+.crumb{font-family:Cairo;color:var(--soft);font-size:14px;margin:0 0 6px}
+h1{font-size:28px;margin:6px 0 4px} h2{font-size:23px;margin:4px 0 10px}
+.sub{color:var(--soft);font-family:Cairo;font-size:15px;margin:0 0 14px}
+.card{background:var(--card);border-radius:24px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.note{font-family:Cairo;font-size:14px;color:var(--soft)}
+#view{animation:pop .3s ease}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* subjects */
+.subs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sub-t{border-radius:26px;padding:16px 12px;color:#fff;text-align:right;box-shadow:0 6px 0 rgba(0,0,0,.18);min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
+.sub-t .i{font-size:44px;line-height:1}
+.sub-t b{font-size:22px}
+.sub-t small{font-family:Cairo;font-size:13px;opacity:.9}
+.sub-t.soon{filter:grayscale(.5);opacity:.6}
+/* map */
+.block{margin-bottom:18px}
+.block>h2{display:flex;align-items:center;gap:8px}
+.unit{background:linear-gradient(180deg,#9be08a,#5fbf5a);border-radius:28px;padding:14px;box-shadow:var(--shadow)}
+.unit h3{margin:0 0 10px;color:#fff;font-size:19px;text-shadow:0 2px 0 rgba(0,0,0,.15)}
+.path{display:grid;gap:12px}
+.stop{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.94);border-radius:22px;padding:12px;box-shadow:var(--shadow);text-align:right;width:100%;font-size:18px}
+.stop:nth-child(even){width:calc(100% - 28px);margin-right:28px}
+.stop .ico{font-size:34px;width:56px;height:56px;display:grid;place-items:center;border-radius:18px;background:var(--sand);flex:none}
+.stop b{display:block;font-size:20px} .stop small{font-family:Cairo;color:var(--soft);font-size:13px}
+.stop .st{margin-inline-start:auto;font-size:22px}
+.stop.lock{opacity:.55;filter:grayscale(.6)} .stop.done .ico{background:#c9f5c0}
+.farm{margin-top:14px;background:#fff7e0;border-radius:22px;padding:12px;box-shadow:var(--shadow)}
+.farm .row{font-size:28px;letter-spacing:3px;word-break:break-all}
+.farm .row.empty{font-size:15px;letter-spacing:0;font-family:Cairo;color:var(--soft)}
+/* story */
+.scene{font-size:70px;text-align:center;height:105px;display:grid;place-items:center;animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+.txt{font-family:Cairo;font-size:22px;line-height:2.1;font-weight:700}
+.txt .w{border-radius:8px;padding:0 2px;transition:background .2s}
+.txt .w.hl{background:var(--yellow)}
+.txt .w.key{color:var(--purple);text-decoration:underline dotted 2px;cursor:pointer}
+.row2{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:12px}
+.btn{background:var(--orange);color:#fff;font-weight:800;font-size:19px;border-radius:18px;padding:10px 18px;box-shadow:0 5px 0 #c7741a}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #c7741a}
+.btn.g{background:var(--green);box-shadow:0 5px 0 #1d8a50} .btn.p{background:var(--purple);box-shadow:0 5px 0 #6337d0}
+.btn.w{background:#fff;color:var(--ink);box-shadow:0 5px 0 #d8d2e8} .btn.big{font-size:22px;padding:14px 22px;width:100%}
+.dots{display:flex;gap:6px;justify-content:center;margin:8px 0}
+.dots i{width:10px;height:10px;border-radius:50%;background:#d8d2e8} .dots i.on{background:var(--orange);width:24px;border-radius:6px}
+/* cards */
+.flips{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.flip{perspective:800px;height:150px;cursor:pointer}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;display:grid;place-items:center;text-align:center;padding:8px;box-shadow:var(--shadow)}
+.flip .f{background:#fff} .flip .f .e{font-size:40px;line-height:1} .flip .f b{font-size:23px}
+.flip .b{transform:rotateY(180deg);background:#fff2c4;font-family:Cairo;font-size:16px;font-weight:700}
+.tag{display:inline-block;border-radius:10px;padding:0 8px;color:#fff;font-size:13px;margin:4px 0}
+.tag.syn{background:var(--green)} .tag.ant{background:var(--red)} .tag.mean{background:var(--purple)}
+/* match */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mc{height:86px;border-radius:18px;font-size:21px;font-weight:800;box-shadow:var(--shadow);background:linear-gradient(135deg,#8a5cf6,#ff6fa5);color:#fff;transition:transform .2s}
+.mc.open{background:#fff;color:var(--ink)} .mc.ok{background:#c9f5c0;color:var(--ink);transform:scale(.94)}
+/* sort games */
+.hud{display:flex;justify-content:space-between;font-size:20px;font-weight:800;margin-bottom:8px}
+.skybox{position:relative;height:210px;border-radius:24px;background:linear-gradient(180deg,#8fd3ff,#d9f2ff);overflow:hidden;box-shadow:var(--shadow)}
+.cloud{position:absolute;font-size:40px;opacity:.9;animation:drift 18s linear infinite}
+@keyframes drift{from{right:-60px}to{right:110%}}
+.bird{position:absolute;top:36px;right:-170px;display:flex;flex-direction:column;align-items:center}
+.bird .b1{font-size:56px;animation:flap .35s infinite alternate}
+@keyframes flap{to{transform:translateY(-6px) rotate(6deg)}}
+.bird .word{background:#fff;border:3px solid var(--ink);border-radius:16px;padding:2px 14px;font-size:26px;font-weight:800;margin-top:-4px;white-space:nowrap}
+.bigword{font-size:40px;font-weight:800;text-align:center;background:#fff;border-radius:24px;padding:22px 10px;box-shadow:var(--shadow)}
+.bigword .al{color:var(--orange)}
+.homes{display:grid;gap:10px;margin-top:12px}
+.home{border-radius:22px;padding:10px 6px;font-size:20px;font-weight:800;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.2)}
+.home span{display:block;font-size:38px;line-height:1.2}
+.home.noun{background:linear-gradient(180deg,#ffb347,#ff8a00)} .home.verb{background:linear-gradient(180deg,#7b8cff,#5b4de0)}
+.home.sun{background:linear-gradient(180deg,#ffd23f,#ff9f2e);color:var(--ink)} .home.moon{background:linear-gradient(180deg,#5b6bbf,#2b2f6b)}
+.hint{font-family:Cairo;font-size:15px;color:var(--soft);text-align:center;margin-top:8px;min-height:24px}
+.shake{animation:shake .4s} @keyframes shake{25%{transform:translateX(8px)}75%{transform:translateX(-8px)}}
+.toast{position:fixed;left:50%;top:18%;transform:translate(-50%,0) scale(.6);opacity:0;font-size:64px;pointer-events:none;transition:.25s;z-index:9}
+.toast.on{opacity:1;transform:translate(-50%,0) scale(1)}
+/* quiz */
+.eggs{display:flex;gap:4px;justify-content:center;font-size:24px;margin:6px 0 12px;flex-wrap:wrap}
+.eggs span.hatch{animation:hatch .7s} @keyframes hatch{30%{transform:rotate(-15deg)}60%{transform:rotate(15deg) scale(1.3)}}
+.q{font-size:23px;font-weight:800;margin-bottom:12px;line-height:1.6}
+.opts{display:grid;gap:10px}
+.opt{background:#fff;border-radius:18px;padding:12px;font-size:21px;font-weight:700;box-shadow:0 5px 0 #d8d2e8;text-align:right;border:2px solid #f0edf7}
+.opt.ok{background:#c9f5c0;box-shadow:0 5px 0 #7fcf72} .opt.no{background:#ffd0d5;box-shadow:0 5px 0 #f28b96}
+.anim{font-size:54px;text-align:center}
+table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,th{padding:8px;border-bottom:1px solid #eee;text-align:right}
+.bar{height:10px;border-radius:6px;background:#eee;overflow:hidden} .bar i{display:block;height:100%;background:var(--green)}
+.end{text-align:center} .end .bigico{font-size:80px}
+.confetti{position:fixed;top:-20px;font-size:26px;animation:fall 1.6s linear forwards;pointer-events:none;z-index:8}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+.err{background:#ffd0d5;border-radius:16px;padding:12px;font-family:Cairo}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <button class="brand" onclick="route('home')">🦁 <span>عالم يحيى</span></button>
+    <div class="pills"><span class="pill">⭐ <b id="stars">0</b></span><span class="pill">🐥 <b id="eggsN">0</b></span></div>
+  </div>
+  <div id="view"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== عالم يحيى — المحرّك =====================
+   البيانات: data/manifest.json (مواد ← بلوكات ← وحدات ← دروس)
+   كل درس: lessons/<id>.json فيه activities بالأنواع: story · cards · match · sort(bird|card) · quiz
+   الصوت: audio/<lessonId>/<key>.mp3 لو موجود في lesson.audio، وإلا صوت الجهاز. */
+const $=id=>document.getElementById(id);
+let M=null, L=null, LID=null, ACT=null, AIDX=0;
+let S={stars:0,eggs:0,done:{},miss:[]};
+try{const x=JSON.parse(localStorage.getItem("yahia-world")||"null"); if(x) S=Object.assign(S,x);}catch(e){}
+function save(local){try{localStorage.setItem("yahia-world",JSON.stringify(S))}catch(e){} $("stars").textContent=S.stars; $("eggsN").textContent=S.eggs; if(!local) pushSync();}
+/* ---------- المزامنة (Firebase — نفس قاعدة برامج محمد) ---------- */
+const FB={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
+let REF=null, SYNC="off", pushT=null;
+function mergeState(r){ if(!r) return false; let ch=false;
+  for(const lid in (r.done||{})){ S.done[lid]=S.done[lid]||{}; for(const i in r.done[lid]) if(!S.done[lid][i]){S.done[lid][i]=true;ch=true} }
+  if((r.stars||0)>S.stars){S.stars=r.stars;ch=true} if((r.eggs||0)>S.eggs){S.eggs=r.eggs;ch=true}
+  const seen=new Set(S.miss.map(m=>m.t)); (r.miss||[]).forEach(m=>{if(m&&!seen.has(m.t)){S.miss.push(m);ch=true}}); S.miss.sort((a,b)=>a.t-b.t); if(S.miss.length>80)S.miss=S.miss.slice(-80);
+  return ch; }
+function pushSync(){ if(!REF) return; clearTimeout(pushT); pushT=setTimeout(()=>{ try{ REF.set(Object.assign({},S,{u:Date.now()})).then(()=>{SYNC="on"}).catch(()=>{SYNC="err"}) }catch(e){} },1200); }
+function initSync(){ try{ if(!window.firebase) return; const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
+  REF=firebase.database(app).ref("yahia_world/state");
+  REF.on("value",snap=>{ SYNC="on"; const r=snap.val(); const ch=mergeState(r); save(true);
+    if(ch||!r) pushSync(); if(ch){ const v=$("view"); if(v&&v.dataset.r) refreshView(); } },()=>{SYNC="err"});
+ }catch(e){SYNC="err"} }
+function refreshView(){ const r=$("view").dataset.r; if(r==="home")viewHome(); else if(r==="parent")viewParent(); }
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function toast(t){const x=$("toast");x.textContent=t;x.classList.add("on");setTimeout(()=>x.classList.remove("on"),650)}
+function confetti(){const e=["🎉","⭐","🐥","🎈","✨"];for(let i=0;i<24;i++){const c=document.createElement("span");c.className="confetti";c.textContent=e[i%5];c.style.left=Math.random()*100+"vw";c.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),2400)}}
+function miss(what){S.miss.push({l:L?L.title:"",a:ACT?ACT.title:"",what,t:Date.now()}); if(S.miss.length>80)S.miss.shift(); save();}
+
+/* ---------- الصوت ---------- */
+let arVoice=null,curAudio=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices();arVoice=v.find(x=>/ar[-_]EG/i.test(x.lang))||v.find(x=>/^ar/i.test(x.lang))||null}catch(e){}}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
+function stopVoice(){try{if(curAudio){curAudio.pause();curAudio=null}speechSynthesis.cancel()}catch(e){}}
+function speak(text,key,onend,onmeta){
+  stopVoice(); const src=key&&L&&L._blob&&L._blob[key];
+  if(src){curAudio=new Audio(src);curAudio.onloadedmetadata=()=>onmeta&&onmeta(curAudio.duration);curAudio.onended=()=>onend&&onend();curAudio.play().catch(()=>sayTTS(text,onend));return}
+  sayTTS(text,onend);
+}
+function sayTTS(text,onend){try{const u=new SpeechSynthesisUtterance(text);u.lang=arVoice?arVoice.lang:"ar-EG";if(arVoice)u.voice=arVoice;u.rate=.85;u.pitch=1.05;u.onend=()=>onend&&onend();speechSynthesis.speak(u)}catch(e){onend&&onend()}}
+
+/* ---------- التحميل ---------- */
+async function getJSON(p){const r=await fetch(p,{cache:"no-cache"}); if(!r.ok) throw new Error(p); return r.json()}
+const LCACHE={};
+async function loadLesson(id){
+  if(LCACHE[id]) return LCACHE[id];
+  const meta=findLesson(id); if(!meta||!meta.file) throw new Error("no lesson");
+  const d=await getJSON(meta.file); LCACHE[id]=d; d._blob={};
+  /* الصفحة مش بتشغّل ملفات صوت مباشرة — بنحمّلها blob الأول */
+  Object.entries(d.audio||{}).forEach(([k,p])=>fetch(p).then(r=>r.ok?r.blob():null).then(b=>{if(b)d._blob[k]=URL.createObjectURL(b)}).catch(()=>{}));
+  return d;
+}
+function findLesson(id){for(const s of M.subjects)for(const b of (s.blocks||[]))for(const u of b.units)for(const l of u.lessons) if(l.id===id) return Object.assign({},l,{subject:s,block:b,unit:u}); return null}
+function lessonDone(id){const d=S.done[id]||{}; const n=Object.keys(d).length; return n}
+
+/* ---------- التنقّل ---------- */
+let stopGame=()=>{};
+function route(r,arg){stopGame();stopGame=()=>{};stopVoice();window.scrollTo(0,0);const v=$("view");v.style.animation="none";v.offsetHeight;v.style.animation="";
+  v.dataset.r=r; ({home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent})[r](arg);}
+
+function viewHome(){
+  $("view").innerHTML=`<h1>أهلًا يا ${esc(M.brand.kid)}! 👋</h1><p class="sub">${esc(M.brand.grade)} · ${esc(M.brand.school)} — اختار المادة وابدأ المغامرة!</p>
+  <div class="subs">${M.subjects.map(s=>`<button class="sub-t ${s.status!=="ready"?"soon":""}" style="background:${s.color}" ${s.status!=="ready"?"disabled":""} onclick="route('subject','${s.id}')">
+    <span class="i">${s.ico}</span><span><b>${esc(s.title)}</b><br><small>${s.status==="ready"?countLessons(s)+" دروس جاهزة":"قريبًا 🔒"}</small></span></button>`).join("")}</div>
+  <div class="farm"><b>🏡 مزرعتك</b> <span class="note">كل إجابة صح في الكويز بتفقس كتكوت</span><div class="row ${S.eggs?"":"empty"}">${S.eggs?"🐥".repeat(Math.min(S.eggs,60)):"لسه فاضية… العب وفقّس البيض!"}</div></div>
+  <p style="text-align:center;margin-top:14px"><button class="back" onclick="route('parent')">👨‍👦 صفحة بابا</button></p>`;
+}
+function countLessons(s){let n=0;(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.forEach(l=>{if(l.file)n++})));return n}
+
+function viewSubject(sid){
+  const s=M.subjects.find(x=>x.id===sid);
+  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('home')">→ المواد</button><span class="pill">${s.ico} ${esc(s.title)}</span></div>
+  ${s.blocks.map(b=>`<div class="block"><h2>🗺️ ${esc(b.title)}</h2>${b.units.map(u=>`<div class="unit"><h3>${u.ico} ${esc(u.title)}</h3><div class="path">
+    ${u.lessons.map(l=>{const lock=!l.file;const n=lessonDone(l.id);return `<button class="stop ${lock?"lock":""} ${n>=5?"done":""}" ${lock?"disabled":""} onclick="route('lesson','${l.id}')">
+    <span class="ico">${l.ico}</span><span><b>${esc(l.title)}</b><small>${lock?"قريبًا":n?`خلّصت ${n} محطات`:"ابدأ المغامرة"}</small></span><span class="st">${lock?"🔒":n>=5?"✅":"▶️"}</span></button>`}).join("")}
+  </div></div>`).join("")}</div>`).join("")}`;
+}
+
+async function viewLesson(id){
+  LID=id; const meta=findLesson(id);
+  $("view").innerHTML=`<p class="note">جاري تحميل الدرس…</p>`;
+  try{L=await loadLesson(id)}catch(e){$("view").innerHTML=`<div class="err">الدرس مش متاح دلوقتي.</div>`;return}
+  const d=S.done[id]||{};
+  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('subject','${meta.subject.id}')">→ الخريطة</button><span class="pill">${meta.ico} ${esc(L.title)}</span></div>
+  <p class="crumb">${esc(meta.subject.title)} · ${esc(meta.block.title)} · ${esc(meta.unit.title)}</p>
+  <div class="unit"><div class="path">${L.activities.map((a,i)=>`<button class="stop ${d[i]?"done":""}" onclick="route('act',${i})">
+    <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||({story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير"}[a.type]||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
+}
+
+function shell(inner){return `<div class="top"><button class="back" onclick="route('lesson','${LID}')">→ الدرس</button><span class="pill">${ACT.ico||""} ${esc(ACT.title)}</span></div>${inner}`}
+function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz})[ACT.type]();}
+function finish(stars,title,sub,ico){
+  const d=S.done[LID]=S.done[LID]||{}; const first=!d[AIDX]; d[AIDX]=true; if(first)S.stars+=stars; save(); confetti(); speak(title);
+  const next=AIDX+1<L.activities.length?AIDX+1:null;
+  $("view").innerHTML=`<div class="card end"><div class="bigico">${ico||"🏆"}</div><h1>${esc(title)}</h1><p class="sub">${esc(sub)}${first?` (+${stars} ⭐)`:""}</p>
+   ${next!==null?`<button class="btn g big" onclick="route('act',${next})">المحطة اللي بعدها: ${esc(L.activities[next].title)} ←</button><br><br>`:""}
+   <button class="btn w big" onclick="route('lesson','${LID}')">ارجع للدرس 🗺️</button></div>`;
+}
+
+/* ---------- story ---------- */
+function actStory(){
+  let si=0; const A=ACT;
+  const draw=()=>{const s=A.scenes[si];
+    $("view").innerHTML=shell(`<div class="card"><div class="scene">${s.e}</div><div class="dots">${A.scenes.map((_,i)=>`<i class="${i===si?"on":""}"></i>`).join("")}</div>
+    <div class="txt" id="sTxt">${s.t.split(" ").map(w=>{const c=w.replace(/[،؛:.!؟]/g,"");const k=(A.keys||[]).some(x=>c.includes(x));return `<span class="w ${k?"key":""}" ${k?`data-say="${esc(c)}"`:""}>${esc(w)}</span>`}).join(" ")}</div>
+    <div class="row2"><button class="btn w" id="sPrev" style="visibility:${si?"visible":"hidden"}">→ اللي فات</button><button class="btn p" id="sRead">🔊 اسمع</button><button class="btn" id="sNext">${si===A.scenes.length-1?"خلّصت ✅":"اللي بعده ←"}</button></div></div>
+    <p class="note">💡 الكلمات البنفسجي كلمات جديدة — دوس عليها تسمعها.</p>`);
+    document.querySelectorAll("[data-say]").forEach(e=>e.onclick=()=>speak(e.dataset.say));
+    $("sPrev").onclick=()=>{si--;draw()};
+    $("sNext").onclick=()=>{if(si===A.scenes.length-1)return finish(1,"شاطر يا يحيى!","خلّصت القصة.","📖");si++;draw()};
+    $("sRead").onclick=()=>{const ws=[...document.querySelectorAll("#sTxt .w")];let i=0,tm=null;
+      const run=ms=>{clearInterval(tm);i=0;tm=setInterval(()=>{ws.forEach(w=>w.classList.remove("hl"));if(i<ws.length)ws[i++].classList.add("hl");else clearInterval(tm)},ms)};
+      const heba=L._blob&&L._blob["s"+si]; if(!heba)run(520);
+      stopGame=()=>clearInterval(tm); speak(s.t,"s"+si,()=>{clearInterval(tm);ws.forEach(w=>w.classList.remove("hl"))},d=>run(Math.max(250,d*1000/ws.length)))};
+  }; draw();
+}
+
+/* ---------- cards ---------- */
+function actCards(){
+  const A=ACT,seen=new Set();
+  $("view").innerHTML=shell(`<p class="sub">اقلب الكارت وشوف المعنى أو المرادف أو المضاد. لما تقلبهم كلهم تاخد نجمة!</p>
+  <div class="flips">${A.items.map((w,i)=>`<div class="flip" data-i="${i}"><div class="in"><div class="f"><div><div class="e">${w.e}</div><b>${esc(w.w)}</b></div></div>
+  <div class="b"><div><b style="font-size:20px">${esc(w.w)}</b><br><span class="tag ${w.k}">${w.k==="syn"?"مرادف":w.k==="ant"?"مضاد":"معنى"}</span><br>${esc(w.a)}</div></div></div></div>`).join("")}</div>`);
+  document.querySelectorAll(".flip").forEach(el=>el.onclick=()=>{el.classList.toggle("on");const i=+el.dataset.i;if(el.classList.contains("on")){speak(A.items[i].w+". "+A.items[i].a);seen.add(i);
+    if(seen.size===A.items.length){const t=setTimeout(()=>finish(1,"حفظت الكلمات الجديدة!","قلبت الكروت كلها.","🃏"),1800);stopGame=()=>clearTimeout(t)}}});
+}
+
+/* ---------- match (memory) ---------- */
+function actMatch(){
+  const A=ACT; const cards=shuffle(A.pairs.flatMap((p,i)=>[{t:p[0],k:i},{t:p[1],k:i}])); let open=[],found=0,tries=0,lock=false;
+  $("view").innerHTML=shell(`<p class="sub">${esc(A.prompt)}</p><div class="hud"><span>محاولات: <b id="mt">0</b></span><span>✅ <b id="mf">0</b>/${A.pairs.length}</span></div>
+  <div class="mgrid">${cards.map((c,i)=>`<button class="mc" data-i="${i}">❓</button>`).join("")}</div>`);
+  document.querySelectorAll(".mc").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(lock||b.classList.contains("open")||b.classList.contains("ok"))return;
+    b.classList.add("open");b.textContent=cards[i].t;speak(cards[i].t);open.push(b);
+    if(open.length===2){lock=true;tries++;$("mt").textContent=tries;const [x,y]=open;
+      if(cards[+x.dataset.i].k===cards[+y.dataset.i].k){setTimeout(()=>{x.classList.add("ok");y.classList.add("ok");open=[];lock=false;found++;$("mf").textContent=found;toast("✨");
+        if(found===A.pairs.length)setTimeout(()=>finish(2,"ذاكرة حديد!",`لقيت كل الأزواج في ${tries} محاولة.`,"🧠"),700)},500)}
+      else{const p=A.pairs[cards[+x.dataset.i].k];setTimeout(()=>{x.classList.remove("open");y.classList.remove("open");x.textContent=y.textContent="❓";open=[];lock=false},1000)}}});
+}
+
+/* ---------- sort (bird / card) ---------- */
+function actSort(){
+  const A=ACT; const Q=shuffle(A.items).slice(0,Math.min(10,A.items.length)); let i=0,score=0,hearts=3,lock=false,raf=null,x=0;
+  const bins=`<div class="homes" style="grid-template-columns:repeat(${A.bins.length},1fr)">${A.bins.map(b=>`<button class="home ${b.cls}" data-b="${b.id}"><span>${b.ico}</span>${esc(b.label)}</button>`).join("")}</div>`;
+  const bird=A.style==="bird";
+  $("view").innerHTML=shell(`${A.help?`<div class="card note" style="font-size:15px">${A.help}</div>`:""}
+   <div class="hud"><span id="hh">${bird?"❤️❤️❤️":"كلمة 1/"+Q.length}</span><span>✅ <b id="sc">0</b>/${Q.length}</span></div>
+   ${bird?`<div class="skybox" id="sky"><span class="cloud" style="top:10px;animation-delay:-4s">☁️</span><span class="cloud" style="top:120px;animation-delay:-11s">☁️</span><div class="bird" id="bird"><span class="b1">🐦</span><span class="word" id="bw"></span></div></div>`:`<div class="bigword" id="bw"></div>`}
+   ${bins}<div class="hint" id="hint">${esc(A.prompt)}</div>`);
+  if(A.small){const e=$("bw");e.style.fontSize=bird?"19px":"25px";e.style.lineHeight="1.7";if(!bird)e.style.padding="18px 12px"}
+  const binLabel=id=>{const b=A.bins.find(z=>z.id===id);return b.label+" "+b.ico};
+  const stop=()=>{if(raf)cancelAnimationFrame(raf);raf=null}; stopGame=stop;
+  const next=()=>{stop(); if(i>=Q.length)return finish(2,"برافو عليك!",`جبت ${score} من ${Q.length} صح.`,A.ico);
+    lock=false; const w=Q[i][0];
+    if(bird){$("bw").textContent=w;const W=$("sky").clientWidth;x=-170;const sp=Math.max(.7,1.3-i*.03)*(W/360);
+      const step=()=>{x+=sp;$("bird").style.right=x+"px";if(x>W+20){wrong("طارت! ");return}raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)}
+    else{$("hh").textContent=`كلمة ${i+1}/${Q.length}`;$("bw").innerHTML=(A.al?`<span class="al">${esc(w.slice(0,2))}</span>${esc(w.slice(2))}`:esc(w))+` <button class="back" style="font-size:20px" id="say">🔊</button>`;$("say").onclick=()=>speak(w)}
+  };
+  const wrong=pre=>{stop();lock=true;const [w,a]=Q[i];$(bird?"sky":"bw").classList.add("shake");setTimeout(()=>{const e=$(bird?"sky":"bw");e&&e.classList.remove("shake")},400);
+    $("hint").textContent=`${pre}«${w}» ← ${binLabel(a)}. ${A.why?A.why[a]:""}`;miss(`${w} ← ${A.bins.find(z=>z.id===a).label}`);speak(w);i++;
+    if(bird){hearts--;$("hh").textContent="❤️".repeat(Math.max(0,hearts))+"🤍".repeat(3-Math.max(0,hearts));
+      if(hearts<=0){setTimeout(()=>{$("view").innerHTML=shell(`<div class="card end"><div class="bigico">🐣</div><h1>ولا يهمك! نجرب تاني؟</h1><p class="sub">جبت ${score} صح. ${esc(Object.values(A.why||{}).join(" · "))}</p><button class="btn g big" onclick="route('act',${AIDX})">العب تاني 🔁</button></div>`)},1000);return}}
+    setTimeout(next,1300)};
+  document.querySelectorAll(".home").forEach(b=>b.onclick=()=>{if(lock||!Q[i])return;const [w,a]=Q[i];
+    if(b.dataset.b===a){lock=true;stop();score++;$("sc").textContent=score;toast(A.bins.find(z=>z.id===a).ico+"✅");$("hint").textContent=`صح! «${w}» ← ${binLabel(a)}. ${A.why?A.why[a]:""}`;speak(w);i++;setTimeout(next,1000)}
+    else wrong("")});
+  next();
+}
+
+/* ---------- quiz ---------- */
+function actQuiz(){
+  const A=ACT,order=shuffle(A.items.map((_,i)=>i)),res=[];let qi=0,score=0;const animals=["🦉","🐫","🦜","🐢","🦊","🐘","🐸","🦒","🐧","🦁"];
+  const eggs=()=>order.map((_,i)=>`<span id="egg${i}">${i<qi?(res[i]?"🐥":"🥚"):"⚪"}</span>`).join("");
+  const show=()=>{
+    if(qi>=order.length){S.eggs+=score;save();return finish(3,score>=8?"بطل المغامرة!":"خلّصت المغامرة!",`فقّست ${score} كتكوت في مزرعتك 🐥`,score>=8?"🏆":"🐣")}
+    const Q=A.items[order[qi]];
+    $("view").innerHTML=shell(`<div class="eggs">${eggs()}</div><div class="card"><div class="anim">${animals[qi%10]}</div>
+      <div class="q">${esc(Q.q)} <button class="back" style="font-size:16px" id="qs">🔊</button></div>
+      <div class="opts">${Q.o.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join("")}</div></div>`);
+    $("qs").onclick=()=>speak(Q.q); speak(Q.q);
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{document.querySelectorAll(".opt").forEach(z=>z.disabled=true);const ok=+b.dataset.i===Q.a;b.classList.add(ok?"ok":"no");
+      if(!ok){document.querySelectorAll(".opt")[Q.a].classList.add("ok");miss(`${Q.q} ← ${Q.o[Q.a]}`);speak("الإجابة الصح: "+Q.o[Q.a].replace(/[^؀-ۿ ]/g,""))}else{score++;toast("🐥");speak("برافو")}
+      res[qi]=ok;qi++;const t=setTimeout(show,ok?1100:2300);stopGame=()=>clearTimeout(t)});
+  }; show();
+}
+
+/* ---------- صفحة بابا ---------- */
+function viewParent(){
+  const rows=[];M.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const n=lessonDone(l.id);rows.push(`<tr><td>${l.ico} ${esc(l.title)}<br><span class="note">${esc(s.title)} · ${esc(b.title)}</span></td><td style="width:40%"><div class="bar"><i style="width:${Math.min(100,n/6*100)}%"></i></div><span class="note">${n} محطات</span></td></tr>`)}))));
+  const m=S.miss.slice(-20).reverse();
+  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('home')">→ الرئيسية</button><span class="pill">👨‍👦 صفحة بابا</span></div>
+  <div class="card"><h2>تقدّم يحيى</h2><p class="note">⭐ ${S.stars} نجمة · 🐥 ${S.eggs} كتكوت</p><table>${rows.join("")}</table></div>
+  <div class="card"><h2>غلط في إيه؟</h2>${m.length?`<table>${m.map(x=>`<tr><td>${esc(x.l)}<br><span class="note">${esc(x.a)}</span></td><td>${esc(x.what)}</td></tr>`).join("")}</table>`:`<p class="note">مفيش غلطات لحد دلوقتي 👏</p>`}</div>
+  <div class="card note">${SYNC==="on"?"☁️ التقدّم متزامن — أي جهاز يفتح المنصة يشوف نفس المستوى.":SYNC==="err"?"⚠️ المزامنة مش شغالة دلوقتي — التقدّم محفوظ على الجهاز ده.":"⏳ بيوصل للمزامنة…"} <button class="back" id="rst">🔄 ابدأ من الأول</button></div>`;
+  $("rst").onclick=()=>{S={stars:0,eggs:0,done:{},miss:[]};try{localStorage.setItem("yahia-world",JSON.stringify(S))}catch(e){} if(REF)REF.set(Object.assign({},S,{u:Date.now()})); route("home")};
+}
+
+(async()=>{save(true);initSync();try{M=await getJSON("data/manifest.json");route("home")}catch(e){$("view").innerHTML=`<div class="err">مش قادر أحمّل المنصة. جرّب تفتحها تاني.</div>`}})();
+</script>
+</body>
+</html>
