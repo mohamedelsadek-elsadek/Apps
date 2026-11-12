@@ -150,7 +150,7 @@ function save(local){try{localStorage.setItem("yw-state:"+KID,JSON.stringify(S))
 const FB={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
 let DB=null, REF=null, SYNC="off", pushT=null;
 function mergeInto(T,r){ if(!r) return false; let ch=false;
-  for(const lid in (r.done||{})){ T.done[lid]=T.done[lid]||{}; for(const i in r.done[lid]) if(!T.done[lid][i]){T.done[lid][i]=true;ch=true} }
+  for(const lid in (r.done||{})){ T.done[lid]=T.done[lid]||{}; for(const i in r.done[lid]) if(r.done[lid][i]&&!T.done[lid][i]){T.done[lid][i]=true;ch=true} }
   if((r.stars||0)>T.stars){T.stars=r.stars;ch=true} if((r.eggs||0)>T.eggs){T.eggs=r.eggs;ch=true}
   const seen=new Set(T.miss.map(m=>m.t)); (r.miss||[]).forEach(m=>{if(m&&!seen.has(m.t)){T.miss.push(m);ch=true}}); T.miss.sort((a,b)=>a.t-b.t); if(T.miss.length>80)T.miss=T.miss.slice(-80);
   return ch; }
