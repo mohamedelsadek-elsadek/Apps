@@ -154,14 +154,33 @@ function mergeInto(T,r){ if(!r) return false; let ch=false;
   if((r.stars||0)>T.stars){T.stars=r.stars;ch=true} if((r.eggs||0)>T.eggs){T.eggs=r.eggs;ch=true}
   const seen=new Set(T.miss.map(m=>m.t)); (r.miss||[]).forEach(m=>{if(m&&!seen.has(m.t)){T.miss.push(m);ch=true}}); T.miss.sort((a,b)=>a.t-b.t); if(T.miss.length>80)T.miss=T.miss.slice(-80);
   return ch; }
-function pushSync(){ if(!REF) return; clearTimeout(pushT); const r=REF, snap=Object.assign({},S,{u:Date.now()}); pushT=setTimeout(()=>{ try{ r.set(snap).then(()=>{SYNC="on"}).catch(()=>{SYNC="err"}) }catch(e){} },1200); }
+/* ---- مسار احتياطي بالـ REST لو مكتبة Firebase ماشتغلتش على الجهاز ---- */
+let REST=false, restPoll=null;
+const RURL=p=>FB.databaseURL+"/"+p+".json";
+async function rget(p){const r=await fetch(RURL(p),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json()}
+async function rput(p,d){const r=await fetch(RURL(p),{method:"PUT",body:JSON.stringify(d),headers:{"Content-Type":"application/json"}});if(!r.ok)throw new Error(r.status);return r.json()}
+function restPush(){ if(!KID) return; const id=KID, snap=Object.assign({},S,{u:Date.now()}); rput("yahia_world/kids/"+id+"/state",snap).then(()=>{SYNC="on";setCloud()}).catch(()=>{SYNC="err";setCloud()}); }
+async function restPull(){ if(!KID) return; const id=KID;
+  try{ const km=await rget("yahia_world/kids_meta")||{}; let ch=false,push=false;
+    for(const k in km){ if(!KIDS[k]||(km[k].u||0)>(KIDS[k].u||0)){KIDS[k]=km[k];ch=true} } for(const k in KIDS) if(!km[k]||(KIDS[k].u||0)>(km[k].u||0)) push=true;
+    if(ch) try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} if(push) rput("yahia_world/kids_meta",KIDS).catch(()=>{});
+    const vd=await rget("yahia_world/videos")||{}; for(const k in vd) if(!VIDS[k]||(vd[k].u||0)>(VIDS[k].u||0)) VIDS[k]=vd[k]; try{localStorage.setItem("yw-vids",JSON.stringify(VIDS))}catch(e){}
+    const r=await rget("yahia_world/kids/"+id+"/state"); if(KID!==id) return; SYNC="on"; setCloud();
+    const c2=mergeInto(S,r); save(true); if(c2||!r||needPush(r)) restPush(); if(c2||ch) refreshView();
+  }catch(e){ SYNC="err"; setCloud(); } }
+function needPush(r){ if(!r) return true; if((S.stars||0)>(r.stars||0)||(S.eggs||0)>(r.eggs||0)) return true;
+  for(const l in S.done) for(const i in S.done[l]) if(S.done[l][i]&&!(r.done&&r.done[l]&&r.done[l][i])) return true; return (S.miss.length>((r.miss||[]).length)); }
+function goRest(){ if(REST) return; REST=true; if(REF) try{REF.off()}catch(e){} REF=null; restPull(); clearInterval(restPoll); restPoll=setInterval(restPull,30000); }
+function diag(){ try{ let dev=localStorage.getItem("yw-dev"); if(!dev){dev="d"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("yw-dev",dev)}
+  rput("yahia_world/diag/"+dev,{t:Date.now(),kid:KID||"",fb:!!window.firebase,mode:REST?"rest":"sdk",sync:SYNC,ua:navigator.userAgent.slice(0,200),stars:S.stars,done:Object.keys(S.done||{}).length}).catch(()=>{}); }catch(e){} }
+function pushSync(){ if(REST) { clearTimeout(pushT); pushT=setTimeout(restPush,1200); return; } if(!REF) return; clearTimeout(pushT); const r=REF, snap=Object.assign({},S,{u:Date.now()}); pushT=setTimeout(()=>{ try{ r.set(snap).then(()=>{SYNC="on"}).catch(()=>{SYNC="err"}) }catch(e){} },1200); }
 /* ---------- فيديوهات الدروس (بابا بيختارها) ---------- */
 let VIDS={}; try{VIDS=JSON.parse(localStorage.getItem("yw-vids")||"{}")||{}}catch(e){}
 function ytId(s){s=String(s||"").trim();const m=s.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(s)?s:"")}
 function lessonVid(id){const v=VIDS[id];return v&&v.id&&!v.del?v.id:""}
-function setVid(lid,raw){const id=raw?ytId(raw):"";if(raw&&!id)return false;VIDS[lid]={id,del:!id,u:Date.now()};try{localStorage.setItem("yw-vids",JSON.stringify(VIDS))}catch(e){} if(DB)try{DB.ref("yahia_world/videos/"+lid).set(VIDS[lid])}catch(e){} return true}
-function saveKids(){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} if(DB) try{DB.ref("yahia_world/kids_meta").set(KIDS)}catch(e){} }
-function initSync(){ try{ if(!window.firebase) return; const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
+function setVid(lid,raw){const id=raw?ytId(raw):"";if(raw&&!id)return false;VIDS[lid]={id,del:!id,u:Date.now()};try{localStorage.setItem("yw-vids",JSON.stringify(VIDS))}catch(e){} if(REST)rput("yahia_world/videos/"+lid,VIDS[lid]).catch(()=>{}); else if(DB)try{DB.ref("yahia_world/videos/"+lid).set(VIDS[lid])}catch(e){} return true}
+function saveKids(){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} if(REST) rput("yahia_world/kids_meta",KIDS).catch(()=>{}); else if(DB) try{DB.ref("yahia_world/kids_meta").set(KIDS)}catch(e){} }
+function initSync(){ setTimeout(()=>{ if(SYNC!=="on") goRest(); setTimeout(diag,4000); },8000); try{ if(!window.firebase) return goRest(); const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
   DB=firebase.database(app);
   DB.ref("yahia_world/kids_meta").on("value",snap=>{ const r=snap.val()||{}; let ch=false, push=false;
     for(const id in r){ const k=r[id]; if(!KIDS[id]||(k.u||0)>(KIDS[id].u||0)){KIDS[id]=k;ch=true} }
@@ -174,11 +193,11 @@ function initSync(){ try{ if(!window.firebase) return; const app=firebase.apps.l
   DB.ref("yahia_world/state").once("value",snap=>{ const r=snap.val(); if(!r) return; DB.ref("yahia_world/kids/yahia/state").transaction(cur=>{ const T=Object.assign(BLANK(),cur||{}); mergeInto(T,r); T.u=Date.now(); return T; }).then(()=>DB.ref("yahia_world/state").remove()).catch(()=>{}); });
   if(KID) attachKid(KID);
  }catch(e){SYNC="err"} }
-function attachKid(id){ if(!DB) return; if(REF) REF.off(); REF=DB.ref("yahia_world/kids/"+id+"/state");
+function attachKid(id){ if(REST) return restPull(); if(!DB) return; if(REF) REF.off(); REF=DB.ref("yahia_world/kids/"+id+"/state");
   REF.on("value",snap=>{ if(KID!==id) return; SYNC="on"; const r=snap.val(); const ch=mergeInto(S,r); save(true);
     if(ch||!r) pushSync(); if(ch) refreshView(); },()=>{SYNC="err"}); }
 function useKid(id){ KID=id; try{localStorage.setItem("yw-kid",id)}catch(e){} S=loadKidLocal(id); save(true); attachKid(id); $("kidPill").textContent=kid().emoji+" "+kid().name; route("home"); }
-function setCloud(){const c=$("cloud");if(c)c.textContent=SYNC==="on"?"☁️":(!window.firebase||SYNC==="err")?"⚠️":"⏳"}
+function setCloud(){const c=$("cloud");if(c)c.textContent=SYNC==="on"?"☁️":SYNC==="err"?"⚠️":"⏳"}
 setInterval(setCloud,1500);
 function refreshView(){ const v=$("view"); const r=v&&v.dataset.r; if(r==="home")viewHome(); else if(r==="parent")viewParent(PKID); else if(r==="kids")viewKids(); }
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -222,7 +241,7 @@ function viewHome(){
   $("view").innerHTML=`<h1>أهلًا يا ${esc(kid().name)}! ${kid().emoji}</h1><p class="sub">اختار المادة وابدأ المغامرة! <button class="back" style="font-size:14px;padding:3px 10px" onclick="route('kids')">🔁 لاعب تاني</button></p>
   <div class="subs">${M.subjects.map(s=>`<button class="sub-t ${s.status!=="ready"?"soon":""}" style="background:${s.color}" ${s.status!=="ready"?"disabled":""} onclick="route('subject','${s.id}')">
     <span class="i">${s.ico}</span><span><b>${esc(s.title)}</b><br><small>${s.status==="ready"?countLessons(s)+" دروس جاهزة":"قريبًا 🔒"}</small></span></button>`).join("")}</div>
-  ${!window.firebase?`<div class="err" style="margin:10px 0">⚠️ النسخة دي مش بتبعت التقدّم لصفحة بابا.<br><a href="https://mohamedelsadek-elsadek.github.io/Apps/yahia/" target="_blank" rel="noopener"><b>افتح «عالم يحيى» من موقع البرامج ↗</b></a></div>`:""}
+  ${SYNC==="err"?`<div class="err" style="margin:10px 0">⚠️ النسخة دي مش بتبعت التقدّم لصفحة بابا.<br><a href="https://mohamedelsadek-elsadek.github.io/Apps/yahia/" target="_blank" rel="noopener"><b>افتح «عالم يحيى» من موقع البرامج ↗</b></a></div>`:""}
   <div class="farm"><b>🏡 مزرعتك</b> <span class="note">كل إجابة صح في الكويز بتفقس كتكوت</span><div class="row ${S.eggs?"":"empty"}">${S.eggs?"🐥".repeat(Math.min(S.eggs,60)):"لسه فاضية… العب وفقّس البيض!"}</div></div>
   <p style="text-align:center;margin-top:14px"><button class="back" onclick="route('parent')">👨‍👦 صفحة بابا</button></p>`;
 }
@@ -384,7 +403,8 @@ function viewParent(pid){
   const _d=draw; const draw2=T=>{_d(T);wire()};
   if(PKID===KID) return draw2(S);
   const T=loadKidLocal(PKID); draw2(T);
-  if(DB) DB.ref("yahia_world/kids/"+PKID+"/state").once("value",snap=>{ if(mergeInto(T,snap.val())&&$("view").dataset.r==="parent"&&PKID===k.id) draw2(T); });
+  const upd=v=>{ if(mergeInto(T,v)&&$("view").dataset.r==="parent"&&PKID===k.id) draw2(T); };
+  if(DB&&!REST) DB.ref("yahia_world/kids/"+PKID+"/state").once("value",snap=>upd(snap.val())); else rget("yahia_world/kids/"+PKID+"/state").then(upd).catch(()=>{});
 }
 
 function vidRows(){const r=[];M.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const v=lessonVid(l.id);
