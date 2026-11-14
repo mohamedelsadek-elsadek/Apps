@@ -355,6 +355,19 @@
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy-d);border:1px solid var(--green);color:#fff;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:600;z-index:400;opacity:0;transition:.25s;pointer-events:none;max-width:88%;text-align:center}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 </style>
+<!-- owner-theme v1 -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style id="ownerTheme">
+:root,:root[data-theme],:root[data-theme=dark],:root[data-theme=light],:root:not([data-theme="light"]),html[data-theme],body[data-theme],body.dark,html.dark{--navy:#10294d!important;--navy-d:#0b1f3d!important;--green:#1f7a57!important;--green-d:#145a3f!important;--bg:#10294d!important;--panel:#f7f2e8!important;--panel-2:#fffdf8!important;--line:#dfd3bb!important;--txt:#1b2a44!important;--mut:#6b7385!important;--acc:#1f7a57!important;--danger:#c0262d!important;--gold:#a8822e!important;--blue:#1e6fd9!important}
+html,body{background-color:#10294d!important}
+body{font-family:Cairo,-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif}
+th{background:#1f7a57!important;color:#fff!important;border-color:#1f7a57!important}
+td{background-color:#fffdf8}
+tbody tr:nth-child(even) td{background-color:#fbf7ee}
+input,select,textarea{background-color:#fffdf8;color:#1b2a44}
+.gbox h2,.gbox p,.gbox div,header.app h1,header.app h1 span,.sync span{color:#fff!important}header.app{background:linear-gradient(180deg,#0b1f3d,#10294d)!important;border-bottom:2px solid #c9a24a}
+</style>
 </head>
 <body>
 <div class="warn" id="warnBanner">⚠️ التخزين المحلي غير متاح — البيانات مؤقتة.</div>
