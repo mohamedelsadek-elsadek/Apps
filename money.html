@@ -83,6 +83,43 @@ button{font-family:inherit;cursor:pointer}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#111827;border:1px solid var(--line);padding:10px 16px;border-radius:12px;font-size:13.5px;z-index:50;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 </style>
+<!-- owner-theme v1 -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style id="ownerTheme">
+:root{--bg:#10294d;--card:#f7f2e8;--card2:#efe7d6;--line:#dfd3bb;--blue:#1f7a57;--green:#1e9a4f;--red:#c0262d;--amber:#d98b0b;--txt:#1b2a44;--mut:#6b7385}
+body{font-family:Cairo,-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif}
+.head{background:linear-gradient(180deg,#0b1f3d,#10294d)!important;border-bottom:2px solid #c9a24a;color:#fff;margin-bottom:12px}
+.head .sub{color:#c9d4e6}
+.head .iconb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
+.sync{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#d8e1ef}
+.sync.on{color:#5ee0a6}.sync.err{color:#ff8a8a}
+.sbox{position:relative;overflow:hidden}
+.sbox .lbl,.net .lbl{color:#10294d;font-weight:800}
+.sbox.me{background:linear-gradient(160deg,#173a6b,#0b1f3d);border-color:#c9a24a}.sbox.me .lbl{color:#d8e1ef}.sbox.me .val{color:#5ee0a6}
+.sbox.them{border:2px solid var(--red)}
+.alerts{background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--red)}
+.alerts h4{color:#10294d}
+.al{border-top-color:var(--line)}
+.tools input,.field input,.field textarea,.field select,.seg button:not(.on){background:#fffdf8!important}
+.tab{color:#10294d}
+.tab.on{background:var(--blue);color:#fff}
+.empty{color:#c9d4e6}
+.pcard{box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.av{background:#10294d;color:#fff}
+.fab{box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.fab.sec{background:var(--card);color:#10294d}
+.sheet{background:var(--card);color:var(--txt)}
+.sheet h2{background:#10294d;color:#fff;border-radius:11px;padding:8px 12px}
+.field label{color:#10294d;font-weight:700}
+.back{color:#c9a24a}
+.st-card{background:linear-gradient(160deg,#173a6b,#0b1f3d);border-color:#c9a24a;color:#fff}
+.st-card .kd,.st-card .bl{color:#c9d4e6}
+.st-card .pos{color:#5ee0a6}.st-card .neg{color:#ff8a8a}
+.st-acts button{background:var(--card)}
+.mv .m,.mv .n{color:var(--mut)}
+.zero{color:var(--mut)}
+</style>
 </head>
 <body>
 <div class="wrap">

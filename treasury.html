@@ -72,6 +72,40 @@ tr:hover td{background:var(--card2)}
 small.muted{color:var(--muted);font-size:12px}
 .flow{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
 </style>
+<!-- owner-theme v1 -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style id="ownerTheme">
+:root{--bg:#10294d;--card:#f7f2e8;--card2:#efe7d6;--primary:#1f7a57;--primary2:#145a3f;--green:#1e9a4f;--red:#c0262d;--amber:#d98b0b;--text:#1b2a44;--muted:#6b7385;--border:#dfd3bb;--cyan:#1e6fd9}
+body{font-family:Cairo,-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif}
+.topbar{background:linear-gradient(180deg,#0b1f3d,#10294d)!important;border-bottom:2px solid #c9a24a!important;color:#fff}
+.topbar .vault-amount{color:#c9d4e6}.topbar .vault-amount b{color:#5ee0a6}
+.topbar .btn-o{color:#fff;border-color:rgba(255,255,255,.3)}
+.tabs{background:#10294d}
+.tab{background:var(--card);color:#10294d;font-weight:700;border:1px solid var(--border)}
+.tab.active{background:var(--primary);color:#fff}
+.section-title{color:#fff;font-weight:800}
+.section-title::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,transparent,#c9a24a)}
+.stat{position:relative;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.stat .lbl{color:#10294d;font-weight:800}
+.cards .stat:first-child{background:linear-gradient(160deg,#173a6b,#0b1f3d);border-color:#c9a24a}
+.cards .stat:first-child .lbl{color:#d8e1ef}.cards .stat:first-child .val{color:#fff}
+.cards .stat:first-child .val.g{color:#5ee0a6}.cards .stat:first-child .val.r{color:#ff8a8a}
+.row{box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.row:hover{border-color:#c9a24a}
+th{background:#1f7a57!important;color:#fff!important}
+td{background:#fffdf8}
+tr:nth-child(even) td{background:#fbf7ee}
+tr:hover td{background:#f1f8f4}
+.modal-box{border-top:3px solid #c9a24a}
+.modal-box h3{background:#10294d;color:#fff;border-radius:11px;padding:8px 12px}
+.field label{color:#10294d;font-weight:700}
+.field input,.field select,.field textarea{background:#fffdf8!important}
+.empty{color:#c9d4e6}
+.fab{box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.chip.g{background:rgba(30,154,79,.14)}.chip.r{background:rgba(192,38,45,.12)}
+.partner-pill{background:var(--card2)}
+</style>
 </head>
 <body>
 <div class="topbar">
