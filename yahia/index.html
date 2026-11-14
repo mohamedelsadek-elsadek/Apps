@@ -154,6 +154,10 @@ function save(local){try{localStorage.setItem("yw-state:"+KID,JSON.stringify(S))
 const FB={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
 let DB=null, REF=null, SYNC="off", pushT=null;
 function mergeInto(T,r){ if(!r) return false; let ch=false;
+  /* rev: نسخة مصحّحة من السحابة بتلغي القديم بدل ما تتدمج معاه */
+  if((r.rev||0)>(T.rev||0)){ T.done={}; for(const lid in (r.done||{})){T.done[lid]={}; for(const i in r.done[lid]) if(r.done[lid][i]) T.done[lid][i]=true}
+    T.stars=r.stars||0; T.eggs=r.eggs||0; T.miss=(r.miss||[]).filter(Boolean); T.rev=r.rev; return true; }
+  if((T.rev||0)>(r.rev||0)) return true;
   for(const lid in (r.done||{})){ T.done[lid]=T.done[lid]||{}; for(const i in r.done[lid]) if(r.done[lid][i]&&!T.done[lid][i]){T.done[lid][i]=true;ch=true} }
   if((r.stars||0)>T.stars){T.stars=r.stars;ch=true} if((r.eggs||0)>T.eggs){T.eggs=r.eggs;ch=true}
   const seen=new Set(T.miss.map(m=>m.t)); (r.miss||[]).forEach(m=>{if(m&&!seen.has(m.t)){T.miss.push(m);ch=true}}); T.miss.sort((a,b)=>a.t-b.t); if(T.miss.length>80)T.miss=T.miss.slice(-80);
@@ -172,11 +176,11 @@ async function restPull(){ if(!KID) return; const id=KID;
     const r=await rget("yahia_world/kids/"+id+"/state"); if(KID!==id) return; SYNC="on"; setCloud();
     const c2=mergeInto(S,r); save(true); if(c2||!r||needPush(r)) restPush(); if(c2||ch) refreshView();
   }catch(e){ SYNC="err"; setCloud(); } }
-function needPush(r){ if(!r) return true; if((S.stars||0)>(r.stars||0)||(S.eggs||0)>(r.eggs||0)) return true;
+function needPush(r){ if(!r) return true; if((S.rev||0)!==(r.rev||0)) return true; if((S.stars||0)>(r.stars||0)||(S.eggs||0)>(r.eggs||0)) return true;
   for(const l in S.done) for(const i in S.done[l]) if(S.done[l][i]&&!(r.done&&r.done[l]&&r.done[l][i])) return true; return (S.miss.length>((r.miss||[]).length)); }
 function goRest(){ if(REST) return; REST=true; if(REF) try{REF.off()}catch(e){} REF=null; restPull(); clearInterval(restPoll); restPoll=setInterval(restPull,30000); }
 function diag(){ try{ let dev=localStorage.getItem("yw-dev"); if(!dev){dev="d"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("yw-dev",dev)}
-  rput("yahia_world/diag/"+dev,{t:Date.now(),kid:KID||"",fb:!!window.firebase,mode:REST?"rest":"sdk",sync:SYNC,ua:navigator.userAgent.slice(0,200),stars:S.stars,done:Object.keys(S.done||{}).length}).catch(()=>{}); }catch(e){} }
+  let vs=[];try{vs=speechSynthesis.getVoices()}catch(e){} rput("yahia_world/diag/"+dev,{vn:vs.length,var:!!arVoice,ven:!!enVoice,aerr:AERR,t:Date.now(),kid:KID||"",fb:!!window.firebase,mode:REST?"rest":"sdk",sync:SYNC,ua:navigator.userAgent.slice(0,200),stars:S.stars,done:Object.keys(S.done||{}).length}).catch(()=>{}); }catch(e){} }
 function pushSync(){ if(REST) { clearTimeout(pushT); pushT=setTimeout(restPush,1200); return; } if(!REF) return; clearTimeout(pushT); const r=REF, snap=Object.assign({},S,{u:Date.now()}); pushT=setTimeout(()=>{ try{ r.set(snap).then(()=>{SYNC="on"}).catch(()=>{SYNC="err"}) }catch(e){} },1200); }
 /* ---------- فيديوهات الدروس (بابا بيختارها) ---------- */
 let VIDS={}; try{VIDS=JSON.parse(localStorage.getItem("yw-vids")||"{}")||{}}catch(e){}
@@ -184,7 +188,7 @@ function ytId(s){s=String(s||"").trim();const m=s.match(/(?:youtu\.be\/|[?&]v=|\
 function lessonVid(id){const v=VIDS[id];return v&&v.id&&!v.del?v.id:""}
 function setVid(lid,raw){const id=raw?ytId(raw):"";if(raw&&!id)return false;VIDS[lid]={id,del:!id,u:Date.now()};try{localStorage.setItem("yw-vids",JSON.stringify(VIDS))}catch(e){} if(REST)rput("yahia_world/videos/"+lid,VIDS[lid]).catch(()=>{}); else if(DB)try{DB.ref("yahia_world/videos/"+lid).set(VIDS[lid])}catch(e){} return true}
 function saveKids(){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} if(REST) rput("yahia_world/kids_meta",KIDS).catch(()=>{}); else if(DB) try{DB.ref("yahia_world/kids_meta").set(KIDS)}catch(e){} }
-function initSync(){ setTimeout(()=>{ if(SYNC!=="on") goRest(); setTimeout(diag,4000); },8000); try{ if(!window.firebase) return goRest(); const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
+function initSync(){ setTimeout(()=>{ if(SYNC!=="on") goRest(); setTimeout(diag,4000); setInterval(diag,90000); },8000); try{ if(!window.firebase) return goRest(); const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
   DB=firebase.database(app);
   DB.ref("yahia_world/kids_meta").on("value",snap=>{ const r=snap.val()||{}; let ch=false, push=false;
     for(const id in r){ const k=r[id]; if(!KIDS[id]||(k.u||0)>(KIDS[id].u||0)){KIDS[id]=k;ch=true} }
@@ -211,16 +215,22 @@ function confetti(){const e=["🎉","⭐","🐥","🎈","✨"];for(let i=0;i<24;
 function miss(what){S.miss.push({l:L?L.title:"",a:ACT?ACT.title:"",what,t:Date.now()}); if(S.miss.length>80)S.miss.shift(); save();}
 
 /* ---------- الصوت ---------- */
-let arVoice=null,enVoice=null,curAudio=null;
+let arVoice=null,enVoice=null,curAudio=null,AERR="",AUNLOCK=false;
+/* iPad/iPhone: لازم أول لمسة "تفتح" الصوت */
+function unlockAudio(){ if(AUNLOCK) return; AUNLOCK=true;
+  try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); }catch(e){}
+ }
+document.addEventListener("pointerdown",unlockAudio,{once:false,capture:true});
+document.addEventListener("touchend",unlockAudio,{capture:true});
 function pickVoice(){try{const v=speechSynthesis.getVoices();arVoice=v.find(x=>/ar[-_]EG/i.test(x.lang))||v.find(x=>/^ar/i.test(x.lang))||null;enVoice=v.find(x=>/en[-_]US/i.test(x.lang)&&/Samantha|Google|Female|Aria|Jenny/i.test(x.name))||v.find(x=>/en[-_](US|GB)/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){}}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
 function stopVoice(){try{if(curAudio){curAudio.pause();curAudio=null}speechSynthesis.cancel()}catch(e){}}
 function speak(text,key,onend,onmeta){
   stopVoice(); const src=key&&L&&L._blob&&L._blob[key];
-  if(src){curAudio=new Audio(src);curAudio.onloadedmetadata=()=>onmeta&&onmeta(curAudio.duration);curAudio.onended=()=>onend&&onend();curAudio.play().catch(()=>sayTTS(text,onend));return}
+  if(src){curAudio=new Audio(src);curAudio.onloadedmetadata=()=>onmeta&&onmeta(curAudio.duration);curAudio.onended=()=>onend&&onend();curAudio.play().catch(e=>{AERR="mp3:"+(e&&e.name);sayTTS(text,onend)});return}
   sayTTS(text,onend);
 }
-function sayTTS(text,onend){try{const u=new SpeechSynthesisUtterance(text);const V=LANG==="en"?enVoice:arVoice;u.lang=V?V.lang:(LANG==="en"?"en-US":"ar-EG");if(V)u.voice=V;u.rate=LANG==="en"?.88:.85;u.pitch=1.05;u.onend=()=>onend&&onend();speechSynthesis.speak(u)}catch(e){onend&&onend()}}
+function sayTTS(text,onend){try{const ss=speechSynthesis; if(ss.paused) ss.resume(); const u=new SpeechSynthesisUtterance(text); window._utt=u; u.onerror=e=>{AERR="tts:"+(e.error||"x");onend&&onend()};const V=LANG==="en"?enVoice:arVoice;u.lang=V?V.lang:(LANG==="en"?"en-US":"ar-EG");if(V)u.voice=V;u.rate=LANG==="en"?.88:.85;u.pitch=1.05;u.onend=()=>onend&&onend();speechSynthesis.speak(u)}catch(e){onend&&onend()}}
 
 /* ---------- التحميل ---------- */
 async function getJSON(p){const r=await fetch(p,{cache:"no-cache"}); if(!r.ok) throw new Error(p); return r.json()}
