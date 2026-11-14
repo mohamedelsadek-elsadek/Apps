@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0f1420">
+<meta name="theme-color" content="#0b1f3d">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>متابعة العجول 2026</title>
 <style>
@@ -74,6 +74,42 @@ input.xl[type=date]{min-width:130px}
 @media(min-width:700px){.ov{align-items:center}.sheet{border-radius:18px}}
 .bk{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;gap:8px}
 details summary{cursor:pointer;color:var(--acc);font-weight:600}
+</style>
+<!-- owner-theme v1 -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style id="ownerTheme">
+:root{--bg:#10294d;--card:#f7f2e8;--card2:#efe7d6;--line:#dfd3bb;--tx:#1b2a44;--mut:#6b7385;--acc:#1f7a57;--ok:#1e9a4f;--warn:#d98b0b;--bad:#c0262d}
+body{font-family:Cairo,-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif}
+header{background:linear-gradient(180deg,#0b1f3d,#10294d)!important;border-bottom:2px solid #c9a24a!important;color:#fff}
+header .mut,header .ver{color:#c9d4e6}
+.card{position:relative;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.card::before{content:"";position:absolute;top:-1px;left:-1px;width:18px;height:18px;background:linear-gradient(135deg,#1f7a57 50%,transparent 50%);border-top-left-radius:14px}
+.card h2{color:#fff!important;background:#10294d;border-radius:11px;padding:8px 12px;margin:-2px -2px 12px;font-weight:800}
+.card h2 *{color:#fff!important}
+label{color:#10294d;font-weight:700}
+input,select,textarea{background-color:#fffdf8!important}
+.btn.sec{background:#fffdf8}
+nav.tabs{background:#0b1f3d!important;border-top:2px solid #c9a24a!important}
+nav.tabs button{color:#b9c5da;border-radius:12px;margin:3px}
+nav.tabs button.on{background:var(--card);color:#10294d}
+.seg{background:var(--card);border:1px solid var(--line)}
+.seg button{color:#10294d;font-weight:700}
+.seg button.on{background:var(--acc)}
+.kpi{border:1px solid var(--line);background:var(--card)!important}
+.kpi small{color:#10294d;font-weight:800}
+.kpi:first-child{background:linear-gradient(160deg,#173a6b,#0b1f3d)!important;border-color:#c9a24a}
+.kpi:first-child small,.kpi:first-child b{color:#fff}
+.bar .fl{background:#10294d}.bar:nth-child(odd) .fl{background:#1f7a57}
+.alert{background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--bad);color:var(--tx)}
+.alert b{color:#10294d}
+.toast{color:#fff}
+.empty{color:var(--mut)}
+.chip{background:#fffdf8}
+th{background:#1f7a57!important;color:#fff!important}
+td{background-color:#fffdf8}
+tr.grp td{background:#efe7d6!important;color:#10294d!important}
+tr.cur td{background:#f1f8f4!important}
 </style>
 </head>
 <body>
