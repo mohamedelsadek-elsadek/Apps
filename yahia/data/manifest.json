@@ -117,7 +117,155 @@
    "title": "Science",
    "ico": "🔬",
    "color": "#14a5c9",
-   "status": "soon"
+   "status": "ready",
+   "lang": "en",
+   "blocks": [
+    {
+     "id": "b1",
+     "title": "Block 1",
+     "units": [
+      {
+       "id": "u1",
+       "title": "Unit 1: Life",
+       "ico": "🌿",
+       "lessons": [
+        {
+         "id": "sc-b1-u1-l1",
+         "title": "Living or Non-living?",
+         "ico": "🌱",
+         "file": "lessons/sc-b1-u1-l1.json",
+         "vq": "living and non living things for kids"
+        },
+        {
+         "id": "sc-b1-u1-l2",
+         "title": "Sorting Animals",
+         "ico": "🦁",
+         "file": "lessons/sc-b1-u1-l2.json",
+         "vq": "vertebrates invertebrates herbivore carnivore omnivore for kids"
+        },
+        {
+         "id": "sc-b1-u1-l3",
+         "title": "Habitats & Adaptation",
+         "ico": "🏜️",
+         "file": "lessons/sc-b1-u1-l3.json",
+         "vq": "animal habitats and adaptations for kids"
+        },
+        {
+         "id": "sc-b1-u1-l4",
+         "title": "Variation & Decay",
+         "ico": "🍂",
+         "file": "lessons/sc-b1-u1-l4.json",
+         "vq": "what is decay for kids"
+        },
+        {
+         "id": "sc-b1-u1-l5",
+         "title": "Extinct Animals, Fossils & Evolution",
+         "ico": "🦕",
+         "file": "lessons/sc-b1-u1-l5.json",
+         "vq": "fossils for kids"
+        }
+       ]
+      },
+      {
+       "id": "u2",
+       "title": "Unit 2: Planet Earth",
+       "ico": "🌍",
+       "lessons": [
+        {
+         "id": "sc-b1-u2-l1",
+         "title": "Our Planet Earth",
+         "ico": "🌍",
+         "file": "lessons/sc-b1-u2-l1.json",
+         "vq": "layers of the earth for kids"
+        },
+        {
+         "id": "sc-b1-u2-l2",
+         "title": "The Solar System",
+         "ico": "🪐",
+         "file": "lessons/sc-b1-u2-l2.json",
+         "vq": "solar system for kids"
+        },
+        {
+         "id": "sc-b1-u2-l3",
+         "title": "Day, Night & Our Calendar",
+         "ico": "🌗",
+         "file": "lessons/sc-b1-u2-l3.json",
+         "vq": "day and night for kids"
+        },
+        {
+         "id": "sc-b1-u2-l4",
+         "title": "Gravity & Mass",
+         "ico": "⚖️",
+         "file": "lessons/sc-b1-u2-l4.json",
+         "vq": "gravity for kids"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b2",
+     "title": "Block 2",
+     "units": [
+      {
+       "id": "u3",
+       "title": "Unit 3: Light and Sound",
+       "ico": "💡",
+       "lessons": [
+        {
+         "id": "sc-b2-u3-l1",
+         "title": "Light Sources & How Light Travels",
+         "ico": "🔦",
+         "file": "lessons/sc-b2-u3-l1.json",
+         "vq": "light sources for kids"
+        },
+        {
+         "id": "sc-b2-u3-l2",
+         "title": "Through, Bounce or Block?",
+         "ico": "🪟",
+         "file": "lessons/sc-b2-u3-l2.json",
+         "vq": "transparent translucent opaque for kids"
+        },
+        {
+         "id": "sc-b2-u3-l3",
+         "title": "Sound & Volume",
+         "ico": "🥁",
+         "file": "lessons/sc-b2-u3-l3.json",
+         "vq": "how sound travels vibrations for kids"
+        },
+        {
+         "id": "sc-b2-u3-l4",
+         "title": "Pitch & Protecting Our Ears",
+         "ico": "🎵",
+         "file": "lessons/sc-b2-u3-l4.json",
+         "vq": "pitch high and low sounds for kids"
+        }
+       ]
+      },
+      {
+       "id": "u4",
+       "title": "Unit 4: Heating and Cooling",
+       "ico": "🌡️",
+       "lessons": [
+        {
+         "id": "sc-b2-u4-l1",
+         "title": "Heat & Temperature",
+         "ico": "🌡️",
+         "file": "lessons/sc-b2-u4-l1.json",
+         "vq": "conductors and insulators heat for kids"
+        },
+        {
+         "id": "sc-b2-u4-l2",
+         "title": "States of Matter",
+         "ico": "🧊",
+         "file": "lessons/sc-b2-u4-l2.json",
+         "vq": "states of matter for kids"
+        }
+       ]
+      }
+     ]
+    }
+   ]
   },
   {
    "id": "so",

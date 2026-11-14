@@ -1,0 +1,355 @@
+{
+ "title": "Our Planet Earth",
+ "source": "Science G3 B1 Study sheet pp.38-40, Worksheet Q2",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Is the Earth Flat?",
+   "ico": "📖",
+   "keys": [
+    "spherical",
+    "Crust",
+    "Mantle",
+    "Core",
+    "layers"
+   ],
+   "scenes": [
+    {
+     "e": "🌍⚽🪙",
+     "t": "Is the Earth flat like a coin, or round like a ball? Let's think like scientists!"
+    },
+    {
+     "e": "🌊⬇️🚶",
+     "t": "If the Earth were flat, maybe the oceans would pour off the edges into space, and travelers could fall off the end!"
+    },
+    {
+     "e": "🌍✅",
+     "t": "That never happens, because the Earth is spherical, like a ball. A sphere has no edges or ends."
+    },
+    {
+     "e": "🧭🌐",
+     "t": "Long ago, in 1267, the Persian astronomer Jamal ad-Din Bukhari brought a globe, a round model of the Earth, to China."
+    },
+    {
+     "e": "🥚🔪",
+     "t": "Inside, the Earth has layers, just like an egg. An egg has a shell, a white and a yolk."
+    },
+    {
+     "e": "🪨🏠",
+     "t": "The crust is the thin outer layer we live on. It is made of rock."
+    },
+    {
+     "e": "🌋🔥",
+     "t": "The mantle is under the crust. It is thicker than the crust and very hot, like lava."
+    },
+    {
+     "e": "☀️🎯",
+     "t": "The core is the center of the Earth. It is even hotter than the mantle!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Spherical",
+     "e": "⚽",
+     "k": "mean",
+     "a": "Shaped like a ball. The Earth is spherical."
+    },
+    {
+     "w": "Globe",
+     "e": "🌐",
+     "k": "mean",
+     "a": "A round model of the Earth."
+    },
+    {
+     "w": "Crust",
+     "e": "🪨",
+     "k": "mean",
+     "a": "The thin outer layer we live on, made of rock."
+    },
+    {
+     "w": "Mantle",
+     "e": "🌋",
+     "k": "mean",
+     "a": "Thicker than the crust and very hot, like lava."
+    },
+    {
+     "w": "Core",
+     "e": "🎯",
+     "k": "mean",
+     "a": "The center of the Earth, the hottest part."
+    },
+    {
+     "w": "Shell = Crust",
+     "e": "🥚",
+     "k": "fact",
+     "a": "In the egg model, the shell is like the crust."
+    },
+    {
+     "w": "White = Mantle",
+     "e": "🍳",
+     "k": "fact",
+     "a": "The egg white is like the mantle."
+    },
+    {
+     "w": "Yolk = Core",
+     "e": "🟡",
+     "k": "fact",
+     "a": "The yolk is like the core."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Egg & Earth",
+   "ico": "🧠",
+   "prompt": "Match the egg part with the Earth layer.",
+   "pairs": [
+    [
+     "Shell",
+     "Crust"
+    ],
+    [
+     "Egg white",
+     "Mantle"
+    ],
+    [
+     "Yolk",
+     "Core"
+    ],
+    [
+     "We live on",
+     "Crust"
+    ],
+    [
+     "Center of Earth",
+     "Core"
+    ],
+    [
+     "Ball shape",
+     "Spherical"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Which Layer?",
+   "ico": "🌍",
+   "prompt": "Which layer of the Earth is this?",
+   "bins": [
+    {
+     "id": "c",
+     "label": "Crust",
+     "ico": "🪨",
+     "cls": "noun"
+    },
+    {
+     "id": "m",
+     "label": "Mantle",
+     "ico": "🌋",
+     "cls": "sun"
+    },
+    {
+     "id": "o",
+     "label": "Core",
+     "ico": "🎯",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "c": "The thin outer rocky layer.",
+    "m": "The thick, hot layer like lava.",
+    "o": "The hottest center."
+   },
+   "items": [
+    [
+     "we live on it",
+     "c"
+    ],
+    [
+     "thin outer layer",
+     "c"
+    ],
+    [
+     "made of rocks",
+     "c"
+    ],
+    [
+     "like the egg shell",
+     "c"
+    ],
+    [
+     "thicker than the crust",
+     "m"
+    ],
+    [
+     "hot like lava",
+     "m"
+    ],
+    [
+     "like the egg white",
+     "m"
+    ],
+    [
+     "center of the Earth",
+     "o"
+    ],
+    [
+     "hotter than the mantle",
+     "o"
+    ],
+    [
+     "like the egg yolk",
+     "o"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "The Egg Earth Model",
+   "ico": "🧪",
+   "e": "🥚🌍",
+   "goal": "See the Earth's three layers using a boiled egg.",
+   "need": [
+    "a hard-boiled egg",
+    "a knife (adult only)",
+    "a plate"
+   ],
+   "safe": "An adult must cut the egg.",
+   "predict": {
+    "q": "Which part of the egg will be in the very center?",
+    "o": [
+     "The shell",
+     "The white",
+     "The yolk"
+    ],
+    "a": 2
+   },
+   "steps": [
+    {
+     "e": "🥚",
+     "t": "Look at the boiled egg. The thin shell is like the Earth's crust."
+    },
+    {
+     "e": "🔪",
+     "t": "Ask an adult to cut the egg in half, with the shell still on."
+    },
+    {
+     "e": "👀",
+     "t": "Find the three layers: shell, white and yellow yolk."
+    },
+    {
+     "e": "✏️",
+     "t": "Point and say: shell is the crust, white is the mantle, yolk is the core!"
+    }
+   ],
+   "result": "You can see a thin shell, a thick white layer and a yolk in the middle — just like the crust, mantle and core.",
+   "why": "The crust is thin like the shell, the mantle is thick like the white, and the core is in the center like the yolk."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What shape is the Earth?",
+     "o": [
+      "Flat like a coin",
+      "Spherical like a ball",
+      "Square like a box"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Why can't travelers fall off the Earth's end?",
+     "o": [
+      "A sphere has no edges or ends",
+      "There is a big wall",
+      "They hold on tight"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which layer do we live on?",
+     "o": [
+      "Core",
+      "Mantle",
+      "Crust"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What is the center of the Earth called?",
+     "o": [
+      "Core",
+      "Crust",
+      "Mantle"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which layer is thicker?",
+     "o": [
+      "Crust",
+      "Mantle"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The crust is made of…",
+     "o": [
+      "Rocks",
+      "Water",
+      "Air"
+     ],
+     "a": 0
+    },
+    {
+     "q": "In the egg model, the yolk is like the…",
+     "o": [
+      "Crust",
+      "Core",
+      "Mantle"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which is the hottest layer?",
+     "o": [
+      "Core",
+      "Crust",
+      "Mantle"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A round model of the Earth is called a…",
+     "o": [
+      "Globe",
+      "Map",
+      "Telescope"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Who brought the first globe to China in 1267?",
+     "o": [
+      "Jamal ad-Din Bukhari",
+      "Isaac Newton",
+      "Yahia"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u2-l1",
+ "lang": "en",
+ "audio": {}
+}

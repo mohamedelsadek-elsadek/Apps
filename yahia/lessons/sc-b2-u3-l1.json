@@ -1,0 +1,367 @@
+{
+ "title": "Light Sources & How Light Travels",
+ "source": "Science G3 B2 Study sheet pp.4-6, 11; Worksheet Q1-Q2",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia and the Torch",
+   "ico": "📖",
+   "keys": [
+    "energy",
+    "light sources",
+    "natural",
+    "man-made",
+    "artificial",
+    "straight line",
+    "shadow",
+    "opaque",
+    "Lux",
+    "reflects"
+   ],
+   "scenes": [
+    {
+     "e": "💡👀",
+     "t": "Light is a type of energy that lets us see the world around us. Light comes from light sources."
+    },
+    {
+     "e": "☀️⭐⚡🔥",
+     "t": "Natural light sources are made by nature: the Sun, stars, lightning and fire. The Sun is our main natural light source."
+    },
+    {
+     "e": "💡🕯️🎆🔦",
+     "t": "Man-made, or artificial, light sources are made by people: a light bulb, a candle, fireworks and a torch."
+    },
+    {
+     "e": "📏🔆",
+     "t": "We can measure light with a light sensor or a data logger. The unit for measuring light is Lux."
+    },
+    {
+     "e": "🔦➡️",
+     "t": "Light travels in a straight line from its source. Shine a torch across a dark room and you can see the straight beam!"
+    },
+    {
+     "e": "🃏🃏🃏",
+     "t": "Make a hole in the middle of 3 cards and line them up with a torch. You can see the light. Move one card up and the light is blocked!"
+    },
+    {
+     "e": "🧱🌑",
+     "t": "Light does not bend. When an opaque object is in its path, it blocks the light and makes a dark area behind it. This is a shadow."
+    },
+    {
+     "e": "🌕🪞",
+     "t": "The Moon, a mirror and water look bright, but they are NOT light sources. They only reflect light from somewhere else."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Light source",
+     "e": "💡",
+     "k": "mean",
+     "a": "Something that makes its own light."
+    },
+    {
+     "w": "Natural",
+     "e": "☀️",
+     "k": "mean",
+     "a": "Made by nature: Sun, stars, lightning, fire."
+    },
+    {
+     "w": "Artificial",
+     "e": "🔦",
+     "k": "mean",
+     "a": "Man-made: bulb, candle, torch, fireworks."
+    },
+    {
+     "w": "Lux",
+     "e": "📏",
+     "k": "mean",
+     "a": "The unit for measuring light."
+    },
+    {
+     "w": "Straight line",
+     "e": "➡️",
+     "k": "fact",
+     "a": "Light always travels in a straight line."
+    },
+    {
+     "w": "Shadow",
+     "e": "🌑",
+     "k": "mean",
+     "a": "A dark area made when an object blocks light."
+    },
+    {
+     "w": "Mirror",
+     "e": "🪞",
+     "k": "fact",
+     "a": "Not a light source — it only reflects light."
+    },
+    {
+     "w": "Moon",
+     "e": "🌕",
+     "k": "fact",
+     "a": "Not a light source — it reflects sunlight."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Light Words",
+   "ico": "🧠",
+   "prompt": "Match the pairs.",
+   "pairs": [
+    [
+     "☀️ Sun",
+     "natural source"
+    ],
+    [
+     "🔦 Torch",
+     "man-made source"
+    ],
+    [
+     "🪞 Mirror",
+     "reflects light"
+    ],
+    [
+     "Lux",
+     "unit of light"
+    ],
+    [
+     "Shadow",
+     "light is blocked"
+    ],
+    [
+     "Light travels",
+     "in a straight line"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Source or Not?",
+   "ico": "🐦",
+   "prompt": "Does it make its own light?",
+   "bins": [
+    {
+     "id": "n",
+     "label": "Natural source",
+     "ico": "☀️",
+     "cls": "sun"
+    },
+    {
+     "id": "m",
+     "label": "Man-made source",
+     "ico": "💡",
+     "cls": "noun"
+    },
+    {
+     "id": "r",
+     "label": "Not a source",
+     "ico": "🪞",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "n": "Made by nature and gives light.",
+    "m": "Made by people and gives light.",
+    "r": "It only reflects light from elsewhere."
+   },
+   "items": [
+    [
+     "the Sun",
+     "n"
+    ],
+    [
+     "stars",
+     "n"
+    ],
+    [
+     "lightning",
+     "n"
+    ],
+    [
+     "fire",
+     "n"
+    ],
+    [
+     "candle",
+     "m"
+    ],
+    [
+     "light bulb",
+     "m"
+    ],
+    [
+     "torch",
+     "m"
+    ],
+    [
+     "fireworks",
+     "m"
+    ],
+    [
+     "mirror",
+     "r"
+    ],
+    [
+     "the Moon",
+     "r"
+    ],
+    [
+     "kitchen foil",
+     "r"
+    ],
+    [
+     "eye",
+     "r"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "The Three-Card Test",
+   "ico": "🧪",
+   "e": "🃏🔦",
+   "goal": "Prove that light travels in a straight line.",
+   "need": [
+    "3 pieces of card",
+    "a pencil to make holes",
+    "play dough to stand the cards up",
+    "a torch"
+   ],
+   "safe": "Never shine the torch into anyone's eyes.",
+   "predict": {
+    "q": "If you move one card up, will you still see the light?",
+    "o": [
+     "Yes",
+     "No"
+    ],
+    "a": 1
+   },
+   "steps": [
+    {
+     "e": "🕳️",
+     "t": "Ask an adult to make a hole in the middle of each card, in exactly the same place."
+    },
+    {
+     "e": "🟤",
+     "t": "Stand the cards in a line using play dough, with the holes lined up."
+    },
+    {
+     "e": "🔦",
+     "t": "Shine the torch through the first hole and look through the last hole. You can see the light!"
+    },
+    {
+     "e": "⬆️",
+     "t": "Now move the middle card up a little and look again."
+    }
+   ],
+   "result": "When the holes are in a straight line you see the light. When one card moves, the light is blocked.",
+   "why": "Light travels only in a straight line. It cannot bend around the card."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Light is a type of…",
+     "o": [
+      "Energy",
+      "Food",
+      "Animal"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What is our main natural light source?",
+     "o": [
+      "The Moon",
+      "The Sun",
+      "A torch"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which is a man-made light source?",
+     "o": [
+      "Lightning",
+      "Candle",
+      "Star"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Is a mirror a light source?",
+     "o": [
+      "Yes",
+      "No, it reflects light"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The unit for measuring light is…",
+     "o": [
+      "Lux",
+      "Gram",
+      "Degree"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How does light travel?",
+     "o": [
+      "In a straight line",
+      "In circles",
+      "It bends around corners"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A dark area made when an object blocks light is a…",
+     "o": [
+      "Shadow",
+      "Reflection",
+      "Rainbow"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Why does the Moon look bright?",
+     "o": [
+      "It makes its own light",
+      "It reflects light from the Sun"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which one is a natural light source?",
+     "o": [
+      "Fireworks",
+      "Light bulb",
+      "Fire"
+     ],
+     "a": 2
+    },
+    {
+     "q": "In the three-card test, moving one card…",
+     "o": [
+      "Blocks the light",
+      "Makes more light",
+      "Changes the light's color"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b2-u3-l1",
+ "lang": "en",
+ "audio": {}
+}

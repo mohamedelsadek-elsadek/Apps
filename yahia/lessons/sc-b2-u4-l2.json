@@ -1,0 +1,420 @@
+{
+ "title": "States of Matter",
+ "source": "Science G3 B2 Study sheet pp.46-49; Worksheet Q4-Q6",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "The Chocolate That Melted",
+   "ico": "📖",
+   "keys": [
+    "Matter",
+    "solid",
+    "liquid",
+    "gas",
+    "melting",
+    "evaporation",
+    "freezing",
+    "condensation",
+    "heating",
+    "cooling"
+   ],
+   "scenes": [
+    {
+     "e": "🪨💧💨",
+     "t": "Matter is anything that takes up space. Matter can be a solid, a liquid or a gas."
+    },
+    {
+     "e": "🍫🔥",
+     "t": "Matter can change from one state to another by heating or cooling."
+    },
+    {
+     "e": "🍫➡️🫗",
+     "t": "Melting is when a solid changes into a liquid by heating. Chocolate melts in the hot sun!"
+    },
+    {
+     "e": "💧➡️💨",
+     "t": "Evaporation is when a liquid changes into a gas by heating. Water becomes water vapour."
+    },
+    {
+     "e": "💧➡️🧊",
+     "t": "Freezing is when a liquid changes into a solid by cooling. Water in the freezer becomes ice."
+    },
+    {
+     "e": "💨➡️💧",
+     "t": "Condensation is when a gas changes into a liquid by cooling. Water vapour becomes water drops."
+    },
+    {
+     "e": "🪟💧❄️",
+     "t": "In winter we see drops of water on the windows. Warm air meets the cold glass, cools down and forms water droplets. That is condensation!"
+    },
+    {
+     "e": "🎈💨",
+     "t": "The air we blow into a balloon is a gas. Gases spread out to fill their container."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Matter",
+     "e": "🧱",
+     "k": "mean",
+     "a": "Anything that takes up space."
+    },
+    {
+     "w": "Solid",
+     "e": "🧊",
+     "k": "ex",
+     "a": "Ice, chocolate, stone."
+    },
+    {
+     "w": "Liquid",
+     "e": "💧",
+     "k": "ex",
+     "a": "Water, juice, milk."
+    },
+    {
+     "w": "Gas",
+     "e": "💨",
+     "k": "ex",
+     "a": "Air, water vapour."
+    },
+    {
+     "w": "Melting",
+     "e": "🍫",
+     "k": "mean",
+     "a": "Solid ➜ liquid by heating."
+    },
+    {
+     "w": "Evaporation",
+     "e": "♨️",
+     "k": "mean",
+     "a": "Liquid ➜ gas by heating."
+    },
+    {
+     "w": "Freezing",
+     "e": "❄️",
+     "k": "mean",
+     "a": "Liquid ➜ solid by cooling."
+    },
+    {
+     "w": "Condensation",
+     "e": "🪟",
+     "k": "mean",
+     "a": "Gas ➜ liquid by cooling."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Change of State",
+   "ico": "🧠",
+   "prompt": "Match each change with its name.",
+   "pairs": [
+    [
+     "solid ➜ liquid",
+     "Melting"
+    ],
+    [
+     "liquid ➜ gas",
+     "Evaporation"
+    ],
+    [
+     "liquid ➜ solid",
+     "Freezing"
+    ],
+    [
+     "gas ➜ liquid",
+     "Condensation"
+    ],
+    [
+     "Balloon air",
+     "gas"
+    ],
+    [
+     "Ice",
+     "solid"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Solid, Liquid or Gas?",
+   "ico": "🐦",
+   "prompt": "What state of matter is it?",
+   "bins": [
+    {
+     "id": "s",
+     "label": "Solid",
+     "ico": "🧊",
+     "cls": "noun"
+    },
+    {
+     "id": "l",
+     "label": "Liquid",
+     "ico": "💧",
+     "cls": "sun"
+    },
+    {
+     "id": "g",
+     "label": "Gas",
+     "ico": "💨",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "s": "It keeps its own shape.",
+    "l": "It flows and takes the shape of its container.",
+    "g": "It spreads out to fill any space."
+   },
+   "items": [
+    [
+     "ice cube",
+     "s"
+    ],
+    [
+     "stone",
+     "s"
+    ],
+    [
+     "chocolate bar",
+     "s"
+    ],
+    [
+     "book",
+     "s"
+    ],
+    [
+     "water",
+     "l"
+    ],
+    [
+     "juice",
+     "l"
+    ],
+    [
+     "milk",
+     "l"
+    ],
+    [
+     "melted chocolate",
+     "l"
+    ],
+    [
+     "air in a balloon",
+     "g"
+    ],
+    [
+     "water vapour",
+     "g"
+    ],
+    [
+     "steam from a kettle",
+     "g"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Heating or Cooling?",
+   "ico": "🌡️",
+   "prompt": "Does this change need heating or cooling?",
+   "bins": [
+    {
+     "id": "h",
+     "label": "Heating",
+     "ico": "🔥",
+     "cls": "sun"
+    },
+    {
+     "id": "c",
+     "label": "Cooling",
+     "ico": "❄️",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "h": "Melting and evaporation need heat.",
+    "c": "Freezing and condensation need cooling."
+   },
+   "items": [
+    [
+     "ice changes to water",
+     "h"
+    ],
+    [
+     "water changes to water vapour",
+     "h"
+    ],
+    [
+     "chocolate melts",
+     "h"
+    ],
+    [
+     "puddle dries up",
+     "h"
+    ],
+    [
+     "water changes to ice",
+     "c"
+    ],
+    [
+     "water vapour changes to water",
+     "c"
+    ],
+    [
+     "drops on a cold window",
+     "c"
+    ],
+    [
+     "making ice lollies",
+     "c"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Ice Cube Race & Cold Glass",
+   "ico": "🧪",
+   "e": "🧊🥤",
+   "goal": "Watch melting and condensation happen.",
+   "need": [
+    "3 ice cubes",
+    "3 small plates",
+    "a glass of very cold water with ice"
+   ],
+   "predict": {
+    "q": "Which ice cube will melt first?",
+    "o": [
+     "In the sun / warm place",
+     "In the shade",
+     "In the fridge"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "🍽️",
+     "t": "Put one ice cube on a plate in a sunny or warm place, one in the shade, and one in the fridge."
+    },
+    {
+     "e": "⏱️",
+     "t": "Check them every 10 minutes. Which one turns to water first?"
+    },
+    {
+     "e": "🥤",
+     "t": "Now fill a dry glass with ice and cold water. Wait 5 minutes."
+    },
+    {
+     "e": "👆",
+     "t": "Touch the outside of the glass. Is it wet? Where did the water come from?"
+    }
+   ],
+   "result": "The ice in the warm place melts first. Water drops appear on the outside of the cold glass.",
+   "why": "Heating melts the solid ice into liquid water. Water vapour in the air cools on the cold glass and condenses into drops."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Matter is…",
+     "o": [
+      "Anything that takes up space",
+      "Only water",
+      "Only rocks"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Melting is when…",
+     "o": [
+      "Solid ➜ liquid",
+      "Liquid ➜ gas",
+      "Gas ➜ liquid"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Evaporation is when…",
+     "o": [
+      "Liquid ➜ solid",
+      "Liquid ➜ gas",
+      "Solid ➜ gas"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Freezing is when…",
+     "o": [
+      "Liquid ➜ solid",
+      "Solid ➜ liquid",
+      "Gas ➜ liquid"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Condensation is when…",
+     "o": [
+      "Gas ➜ liquid",
+      "Liquid ➜ gas",
+      "Solid ➜ liquid"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Ice changes to water when it is…",
+     "o": [
+      "Heated",
+      "Cooled"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Water changes into ice when it is…",
+     "o": [
+      "Heated",
+      "Cooled"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Water vapour changes into water when it is…",
+     "o": [
+      "Heated",
+      "Cooled"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The air blown into a balloon is a…",
+     "o": [
+      "Solid",
+      "Liquid",
+      "Gas"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Drops of water on a cold window in winter are caused by…",
+     "o": [
+      "Condensation",
+      "Melting",
+      "Evaporation"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b2-u4-l2",
+ "lang": "en",
+ "audio": {}
+}

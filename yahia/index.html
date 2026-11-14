@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>عالم يحيى — منصة يحيى التعليمية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=Cairo:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=Cairo:wght@500;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
 <style>
 :root{--sky:#bfe6ff;--sky2:#e9f7ff;--sand:#ffe2a8;--ink:#2b2340;--soft:#6b6385;--card:#fff;--orange:#ff9f2e;--purple:#8a5cf6;--green:#2fb36d;--red:#ef4f5f;--yellow:#ffd23f;--shadow:0 6px 0 rgba(43,35,64,.15)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -113,6 +113,10 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 .brand{white-space:nowrap}.pill{white-space:nowrap}
 @media(max-width:430px){.brand span{display:none}.pill{font-size:15px;padding:4px 9px}}
 .vbox{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000;margin-bottom:8px}.vbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.stop.vid{background:#ffe9e9}
+#view.en .txt,#view.en .q,#view.en .opt,#view.en .sub,#view.en .note,#view.en .crumb,#view.en .stop small,#view.en .hint{font-family:'Nunito','Baloo Bhaijaan 2',system-ui,sans-serif}
+#view.en .txt{font-size:21px;line-height:1.7}
+#view.en .opt,#view.en .stop,#view.en .q,#view.en .txt,#view.en .labneed,#view.en .hint,#view.en h1,#view.en h2{text-align:left}#view.en .labneed{font-family:Nunito,system-ui,sans-serif}#view.en .stop b{font-family:Nunito,'Baloo Bhaijaan 2',system-ui,sans-serif}
+.labneed{font-family:Cairo;font-size:17px;margin:4px 0 10px;padding-inline-start:22px}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -207,8 +211,8 @@ function confetti(){const e=["🎉","⭐","🐥","🎈","✨"];for(let i=0;i<24;
 function miss(what){S.miss.push({l:L?L.title:"",a:ACT?ACT.title:"",what,t:Date.now()}); if(S.miss.length>80)S.miss.shift(); save();}
 
 /* ---------- الصوت ---------- */
-let arVoice=null,curAudio=null;
-function pickVoice(){try{const v=speechSynthesis.getVoices();arVoice=v.find(x=>/ar[-_]EG/i.test(x.lang))||v.find(x=>/^ar/i.test(x.lang))||null}catch(e){}}
+let arVoice=null,enVoice=null,curAudio=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices();arVoice=v.find(x=>/ar[-_]EG/i.test(x.lang))||v.find(x=>/^ar/i.test(x.lang))||null;enVoice=v.find(x=>/en[-_]US/i.test(x.lang)&&/Samantha|Google|Female|Aria|Jenny/i.test(x.name))||v.find(x=>/en[-_](US|GB)/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){}}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
 function stopVoice(){try{if(curAudio){curAudio.pause();curAudio=null}speechSynthesis.cancel()}catch(e){}}
 function speak(text,key,onend,onmeta){
@@ -216,7 +220,7 @@ function speak(text,key,onend,onmeta){
   if(src){curAudio=new Audio(src);curAudio.onloadedmetadata=()=>onmeta&&onmeta(curAudio.duration);curAudio.onended=()=>onend&&onend();curAudio.play().catch(()=>sayTTS(text,onend));return}
   sayTTS(text,onend);
 }
-function sayTTS(text,onend){try{const u=new SpeechSynthesisUtterance(text);u.lang=arVoice?arVoice.lang:"ar-EG";if(arVoice)u.voice=arVoice;u.rate=.85;u.pitch=1.05;u.onend=()=>onend&&onend();speechSynthesis.speak(u)}catch(e){onend&&onend()}}
+function sayTTS(text,onend){try{const u=new SpeechSynthesisUtterance(text);const V=LANG==="en"?enVoice:arVoice;u.lang=V?V.lang:(LANG==="en"?"en-US":"ar-EG");if(V)u.voice=V;u.rate=LANG==="en"?.88:.85;u.pitch=1.05;u.onend=()=>onend&&onend();speechSynthesis.speak(u)}catch(e){onend&&onend()}}
 
 /* ---------- التحميل ---------- */
 async function getJSON(p){const r=await fetch(p,{cache:"no-cache"}); if(!r.ok) throw new Error(p); return r.json()}
@@ -234,8 +238,14 @@ function lessonDone(id,T){const d=(T||S).done[id]||{}; return Object.keys(d).len
 
 /* ---------- التنقّل ---------- */
 let stopGame=()=>{};
+let LANG="ar"; const tr=(a,e)=>LANG==="en"?e:a;
+function setLangFor(r,arg){ let lg="ar";
+  if(r==="subject"){const s=M&&M.subjects.find(x=>x.id===arg); lg=(s&&s.lang)||"ar"}
+  else if(r==="lesson"){const m=findLesson(arg); lg=(m&&m.subject.lang)||"ar"}
+  else if(r==="act"||r==="video"){const m=LID&&findLesson(LID); lg=(m&&m.subject.lang)||"ar"}
+  LANG=lg; const v=$("view"); v.dir=lg==="en"?"ltr":"rtl"; v.lang=lg; v.classList.toggle("en",lg==="en"); }
 function route(r,arg){stopGame();stopGame=()=>{};stopVoice();window.scrollTo(0,0);const v=$("view");v.style.animation="none";v.offsetHeight;v.style.animation="";
-  v.dataset.r=r; ({video:viewVideo,home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent,kids:viewKids})[r](arg);}
+  v.dataset.r=r; setLangFor(r,arg); ({video:viewVideo,home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent,kids:viewKids})[r](arg);}
 
 function viewHome(){
   $("view").innerHTML=`<h1>أهلًا يا ${esc(kid().name)}! ${kid().emoji}</h1><p class="sub">اختار المادة وابدأ المغامرة! <button class="back" style="font-size:14px;padding:3px 10px" onclick="route('kids')">🔁 لاعب تاني</button></p>
@@ -249,10 +259,10 @@ function countLessons(s){let n=0;(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.
 
 function viewSubject(sid){
   const s=M.subjects.find(x=>x.id===sid);
-  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('home')">→ المواد</button><span class="pill">${s.ico} ${esc(s.title)}</span></div>
+  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('home')">${tr("→ المواد","← Subjects")}</button><span class="pill">${s.ico} ${esc(s.title)}</span></div>
   ${s.blocks.map(b=>`<div class="block"><h2>🗺️ ${esc(b.title)}</h2>${b.units.map(u=>`<div class="unit"><h3>${u.ico} ${esc(u.title)}</h3><div class="path">
     ${u.lessons.map(l=>{const lock=!l.file;const n=lessonDone(l.id);return `<button class="stop ${lock?"lock":""} ${n>=5?"done":""}" ${lock?"disabled":""} onclick="route('lesson','${l.id}')">
-    <span class="ico">${l.ico}</span><span><b>${esc(l.title)}</b><small>${lock?"قريبًا":n?`خلّصت ${n} محطات`:"ابدأ المغامرة"}</small></span><span class="st">${lock?"🔒":n>=5?"✅":"▶️"}</span></button>`}).join("")}
+    <span class="ico">${l.ico}</span><span><b>${esc(l.title)}</b><small>${lock?tr("قريبًا","Coming soon"):n?tr(`خلّصت ${n} محطات`,`${n} stations done`):tr("ابدأ المغامرة","Start the adventure")}</small></span><span class="st">${lock?"🔒":n>=5?"✅":"▶️"}</span></button>`}).join("")}
   </div></div>`).join("")}</div>`).join("")}`;
 }
 
@@ -261,25 +271,30 @@ async function viewLesson(id){
   $("view").innerHTML=`<p class="note">جاري تحميل الدرس…</p>`;
   try{L=await loadLesson(id)}catch(e){$("view").innerHTML=`<div class="err">الدرس مش متاح دلوقتي.</div>`;return}
   const d=S.done[id]||{};
-  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('subject','${meta.subject.id}')">→ الخريطة</button><span class="pill">${meta.ico} ${esc(L.title)}</span></div>
+  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('subject','${meta.subject.id}')">${tr("→ الخريطة","← Map")}</button><span class="pill">${meta.ico} ${esc(L.title)}</span></div>
   <p class="crumb">${esc(meta.subject.title)} · ${esc(meta.block.title)} · ${esc(meta.unit.title)}</p>
-  <div class="unit"><div class="path">${lessonVid(id)?`<button class="stop vid" onclick="route('video')"><span class="ico">🎬</span><span><b>شوف بعينك</b><small>فيديو قصير عن الدرس</small></span><span class="st">▶️</span></button>`:""}${L.activities.map((a,i)=>`<button class="stop ${d[i]?"done":""}" onclick="route('act',${i})">
-    <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||({story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير"}[a.type]||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
+  <div class="unit"><div class="path">${allVids(id).length?`<button class="stop vid" onclick="route('video')"><span class="ico">🎬</span><span><b>${tr("شوف بعينك","Watch & Learn")}</b><small>${tr("فيديو قصير عن الدرس",allVids(id).length+" short video"+(allVids(id).length>1?"s":""))}</small></span><span class="st">▶️</span></button>`:""}${L.activities.map((a,i)=>`<button class="stop ${d[i]?"done":""}" onclick="route('act',${i})">
+    <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||((LANG==="en"?{story:"Listen and read",cards:"Flip the cards",match:"Find the pairs",quiz:"The big quiz",lab:"Try it at home"}:{story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير",lab:"جرّبها في البيت"})[a.type]||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
 }
 
-function viewVideo(){const vid=lessonVid(LID);if(!vid)return route('lesson',LID);
-  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('lesson','${LID}')">→ الدرس</button><span class="pill">🎬 شوف بعينك</span></div>
-  <div class="card"><div class="vbox"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-  <p class="note" style="text-align:center">لو الفيديو ماظهرش: <a href="https://www.youtube.com/watch?v=${vid}" target="_blank" rel="noopener">افتحه على يوتيوب ↗</a></p>
-  <div class="row2"><button class="btn g big" onclick="route('act',0)">يلا نبدأ القصة ←</button></div></div>`;}
-function shell(inner){return `<div class="top"><button class="back" onclick="route('lesson','${LID}')">→ الدرس</button><span class="pill">${ACT.ico||""} ${esc(ACT.title)}</span></div>${inner}`}
-function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz})[ACT.type]();}
+function allVids(id){const out=[],seen=new Set();const p=lessonVid(id);if(p){out.push({id:p,t:tr("فيديو اختاره بابا","Picked by Dad")});seen.add(p)}
+  const Ls=LCACHE[id]; ((Ls&&Ls.videos)||[]).forEach(v=>{if(!seen.has(v.id)){out.push(v);seen.add(v.id)}}); return out}
+function viewVideo(){const vs=allVids(LID);if(!vs.length)return route('lesson',LID); let vi=0;
+  const draw=()=>{const v=vs[vi].id;
+  $("view").innerHTML=`<div class="top"><button class="back" onclick="route('lesson','${LID}')">${tr("→ الدرس","← Lesson")}</button><span class="pill">🎬 ${tr("شوف بعينك","Watch & Learn")}</span></div>
+  ${vs.length>1?`<div class="row2" style="flex-wrap:wrap">${vs.map((x,i)=>`<button class="btn ${i===vi?"p":"w"}" data-v="${i}" style="font-size:15px">${i+1}. ${esc(x.t||"")}</button>`).join("")}</div>`:""}
+  <div class="card"><div class="vbox"><iframe src="https://www.youtube-nocookie.com/embed/${v}?rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+  <p class="note" style="text-align:center">${tr("لو الفيديو ماظهرش:","Video not showing?")} <a href="https://www.youtube.com/watch?v=${v}" target="_blank" rel="noopener">${tr("افتحه على يوتيوب ↗","Open on YouTube ↗")}</a></p>
+  <div class="row2"><button class="btn g big" onclick="route('act',0)">${tr("يلا نبدأ القصة ←","Let's start →")}</button></div></div>`;
+  document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{vi=+b.dataset.v;draw()});};draw();}
+function shell(inner){return `<div class="top"><button class="back" onclick="route('lesson','${LID}')">${tr("→ الدرس","← Lesson")}</button><span class="pill">${ACT.ico||""} ${esc(ACT.title)}</span></div>${inner}`}
+function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz,lab:actLab})[ACT.type]();}
 function finish(stars,title,sub,ico){
   const d=S.done[LID]=S.done[LID]||{}; const first=!d[AIDX]; d[AIDX]=true; if(first)S.stars+=stars; save(); confetti(); speak(title);
   const next=AIDX+1<L.activities.length?AIDX+1:null;
   $("view").innerHTML=`<div class="card end"><div class="bigico">${ico||"🏆"}</div><h1>${esc(title)}</h1><p class="sub">${esc(sub)}${first?` (+${stars} ⭐)`:""}</p>
-   ${next!==null?`<button class="btn g big" onclick="route('act',${next})">المحطة اللي بعدها: ${esc(L.activities[next].title)} ←</button><br><br>`:""}
-   <button class="btn w big" onclick="route('lesson','${LID}')">ارجع للدرس 🗺️</button></div>`;
+   ${next!==null?`<button class="btn g big" onclick="route('act',${next})">${tr("المحطة اللي بعدها:","Next:")} ${esc(L.activities[next].title)} ${tr("←","→")}</button><br><br>`:""}
+   <button class="btn w big" onclick="route('lesson','${LID}')">${tr("ارجع للدرس 🗺️","Back to lesson 🗺️")}</button></div>`;
 }
 
 /* ---------- story ---------- */
@@ -287,15 +302,15 @@ function actStory(){
   let si=0; const A=ACT;
   const draw=()=>{const s=A.scenes[si];
     $("view").innerHTML=shell(`<div class="card"><div class="scene">${s.e}</div><div class="dots">${A.scenes.map((_,i)=>`<i class="${i===si?"on":""}"></i>`).join("")}</div>
-    <div class="txt" id="sTxt">${s.t.split(" ").map(w=>{const c=w.replace(/[،؛:.!؟]/g,"");const k=(A.keys||[]).some(x=>c.includes(x));return `<span class="w ${k?"key":""}" ${k?`data-say="${esc(c)}"`:""}>${esc(w)}</span>`}).join(" ")}</div>
-    <div class="row2"><button class="btn w" id="sPrev" style="visibility:${si?"visible":"hidden"}">→ اللي فات</button><button class="btn p" id="sRead">🔊 اسمع</button><button class="btn" id="sNext">${si===A.scenes.length-1?"خلّصت ✅":"اللي بعده ←"}</button></div></div>
-    <p class="note">💡 الكلمات البنفسجي كلمات جديدة — دوس عليها تسمعها.</p>`);
+    <div class="txt" id="sTxt">${s.t.split(" ").map(w=>{const c=w.replace(/[،؛:.!؟,?()"]/g,"");const k=(A.keys||[]).some(x=>c.toLowerCase().includes(x.toLowerCase()));return `<span class="w ${k?"key":""}" ${k?`data-say="${esc(c)}"`:""}>${esc(w)}</span>`}).join(" ")}</div>
+    <div class="row2"><button class="btn w" id="sPrev" style="visibility:${si?"visible":"hidden"}">${tr("→ اللي فات","← Back")}</button><button class="btn p" id="sRead">🔊 ${tr("اسمع","Listen")}</button><button class="btn" id="sNext">${si===A.scenes.length-1?tr("خلّصت ✅","Done ✅"):tr("اللي بعده ←","Next →")}</button></div></div>
+    <p class="note">💡 ${tr("الكلمات البنفسجي كلمات جديدة — دوس عليها تسمعها.","Purple words are new science words — tap to hear them.")}</p>`);
     document.querySelectorAll("[data-say]").forEach(e=>e.onclick=()=>speak(e.dataset.say));
     $("sPrev").onclick=()=>{si--;draw()};
-    $("sNext").onclick=()=>{if(si===A.scenes.length-1)return finish(1,"شاطر يا يحيى!","خلّصت القصة.","📖");si++;draw()};
+    $("sNext").onclick=()=>{if(si===A.scenes.length-1)return finish(1,tr("شاطر يا "+kid().name+"!","Great job, "+kid().name+"!"),tr("خلّصت القصة.","You finished the lesson."),"📖");si++;draw()};
     $("sRead").onclick=()=>{const ws=[...document.querySelectorAll("#sTxt .w")];let i=0,tm=null;
       const run=ms=>{clearInterval(tm);i=0;tm=setInterval(()=>{ws.forEach(w=>w.classList.remove("hl"));if(i<ws.length)ws[i++].classList.add("hl");else clearInterval(tm)},ms)};
-      const heba=L._blob&&L._blob["s"+si]; if(!heba)run(520);
+      const heba=L._blob&&L._blob["s"+si]; if(!heba)run(LANG==="en"?380:520);
       stopGame=()=>clearInterval(tm); speak(s.t,"s"+si,()=>{clearInterval(tm);ws.forEach(w=>w.classList.remove("hl"))},d=>run(Math.max(250,d*1000/ws.length)))};
   }; draw();
 }
@@ -303,23 +318,23 @@ function actStory(){
 /* ---------- cards ---------- */
 function actCards(){
   const A=ACT,seen=new Set();
-  $("view").innerHTML=shell(`<p class="sub">اقلب الكارت وشوف المعنى أو المرادف أو المضاد. لما تقلبهم كلهم تاخد نجمة!</p>
+  $("view").innerHTML=shell(`<p class="sub">${tr("اقلب الكارت وشوف المعنى أو المرادف أو المضاد. لما تقلبهم كلهم تاخد نجمة!","Flip every card to learn the science words. Flip them all to win a star!")}</p>
   <div class="flips">${A.items.map((w,i)=>`<div class="flip" data-i="${i}"><div class="in"><div class="f"><div><div class="e">${w.e}</div><b>${esc(w.w)}</b></div></div>
-  <div class="b"><div><b style="font-size:20px">${esc(w.w)}</b><br><span class="tag ${w.k}">${w.k==="syn"?"مرادف":w.k==="ant"?"مضاد":"معنى"}</span><br>${esc(w.a)}</div></div></div></div>`).join("")}</div>`);
+  <div class="b"><div><b style="font-size:20px">${esc(w.w)}</b><br><span class="tag ${({ex:"syn",fact:"ant"}[w.k]||w.k)}">${LANG==="en"?({ex:"Example",fact:"Fun fact"}[w.k]||"Meaning"):w.k==="syn"?"مرادف":w.k==="ant"?"مضاد":"معنى"}</span><br>${esc(w.a)}</div></div></div></div>`).join("")}</div>`);
   document.querySelectorAll(".flip").forEach(el=>el.onclick=()=>{el.classList.toggle("on");const i=+el.dataset.i;if(el.classList.contains("on")){speak(A.items[i].w+". "+A.items[i].a);seen.add(i);
-    if(seen.size===A.items.length){const t=setTimeout(()=>finish(1,"حفظت الكلمات الجديدة!","قلبت الكروت كلها.","🃏"),1800);stopGame=()=>clearTimeout(t)}}});
+    if(seen.size===A.items.length){const t=setTimeout(()=>finish(1,tr("حفظت الكلمات الجديدة!","You learned the new words!"),tr("قلبت الكروت كلها.","You flipped all the cards."),"🃏"),1800);stopGame=()=>clearTimeout(t)}}});
 }
 
 /* ---------- match (memory) ---------- */
 function actMatch(){
   const A=ACT; const cards=shuffle(A.pairs.flatMap((p,i)=>[{t:p[0],k:i},{t:p[1],k:i}])); let open=[],found=0,tries=0,lock=false;
-  $("view").innerHTML=shell(`<p class="sub">${esc(A.prompt)}</p><div class="hud"><span>محاولات: <b id="mt">0</b></span><span>✅ <b id="mf">0</b>/${A.pairs.length}</span></div>
+  $("view").innerHTML=shell(`<p class="sub">${esc(A.prompt)}</p><div class="hud"><span>${tr("محاولات:","Tries:")} <b id="mt">0</b></span><span>✅ <b id="mf">0</b>/${A.pairs.length}</span></div>
   <div class="mgrid">${cards.map((c,i)=>`<button class="mc" data-i="${i}">❓</button>`).join("")}</div>`);
   document.querySelectorAll(".mc").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(lock||b.classList.contains("open")||b.classList.contains("ok"))return;
     b.classList.add("open");b.textContent=cards[i].t;speak(cards[i].t);open.push(b);
     if(open.length===2){lock=true;tries++;$("mt").textContent=tries;const [x,y]=open;
       if(cards[+x.dataset.i].k===cards[+y.dataset.i].k){setTimeout(()=>{x.classList.add("ok");y.classList.add("ok");open=[];lock=false;found++;$("mf").textContent=found;toast("✨");
-        if(found===A.pairs.length)setTimeout(()=>finish(2,"ذاكرة حديد!",`لقيت كل الأزواج في ${tries} محاولة.`,"🧠"),700)},500)}
+        if(found===A.pairs.length)setTimeout(()=>finish(2,tr("ذاكرة حديد!","Super memory!"),tr(`لقيت كل الأزواج في ${tries} محاولة.`,`You found all pairs in ${tries} tries.`),"🧠"),700)},500)}
       else{const p=A.pairs[cards[+x.dataset.i].k];setTimeout(()=>{x.classList.remove("open");y.classList.remove("open");x.textContent=y.textContent="❓";open=[];lock=false},1000)}}});
 }
 
@@ -329,27 +344,51 @@ function actSort(){
   const bins=`<div class="homes" style="grid-template-columns:repeat(${A.bins.length},1fr)">${A.bins.map(b=>`<button class="home ${b.cls}" data-b="${b.id}"><span>${b.ico}</span>${esc(b.label)}</button>`).join("")}</div>`;
   const bird=A.style==="bird";
   $("view").innerHTML=shell(`${A.help?`<div class="card note" style="font-size:15px">${A.help}</div>`:""}
-   <div class="hud"><span id="hh">${bird?"❤️❤️❤️":"كلمة 1/"+Q.length}</span><span>✅ <b id="sc">0</b>/${Q.length}</span></div>
+   <div class="hud"><span id="hh">${bird?"❤️❤️❤️":tr("كلمة","Word")+" 1/"+Q.length}</span><span>✅ <b id="sc">0</b>/${Q.length}</span></div>
    ${bird?`<div class="skybox" id="sky"><span class="cloud" style="top:10px;animation-delay:-4s">☁️</span><span class="cloud" style="top:120px;animation-delay:-11s">☁️</span><div class="bird" id="bird"><span class="b1">🐦</span><span class="word" id="bw"></span></div></div>`:`<div class="bigword" id="bw"></div>`}
    ${bins}<div class="hint" id="hint">${esc(A.prompt)}</div>`);
   if(A.small){const e=$("bw");e.style.fontSize=bird?"19px":"25px";e.style.lineHeight="1.7";if(!bird)e.style.padding="18px 12px"}
   const binLabel=id=>{const b=A.bins.find(z=>z.id===id);return b.label+" "+b.ico};
   const stop=()=>{if(raf)cancelAnimationFrame(raf);raf=null}; stopGame=stop;
-  const next=()=>{stop(); if(i>=Q.length)return finish(2,"برافو عليك!",`جبت ${score} من ${Q.length} صح.`,A.ico);
+  const next=()=>{stop(); if(i>=Q.length)return finish(2,tr("برافو عليك!","Well done!"),tr(`جبت ${score} من ${Q.length} صح.`,`You got ${score} of ${Q.length} right.`),A.ico);
     lock=false; const w=Q[i][0];
     if(bird){$("bw").textContent=w;const W=$("sky").clientWidth;x=-170;const sp=Math.max(.7,1.3-i*.03)*(W/360);
-      const step=()=>{x+=sp;$("bird").style.right=x+"px";if(x>W+20){wrong("طارت! ");return}raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)}
-    else{$("hh").textContent=`كلمة ${i+1}/${Q.length}`;$("bw").innerHTML=(A.al?`<span class="al">${esc(w.slice(0,2))}</span>${esc(w.slice(2))}`:esc(w))+` <button class="back" style="font-size:20px" id="say">🔊</button>`;$("say").onclick=()=>speak(w)}
+      const step=()=>{x+=sp;$("bird").style[LANG==="en"?"left":"right"]=x+"px";if(x>W+20){wrong(tr("طارت! ","It flew away! "));return}raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)}
+    else{$("hh").textContent=`${tr("كلمة","Word")} ${i+1}/${Q.length}`;$("bw").innerHTML=(A.al?`<span class="al">${esc(w.slice(0,2))}</span>${esc(w.slice(2))}`:esc(w))+` <button class="back" style="font-size:20px" id="say">🔊</button>`;$("say").onclick=()=>speak(w)}
   };
   const wrong=pre=>{stop();lock=true;const [w,a]=Q[i];$(bird?"sky":"bw").classList.add("shake");setTimeout(()=>{const e=$(bird?"sky":"bw");e&&e.classList.remove("shake")},400);
     $("hint").textContent=`${pre}«${w}» ← ${binLabel(a)}. ${A.why?A.why[a]:""}`;miss(`${w} ← ${A.bins.find(z=>z.id===a).label}`);speak(w);i++;
     if(bird){hearts--;$("hh").textContent="❤️".repeat(Math.max(0,hearts))+"🤍".repeat(3-Math.max(0,hearts));
-      if(hearts<=0){setTimeout(()=>{$("view").innerHTML=shell(`<div class="card end"><div class="bigico">🐣</div><h1>ولا يهمك! نجرب تاني؟</h1><p class="sub">جبت ${score} صح. ${esc(Object.values(A.why||{}).join(" · "))}</p><button class="btn g big" onclick="route('act',${AIDX})">العب تاني 🔁</button></div>`)},1000);return}}
+      if(hearts<=0){setTimeout(()=>{$("view").innerHTML=shell(`<div class="card end"><div class="bigico">🐣</div><h1>${tr("ولا يهمك! نجرب تاني؟","No problem! Try again?")}</h1><p class="sub">${tr("جبت","You got")} ${score} ${tr("صح.","right.")} ${esc(Object.values(A.why||{}).join(" · "))}</p><button class="btn g big" onclick="route('act',${AIDX})">${tr("العب تاني 🔁","Play again 🔁")}</button></div>`)},1000);return}}
     setTimeout(next,1300)};
   document.querySelectorAll(".home").forEach(b=>b.onclick=()=>{if(lock||!Q[i])return;const [w,a]=Q[i];
-    if(b.dataset.b===a){lock=true;stop();score++;$("sc").textContent=score;toast(A.bins.find(z=>z.id===a).ico+"✅");$("hint").textContent=`صح! «${w}» ← ${binLabel(a)}. ${A.why?A.why[a]:""}`;speak(w);i++;setTimeout(next,1000)}
+    if(b.dataset.b===a){lock=true;stop();score++;$("sc").textContent=score;toast(A.bins.find(z=>z.id===a).ico+"✅");$("hint").textContent=`${tr("صح!","Correct!")} «${w}» ← ${binLabel(a)}. ${A.why?A.why[a]:""}`;speak(w);i++;setTimeout(next,1000)}
     else wrong("")});
   next();
+}
+
+/* ---------- lab (experiment at home) ---------- */
+function actLab(){
+  const A=ACT; let st=-1, guess=null;
+  const draw=()=>{ let body="";
+    if(st===-1){ body=`<div class="card"><div class="scene">${A.e||"🧪"}</div><h2 style="margin:4px 0">${esc(A.goal)}</h2>
+      <div class="note" style="font-size:15px;margin:6px 0">🧺 <b>${tr("هتحتاج:","You need:")}</b></div><ul class="labneed">${A.need.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+      ${A.safe?`<div class="err" style="font-size:15px">⚠️ ${esc(A.safe)}</div>`:""}
+      ${A.predict?`<div class="q" style="margin-top:10px">🤔 ${esc(A.predict.q)}</div><div class="opts">${A.predict.o.map((o,i)=>`<button class="opt ${guess===i?"ok":""}" data-g="${i}">${esc(o)}</button>`).join("")}</div>`:""}
+      <div class="row2"><button class="btn g big" id="lGo" ${A.predict&&guess===null?"disabled style='opacity:.5'":""}>${tr("يلا نبدأ التجربة ←","Start the experiment →")}</button></div></div>`; }
+    else if(st<A.steps.length){ const s=A.steps[st]; body=`<div class="card"><div class="dots">${A.steps.map((_,i)=>`<i class="${i===st?"on":""}"></i>`).join("")}</div>
+      <div class="scene">${s.e}</div><div class="txt">${tr("خطوة","Step")} ${st+1}: ${esc(s.t)}</div>
+      <div class="row2"><button class="btn p" id="lSay">🔊 ${tr("اسمع","Listen")}</button><button class="btn g" id="lGo">${tr("عملتها ✅","I did it ✅")}</button></div></div>`; }
+    else { const right=A.predict&&guess===A.predict.a; body=`<div class="card"><div class="scene">🔬</div><h2>${tr("إيه اللي حصل؟","What happened?")}</h2><div class="txt">${esc(A.result)}</div>
+      ${A.predict?`<p class="sub" style="margin-top:8px">${right?tr("توقّعك كان صح! 🎯","Your prediction was right! 🎯"):tr("توقّعك كان مختلف — وده عادي، العلماء بيتعلموا كده!","Your prediction was different — that's how scientists learn!")}</p>`:""}
+      ${A.why?`<div class="card note" style="font-size:16px">💡 <b>${tr("ليه؟","Why?")}</b> ${esc(A.why)}</div>`:""}
+      <div class="row2"><button class="btn g big" id="lGo">${tr("خلّصت التجربة 🏅","Experiment complete 🏅")}</button></div></div>`; }
+    $("view").innerHTML=shell(body);
+    document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{guess=+b.dataset.g;speak(A.predict.o[guess]);draw()});
+    const say=$("lSay"); if(say) say.onclick=()=>speak(A.steps[st].t);
+    $("lGo").onclick=()=>{ if(st>=A.steps.length) return finish(2,tr("عالم صغير!","Little scientist!"),tr("عملت التجربة بنفسك.","You did the experiment yourself."),"🧪");
+      st++; draw(); if(st<A.steps.length) speak(A.steps[st].t); else speak(A.result); };
+  }; draw();
 }
 
 /* ---------- quiz ---------- */
@@ -357,14 +396,14 @@ function actQuiz(){
   const A=ACT,order=shuffle(A.items.map((_,i)=>i)),res=[];let qi=0,score=0;const animals=["🦉","🐫","🦜","🐢","🦊","🐘","🐸","🦒","🐧","🦁"];
   const eggs=()=>order.map((_,i)=>`<span id="egg${i}">${i<qi?(res[i]?"🐥":"🥚"):"⚪"}</span>`).join("");
   const show=()=>{
-    if(qi>=order.length){S.eggs+=score;save();return finish(3,score>=8?"بطل المغامرة!":"خلّصت المغامرة!",`فقّست ${score} كتكوت في مزرعتك 🐥`,score>=8?"🏆":"🐣")}
+    if(qi>=order.length){S.eggs+=score;save();return finish(3,score>=8?tr("بطل المغامرة!","Adventure champion!"):tr("خلّصت المغامرة!","Adventure complete!"),tr(`فقّست ${score} كتكوت في مزرعتك 🐥`,`You hatched ${score} chicks on your farm 🐥`),score>=8?"🏆":"🐣")}
     const Q=A.items[order[qi]];
     $("view").innerHTML=shell(`<div class="eggs">${eggs()}</div><div class="card"><div class="anim">${animals[qi%10]}</div>
       <div class="q">${esc(Q.q)} <button class="back" style="font-size:16px" id="qs">🔊</button></div>
       <div class="opts">${Q.o.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join("")}</div></div>`);
     $("qs").onclick=()=>speak(Q.q); speak(Q.q);
     document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{document.querySelectorAll(".opt").forEach(z=>z.disabled=true);const ok=+b.dataset.i===Q.a;b.classList.add(ok?"ok":"no");
-      if(!ok){document.querySelectorAll(".opt")[Q.a].classList.add("ok");miss(`${Q.q} ← ${Q.o[Q.a]}`);speak("الإجابة الصح: "+Q.o[Q.a].replace(/[^؀-ۿ ]/g,""))}else{score++;toast("🐥");speak("برافو")}
+      if(!ok){document.querySelectorAll(".opt")[Q.a].classList.add("ok");miss(`${Q.q} ← ${Q.o[Q.a]}`);speak(LANG==="en"?"The right answer is: "+Q.o[Q.a].replace(/[^A-Za-z0-9 ,.'-]/g,""):"الإجابة الصح: "+Q.o[Q.a].replace(/[^؀-ۿ ]/g,""))}else{score++;toast("🐥");speak(tr("برافو","Well done!"))}
       res[qi]=ok;qi++;const t=setTimeout(show,ok?1100:2300);stopGame=()=>clearTimeout(t)});
   }; show();
 }

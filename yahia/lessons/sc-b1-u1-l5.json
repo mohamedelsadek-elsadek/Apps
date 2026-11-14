@@ -1,0 +1,349 @@
+{
+ "title": "Extinct Animals, Fossils & Evolution",
+ "source": "Science G3 B1 Study sheet pp.16-19, Worksheet Q12-Q13",
+ "videos": [
+  {
+   "id": "PonlM01z-kI",
+   "t": "Lonesome George (school link)"
+  },
+  {
+   "id": "8cn0kf8mhS4",
+   "t": "How whales changed (school link)"
+  }
+ ],
+ "activities": [
+  {
+   "type": "story",
+   "title": "The Story of Lonesome George",
+   "ico": "📖",
+   "keys": [
+    "endangered",
+    "extinct",
+    "fossils",
+    "evolution",
+    "Archaeopteryx"
+   ],
+   "scenes": [
+    {
+     "e": "🐅🐼🦏🐢",
+     "t": "An animal is endangered when its numbers go down quickly. Tigers, pandas, rhinos and turtles are endangered. We must take care of them!"
+    },
+    {
+     "e": "🦕🦤🦣",
+     "t": "An animal is extinct when all of its kind have died and none is alive on Earth. Dinosaurs, dodo birds, mammoths and saber-tooth cats are extinct."
+    },
+    {
+     "e": "🐢🏝️",
+     "t": "Lonesome George was a tortoise. He was the last one of his kind, so he was lonely."
+    },
+    {
+     "e": "🐐🌿",
+     "t": "Humans brought goats to his island. The goats ate all the food, so the tortoises could not eat and many died."
+    },
+    {
+     "e": "🐢💔",
+     "t": "Scientists took care of George, but when he died, his kind became extinct. Humans can harm the environment, but we can also protect it."
+    },
+    {
+     "e": "🦴🪨",
+     "t": "How do we know about animals from long ago? From fossils! Fossils are the remains of living things from a long time ago, found in rocks."
+    },
+    {
+     "e": "🦖➡️🐦",
+     "t": "Evolution is how living things slowly change over a very long time. Archaeopteryx had wings, feathers and a beak like a bird, but teeth, fingers and claws like a dinosaur."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Endangered",
+     "e": "🐼",
+     "k": "mean",
+     "a": "Very few are left; they could disappear forever."
+    },
+    {
+     "w": "Extinct",
+     "e": "🦤",
+     "k": "mean",
+     "a": "All are dead; none is alive anywhere on Earth."
+    },
+    {
+     "w": "Fossils",
+     "e": "🦴",
+     "k": "mean",
+     "a": "Remains of living things from long ago, found in rocks."
+    },
+    {
+     "w": "Evolution",
+     "e": "🦖",
+     "k": "mean",
+     "a": "Living things slowly change over a very long time."
+    },
+    {
+     "w": "Archaeopteryx",
+     "e": "🪶",
+     "k": "fact",
+     "a": "Had feathers like a bird and teeth like a dinosaur."
+    },
+    {
+     "w": "Lonesome George",
+     "e": "🐢",
+     "k": "fact",
+     "a": "The last tortoise of his kind."
+    },
+    {
+     "w": "Dodo",
+     "e": "🦤",
+     "k": "ex",
+     "a": "An extinct bird."
+    },
+    {
+     "w": "Panda",
+     "e": "🐼",
+     "k": "ex",
+     "a": "An endangered animal."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Science Terms",
+   "ico": "🧠",
+   "prompt": "Match each term with its meaning.",
+   "pairs": [
+    [
+     "Decay",
+     "dead things change color & smell"
+    ],
+    [
+     "Fossils",
+     "old remains in rocks"
+    ],
+    [
+     "Variation",
+     "same kind, not the same"
+    ],
+    [
+     "Evolution",
+     "slow change over a long time"
+    ],
+    [
+     "Extinct",
+     "none alive on Earth"
+    ],
+    [
+     "Habitat",
+     "where an animal lives"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Extinct or Endangered?",
+   "ico": "🐦",
+   "prompt": "Is it extinct or endangered?",
+   "bins": [
+    {
+     "id": "x",
+     "label": "Extinct",
+     "ico": "🦴",
+     "cls": "verb"
+    },
+    {
+     "id": "e",
+     "label": "Endangered",
+     "ico": "⚠️",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "x": "None of its kind is alive today.",
+    "e": "It is still alive, but very few are left."
+   },
+   "items": [
+    [
+     "dinosaur",
+     "x"
+    ],
+    [
+     "dodo bird",
+     "x"
+    ],
+    [
+     "mammoth",
+     "x"
+    ],
+    [
+     "saber-tooth cat",
+     "x"
+    ],
+    [
+     "panda",
+     "e"
+    ],
+    [
+     "tiger",
+     "e"
+    ],
+    [
+     "rhinoceros",
+     "e"
+    ],
+    [
+     "sea turtle",
+     "e"
+    ],
+    [
+     "elephant",
+     "e"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Make Your Own Fossil",
+   "ico": "🧪",
+   "e": "🐚🪨",
+   "goal": "Make a fossil print like the ones scientists find in rocks.",
+   "need": [
+    "play dough or clay",
+    "a shell, a leaf or a toy dinosaur",
+    "a rolling pin or a cup"
+   ],
+   "predict": {
+    "q": "What will you see when you lift the shell?",
+    "o": [
+     "Nothing",
+     "Its shape printed in the dough",
+     "A real dinosaur"
+    ],
+    "a": 1
+   },
+   "steps": [
+    {
+     "e": "🟤",
+     "t": "Roll the dough flat and smooth."
+    },
+    {
+     "e": "🐚",
+     "t": "Press the shell or leaf firmly into the dough."
+    },
+    {
+     "e": "✋",
+     "t": "Lift it out very carefully."
+    },
+    {
+     "e": "☀️",
+     "t": "Leave the dough to dry for one day. Now you have a fossil!"
+    }
+   ],
+   "result": "The exact shape and lines of the shell stay printed in the dough.",
+   "why": "Long ago, plants and animals were pressed into mud. Over a very long time the mud turned into rock and kept their shapes as fossils."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What does endangered mean?",
+     "o": [
+      "Animals that are very big",
+      "Very few are left and they could disappear forever",
+      "Animals that run fast"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What does extinct mean?",
+     "o": [
+      "Animals that sleep in winter",
+      "Animals in danger but still alive",
+      "Animals that no longer exist anywhere on Earth"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What does evolution mean?",
+     "o": [
+      "A sudden change in one day",
+      "Living things slowly change over a very long time",
+      "Animals moving house"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which animal is extinct?",
+     "o": [
+      "Panda 🐼",
+      "Dinosaur 🦕",
+      "Tiger 🐅"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which animal is endangered?",
+     "o": [
+      "Rhino 🦏",
+      "Mammoth 🦣",
+      "Dodo 🦤"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Why did Lonesome George's kind die out?",
+     "o": [
+      "Goats ate all their food",
+      "It was too cold",
+      "They flew away"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Fossils are…",
+     "o": [
+      "Remains of living things from long ago",
+      "New baby animals",
+      "Types of plants"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How do we know about dinosaurs?",
+     "o": [
+      "From photos",
+      "From fossils",
+      "From TV only"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Archaeopteryx had feathers like a bird and teeth like a…",
+     "o": [
+      "Fish",
+      "Dinosaur",
+      "Cat"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Scientists think whales changed over millions of years. This is…",
+     "o": [
+      "Decay",
+      "Evolution",
+      "Variation"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u1-l5",
+ "lang": "en",
+ "audio": {}
+}

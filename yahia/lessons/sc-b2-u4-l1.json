@@ -1,0 +1,406 @@
+{
+ "title": "Heat & Temperature",
+ "source": "Science G3 B2 Study sheet pp.40-45; Worksheet Q1-Q3",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia's Hot Cup",
+   "ico": "📖",
+   "keys": [
+    "thermometer",
+    "temperature",
+    "Celsius",
+    "boils",
+    "freezes",
+    "contact",
+    "distance",
+    "conductors",
+    "insulators"
+   ],
+   "scenes": [
+    {
+     "e": "🌡️",
+     "t": "We measure temperature with a thermometer. The unit is degrees Celsius, written °C."
+    },
+    {
+     "e": "♨️🧊",
+     "t": "Water boils at 100 °C and freezes at 0 °C."
+    },
+    {
+     "e": "☕➡️🥶",
+     "t": "Put a warm object next to a cold one, and heat moves from the hot one to the cold one until they are the same temperature."
+    },
+    {
+     "e": "☕✋",
+     "t": "Heat can move by contact, when things touch: holding a cup of hot coffee, an iron on cloth, or food in a cooking pot."
+    },
+    {
+     "e": "☀️🔥",
+     "t": "Heat can also move from a distance, without touching. You feel a heater on a cold night and the Sun on a hot day, even though the Sun is millions of kilometers away!"
+    },
+    {
+     "e": "🍳🥄",
+     "t": "Some materials let heat move through them easily. They are called heat conductors, like metals. That is why saucepans are made of metal."
+    },
+    {
+     "e": "🧣🧤",
+     "t": "Some materials slow heat down. They are called heat insulators, like wool, wood and plastic. Wool coats, scarves and gloves keep us warm."
+    },
+    {
+     "e": "🍳🏠",
+     "t": "A pan has a metal body to cook and a plastic or wooden handle so we don't burn our hands. Houses use insulation to keep heat out in summer and in during winter."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Thermometer",
+     "e": "🌡️",
+     "k": "mean",
+     "a": "The tool for measuring temperature."
+    },
+    {
+     "w": "Degree Celsius (°C)",
+     "e": "🔢",
+     "k": "mean",
+     "a": "The unit of temperature."
+    },
+    {
+     "w": "Boiling point",
+     "e": "♨️",
+     "k": "fact",
+     "a": "Water boils at 100 °C."
+    },
+    {
+     "w": "Freezing point",
+     "e": "🧊",
+     "k": "fact",
+     "a": "Water freezes at 0 °C."
+    },
+    {
+     "w": "Heat by contact",
+     "e": "☕",
+     "k": "ex",
+     "a": "Holding a hot cup; iron on cloth."
+    },
+    {
+     "w": "Heat at a distance",
+     "e": "☀️",
+     "k": "ex",
+     "a": "Feeling the Sun or a heater without touching."
+    },
+    {
+     "w": "Conductor",
+     "e": "🥄",
+     "k": "mean",
+     "a": "Lets heat pass easily. Metals."
+    },
+    {
+     "w": "Insulator",
+     "e": "🧣",
+     "k": "mean",
+     "a": "Slows heat down. Wool, wood, plastic."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Hot & Cold",
+   "ico": "🧠",
+   "prompt": "Match the pairs.",
+   "pairs": [
+    [
+     "Thermometer",
+     "measures temperature"
+    ],
+    [
+     "100 °C",
+     "water boils"
+    ],
+    [
+     "0 °C",
+     "water freezes"
+    ],
+    [
+     "Metal",
+     "conductor"
+    ],
+    [
+     "Wool",
+     "insulator"
+    ],
+    [
+     "Pan handle",
+     "insulator"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Conductor or Insulator?",
+   "ico": "🔥",
+   "prompt": "Does heat pass through it easily?",
+   "bins": [
+    {
+     "id": "c",
+     "label": "Conductor",
+     "ico": "🥄",
+     "cls": "sun"
+    },
+    {
+     "id": "i",
+     "label": "Insulator",
+     "ico": "🧣",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "c": "Metals let heat pass easily.",
+    "i": "It slows the movement of heat."
+   },
+   "items": [
+    [
+     "metal spoon",
+     "c"
+    ],
+    [
+     "saucepan body",
+     "c"
+    ],
+    [
+     "iron nail",
+     "c"
+    ],
+    [
+     "aluminum foil",
+     "c"
+    ],
+    [
+     "copper wire",
+     "c"
+    ],
+    [
+     "wool scarf",
+     "i"
+    ],
+    [
+     "wooden spoon",
+     "i"
+    ],
+    [
+     "plastic handle",
+     "i"
+    ],
+    [
+     "oven glove",
+     "i"
+    ],
+    [
+     "cork",
+     "i"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Contact or Distance?",
+   "ico": "🐦",
+   "prompt": "How does the heat move?",
+   "bins": [
+    {
+     "id": "t",
+     "label": "By contact",
+     "ico": "✋",
+     "cls": "noun"
+    },
+    {
+     "id": "d",
+     "label": "At a distance",
+     "ico": "☀️",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "t": "The objects are touching.",
+    "d": "The heat travels without touching."
+   },
+   "items": [
+    [
+     "holding a hot cup",
+     "t"
+    ],
+    [
+     "iron on clothes",
+     "t"
+    ],
+    [
+     "food in a hot pot",
+     "t"
+    ],
+    [
+     "hand on a warm radiator",
+     "t"
+    ],
+    [
+     "feeling the Sun",
+     "d"
+    ],
+    [
+     "warming hands near a fire",
+     "d"
+    ],
+    [
+     "feeling a heater across the room",
+     "d"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Spoon Race",
+   "ico": "🧪",
+   "e": "🥄♨️",
+   "goal": "Find out which spoon lets heat travel fastest.",
+   "need": [
+    "a metal spoon",
+    "a wooden spoon",
+    "a plastic spoon",
+    "a mug of hot tap water (not boiling)",
+    "3 small pieces of butter"
+   ],
+   "safe": "Ask an adult for the hot water. Use hot tap water, never boiling water.",
+   "predict": {
+    "q": "On which spoon will the butter melt first?",
+    "o": [
+     "Metal spoon",
+     "Wooden spoon",
+     "Plastic spoon"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "🧈",
+     "t": "Stick a small piece of butter near the top of each spoon handle."
+    },
+    {
+     "e": "☕",
+     "t": "Ask an adult to stand all three spoons in the mug of hot water at the same time."
+    },
+    {
+     "e": "⏱️",
+     "t": "Watch carefully. Which butter starts to melt and slide first?"
+    },
+    {
+     "e": "✍️",
+     "t": "Write the order: first, second, last."
+    }
+   ],
+   "result": "The butter on the metal spoon melts first. The wooden and plastic spoons stay cool for much longer.",
+   "why": "Metal is a heat conductor, so heat travels through it fast. Wood and plastic are insulators."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "We measure temperature with a…",
+     "o": [
+      "Thermometer",
+      "Scale",
+      "Ruler"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The unit of temperature is…",
+     "o": [
+      "Degree Celsius °C",
+      "Gram",
+      "Lux"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Water boils at…",
+     "o": [
+      "0 °C",
+      "50 °C",
+      "100 °C"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Water freezes at…",
+     "o": [
+      "0 °C",
+      "10 °C",
+      "100 °C"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Heat moves from…",
+     "o": [
+      "Hot to cold",
+      "Cold to hot"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Feeling the Sun's heat is heat transfer…",
+     "o": [
+      "By contact",
+      "At a distance"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Holding a hot cup of coffee is heat transfer…",
+     "o": [
+      "By contact",
+      "At a distance"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Saucepans are made of metal because metal is a…",
+     "o": [
+      "Heat conductor",
+      "Heat insulator"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Why are winter gloves made of wool?",
+     "o": [
+      "Wool is an insulator",
+      "Wool is a conductor",
+      "Wool is shiny"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Pan handles are made of plastic or wood so that…",
+     "o": [
+      "We don't burn our hands",
+      "The food cooks faster",
+      "The pan is heavier"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b2-u4-l1",
+ "lang": "en",
+ "audio": {}
+}

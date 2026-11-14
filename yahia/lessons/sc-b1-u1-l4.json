@@ -1,0 +1,342 @@
+{
+ "title": "Variation & Decay",
+ "source": "Science G3 B1 Study sheet pp.13-15, Worksheet Q10-Q11",
+ "videos": [
+  {
+   "id": "2jeYXGJyY9k",
+   "t": "Apple decay time-lapse (school link)"
+  }
+ ],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Why Do Things Rot?",
+   "ico": "📖",
+   "keys": [
+    "variation",
+    "offspring",
+    "decay",
+    "Bacteria",
+    "fungi",
+    "microorganisms",
+    "nutrients"
+   ],
+   "scenes": [
+    {
+     "e": "🐱🐈🐈‍⬛",
+     "t": "Look at these cats. They are all cats, but they have different colors and sizes. This is called variation."
+    },
+    {
+     "e": "👨‍👩‍👦",
+     "t": "Babies, called offspring, look like their parents, but not exactly the same. People vary in skin, eye and hair color, height and weight."
+    },
+    {
+     "e": "🍅➡️🟤",
+     "t": "When a living thing dies, it starts to decay. It becomes soft, it may smell bad, and its color turns darker or gets white or black spots."
+    },
+    {
+     "e": "🔬🦠🍄",
+     "t": "What causes decay? Bacteria and fungi! They are tiny microorganisms that we can only see with a microscope."
+    },
+    {
+     "e": "🦠➡️🌱",
+     "t": "They feed on dead things and break them down. They return nutrients to the soil, so new plants can use them to grow."
+    },
+    {
+     "e": "🔥💧💨",
+     "t": "Bacteria and fungi work faster in hot weather, when there is a little water, and when there is air. So decay is faster in warm, wet, open places."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Variation",
+     "e": "🐈",
+     "k": "mean",
+     "a": "Living things of the same kind look similar but not the same."
+    },
+    {
+     "w": "Offspring",
+     "e": "🐣",
+     "k": "mean",
+     "a": "The babies of a living thing."
+    },
+    {
+     "w": "Decay",
+     "e": "🍂",
+     "k": "mean",
+     "a": "Change in shape, color and smell of dead things."
+    },
+    {
+     "w": "Bacteria",
+     "e": "🦠",
+     "k": "mean",
+     "a": "Tiny microorganisms that help things decay."
+    },
+    {
+     "w": "Fungi",
+     "e": "🍄",
+     "k": "mean",
+     "a": "Tiny living things, like mould, that break down dead things."
+    },
+    {
+     "w": "Microscope",
+     "e": "🔬",
+     "k": "fact",
+     "a": "We need it to see bacteria and fungi."
+    },
+    {
+     "w": "Nutrients",
+     "e": "🌱",
+     "k": "fact",
+     "a": "Decay returns them to the soil to help new plants grow."
+    },
+    {
+     "w": "Faster decay",
+     "e": "🔥",
+     "k": "fact",
+     "a": "Warm + a little water + air."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Decay Clues",
+   "ico": "🧠",
+   "prompt": "Match each word with its meaning.",
+   "pairs": [
+    [
+     "Texture",
+     "becomes soft"
+    ],
+    [
+     "Smell",
+     "may smell bad"
+    ],
+    [
+     "Color",
+     "gets darker / spots"
+    ],
+    [
+     "Heat",
+     "decay is faster"
+    ],
+    [
+     "Air",
+     "decay is faster"
+    ],
+    [
+     "Variation",
+     "same kind, not the same"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Fast or Slow Decay?",
+   "ico": "🍎",
+   "prompt": "Will the food decay FAST or SLOW here?",
+   "bins": [
+    {
+     "id": "f",
+     "label": "Fast",
+     "ico": "🔥",
+     "cls": "sun"
+    },
+    {
+     "id": "s",
+     "label": "Slow",
+     "ico": "🧊",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "f": "Warm, wet or open to air helps bacteria and fungi.",
+    "s": "Cold, dry or closed slows bacteria and fungi."
+   },
+   "items": [
+    [
+     "bread in a warm room",
+     "f"
+    ],
+    [
+     "apple in an open box",
+     "f"
+    ],
+    [
+     "wet bread",
+     "f"
+    ],
+    [
+     "banana in the sun",
+     "f"
+    ],
+    [
+     "tomato in a warm kitchen",
+     "f"
+    ],
+    [
+     "food in the freezer",
+     "s"
+    ],
+    [
+     "dry biscuit",
+     "s"
+    ],
+    [
+     "food in a closed box",
+     "s"
+    ],
+    [
+     "cheese in the fridge",
+     "s"
+    ],
+    [
+     "dry rice in a jar",
+     "s"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "The Bread Decay Test",
+   "ico": "🧪",
+   "e": "🍞🔍",
+   "goal": "Find out what makes bread decay faster.",
+   "need": [
+    "2 slices of bread",
+    "2 zip bags",
+    "a few drops of water",
+    "a marker"
+   ],
+   "safe": "Never open the bags or smell the mould. When you finish, give the closed bags to an adult to throw away.",
+   "predict": {
+    "q": "Which bread will grow mould first?",
+    "o": [
+     "The wet bread in a warm place",
+     "The dry bread"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "💧🍞",
+     "t": "Sprinkle a few drops of water on one slice. Leave the other slice dry."
+    },
+    {
+     "e": "🛍️",
+     "t": "Put each slice in its own bag and close it. Write WET and DRY on the bags."
+    },
+    {
+     "e": "🏠",
+     "t": "Put both bags in a warm place, like a kitchen shelf."
+    },
+    {
+     "e": "📅👀",
+     "t": "Look every day for one week. Write down the color, texture and spots you see."
+    }
+   ],
+   "result": "The wet bread gets fuzzy spots of mould first. The dry bread stays fresh for longer.",
+   "why": "Fungi need a little water and warmth to grow. That is why we keep food dry, cold or closed."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Cats of the same kind with different colors show…",
+     "o": [
+      "Variation",
+      "Decay",
+      "Extinction"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Babies of a living thing are called…",
+     "o": [
+      "Offspring",
+      "Fossils",
+      "Habitats"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Do offspring look EXACTLY like their parents?",
+     "o": [
+      "Yes, exactly the same",
+      "Similar, but not exactly the same"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What causes decay?",
+     "o": [
+      "Bacteria and fungi",
+      "The moon",
+      "Plastic"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Can we see bacteria with our eyes only?",
+     "o": [
+      "Yes, easily",
+      "No, we need a microscope"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which food will decay more quickly?",
+     "o": [
+      "In a warm place",
+      "In a cold place"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which food will decay more quickly?",
+     "o": [
+      "In a closed box",
+      "In an open box"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which food will decay more quickly?",
+     "o": [
+      "With water",
+      "Without water"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A decayed tomato is…",
+     "o": [
+      "Hard and bright",
+      "Soft, darker and may smell bad"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Decay returns nutrients to the…",
+     "o": [
+      "Soil",
+      "Sky",
+      "Sea"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u1-l4",
+ "lang": "en",
+ "audio": {}
+}

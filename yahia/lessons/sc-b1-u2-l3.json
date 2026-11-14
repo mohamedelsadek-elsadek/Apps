@@ -1,0 +1,350 @@
+{
+ "title": "Day, Night & Our Calendar",
+ "source": "Science G3 B1 Study sheet pp.44-47, Worksheet Day and Night Investigation",
+ "videos": [
+  {
+   "id": "CqkQv617bcw",
+   "t": "Sun, Earth and Moon (school link)"
+  },
+  {
+   "id": "ZVnDoaT35dY",
+   "t": "Sun, Earth and Moon 2 (school link)"
+  }
+ ],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Why Do We Have Night?",
+   "ico": "📖",
+   "keys": [
+    "rotates",
+    "axis",
+    "rotation",
+    "orbit",
+    "revolution",
+    "year",
+    "lunar month",
+    "leap year",
+    "crescent",
+    "Gregorian",
+    "Islamic"
+   ],
+   "scenes": [
+    {
+     "e": "🌍🔄",
+     "t": "The Earth spins around an imaginary line called its axis. This spinning is called rotation. One full spin takes 24 hours, which is one day."
+    },
+    {
+     "e": "🌞🌚",
+     "t": "The side of the Earth facing the Sun has day. The side facing away from the Sun has night."
+    },
+    {
+     "e": "🌍➡️☀️",
+     "t": "The Earth also travels around the Sun. This is called revolution, or orbit. One full trip takes 365 and a quarter days, which is one year."
+    },
+    {
+     "e": "🌙🔄🌍",
+     "t": "The Moon orbits the Earth about every 28 days. This makes one lunar month."
+    },
+    {
+     "e": "📅",
+     "t": "The Gregorian calendar follows the Earth's trip around the Sun. It has 12 months of 30 or 31 days, but February has 28 days."
+    },
+    {
+     "e": "➕1️⃣",
+     "t": "Every year has an extra quarter of a day. So every four years we add one day to February, giving it 29 days. That year has 366 days and is called a leap year."
+    },
+    {
+     "e": "🌙🕌",
+     "t": "The Islamic calendar also has 12 months. Each month starts when people see the crescent moon, called the Hilal, so a month has 29 or 30 days."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Rotation",
+     "e": "🔄",
+     "k": "mean",
+     "a": "The Earth spinning on its axis. Takes 24 hours = 1 day."
+    },
+    {
+     "w": "Revolution",
+     "e": "☀️",
+     "k": "mean",
+     "a": "The Earth orbiting the Sun. Takes 365¼ days = 1 year."
+    },
+    {
+     "w": "Axis",
+     "e": "📍",
+     "k": "mean",
+     "a": "The imaginary line the Earth spins around."
+    },
+    {
+     "w": "Lunar month",
+     "e": "🌙",
+     "k": "mean",
+     "a": "The Moon orbits the Earth in about 28 days."
+    },
+    {
+     "w": "Leap year",
+     "e": "📆",
+     "k": "mean",
+     "a": "A year with 366 days. It comes every 4 years."
+    },
+    {
+     "w": "Day & night",
+     "e": "🌗",
+     "k": "fact",
+     "a": "Caused by the Earth's rotation."
+    },
+    {
+     "w": "Crescent (Hilal)",
+     "e": "🌙",
+     "k": "fact",
+     "a": "Seeing it starts a new Islamic month."
+    },
+    {
+     "w": "February",
+     "e": "❄️",
+     "k": "fact",
+     "a": "28 days, or 29 in a leap year."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: How Long?",
+   "ico": "🧠",
+   "prompt": "Match each motion with the time it takes.",
+   "pairs": [
+    [
+     "Earth spins once",
+     "24 hours"
+    ],
+    [
+     "Earth orbits the Sun",
+     "365¼ days"
+    ],
+    [
+     "Moon orbits Earth",
+     "28 days"
+    ],
+    [
+     "Leap year",
+     "366 days"
+    ],
+    [
+     "Islamic month",
+     "29 or 30 days"
+    ],
+    [
+     "Normal February",
+     "28 days"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Rotation or Revolution?",
+   "ico": "🌍",
+   "prompt": "Is this about rotation or revolution?",
+   "bins": [
+    {
+     "id": "r",
+     "label": "Rotation (spin)",
+     "ico": "🔄",
+     "cls": "noun"
+    },
+    {
+     "id": "v",
+     "label": "Revolution (orbit)",
+     "ico": "☀️",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "r": "Spinning on its axis: 24 hours, day and night.",
+    "v": "Going around the Sun: 365¼ days, one year."
+   },
+   "items": [
+    [
+     "spinning on its axis",
+     "r"
+    ],
+    [
+     "takes 24 hours",
+     "r"
+    ],
+    [
+     "makes day and night",
+     "r"
+    ],
+    [
+     "one day",
+     "r"
+    ],
+    [
+     "going around the Sun",
+     "v"
+    ],
+    [
+     "takes 365¼ days",
+     "v"
+    ],
+    [
+     "makes one year",
+     "v"
+    ],
+    [
+     "the Earth's orbit",
+     "v"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Day and Night Model",
+   "ico": "🧪",
+   "e": "💡🌍",
+   "goal": "Show how the Earth's spin makes day and night.",
+   "need": [
+    "a lamp or torch (the Sun)",
+    "a ball (the Earth)",
+    "a small sticker (your home)",
+    "a dark room"
+   ],
+   "predict": {
+    "q": "When your sticker faces the lamp, is it day or night there?",
+    "o": [
+     "Day",
+     "Night"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "💡",
+     "t": "Turn on the lamp and switch off the room lights. The lamp is the Sun."
+    },
+    {
+     "e": "🟡",
+     "t": "Put a sticker on the ball. This is where you live."
+    },
+    {
+     "e": "🔄",
+     "t": "Hold the ball near the lamp and spin it slowly."
+    },
+    {
+     "e": "👀",
+     "t": "Watch the sticker: when it faces the lamp it is in light, when it turns away it is in the dark."
+    }
+   ],
+   "result": "When the sticker faces the lamp it is day there. When it turns away, it is night.",
+   "why": "The Earth's rotation on its axis every 24 hours causes day and night."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What causes day and night?",
+     "o": [
+      "The Earth's rotation",
+      "The Moon",
+      "Clouds"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How long does the Earth take to spin once?",
+     "o": [
+      "24 hours",
+      "7 days",
+      "1 year"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How long does the Earth take to orbit the Sun?",
+     "o": [
+      "28 days",
+      "365¼ days",
+      "24 hours"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The Moon orbits the Earth about every…",
+     "o": [
+      "28 days",
+      "365 days",
+      "24 hours"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The side of Earth facing away from the Sun has…",
+     "o": [
+      "Day",
+      "Night"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The spinning motion of the Earth is called…",
+     "o": [
+      "Rotation",
+      "Revolution",
+      "Reflection"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A leap year has…",
+     "o": [
+      "365 days",
+      "366 days",
+      "360 days"
+     ],
+     "a": 1
+    },
+    {
+     "q": "A leap year comes every…",
+     "o": [
+      "2 years",
+      "4 years",
+      "10 years"
+     ],
+     "a": 1
+    },
+    {
+     "q": "In a leap year, February has…",
+     "o": [
+      "28 days",
+      "29 days",
+      "31 days"
+     ],
+     "a": 1
+    },
+    {
+     "q": "An Islamic month starts when we see the…",
+     "o": [
+      "Full moon",
+      "Crescent moon (Hilal)",
+      "Sun"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u2-l3",
+ "lang": "en",
+ "audio": {}
+}

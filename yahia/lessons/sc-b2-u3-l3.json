@@ -1,0 +1,348 @@
+{
+ "title": "Sound & Volume",
+ "source": "Science G3 B2 Study sheet pp.12-16; Worksheet Q10",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "The Drum Mystery",
+   "ico": "📖",
+   "keys": [
+    "vibrations",
+    "vibrate",
+    "sound waves",
+    "volume",
+    "loud",
+    "quiet",
+    "force",
+    "distance"
+   ],
+   "scenes": [
+    {
+     "e": "🥁👂",
+     "t": "Sound is made of vibrations. Vibration means moving back and forth very fast."
+    },
+    {
+     "e": "🎵〰️",
+     "t": "When an object vibrates, it makes sound waves. The waves travel through the air to reach our ears."
+    },
+    {
+     "e": "🎻🥁",
+     "t": "Violin strings vibrate when you pluck them. A drum skin vibrates when you hit it."
+    },
+    {
+     "e": "🎹🎺",
+     "t": "Xylophone bars vibrate when you hit them. The air inside a trumpet vibrates when you blow into it."
+    },
+    {
+     "e": "🔊🔉",
+     "t": "Volume is how loud or quiet a sound is. Bigger vibrations make louder sounds. Smaller vibrations make quieter sounds."
+    },
+    {
+     "e": "💪🥁",
+     "t": "We can change the volume by changing the force. Hit a drum strongly for a loud sound, and gently for a quiet sound."
+    },
+    {
+     "e": "🚶‍♂️📻",
+     "t": "We can also change the distance. The closer you are to the sound source, the louder it is. The further away, the quieter it is."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Vibration",
+     "e": "〰️",
+     "k": "mean",
+     "a": "Moving back and forth very fast."
+    },
+    {
+     "w": "Sound waves",
+     "e": "🌊",
+     "k": "mean",
+     "a": "Vibrations that travel through the air to our ears."
+    },
+    {
+     "w": "Volume",
+     "e": "🔊",
+     "k": "mean",
+     "a": "How loud or quiet a sound is."
+    },
+    {
+     "w": "Loud",
+     "e": "📢",
+     "k": "fact",
+     "a": "Bigger vibrations."
+    },
+    {
+     "w": "Quiet",
+     "e": "🤫",
+     "k": "fact",
+     "a": "Smaller vibrations."
+    },
+    {
+     "w": "Force",
+     "e": "💪",
+     "k": "fact",
+     "a": "Hit harder = louder sound."
+    },
+    {
+     "w": "Distance",
+     "e": "📏",
+     "k": "fact",
+     "a": "Closer = louder, further = quieter."
+    },
+    {
+     "w": "Drum skin",
+     "e": "🥁",
+     "k": "ex",
+     "a": "The part of a drum that vibrates."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: What Vibrates?",
+   "ico": "🧠",
+   "prompt": "Match each instrument with the part that vibrates.",
+   "pairs": [
+    [
+     "🎻 Violin",
+     "strings"
+    ],
+    [
+     "🥁 Drum",
+     "skin"
+    ],
+    [
+     "🎹 Xylophone",
+     "bars"
+    ],
+    [
+     "🎺 Trumpet",
+     "air inside"
+    ],
+    [
+     "Big vibration",
+     "loud sound"
+    ],
+    [
+     "Small vibration",
+     "quiet sound"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Loud or Quiet?",
+   "ico": "🐦",
+   "prompt": "Will the sound be LOUD or QUIET?",
+   "bins": [
+    {
+     "id": "l",
+     "label": "Loud",
+     "ico": "📢",
+     "cls": "sun"
+    },
+    {
+     "id": "q",
+     "label": "Quiet",
+     "ico": "🤫",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "l": "More force or closer distance makes bigger vibrations.",
+    "q": "Less force or further distance makes it quieter."
+   },
+   "items": [
+    [
+     "hitting a drum strongly",
+     "l"
+    ],
+    [
+     "standing close to the speaker",
+     "l"
+    ],
+    [
+     "plucking strings hard",
+     "l"
+    ],
+    [
+     "big vibrations",
+     "l"
+    ],
+    [
+     "shouting",
+     "l"
+    ],
+    [
+     "hitting a drum gently",
+     "q"
+    ],
+    [
+     "standing far away",
+     "q"
+    ],
+    [
+     "plucking strings softly",
+     "q"
+    ],
+    [
+     "small vibrations",
+     "q"
+    ],
+    [
+     "whispering",
+     "q"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Dancing Rice Drum",
+   "ico": "🧪",
+   "e": "🍚🥁",
+   "goal": "See sound vibrations and test loud vs quiet.",
+   "need": [
+    "a bowl",
+    "cling film (plastic wrap)",
+    "a rubber band",
+    "a few grains of rice",
+    "a pot and a spoon"
+   ],
+   "predict": {
+    "q": "When you bang the pot harder, the rice will jump…",
+    "o": [
+     "Higher",
+     "Lower",
+     "Not at all"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "🥣",
+     "t": "Stretch the cling film tightly over the bowl and hold it with the rubber band. This is your drum."
+    },
+    {
+     "e": "🍚",
+     "t": "Put a few grains of rice on top of the cling film."
+    },
+    {
+     "e": "🥄",
+     "t": "Hold the pot close to the bowl and tap it gently with the spoon. Watch the rice."
+    },
+    {
+     "e": "💥",
+     "t": "Now bang the pot harder. Then try again standing further away."
+    }
+   ],
+   "result": "The rice jumps when you make a sound. A louder bang makes it jump higher, and from further away it jumps less.",
+   "why": "Sound waves make the cling film vibrate. Bigger vibrations mean a louder sound, and sound gets quieter with distance."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Sound is made of…",
+     "o": [
+      "Vibrations",
+      "Light",
+      "Water"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Vibration means…",
+     "o": [
+      "Moving back and forth",
+      "Staying still",
+      "Getting hot"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What vibrates in a violin?",
+     "o": [
+      "The strings",
+      "The wood only",
+      "The bow only"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What vibrates in a trumpet?",
+     "o": [
+      "The air inside",
+      "The buttons",
+      "Nothing"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Volume means…",
+     "o": [
+      "How loud or quiet a sound is",
+      "How high or low a sound is",
+      "How fast light goes"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Bigger vibrations make a ___ sound.",
+     "o": [
+      "Louder",
+      "Quieter"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How can you make a drum sound quieter?",
+     "o": [
+      "Hit it gently",
+      "Hit it strongly",
+      "Stand closer"
+     ],
+     "a": 0
+    },
+    {
+     "q": "When you move away from the sound source, the sound gets…",
+     "o": [
+      "Louder",
+      "Quieter",
+      "Higher"
+     ],
+     "a": 1
+    },
+    {
+     "q": "How do sound waves reach our ears?",
+     "o": [
+      "Through the air",
+      "Through light",
+      "They don't"
+     ],
+     "a": 0
+    },
+    {
+     "q": "In a fair test about distance, what do we keep the SAME?",
+     "o": [
+      "The music volume",
+      "The distance",
+      "Nothing"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b2-u3-l3",
+ "lang": "en",
+ "audio": {}
+}

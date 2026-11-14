@@ -1,0 +1,417 @@
+{
+ "title": "Pitch & Protecting Our Ears",
+ "source": "Science G3 B2 Study sheet pp.17-22; Worksheet Q13",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "High Bird, Low Lion",
+   "ico": "📖",
+   "keys": [
+    "pitch",
+    "high-pitched",
+    "low-pitched",
+    "tighter",
+    "looser",
+    "shorter",
+    "longer",
+    "muffle",
+    "insulators",
+    "ear defenders",
+    "ear plugs"
+   ],
+   "scenes": [
+    {
+     "e": "🐦🦁",
+     "t": "Pitch is how high or low a sound is. It depends on how fast something vibrates."
+    },
+    {
+     "e": "🐦🎻📯",
+     "t": "Fast vibrations make a high-pitched sound, like a bird chirping, a violin, a whistle or a woman's voice."
+    },
+    {
+     "e": "🦁🥁❤️",
+     "t": "Slow vibrations make a low-pitched sound, like a lion roaring, a drum, heart beats or a man's voice."
+    },
+    {
+     "e": "🥁🔧",
+     "t": "Tightness changes pitch. Tighten a drum skin for a higher pitch. Loosen it for a lower pitch."
+    },
+    {
+     "e": "🎸📏",
+     "t": "Length changes pitch. Short guitar strings make a high pitch. Long strings make a low pitch."
+    },
+    {
+     "e": "🍾🍾",
+     "t": "Air changes pitch too. Blow across a bottle with little air space and you get a high pitch. More air space gives a lower pitch."
+    },
+    {
+     "e": "🪵🧽",
+     "t": "Sound travels easily through hard materials like wood and metal. Soft materials like foam, rubber and cotton wool muffle, or reduce, sound."
+    },
+    {
+     "e": "🎧👂",
+     "t": "Loud sounds for a long time can damage our ears. Turn the volume down, wear ear defenders or ear plugs, and spend less time near loud noise."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Pitch",
+     "e": "🎵",
+     "k": "mean",
+     "a": "How high or low a sound is."
+    },
+    {
+     "w": "High pitch",
+     "e": "🐦",
+     "k": "fact",
+     "a": "Fast vibrations: bird, whistle, violin."
+    },
+    {
+     "w": "Low pitch",
+     "e": "🦁",
+     "k": "fact",
+     "a": "Slow vibrations: lion, drum, heart beats."
+    },
+    {
+     "w": "Tighter",
+     "e": "🥁",
+     "k": "fact",
+     "a": "Tighter drum skin = higher pitch."
+    },
+    {
+     "w": "Shorter",
+     "e": "🎸",
+     "k": "fact",
+     "a": "Shorter string = higher pitch."
+    },
+    {
+     "w": "Muffle",
+     "e": "🧽",
+     "k": "mean",
+     "a": "To reduce the amount of sound."
+    },
+    {
+     "w": "Sound insulators",
+     "e": "🧤",
+     "k": "ex",
+     "a": "Foam, rubber, cotton wool."
+    },
+    {
+     "w": "Ear defenders",
+     "e": "🎧",
+     "k": "mean",
+     "a": "Ear muffs that protect our ears from loud noise."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Pitch Pairs",
+   "ico": "🧠",
+   "prompt": "Match each change with its pitch.",
+   "pairs": [
+    [
+     "Tight drum skin",
+     "high pitch"
+    ],
+    [
+     "Loose drum skin",
+     "low pitch"
+    ],
+    [
+     "Short string",
+     "high pitch"
+    ],
+    [
+     "Long string",
+     "low pitch"
+    ],
+    [
+     "Foam",
+     "muffles sound"
+    ],
+    [
+     "Ear plugs",
+     "protect ears"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "High or Low Pitch?",
+   "ico": "🐦",
+   "prompt": "Is it a HIGH or LOW pitched sound?",
+   "bins": [
+    {
+     "id": "h",
+     "label": "High pitch",
+     "ico": "🐦",
+     "cls": "sun"
+    },
+    {
+     "id": "w",
+     "label": "Low pitch",
+     "ico": "🦁",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "h": "Fast vibrations, short, tight or little air.",
+    "w": "Slow vibrations, long, loose or more air."
+   },
+   "items": [
+    [
+     "bird chirping",
+     "h"
+    ],
+    [
+     "whistle",
+     "h"
+    ],
+    [
+     "violin",
+     "h"
+    ],
+    [
+     "woman's voice",
+     "h"
+    ],
+    [
+     "short guitar string",
+     "h"
+    ],
+    [
+     "tight drum skin",
+     "h"
+    ],
+    [
+     "lion roaring",
+     "w"
+    ],
+    [
+     "heart beats",
+     "w"
+    ],
+    [
+     "big drum",
+     "w"
+    ],
+    [
+     "man's voice",
+     "w"
+    ],
+    [
+     "long guitar string",
+     "w"
+    ],
+    [
+     "loose drum skin",
+     "w"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Sound Through or Muffled?",
+   "ico": "🧽",
+   "prompt": "Does sound travel easily through it, or is it muffled?",
+   "bins": [
+    {
+     "id": "t",
+     "label": "Sound travels easily",
+     "ico": "🔊",
+     "cls": "noun"
+    },
+    {
+     "id": "m",
+     "label": "Muffles sound",
+     "ico": "🤫",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "t": "Hard materials like wood and metal carry sound.",
+    "m": "Soft materials absorb and reduce sound."
+   },
+   "items": [
+    [
+     "wood",
+     "t"
+    ],
+    [
+     "metal",
+     "t"
+    ],
+    [
+     "a table",
+     "t"
+    ],
+    [
+     "foam",
+     "m"
+    ],
+    [
+     "rubber",
+     "m"
+    ],
+    [
+     "cotton wool",
+     "m"
+    ],
+    [
+     "thick curtain",
+     "m"
+    ],
+    [
+     "ear plugs",
+     "m"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Water Bottle Music",
+   "ico": "🧪",
+   "e": "🍾🎶",
+   "goal": "Make high and low notes with bottles.",
+   "need": [
+    "3 glass bottles or glasses the same size",
+    "water",
+    "a spoon"
+   ],
+   "predict": {
+    "q": "Which bottle will make the HIGHEST sound when you blow across it?",
+    "o": [
+     "The one with the most water",
+     "The one with the least water"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "💧",
+     "t": "Fill one bottle a little, one half full, and one almost full."
+    },
+    {
+     "e": "😮‍💨",
+     "t": "Blow gently across the top of each bottle. Listen to the pitch."
+    },
+    {
+     "e": "🔢",
+     "t": "Which one is highest? Which one is lowest? Put them in order."
+    },
+    {
+     "e": "🥄",
+     "t": "Bonus: tap each bottle gently with a spoon and listen again!"
+    }
+   ],
+   "result": "When you blow, the bottle with the most water (little air) makes the highest note, and the one with the least water makes the lowest.",
+   "why": "Less air space vibrates quickly for a high pitch. More air space vibrates slowly for a low pitch."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Pitch means…",
+     "o": [
+      "How high or low a sound is",
+      "How loud a sound is",
+      "How far a sound goes"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Fast vibrations make a ___ pitched sound.",
+     "o": [
+      "High",
+      "Low"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which sound is low pitched?",
+     "o": [
+      "Bird chirping",
+      "Lion roaring",
+      "Whistle"
+     ],
+     "a": 1
+    },
+    {
+     "q": "To make a drum's pitch higher, you…",
+     "o": [
+      "Tighten the skin",
+      "Loosen the skin",
+      "Hit it softly"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Short guitar strings make a ___ pitch.",
+     "o": [
+      "High",
+      "Low"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A bottle with MORE air space makes a ___ pitch.",
+     "o": [
+      "Higher",
+      "Lower"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which material muffles sound?",
+     "o": [
+      "Metal",
+      "Foam",
+      "Wood"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Sound travels easily through…",
+     "o": [
+      "Hard materials like wood and metal",
+      "Cotton wool",
+      "Foam"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which helps protect our ears?",
+     "o": [
+      "Ear defenders",
+      "Louder music",
+      "Standing closer to speakers"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Ear plugs are usually made of…",
+     "o": [
+      "Foam or rubber",
+      "Glass",
+      "Metal"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b2-u3-l4",
+ "lang": "en",
+ "audio": {}
+}

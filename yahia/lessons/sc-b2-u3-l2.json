@@ -1,0 +1,430 @@
+{
+ "title": "Through, Bounce or Block?",
+ "source": "Science G3 B2 Study sheet pp.7-11; Worksheet Q3-Q7",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia's Window Mystery",
+   "ico": "📖",
+   "keys": [
+    "transparent",
+    "translucent",
+    "opaque",
+    "reflection",
+    "reflective",
+    "non-reflective",
+    "angle"
+   ],
+   "scenes": [
+    {
+     "e": "🪟👀",
+     "t": "Why can we see through a window but not through a wall? Materials let different amounts of light pass through them."
+    },
+    {
+     "e": "🥛💧🪟",
+     "t": "Transparent materials let most light pass through. We can see clearly through them, like clear glass, clear water and clear plastic."
+    },
+    {
+     "e": "📜🌫️",
+     "t": "Translucent materials let some light pass through. We can see through them, but not clearly, like parchment paper, linen curtains and a frosted bulb."
+    },
+    {
+     "e": "🪵🧱",
+     "t": "Opaque materials let no light pass through. We cannot see through them at all, like wood, ceramic and aluminum."
+    },
+    {
+     "e": "🔦🪞↩️",
+     "t": "Reflection is when light bounces back from a surface. We see things because light bounces off them and travels into our eyes."
+    },
+    {
+     "e": "🪞💧💍",
+     "t": "Smooth, shiny surfaces like mirrors, water, metal, foil and jewelry reflect the most light. Light hits a mirror and bounces off at the same angle."
+    },
+    {
+     "e": "🛞🎨🧣",
+     "t": "Rubber, matte paint and some fabrics are non-reflective. They do not reflect light well."
+    },
+    {
+     "e": "🧑‍🚒✨",
+     "t": "Reflective strips on coats help firefighters and builders be seen at night. Solar power stations use mirrors to collect sunlight. But in a totally dark room you cannot see a mirror!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Transparent",
+     "e": "🪟",
+     "k": "mean",
+     "a": "Lets most light through; we see clearly. Clear glass, water."
+    },
+    {
+     "w": "Translucent",
+     "e": "📜",
+     "k": "mean",
+     "a": "Lets some light through; we see unclearly. Parchment paper."
+    },
+    {
+     "w": "Opaque",
+     "e": "🪵",
+     "k": "mean",
+     "a": "Lets no light through. Wood, ceramic, aluminum."
+    },
+    {
+     "w": "Reflection",
+     "e": "↩️",
+     "k": "mean",
+     "a": "Light bouncing back from a surface."
+    },
+    {
+     "w": "Reflective",
+     "e": "🪞",
+     "k": "ex",
+     "a": "Mirror, water, foil, jewelry, some metals."
+    },
+    {
+     "w": "Non-reflective",
+     "e": "🛞",
+     "k": "ex",
+     "a": "Rubber, matte paint, some fabrics."
+    },
+    {
+     "w": "Reflective clothing",
+     "e": "🦺",
+     "k": "fact",
+     "a": "Helps people be seen at night."
+    },
+    {
+     "w": "How we see",
+     "e": "👁️",
+     "k": "fact",
+     "a": "Light bounces off objects into our eyes."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Materials",
+   "ico": "🧠",
+   "prompt": "Match each material with its group.",
+   "pairs": [
+    [
+     "Clear glass",
+     "transparent"
+    ],
+    [
+     "Parchment paper",
+     "translucent"
+    ],
+    [
+     "Wood",
+     "opaque"
+    ],
+    [
+     "Mirror",
+     "reflective"
+    ],
+    [
+     "Rubber",
+     "non-reflective"
+    ],
+    [
+     "Frosted bulb",
+     "translucent"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Transparent, Translucent or Opaque?",
+   "ico": "🔍",
+   "prompt": "How much light passes through?",
+   "bins": [
+    {
+     "id": "t",
+     "label": "Transparent",
+     "ico": "🪟",
+     "cls": "noun"
+    },
+    {
+     "id": "l",
+     "label": "Translucent",
+     "ico": "🌫️",
+     "cls": "sun"
+    },
+    {
+     "id": "o",
+     "label": "Opaque",
+     "ico": "🧱",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "t": "Most light passes through — see clearly.",
+    "l": "Some light passes — see unclearly.",
+    "o": "No light passes through."
+   },
+   "items": [
+    [
+     "clear glass",
+     "t"
+    ],
+    [
+     "clear water",
+     "t"
+    ],
+    [
+     "clear plastic",
+     "t"
+    ],
+    [
+     "parchment paper",
+     "l"
+    ],
+    [
+     "linen curtain",
+     "l"
+    ],
+    [
+     "frosted light bulb",
+     "l"
+    ],
+    [
+     "tissue paper",
+     "l"
+    ],
+    [
+     "wood",
+     "o"
+    ],
+    [
+     "ceramic plate",
+     "o"
+    ],
+    [
+     "aluminum",
+     "o"
+    ],
+    [
+     "book",
+     "o"
+    ],
+    [
+     "brick wall",
+     "o"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Shiny or Not?",
+   "ico": "🐦",
+   "prompt": "Does it reflect light well?",
+   "bins": [
+    {
+     "id": "r",
+     "label": "Reflective",
+     "ico": "🪞",
+     "cls": "sun"
+    },
+    {
+     "id": "n",
+     "label": "Non-reflective",
+     "ico": "🛞",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "r": "Smooth and shiny surfaces reflect the most light.",
+    "n": "It does not reflect light well."
+   },
+   "items": [
+    [
+     "mirror",
+     "r"
+    ],
+    [
+     "still water",
+     "r"
+    ],
+    [
+     "aluminum foil",
+     "r"
+    ],
+    [
+     "jewelry",
+     "r"
+    ],
+    [
+     "spoon",
+     "r"
+    ],
+    [
+     "rubber",
+     "n"
+    ],
+    [
+     "matte paint",
+     "n"
+    ],
+    [
+     "wool scarf",
+     "n"
+    ],
+    [
+     "cardboard",
+     "n"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Torch Detective",
+   "ico": "🧪",
+   "e": "🔦🔍",
+   "goal": "Test which materials let light through, and catch a reflection.",
+   "need": [
+    "a torch",
+    "clear plastic or glass",
+    "baking paper or tissue",
+    "a book or wood",
+    "a mirror"
+   ],
+   "safe": "Never shine light into anyone's eyes.",
+   "predict": {
+    "q": "Which one will let the MOST light through?",
+    "o": [
+     "The book",
+     "The baking paper",
+     "The clear plastic"
+    ],
+    "a": 2
+   },
+   "steps": [
+    {
+     "e": "🌑",
+     "t": "Make the room dark and shine the torch on a wall."
+    },
+    {
+     "e": "🪟",
+     "t": "Hold the clear plastic in front of the torch. Is the light still bright on the wall?"
+    },
+    {
+     "e": "📜",
+     "t": "Now try the baking paper, then the book. Watch the light on the wall each time."
+    },
+    {
+     "e": "🪞",
+     "t": "Shine the torch at the mirror and try to make the light bounce onto the wall!"
+    }
+   ],
+   "result": "Clear plastic lets almost all the light through, baking paper only some, and the book none. The mirror bounces the light to a new place.",
+   "why": "Transparent lets most light through, translucent lets some, opaque blocks it. Shiny surfaces reflect light."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "A material that lets MOST light pass through is…",
+     "o": [
+      "Transparent",
+      "Translucent",
+      "Opaque"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Parchment paper is…",
+     "o": [
+      "Transparent",
+      "Translucent",
+      "Opaque"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Wood is…",
+     "o": [
+      "Transparent",
+      "Translucent",
+      "Opaque"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which one is transparent?",
+     "o": [
+      "Clear water",
+      "Ceramic",
+      "Aluminum"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Reflection means light…",
+     "o": [
+      "Bounces back from a surface",
+      "Disappears",
+      "Gets hotter"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which surface reflects the most light?",
+     "o": [
+      "Rubber",
+      "Mirror",
+      "Fabric"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Why do firefighters wear reflective strips?",
+     "o": [
+      "To be seen at night",
+      "To keep warm",
+      "To look nice"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How do we see a tree?",
+     "o": [
+      "Light reflects off the tree into our eyes",
+      "Our eyes make light",
+      "The tree makes light"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Can you see a mirror in a completely dark room?",
+     "o": [
+      "Yes",
+      "No"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Light hits a mirror and bounces off at…",
+     "o": [
+      "The same angle",
+      "A random angle",
+      "No angle"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b2-u3-l2",
+ "lang": "en",
+ "audio": {}
+}

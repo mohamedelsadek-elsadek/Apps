@@ -1,0 +1,405 @@
+{
+ "title": "The Solar System",
+ "source": "Science G3 B1 Study sheet pp.41-43, Worksheet Q3",
+ "videos": [
+  {
+   "id": "Fj_PjkQqrDo",
+   "t": "Comparing sizes in space (school link)"
+  }
+ ],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia's Trip Around the Sun",
+   "ico": "📖",
+   "keys": [
+    "solar system",
+    "planets",
+    "star",
+    "orbit",
+    "Mercury",
+    "Neptune",
+    "Jupiter",
+    "Venus",
+    "moon",
+    "reflect"
+   ],
+   "scenes": [
+    {
+     "e": "☀️🪐",
+     "t": "The solar system is made of the Sun, the planets and their moons. The planets move around the Sun."
+    },
+    {
+     "e": "8️⃣🪐",
+     "t": "There are 8 planets. The biggest object in the solar system is the Sun!"
+    },
+    {
+     "e": "👩‍🍳🍜",
+     "t": "Remember the planets in order with this sentence: My Very Elegant Mother Just Served Us Noodles. Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune."
+    },
+    {
+     "e": "☿️🔥",
+     "t": "Mercury is the nearest planet to the Sun. Neptune is the furthest. Jupiter is the biggest. Venus is the hottest."
+    },
+    {
+     "e": "🌍🫁",
+     "t": "Earth is the third planet from the Sun. It is the only planet we can live on, because it has oxygen for living things to breathe."
+    },
+    {
+     "e": "🪐🌑",
+     "t": "Planets are dark spherical bodies. They cannot give heat or light. They orbit the Sun."
+    },
+    {
+     "e": "☀️⭐",
+     "t": "The Sun is a star. Stars are shining balls that give heat and light. The Sun looks bigger than other stars because it is the closest star to Earth."
+    },
+    {
+     "e": "🌕🪞",
+     "t": "The Moon is a dark body, but it reflects sunlight, so it looks shiny. Our Moon orbits the Earth."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Solar system",
+     "e": "☀️",
+     "k": "mean",
+     "a": "The Sun, the planets and their moons."
+    },
+    {
+     "w": "Planet",
+     "e": "🪐",
+     "k": "mean",
+     "a": "A dark spherical body that orbits the Sun."
+    },
+    {
+     "w": "Star",
+     "e": "⭐",
+     "k": "mean",
+     "a": "A shining ball that gives heat and light. The Sun is a star."
+    },
+    {
+     "w": "Orbit",
+     "e": "🔄",
+     "k": "mean",
+     "a": "To move around something in a path."
+    },
+    {
+     "w": "Mercury",
+     "e": "☿️",
+     "k": "fact",
+     "a": "The nearest planet to the Sun."
+    },
+    {
+     "w": "Jupiter",
+     "e": "🟠",
+     "k": "fact",
+     "a": "The biggest planet."
+    },
+    {
+     "w": "Venus",
+     "e": "🔥",
+     "k": "fact",
+     "a": "The hottest planet."
+    },
+    {
+     "w": "Neptune",
+     "e": "🔵",
+     "k": "fact",
+     "a": "The furthest planet from the Sun."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Planet Facts",
+   "ico": "🧠",
+   "prompt": "Match each planet with its fact.",
+   "pairs": [
+    [
+     "Mercury",
+     "nearest to the Sun"
+    ],
+    [
+     "Neptune",
+     "furthest from the Sun"
+    ],
+    [
+     "Jupiter",
+     "biggest planet"
+    ],
+    [
+     "Venus",
+     "hottest planet"
+    ],
+    [
+     "Earth",
+     "we live here"
+    ],
+    [
+     "Sun",
+     "a star"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Planet Order: Near or Far?",
+   "ico": "🐦",
+   "prompt": "Is the planet one of the 4 NEAR the Sun or the 4 FAR from it?",
+   "bins": [
+    {
+     "id": "n",
+     "label": "Near the Sun",
+     "ico": "☀️",
+     "cls": "sun"
+    },
+    {
+     "id": "f",
+     "label": "Far from the Sun",
+     "ico": "🌌",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "n": "Mercury, Venus, Earth, Mars are the first 4.",
+    "f": "Jupiter, Saturn, Uranus, Neptune are the last 4."
+   },
+   "items": [
+    [
+     "Mercury",
+     "n"
+    ],
+    [
+     "Venus",
+     "n"
+    ],
+    [
+     "Earth",
+     "n"
+    ],
+    [
+     "Mars",
+     "n"
+    ],
+    [
+     "Jupiter",
+     "f"
+    ],
+    [
+     "Saturn",
+     "f"
+    ],
+    [
+     "Uranus",
+     "f"
+    ],
+    [
+     "Neptune",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Gives Light or Reflects Light?",
+   "ico": "✨",
+   "prompt": "Does it make its own light?",
+   "bins": [
+    {
+     "id": "s",
+     "label": "Makes light (star)",
+     "ico": "⭐",
+     "cls": "sun"
+    },
+    {
+     "id": "d",
+     "label": "Dark body",
+     "ico": "🌑",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "s": "Stars shine and give heat and light.",
+    "d": "It cannot make light; it only reflects sunlight."
+   },
+   "items": [
+    [
+     "the Sun",
+     "s"
+    ],
+    [
+     "stars",
+     "s"
+    ],
+    [
+     "the Moon",
+     "d"
+    ],
+    [
+     "Earth",
+     "d"
+    ],
+    [
+     "Mars",
+     "d"
+    ],
+    [
+     "Jupiter",
+     "d"
+    ],
+    [
+     "Saturn",
+     "d"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Planet Walk",
+   "ico": "🧪",
+   "e": "🚶‍♂️🪐",
+   "goal": "Feel how far the planets are from the Sun.",
+   "need": [
+    "8 pieces of paper",
+    "a pen",
+    "a garden, a park or a long street with an adult"
+   ],
+   "predict": {
+    "q": "Which planet will be the furthest from your Sun?",
+    "o": [
+     "Mercury",
+     "Neptune",
+     "Earth"
+    ],
+    "a": 1
+   },
+   "steps": [
+    {
+     "e": "✍️",
+     "t": "Write the 8 planet names on 8 papers. Use the sentence: My Very Elegant Mother Just Served Us Noodles."
+    },
+    {
+     "e": "☀️",
+     "t": "Stand at one end. You are the Sun!"
+    },
+    {
+     "e": "👣",
+     "t": "Put Mercury 1 step away, Venus 2 steps, Earth 3 steps and Mars 5 steps."
+    },
+    {
+     "e": "👣👣",
+     "t": "Now keep walking: Jupiter at 16 steps, Saturn at 29, Uranus at 58 and Neptune at 90 steps!"
+    }
+   ],
+   "result": "The first four planets are close together, but the last four are very, very far away. Neptune is the furthest!",
+   "why": "The solar system is huge. The outer planets are much further from the Sun, so they are very cold."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "How many planets are in the solar system?",
+     "o": [
+      "7",
+      "8",
+      "9"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What is the biggest object in the solar system?",
+     "o": [
+      "The Sun",
+      "Jupiter",
+      "Earth"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which planet is nearest to the Sun?",
+     "o": [
+      "Mars",
+      "Mercury",
+      "Neptune"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which planet is the biggest?",
+     "o": [
+      "Jupiter",
+      "Saturn",
+      "Earth"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which planet is the hottest?",
+     "o": [
+      "Mercury",
+      "Venus",
+      "Mars"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which planet is the furthest from the Sun?",
+     "o": [
+      "Uranus",
+      "Neptune",
+      "Saturn"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Earth is the ___ planet from the Sun.",
+     "o": [
+      "first",
+      "second",
+      "third"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Why can we live on Earth?",
+     "o": [
+      "It has oxygen to breathe",
+      "It is the biggest",
+      "It is the hottest"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The Sun is a…",
+     "o": [
+      "Planet",
+      "Star",
+      "Moon"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Why does the Moon look shiny?",
+     "o": [
+      "It makes its own light",
+      "It reflects sunlight",
+      "It is on fire"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u2-l2",
+ "lang": "en",
+ "audio": {}
+}

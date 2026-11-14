@@ -1,0 +1,376 @@
+{
+ "title": "Living or Non-living?",
+ "source": "Science G3 B1 Study sheet pp.6-7, Worksheet Q1",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Meet MRS GREN",
+   "ico": "📖",
+   "keys": [
+    "living",
+    "non-living",
+    "Movement",
+    "Respiration",
+    "Sensitivity",
+    "Growth",
+    "Reproduction",
+    "Excretion",
+    "Nutrition"
+   ],
+   "scenes": [
+    {
+     "e": "🧑‍🔬🌍",
+     "t": "Yahia is a young scientist. Today he asks a big question: how can we tell if something is living or non-living?"
+    },
+    {
+     "e": "👩‍🦰✨",
+     "t": "Meet MRS GREN! She is living, because she can do the seven life processes. Each letter of her name is one process."
+    },
+    {
+     "e": "🏃‍♀️💨",
+     "t": "M is for Movement: she can move from one place to another. R is for Respiration: she breathes in oxygen to get energy."
+    },
+    {
+     "e": "👂🔥❄️",
+     "t": "S is for Sensitivity: she can feel pain, sound, heat, cold and light. G is for Growth: she gets bigger, like a child becomes an adult."
+    },
+    {
+     "e": "👶🚽",
+     "t": "R is for Reproduction: she can have babies. E is for Excretion: she gets rid of wastes from her body."
+    },
+    {
+     "e": "🍎💧",
+     "t": "N is for Nutrition: she needs food and water to live. All living things, like animals and plants, do these seven things."
+    },
+    {
+     "e": "🪨🧸☀️",
+     "t": "Non-living things, like plastic, stone, air, water and the sun, do not eat, breathe, sense, grow or reproduce."
+    },
+    {
+     "e": "🚗🌀⏰",
+     "t": "Some non-living things can move, like fans, clocks and cars. But they move with electricity or gas, not by themselves!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Movement",
+     "e": "🏃",
+     "k": "mean",
+     "a": "Moving from one place to another."
+    },
+    {
+     "w": "Respiration",
+     "e": "🫁",
+     "k": "mean",
+     "a": "Breathing in oxygen to get energy."
+    },
+    {
+     "w": "Sensitivity",
+     "e": "👂",
+     "k": "mean",
+     "a": "Feeling pain, sound, heat, cold and light."
+    },
+    {
+     "w": "Growth",
+     "e": "📏",
+     "k": "mean",
+     "a": "Getting bigger, like a child becoming an adult."
+    },
+    {
+     "w": "Reproduction",
+     "e": "👶",
+     "k": "mean",
+     "a": "Making new babies."
+    },
+    {
+     "w": "Excretion",
+     "e": "🚽",
+     "k": "mean",
+     "a": "Getting rid of wastes."
+    },
+    {
+     "w": "Nutrition",
+     "e": "🍎",
+     "k": "mean",
+     "a": "Needing food and water to live."
+    },
+    {
+     "w": "Non-living",
+     "e": "🪨",
+     "k": "ex",
+     "a": "Plastic, stone, air, water, the sun."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: MRS GREN",
+   "ico": "🧠",
+   "prompt": "Match each letter of MRS GREN with its life process.",
+   "pairs": [
+    [
+     "M",
+     "Movement"
+    ],
+    [
+     "R",
+     "Respiration"
+    ],
+    [
+     "S",
+     "Sensitivity"
+    ],
+    [
+     "G",
+     "Growth"
+    ],
+    [
+     "E",
+     "Excretion"
+    ],
+    [
+     "N",
+     "Nutrition"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Living, Non-living or Dead?",
+   "ico": "🐦",
+   "prompt": "Catch the word and send it to the right group!",
+   "bins": [
+    {
+     "id": "l",
+     "label": "Living",
+     "ico": "🌱",
+     "cls": "noun"
+    },
+    {
+     "id": "n",
+     "label": "Non-living",
+     "ico": "🪨",
+     "cls": "verb"
+    },
+    {
+     "id": "d",
+     "label": "Dead",
+     "ico": "🍂",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "l": "It does all 7 life processes.",
+    "n": "It was never alive.",
+    "d": "It was once living."
+   },
+   "items": [
+    [
+     "cat",
+     "l"
+    ],
+    [
+     "tree",
+     "l"
+    ],
+    [
+     "fish",
+     "l"
+    ],
+    [
+     "bird",
+     "l"
+    ],
+    [
+     "flower",
+     "l"
+    ],
+    [
+     "stone",
+     "n"
+    ],
+    [
+     "plastic",
+     "n"
+    ],
+    [
+     "car",
+     "n"
+    ],
+    [
+     "fan",
+     "n"
+    ],
+    [
+     "water",
+     "n"
+    ],
+    [
+     "dry leaf",
+     "d"
+    ],
+    [
+     "wooden chair",
+     "d"
+    ],
+    [
+     "bone",
+     "d"
+    ],
+    [
+     "feather",
+     "d"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Grow a Bean",
+   "ico": "🧪",
+   "e": "🫘🌱",
+   "goal": "Prove a bean seed is living: watch it grow!",
+   "need": [
+    "2 dry beans",
+    "cotton wool",
+    "a clear cup",
+    "a little water"
+   ],
+   "predict": {
+    "q": "What will happen to the bean in a few days?",
+    "o": [
+     "Nothing, it is a stone",
+     "It will grow roots and a shoot",
+     "It will turn into plastic"
+    ],
+    "a": 1
+   },
+   "steps": [
+    {
+     "e": "🥤☁️",
+     "t": "Put wet cotton wool inside the clear cup."
+    },
+    {
+     "e": "🫘",
+     "t": "Push the beans between the cotton and the side of the cup so you can see them."
+    },
+    {
+     "e": "💧",
+     "t": "Add a little water every day. Keep the cotton wet, not flooded."
+    },
+    {
+     "e": "☀️📅",
+     "t": "Put the cup near a window and look at it every day for one week."
+    }
+   ],
+   "result": "After a few days the bean grows a root, then a green shoot. It gets bigger every day!",
+   "why": "Growth and nutrition are life processes. The bean uses water to grow, so it is a living thing."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "How many life processes are there?",
+     "o": [
+      "5",
+      "7",
+      "10"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What does the S in MRS GREN stand for?",
+     "o": [
+      "Sleeping",
+      "Sensitivity",
+      "Swimming"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Breathing in oxygen to get energy is called…",
+     "o": [
+      "Respiration",
+      "Reproduction",
+      "Excretion"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Getting rid of wastes is called…",
+     "o": [
+      "Nutrition",
+      "Growth",
+      "Excretion"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which one is a living thing?",
+     "o": [
+      "A stone 🪨",
+      "A rabbit 🐇",
+      "A clock ⏰"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which one is non-living?",
+     "o": [
+      "A tree 🌳",
+      "A fish 🐟",
+      "Plastic 🧴"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A fan can move. Why is it NOT living?",
+     "o": [
+      "It moves by electricity",
+      "It eats food",
+      "It grows bigger"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Having babies is called…",
+     "o": [
+      "Reproduction",
+      "Respiration",
+      "Movement"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A child becoming an adult shows…",
+     "o": [
+      "Growth",
+      "Excretion",
+      "Sensitivity"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A dry leaf that fell from a tree is…",
+     "o": [
+      "Living",
+      "Dead (was once living)",
+      "Never alive"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u1-l1",
+ "lang": "en",
+ "audio": {}
+}

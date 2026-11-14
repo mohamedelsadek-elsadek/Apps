@@ -1,0 +1,447 @@
+{
+ "title": "Sorting Animals",
+ "source": "Science G3 B1 Study sheet pp.7-9, Worksheet Q2-Q4, Q8",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia's Animal Groups",
+   "ico": "📖",
+   "keys": [
+    "herbivore",
+    "carnivore",
+    "omnivore",
+    "vertebrates",
+    "invertebrates",
+    "backbone",
+    "Mammals",
+    "Birds",
+    "Fish",
+    "Reptiles",
+    "Amphibians"
+   ],
+   "scenes": [
+    {
+     "e": "🦁🐄🐻",
+     "t": "There are so many animals! Scientists sort them into groups by their food, their features and their habitat."
+    },
+    {
+     "e": "🐄🌿",
+     "t": "A herbivore eats only plants, like a cow, a rabbit or a giraffe."
+    },
+    {
+     "e": "🦁🥩",
+     "t": "A carnivore eats other animals, like a lion, a shark or an eagle."
+    },
+    {
+     "e": "🐻🍓🐟",
+     "t": "An omnivore eats both plants and animals, like a bear, a chicken and… people!"
+    },
+    {
+     "e": "🦴🐶",
+     "t": "Animals with a backbone are called vertebrates. Animals without a backbone are called invertebrates, like worms, insects and octopuses."
+    },
+    {
+     "e": "🐕🐦🐟",
+     "t": "Vertebrates have five groups. Mammals have hair or fur and give birth. Birds have feathers, wings and beaks and lay eggs."
+    },
+    {
+     "e": "🐟🐍🐸",
+     "t": "Fish have scales, fins and gills. Reptiles have dry scaly skin and lay eggs on land. Amphibians have wet soft skin and live in water and on land."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Herbivore",
+     "e": "🐄",
+     "k": "mean",
+     "a": "Eats only plants. Example: cow, rabbit."
+    },
+    {
+     "w": "Carnivore",
+     "e": "🦁",
+     "k": "mean",
+     "a": "Eats other animals. Example: lion, shark."
+    },
+    {
+     "w": "Omnivore",
+     "e": "🐻",
+     "k": "mean",
+     "a": "Eats plants and animals. Example: bear, chicken."
+    },
+    {
+     "w": "Vertebrate",
+     "e": "🦴",
+     "k": "mean",
+     "a": "An animal with a backbone."
+    },
+    {
+     "w": "Invertebrate",
+     "e": "🐛",
+     "k": "mean",
+     "a": "An animal without a backbone."
+    },
+    {
+     "w": "Mammals",
+     "e": "🐕",
+     "k": "fact",
+     "a": "Have hair or fur, give birth, breathe with lungs."
+    },
+    {
+     "w": "Reptiles",
+     "e": "🐍",
+     "k": "fact",
+     "a": "Dry scaly skin, lay eggs on land."
+    },
+    {
+     "w": "Amphibians",
+     "e": "🐸",
+     "k": "fact",
+     "a": "Wet soft skin, live in water and on land, webbed feet."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Who Eats What?",
+   "ico": "🧠",
+   "prompt": "Match each animal with its diet group.",
+   "pairs": [
+    [
+     "🐄 Cow",
+     "Herbivore"
+    ],
+    [
+     "🦁 Lion",
+     "Carnivore"
+    ],
+    [
+     "🐻 Bear",
+     "Omnivore"
+    ],
+    [
+     "🐸 Frog",
+     "Amphibian"
+    ],
+    [
+     "🦅 Eagle",
+     "Bird"
+    ],
+    [
+     "🐛 Worm",
+     "Invertebrate"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Diet Birds",
+   "ico": "🐦",
+   "prompt": "Catch each animal and send it to its diet group!",
+   "bins": [
+    {
+     "id": "h",
+     "label": "Herbivore",
+     "ico": "🌿",
+     "cls": "noun"
+    },
+    {
+     "id": "c",
+     "label": "Carnivore",
+     "ico": "🥩",
+     "cls": "verb"
+    },
+    {
+     "id": "o",
+     "label": "Omnivore",
+     "ico": "🍽️",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "h": "It eats only plants.",
+    "c": "It eats other animals.",
+    "o": "It eats plants and animals."
+   },
+   "items": [
+    [
+     "cow",
+     "h"
+    ],
+    [
+     "rabbit",
+     "h"
+    ],
+    [
+     "giraffe",
+     "h"
+    ],
+    [
+     "horse",
+     "h"
+    ],
+    [
+     "elephant",
+     "h"
+    ],
+    [
+     "lion",
+     "c"
+    ],
+    [
+     "shark",
+     "c"
+    ],
+    [
+     "eagle",
+     "c"
+    ],
+    [
+     "tiger",
+     "c"
+    ],
+    [
+     "wolf",
+     "c"
+    ],
+    [
+     "bear",
+     "o"
+    ],
+    [
+     "chicken",
+     "o"
+    ],
+    [
+     "human",
+     "o"
+    ],
+    [
+     "monkey",
+     "o"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Backbone or Not?",
+   "ico": "🦴",
+   "prompt": "Does this animal have a backbone?",
+   "bins": [
+    {
+     "id": "v",
+     "label": "Vertebrate",
+     "ico": "🦴",
+     "cls": "noun"
+    },
+    {
+     "id": "i",
+     "label": "Invertebrate",
+     "ico": "🐛",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "v": "It has a backbone.",
+    "i": "It has no backbone."
+   },
+   "items": [
+    [
+     "dog",
+     "v"
+    ],
+    [
+     "fish",
+     "v"
+    ],
+    [
+     "snake",
+     "v"
+    ],
+    [
+     "frog",
+     "v"
+    ],
+    [
+     "parrot",
+     "v"
+    ],
+    [
+     "camel",
+     "v"
+    ],
+    [
+     "worm",
+     "i"
+    ],
+    [
+     "butterfly",
+     "i"
+    ],
+    [
+     "spider",
+     "i"
+    ],
+    [
+     "octopus",
+     "i"
+    ],
+    [
+     "snail",
+     "i"
+    ],
+    [
+     "jellyfish",
+     "i"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "Find Your Backbone",
+   "ico": "🧪",
+   "e": "🦴🙋",
+   "goal": "Feel your own backbone and test toy animals.",
+   "need": [
+    "your own back 😄",
+    "a family member",
+    "toy animals or animal pictures"
+   ],
+   "predict": {
+    "q": "Are you a vertebrate or an invertebrate?",
+    "o": [
+     "Vertebrate — I have a backbone",
+     "Invertebrate — no backbone"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "🙇",
+     "t": "Bend forward slowly and ask a family member to gently run a finger down the middle of your back."
+    },
+    {
+     "e": "🦴",
+     "t": "Can they feel little bumps in a line? Those are the bones of your backbone!"
+    },
+    {
+     "e": "🧸",
+     "t": "Now take your toy animals or pictures. Put the animals with a backbone in one group."
+    },
+    {
+     "e": "🐛",
+     "t": "Put the animals without a backbone, like insects and worms, in another group."
+    }
+   ],
+   "result": "You can feel a line of small bones down your back. You are a vertebrate, like dogs, birds and fish!",
+   "why": "A backbone holds the body up. Invertebrates like worms and insects do not have one."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "An animal that eats only plants is a…",
+     "o": [
+      "Carnivore",
+      "Herbivore",
+      "Omnivore"
+     ],
+     "a": 1
+    },
+    {
+     "q": "A lion is a…",
+     "o": [
+      "Carnivore",
+      "Herbivore",
+      "Omnivore"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A bear eats fish and berries. It is an…",
+     "o": [
+      "Herbivore",
+      "Omnivore",
+      "Invertebrate"
+     ],
+     "a": 1
+    },
+    {
+     "q": "An animal WITHOUT a backbone is called…",
+     "o": [
+      "Vertebrate",
+      "Invertebrate",
+      "Mammal"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which animal is an invertebrate?",
+     "o": [
+      "Dog 🐶",
+      "Butterfly 🦋",
+      "Snake 🐍"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which group has feathers, wings and a beak?",
+     "o": [
+      "Birds",
+      "Fish",
+      "Reptiles"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which group breathes with gills?",
+     "o": [
+      "Mammals",
+      "Fish",
+      "Birds"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Mammals have…",
+     "o": [
+      "Hair or fur",
+      "Feathers",
+      "Fins"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which animal lives in water AND on land?",
+     "o": [
+      "Frog 🐸 (amphibian)",
+      "Eagle 🦅",
+      "Cat 🐱"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which group has dry scaly skin and lays eggs on land?",
+     "o": [
+      "Amphibians",
+      "Reptiles",
+      "Mammals"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u1-l2",
+ "lang": "en",
+ "audio": {}
+}

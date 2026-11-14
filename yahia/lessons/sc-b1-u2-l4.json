@@ -1,0 +1,343 @@
+{
+ "title": "Gravity & Mass",
+ "source": "Science G3 B1 Study sheet pp.48-50, Worksheet Q8, Q10-Q11",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Why Do Things Fall Down?",
+   "ico": "📖",
+   "keys": [
+    "gravity",
+    "craters",
+    "meteors",
+    "mass",
+    "grams"
+   ],
+   "scenes": [
+    {
+     "e": "✏️⬇️",
+     "t": "If you hold a pencil and let it go, it falls down to the floor. Why doesn't it go up to the ceiling? Because of gravity!"
+    },
+    {
+     "e": "🌍🧲",
+     "t": "Gravity is a force that pulls things down towards the center of the Earth. It keeps everything on Earth."
+    },
+    {
+     "e": "🌊🙋",
+     "t": "Without gravity, there would be no water in the seas, and people and animals could not live on Earth."
+    },
+    {
+     "e": "🌕☄️",
+     "t": "The Moon has gravity too. Rocks in space called meteors are pulled to the Moon and crash, leaving holes called craters."
+    },
+    {
+     "e": "🦕☄️",
+     "t": "Scientists think a very large meteor hit the Earth long ago, changed the climate and killed the dinosaurs."
+    },
+    {
+     "e": "🍎⚖️",
+     "t": "Mass is how much stuff is in an object. We measure it in grams with a scale."
+    },
+    {
+     "e": "🍎🔪",
+     "t": "If an apple has a mass of 200 grams and we cut it into pieces, all the pieces together still have a mass of 200 grams."
+    },
+    {
+     "e": "🟤✊",
+     "t": "If we squeeze 50 grams of clay, it still has a mass of 50 grams. Breaking or squashing does not change the total mass!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Gravity",
+     "e": "🌍",
+     "k": "mean",
+     "a": "A force that pulls things down towards the center of the Earth."
+    },
+    {
+     "w": "Meteor",
+     "e": "☄️",
+     "k": "mean",
+     "a": "A rock moving in space."
+    },
+    {
+     "w": "Crater",
+     "e": "🌕",
+     "k": "mean",
+     "a": "A hole left when a meteor hits the Moon."
+    },
+    {
+     "w": "Mass",
+     "e": "⚖️",
+     "k": "mean",
+     "a": "How much stuff is in an object."
+    },
+    {
+     "w": "Gram (g)",
+     "e": "🔢",
+     "k": "mean",
+     "a": "A unit for measuring mass."
+    },
+    {
+     "w": "Scale",
+     "e": "⚖️",
+     "k": "mean",
+     "a": "A tool for measuring mass."
+    },
+    {
+     "w": "Same mass",
+     "e": "🍎",
+     "k": "fact",
+     "a": "Parts added together = mass of the whole object."
+    },
+    {
+     "w": "Dinosaurs",
+     "e": "🦖",
+     "k": "fact",
+     "a": "A giant meteor may have caused their extinction."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Gravity & Mass",
+   "ico": "🧠",
+   "prompt": "Match each word with its meaning.",
+   "pairs": [
+    [
+     "Gravity",
+     "pulls things down"
+    ],
+    [
+     "Crater",
+     "hole on the Moon"
+    ],
+    [
+     "Meteor",
+     "rock in space"
+    ],
+    [
+     "Mass",
+     "amount of stuff"
+    ],
+    [
+     "Scale",
+     "measures mass"
+    ],
+    [
+     "Gram",
+     "unit of mass"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Mass Detective",
+   "ico": "⚖️",
+   "prompt": "Does the total mass CHANGE or STAY THE SAME?",
+   "bins": [
+    {
+     "id": "s",
+     "label": "Stays the same",
+     "ico": "✅",
+     "cls": "noun"
+    },
+    {
+     "id": "c",
+     "label": "Changes",
+     "ico": "❌",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "s": "Cutting, breaking or squashing does not change the total mass.",
+    "c": "Adding or taking away stuff changes the mass."
+   },
+   "items": [
+    [
+     "cutting an apple into pieces",
+     "s"
+    ],
+    [
+     "squeezing clay",
+     "s"
+    ],
+    [
+     "breaking a biscuit in half",
+     "s"
+    ],
+    [
+     "folding a paper",
+     "s"
+    ],
+    [
+     "putting pencils back in the case",
+     "s"
+    ],
+    [
+     "eating half the apple",
+     "c"
+    ],
+    [
+     "adding more clay",
+     "c"
+    ],
+    [
+     "throwing a piece away",
+     "c"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "The Apple Scale Test",
+   "ico": "🧪",
+   "e": "🍎⚖️",
+   "goal": "Prove that the parts add up to the whole mass.",
+   "need": [
+    "a kitchen scale",
+    "an apple",
+    "a knife (adult only)",
+    "a plate",
+    "paper and pencil"
+   ],
+   "safe": "An adult must cut the apple.",
+   "predict": {
+    "q": "Will the pieces together weigh the same as the whole apple?",
+    "o": [
+     "More",
+     "The same",
+     "Less"
+    ],
+    "a": 1
+   },
+   "steps": [
+    {
+     "e": "⚖️",
+     "t": "Put the plate on the scale and press zero. Weigh the whole apple and write the mass."
+    },
+    {
+     "e": "🔪",
+     "t": "Ask an adult to cut the apple into 4 pieces."
+    },
+    {
+     "e": "🍎",
+     "t": "Weigh each piece on its own and write each mass."
+    },
+    {
+     "e": "➕",
+     "t": "Add the four masses together and compare with the whole apple."
+    }
+   ],
+   "result": "The four pieces added together have the same mass as the whole apple (maybe 1 gram less from the juice).",
+   "why": "Cutting does not add or remove stuff, so the total mass stays the same."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Why does a pencil fall down when you drop it?",
+     "o": [
+      "Gravity",
+      "Wind",
+      "Magic"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Gravity pulls things towards…",
+     "o": [
+      "The sky",
+      "The center of the Earth",
+      "The Sun only"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Without gravity…",
+     "o": [
+      "There would be no water in the seas",
+      "Things would be heavier",
+      "Nothing changes"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Holes on the Moon made by meteors are called…",
+     "o": [
+      "Craters",
+      "Fossils",
+      "Orbits"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Mass is measured in…",
+     "o": [
+      "Grams",
+      "Degrees",
+      "Hours"
+     ],
+     "a": 0
+    },
+    {
+     "q": "An apple has a mass of 200 g. We cut it into pieces. All the pieces together are…",
+     "o": [
+      "100 g",
+      "200 g",
+      "400 g"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Clay has a mass of 50 g. We squeeze it. Now it is…",
+     "o": [
+      "50 g",
+      "25 g",
+      "100 g"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Pencils 80 g + eraser 20 g + sharpener 30 g + case 70 g =",
+     "o": [
+      "180 g",
+      "200 g",
+      "220 g"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Front cover 100 g + back cover 100 g + pages 300 g =",
+     "o": [
+      "400 g",
+      "500 g",
+      "600 g"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which tool do we use to measure mass?",
+     "o": [
+      "Scale",
+      "Thermometer",
+      "Ruler"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u2-l4",
+ "lang": "en",
+ "audio": {}
+}

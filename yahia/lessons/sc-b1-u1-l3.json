@@ -1,0 +1,382 @@
+{
+ "title": "Habitats & Adaptation",
+ "source": "Science G3 B1 Study sheet pp.10-12, Worksheet Q5-Q6",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia Visits Every Habitat",
+   "ico": "📖",
+   "keys": [
+    "habitat",
+    "Arctic",
+    "Desert",
+    "aquatic",
+    "Grassland",
+    "Forest",
+    "adaptation",
+    "blubber"
+   ],
+   "scenes": [
+    {
+     "e": "🏠🐾",
+     "t": "A habitat is the place where an animal lives. It is the animal's home that gives it food, water and shelter."
+    },
+    {
+     "e": "🧊🐻‍❄️🐧",
+     "t": "In the cold Arctic habitat live polar bears, penguins, polar foxes and seals. They have thick fur or feathers to stay warm."
+    },
+    {
+     "e": "🏜️🐪🦂",
+     "t": "In the hot, dry desert live camels, snakes, scorpions and tortoises. They can live a long time without water."
+    },
+    {
+     "e": "🌊🐟🐙",
+     "t": "Seas and rivers are aquatic habitats. Fish, octopuses, sharks and whales live there. Fish breathe with gills and swim with fins."
+    },
+    {
+     "e": "🌾🦓🦁",
+     "t": "A grassland gets enough rain for grass, but not for trees. Zebras, lions, cheetahs and ostriches live there."
+    },
+    {
+     "e": "🌳🐒🦜",
+     "t": "A forest has lots of tall trees because it gets plenty of rain. Monkeys, parrots, tigers and deer live there."
+    },
+    {
+     "e": "🐪👣",
+     "t": "Adaptation means the features that help a living thing survive in its habitat. The camel has padded feet so it does not sink in the sand, and a hump to store food."
+    },
+    {
+     "e": "🐧🧊",
+     "t": "The penguin has thick feathers and a fatty layer called blubber to keep warm, and webbed feet for swimming. A fish cannot live on land: it has no legs and its gills cannot breathe air."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Science Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Habitat",
+     "e": "🏠",
+     "k": "mean",
+     "a": "The place where an animal lives and finds food, water and shelter."
+    },
+    {
+     "w": "Adaptation",
+     "e": "🛠️",
+     "k": "mean",
+     "a": "Features that help a living thing survive in its habitat."
+    },
+    {
+     "w": "Arctic",
+     "e": "🧊",
+     "k": "ex",
+     "a": "Very cold. Polar bear, penguin, seal."
+    },
+    {
+     "w": "Desert",
+     "e": "🏜️",
+     "k": "ex",
+     "a": "Hot, sandy, few plants. Camel, scorpion."
+    },
+    {
+     "w": "Aquatic",
+     "e": "🌊",
+     "k": "ex",
+     "a": "Water habitat. Fish, octopus, whale."
+    },
+    {
+     "w": "Grassland",
+     "e": "🌾",
+     "k": "ex",
+     "a": "Lots of grass, few trees. Zebra, lion."
+    },
+    {
+     "w": "Forest",
+     "e": "🌳",
+     "k": "ex",
+     "a": "Many tall trees. Monkey, parrot, tiger."
+    },
+    {
+     "w": "Blubber",
+     "e": "🐧",
+     "k": "fact",
+     "a": "A thick fatty layer that keeps penguins and seals warm."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Who Lives Where?",
+   "ico": "🧠",
+   "prompt": "Match each animal with its home.",
+   "pairs": [
+    [
+     "🐻‍❄️ Polar bear",
+     "Arctic"
+    ],
+    [
+     "🐪 Camel",
+     "Desert"
+    ],
+    [
+     "🦈 Shark",
+     "Ocean"
+    ],
+    [
+     "🦓 Zebra",
+     "Grassland"
+    ],
+    [
+     "🐒 Monkey",
+     "Forest"
+    ],
+    [
+     "🐧 Penguin",
+     "Polar"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Habitat Birds",
+   "ico": "🐦",
+   "prompt": "Send each animal to its habitat!",
+   "bins": [
+    {
+     "id": "a",
+     "label": "Arctic",
+     "ico": "🧊",
+     "cls": "moon"
+    },
+    {
+     "id": "d",
+     "label": "Desert",
+     "ico": "🏜️",
+     "cls": "sun"
+    },
+    {
+     "id": "w",
+     "label": "Water",
+     "ico": "🌊",
+     "cls": "noun"
+    },
+    {
+     "id": "f",
+     "label": "Forest",
+     "ico": "🌳",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "a": "Thick fur or feathers keep it warm.",
+    "d": "It can live with little water in the heat.",
+    "w": "It swims and lives in water.",
+    "f": "It lives among tall trees."
+   },
+   "items": [
+    [
+     "polar bear",
+     "a"
+    ],
+    [
+     "penguin",
+     "a"
+    ],
+    [
+     "seal",
+     "a"
+    ],
+    [
+     "polar fox",
+     "a"
+    ],
+    [
+     "camel",
+     "d"
+    ],
+    [
+     "scorpion",
+     "d"
+    ],
+    [
+     "tortoise",
+     "d"
+    ],
+    [
+     "fish",
+     "w"
+    ],
+    [
+     "octopus",
+     "w"
+    ],
+    [
+     "whale",
+     "w"
+    ],
+    [
+     "monkey",
+     "f"
+    ],
+    [
+     "parrot",
+     "f"
+    ],
+    [
+     "deer",
+     "f"
+    ],
+    [
+     "raccoon",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "lab",
+   "title": "The Blubber Glove",
+   "ico": "🧪",
+   "e": "🧤🧊",
+   "goal": "Feel how blubber keeps a penguin warm.",
+   "need": [
+    "a bowl of ice water",
+    "2 zip bags",
+    "vegetable fat or butter (about 1 cup)",
+    "a spoon"
+   ],
+   "safe": "Ask an adult to help you. Take your hand out if it gets too cold.",
+   "predict": {
+    "q": "Which hand will feel colder in the ice water?",
+    "o": [
+     "The bare hand",
+     "The hand in the fat (blubber) bag"
+    ],
+    "a": 0
+   },
+   "steps": [
+    {
+     "e": "🧈",
+     "t": "Put the fat inside one zip bag."
+    },
+    {
+     "e": "🧤",
+     "t": "Put your hand in the second bag, then push it into the fat bag and squish the fat all around it. This is your blubber glove!"
+    },
+    {
+     "e": "🧊",
+     "t": "Put your other hand, with no glove, in the ice water for a few seconds."
+    },
+    {
+     "e": "🖐️",
+     "t": "Now put the blubber glove hand in the ice water. Compare how both hands feel."
+    }
+   ],
+   "result": "The bare hand gets cold very fast, but the blubber glove hand stays warm for much longer!",
+   "why": "Fat slows down the cold. Penguins, seals and whales have blubber, an adaptation for the cold Arctic habitat."
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "A habitat is…",
+     "o": [
+      "The food an animal eats",
+      "The place where an animal lives",
+      "A type of animal"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which animal lives in the Arctic?",
+     "o": [
+      "Camel 🐪",
+      "Polar bear 🐻‍❄️",
+      "Monkey 🐒"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which habitat has lots of sand, high temperature and few plants?",
+     "o": [
+      "Desert",
+      "Forest",
+      "Ocean"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Where do fish live?",
+     "o": [
+      "Aquatic (water) habitat",
+      "Desert",
+      "Grassland"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which habitat has many tall trees?",
+     "o": [
+      "Arctic",
+      "Forest",
+      "Desert"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Why can't a fish live on land?",
+     "o": [
+      "It has no legs and gills can't breathe air",
+      "It is too big",
+      "It does not like the sun"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The camel's padded feet help it to…",
+     "o": [
+      "Swim fast",
+      "Not sink in the sand",
+      "Climb trees"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What does the camel store in its hump?",
+     "o": [
+      "Food (fat)",
+      "Stones",
+      "Babies"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The fatty layer that keeps a penguin warm is called…",
+     "o": [
+      "Blubber",
+      "Fur",
+      "Scales"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Adaptation means…",
+     "o": [
+      "Features that help an animal survive in its habitat",
+      "Moving to a new house",
+      "Eating only plants"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "sc-b1-u1-l3",
+ "lang": "en",
+ "audio": {}
+}
