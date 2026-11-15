@@ -117,6 +117,10 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 #view.en .txt{font-size:21px;line-height:1.7}
 #view.en .opt,#view.en .stop,#view.en .q,#view.en .txt,#view.en .labneed,#view.en .hint,#view.en h1,#view.en h2{text-align:left}#view.en .labneed{font-family:Nunito,system-ui,sans-serif}#view.en .stop b{font-family:Nunito,'Baloo Bhaijaan 2',system-ui,sans-serif}
 .labneed{font-family:Cairo;font-size:17px;margin:4px 0 10px;padding-inline-start:22px}
+.passage p{font-family:Cairo,serif;font-size:19px;line-height:2;margin:6px 0}.passage .pn{display:inline-block;background:#8a5cf6;color:#fff;border-radius:50%;width:26px;height:26px;text-align:center;line-height:26px;font-size:14px}
+.wplan{display:flex;gap:10px;align-items:flex-start;background:#f6f3ff;border-radius:12px;padding:8px 10px;margin:6px 0;font-family:Cairo;font-size:16px}.wplan>b{background:#8a5cf6;color:#fff;border-radius:50%;min-width:26px;height:26px;text-align:center;line-height:26px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#e9fbf1;border:2px solid #2fb36d;border-radius:20px;padding:4px 12px;font-family:Cairo;font-size:17px}
+.wchk{display:block;font-family:Cairo;font-size:17px;padding:8px;border-radius:12px;background:#fff8e6;margin:6px 0}.wchk input{transform:scale(1.4);margin-inline-end:8px}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -284,7 +288,7 @@ async function viewLesson(id){
   $("view").innerHTML=`<div class="top"><button class="back" onclick="route('subject','${meta.subject.id}')">${tr("→ الخريطة","← Map")}</button><span class="pill">${meta.ico} ${esc(L.title)}</span></div>
   <p class="crumb">${esc(meta.subject.title)} · ${esc(meta.block.title)} · ${esc(meta.unit.title)}</p>
   <div class="unit"><div class="path">${allVids(id).length?`<button class="stop vid" onclick="route('video')"><span class="ico">🎬</span><span><b>${tr("شوف بعينك","Watch & Learn")}</b><small>${tr("فيديو قصير عن الدرس",allVids(id).length+" short video"+(allVids(id).length>1?"s":""))}</small></span><span class="st">▶️</span></button>`:""}${L.activities.map((a,i)=>`<button class="stop ${d[i]?"done":""}" onclick="route('act',${i})">
-    <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||((LANG==="en"?{story:"Listen and read",cards:"Flip the cards",match:"Find the pairs",quiz:"The big quiz",lab:"Try it at home"}:{story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير",lab:"جرّبها في البيت"})[a.type]||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
+    <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||((a.sub||(LANG==="en"?{story:"Listen and read",cards:"Flip the cards",match:"Find the pairs",quiz:"The big quiz",lab:"Try it at home",write:"Writing"}:{story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير",lab:"جرّبها في البيت",write:"التعبير خطوة بخطوة"})[a.type])||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
 }
 
 function allVids(id){const out=[],seen=new Set();const p=lessonVid(id);if(p){out.push({id:p,t:tr("فيديو اختاره بابا","Picked by Dad")});seen.add(p)}
@@ -298,7 +302,7 @@ function viewVideo(){const vs=allVids(LID);if(!vs.length)return route('lesson',L
   <div class="row2"><button class="btn g big" onclick="route('act',0)">${tr("يلا نبدأ القصة ←","Let's start →")}</button></div></div>`;
   document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{vi=+b.dataset.v;draw()});};draw();}
 function shell(inner){return `<div class="top"><button class="back" onclick="route('lesson','${LID}')">${tr("→ الدرس","← Lesson")}</button><span class="pill">${ACT.ico||""} ${esc(ACT.title)}</span></div>${inner}`}
-function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz,lab:actLab})[ACT.type]();}
+function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz,lab:actLab,write:actWrite})[ACT.type]();}
 function finish(stars,title,sub,ico){
   const d=S.done[LID]=S.done[LID]||{}; const first=!d[AIDX]; d[AIDX]=true; if(first)S.stars+=stars; save(); confetti(); speak(title);
   const next=AIDX+1<L.activities.length?AIDX+1:null;
@@ -401,17 +405,41 @@ function actLab(){
   }; draw();
 }
 
+/* ---------- write (تعبير) ---------- */
+function actWrite(){
+  const A=ACT; let st=0;
+  const pages=[
+    ()=>`<div class="card"><div class="scene">✍️</div><h2>${esc(A.prompt)}</h2><ul class="labneed">${A.points.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+      <p class="note">${esc(A.note||"")}</p></div>`,
+    ()=>`<div class="card"><h2>🧱 ${tr("ترتيب الرسالة","Plan")}</h2>${A.plan.map((x,i)=>`<div class="wplan"><b>${i+1}</b> <span><b>${esc(x[0])}:</b> ${esc(x[1])}</span></div>`).join("")}</div>`,
+    ()=>`<div class="card"><h2>🔗 ${tr("أدوات الربط وعلامات الترقيم","Linking words")}</h2><div class="chips">${A.links.map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div>
+      <p class="note" style="margin-top:8px">${esc(A.punct||"")}</p></div>`,
+    ()=>`<div class="card passage"><h2>📜 ${tr("نموذج للاسترشاد","Model")}</h2>${A.model.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`,
+    ()=>`<div class="card"><div class="scene">📝</div><h2>${tr("دلوقتي دورك!","Your turn!")}</h2><p class="sub">${tr("اكتب الموضوع في كراستك بخط جميل، وبعدين خلّي بابا أو ماما يراجعوه معاك.","Write it in your notebook, then check it with Dad or Mum.")}</p>
+      ${A.check.map((x,i)=>`<label class="wchk"><input type="checkbox" data-c="${i}"> ${esc(x)}</label>`).join("")}</div>`];
+  const draw=()=>{ const last=st===pages.length-1;
+    $("view").innerHTML=shell(`<div class="dots">${pages.map((_,i)=>`<i class="${i===st?"on":""}"></i>`).join("")}</div>${pages[st]()}
+      <div class="row2">${st?`<button class="btn w" id="wb">${tr("→ اللي فات","← Back")}</button>`:""}<button class="btn ${last?"g":""}" id="wn">${last?tr("كتبت الموضوع ✅","Done ✅"):tr("اللي بعده ←","Next →")}</button></div>`);
+    if($("wb")) $("wb").onclick=()=>{st--;draw()};
+    $("wn").onclick=()=>{ if(!last){st++;draw();return}
+      const n=document.querySelectorAll("[data-c]:checked").length; if(n<A.check.length){toast(tr("علّم على كل النقط الأول ✔️","Tick all the boxes first ✔️"));return}
+      finish(2,tr("كاتب شاطر!","Great writer!"),tr("كتبت الموضوع وراجعته.","You wrote and checked it."),"✍️"); };
+  }; draw();
+}
+
 /* ---------- quiz ---------- */
 function actQuiz(){
-  const A=ACT,order=shuffle(A.items.map((_,i)=>i)),res=[];let qi=0,score=0;const animals=["🦉","🐫","🦜","🐢","🦊","🐘","🐸","🦒","🐧","🦁"];
+  const A=ACT,order=A.ordered?A.items.map((_,i)=>i):shuffle(A.items.map((_,i)=>i)),res=[];let qi=0,score=0;const animals=["🦉","🐫","🦜","🐢","🦊","🐘","🐸","🦒","🐧","🦁"];
   const eggs=()=>order.map((_,i)=>`<span id="egg${i}">${i<qi?(res[i]?"🐥":"🥚"):"⚪"}</span>`).join("");
   const show=()=>{
     if(qi>=order.length){S.eggs+=score;save();return finish(3,score>=8?tr("بطل المغامرة!","Adventure champion!"):tr("خلّصت المغامرة!","Adventure complete!"),tr(`فقّست ${score} كتكوت في مزرعتك 🐥`,`You hatched ${score} chicks on your farm 🐥`),score>=8?"🏆":"🐣")}
     const Q=A.items[order[qi]];
-    $("view").innerHTML=shell(`<div class="eggs">${eggs()}</div><div class="card"><div class="anim">${animals[qi%10]}</div>
+    const pas=A.passage?`<button class="btn w" id="pbtn" style="font-size:16px;padding:6px 14px">📄 ${tr("اقرأ النص","Read the text")}</button><div id="pbox" class="card passage" style="display:none">${A.passage.map((p,i)=>`<p><b class="pn">${i+1}</b> ${esc(p)}</p>`).join("")}</div>`:"";
+    $("view").innerHTML=shell(`<div class="eggs">${eggs()}</div>${pas}<div class="card"><div class="anim">${animals[qi%10]}</div>
       <div class="q">${esc(Q.q)} <button class="back" style="font-size:16px" id="qs">🔊</button></div>
       <div class="opts">${Q.o.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join("")}</div></div>`);
     $("qs").onclick=()=>speak(Q.q); speak(Q.q);
+    if(A.passage) $("pbtn").onclick=()=>{const b=$("pbox");b.style.display=b.style.display==="none"?"block":"none"};
     document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{document.querySelectorAll(".opt").forEach(z=>z.disabled=true);const ok=+b.dataset.i===Q.a;b.classList.add(ok?"ok":"no");
       if(!ok){document.querySelectorAll(".opt")[Q.a].classList.add("ok");miss(`${Q.q} ← ${Q.o[Q.a]}`);speak(LANG==="en"?"The right answer is: "+Q.o[Q.a].replace(/[^A-Za-z0-9 ,.'-]/g,""):"الإجابة الصح: "+Q.o[Q.a].replace(/[^؀-ۿ ]/g,""))}else{score++;toast("🐥");speak(tr("برافو","Well done!"))}
       res[qi]=ok;qi++;const t=setTimeout(show,ok?1100:2300);stopGame=()=>clearTimeout(t)});
