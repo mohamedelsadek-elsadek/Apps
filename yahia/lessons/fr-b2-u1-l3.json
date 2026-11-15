@@ -1,0 +1,430 @@
+{
+ "id": "fr-b2-u1-l3",
+ "title": "Quel métier tu veux faire plus tard ?",
+ "source": "Resource Période 2 — Leçon 3 p.4-22 + Fiches 2026-2027",
+ "activities": [
+  {
+   "type": "story",
+   "title": "La lettre d'Érica",
+   "ico": "📖",
+   "keys": [
+    "chanteuse",
+    "pompier",
+    "policier",
+    "vétérinaire",
+    "veut",
+    "veux"
+   ],
+   "scenes": [
+    {
+     "e": "✉️👧",
+     "t": "Bonjour Lise, je m'appelle Érica."
+    },
+    {
+     "e": "🎤👧",
+     "t": "Ma sœur Clara adore chanter. Elle fait de la musique et elle veut être chanteuse."
+    },
+    {
+     "e": "🚒👮",
+     "t": "Mon frère Basile déteste chanter. Il veut être pompier ou policier."
+    },
+    {
+     "e": "🐶🐱",
+     "t": "Moi, je n'aime pas chanter ou danser, mais j'adore les animaux."
+    },
+    {
+     "e": "🩺🐾",
+     "t": "Je veux être vétérinaire comme mon père !"
+    },
+    {
+     "e": "❓💌",
+     "t": "Et toi, qu'est-ce que tu veux faire ? Bisous, Érica."
+    },
+    {
+     "e": "📝⭐",
+     "t": "Le verbe vouloir : je veux, tu veux, il veut, elle veut, on veut."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Les métiers",
+   "ico": "👷",
+   "items": [
+    {
+     "w": "un chanteur / une chanteuse",
+     "e": "🎤",
+     "k": "ex",
+     "a": "Il aime chanter."
+    },
+    {
+     "w": "un danseur / une danseuse",
+     "e": "💃",
+     "k": "ex",
+     "a": "Il aime danser."
+    },
+    {
+     "w": "un vétérinaire / une vétérinaire",
+     "e": "🐶",
+     "k": "ex",
+     "a": "Il aide les animaux."
+    },
+    {
+     "w": "un policier / une policière",
+     "e": "👮",
+     "k": "ex",
+     "a": "Il attrape les criminels."
+    },
+    {
+     "w": "un docteur / une docteur",
+     "e": "🩺",
+     "k": "ex",
+     "a": "Il aide les malades."
+    },
+    {
+     "w": "un pompier / une pompière",
+     "e": "🚒",
+     "k": "ex",
+     "a": "Il éteint le feu."
+    },
+    {
+     "w": "Je veux être …",
+     "e": "🌟",
+     "k": "ex",
+     "a": "Je veux être docteur."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Qui suis-je ?",
+   "ico": "🧠",
+   "prompt": "Relie le métier et son travail !",
+   "pairs": [
+    [
+     "un chanteur",
+     "Il aime chanter."
+    ],
+    [
+     "un danseur",
+     "Il aime danser."
+    ],
+    [
+     "un vétérinaire",
+     "Il aide les animaux."
+    ],
+    [
+     "un policier",
+     "Il attrape les criminels."
+    ],
+    [
+     "un docteur",
+     "Il aide les malades."
+    ],
+    [
+     "un pompier",
+     "Il éteint le feu."
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "veux ou veut ?",
+   "ico": "📝",
+   "prompt": "Choisis la bonne forme du verbe vouloir !",
+   "bins": [
+    {
+     "id": "veux",
+     "label": "veux (je / tu)",
+     "ico": "🙋",
+     "cls": "noun"
+    },
+    {
+     "id": "veut",
+     "label": "veut (il / elle / on)",
+     "ico": "👫",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "veux": "je veux · tu veux",
+    "veut": "il veut · elle veut · on veut"
+   },
+   "items": [
+    [
+     "Je ___ être policier.",
+     "veux"
+    ],
+    [
+     "Elle ___ être vétérinaire.",
+     "veut"
+    ],
+    [
+     "Il ___ être pompier.",
+     "veut"
+    ],
+    [
+     "Tu ___ être chanteur.",
+     "veux"
+    ],
+    [
+     "On ___ être docteur.",
+     "veut"
+    ],
+    [
+     "Je ___ être danseuse.",
+     "veux"
+    ],
+    [
+     "Clara ___ être chanteuse.",
+     "veut"
+    ],
+    [
+     "Tu ___ être vétérinaire.",
+     "veux"
+    ],
+    [
+     "Basile ___ être pompier.",
+     "veut"
+    ],
+    [
+     "Érica ___ être vétérinaire.",
+     "veut"
+    ]
+   ],
+   "help": "<b>Le verbe vouloir</b><br>je veux · tu veux · il veut · elle veut · on veut"
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Garçon ou fille ?",
+   "ico": "👦👧",
+   "prompt": "un … 👦 ou une … 👧 ?",
+   "bins": [
+    {
+     "id": "m",
+     "label": "un",
+     "ico": "👦",
+     "cls": "verb"
+    },
+    {
+     "id": "f",
+     "label": "une",
+     "ico": "👧",
+     "cls": "noun"
+    }
+   ],
+   "why": {
+    "m": "un chanteur, un policier",
+    "f": "une chanteuse, une policière"
+   },
+   "items": [
+    [
+     "chanteur",
+     "m"
+    ],
+    [
+     "chanteuse",
+     "f"
+    ],
+    [
+     "danseuse",
+     "f"
+    ],
+    [
+     "danseur",
+     "m"
+    ],
+    [
+     "policière",
+     "f"
+    ],
+    [
+     "policier",
+     "m"
+    ],
+    [
+     "pompier",
+     "m"
+    ],
+    [
+     "pompière",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Le son « ier » ou « ou » ?",
+   "ico": "🔊",
+   "prompt": "Écoute le mot : « ier » ou « ou » ?",
+   "bins": [
+    {
+     "id": "ier",
+     "label": "ier",
+     "ico": "🔊",
+     "cls": "sun"
+    },
+    {
+     "id": "ou",
+     "label": "ou",
+     "ico": "🔉",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "ier": "policier, pompier, cahier",
+    "ou": "rouge, jour, loup"
+   },
+   "items": [
+    [
+     "policier",
+     "ier"
+    ],
+    [
+     "rouge",
+     "ou"
+    ],
+    [
+     "pompier",
+     "ier"
+    ],
+    [
+     "jour",
+     "ou"
+    ],
+    [
+     "cahier",
+     "ier"
+    ],
+    [
+     "poule",
+     "ou"
+    ],
+    [
+     "janvier",
+     "ier"
+    ],
+    [
+     "loup",
+     "ou"
+    ],
+    [
+     "février",
+     "ier"
+    ],
+    [
+     "bouche",
+     "ou"
+    ],
+    [
+     "escalier",
+     "ier"
+    ],
+    [
+     "ours",
+     "ou"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "La grande aventure",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "🎤 Il aime chanter. C'est …",
+     "o": [
+      "un pompier",
+      "un chanteur",
+      "un docteur"
+     ],
+     "a": 1
+    },
+    {
+     "q": "🚒 Il éteint le feu. C'est …",
+     "o": [
+      "un pompier",
+      "un policier",
+      "un danseur"
+     ],
+     "a": 0
+    },
+    {
+     "q": "🩺 Il aide les malades. C'est …",
+     "o": [
+      "un vétérinaire",
+      "un chanteur",
+      "un docteur"
+     ],
+     "a": 2
+    },
+    {
+     "q": "🐶 Elle aide les animaux. C'est …",
+     "o": [
+      "une vétérinaire",
+      "une danseuse",
+      "une policière"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Je ___ être policier.",
+     "o": [
+      "veut",
+      "veux",
+      "veulent"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Elle ___ être vétérinaire.",
+     "o": [
+      "veux",
+      "veut",
+      "vouloir"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Clara veut être …",
+     "o": [
+      "vétérinaire",
+      "danseuse",
+      "chanteuse"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Basile veut être …",
+     "o": [
+      "pompier ou policier",
+      "chanteur",
+      "docteur"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Érica veut être …",
+     "o": [
+      "chanteuse",
+      "vétérinaire",
+      "policière"
+     ],
+     "a": 1
+    },
+    {
+     "q": "J'adore les animaux. Je veux être …",
+     "o": [
+      "pompier",
+      "vétérinaire",
+      "danseur"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,247 @@
+{
+ "id": "fr-b1-ex-1",
+ "title": "Révision Période 1 : Sara et Juliette",
+ "source": "Revision Sheet 3 + Sheet 1 — Période 1",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Sara et Juliette",
+   "ico": "📖",
+   "keys": [
+    "égyptienne",
+    "française",
+    "cheveux",
+    "yeux",
+    "parle",
+    "mince"
+   ],
+   "scenes": [
+    {
+     "e": "👧🇪🇬",
+     "t": "Bonjour ! Je m'appelle Sara. J'ai 9 ans. Je suis égyptienne."
+    },
+    {
+     "e": "🗣️📖",
+     "t": "Je parle arabe et un peu français."
+    },
+    {
+     "e": "💇‍♀️⚫",
+     "t": "J'ai les cheveux noirs et courts."
+    },
+    {
+     "e": "👧🇫🇷",
+     "t": "Mon amie s'appelle Juliette. Elle a 11 ans. Elle est française."
+    },
+    {
+     "e": "🗣️📚",
+     "t": "Elle parle français, anglais et un peu arabe."
+    },
+    {
+     "e": "🧍‍♀️💚",
+     "t": "Elle est mince. Elle a les cheveux bruns et les yeux verts."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Question → réponse",
+   "ico": "💬",
+   "prompt": "Relie la question et la réponse !",
+   "pairs": [
+    [
+     "Tu as quel âge ?",
+     "J'ai 9 ans."
+    ],
+    [
+     "Tu habites où ?",
+     "J'habite en Égypte."
+    ],
+    [
+     "Quelle est ta nationalité ?",
+     "Je suis égyptien."
+    ],
+    [
+     "Tu parles quelle langue ?",
+     "Je parle arabe."
+    ],
+    [
+     "Il est comment ?",
+     "Il est grand."
+    ],
+    [
+     "Comment tu t'appelles ?",
+     "Je m'appelle Yahia."
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Avoir ou être ?",
+   "ico": "📝",
+   "prompt": "Quel verbe dans la phrase ?",
+   "bins": [
+    {
+     "id": "av",
+     "label": "avoir",
+     "ico": "🎒",
+     "cls": "noun"
+    },
+    {
+     "id": "et",
+     "label": "être",
+     "ico": "⭐",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "av": "avoir : j'ai, tu as, il a",
+    "et": "être : je suis, tu es, il est"
+   },
+   "items": [
+    [
+     "Je suis égyptienne.",
+     "et"
+    ],
+    [
+     "J'ai les cheveux noirs.",
+     "av"
+    ],
+    [
+     "Elle est française.",
+     "et"
+    ],
+    [
+     "Elle a 11 ans.",
+     "av"
+    ],
+    [
+     "Il est grand.",
+     "et"
+    ],
+    [
+     "Tu as les yeux verts.",
+     "av"
+    ],
+    [
+     "On est sympa.",
+     "et"
+    ],
+    [
+     "Elle a les cheveux bruns.",
+     "av"
+    ],
+    [
+     "Tu es drôle.",
+     "et"
+    ],
+    [
+     "J'ai les yeux marron.",
+     "av"
+    ],
+    [
+     "Il a les cheveux courts.",
+     "av"
+    ],
+    [
+     "Je suis petit.",
+     "et"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Révision",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Sara a … ans.",
+     "o": [
+      "onze",
+      "neuf",
+      "dix"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Sara a les cheveux …",
+     "o": [
+      "noirs",
+      "bruns",
+      "blonds"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Juliette parle …",
+     "o": [
+      "espagnol",
+      "portugais",
+      "français"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Sara parle arabe et un peu anglais.",
+     "o": [
+      "Vrai ✅",
+      "Faux ❌"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Juliette est grosse.",
+     "o": [
+      "Vrai ✅",
+      "Faux ❌"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Juliette a les yeux verts.",
+     "o": [
+      "Vrai ✅",
+      "Faux ❌"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Juliette a … ans.",
+     "o": [
+      "neuf",
+      "onze",
+      "dix"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Sara est …",
+     "o": [
+      "française",
+      "égyptienne",
+      "chinoise"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Il est français et il parle …",
+     "o": [
+      "français",
+      "chinois",
+      "espagnol"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Il ___ les yeux bleus.",
+     "o": [
+      "est",
+      "es",
+      "a"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ]
+}

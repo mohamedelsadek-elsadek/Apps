@@ -1,0 +1,400 @@
+{
+ "id": "fr-b1-u0-l1",
+ "title": "Présente-toi !",
+ "source": "Resource Période 1 — Unité 0 p.4-13",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Ali et Mariam",
+   "ico": "📖",
+   "keys": [
+    "Bonjour",
+    "m'appelle",
+    "J'ai",
+    "J'habite",
+    "parle",
+    "J'aime",
+    "préfère"
+   ],
+   "scenes": [
+    {
+     "e": "👋🙂",
+     "t": "Mariam : Bonjour ! Comment tu t'appelles ? Ali : Je m'appelle Ali, et toi ?"
+    },
+    {
+     "e": "🎂9️⃣",
+     "t": "Mariam : Je m'appelle Mariam. Tu as quel âge ? Ali : J'ai 9 ans."
+    },
+    {
+     "e": "🏠🇪🇬",
+     "t": "Mariam : Tu habites où ? Ali : J'habite au Caire, en Égypte."
+    },
+    {
+     "e": "🗣️📚",
+     "t": "Mariam : Tu parles quelle langue ? Ali : Je parle arabe, anglais et français."
+    },
+    {
+     "e": "⚽🎾",
+     "t": "Mariam : Qu'est-ce que tu aimes ? Ali : J'aime le football et je n'aime pas le tennis."
+    },
+    {
+     "e": "💙💚",
+     "t": "Mariam : Quelle est ta couleur préférée ? Ali : J'aime le bleu et le vert."
+    },
+    {
+     "e": "🐱🐶",
+     "t": "Mariam : Quel est ton animal préféré ? Ali : Je préfère le chat et le chien."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Les mots",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "nager",
+     "e": "🏊",
+     "k": "ex",
+     "a": "J'aime nager."
+    },
+    {
+     "w": "dessiner",
+     "e": "🎨",
+     "k": "ex",
+     "a": "J'aime dessiner."
+    },
+    {
+     "w": "chanter",
+     "e": "🎤",
+     "k": "ex",
+     "a": "J'aime chanter."
+    },
+    {
+     "w": "courir",
+     "e": "🏃",
+     "k": "ex",
+     "a": "Je n'aime pas courir."
+    },
+    {
+     "w": "jouer au foot",
+     "e": "⚽",
+     "k": "ex",
+     "a": "J'aime jouer au foot."
+    },
+    {
+     "w": "jouer aux jeux vidéo",
+     "e": "🎮",
+     "k": "ex",
+     "a": "J'aime jouer aux jeux vidéo."
+    },
+    {
+     "w": "la famille",
+     "e": "👨‍👩‍👧‍👦",
+     "k": "ex",
+     "a": "Mon père, ma mère, mon frère et ma sœur."
+    },
+    {
+     "w": "les jours",
+     "e": "📅",
+     "k": "ex",
+     "a": "lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche"
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Les nombres",
+   "ico": "🔢",
+   "prompt": "Relie le nombre et le mot !",
+   "pairs": [
+    [
+     "3",
+     "trois"
+    ],
+    [
+     "7",
+     "sept"
+    ],
+    [
+     "9",
+     "neuf"
+    ],
+    [
+     "11",
+     "onze"
+    ],
+    [
+     "16",
+     "seize"
+    ],
+    [
+     "20",
+     "vingt"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Jour, couleur ou nombre ?",
+   "ico": "🐦",
+   "prompt": "Mets chaque mot dans sa maison !",
+   "bins": [
+    {
+     "id": "j",
+     "label": "jour",
+     "ico": "📅",
+     "cls": "noun"
+    },
+    {
+     "id": "c",
+     "label": "couleur",
+     "ico": "🎨",
+     "cls": "sun"
+    },
+    {
+     "id": "n",
+     "label": "nombre",
+     "ico": "🔢",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "j": "lundi … dimanche",
+    "c": "rouge, vert, bleu…",
+    "n": "un, deux, trois…"
+   },
+   "items": [
+    [
+     "lundi",
+     "j"
+    ],
+    [
+     "rouge",
+     "c"
+    ],
+    [
+     "huit",
+     "n"
+    ],
+    [
+     "mercredi",
+     "j"
+    ],
+    [
+     "vert",
+     "c"
+    ],
+    [
+     "quatorze",
+     "n"
+    ],
+    [
+     "dimanche",
+     "j"
+    ],
+    [
+     "jaune",
+     "c"
+    ],
+    [
+     "dix",
+     "n"
+    ],
+    [
+     "vendredi",
+     "j"
+    ],
+    [
+     "bleu",
+     "c"
+    ],
+    [
+     "deux",
+     "n"
+    ],
+    [
+     "jeudi",
+     "j"
+    ],
+    [
+     "noir",
+     "c"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Famille ou école ?",
+   "ico": "🎒",
+   "prompt": "La famille 👨‍👩‍👧 ou les fournitures scolaires 🎒 ?",
+   "bins": [
+    {
+     "id": "f",
+     "label": "la famille",
+     "ico": "👨‍👩‍👧",
+     "cls": "noun"
+    },
+    {
+     "id": "e",
+     "label": "l'école",
+     "ico": "🎒",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "f": "les membres de la famille",
+    "e": "les fournitures scolaires"
+   },
+   "items": [
+    [
+     "le père",
+     "f"
+    ],
+    [
+     "un stylo",
+     "e"
+    ],
+    [
+     "la mère",
+     "f"
+    ],
+    [
+     "une gomme",
+     "e"
+    ],
+    [
+     "le frère",
+     "f"
+    ],
+    [
+     "un cahier",
+     "e"
+    ],
+    [
+     "la sœur",
+     "f"
+    ],
+    [
+     "une règle",
+     "e"
+    ],
+    [
+     "le grand-père",
+     "f"
+    ],
+    [
+     "un crayon",
+     "e"
+    ],
+    [
+     "la grand-mère",
+     "f"
+    ],
+    [
+     "un cartable",
+     "e"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "La grande aventure",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Comment tu t'appelles ?",
+     "o": [
+      "Je m'appelle Ali.",
+      "J'ai 9 ans.",
+      "J'habite au Caire."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Tu as quel âge ?",
+     "o": [
+      "J'aime le bleu.",
+      "J'ai 9 ans.",
+      "Je parle arabe."
+     ],
+     "a": 1
+    },
+    {
+     "q": "Tu habites où ?",
+     "o": [
+      "Je préfère le chat.",
+      "Je suis Ali.",
+      "J'habite en Égypte."
+     ],
+     "a": 2
+    },
+    {
+     "q": "Tu parles quelle langue ?",
+     "o": [
+      "Je parle arabe et français.",
+      "J'habite au Caire.",
+      "J'ai 9 ans."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Quelle est ta nationalité ?",
+     "o": [
+      "Je parle égyptien.",
+      "Je suis égyptien.",
+      "J'habite égyptien."
+     ],
+     "a": 1
+    },
+    {
+     "q": "Après lundi, c'est …",
+     "o": [
+      "jeudi",
+      "dimanche",
+      "mardi"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Le dernier jour de la semaine, c'est …",
+     "o": [
+      "dimanche",
+      "mercredi",
+      "lundi"
+     ],
+     "a": 0
+    },
+    {
+     "q": "10 + 2 = …",
+     "o": [
+      "deux",
+      "douze",
+      "dix-huit"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Quel est ton animal préféré ?",
+     "o": [
+      "Je préfère le chat.",
+      "J'aime le vert.",
+      "Je n'aime pas le tennis."
+     ],
+     "a": 0
+    },
+    {
+     "q": "La mère de mon père, c'est ma …",
+     "o": [
+      "sœur",
+      "grand-mère",
+      "tante"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ]
+}

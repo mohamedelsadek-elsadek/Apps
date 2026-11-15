@@ -1,0 +1,322 @@
+{
+ "id": "fr-b1-u1-l1",
+ "title": "Il est comment ? Les yeux et les cheveux",
+ "source": "Resource Période 1 — Leçon 1 p.14-22, 27 + Sheet 1",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Le correspondant de Mehdi",
+   "ico": "📖",
+   "keys": [
+    "yeux",
+    "cheveux",
+    "noirs",
+    "courts",
+    "drôle"
+   ],
+   "scenes": [
+    {
+     "e": "👋😊",
+     "t": "Lilly : Salut Mehdi, ça va ? Mehdi : Oui, ça va bien ! J'ai un nouveau correspondant !"
+    },
+    {
+     "e": "🧒✨",
+     "t": "Lilly : Super ! Comment il s'appelle ? Mehdi : Il s'appelle Dawei."
+    },
+    {
+     "e": "🎂⚽",
+     "t": "Lilly : Il a ton âge ? Mehdi : Non, il a 9 ans. Il est très drôle et il adore le sport !"
+    },
+    {
+     "e": "🤔❓",
+     "t": "Lilly : Génial ! Et il est comment ?"
+    },
+    {
+     "e": "💇‍♂️⚫",
+     "t": "Mehdi : Il a les cheveux noirs et courts !"
+    },
+    {
+     "e": "👀⚫",
+     "t": "Lilly : Et il a les yeux de quelle couleur ? Mehdi : Il a les yeux noirs !"
+    },
+    {
+     "e": "📝⭐",
+     "t": "Le verbe avoir : j'ai, tu as, il a, elle a, on a."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Les mots",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "les yeux",
+     "e": "👀",
+     "k": "ex",
+     "a": "J'ai les yeux bleus."
+    },
+    {
+     "w": "les cheveux",
+     "e": "💇",
+     "k": "ex",
+     "a": "Elle a les cheveux longs."
+    },
+    {
+     "w": "blonds",
+     "e": "👱",
+     "k": "ex",
+     "a": "Il a les cheveux blonds."
+    },
+    {
+     "w": "roux",
+     "e": "🧑‍🦰",
+     "k": "ex",
+     "a": "Elle a les cheveux roux."
+    },
+    {
+     "w": "bruns",
+     "e": "🟤",
+     "k": "ex",
+     "a": "Tu as les cheveux bruns."
+    },
+    {
+     "w": "courts",
+     "e": "✂️",
+     "k": "ex",
+     "a": "Il a les cheveux courts."
+    },
+    {
+     "w": "longs",
+     "e": "👸",
+     "k": "ex",
+     "a": "Elle a les cheveux longs."
+    },
+    {
+     "w": "marron",
+     "e": "🌰",
+     "k": "ex",
+     "a": "Tu as les yeux marron."
+    },
+    {
+     "w": "verts",
+     "e": "💚",
+     "k": "ex",
+     "a": "Elle a les yeux verts."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Mémoire",
+   "ico": "🧠",
+   "prompt": "Relie l'image et les mots !",
+   "pairs": [
+    [
+     "👱",
+     "les cheveux blonds"
+    ],
+    [
+     "🧑‍🦰",
+     "les cheveux roux"
+    ],
+    [
+     "👀💙",
+     "les yeux bleus"
+    ],
+    [
+     "👀💚",
+     "les yeux verts"
+    ],
+    [
+     "💇‍♀️📏",
+     "les cheveux longs"
+    ],
+    [
+     "✂️💇‍♂️",
+     "les cheveux courts"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "ai, as ou a ?",
+   "ico": "📝",
+   "prompt": "Choisis la bonne forme du verbe avoir !",
+   "bins": [
+    {
+     "id": "ai",
+     "label": "ai (j')",
+     "ico": "🙋",
+     "cls": "noun"
+    },
+    {
+     "id": "as",
+     "label": "as (tu)",
+     "ico": "👉",
+     "cls": "sun"
+    },
+    {
+     "id": "a",
+     "label": "a (il / elle / on)",
+     "ico": "👫",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "ai": "je → j'ai",
+    "as": "tu → tu as",
+    "a": "il / elle / on → a"
+   },
+   "items": [
+    [
+     "J'___ les yeux bleus.",
+     "ai"
+    ],
+    [
+     "Tu ___ les cheveux roux.",
+     "as"
+    ],
+    [
+     "Il ___ les cheveux noirs.",
+     "a"
+    ],
+    [
+     "Elle ___ les yeux verts.",
+     "a"
+    ],
+    [
+     "On ___ les cheveux bruns.",
+     "a"
+    ],
+    [
+     "J'___ les cheveux longs.",
+     "ai"
+    ],
+    [
+     "Tu ___ les yeux marron.",
+     "as"
+    ],
+    [
+     "Dawei ___ 9 ans.",
+     "a"
+    ],
+    [
+     "Tu ___ les cheveux courts.",
+     "as"
+    ],
+    [
+     "J'___ les cheveux blonds.",
+     "ai"
+    ],
+    [
+     "Elle ___ les cheveux courts et roux.",
+     "a"
+    ],
+    [
+     "Tu ___ quel âge ?",
+     "as"
+    ]
+   ],
+   "help": "<b>Le verbe avoir</b><br>j'ai · tu as · il a · elle a · on a"
+  },
+  {
+   "type": "quiz",
+   "title": "La grande aventure",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "👱‍♂️ Il est comment ?",
+     "o": [
+      "Il a les cheveux blonds.",
+      "Il a les cheveux roux.",
+      "Il a les cheveux noirs."
+     ],
+     "a": 0
+    },
+    {
+     "q": "🧑‍🦰 Elle est comment ?",
+     "o": [
+      "Elle a les cheveux blonds.",
+      "Elle a les cheveux roux.",
+      "Elle a les cheveux blancs."
+     ],
+     "a": 1
+    },
+    {
+     "q": "Tu ___ les yeux verts.",
+     "o": [
+      "ai",
+      "a",
+      "as"
+     ],
+     "a": 2
+    },
+    {
+     "q": "J'___ les cheveux noirs.",
+     "o": [
+      "ai",
+      "as",
+      "a"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Elle ___ les cheveux longs.",
+     "o": [
+      "as",
+      "a",
+      "ai"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Mets en ordre : bleus – J'ai – les yeux",
+     "o": [
+      "Les yeux j'ai bleus.",
+      "J'ai les yeux bleus.",
+      "Bleus j'ai les yeux."
+     ],
+     "a": 1
+    },
+    {
+     "q": "Mets en ordre : longs – Elle a – les cheveux",
+     "o": [
+      "Elle a les cheveux longs.",
+      "Les cheveux elle a longs.",
+      "Longs elle a les cheveux."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Dawei a les cheveux …",
+     "o": [
+      "blonds et longs",
+      "roux et courts",
+      "noirs et courts"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Dawei a quel âge ?",
+     "o": [
+      "9 ans",
+      "10 ans",
+      "7 ans"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Le contraire de « courts », c'est …",
+     "o": [
+      "roux",
+      "longs",
+      "bruns"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ]
+}

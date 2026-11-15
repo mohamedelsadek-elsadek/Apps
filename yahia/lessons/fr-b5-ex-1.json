@@ -1,0 +1,152 @@
+{
+ "id": "fr-b5-ex-1",
+ "title": "Le carnaval et les fêtes",
+ "source": "Revision Sheet 1 — Block 5 (Extra, Port Said)",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Le carnaval de l'école",
+   "ico": "📖",
+   "keys": [
+    "carnaval",
+    "décore",
+    "musique",
+    "danse",
+    "crêpes",
+    "magicienne",
+    "princesse"
+   ],
+   "scenes": [
+    {
+     "e": "👧🎭",
+     "t": "Salut, moi c'est Juliette. À l'école, il y a un carnaval."
+    },
+    {
+     "e": "🎨🏫",
+     "t": "Pablo décore l'école avec ses amis."
+    },
+    {
+     "e": "🎵🎹",
+     "t": "Manon fait de la musique."
+    },
+    {
+     "e": "💃👯",
+     "t": "Lilly fait un défilé et elle danse avec son amie."
+    },
+    {
+     "e": "🥞👦",
+     "t": "Louis et Mehdi font des crêpes."
+    },
+    {
+     "e": "🧙‍♀️👸",
+     "t": "Moi, je me déguise en magicienne et mon amie se déguise en princesse."
+    },
+    {
+     "e": "😄🎉",
+     "t": "Tout le monde est content au carnaval."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Les fêtes",
+   "ico": "📅",
+   "prompt": "Relie la fête et le moment !",
+   "pairs": [
+    [
+     "le carnaval",
+     "février 🎭"
+    ],
+    [
+     "le poisson d'avril",
+     "avril 🐟"
+    ],
+    [
+     "la rentrée",
+     "septembre 🎒"
+    ],
+    [
+     "les grandes vacances",
+     "je voyage ✈️"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Révision",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Pablo décore …",
+     "o": [
+      "l'école",
+      "la maison",
+      "la classe"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Manon fait de la …",
+     "o": [
+      "cuisine",
+      "danse",
+      "musique"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Louis et Mehdi font des …",
+     "o": [
+      "gâteaux",
+      "crêpes",
+      "pizzas"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Le carnaval est au club.",
+     "o": [
+      "Vrai ✅",
+      "Faux ❌"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Lilly danse avec son amie.",
+     "o": [
+      "Vrai ✅",
+      "Faux ❌"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Juliette se déguise en …",
+     "o": [
+      "princesse",
+      "pirate",
+      "magicienne"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Le carnaval, c'est en …",
+     "o": [
+      "février",
+      "avril",
+      "septembre"
+     ],
+     "a": 0
+    },
+    {
+     "q": "La rentrée : en septembre, je …",
+     "o": [
+      "voyage avec ma famille",
+      "retourne à l'école",
+      "me déguise en pirate"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ]
+}

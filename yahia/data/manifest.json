@@ -126,6 +126,130 @@
    "status": "soon"
   },
   {
+   "id": "fr",
+   "title": "Français",
+   "ico": "🗼",
+   "color": "#3d6bff",
+   "status": "ready",
+   "lang": "fr",
+   "blocks": [
+    {
+     "id": "b1",
+     "title": "Période 1",
+     "units": [
+      {
+       "id": "u0",
+       "title": "Unité 0 : Révision",
+       "ico": "🙋",
+       "lessons": [
+        {
+         "id": "fr-b1-u0-l1",
+         "title": "Présente-toi !",
+         "ico": "🙋",
+         "file": "lessons/fr-b1-u0-l1.json"
+        }
+       ]
+      },
+      {
+       "id": "u1",
+       "title": "Unité 1 : Les correspondants de Lilly et Mehdi",
+       "ico": "✉️",
+       "lessons": [
+        {
+         "id": "fr-b1-u1-l1",
+         "title": "Il est comment ? Les yeux et les cheveux",
+         "ico": "👀",
+         "file": "lessons/fr-b1-u1-l1.json"
+        },
+        {
+         "id": "fr-b1-u1-l2",
+         "title": "Grand, petit, sympa… Le verbe être",
+         "ico": "📏",
+         "file": "lessons/fr-b1-u1-l2.json"
+        },
+        {
+         "id": "fr-b1-u1-l3",
+         "title": "Parle de ton correspondant ! Pays et langues",
+         "ico": "🌍",
+         "file": "lessons/fr-b1-u1-l3.json"
+        }
+       ]
+      },
+      {
+       "id": "ex",
+       "title": "🏆 Révision",
+       "ico": "🏆",
+       "lessons": [
+        {
+         "id": "fr-b1-ex-1",
+         "title": "Révision Période 1 : Sara et Juliette",
+         "ico": "📝",
+         "file": "lessons/fr-b1-ex-1.json"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b2",
+     "title": "Période 2",
+     "units": [
+      {
+       "id": "u1",
+       "title": "Unité 1 : Les correspondants (suite)",
+       "ico": "✉️",
+       "lessons": [
+        {
+         "id": "fr-b2-u1-l3",
+         "title": "Quel métier tu veux faire plus tard ?",
+         "ico": "👩‍🚒",
+         "file": "lessons/fr-b2-u1-l3.json"
+        },
+        {
+         "id": "fr-b2-u1-l4",
+         "title": "Je cuisine bien, et toi ?",
+         "ico": "🍳",
+         "file": "lessons/fr-b2-u1-l4.json"
+        }
+       ]
+      },
+      {
+       "id": "ex",
+       "title": "🏆 Révision",
+       "ico": "🏆",
+       "lessons": [
+        {
+         "id": "fr-b2-ex-1",
+         "title": "Révision Période 2 : Léo et Sandrine",
+         "ico": "📝",
+         "file": "lessons/fr-b2-ex-1.json"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b5",
+     "title": "Période 5",
+     "units": [
+      {
+       "id": "ex",
+       "title": "🏆 Révision (Extra)",
+       "ico": "🏆",
+       "lessons": [
+        {
+         "id": "fr-b5-ex-1",
+         "title": "Le carnaval et les fêtes",
+         "ico": "🎭",
+         "file": "lessons/fr-b5-ex-1.json"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
    "id": "sc",
    "title": "Science",
    "ico": "🔬",

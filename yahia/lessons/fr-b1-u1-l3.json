@@ -1,0 +1,406 @@
+{
+ "id": "fr-b1-u1-l3",
+ "title": "Parle de ton correspondant ! Pays et langues",
+ "source": "Resource Période 1 — Leçon 2 p.33-41",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Louis et Sophie",
+   "ico": "📖",
+   "keys": [
+    "nationalité",
+    "française",
+    "J'habite",
+    "France",
+    "parle",
+    "Chine",
+    "chinois",
+    "Égypte",
+    "égyptien"
+   ],
+   "scenes": [
+    {
+     "e": "👋😊",
+     "t": "Louis : Bonjour ! Comment tu t'appelles ? Sophie : Je m'appelle Sophie, et toi ?"
+    },
+    {
+     "e": "🎂9️⃣",
+     "t": "Louis : Je m'appelle Louis. Tu as quel âge ? Sophie : J'ai 9 ans."
+    },
+    {
+     "e": "🇫🇷👧",
+     "t": "Louis : Quelle est ta nationalité ? Sophie : Je suis française."
+    },
+    {
+     "e": "🗼🏠",
+     "t": "Louis : Tu habites où ? Sophie : J'habite à Paris, en France."
+    },
+    {
+     "e": "🗣️📚",
+     "t": "Louis : Tu parles quelle langue ? Sophie : Je parle français, anglais et un peu arabe."
+    },
+    {
+     "e": "🇨🇳🐼",
+     "t": "Mon correspondant habite en Chine. Il est chinois et il parle chinois."
+    },
+    {
+     "e": "🇪🇬🔺",
+     "t": "Et moi ? J'habite en Égypte. Je suis égyptien et je parle arabe."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Pays et langues",
+   "ico": "🗺️",
+   "items": [
+    {
+     "w": "l'Égypte",
+     "e": "🇪🇬",
+     "k": "ex",
+     "a": "J'habite en Égypte. Je suis égyptien. Je parle arabe."
+    },
+    {
+     "w": "la France",
+     "e": "🇫🇷",
+     "k": "ex",
+     "a": "J'habite en France. Je suis français. Je parle français."
+    },
+    {
+     "w": "la Chine",
+     "e": "🇨🇳",
+     "k": "ex",
+     "a": "J'habite en Chine. Je suis chinois. Je parle chinois."
+    },
+    {
+     "w": "l'Espagne",
+     "e": "🇪🇸",
+     "k": "ex",
+     "a": "J'habite en Espagne. Je suis espagnol. Je parle espagnol."
+    },
+    {
+     "w": "le Maroc",
+     "e": "🇲🇦",
+     "k": "ex",
+     "a": "J'habite au Maroc. Je suis marocain. Je parle arabe."
+    },
+    {
+     "w": "le Brésil",
+     "e": "🇧🇷",
+     "k": "ex",
+     "a": "J'habite au Brésil. Je suis brésilien. Je parle portugais."
+    },
+    {
+     "w": "l'Angleterre",
+     "e": "💂",
+     "k": "ex",
+     "a": "J'habite en Angleterre. Je suis anglais. Je parle anglais."
+    },
+    {
+     "w": "les États-Unis",
+     "e": "🇺🇸",
+     "k": "ex",
+     "a": "J'habite aux États-Unis. Je suis américain. Je parle anglais."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Pays → nationalité",
+   "ico": "🧠",
+   "prompt": "Relie le pays et la nationalité !",
+   "pairs": [
+    [
+     "en Chine",
+     "chinois"
+    ],
+    [
+     "en Égypte",
+     "égyptien"
+    ],
+    [
+     "aux États-Unis",
+     "américain"
+    ],
+    [
+     "en France",
+     "français"
+    ],
+    [
+     "en Italie",
+     "italien"
+    ],
+    [
+     "au Japon",
+     "japonais"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "en, au ou aux ?",
+   "ico": "🏠",
+   "prompt": "J'habite … ? Choisis le bon mot !",
+   "bins": [
+    {
+     "id": "en",
+     "label": "en",
+     "ico": "🌸",
+     "cls": "noun"
+    },
+    {
+     "id": "au",
+     "label": "au",
+     "ico": "🌳",
+     "cls": "verb"
+    },
+    {
+     "id": "aux",
+     "label": "aux",
+     "ico": "🌍",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "en": "en Égypte, en France, en Chine…",
+    "au": "au Maroc, au Brésil, au Japon…",
+    "aux": "aux États-Unis"
+   },
+   "items": [
+    [
+     "Égypte",
+     "en"
+    ],
+    [
+     "Maroc",
+     "au"
+    ],
+    [
+     "France",
+     "en"
+    ],
+    [
+     "Brésil",
+     "au"
+    ],
+    [
+     "États-Unis",
+     "aux"
+    ],
+    [
+     "Chine",
+     "en"
+    ],
+    [
+     "Japon",
+     "au"
+    ],
+    [
+     "Espagne",
+     "en"
+    ],
+    [
+     "Liban",
+     "au"
+    ],
+    [
+     "Italie",
+     "en"
+    ],
+    [
+     "Mexique",
+     "au"
+    ],
+    [
+     "Angleterre",
+     "en"
+    ],
+    [
+     "Allemagne",
+     "en"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Garçon ou fille ?",
+   "ico": "👦👧",
+   "prompt": "Il est … 👦 ou Elle est … 👧 ?",
+   "bins": [
+    {
+     "id": "m",
+     "label": "Il est …",
+     "ico": "👦",
+     "cls": "verb"
+    },
+    {
+     "id": "f",
+     "label": "Elle est …",
+     "ico": "👧",
+     "cls": "noun"
+    }
+   ],
+   "why": {
+    "m": "masculin : égyptien, français",
+    "f": "féminin : égyptienne, française"
+   },
+   "items": [
+    [
+     "égyptien",
+     "m"
+    ],
+    [
+     "égyptienne",
+     "f"
+    ],
+    [
+     "française",
+     "f"
+    ],
+    [
+     "français",
+     "m"
+    ],
+    [
+     "chinoise",
+     "f"
+    ],
+    [
+     "chinois",
+     "m"
+    ],
+    [
+     "espagnole",
+     "f"
+    ],
+    [
+     "espagnol",
+     "m"
+    ],
+    [
+     "marocaine",
+     "f"
+    ],
+    [
+     "marocain",
+     "m"
+    ],
+    [
+     "brésilienne",
+     "f"
+    ],
+    [
+     "américain",
+     "m"
+    ],
+    [
+     "anglaise",
+     "f"
+    ],
+    [
+     "allemande",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "La grande aventure",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Il habite en Chine. Il est …",
+     "o": [
+      "chinoise",
+      "chinois",
+      "espagnol"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Elle est espagnole et elle parle …",
+     "o": [
+      "français",
+      "chinois",
+      "espagnol"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Il est anglais et il parle …",
+     "o": [
+      "anglais",
+      "arabe",
+      "portugais"
+     ],
+     "a": 0
+    },
+    {
+     "q": "J'habite ___ Maroc.",
+     "o": [
+      "en",
+      "au",
+      "aux"
+     ],
+     "a": 1
+    },
+    {
+     "q": "J'habite ___ États-Unis.",
+     "o": [
+      "aux",
+      "en",
+      "au"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Au Brésil, on parle …",
+     "o": [
+      "espagnol",
+      "portugais",
+      "brésilien"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Sophie est …",
+     "o": [
+      "française",
+      "égyptienne",
+      "chinoise"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Verbe parler : tu …",
+     "o": [
+      "parle",
+      "parles",
+      "parlez"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Verbe habiter : j' …",
+     "o": [
+      "habites",
+      "habitent",
+      "habite"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Mets en ordre : en – Égypte – J'habite",
+     "o": [
+      "Égypte j'habite en.",
+      "J'habite en Égypte.",
+      "En j'habite Égypte."
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ]
+}

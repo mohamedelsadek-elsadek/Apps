@@ -1,0 +1,253 @@
+{
+ "id": "fr-b2-ex-1",
+ "title": "Révision Période 2 : Léo et Sandrine",
+ "source": "Resource Période 2 — Révision p.19-22, 34-40 + Fiche p.25",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Léo et sa famille",
+   "ico": "📖",
+   "keys": [
+    "espagnol",
+    "vétérinaire",
+    "docteur",
+    "chanteuse",
+    "policier",
+    "Madrid"
+   ],
+   "scenes": [
+    {
+     "e": "👦🇪🇸",
+     "t": "Bonjour ! Je suis Léo. Je suis espagnol. J'habite en Espagne avec ma famille."
+    },
+    {
+     "e": "👨🐶",
+     "t": "Mon père est vétérinaire."
+    },
+    {
+     "e": "👩🩺",
+     "t": "Ma mère est docteur."
+    },
+    {
+     "e": "👧🎤",
+     "t": "J'ai une sœur, elle s'appelle Élisa. Elle veut être chanteuse."
+    },
+    {
+     "e": "👮⭐",
+     "t": "Plus tard, je veux être policier."
+    },
+    {
+     "e": "👧👧",
+     "t": "Lucie : Comment tu t'appelles ? Sandrine : Je m'appelle Sandrine. J'ai 9 ans."
+    },
+    {
+     "e": "🇪🇸🗣️",
+     "t": "Sandrine : Je suis espagnole. J'habite à Madrid, en Espagne. Je parle espagnol et français."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Présente-toi !",
+   "ico": "💬",
+   "prompt": "Relie la question et la réponse !",
+   "pairs": [
+    [
+     "Comment tu t'appelles ?",
+     "Je m'appelle Léo."
+    ],
+    [
+     "Tu as quel âge ?",
+     "J'ai 9 ans."
+    ],
+    [
+     "Tu habites où ?",
+     "J'habite en Espagne."
+    ],
+    [
+     "Quelle est ta nationalité ?",
+     "Je suis espagnol."
+    ],
+    [
+     "Tu parles quelle langue ?",
+     "Je parle espagnol."
+    ],
+    [
+     "Qu'est-ce que tu veux faire plus tard ?",
+     "Je veux être policier."
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Métier ou activité ?",
+   "ico": "🐦",
+   "prompt": "C'est un métier 👷 ou une activité 🎯 ?",
+   "bins": [
+    {
+     "id": "m",
+     "label": "métier",
+     "ico": "👷",
+     "cls": "noun"
+    },
+    {
+     "id": "a",
+     "label": "activité",
+     "ico": "🎯",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "m": "un chanteur, un pompier…",
+    "a": "cuisiner, nager, dessiner…"
+   },
+   "items": [
+    [
+     "chanteur",
+     "m"
+    ],
+    [
+     "cuisiner",
+     "a"
+    ],
+    [
+     "pompier",
+     "m"
+    ],
+    [
+     "bricoler",
+     "a"
+    ],
+    [
+     "docteur",
+     "m"
+    ],
+    [
+     "nager",
+     "a"
+    ],
+    [
+     "policier",
+     "m"
+    ],
+    [
+     "dessiner",
+     "a"
+    ],
+    [
+     "vétérinaire",
+     "m"
+    ],
+    [
+     "ranger",
+     "a"
+    ],
+    [
+     "danseuse",
+     "m"
+    ],
+    [
+     "travailler",
+     "a"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Révision",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Léo est …",
+     "o": [
+      "français",
+      "espagnol",
+      "marocain"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Le père de Léo est …",
+     "o": [
+      "docteur",
+      "pompier",
+      "vétérinaire"
+     ],
+     "a": 2
+    },
+    {
+     "q": "La mère de Léo est …",
+     "o": [
+      "docteur",
+      "chanteuse",
+      "policière"
+     ],
+     "a": 0
+    },
+    {
+     "q": "La sœur de Léo s'appelle …",
+     "o": [
+      "Sandrine",
+      "Élisa",
+      "Lucie"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Élisa veut être …",
+     "o": [
+      "chanteuse",
+      "danseuse",
+      "vétérinaire"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Plus tard, Léo veut être …",
+     "o": [
+      "pompier",
+      "docteur",
+      "policier"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Sandrine a … ans.",
+     "o": [
+      "huit",
+      "neuf",
+      "dix"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Sandrine est …",
+     "o": [
+      "espagnole",
+      "égyptienne",
+      "française"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Sandrine habite à …",
+     "o": [
+      "Paris",
+      "Le Caire",
+      "Madrid"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Sandrine parle 2 langues.",
+     "o": [
+      "Vrai ✅",
+      "Faux ❌"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ]
+}

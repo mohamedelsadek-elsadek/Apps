@@ -1,0 +1,313 @@
+{
+ "id": "fr-b2-u1-l4",
+ "title": "Je cuisine bien, et toi ?",
+ "source": "Resource Période 2 — Leçon 4 p.23-40 + Fiches 2026-2027",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Les correspondants de Stéphanie",
+   "ico": "📖",
+   "keys": [
+    "nager",
+    "tennis",
+    "cuisine",
+    "bricoler",
+    "Moi aussi",
+    "cuisine bien"
+   ],
+   "scenes": [
+    {
+     "e": "👧🏊",
+     "t": "Bonjour ! Je m'appelle Stéphanie. Je suis française et j'aime nager."
+    },
+    {
+     "e": "🇪🇸🎾",
+     "t": "Voici mes correspondants : Pédro, il est espagnol, il aime jouer au tennis."
+    },
+    {
+     "e": "🇲🇦🍰",
+     "t": "Fatima, elle est marocaine, elle cuisine bien."
+    },
+    {
+     "e": "🇧🇷⚽🤖",
+     "t": "Léo, il est brésilien, il aime jouer au foot et bricoler des robots."
+    },
+    {
+     "e": "🇮🇹🤖",
+     "t": "Marie, elle est italienne, elle aime bricoler des robots."
+    },
+    {
+     "e": "🍳📖",
+     "t": "Je cuisine bien, et toi ? Moi, je travaille dans la classe."
+    },
+    {
+     "e": "🗣️🇫🇷",
+     "t": "Je parle français, et toi ? Moi aussi, je parle français !"
+    },
+    {
+     "e": "🤖🔧",
+     "t": "Je bricole un robot, et toi ? Moi, pas très bien !"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Mes talents",
+   "ico": "⭐",
+   "items": [
+    {
+     "w": "je cuisine",
+     "e": "🍳",
+     "k": "ex",
+     "a": "Je fais un gâteau."
+    },
+    {
+     "w": "je bricole",
+     "e": "🔧",
+     "k": "ex",
+     "a": "Je fais un robot."
+    },
+    {
+     "w": "je range",
+     "e": "📚",
+     "k": "ex",
+     "a": "Je range bien."
+    },
+    {
+     "w": "je travaille",
+     "e": "📖",
+     "k": "ex",
+     "a": "J'étudie mes leçons."
+    },
+    {
+     "w": "je danse",
+     "e": "💃",
+     "k": "ex",
+     "a": "J'aime danser."
+    },
+    {
+     "w": "je dessine",
+     "e": "🎨",
+     "k": "ex",
+     "a": "Je dessine bien."
+    },
+    {
+     "w": "je nage",
+     "e": "🏊",
+     "k": "ex",
+     "a": "J'adore nager."
+    },
+    {
+     "w": "je parle",
+     "e": "🗣️",
+     "k": "ex",
+     "a": "Je parle espagnol avec ma correspondante."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Qu'est-ce qu'il fait ?",
+   "ico": "🧠",
+   "prompt": "Relie l'image et la phrase !",
+   "pairs": [
+    [
+     "🍳",
+     "Elle cuisine."
+    ],
+    [
+     "🤖",
+     "Il bricole un robot."
+    ],
+    [
+     "🛏️",
+     "Il range sa chambre."
+    ],
+    [
+     "🏊",
+     "Je nage bien."
+    ],
+    [
+     "🎤",
+     "Elle chante bien."
+    ],
+    [
+     "📺",
+     "Il regarde la télévision."
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "-e ou -es ?",
+   "ico": "📝",
+   "prompt": "Les verbes en -er : choisis la bonne fin !",
+   "bins": [
+    {
+     "id": "e",
+     "label": "-e",
+     "ico": "👫",
+     "cls": "verb"
+    },
+    {
+     "id": "es",
+     "label": "-es (tu)",
+     "ico": "👉",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "e": "je, il, elle, on → -e",
+    "es": "tu → -es"
+   },
+   "items": [
+    [
+     "Je cuisin___",
+     "e"
+    ],
+    [
+     "Tu cuisin___",
+     "es"
+    ],
+    [
+     "Il bricol___",
+     "e"
+    ],
+    [
+     "Tu rang___",
+     "es"
+    ],
+    [
+     "Elle dans___",
+     "e"
+    ],
+    [
+     "On dessin___",
+     "e"
+    ],
+    [
+     "Tu parl___",
+     "es"
+    ],
+    [
+     "J'aim___",
+     "e"
+    ],
+    [
+     "Tu travaill___",
+     "es"
+    ],
+    [
+     "Il ador___",
+     "e"
+    ],
+    [
+     "Tu dessin___",
+     "es"
+    ],
+    [
+     "Elle parl___",
+     "e"
+    ]
+   ],
+   "help": "<b>Les verbes en -er</b><br>je cuisine · tu cuisines · il cuisine · elle cuisine · on cuisine"
+  },
+  {
+   "type": "quiz",
+   "title": "La grande aventure",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "___ ranges ta chambre.",
+     "o": [
+      "Je",
+      "Tu",
+      "Il"
+     ],
+     "a": 1
+    },
+    {
+     "q": "___ parle anglais avec mes correspondants.",
+     "o": [
+      "Je",
+      "Tu",
+      "Elle"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Moi et mon frère, ___ aime danser.",
+     "o": [
+      "tu",
+      "il",
+      "on"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Lilly va à la piscine. ___ adore nager.",
+     "o": [
+      "Il",
+      "Elle",
+      "Tu"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Pablo aime manger la pizza. ___ cuisine bien.",
+     "o": [
+      "Il",
+      "Elle",
+      "Je"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Stéphanie a … correspondants.",
+     "o": [
+      "3",
+      "5",
+      "4"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Pédro est …",
+     "o": [
+      "espagnol",
+      "français",
+      "égyptien"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Fatima … bien.",
+     "o": [
+      "range",
+      "cuisine",
+      "étudie"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Léo aime jouer au foot et nager.",
+     "o": [
+      "Vrai ✅",
+      "Faux ❌"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Je parle français, et toi ?",
+     "o": [
+      "Moi aussi, je parle français !",
+      "Il est français.",
+      "J'ai 9 ans."
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ]
+}

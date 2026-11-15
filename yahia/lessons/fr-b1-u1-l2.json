@@ -1,0 +1,397 @@
+{
+ "id": "fr-b1-u1-l2",
+ "title": "Grand, petit, sympa… Le verbe être",
+ "source": "Resource Période 1 — Leçon 1 p.23-32",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Voici mes amis !",
+   "ico": "📖",
+   "keys": [
+    "petit",
+    "petite",
+    "grand",
+    "grande",
+    "sympa",
+    "gentil",
+    "belle",
+    "Il est",
+    "Elle est"
+   ],
+   "scenes": [
+    {
+     "e": "🧑‍🤝‍🧑🎒",
+     "t": "Voici mes amis ! Ils sont comment ?"
+    },
+    {
+     "e": "👦🌼",
+     "t": "C'est Paul. Il est petit et sympa. Il a les cheveux blonds et les yeux noirs."
+    },
+    {
+     "e": "👧🧡",
+     "t": "Voilà Marie. Elle est belle. Elle a les cheveux roux et les yeux bleus."
+    },
+    {
+     "e": "👧📏",
+     "t": "C'est Alice. Elle est grande et sympa. Elle a les cheveux noirs et les yeux marron."
+    },
+    {
+     "e": "👦💚",
+     "t": "Voilà Jean. Il est petit et gentil. Il a les cheveux bruns et les yeux verts."
+    },
+    {
+     "e": "👦👧",
+     "t": "Un garçon : il est grand. Une fille : elle est grande !"
+    },
+    {
+     "e": "📝⭐",
+     "t": "Le verbe être : je suis, tu es, il est, elle est, on est."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Les mots",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "grand / grande",
+     "e": "🦒",
+     "k": "ex",
+     "a": "Il est grand. Elle est grande."
+    },
+    {
+     "w": "petit / petite",
+     "e": "🐭",
+     "k": "ex",
+     "a": "Il est petit. Elle est petite."
+    },
+    {
+     "w": "mince",
+     "e": "🧍",
+     "k": "ex",
+     "a": "Il est mince. Elle est mince."
+    },
+    {
+     "w": "beau / belle",
+     "e": "🌸",
+     "k": "ex",
+     "a": "Il est beau. Elle est belle."
+    },
+    {
+     "w": "gentil / gentille",
+     "e": "🤗",
+     "k": "ex",
+     "a": "Il est gentil. Elle est gentille."
+    },
+    {
+     "w": "content / contente",
+     "e": "😄",
+     "k": "ex",
+     "a": "Il est content. Elle est contente."
+    },
+    {
+     "w": "triste",
+     "e": "😢",
+     "k": "ex",
+     "a": "Il est triste. Elle est triste."
+    },
+    {
+     "w": "sympa",
+     "e": "😊",
+     "k": "ex",
+     "a": "Je suis sympa."
+    },
+    {
+     "w": "drôle",
+     "e": "🤡",
+     "k": "ex",
+     "a": "Il est drôle."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Il → Elle",
+   "ico": "👦👧",
+   "prompt": "Relie le masculin et le féminin !",
+   "pairs": [
+    [
+     "grand",
+     "grande"
+    ],
+    [
+     "petit",
+     "petite"
+    ],
+    [
+     "gros",
+     "grosse"
+    ],
+    [
+     "beau",
+     "belle"
+    ],
+    [
+     "gentil",
+     "gentille"
+    ],
+    [
+     "content",
+     "contente"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Il ou Elle ?",
+   "ico": "🐦",
+   "prompt": "C'est pour un garçon 👦 ou une fille 👧 ?",
+   "bins": [
+    {
+     "id": "m",
+     "label": "Il est …",
+     "ico": "👦",
+     "cls": "verb"
+    },
+    {
+     "id": "f",
+     "label": "Elle est …",
+     "ico": "👧",
+     "cls": "noun"
+    }
+   ],
+   "why": {
+    "m": "masculin : grand, petit, beau",
+    "f": "féminin : souvent + e → grande, petite"
+   },
+   "items": [
+    [
+     "grand",
+     "m"
+    ],
+    [
+     "grande",
+     "f"
+    ],
+    [
+     "petite",
+     "f"
+    ],
+    [
+     "petit",
+     "m"
+    ],
+    [
+     "belle",
+     "f"
+    ],
+    [
+     "beau",
+     "m"
+    ],
+    [
+     "gentille",
+     "f"
+    ],
+    [
+     "gentil",
+     "m"
+    ],
+    [
+     "grosse",
+     "f"
+    ],
+    [
+     "gros",
+     "m"
+    ],
+    [
+     "contente",
+     "f"
+    ],
+    [
+     "content",
+     "m"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "suis, es ou est ?",
+   "ico": "📝",
+   "prompt": "Choisis la bonne forme du verbe être !",
+   "bins": [
+    {
+     "id": "suis",
+     "label": "suis (je)",
+     "ico": "🙋",
+     "cls": "noun"
+    },
+    {
+     "id": "es",
+     "label": "es (tu)",
+     "ico": "👉",
+     "cls": "sun"
+    },
+    {
+     "id": "est",
+     "label": "est (il / elle / on)",
+     "ico": "👫",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "suis": "je → je suis",
+    "es": "tu → tu es",
+    "est": "il / elle / on → est"
+   },
+   "items": [
+    [
+     "Je ___ grand.",
+     "suis"
+    ],
+    [
+     "Tu ___ petite.",
+     "es"
+    ],
+    [
+     "Il ___ drôle.",
+     "est"
+    ],
+    [
+     "Elle ___ sympa.",
+     "est"
+    ],
+    [
+     "On ___ content.",
+     "est"
+    ],
+    [
+     "Je ___ petite.",
+     "suis"
+    ],
+    [
+     "Tu ___ grand.",
+     "es"
+    ],
+    [
+     "Elle ___ grande.",
+     "est"
+    ],
+    [
+     "Il ___ gentil.",
+     "est"
+    ],
+    [
+     "Tu ___ triste.",
+     "es"
+    ],
+    [
+     "Je ___ sympa.",
+     "suis"
+    ]
+   ],
+   "help": "<b>Le verbe être</b><br>je suis · tu es · il est · elle est · on est"
+  },
+  {
+   "type": "quiz",
+   "title": "La grande aventure",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Paul est …",
+     "o": [
+      "grand et drôle",
+      "petit et sympa",
+      "gros et triste"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Marie a les cheveux …",
+     "o": [
+      "roux",
+      "noirs",
+      "blonds"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Alice est …",
+     "o": [
+      "petite et belle",
+      "grande et sympa",
+      "triste"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Jean a les yeux …",
+     "o": [
+      "bleus",
+      "marron",
+      "verts"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Je ___ grand.",
+     "o": [
+      "es",
+      "suis",
+      "est"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Tu ___ drôle.",
+     "o": [
+      "es",
+      "suis",
+      "est"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Elle ___ sympa.",
+     "o": [
+      "suis",
+      "es",
+      "est"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Il est petit. Elle est …",
+     "o": [
+      "petit",
+      "petite",
+      "petits"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Il est beau. Elle est …",
+     "o": [
+      "belle",
+      "beau",
+      "beaue"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Elle – grande →",
+     "o": [
+      "Elle as grande.",
+      "Elle suis grande.",
+      "Elle est grande."
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ]
+}
