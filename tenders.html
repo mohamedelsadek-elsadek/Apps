@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b1f3d">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>عروض الأسعار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ثيم «لوحة المالك»: إطار كحلي + كروت كريمي + أخضر زمردي + لمسة ذهبي */
+:root{--navy:#10294d;--navy2:#0b1f3d;--bg:#10294d;--card:#f7f2e8;--card2:#efe7d6;--cell:#fffdf8;--line:#dfd3bb;--tx:#1b2a44;--mut:#6b7385;
+  --acc:#1f7a57;--acc2:#2bb5a0;--gold:#c9a24a;--ok:#1e9a4f;--warn:#d98b0b;--bad:#c0262d;--blue:#1e6fd9;--gray:#8a8f98}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font:15px/1.55 Cairo,-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif;padding:0 0 calc(84px + env(safe-area-inset-bottom));overflow-x:hidden}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--navy2),var(--navy));border-bottom:2px solid var(--gold);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;color:#fff}
+header h1{font-size:21px;font-weight:800;flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header h1 .hsub{font-size:13px;font-weight:600;color:#d8e1ef;border-inline-start:2px solid var(--gold);padding-inline-start:10px}
+.ver{font-size:11px;color:#9fb0cc;font-weight:400}
+header .mut{color:#c9d4e6}
+.dot{width:10px;height:10px;border-radius:50%;background:#8a96ad;display:inline-block}
+.dot.on{background:#3ddc97}.dot.err{background:#ff6b6b}.dot.wait{background:#f5b942}
+main{max-width:1100px;margin:0 auto;padding:12px}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;min-width:0;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.card::before{content:"";position:absolute;top:-1px;left:-1px;width:18px;height:18px;background:linear-gradient(135deg,var(--acc) 50%,transparent 50%);border-top-left-radius:16px}
+.card h2{font-size:15px;margin:-2px -2px 12px;font-weight:800;color:#fff;background:var(--navy);border-radius:11px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2 .mut{color:#c9d4e6}
+.card h2 b{color:#fff!important}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.full{grid-column:1/-1}
+label{display:block;font-size:12px;color:var(--navy);font-weight:700;margin-bottom:4px}
+input,select{width:100%;min-height:44px;background:var(--cell);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:16px;appearance:none;-webkit-appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--navy) 50%),linear-gradient(135deg,var(--navy) 50%,transparent 50%);background-position:14px 50%,9px 50%;background-size:5px 5px;background-repeat:no-repeat;padding-left:26px}
+input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(31,122,87,.15)}
+input:disabled,select:disabled{opacity:.45}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:11px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 2px 0 #145a3f}
+.btn.sec{background:var(--cell);color:var(--navy);border:1px solid var(--line);box-shadow:none}
+.btn.sm{padding:6px 11px;font-size:13px}
+.card h2 .btn{box-shadow:none}
+.card h2 .btn.sec{background:#fff}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--navy2);border-top:2px solid var(--gold);display:flex;padding:4px 4px env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;background:none;border:0;color:#b9c5da;font:inherit;font-size:11.5px;font-weight:600;padding:7px 0 6px;cursor:pointer;border-radius:12px;margin:2px}
+nav.tabs button b{display:block;font-size:19px;font-weight:400}
+nav.tabs button.on{background:var(--card);color:var(--navy)}
+.page{display:none}.page.on{display:block}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px;margin-bottom:12px;overflow-x:auto}
+.seg button{flex:1;white-space:nowrap;background:none;border:0;color:var(--navy);font:inherit;font-size:13px;font-weight:700;padding:8px 6px;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.kpi{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;min-width:0;overflow:hidden}
+.kpi small{color:var(--navy);font-size:12.5px;font-weight:800;display:block}
+.kpi b{font-size:24px;font-weight:800;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--navy);font-variant-numeric:tabular-nums}
+.kpi i{position:absolute;left:10px;bottom:6px;font-style:normal;font-size:26px;opacity:.9}
+.kpi.hero{background:linear-gradient(160deg,#173a6b,var(--navy2));border:1px solid var(--gold)}
+.kpi.hero small{color:#d8e1ef}.kpi.hero b{color:#fff}
+.kpi.gr{border:2px solid var(--acc)}
+.pos{color:var(--ok)!important}.neg{color:var(--bad)!important}.wrn{color:var(--warn)!important}
+.kpi.hero .pos{color:#5ee0a6!important}.kpi.hero .neg{color:#ff8a8a!important}
+.bar{margin:7px 0}
+.bar .t{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:3px;font-weight:600}
+.bar .t span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .tr{height:12px;background:var(--card2);border-radius:4px;overflow:hidden}
+.bar .fl{height:100%;background:var(--navy);border-radius:4px}
+.bar:nth-child(odd) .fl{background:var(--acc)}
+.bar .fl.n{background:var(--bad)!important}
+.sech{display:flex;justify-content:space-between;margin:12px 0 4px;padding-bottom:3px;border-bottom:1px dashed var(--line);font-weight:800;color:var(--navy)}
+.alert{background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--bad);border-radius:12px;padding:12px;margin-bottom:12px;font-size:14px}
+.alert b{color:var(--navy)}
+.alert ul{margin:6px 18px 0 0}
+.urg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:12px}
+.urg>div{background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--bad);border-radius:12px;padding:10px 12px;font-size:13.5px}
+.urg>div.w{border-inline-start-color:var(--warn)}
+.urg b{display:block;color:var(--navy);font-size:14.5px}
+.secttl{display:flex;align-items:center;gap:10px;color:#fff;font-weight:800;font-size:17px;margin:16px 2px 10px}
+.secttl::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,transparent,var(--gold))}
+.mut{color:var(--mut);font-size:12px}
+.empty{text-align:center;color:var(--mut);padding:18px}
+.toast{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ok);color:#fff;padding:9px 18px;border-radius:20px;font-weight:700;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+/* جداول إكسيل */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--cell)}
+table.xg{border-collapse:collapse;width:100%;font-size:14px}
+table.xg th{background:var(--acc);color:#fff;font-weight:700;font-size:12.5px;padding:8px 6px;text-align:right;white-space:nowrap;position:sticky;top:0;border-inline-start:1px solid rgba(255,255,255,.15)}
+table.xg td{border-top:1px solid var(--line);border-inline-start:1px solid #efe6d3;padding:0;white-space:nowrap;background:var(--cell)}
+table.xg tbody tr:nth-child(even) td{background:#fbf7ee}
+table.xg td.c{padding:6px 8px;color:var(--mut);font-variant-numeric:tabular-nums}
+table.xg td.c b{color:var(--tx)}
+.xl{border:0!important;border-radius:0!important;background:transparent!important;min-height:40px!important;padding:6px 8px!important;font-size:16px;width:100%;min-width:90px;font-weight:600;color:var(--tx);box-shadow:none!important}
+select.xl{min-width:120px;padding-left:22px!important;background-image:linear-gradient(45deg,transparent 50%,var(--navy) 50%),linear-gradient(135deg,var(--navy) 50%,transparent 50%)!important;background-position:10px 50%,5px 50%!important;background-size:5px 5px!important;background-repeat:no-repeat!important}
+input.xl.num{min-width:100px;font-variant-numeric:tabular-nums}
+input.xl.pct{min-width:70px}
+input.xl[type=date]{min-width:140px}
+.xl:focus{outline:2px solid var(--acc)!important;outline-offset:-2px;background:#eaf6f0!important}
+tr.foc td{background:#f1f8f4!important}
+@keyframes fl{from{background:rgba(30,154,79,.35)}to{background:transparent}}
+.flash{animation:fl .9s}
+.ib{background:none;border:0;color:var(--mut);font-size:16px;min-width:38px;min-height:38px;cursor:pointer}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 9px;border-radius:10px;background:var(--card2);color:var(--navy);margin-inline-start:4px}
+.card h2 .tag{background:rgba(255,255,255,.15);color:#fff}
+.tot td{font-weight:800!important;background:var(--card2)!important;color:var(--navy)}
+.st{width:100%;border-collapse:collapse;font-size:13px;background:var(--cell);border-radius:10px;overflow:hidden}
+.st.wr td{white-space:normal}.st.wr td:last-child{white-space:nowrap}
+.st th{background:var(--acc);color:#fff;font-weight:700;font-size:12px}
+.st th,.st td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.st tr:nth-child(even) td{background:#fbf7ee}
+/* حالات ملونة */
+.pill{display:inline-block;padding:2px 12px;border-radius:20px;color:#fff;font-weight:700;font-size:12px}
+select.xl.s-run{background-color:#e3eefc!important;color:var(--blue)}
+select.xl.s-ready{background-color:#def4f0!important;color:#178a7b}
+select.xl.s-sell{background-color:#e2f4e8!important;color:var(--ok)}
+select.xl.s-stop{background-color:#fdf1dc!important;color:var(--warn)}
+select.xl.s-done{background-color:#eceef1!important;color:var(--gray)}
+/* رسوم */
+.charts{display:grid;grid-template-columns:1fr;gap:12px}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:5px;vertical-align:-1px}
+.donut{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.donut svg{width:150px;height:150px;flex:none}
+.donut ul{list-style:none;flex:1;min-width:150px}
+.donut li{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed var(--line);font-size:13px;font-weight:700}
+.donut li i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px}
+@media(min-width:700px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.charts{grid-template-columns:1fr 1fr}}
+/* ديسكتوب: القائمة جانبية زي لوحة التحكم */
+@media(min-width:1000px){
+  body{padding:0 0 0 0;padding-right:210px}
+  nav.tabs{top:0;bottom:0;right:0;left:auto;width:210px;flex-direction:column;justify-content:flex-start;gap:6px;padding:90px 12px 12px;background:var(--card);border-top:0;border-left:3px solid var(--gold)}
+  nav.tabs::before{content:"🏛️ المجموعة";position:absolute;top:22px;right:0;left:0;text-align:center;font-weight:800;font-size:20px;color:var(--navy)}
+  nav.tabs button{flex:none;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:15px;color:var(--navy);text-align:right}
+  nav.tabs button b{display:inline;font-size:20px}
+  nav.tabs button.on{background:var(--navy);color:#fff}
+  .toast{bottom:24px}
+}
+
+/* إضافات عروض الأسعار */
+.pill.win{background:var(--gold);color:#1b2a44}.pill.ok{background:var(--ok)}.pill.bad{background:var(--bad)}.pill.wt{background:var(--warn)}.pill.gr{background:var(--gray)}.pill.bl{background:var(--blue)}
+table.xg td.c.big{font-weight:800;color:var(--navy)}
+tr.winr td{background:#fbf3dc!important}
+.flt{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.flt select{width:auto;min-width:150px;min-height:40px;padding:6px 10px 6px 26px;font-size:14px}
+input.xl.sc{min-width:58px;width:58px;text-align:center}
+.help{font-size:13px;color:var(--mut);margin-top:6px}
+@media(min-width:1000px){nav.tabs::before{content:"📑 عروض الأسعار"}}
+@media print{
+  body{background:#fff;padding:0!important}
+  header,nav.tabs,.noprint,.toast{display:none!important}
+  .page{display:none!important}.page.on{display:block!important}
+  .card{box-shadow:none;break-inside:avoid;border-color:#bbb}
+  .tbl-wrap{overflow:visible;border:0}
+  main{max-width:none;padding:0}
+  .prt-h{display:block!important}
+}
+.prt-h{display:none;text-align:center;margin-bottom:10px}
+.prt-h h1{font-size:20px;color:var(--navy)}
+</style>
+</head>
+<body>
+<header>
+  <h1>📑 عروض الأسعار <span class="hsub" id="hsub">الرئيسية</span> <span class="ver" id="verLbl"></span></h1>
+  <span id="syncTxt" class="mut">—</span><span id="syncDot" class="dot"></span>
+</header>
+
+<main>
+<!-- ============ الرئيسية ============ -->
+<section class="page on" id="pg-home">
+  <div class="card noprint" style="padding:10px 14px"><div class="row"><b style="color:var(--navy)">موسم <span id="seasonSel"></span></b><span class="mut" id="homeNote"></span></div></div>
+  <div class="kpis" id="kpis"></div>
+  <div id="urgBox"></div>
+  <div class="charts">
+    <div class="card chart"><h2>تكلفة السنة بالعروض الفايزة حسب القسم</h2><div id="donChart"></div></div>
+    <div class="card"><h2>الترسية حسب الشركة <span class="mut">قيمة سنوية</span></h2><div id="coBars"></div></div>
+  </div>
+  <div class="card"><h2>الفايز في كل صنف</h2><div class="tbl-wrap"><table class="st" id="winT"></table></div></div>
+</section>
+
+<!-- ============ الأصناف ============ -->
+<section class="page" id="pg-items">
+  <div class="card">
+    <h2>إضافة صنف مطلوب</h2>
+    <div class="grid">
+      <div class="full"><label>اسم الصنف (اللي بنقارن عليه)</label><input id="iN" placeholder="مثال: نيوكاسل لاسوتا حي — أو — أموكسيسيلين 50%" autocomplete="off"></div>
+      <div><label>القسم</label><select id="iC"></select></div>
+      <div><label>وحدة المقارنة</label><input id="iU" list="unitList" placeholder="جرعة / لتر / كجم"></div>
+      <div><label>الاحتياج السنوي (بالوحدة)</label><input id="iQ" inputmode="decimal" placeholder="مثال: 1000000"></div>
+      <div><label>ملاحظة</label><input id="iT" placeholder="اختياري"></div>
+      <div class="full"><button class="btn" style="width:100%" id="saveIt">إضافة الصنف</button></div>
+    </div>
+    <p class="help">وحدة المقارنة هي اللي كل العروض هتتحوّل لها: التحصينات بالجرعة، الأدوية والمطهرات باللتر أو الكيلو. كده عبوة 2500 و5000 و10000 تتقارن صح.</p>
+  </div>
+  <div class="card">
+    <h2>الأصناف <span class="row" style="gap:6px"><select id="qIC" style="min-height:34px;padding:4px 8px 4px 24px;width:auto;font-size:13px"></select></span></h2>
+    <div class="tbl-wrap"><table class="xg" id="itT"></table></div>
+    <p class="help">عدّل في الخانة على طول — الأسهم وEnter بتتنقل، والحفظ تلقائي.</p>
+  </div>
+</section>
+
+<!-- ============ العروض ============ -->
+<section class="page" id="pg-offers">
+  <div class="card">
+    <h2>تسجيل عرض</h2>
+    <div class="grid">
+      <div><label>الصنف</label><select id="oI"></select></div>
+      <div><label>الشركة</label><select id="oC"></select></div>
+      <div><label>الاسم التجاري</label><input id="oP" autocomplete="off"></div>
+      <div><label>المنتج / المنشأ</label><input id="oM" list="makerList" autocomplete="off" placeholder="مثال: MSD — هولندا"></div>
+      <div><label>العبوة (<span id="oUl">وحدة</span>)</label><input id="oK" inputmode="decimal" placeholder="مثال: 5000"></div>
+      <div><label>سعر العبوة (ج)</label><input id="oR" inputmode="decimal"></div>
+      <div><label>خصم %</label><input id="oD" inputmode="decimal" placeholder="0"></div>
+      <div><label>بونص % (مثلاً 10+1 = 10)</label><input id="oB" inputmode="decimal" placeholder="0"></div>
+      <div><label>الصلاحية (شهور)</label><input id="oE" inputmode="decimal"></div>
+      <div><label>مدة التوريد (أيام)</label><input id="oL" inputmode="decimal"></div>
+      <div class="full"><button class="btn" style="width:100%" id="saveOf">حفظ العرض</button></div>
+    </div>
+    <p class="help">شروط الدفع (آجل كام يوم وخصم عام) بتتسجل مرة واحدة للشركة من «الشركات».</p>
+  </div>
+  <div class="card">
+    <h2>العروض
+      <span class="row" style="gap:6px">
+        <select id="qOC" style="min-height:34px;padding:4px 8px 4px 24px;width:auto;font-size:13px"></select>
+        <select id="qOI" style="min-height:34px;padding:4px 8px 4px 24px;width:auto;font-size:13px"></select>
+        <select id="qOCo" style="min-height:34px;padding:4px 8px 4px 24px;width:auto;font-size:13px"></select>
+      </span>
+    </h2>
+    <div class="tbl-wrap"><table class="xg" id="ofT"></table></div>
+    <p class="help">«الصافي» = سعر الوحدة بعد الخصم والبونص والخصم العام. «الفعلي» = الصافي بعد حساب قيمة الآجل (كل ما الآجل أطول، الفعلي أقل).</p>
+  </div>
+</section>
+
+<!-- ============ التقييم الفني ============ -->
+<section class="page" id="pg-tech">
+  <div class="card">
+    <h2>التقييم الفني <span class="mut" id="techPassLbl"></span></h2>
+    <div class="flt"><select id="tC"></select><select id="tI"></select></div>
+    <div class="tbl-wrap"><table class="xg" id="tsT"></table></div>
+    <p class="help">ادّي كل بند درجة من 0 لـ 10. النسبة = مجموع (الدرجة × الوزن) ÷ أقصى مجموع. العرض اللي يقل عن حد النجاح بيتستبعد ومابيدخلش المقارنة المادية.</p>
+  </div>
+  <div class="card">
+    <h2>بنود التقييم وأوزانها <span class="mut" id="tcCatLbl"></span></h2>
+    <div class="tbl-wrap"><table class="xg" id="tcT"></table></div>
+    <div class="row" style="margin-top:8px"><button class="btn sec sm" id="addTc">➕ بند جديد</button><span class="mut" id="tcSum"></span></div>
+  </div>
+</section>
+
+<!-- ============ المقارنة والترسية ============ -->
+<section class="page" id="pg-cmp">
+  <div class="prt-h"><h1>📑 مقارنة عروض الأسعار — مزارع الشركة المصرية</h1><div class="mut" id="prtSub"></div></div>
+  <div class="card noprint">
+    <h2>المقارنة والترسية <button class="btn sec sm" id="prtBtn">🖨️ تقرير PDF</button></h2>
+    <div class="flt"><select id="cC"></select><select id="cI"></select></div>
+    <p class="help" id="cmpRule"></p>
+  </div>
+  <div class="kpis" id="cmpKpis"></div>
+  <div id="cmpBox"></div>
+</section>
+
+<!-- ============ الإعدادات ============ -->
+<section class="page" id="pg-set">
+  <div class="card">
+    <h2>الشركات وشروط الدفع</h2>
+    <div class="grid">
+      <div><label>اسم الشركة</label><input id="cN" autocomplete="off"></div>
+      <div><label>آجل (أيام)</label><input id="cD" inputmode="decimal" placeholder="0 = كاش"></div>
+      <div><label>خصم عام %</label><input id="cG" inputmode="decimal" placeholder="0"></div>
+      <div><label>تليفون / مندوب</label><input id="cP"></div>
+      <div class="full"><button class="btn" style="width:100%" id="saveCo">إضافة شركة</button></div>
+    </div>
+    <div class="tbl-wrap" style="margin-top:12px"><table class="xg" id="coT"></table></div>
+  </div>
+  <div class="card">
+    <h2>قواعد التقييم</h2>
+    <div class="grid">
+      <div><label>حد النجاح الفني %</label><input id="sPass" inputmode="decimal"></div>
+      <div><label>وزن الفني في النتيجة %</label><input id="sWT" inputmode="decimal"></div>
+      <div><label>تكلفة الفلوس شهريًا % (لحساب قيمة الآجل)</label><input id="sRate" inputmode="decimal"></div>
+      <div><label>اسم الموسم</label><input id="sSeason" placeholder="2027"></div>
+      <div class="full"><button class="btn" style="width:100%" id="saveCfg">حفظ القواعد</button></div>
+    </div>
+    <p class="help" id="cfgHelp"></p>
+  </div>
+  <div class="card">
+    <h2>المزامنة</h2>
+    <div class="row"><span id="syncState" style="flex:1"></span><button class="btn sec sm" id="syncTg"></button></div>
+  </div>
+  <div class="card">
+    <h2>نسخ احتياطي</h2>
+    <div class="row">
+      <button class="btn sec" id="expBtn">تنزيل نسخة JSON</button>
+      <label class="btn sec" style="margin:0;display:inline-block">استيراد نسخة<input type="file" id="impF" accept=".json,application/json" style="display:none"></label>
+    </div>
+    <p class="mut" style="margin:8px 0">الاستيراد بيدمج — مابيمسحش حاجة، الأحدث في كل سجل يكسب.</p>
+  </div>
+  <div class="card mut" id="about"></div>
+</section>
+</main>
+
+<datalist id="unitList"><option value="جرعة"><option value="لتر"><option value="كجم"><option value="عبوة"></datalist>
+<datalist id="makerList"></datalist>
+
+<nav class="tabs">
+  <button data-p="home" class="on"><b>📊</b>الرئيسية</button>
+  <button data-p="items"><b>📦</b>الأصناف</button>
+  <button data-p="offers"><b>🧾</b>العروض</button>
+  <button data-p="tech"><b>🔬</b>فني</button>
+  <button data-p="cmp"><b>⚖️</b>الترسية</button>
+  <button data-p="set"><b>⚙️</b>إعدادات</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+var APP_VER='1.0';
+var DEFAULT_FB={
+  apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",
+  authDomain:"my-app-sync-11ad9.firebaseapp.com",
+  databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"my-app-sync-11ad9",
+  storageBucket:"my-app-sync-11ad9.firebasestorage.app",
+  messagingSenderId:"177039534756",
+  appId:"1:177039534756:web:367ecccc684c2cdfdd1431"
+};
+var FB_PATH='tenders';
+var LS_KEY='tenders.state.v1', LS_ON='tenders.sync.on', LS_DEV='tenders.sync.dev', LS_UI='tenders.ui';
+var COLS=['co','it','of','tc','ts','cfg'];
+var CAT={vac:'تحصينات',med:'أدوية',dis:'مطهرات'};
+var CAT_ORD=['vac','med','dis'];
+var CAT_UNIT={vac:'جرعة',med:'لتر',dis:'لتر'};
+var CAT_COL={vac:'#10294d',med:'#1f7a57',dis:'#c9a24a'};
+/* بنود التقييم الافتراضية: [القسم، البند، الوزن] */
+var SEED_TC=[
+  ['vac','الشركة المنتجة والمنشأ',15],['vac','العترة ومطابقتها للوبائيات عندنا',25],['vac','نتايج المناعة والتجارب في مزارعنا',25],
+  ['vac','الثبات والتخزين وسلسلة التبريد',15],['vac','التسجيل والصلاحية',10],['vac','الدعم الفني وانتظام التوريد',10],
+  ['med','المادة الفعالة والتركيز',20],['med','الشركة المنتجة والمنشأ',15],['med','الفاعلية في مزارعنا',25],
+  ['med','الذوبان والثبات في المياه',15],['med','التسجيل والصلاحية وفترة السحب',15],['med','الدعم الفني وانتظام التوريد',10],
+  ['dis','المادة الفعالة والتركيز',25],['dis','الطيف والفاعلية',25],['dis','الأمان على الطيور والمعدات',15],
+  ['dis','الثبات مع المياه العسرة والمادة العضوية',15],['dis','التسجيل والصلاحية',10],['dis','الدعم الفني وانتظام التوريد',10]
+];
+/* الحالة
+   co : {id,n,cd(آجل أيام),gd(خصم عام%),ph,nt,u,del}
+   it : {id,n,c(قسم),un,q(احتياج سنوي),nt,u,del}
+   of : {id,i(صنف),co,p(اسم تجاري),m(منتج/منشأ),k(عبوة),r(سعر العبوة),d(خصم%),b(بونص%),e(صلاحية شهور),l(توريد أيام),nt,u,del}
+   tc : {id,c(قسم),n,w(وزن),o,u,del}
+   ts : {id:'s_'+of+'_'+tc,o,t,v(0-10),u,del}
+   cfg: {id:'main',pass,wT,rate,season,u}                                  */
+var S={co:{},it:{},of:{},tc:{},ts:{},cfg:{}};
+
+function $(id){return document.getElementById(id)}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}
+var srvOff=0;
+function now(){return Date.now()+srvOff}
+function stamp(prev){var t=now();return prev&&prev.u>=t?prev.u+1:t}
+function nid(p){return p+now().toString(36).slice(-8)+Math.random().toString(36).slice(2,8)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function pad(n){return (n<10?'0':'')+n}
+function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function num(s){
+  if(typeof s==='number') return s;
+  s=String(s==null?'':s).trim().replace(/[٠-٩]/g,function(c){return '٠١٢٣٤٥٦٧٨٩'.indexOf(c)}).replace(/[۰-۹]/g,function(c){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(c)})
+    .replace(/[‎‏]/g,'').replace(/٫/g,'.').replace(/[,٬\s]/g,'').replace(/−/g,'-').replace(/%/g,'');
+  if(s===''||!/^-?\d*\.?\d+$/.test(s)) return NaN;
+  return parseFloat(s);
+}
+function numOr(s,d){var n=num(s);return isFinite(n)?n:d}
+function r2(x){return Math.round(x*100)/100}
+function fmt(x,dg){if(!isFinite(x))return '—';dg=dg==null?2:dg;x=+x||0;return (x<0?'‎':'')+x.toLocaleString('en-US',{maximumFractionDigits:dg})}
+function fmtU(x){ /* سعر الوحدة: أرقام صغيرة زي سعر الجرعة */
+  if(!isFinite(x))return '—'; var a=Math.abs(x); return fmt(x,a>=100?1:a>=1?3:4)}
+function fmtP(x){return isFinite(x)?fmt(x,1)+'%':'—'}
+var tT;function toast(msg,bad){var t=$('toast');t.textContent=msg;t.style.background=bad?'var(--bad)':'var(--ok)';t.style.color='#fff';t.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show')},bad?3200:1800)}
+
+/* ================= تحقق ================= */
+function isNum(x){return typeof x==='number'&&isFinite(x)}
+function validRec(col,k,x){
+  if(!x||typeof x!=='object'||x.id!==k||typeof x.u!=='number'||!/^[a-zA-Z0-9_]{2,80}$/.test(k)) return false;
+  if(x.del) return true;
+  if(col==='co') return typeof x.n==='string'&&x.n!=='';
+  if(col==='it') return typeof x.n==='string'&&x.n!==''&&!!CAT[x.c];
+  if(col==='of') return typeof x.i==='string'&&typeof x.co==='string';
+  if(col==='tc') return typeof x.n==='string'&&x.n!==''&&!!CAT[x.c]&&isNum(x.w);
+  if(col==='ts') return typeof x.o==='string'&&typeof x.t==='string'&&isNum(x.v);
+  if(col==='cfg') return k==='main';
+  return false;
+}
+
+/* ================= تخزين ================= */
+function seed(){
+  var ch=false;
+  SEED_TC.forEach(function(s,i){var id='tc_'+s[0]+i;if(!S.tc[id]){S.tc[id]={id:id,c:s[0],n:s[1],w:s[2],o:i,u:1};ch=true}});
+  if(!S.cfg.main){S.cfg.main={id:'main',pass:70,wT:60,rate:2,season:'2027',u:1};ch=true}
+  if(ch) persist();
+}
+function load(){
+  var o=null; try{o=JSON.parse(lsGet(LS_KEY)||'null')}catch(e){}
+  if(o) COLS.forEach(function(c){var m=o[c]||{};for(var k in m) if(validRec(c,k,m[k])) S[c][k]=m[k]});
+  seed();
+}
+var warnedQuota=false;
+function persist(){ if(!lsSet(LS_KEY,JSON.stringify(S))&&!warnedQuota){warnedQuota=true;toast('مساحة التخزين مليانة — نزّل نسخة احتياطية',true)} }
+function devId(){var d=lsGet(LS_DEV);if(!d){d='dev-'+Math.random().toString(36).slice(2,8);lsSet(LS_DEV,d)}return d}
+function live(col){var m=S[col],o=[];for(var k in m) if(!m[k].del) o.push(m[k]);return o}
+function put(col,rec){rec.u=stamp(S[col][rec.id]);S[col][rec.id]=rec;persist();push(col,rec);return rec}
+function softDel(col,id){if(!S[col][id])return;put(col,{id:id,del:1})}
+function cfg(){var c=S.cfg.main||{};return {pass:isNum(c.pass)?c.pass:70,wT:isNum(c.wT)?c.wT:60,rate:isNum(c.rate)?c.rate:2,season:c.season||''}}
+
+/* ================= قوائم ================= */
+function cosSorted(){return live('co').sort(function(a,b){return a.n.localeCompare(b.n,'ar')})}
+function itsSorted(cat){return live('it').filter(function(x){return !cat||x.c===cat}).sort(function(a,b){return CAT_ORD.indexOf(a.c)-CAT_ORD.indexOf(b.c)||a.n.localeCompare(b.n,'ar')})}
+function tcsOf(cat){return live('tc').filter(function(x){return x.c===cat}).sort(function(a,b){return (a.o||0)-(b.o||0)})}
+function coName(id){var c=S.co[id];return c&&!c.del?c.n:'(محذوفة)'}
+function itName(id){var c=S.it[id];return c&&!c.del?c.n:'(محذوف)'}
+function catOpts(sel,all){var h=all?'<option value="">'+all+'</option>':'';CAT_ORD.forEach(function(c){h+='<option value="'+c+'"'+(c===sel?' selected':'')+'>'+CAT[c]+'</option>'});return h}
+function coOpts(sel,all){var h=all?'<option value="">'+all+'</option>':'';cosSorted().forEach(function(c){h+='<option value="'+esc(c.id)+'"'+(c.id===sel?' selected':'')+'>'+esc(c.n)+'</option>'});
+  if(sel&&(!S.co[sel]||S.co[sel].del))h+='<option value="'+esc(sel)+'" selected>(محذوفة)</option>';return h}
+function itOpts(sel,cat,all){var h=all?'<option value="">'+all+'</option>':'',cur=null;
+  itsSorted(cat).forEach(function(x){if(x.c!==cur){if(cur!==null)h+='</optgroup>';h+='<optgroup label="'+CAT[x.c]+'">';cur=x.c}
+    h+='<option value="'+esc(x.id)+'"'+(x.id===sel?' selected':'')+'>'+esc(x.n)+'</option>'});
+  if(cur!==null)h+='</optgroup>';
+  if(sel&&(!S.it[sel]||S.it[sel].del))h+='<option value="'+esc(sel)+'" selected>(محذوف)</option>';return h}
+
+/* ================= الحسابات ================= */
+function unitNet(o){
+  var k=numOr(o.k,0), r=numOr(o.r,0); if(!(k>0)||!(r>0)) return NaN;
+  var c=S.co[o.co]||{}, p=r/k;
+  p*=(1-numOr(o.d,0)/100); p/=(1+numOr(o.b,0)/100); p*=(1-numOr(c.gd,0)/100);
+  return p;
+}
+function effUnit(o){var n=unitNet(o), c=S.co[o.co]||{}, cd=numOr(c.cd,0);return n/(1+cfg().rate/100*cd/30)}
+function sid(oid,tid){return 's_'+oid+'_'+tid}
+function techOf(o){
+  var it=S.it[o.i]; if(!it) return {pct:NaN,n:0,tot:0,done:false};
+  var cr=tcsOf(it.c), sv=0, sw=0, n=0;
+  cr.forEach(function(c){var s=S.ts[sid(o.id,c.id)];if(s&&!s.del&&isNum(s.v)&&c.w>0){sv+=s.v*c.w;sw+=10*c.w;n++}});
+  var tot=cr.filter(function(c){return c.w>0}).length;
+  return {pct:sw?sv/sw*100:NaN,n:n,tot:tot,done:tot>0&&n===tot};
+}
+/* تقييم صنف كامل: ترتيب العروض + الفايز */
+function evalItem(iid){
+  var it=S.it[iid], C=cfg(), q=it?numOr(it.q,0):0;
+  var rows=live('of').filter(function(o){return o.i===iid}).map(function(o){
+    var t=techOf(o), e=effUnit(o);
+    return {o:o,net:unitNet(o),eff:e,tech:t,ann:isFinite(e)?e*q:NaN,st:''};
+  });
+  var anyTech=rows.some(function(r){return r.tech.n>0});
+  var mode=anyTech?'full':'fin';
+  rows.forEach(function(r){
+    if(!isFinite(r.eff)) r.st='noprice';
+    else if(mode==='fin') r.st='fin';
+    else if(!r.tech.done) r.st='part';
+    else r.st=r.tech.pct>=C.pass?'pass':'fail';
+  });
+  var cand=rows.filter(function(r){return r.st==='pass'||r.st==='fin'});
+  var minE=Infinity; cand.forEach(function(r){if(r.eff<minE)minE=r.eff});
+  cand.forEach(function(r){
+    r.fin=minE/r.eff*100;
+    r.score=mode==='fin'?r.fin:r.tech.pct*C.wT/100+r.fin*(100-C.wT)/100;
+  });
+  var ordr={pass:0,fin:0,part:1,fail:2,noprice:3};
+  rows.sort(function(a,b){return ordr[a.st]-ordr[b.st]||((b.score||0)-(a.score||0))||((a.eff||1e18)-(b.eff||1e18))});
+  var win=cand.length?rows[0]:null; if(win) win.st='win';
+  var avg=NaN, mx=NaN; if(cand.length){var s=0;cand.forEach(function(r){s+=r.ann});avg=s/cand.length;mx=Math.max.apply(null,cand.map(function(r){return r.ann}))}
+  return {it:it,rows:rows,win:win,mode:mode,cand:cand.length,avgAnn:avg,maxAnn:mx,q:q};
+}
+function evalAll(cat){return itsSorted(cat).map(function(it){return evalItem(it.id)})}
+var ST_PILL={win:['🥇 الفايز','win'],pass:['ناجح فنيًا','ok'],fin:['مادي بس','bl'],part:['التقييم ناقص','wt'],fail:['مستبعد فنيًا','bad'],noprice:['ناقص سعر/عبوة','gr']};
+function pill(st){var p=ST_PILL[st]||['—','gr'];return '<span class="pill '+p[1]+'">'+p[0]+'</span>'}
+
+/* ================= شبكة إكسيل ================= */
+function xlGridAttach(tb,onSave){
+  if(tb._xl) return; tb._xl=1;
+  function commit(el){
+    if(el.value===el._last) return;
+    var ok=onSave(el);
+    if(ok===false){el.value=el._last;return}
+    el._last=el.value; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  }
+  tb.addEventListener('focusin',function(e){var el=e.target;if(!el.classList||!el.classList.contains('xl'))return;
+    el._last=el.value; var tr=el.closest('tr'); if(tr) tr.classList.add('foc');
+    if(el.tagName==='INPUT'&&el.type!=='date'){try{el.select()}catch(x){} setTimeout(function(){try{if(document.activeElement===el&&el.value===el._last)el.select()}catch(x){}},0);}});
+  tb.addEventListener('focusout',function(e){var tr=e.target.closest&&e.target.closest('tr');if(tr)tr.classList.remove('foc');
+    var el=e.target; if(el.classList&&el.classList.contains('xl')) setTimeout(flushRender,60);});
+  tb.addEventListener('change',function(e){var el=e.target;if(el.classList&&el.classList.contains('xl'))commit(el)});
+  tb.addEventListener('keydown',function(e){
+    var el=e.target;if(!el.classList||!el.classList.contains('xl'))return;
+    var sel=el.tagName==='SELECT', dr=0, dc=0;
+    if(e.key==='Enter') dr=e.shiftKey?-1:1;
+    else if(e.key==='ArrowDown'&&!sel) dr=1;
+    else if(e.key==='ArrowUp'&&!sel) dr=-1;
+    else if(e.key==='ArrowRight') dc=-1;
+    else if(e.key==='ArrowLeft') dc=1;
+    else return;
+    e.preventDefault(); commit(el);
+    var r=+el.getAttribute('data-r'), c=+el.getAttribute('data-c'), t=null;
+    for(var i=0;i<40&&!t;i++){r+=dr;c+=dc;if(r<0||c<0||r>9999||c>40)break;t=tb.querySelector('.xl[data-r="'+r+'"][data-c="'+c+'"]:not([disabled])')}
+    if(t){t.focus();if(t.tagName==='INPUT'&&t.type!=='date')try{t.select()}catch(x){}}
+  });
+}
+var NUMF={q:1,k:1,r:1,d:1,b:1,e:1,l:1,w:1,cd:1,gd:1,v:1};
+function cellSave(el){
+  var col=el.getAttribute('data-k'), id=el.getAttribute('data-id'), f=el.getAttribute('data-f');
+  var v=el.value, rec;
+  if(col==='ts'){ /* درجة فنية: id = عرض|بند */
+    var p=id.split('|'), key=sid(p[0],p[1]), old=S.ts[key];
+    if(String(v).trim()===''){ if(old&&!old.del) softDel('ts',key); afterSave(col,el); return true }
+    var n=num(v); if(!isFinite(n)||n<0||n>10){toast('الدرجة من 0 لـ 10',true);return false}
+    put('ts',{id:key,o:p[0],t:p[1],v:r2(n)}); el.value=fmt(n); afterSave(col,el); return true;
+  }
+  var x=S[col]&&S[col][id];
+  if(!x||x.del){toast('السجل اتمسح من جهاز تاني',true);return false}
+  rec=JSON.parse(JSON.stringify(x));
+  if(NUMF[f]){
+    if(String(v).trim()===''&&f!=='w'){delete rec[f]}
+    else{
+      var m=num(v);
+      if(!isFinite(m)||m<0){toast('رقم مش صحيح',true);return false}
+      if((f==='d'||f==='gd')&&m>=100){toast('الخصم أقل من 100%',true);return false}
+      rec[f]=r2(m); el.value=fmt(rec[f]);
+    }
+  } else if(f==='n'){v=v.trim();if(!v){toast('الاسم مايبقاش فاضي',true);return false}rec.n=v}
+  else rec[f]=v;
+  if(col==='it'&&f==='c'&&x.c!==v){pendingRender=true}
+  put(col,rec); afterSave(col,el); return true;
+}
+var pendingRender=false;
+function afterSave(col,el){ updCalcs(); if(col==='co'||col==='it'||col==='tc') pendingRender=true; }
+function editing(){var a=document.activeElement;return a&&a.classList&&a.classList.contains('xl')}
+function flushRender(){ if(editing()) return; if(pendingRender){pendingRender=false;refreshSelects();renderAll()} }
+/* تحديث الخانات المحسوبة في مكانها */
+function updCalcs(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-cv]'),function(td){
+    var t=td.getAttribute('data-cv'), id=td.getAttribute('data-id'), o=S.of[id], it=S.it[id];
+    if(t==='net'&&o) td.textContent=fmtU(unitNet(o));
+    else if(t==='eff'&&o) td.textContent=fmtU(effUnit(o));
+    else if(t==='tech'&&o){var tt=techOf(o);td.innerHTML=tt.n?'<b>'+fmtP(tt.pct)+'</b>'+(tt.done?'':' <span class="mut">('+tt.n+'/'+tt.tot+')</span>'):'—'}
+    else if(t==='tst'&&o){var t2=techOf(o),C=cfg();td.innerHTML=!t2.n?'<span class="pill gr">مش متقيم</span>':!t2.done?'<span class="pill wt">ناقص</span>':t2.pct>=C.pass?'<span class="pill ok">ناجح</span>':'<span class="pill bad">مستبعد</span>'}
+    else if(t==='nof'&&it) td.textContent=live('of').filter(function(z){return z.i===id}).length;
+    else if(t==='best'&&it){var ev=evalItem(id);td.innerHTML=ev.win?esc(coName(ev.win.o.co))+' <span class="mut">'+fmtU(ev.win.eff)+'</span>':'—'}
+    else if(t==='tcsum'){var cat=id,s=0;tcsOf(cat).forEach(function(c){s+=c.w});td.textContent='مجموع الأوزان: '+fmt(s)}
+  });
+}
+
+/* ================= الرئيسية ================= */
+function renderHome(){
+  var C=cfg(), evs=evalAll(''), nCo=live('co').length, nOf=live('of').length;
+  var tot=0, avgTot=0, maxTot=0, won=0, noOf=[], partial=[], noQ=[], byCat={}, byCo={};
+  evs.forEach(function(ev){
+    if(!ev.rows.length){noOf.push(ev.it);return}
+    if(ev.rows.some(function(r){return r.st==='part'})) partial.push(ev.it);
+    if(!(ev.q>0)) noQ.push(ev.it);
+    if(ev.win&&isFinite(ev.win.ann)){won++;tot+=ev.win.ann;avgTot+=ev.avgAnn;maxTot+=ev.maxAnn;
+      byCat[ev.it.c]=(byCat[ev.it.c]||0)+ev.win.ann; var cn=coName(ev.win.o.co); byCo[cn]=(byCo[cn]||0)+ev.win.ann}
+  });
+  var sav=avgTot-tot;
+  $('kpis').innerHTML=
+    '<div class="kpi hero"><small>تكلفة السنة بالعروض الفايزة</small><b>'+fmt(tot,0)+'</b><i>💰</i></div>'+
+    '<div class="kpi gr"><small>التوفير مقابل متوسط العروض</small><b class="pos">'+fmt(sav,0)+'</b><i>📉</i></div>'+
+    '<div class="kpi"><small>أصناف اترسّت</small><b>'+won+' / '+evs.length+'</b><i>📦</i></div>'+
+    '<div class="kpi"><small>عروض من '+nCo+' شركة</small><b>'+nOf+'</b><i>🧾</i></div>';
+  var u='';
+  if(noOf.length) u+='<div><b>📭 أصناف من غير عروض ('+noOf.length+')</b>'+noOf.slice(0,6).map(function(x){return esc(x.n)}).join('، ')+(noOf.length>6?'…':'')+'</div>';
+  if(partial.length) u+='<div class="w"><b>🔬 تقييم فني ناقص ('+partial.length+')</b>'+partial.slice(0,6).map(function(x){return esc(x.n)}).join('، ')+(partial.length>6?'…':'')+'</div>';
+  if(noQ.length) u+='<div class="w"><b>📏 من غير احتياج سنوي ('+noQ.length+')</b>التكلفة السنوية مش هتتحسب: '+noQ.slice(0,5).map(function(x){return esc(x.n)}).join('، ')+'</div>';
+  if(!evs.length) u+='<div class="w"><b>ابدأ من «الأصناف»</b>سجّل الأصناف المطلوبة، وبعدين الشركات من الإعدادات، وبعدين العروض.</div>';
+  $('urgBox').innerHTML=u?'<div class="secttl">🚨 متابعة عاجلة</div><div class="urg">'+u+'</div>':'';
+  /* دونات حسب القسم */
+  var dsum=0; CAT_ORD.forEach(function(c){dsum+=byCat[c]||0});
+  if(dsum>0){
+    var a0=-Math.PI/2, svg='<svg viewBox="0 0 120 120">';
+    CAT_ORD.forEach(function(c){var v=byCat[c]||0;if(!v)return;var a1=a0+v/dsum*Math.PI*2;
+      if(v/dsum>0.999){svg+='<circle cx="60" cy="60" r="45" fill="none" stroke="'+CAT_COL[c]+'" stroke-width="22"/>'}
+      else{var x0=60+45*Math.cos(a0),y0=60+45*Math.sin(a0),x1=60+45*Math.cos(a1),y1=60+45*Math.sin(a1);
+      svg+='<path d="M'+x0+' '+y0+' A45 45 0 '+(a1-a0>Math.PI?1:0)+' 1 '+x1+' '+y1+'" fill="none" stroke="'+CAT_COL[c]+'" stroke-width="22"/>'}a0=a1});
+    svg+='</svg>';
+    $('donChart').innerHTML='<div class="donut">'+svg+'<ul>'+CAT_ORD.filter(function(c){return byCat[c]}).map(function(c){return '<li><span><i style="background:'+CAT_COL[c]+'"></i>'+CAT[c]+'</span><span>'+fmt(byCat[c],0)+' <span class="mut">'+fmt(byCat[c]/dsum*100,0)+'%</span></span></li>'}).join('')+'</ul></div>';
+  } else $('donChart').innerHTML='<div class="empty">لسه مفيش ترسية</div>';
+  var cl=Object.keys(byCo).sort(function(a,b){return byCo[b]-byCo[a]}), mxc=cl.length?byCo[cl[0]]:1;
+  $('coBars').innerHTML=cl.length?cl.map(function(n){return '<div class="bar"><div class="t"><span>'+esc(n)+'</span><span>'+fmt(byCo[n],0)+'</span></div><div class="tr"><div class="fl" style="width:'+(byCo[n]/mxc*100)+'%"></div></div></div>'}).join(''):'<div class="empty">—</div>';
+  var h='<thead><tr><th>الصنف</th><th>القسم</th><th>الشركة الفايزة</th><th>الاسم التجاري</th><th>الفعلي/وحدة</th><th>التكلفة السنوية</th></tr></thead><tbody>';
+  var any=false;
+  evs.forEach(function(ev){if(!ev.win)return;any=true;var w=ev.win;
+    h+='<tr><td>'+esc(ev.it.n)+'</td><td>'+CAT[ev.it.c]+'</td><td><b>'+esc(coName(w.o.co))+'</b></td><td>'+esc(w.o.p||'')+'</td><td>'+fmtU(w.eff)+' <span class="mut">/'+esc(ev.it.un||CAT_UNIT[ev.it.c])+'</span></td><td>'+fmt(w.ann,0)+'</td></tr>'});
+  if(!any) h+='<tr><td colspan="6" class="empty">لسه مفيش أصناف اترسّت</td></tr>';
+  $('winT').innerHTML=h+'</tbody>';
+  $('homeNote').textContent='حد النجاح الفني '+C.pass+'% — فني '+C.wT+'% / مادي '+(100-C.wT)+'%';
+}
+
+/* ================= الأصناف ================= */
+function renderItems(){
+  var qc=$('qIC').value, arr=itsSorted(qc);
+  var h='<thead><tr><th>الصنف</th><th>القسم</th><th>وحدة المقارنة</th><th>الاحتياج السنوي</th><th>ملاحظة</th><th>العروض</th><th>الأفضل لحد دلوقتي</th><th></th></tr></thead><tbody>';
+  arr.forEach(function(x,r){
+    var a=' data-k="it" data-id="'+esc(x.id)+'" data-r="'+r+'"';
+    h+='<tr><td><input class="xl"'+a+' data-c="0" data-f="n" value="'+esc(x.n)+'" style="min-width:200px"></td>'+
+      '<td><select class="xl"'+a+' data-c="1" data-f="c">'+catOpts(x.c)+'</select></td>'+
+      '<td><input class="xl" list="unitList"'+a+' data-c="2" data-f="un" value="'+esc(x.un||'')+'"></td>'+
+      '<td><input class="xl num" inputmode="decimal"'+a+' data-c="3" data-f="q" value="'+(isNum(x.q)?fmt(x.q):'')+'"></td>'+
+      '<td><input class="xl"'+a+' data-c="4" data-f="nt" value="'+esc(x.nt||'')+'" style="min-width:140px"></td>'+
+      '<td class="c" data-cv="nof" data-id="'+esc(x.id)+'"></td><td class="c" data-cv="best" data-id="'+esc(x.id)+'"></td>'+
+      '<td><button class="ib" data-act="delit" data-id="'+esc(x.id)+'">🗑</button></td></tr>';
+  });
+  if(!arr.length) h+='<tr><td colspan="8" class="empty">لسه مفيش أصناف</td></tr>';
+  $('itT').innerHTML=h+'</tbody>'; xlGridAttach($('itT'),cellSave); updCalcs();
+}
+function saveIt(){
+  var n=$('iN').value.trim(), c=$('iC').value, q=$('iQ').value.trim()?num($('iQ').value):NaN;
+  if(!n){toast('اكتب اسم الصنف',true);return}
+  if($('iQ').value.trim()&&(!isFinite(q)||q<0)){toast('الاحتياج رقم مش صحيح',true);return}
+  if(live('it').some(function(x){return x.n===n&&x.c===c})){toast('الصنف ده متسجل قبل كده',true);return}
+  var rec={id:nid('i'),n:n,c:c,un:$('iU').value.trim()||CAT_UNIT[c],nt:$('iT').value.trim()}; if(isFinite(q)) rec.q=r2(q);
+  put('it',rec); $('iN').value='';$('iQ').value='';$('iT').value=''; toast('اتضاف ✓'); refreshSelects(); renderItems(); $('iN').focus();
+}
+
+/* ================= العروض ================= */
+function renderOffers(){
+  var qc=$('qOC').value, qi=$('qOI').value, qco=$('qOCo').value;
+  var arr=live('of').filter(function(o){var it=S.it[o.i];return (!qc||(it&&it.c===qc))&&(!qi||o.i===qi)&&(!qco||o.co===qco)})
+    .sort(function(a,b){var ia=S.it[a.i],ib=S.it[b.i];return (ia&&ib?(CAT_ORD.indexOf(ia.c)-CAT_ORD.indexOf(ib.c)||ia.n.localeCompare(ib.n,'ar')):0)||(effUnit(a)||1e18)-(effUnit(b)||1e18)});
+  var h='<thead><tr><th>الصنف</th><th>الشركة</th><th>الاسم التجاري</th><th>المنتج/المنشأ</th><th>العبوة</th><th>سعر العبوة</th><th>خصم %</th><th>بونص %</th><th>صلاحية (ش)</th><th>توريد (يوم)</th><th>الصافي/وحدة</th><th>الفعلي/وحدة</th><th>فني</th><th></th></tr></thead><tbody>';
+  arr.forEach(function(o,r){
+    var a=' data-k="of" data-id="'+esc(o.id)+'" data-r="'+r+'"';
+    function ni(c,f){return '<td><input class="xl num" inputmode="decimal"'+a+' data-c="'+c+'" data-f="'+f+'" value="'+(isNum(o[f])?fmt(o[f]):'')+'"></td>'}
+    h+='<tr><td><select class="xl"'+a+' data-c="0" data-f="i" style="min-width:170px">'+itOpts(o.i,'')+'</select></td>'+
+      '<td><select class="xl"'+a+' data-c="1" data-f="co">'+coOpts(o.co)+'</select></td>'+
+      '<td><input class="xl"'+a+' data-c="2" data-f="p" value="'+esc(o.p||'')+'" style="min-width:140px"></td>'+
+      '<td><input class="xl" list="makerList"'+a+' data-c="3" data-f="m" value="'+esc(o.m||'')+'" style="min-width:120px"></td>'+
+      ni(4,'k')+ni(5,'r')+ni(6,'d')+ni(7,'b')+ni(8,'e')+ni(9,'l')+
+      '<td class="c big" data-cv="net" data-id="'+esc(o.id)+'"></td><td class="c big" data-cv="eff" data-id="'+esc(o.id)+'"></td><td class="c" data-cv="tech" data-id="'+esc(o.id)+'"></td>'+
+      '<td><button class="ib" data-act="delof" data-id="'+esc(o.id)+'">🗑</button></td></tr>';
+  });
+  if(!arr.length) h+='<tr><td colspan="14" class="empty">لسه مفيش عروض'+(qc||qi||qco?' بالفلتر ده':'')+'</td></tr>';
+  $('ofT').innerHTML=h+'</tbody>'; xlGridAttach($('ofT'),cellSave); updCalcs();
+}
+function saveOf(){
+  var i=$('oI').value, co=$('oC').value;
+  if(!i){toast('اختار الصنف (ضيفه من «الأصناف» الأول)',true);return}
+  if(!co){toast('اختار الشركة (ضيفها من «إعدادات» الأول)',true);return}
+  var rec={id:nid('o'),i:i,co:co,p:$('oP').value.trim(),m:$('oM').value.trim()}, bad='';
+  [['k','oK','العبوة'],['r','oR','السعر'],['d','oD','الخصم'],['b','oB','البونص'],['e','oE','الصلاحية'],['l','oL','التوريد']].forEach(function(f){
+    var s=$(f[1]).value.trim(); if(!s) return; var n=num(s); if(!isFinite(n)||n<0){bad=f[2];return} rec[f[0]]=r2(n)});
+  if(bad){toast(bad+' رقم مش صحيح',true);return}
+  if(isNum(rec.d)&&rec.d>=100){toast('الخصم أقل من 100%',true);return}
+  if(!(rec.k>0)||!(rec.r>0)) toast('اتحفظ — بس من غير عبوة وسعر مش هيدخل المقارنة',true); else toast('اتحفظ ✓');
+  put('of',rec); ['oP','oM','oK','oR','oD','oB','oE','oL'].forEach(function(k){$(k).value=''});
+  refreshSelects(); renderOffers(); $('oP').focus();
+}
+function updOfUnit(){var it=S.it[$('oI').value];$('oUl').textContent=it?(it.un||CAT_UNIT[it.c]):'وحدة'}
+
+/* ================= التقييم الفني ================= */
+function renderTech(){
+  var cat=$('tC').value||'vac', C=cfg();
+  var iSel=$('tI').value; $('tI').innerHTML=itOpts(iSel,cat,'كل أصناف '+CAT[cat]); if(iSel&&S.it[iSel]&&S.it[iSel].c===cat) $('tI').value=iSel; else $('tI').value='';
+  var qi=$('tI').value, cr=tcsOf(cat);
+  var offs=live('of').filter(function(o){var it=S.it[o.i];return it&&it.c===cat&&(!qi||o.i===qi)})
+    .sort(function(a,b){return itName(a.i).localeCompare(itName(b.i),'ar')||coName(a.co).localeCompare(coName(b.co),'ar')});
+  $('techPassLbl').textContent='حد النجاح '+C.pass+'%';
+  var h='<thead><tr><th>الصنف</th><th>الشركة — المنتج</th>'+cr.map(function(c){return '<th title="'+esc(c.n)+'" style="white-space:normal;min-width:78px;font-size:11.5px">'+esc(c.n)+'<br><span style="opacity:.8">وزن '+fmt(c.w)+'</span></th>'}).join('')+'<th>الفني</th><th>الحالة</th></tr></thead><tbody>';
+  offs.forEach(function(o,r){
+    h+='<tr><td class="c"><b>'+esc(itName(o.i))+'</b></td><td class="c">'+esc(coName(o.co))+(o.p?' — '+esc(o.p):'')+'</td>';
+    cr.forEach(function(c,ci){var s=S.ts[sid(o.id,c.id)];
+      h+='<td><input class="xl sc" inputmode="decimal" data-k="ts" data-id="'+esc(o.id+'|'+c.id)+'" data-f="v" data-r="'+r+'" data-c="'+ci+'" value="'+(s&&!s.del?fmt(s.v):'')+'"></td>'});
+    h+='<td class="c big" data-cv="tech" data-id="'+esc(o.id)+'"></td><td class="c" data-cv="tst" data-id="'+esc(o.id)+'"></td></tr>';
+  });
+  if(!offs.length) h+='<tr><td colspan="'+(cr.length+4)+'" class="empty">مفيش عروض '+CAT[cat]+' لسه</td></tr>';
+  $('tsT').innerHTML=h+'</tbody>'; xlGridAttach($('tsT'),cellSave);
+  /* البنود */
+  $('tcCatLbl').textContent=CAT[cat];
+  var g='<thead><tr><th>البند</th><th>الوزن</th><th></th></tr></thead><tbody>';
+  cr.forEach(function(c,r){var a=' data-k="tc" data-id="'+esc(c.id)+'" data-r="'+r+'"';
+    g+='<tr><td><input class="xl"'+a+' data-c="0" data-f="n" value="'+esc(c.n)+'" style="min-width:240px"></td><td><input class="xl num" inputmode="decimal"'+a+' data-c="1" data-f="w" value="'+fmt(c.w)+'"></td><td><button class="ib" data-act="deltc" data-id="'+esc(c.id)+'">🗑</button></td></tr>'});
+  $('tcT').innerHTML=g+'</tbody>'; xlGridAttach($('tcT'),cellSave);
+  $('tcSum').setAttribute('data-cv','tcsum'); $('tcSum').setAttribute('data-id',cat);
+  updCalcs();
+}
+function addTc(){var cat=$('tC').value||'vac', mx=0;tcsOf(cat).forEach(function(c){mx=Math.max(mx,c.o||0)});
+  put('tc',{id:nid('t'),c:cat,n:'بند جديد',w:10,o:mx+1}); renderTech();
+  var ins=$('tcT').querySelectorAll('input[data-f="n"]'); if(ins.length){ins[ins.length-1].focus()}}
+
+/* ================= المقارنة ================= */
+function renderCmp(){
+  var cat=$('cC').value, C=cfg();
+  var iSel=$('cI').value; $('cI').innerHTML=itOpts(iSel,cat,'كل الأصناف'); if(iSel&&S.it[iSel]&&(!cat||S.it[iSel].c===cat)) $('cI').value=iSel; else $('cI').value='';
+  var qi=$('cI').value, evs=qi?[evalItem(qi)]:evalAll(cat);
+  $('cmpRule').textContent='الخطوة 1: العروض اللي فنيًا أقل من '+C.pass+'% بتتستبعد. الخطوة 2: الناجحين بياخدوا درجة مادية = (أقل سعر فعلي ÷ سعر العرض) × 100. النتيجة = فني × '+C.wT+'% + مادي × '+(100-C.wT)+'%. لو صنف مفيهوش أي تقييم فني، الترتيب بيبقى بالسعر بس.';
+  $('prtSub').textContent=(C.season?'موسم '+C.season+' — ':'')+(cat?CAT[cat]:'كل الأقسام')+' — '+today();
+  var tot=0, avg=0, n=0;
+  evs.forEach(function(ev){if(ev.win&&isFinite(ev.win.ann)){tot+=ev.win.ann;avg+=ev.avgAnn;n++}});
+  $('cmpKpis').innerHTML='<div class="kpi hero"><small>تكلفة السنة بالفايزين</small><b>'+fmt(tot,0)+'</b><i>💰</i></div>'+
+    '<div class="kpi gr"><small>التوفير مقابل المتوسط</small><b class="pos">'+fmt(avg-tot,0)+'</b><i>📉</i></div>'+
+    '<div class="kpi"><small>أصناف اترسّت</small><b>'+n+' / '+evs.length+'</b><i>📦</i></div>'+
+    '<div class="kpi"><small>القاعدة</small><b style="font-size:17px">فني '+C.wT+' / مادي '+(100-C.wT)+'</b><i>⚖️</i></div>';
+  var h='';
+  evs.forEach(function(ev){
+    if(!ev.it) return; var un=ev.it.un||CAT_UNIT[ev.it.c];
+    h+='<div class="card"><h2>'+esc(ev.it.n)+' <span class="tag">'+CAT[ev.it.c]+'</span> <span class="mut">احتياج '+(ev.q>0?fmt(ev.q,0)+' '+esc(un):'مش محدد')+'</span></h2>';
+    if(!ev.rows.length){h+='<div class="empty">مفيش عروض للصنف ده</div></div>';return}
+    h+='<div class="tbl-wrap"><table class="st"><thead><tr><th>#</th><th>الشركة</th><th>الاسم التجاري</th><th>المنشأ</th><th>العبوة × السعر</th><th>آجل</th><th>الفعلي/'+esc(un)+'</th><th>فني</th><th>مادي</th><th>النتيجة</th><th>التكلفة السنوية</th><th>الحالة</th></tr></thead><tbody>';
+    ev.rows.forEach(function(r,i){var o=r.o,c=S.co[o.co]||{};
+      h+='<tr'+(r.st==='win'?' class="winr"':'')+'><td>'+(i+1)+'</td><td><b>'+esc(coName(o.co))+'</b></td><td>'+esc(o.p||'')+'</td><td>'+esc(o.m||'')+'</td>'+
+        '<td>'+(isNum(o.k)?fmt(o.k,0):'—')+' × '+(isNum(o.r)?fmt(o.r):'—')+((o.d||o.b)?' <span class="mut">('+(o.d?'خ '+fmt(o.d)+'%':'')+(o.d&&o.b?' ':'')+(o.b?'ب '+fmt(o.b)+'%':'')+')</span>':'')+'</td>'+
+        '<td>'+(c.cd?fmt(c.cd,0)+' يوم':'كاش')+'</td><td><b>'+fmtU(r.eff)+'</b></td><td>'+(r.tech.n?fmtP(r.tech.pct):'—')+'</td><td>'+fmtP(r.fin)+'</td><td><b>'+(isFinite(r.score)?fmt(r.score,1):'—')+'</b></td>'+
+        '<td>'+fmt(r.ann,0)+'</td><td>'+pill(r.st)+'</td></tr>'});
+    h+='</tbody></table></div>';
+    if(ev.win&&ev.cand>1&&isFinite(ev.maxAnn)) h+='<p class="help">الفرق بين الفايز وأغلى عرض ناجح: <b>'+fmt(ev.maxAnn-ev.win.ann,0)+'</b> ج في السنة.</p>';
+    h+='</div>';
+  });
+  $('cmpBox').innerHTML=h||'<div class="card"><div class="empty">لسه مفيش أصناف</div></div>';
+}
+
+/* ================= الإعدادات ================= */
+function renderSet(){
+  var arr=cosSorted();
+  var h='<thead><tr><th>الشركة</th><th>آجل (يوم)</th><th>خصم عام %</th><th>تليفون/مندوب</th><th>ملاحظة</th><th>عروض</th><th></th></tr></thead><tbody>';
+  arr.forEach(function(c,r){var a=' data-k="co" data-id="'+esc(c.id)+'" data-r="'+r+'"';
+    h+='<tr><td><input class="xl"'+a+' data-c="0" data-f="n" value="'+esc(c.n)+'" style="min-width:160px"></td>'+
+      '<td><input class="xl num" inputmode="decimal"'+a+' data-c="1" data-f="cd" value="'+(isNum(c.cd)?fmt(c.cd):'')+'"></td>'+
+      '<td><input class="xl num" inputmode="decimal"'+a+' data-c="2" data-f="gd" value="'+(isNum(c.gd)?fmt(c.gd):'')+'"></td>'+
+      '<td><input class="xl"'+a+' data-c="3" data-f="ph" value="'+esc(c.ph||'')+'"></td>'+
+      '<td><input class="xl"'+a+' data-c="4" data-f="nt" value="'+esc(c.nt||'')+'" style="min-width:140px"></td>'+
+      '<td class="c">'+live('of').filter(function(o){return o.co===c.id}).length+'</td>'+
+      '<td><button class="ib" data-act="delco" data-id="'+esc(c.id)+'">🗑</button></td></tr>'});
+  if(!arr.length) h+='<tr><td colspan="7" class="empty">لسه مفيش شركات</td></tr>';
+  $('coT').innerHTML=h+'</tbody>'; xlGridAttach($('coT'),cellSave);
+  var C=cfg(); $('sPass').value=C.pass; $('sWT').value=C.wT; $('sRate').value=C.rate; $('sSeason').value=C.season;
+  $('cfgHelp').textContent='الآجل بيتحسب كده: السعر الفعلي = الصافي ÷ (1 + '+C.rate+'% × أيام الآجل ÷ 30). يعني عرض بآجل 90 يوم بيتقارن كأنه أرخص بحوالي '+fmt(100-100/(1+C.rate/100*3),1)+'%.';
+  var on=lsGet(LS_ON)!=='OFF'; $('syncState').textContent=on?'المزامنة شغالة بين الأجهزة':'المزامنة متوقفة — البيانات على الجهاز ده بس'; $('syncTg').textContent=on?'إيقاف':'تشغيل';
+  $('about').innerHTML='عروض الأسعار v'+APP_VER+' — '+live('it').length+' صنف · '+live('co').length+' شركة · '+live('of').length+' عرض<br>المسار في Firebase: '+FB_PATH;
+}
+function saveCo(){
+  var n=$('cN').value.trim(); if(!n){toast('اكتب اسم الشركة',true);return}
+  if(live('co').some(function(c){return c.n===n})){toast('الشركة متسجلة قبل كده',true);return}
+  var rec={id:nid('c'),n:n,ph:$('cP').value.trim()}, cd=$('cD').value.trim(), gd=$('cG').value.trim();
+  if(cd){var a=num(cd);if(!isFinite(a)||a<0){toast('الآجل رقم مش صحيح',true);return}rec.cd=a}
+  if(gd){var b=num(gd);if(!isFinite(b)||b<0||b>=100){toast('الخصم من 0 لأقل من 100',true);return}rec.gd=b}
+  put('co',rec); ['cN','cD','cG','cP'].forEach(function(k){$(k).value=''}); toast('اتضافت ✓'); refreshSelects(); renderSet();
+}
+function saveCfg(){
+  var p=num($('sPass').value), w=num($('sWT').value), r=num($('sRate').value);
+  if(!isFinite(p)||p<0||p>100){toast('حد النجاح من 0 لـ 100',true);return}
+  if(!isFinite(w)||w<0||w>100){toast('الوزن من 0 لـ 100',true);return}
+  if(!isFinite(r)||r<0||r>20){toast('تكلفة الفلوس من 0 لـ 20% شهريًا',true);return}
+  var c=JSON.parse(JSON.stringify(S.cfg.main||{id:'main'})); c.pass=p;c.wT=w;c.rate=r;c.season=$('sSeason').value.trim();
+  put('cfg',c); toast('اتحفظت ✓'); renderSet();
+}
+function exportJSON(){
+  var blob=new Blob([JSON.stringify({app:'tenders',ver:APP_VER,at:new Date().toISOString(),data:S},null,1)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tenders-'+today()+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+}
+function importJSON(f){
+  var rd=new FileReader(); rd.onload=function(){
+    try{var o=JSON.parse(rd.result); o=o.data||o; var n=0;
+      COLS.forEach(function(col){var m=o[col]||{};for(var k in m){var x=m[k];if(!validRec(col,k,x))continue;var l=S[col][k];if(!l||x.u>l.u){S[col][k]=x;push(col,x);n++}}});
+      persist(); refreshSelects(); renderAll(); toast('اتدمج '+n+' سجل ✓');
+    }catch(e){toast('الملف مش صحيح',true)}
+  }; rd.readAsText(f);
+}
+
+/* ================= المزامنة ================= */
+var fbDb=null,fbRoot=null,fbReady=false,fbListening=false;
+function warn(e){console.warn(e)}
+function syncUI(s,t){$('syncDot').className='dot '+(s||'');$('syncTxt').textContent=t||''}
+function loadScript(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=function(){rej(new Error(src))};document.head.appendChild(s)})}
+function initSync(){
+  if(lsGet(LS_ON)==='OFF'){syncUI('','محلي');return}
+  syncUI('wait',navigator.onLine?'بيتصل...':'أوفلاين');
+  var V='https://www.gstatic.com/firebasejs/10.12.2/';
+  (window.firebase?Promise.resolve():loadScript(V+'firebase-app-compat.js').then(function(){return loadScript(V+'firebase-database-compat.js')}))
+  .then(function(){
+    var app=firebase.apps.length?firebase.app():firebase.initializeApp(DEFAULT_FB);
+    if(!fbDb){
+      fbDb=firebase.database(app);
+      fbDb.ref('.info/serverTimeOffset').on('value',function(s){srvOff=+s.val()||0});
+      fbDb.ref('.info/connected').on('value',function(s){if(lsGet(LS_ON)==='OFF')return;if(s.val())syncUI('on','متزامن');else syncUI(fbReady?'wait':'err',fbReady?'أوفلاين':'مش متصل')});
+    }
+    fbDb.goOnline(); fbRoot=fbDb.ref(FB_PATH);
+    if(!fbListening){fbListening=true;fbRoot.on('value',function(snap){mergeCloud(snap.val()||{})},function(err){syncUI('err','خطأ صلاحيات');warn(err)})}
+  }).catch(function(e){syncUI('err','مش متصل');warn(e)});
+}
+/* دمج سجل بسجل — الأحدث (u) يكسب، ومابنكتبش فوق سجل أحدث في السحابة */
+function mergeCloud(c){
+  var changed=false,toPush={};
+  COLS.forEach(function(col){
+    var cm=c[col]||{};
+    for(var k in cm){var x=cm[k],l=S[col][k];if(!validRec(col,k,x))continue;if(!l||x.u>l.u){S[col][k]=x;changed=true}}
+    for(var k2 in S[col]){var lx=S[col][k2],cx=cm[k2];if(!cx||lx.u>(cx.u||0))toPush[col+'/'+k2]=lx}
+  });
+  if(Object.keys(toPush).length){toPush.lastDevice=devId();toPush.ver=APP_VER;fbRoot.update(toPush).catch(warn)}
+  fbReady=true;
+  if(changed){persist(); if(editing()) pendingRender=true; else {refreshSelects();renderAll()}}
+}
+function push(col,rec){if(fbRoot){var u={};u[col+'/'+rec.id]=rec;u.lastDevice=devId();fbRoot.update(u).catch(warn)}}
+function toggleSync(){
+  if(lsGet(LS_ON)==='OFF'){lsSet(LS_ON,'1');initSync()}
+  else{lsSet(LS_ON,'OFF');if(fbRoot){fbRoot.off('value');fbListening=false}if(fbDb)fbDb.goOffline();fbRoot=null;fbReady=false;syncUI('','محلي')}
+  renderSet();
+}
+
+/* ================= تنقل ================= */
+var curPage='home';
+var PG_T={home:'الرئيسية',items:'الأصناف المطلوبة',offers:'العروض',tech:'التقييم الفني',cmp:'المقارنة والترسية',set:'الإعدادات'};
+function showPage(p){
+  curPage=p; $('hsub').textContent=PG_T[p]||'';
+  Array.prototype.forEach.call(document.querySelectorAll('.page'),function(x){x.classList.toggle('on',x.id==='pg-'+p)});
+  Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'),function(x){x.classList.toggle('on',x.getAttribute('data-p')===p)});
+  lsSet(LS_UI,p); renderAll(); window.scrollTo(0,0);
+}
+function renderAll(){
+  if(curPage==='home') renderHome();
+  else if(curPage==='items') renderItems();
+  else if(curPage==='offers') renderOffers();
+  else if(curPage==='tech') renderTech();
+  else if(curPage==='cmp') renderCmp();
+  else renderSet();
+}
+function keepSel(el,html){var v=el.value;el.innerHTML=html;if(v&&el.querySelector('option[value="'+(window.CSS&&CSS.escape?CSS.escape(v):v)+'"]'))el.value=v}
+function refreshSelects(){
+  keepSel($('iC'),catOpts('vac')); keepSel($('qIC'),catOpts('','كل الأقسام'));
+  keepSel($('oI'),itOpts('', '', 'اختار الصنف…')); keepSel($('oC'),coOpts('','اختار الشركة…'));
+  keepSel($('qOC'),catOpts('','كل الأقسام')); keepSel($('qOI'),itOpts('',$('qOC').value,'كل الأصناف')); keepSel($('qOCo'),coOpts('','كل الشركات'));
+  keepSel($('tC'),catOpts('vac')); keepSel($('cC'),catOpts('','كل الأقسام'));
+  var mk={}; live('of').forEach(function(o){if(o.m)mk[o.m]=1}); $('makerList').innerHTML=Object.keys(mk).map(function(m){return '<option value="'+esc(m)+'">'}).join('');
+  var C=cfg(); $('seasonSel').textContent=C.season||'—';
+  updOfUnit();
+}
+function onAction(e){
+  var b=e.target.closest?e.target.closest('[data-act]'):null; if(!b) return;
+  var act=b.getAttribute('data-act'), id=b.getAttribute('data-id');
+  if(act==='delit'){var n=live('of').filter(function(o){return o.i===id}).length;
+    if(!confirm('امسح الصنف «'+itName(id)+'»'+(n?' ومعاه '+n+' عرض':'')+'؟'))return;
+    live('of').forEach(function(o){if(o.i===id)softDel('of',o.id)}); softDel('it',id); refreshSelects(); renderAll(); toast('اتمسح')}
+  else if(act==='delof'){if(!confirm('امسح العرض ده؟'))return; softDel('of',id); renderAll(); toast('اتمسح')}
+  else if(act==='delco'){var m=live('of').filter(function(o){return o.co===id}).length;
+    if(m){toast('الشركة عليها '+m+' عرض — امسح العروض الأول',true);return}
+    if(!confirm('امسح الشركة «'+coName(id)+'»؟'))return; softDel('co',id); refreshSelects(); renderAll(); toast('اتمسحت')}
+  else if(act==='deltc'){if(!confirm('امسح البند ده؟ الدرجات اللي عليه مش هتتحسب'))return; softDel('tc',id); renderAll(); toast('اتمسح')}
+}
+
+/* ================= تشغيل ================= */
+load();
+$('verLbl').textContent='v'+APP_VER;
+refreshSelects();
+Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'),function(b){b.addEventListener('click',function(){showPage(b.getAttribute('data-p'))})});
+document.addEventListener('click',onAction);
+$('saveIt').addEventListener('click',saveIt); $('saveOf').addEventListener('click',saveOf); $('saveCo').addEventListener('click',saveCo); $('saveCfg').addEventListener('click',saveCfg);
+$('iC').addEventListener('change',function(){$('iU').value=CAT_UNIT[$('iC').value]});
+$('oI').addEventListener('change',updOfUnit);
+$('qIC').addEventListener('change',renderItems);
+$('qOC').addEventListener('change',function(){keepSel($('qOI'),itOpts('',$('qOC').value,'كل الأصناف'));renderOffers()});
+$('qOI').addEventListener('change',renderOffers); $('qOCo').addEventListener('change',renderOffers);
+$('tC').addEventListener('change',renderTech); $('tI').addEventListener('change',renderTech); $('addTc').addEventListener('click',addTc);
+$('cC').addEventListener('change',renderCmp); $('cI').addEventListener('change',renderCmp);
+$('prtBtn').addEventListener('click',function(){window.print()});
+$('syncTg').addEventListener('click',toggleSync); $('expBtn').addEventListener('click',exportJSON);
+$('impF').addEventListener('change',function(){if(this.files[0])importJSON(this.files[0]);this.value=''});
+$('iU').value=CAT_UNIT.vac;
+var lp=lsGet(LS_UI); showPage(PG_T[lp]?lp:'home');
+initSync();
+</script>
+</body>
+</html>
