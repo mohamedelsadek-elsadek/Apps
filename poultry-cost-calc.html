@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>
+/* تعدد المزارع/الدورات: كل مزرعة ليها مسار بيانات لوحدها. main = المسار القديم */
+(function(){
+  var q=null; try{ q=new URLSearchParams(location.search).get('farm'); }catch(e){}
+  var f=q||(function(){try{return localStorage.getItem('pcc_farm');}catch(e){return null;}})()||'main';
+  f=String(f).replace(/[^A-Za-z0-9_-]/g,'')||'main';
+  try{ localStorage.setItem('pcc_farm',f); }catch(e){}
+  window.PCC_FARM=f;
+  window.PCC_SFX=(f==='main')?'':('__'+f);
+  window.PCC_PATH=(f==='main')?'poultry_cost_calc':('poultry_cost_calc/farms/'+f);
+})();
+</script>
 <script>/*SAFESYNC BEGIN*/
 /* ===== SafeSync v1 — حماية البيانات المشتركة لكل البرامج =====
    1) merge3(base, local, remote): دمج ثلاثي سجل بسجل (حسب id) — جهاز قديم مايقدرش يمسح شغل جهاز تاني.
@@ -269,6 +281,9 @@
   }
   .brand-text h1{margin:0;font-size:19px;font-weight:800;letter-spacing:.2px;}
   .brand-text p{margin:2px 0 0;font-size:12.5px;color:#E4E1FF;}
+  .farm-switch{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;color:#fff;font-weight:700}
+  .farm-switch select{font-family:inherit;font-size:13px;font-weight:700;padding:4px 8px;border-radius:8px;border:1px solid var(--wheat,#c9a24a);background:#fff;color:#10294d;max-width:230px}
+  .farm-switch button{font-family:inherit;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;border:1px solid var(--wheat,#c9a24a);background:var(--wheat,#c9a24a);color:#10294d;cursor:pointer}
   .eyebrow{
     display:inline-block;font-size:11px;letter-spacing:1.5px;color:var(--wheat);
     text-transform:uppercase;margin-bottom:6px;font-weight:700;
@@ -603,31 +618,33 @@
   };
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const dataRef = ref(db, "poultry_cost_calc/data");
+  const dataRef = ref(db, window.PCC_PATH+"/data");
   window.__fb = {
     ready:true,
     push:(obj)=>window.__fb.pushMerged(obj),
     /* SafeSync: transaction + دمج ثلاثي على آخر نسخة في السحابة (بدل set أعمى) */
-    pushMerged:(obj)=>SafeSync.loadBase('pcc').then(()=>{
+    pushMerged:(obj)=>SafeSync.loadBase(('pcc'+window.PCC_SFX)).then(()=>{
       const local=JSON.parse(JSON.stringify(obj));
       return runTransaction(dataRef, cur=>{
         let remote=null; try{ remote=cur&&cur.payload?JSON.parse(cur.payload):null; }catch(e){}
         if(!remote) return {payload:JSON.stringify(local), ts:Date.now()};
-        const b=SafeSync.base('pcc');
+        const b=SafeSync.base(('pcc'+window.PCC_SFX));
         const m=SafeSync.merge3(b, local, remote);
         if(SafeSync.massDelete(m,remote)) return;   /* إلغاء */
         m.__ts=Date.now();
         return {payload:JSON.stringify(m), ts:Date.now()};
       },{applyLocally:false}).then(r=>{
         if(!r.committed) return {blocked:true};
-        const v=JSON.parse(r.snapshot.val().payload); SafeSync.commitBase('pcc',v);
+        const v=JSON.parse(r.snapshot.val().payload); SafeSync.commitBase(('pcc'+window.PCC_SFX),v);
         return {data:v, changed:!SafeSync.same(v,local)};
       });
     }),
     subscribe:(cb)=>{ onValue(dataRef,(snap)=>{ const v=snap.val(); if(v&&v.payload) cb(v.payload, v.ts); }); },
     getOnce:()=>get(dataRef).then(snap=>snap.val()),
-    pushSnapshot:(id,obj)=>{ return set(ref(db,"poultry_cost_calc/snapshots/"+id), obj); },
-    listSnapshots:()=>get(ref(db,"poultry_cost_calc/snapshots")).then(snap=>snap.val()||{})
+    pushSnapshot:(id,obj)=>{ return set(ref(db,window.PCC_PATH+"/snapshots/"+id), obj); },
+    listSnapshots:()=>get(ref(db,window.PCC_PATH+"/snapshots")).then(snap=>snap.val()||{}),
+    farmsIndex:()=>get(ref(db,"poultry_cost_calc/farmsIndex")).then(snap=>snap.val()||{}),
+    setFarmIndex:(id,obj)=>set(ref(db,"poultry_cost_calc/farmsIndex/"+id), obj)
   };
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -675,6 +692,11 @@ header.top .kpi:first-child *{color:#10294d!important}
         <span> · </span>
         <span id="hdrSyncBadge" style="font-weight:700">⏳ بيتصل...</span>
       </p>
+      <div class="farm-switch" id="farmSwitchBox">
+        <span>🏠 المزرعة/الدورة:</span>
+        <select id="farmSwitch"><option>...</option></select>
+        <button type="button" id="farmAddBtn" title="فتح مزرعة أو دورة جديدة شغالة بالتوازي">＋ دورة جديدة</button>
+      </div>
     </div>
   </div>
   <div class="kpi-strip">
@@ -704,7 +726,7 @@ header.top .kpi:first-child *{color:#10294d!important}
 "use strict";
 
 /* ========================= DATA MODEL ========================= */
-const STORAGE_KEY = "poultry_cost_calc_v1";
+const STORAGE_KEY = "poultry_cost_calc_v1"+window.PCC_SFX;
 const uid = () => "id" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 
 function defaultState(){
@@ -720,7 +742,8 @@ function defaultState(){
     suppliers:[], supplierTx:[],
     itemCatalog:{}, extraCosts:[],
     payments:[], payers:[], samples:[], benchmarks:{}, credits:[],
-    archivedCycles:[], attendance:[], measureCustomRows:[], measureOverrides:{}
+    archivedCycles:[], attendance:[], measureCustomRows:[], measureOverrides:{},
+    capital:[], partnerCfg:{investors:[], equal:[], maxInvestorPct:10}
   };
 }
 
@@ -1082,7 +1105,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v13 — Farm Measurement Comparative + مقارنة تفصيلية + Excel ملوّن';
+const APP_VERSION='v14 — أكتر من دورة بالتوازي + رأس المال وتقسيم الشركاء';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -1116,14 +1139,14 @@ function pushNow(){
   const local=JSON.parse(JSON.stringify(state));
   window.__fb.pushMerged(local).then(r=>{
     window.__pccPushing=false; window.__pccFresh=false; window.__pccPending=null;   /* اللقطات اللي وصلت قبل الحفظ أقدم منه */
-    try{localStorage.removeItem('pcc_dirty');}catch(e){}
+    try{localStorage.removeItem(('pcc_dirty'+window.PCC_SFX));}catch(e){}
     updateSyncBadge(r&&r.blocked?'error':'synced');
     if(r&&r.data&&r.changed){
       if(SafeSync.same(state,local)){ __fbApplying=true; state=Object.assign(defaultState(), r.data); try{localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}catch(e){} renderAll(); __fbApplying=false; }
       else window.__pccAgain=true;
     }
     if(window.__pccAgain){ window.__pccAgain=false; pushNow(); }
-    else if(window.__pccPending){ const pv=window.__pccPending; window.__pccPending=null; try{ const rr=SafeSync.mergeRemote('pcc',JSON.parse(JSON.stringify(state)),JSON.parse(pv),{}); if(!rr.blocked&&!SafeSync.same(rr.data,state)){ __fbApplying=true; state=Object.assign(defaultState(), rr.data); renderAll(); __fbApplying=false; } if(rr.push) pushNow(); }catch(e){} }
+    else if(window.__pccPending){ const pv=window.__pccPending; window.__pccPending=null; try{ const rr=SafeSync.mergeRemote(('pcc'+window.PCC_SFX),JSON.parse(JSON.stringify(state)),JSON.parse(pv),{}); if(!rr.blocked&&!SafeSync.same(rr.data,state)){ __fbApplying=true; state=Object.assign(defaultState(), rr.data); renderAll(); __fbApplying=false; } if(rr.push) pushNow(); }catch(e){} }
   }).catch(()=>{ window.__pccPushing=false; updateSyncBadge('error'); setTimeout(pushNow,5000); });
 }
 function deviceTag(){
@@ -1146,16 +1169,16 @@ function snapshotBeforeCloudApply(){
     }
     /* النسخة المحلية اختيارية بس — نفس حارس الحجم اللي في autoSnapshot الأصلية، وعدد أقل */
     if(dataStr.length > 300000) return;   // بيانات كبيرة → متضيفش ضغط على مساحة محدودة أصلاً
-    let snaps=JSON.parse(localStorage.getItem('pcc_cloud_snaps')||'[]');
+    let snaps=JSON.parse(localStorage.getItem(('pcc_cloud_snaps'+window.PCC_SFX))||'[]');
     snaps.push(snapObj);
     while(snaps.length>2) snaps.shift();   // 2 بدل 5 — نفس حد autoSnapshot الأصلية
-    localStorage.setItem('pcc_cloud_snaps',JSON.stringify(snaps));
+    localStorage.setItem(('pcc_cloud_snaps'+window.PCC_SFX),JSON.stringify(snaps));
   }catch(e){
-    try{ localStorage.removeItem('pcc_cloud_snaps'); }catch(e2){}
+    try{ localStorage.removeItem(('pcc_cloud_snaps'+window.PCC_SFX)); }catch(e2){}
   }
 }
-function pendingConflict(){ try{return JSON.parse(localStorage.getItem('pcc_conflict')||'null');}catch(e){return null;} }
-function rejectConflict(){ try{localStorage.removeItem('pcc_conflict');}catch(e){} renderAll(); }
+function pendingConflict(){ try{return JSON.parse(localStorage.getItem(('pcc_conflict'+window.PCC_SFX))||'null');}catch(e){return null;} }
+function rejectConflict(){ try{localStorage.removeItem(('pcc_conflict'+window.PCC_SFX));}catch(e){} renderAll(); }
 function acceptConflict(){
   const c=pendingConflict(); if(!c)return;
   if(!confirm('استبدال بياناتك الحالية بتحديث فيه '+c.rCount+' سجل؟'))return;
@@ -1165,7 +1188,7 @@ function acceptConflict(){
     state=Object.assign(defaultState(), remote);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }catch(e){}
-  try{localStorage.removeItem('pcc_conflict');}catch(e){}
+  try{localStorage.removeItem(('pcc_conflict'+window.PCC_SFX));}catch(e){}
   renderAll();
 }
 function conflictBannerHtml(){
@@ -1189,14 +1212,14 @@ function startSync(attempt){
     updateSyncBadge('offline'); return;
   }
   __mySeq=state.__seq||0;
-  SafeSync.loadBase('pcc').then(()=>window.__fb.subscribe((payload)=>{
+  SafeSync.loadBase(('pcc'+window.PCC_SFX)).then(()=>window.__fb.subscribe((payload)=>{
     try{
       const remote=JSON.parse(payload);
       __gotCloud=true;
       updateSyncBadge('synced');
       if(window.__pccPushing){ window.__pccPending=payload; return; }
       /* دمج ثلاثي بدل "الختم الأحدث يكسب": اللي اتغير عندك يفضل، واللي اتغير في جهاز تاني ييجي */
-      const r=SafeSync.mergeRemote('pcc', JSON.parse(JSON.stringify(state)), remote, {localEmpty: !SafeSync.base('pcc') && !!window.__pccFresh});
+      const r=SafeSync.mergeRemote(('pcc'+window.PCC_SFX), JSON.parse(JSON.stringify(state)), remote, {localEmpty: !SafeSync.base(('pcc'+window.PCC_SFX)) && !!window.__pccFresh});
       if(r.blocked){ renderAll(); return; }
       if(!SafeSync.same(r.data,state)){
         snapshotBeforeCloudApply();
@@ -1226,7 +1249,7 @@ window.addEventListener('offline', ()=>{ updateSyncBadge('offline'); });
 function initTabConflictDetector(){
   if(typeof BroadcastChannel==='undefined') return;
   const myTabId='tab_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-  const ch=new BroadcastChannel('pcc_tabs');
+  const ch=new BroadcastChannel(('pcc_tabs'+window.PCC_SFX));
   ch.onmessage=(ev)=>{
     if(!ev.data||ev.data.id===myTabId) return;
     if(ev.data.type==='hello'){ ch.postMessage({type:'here',id:myTabId}); }
@@ -1263,7 +1286,7 @@ async function hardResetCache(){
   location.replace(location.pathname+'?_fresh='+Date.now());
 }
 
-const SNAP_KEY = "poultry_cost_calc_snapshots";
+const SNAP_KEY = "poultry_cost_calc_snapshots"+window.PCC_SFX;
 let saveFailed = false;
 
 /* الحفظ آمن: لو المساحة اتملت بننضف النسخ التلقائية ونعيد المحاولة،
@@ -1277,7 +1300,7 @@ function save(){
   }catch(e){
     // المساحة اتملت → امسح النسخ الاحتياطية القديمة (المحلية بتاعتنا + بتاعة التطبيق) وجرّب تاني
     try{ localStorage.removeItem(SNAP_KEY); }catch(e2){}
-    try{ localStorage.removeItem('pcc_cloud_snaps'); }catch(e2){}
+    try{ localStorage.removeItem(('pcc_cloud_snaps'+window.PCC_SFX)); }catch(e2){}
     try{
       localStorage.setItem(STORAGE_KEY, payload);
       saveFailed = false;
@@ -1292,7 +1315,7 @@ function save(){
       return false;
     }
   }
-  try{ if(!__fbApplying) localStorage.setItem('pcc_dirty','1'); }catch(e){}
+  try{ if(!__fbApplying) localStorage.setItem(('pcc_dirty'+window.PCC_SFX),'1'); }catch(e){}
   if(!__fbApplying) cloudPush();
   autoSnapshot(payload);
   return true;
@@ -1829,7 +1852,7 @@ const TABS = [
   {id:"maint", label:"الصيانة والتأسيس", icon:"🛠️"},
   {id:"other", label:"بنود أخرى", icon:"➕"},
   {id:"suppliers", label:"الموردون", icon:"🧾"},
-  {id:"payments", label:"الدفعات", icon:"🤝"},
+  {id:"payments", label:"الدفعات والشركاء", icon:"🤝"},
   {id:"sales", label:"نتيجة البيع", icon:"💰"},
   {id:"setup", label:"الإعدادات", icon:"⚙️"},
 ];
@@ -3144,6 +3167,96 @@ function wireCosts(){
   wireExportBars();
 }
 
+/* ===== رأس المال وتقسيم الشركاء =====
+   مستثمر (زي الحاج علي): نسبته = اللي دفعه ÷ إجمالي تكاليف الدورة، وبياخد مكسب/خسارة بنفس النسبة.
+   الباقي بيتقسم بالتساوي على الشركاء الأساسيين. */
+function partnerSplit(){
+  const c = computed();
+  const cfg = state.partnerCfg||{investors:[],equal:[],maxInvestorPct:10};
+  const cap = state.capital||[];
+  const capTotal = sum(cap, r=>num(r.amount));
+  const spentFromCap = sum(allExpenses().filter(e=>e.payer==="رأس المال"), e=>e.amount)
+                     + sum(state.payments.filter(p=>(p.payer||"").trim()==="رأس المال"), p=>num(p.amount));
+  const base = Math.max(num(c.totalCost), spentFromCap, 0);
+  const inv = (cfg.investors||[]).map(n=>{
+    const paid = sum(cap.filter(r=>(r.name||"").trim()===n), r=>num(r.amount));
+    const pct = base>0 ? paid/base*100 : 0;
+    return {name:n, paid, pct, kind:"مستثمر"};
+  });
+  const invPct = sum(inv, x=>x.pct);
+  const eq = (cfg.equal||[]).filter(Boolean);
+  const eqPct = eq.length ? Math.max(0,100-invPct)/eq.length : 0;
+  const rows = inv.concat(eq.map(n=>({name:n, paid:sum(cap.filter(r=>(r.name||"").trim()===n), r=>num(r.amount)), pct:eqPct, kind:"شريك بالتساوي"})));
+  rows.forEach(r=>r.profit = num(c.profit)*r.pct/100);
+  return {rows, capTotal, spentFromCap, capLeft:capTotal-spentFromCap, base, profit:num(c.profit), invPct, maxInv:num(cfg.maxInvestorPct)||10, closed:c.cycleClosed};
+}
+function capitalPartnersHTML(){
+  const cfg = state.partnerCfg||{investors:[],equal:[]};
+  const cap = state.capital||[];
+  const p = partnerSplit();
+  return `
+  <div class="card" id="capPartnersCard">
+    <h2><span class="ic">💼</span> رأس مال الدورة وتقسيم الشركاء</h2>
+    <p class="sub">المستثمر نسبته = اللي دفعه ÷ إجمالي تكاليف الدورة (بيتحدث لوحده مع كل مصروف). الباقي بيتقسم بالتساوي على الشركاء. أي مصروف اتدفع من رأس المال اكتب في «الدافع»: <b>رأس المال</b>.</p>
+    <div class="table-wrap"><table class="grid-table" id="capTable">
+      <thead><tr><th class="c-date">التاريخ</th><th class="c-text">مصدر رأس المال</th><th class="c-num">المبلغ</th><th class="c-text">ملاحظة</th><th></th></tr></thead>
+      <tbody>
+      ${cap.map(r=>`<tr>
+        <td class="rocell c-date"><span class="numcell">${esc(r.date||"—")}</span></td>
+        <td class="rocell c-text" style="text-align:right">${esc(r.name||"")}</td>
+        <td class="rocell c-num"><span class="numcell">${fmtMoney(num(r.amount))}</span></td>
+        <td class="rocell c-text" style="text-align:right">${esc(r.note||"")}</td>
+        <td class="rocell"><button class="btn btn-ghost btn-sm cap-del" data-id="${r.id}">🗑️</button></td></tr>`).join("")}
+      <tr>
+        <td><input type="date" id="cap_date" value="${todayISO()}" style="width:100%"></td>
+        <td><input type="text" id="cap_name" placeholder="مين دفع / أرباح سابقة" style="width:100%"></td>
+        <td><input type="number" id="cap_amt" placeholder="0" style="width:100%"></td>
+        <td><input type="text" id="cap_note" placeholder="ملاحظة" style="width:100%"></td>
+        <td><button class="btn btn-primary btn-sm" id="cap_add">＋</button></td></tr>
+      </tbody></table></div>
+    <div class="totalbar" style="margin-top:8px"><span>إجمالي رأس المال</span><span>${fmtMoney(p.capTotal)}</span></div>
+    <div class="totalbar" style="margin-top:6px"><span>اتصرف من رأس المال (دافع = رأس المال)</span><span>${fmtMoney(p.spentFromCap)}</span></div>
+    <div class="totalbar" style="margin-top:6px"><span>الباقي من رأس المال</span><span>${fmtMoney(p.capLeft)}</span></div>
+
+    <h3 style="font-size:13.5px;margin:14px 0 6px;color:var(--forest);">الشركاء</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px">
+      <label>المستثمرين (نسبة حسب الدفع): <input type="text" id="pc_inv" value="${esc((cfg.investors||[]).join("، "))}" style="min-width:160px"></label>
+      <label>الشركاء بالتساوي: <input type="text" id="pc_eq" value="${esc((cfg.equal||[]).join("، "))}" style="min-width:260px"></label>
+      <label>أقصى نسبة للمستثمر %: <input type="number" id="pc_max" value="${num(cfg.maxInvestorPct)||10}" style="width:70px"></label>
+      <button class="btn btn-ghost btn-sm" id="pc_save">حفظ</button>
+    </div>
+    <div class="table-wrap" style="margin-top:8px"><table class="grid-table" id="partnerSplitTable">
+      <thead><tr><th class="c-text">الشريك</th><th class="c-text">النوع</th><th class="c-num">دفع في رأس المال</th><th class="c-num">النسبة</th><th class="c-num">${p.closed?"نصيبه من صافي الربح":"نصيبه من الربح المتوقع"}</th></tr></thead>
+      <tbody>${p.rows.map(r=>`<tr>
+        <td class="rocell c-text" style="text-align:right">${esc(r.name)}</td>
+        <td class="rocell c-text" style="text-align:right">${r.kind}</td>
+        <td class="rocell c-num"><span class="numcell">${fmtMoney(r.paid)}</span></td>
+        <td class="rocell c-num"><span class="numcell" style="${r.kind==="مستثمر"&&r.pct>p.maxInv?"color:var(--bad);font-weight:800":""}">${fmt(r.pct,2)}%</span></td>
+        <td class="rocell c-num"><span class="numcell" style="color:${r.profit>=0?"var(--good)":"var(--bad)"}">${(r.profit>=0?"+":"")+fmtMoney(r.profit)}</span></td></tr>`).join("")}
+      </tbody></table></div>
+    <p class="sub" style="margin-top:6px">نسبة المستثمر محسوبة على إجمالي التكاليف ${fmtMoney(p.base)} — هتقل كل ما المصاريف تزيد.${p.invPct>p.maxInv?` <b style="color:var(--bad)">⚠️ نسبة المستثمر حاليًا ${fmt(p.invPct,1)}% أكبر من ${fmt(p.maxInv,0)}% لأن التكاليف لسه قليلة.</b>`:""}</p>
+    ${exportBar("partnerSplitTable","تقسيم الشركاء")}
+  </div>`;
+}
+function wireCapitalPartners(){
+  const g=id=>document.getElementById(id);
+  const splitNames=v=>(v||"").split(/[،,]/).map(x=>x.trim()).filter(Boolean);
+  if(g("cap_add")) g("cap_add").addEventListener("click",()=>{
+    const name=(g("cap_name").value||"").trim(), amount=num(g("cap_amt").value);
+    if(!name||!(amount>0)){ toast("اكتب الاسم والمبلغ"); return; }
+    if(!state.capital) state.capital=[];
+    state.capital.push({id:uid(), date:g("cap_date").value||todayISO(), name, amount, note:(g("cap_note").value||"").trim()});
+    save(); renderAll();
+  });
+  document.querySelectorAll(".cap-del").forEach(b=>b.addEventListener("click",()=>{
+    if(!confirm("تمسح السطر ده من رأس المال؟")) return;
+    state.capital=(state.capital||[]).filter(r=>r.id!==b.dataset.id); save(); renderAll();
+  }));
+  if(g("pc_save")) g("pc_save").addEventListener("click",()=>{
+    state.partnerCfg={investors:splitNames(g("pc_inv").value), equal:splitNames(g("pc_eq").value), maxInvestorPct:num(g("pc_max").value)||10};
+    save(); toast("اتحفظ"); renderAll();
+  });
+}
 function panelPayments(){
   const rows = sortByDate(state.payments, "payments", "date");
   const unass = unassignedExpenses();
@@ -3160,7 +3273,7 @@ function panelPayments(){
     ]},
     {field:"note", label:"ملاحظة", type:"text"},
   ];
-  return `
+  return capitalPartnersHTML() + `
   <div class="card">
     <h2><span class="ic">👥</span> حساب الشركاء — مين موّل كام</h2>
     <p class="sub">بيتجمع تلقائيًا من مصدرين: (١) أي مصروف مكتوب فيه «الدافع» وسدادُه نقدي في أي تبويب، (٢) الدفعات المسجّلة تحت لسداد الموردين الآجلين.</p>
@@ -3327,6 +3440,7 @@ function wirePayments(){
   if(b) b.addEventListener("click", ()=>{ addRow(); renderAll(); });
   wireSpreadsheet("payments","payments",columns,recompute(),{onAddRow:addRow, recompute, totalsId:"paymentsTotals", totalsFn:paymentsTotalsHTML});
   wireSortToggle("payments");
+  wireCapitalPartners();
   wireExportBars();
 }
 
@@ -6287,6 +6401,31 @@ startSync();
 initTabConflictDetector();
 setTimeout(checkForNewerVersion,3000);
 setInterval(checkForNewerVersion,60000);
+})();
+</script>
+<script>
+/* ===== تعدد المزارع/الدورات الشغالة بالتوازي ===== */
+(function(){
+  function go(id){ try{localStorage.setItem('pcc_farm',id);}catch(e){} var u=location.pathname+'?farm='+encodeURIComponent(id); location.href=u; }
+  function fill(idx){
+    var sel=document.getElementById('farmSwitch'); if(!sel) return;
+    idx=idx||{}; if(!idx.main) idx.main={name:'المزرعة الأساسية',o:0};
+    if(!idx[window.PCC_FARM]) idx[window.PCC_FARM]={name:window.PCC_FARM,o:Date.now()};
+    var ids=Object.keys(idx).filter(function(k){return !idx[k].del;}).sort(function(a,b){return (idx[a].o||0)-(idx[b].o||0);});
+    sel.innerHTML=ids.map(function(k){return '<option value="'+k+'"'+(k===window.PCC_FARM?' selected':'')+'>'+String(idx[k].name||k).replace(/[<>&]/g,'')+'</option>';}).join('');
+    sel.onchange=function(){ if(sel.value!==window.PCC_FARM) go(sel.value); };
+    var add=document.getElementById('farmAddBtn');
+    add.onclick=function(){
+      var n=prompt('اسم المزرعة / الدورة الجديدة (مثال: النخاس بلدي)'); if(!n||!n.trim()) return;
+      var id='f'+Date.now().toString(36);
+      window.__fb.setFarmIndex(id,{name:n.trim(),o:Date.now()}).then(function(){ go(id); }).catch(function(e){ alert('مقدرتش أضيف المزرعة: '+e.message); });
+    };
+  }
+  var tries=0;
+  (function wait(){
+    if(window.__fb&&window.__fb.farmsIndex){ window.__fb.farmsIndex().then(fill).catch(function(){fill({});}); }
+    else if(tries++<100) setTimeout(wait,150); else fill({});
+  })();
 })();
 </script>
 </body>
