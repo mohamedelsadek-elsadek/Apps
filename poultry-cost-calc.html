@@ -1105,7 +1105,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v14 — أكتر من دورة بالتوازي + رأس المال وتقسيم الشركاء';
+const APP_VERSION='v14.1 — إصلاح امتلاء مساحة المتصفح + مدير التخزين';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -1301,11 +1301,17 @@ function save(){
     // المساحة اتملت → امسح النسخ الاحتياطية القديمة (المحلية بتاعتنا + بتاعة التطبيق) وجرّب تاني
     try{ localStorage.removeItem(SNAP_KEY); }catch(e2){}
     try{ localStorage.removeItem(('pcc_cloud_snaps'+window.PCC_SFX)); }catch(e2){}
-    try{
-      localStorage.setItem(STORAGE_KEY, payload);
+    let ok=false;
+    try{ localStorage.setItem(STORAGE_KEY, payload); ok=true; }catch(e3){}
+    /* لسه مليان → امسح النسخ الاحتياطية المحلية لكل البرامج اللي على نفس الموقع (البيانات الأساسية متتلمسش) */
+    if(!ok){ freeBrowserSpace(); try{ localStorage.setItem(STORAGE_KEY, payload); ok=true; }catch(e4){} }
+    if(ok){
       saveFailed = false;
-    }catch(e3){
+      const bar=document.getElementById("saveErrorBar"); if(bar) bar.remove();
+    }else{
       saveFailed = true;
+      /* احفظ في IndexedDB (مساحة أكبر بكتير) — البرنامج بيقرا منها تلقائيًا عند الفتح */
+      try{ SafeSync.lsSet(STORAGE_KEY, payload); }catch(e5){}
       showSaveError();
       /* المهم: حتى لو المتصفح رفض يخزّن محليًا، سيبها ترفع للسحابة —
          مساحة السحابة مش محدودة زي المتصفح، ودي أهم طوق نجاة هنا */
@@ -1328,10 +1334,13 @@ function showSaveError(){
     bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#B23A32;color:#fff;padding:10px 14px;font-weight:800;font-size:13.5px;text-align:center;";
     document.body.appendChild(bar);
   }
-  bar.innerHTML = "⚠️ الحفظ فشل — مساحة المتصفح ممتلئة. صدّر نسخة احتياطية فورًا ولا تعمل Reload قبلها! " +
-                  '<button id="saveErrBackup" style="margin-inline-start:10px;background:#fff;color:#B23A32;border:none;border-radius:6px;padding:5px 12px;font-weight:800;cursor:pointer;">⬇️ تصدير الآن</button>';
+  bar.innerHTML = "⚠️ مساحة المتصفح مليانة (مشتركة مع باقي برامجك) — بياناتك اتحفظت في المخزن الاحتياطي وعلى السحابة. " +
+                  '<button id="saveErrClean" style="margin-inline-start:8px;background:#fff;color:#B23A32;border:none;border-radius:6px;padding:5px 12px;font-weight:800;cursor:pointer;">🧹 فضّي المساحة</button>' +
+                  '<button id="saveErrBackup" style="margin-inline-start:8px;background:#fff;color:#B23A32;border:none;border-radius:6px;padding:5px 12px;font-weight:800;cursor:pointer;">⬇️ تصدير</button>';
   const b = document.getElementById("saveErrBackup");
   if(b) b.onclick = ()=>exportBackup();
+  const c = document.getElementById("saveErrClean");
+  if(c) c.onclick = ()=>openStorageManager();
 }
 /* نسخة تلقائية واحدة فقط وبحجم محدود — عشان ما تاكلش مساحة الحفظ الأساسي */
 function autoSnapshot(payload){
@@ -1349,6 +1358,61 @@ function autoSnapshot(payload){
     try{ localStorage.removeItem(SNAP_KEY); }catch(e2){}
   }
 }
+/* ===== مدير مساحة المتصفح =====
+   كل برامجك على نفس الموقع (github.io) بتتقاسم ~5MB في Safari، والنسخ الاحتياطية المحلية لكل برنامج بتاكلها.
+   هنا بنمسح النسخ الاحتياطية بس — البيانات الأساسية متتلمسش، والنسخ موجودة على السحابة. */
+function isBackupKey(k){
+  if(k===STORAGE_KEY) return false;
+  return /(backup|snap|_bak)/i.test(k) && !/(dismissed|last_backup|nag)/i.test(k);
+}
+function storageKeys(){
+  const out=[];
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); const v=localStorage.getItem(k)||''; out.push({k, size:(k.length+v.length)*2}); } }catch(e){}
+  return out.sort((a,b)=>b.size-a.size);
+}
+function freeBrowserSpace(){
+  let freed=0;
+  storageKeys().forEach(x=>{ if(isBackupKey(x.k)){ try{ localStorage.removeItem(x.k); freed+=x.size; }catch(e){} } });
+  return freed;
+}
+function fmtBytes(n){ return n>=1048576 ? (n/1048576).toFixed(2)+' MB' : Math.round(n/1024)+' KB'; }
+function storageManagerHtml(){
+  const ks=storageKeys(), total=ks.reduce((s,x)=>s+x.size,0), bk=ks.filter(x=>isBackupKey(x.k)).reduce((s,x)=>s+x.size,0);
+  return `<div style="font-size:13px;margin-bottom:8px">المستخدم: <b>${fmtBytes(total)}</b> من حوالي 5 MB — منها نسخ احتياطية محلية: <b style="color:#b91c1c">${fmtBytes(bk)}</b></div>
+  <button class="btn" style="background:#1a7f4b;color:#fff;margin-bottom:10px" onclick="(function(){const f=freeBrowserSpace();toast('اتفضّى '+fmtBytes(f));if(saveFailed)save();renderStorageManager();})()">🧹 امسح كل النسخ الاحتياطية المحلية (آمن)</button>
+  <div class="table-wrap"><table><thead><tr><th>المفتاح</th><th>الحجم</th><th></th></tr></thead><tbody>
+  ${ks.slice(0,40).map(x=>`<tr><td class="rocell c-text" style="text-align:left;direction:ltr;font-size:12px">${esc(x.k)}${x.k===STORAGE_KEY?' ⭐':''}</td><td class="rocell c-num">${fmtBytes(x.size)}</td>
+  <td class="rocell">${isBackupKey(x.k)?`<button class="btn btn-ghost btn-sm" onclick="try{localStorage.removeItem(${esc(JSON.stringify(x.k))});}catch(e){} renderStorageManager();">🗑</button>`:''}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function renderStorageManager(){ const b=document.getElementById('storageMgrBody'); if(b) b.innerHTML=storageManagerHtml(); }
+function openStorageManager(){
+  let m=document.getElementById('storageMgrModal');
+  if(!m){
+    m=document.createElement('div'); m.id='storageMgrModal'; m.setAttribute('dir','rtl');
+    m.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px';
+    m.innerHTML='<div style="background:#fff;color:#111;border-radius:14px;max-width:620px;width:100%;max-height:85vh;overflow:auto;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>💾 مساحة المتصفح</b><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'storageMgrModal\').remove()">✕</button></div><div id="storageMgrBody"></div></div>';
+    document.body.appendChild(m);
+  }
+  renderStorageManager();
+}
+/* عند الفتح: لو آخر حفظ راح للمخزن الاحتياطي (IndexedDB) وهو أحدث — استخدمه */
+function recoverFromIdb(){
+  try{
+    SafeSync.lsGet(STORAGE_KEY).then(v=>{
+      if(!v) return;
+      let ls=null; try{ ls=localStorage.getItem(STORAGE_KEY); }catch(e){}
+      if(v===ls) return;
+      const p=JSON.parse(v);
+      if((p.__ts||0) > (state.__ts||0)){
+        state=repairState(Object.assign(defaultState(), p));
+        try{ localStorage.setItem(STORAGE_KEY, v); }catch(e){ freeBrowserSpace(); try{ localStorage.setItem(STORAGE_KEY, v); }catch(e2){} }
+        renderAll();
+      }
+    }).catch(()=>{});
+  }catch(e){}
+}
+
 /* تصدير يشتغل حتى لو المتصفح مانع التحميل من ملف محلي */
 function exportBackup(){
   const txt = JSON.stringify(state, null, 2);
@@ -2218,6 +2282,11 @@ function panelSetup(){
           <td class="rocell c-text" style="text-align:right;"><button class="btn btn-ghost btn-sm snap-restore" data-idx="${sn.length-1-i}">↺ استعادة</button></td>
         </tr>`).join("")}</tbody>
       </table></div>` : `<div class="empty-hint">لسه مفيش نسخ تلقائية — بتتاخد نسخة كل ساعة شغل</div>`;})()}
+  </div>
+  <div class="card">
+    <h2><span class="ic">💾</span> مساحة المتصفح</h2>
+    <p class="sub">كل برامجك على نفس الموقع بتتقاسم نفس المساحة. لو ظهر تحذير «المساحة مليانة» امسح النسخ الاحتياطية المحلية من هنا — بياناتك الأساسية والسحابة مش هيتأثروا.</p>
+    <button class="btn" onclick="openStorageManager()">💾 افتح مدير المساحة</button>
   </div>
   <div class="card" id="cloudSnapsCard" style="border:2px solid #1a7f4b">
     <h2><span class="ic">☁️</span> لقطات أمان من السحابة (كل الأجهزة)</h2>
@@ -6397,6 +6466,9 @@ document.addEventListener("input", function(e){
 });
 
 renderAll();
+/* لو المساحة قربت تخلص، فضّي النسخ الاحتياطية المحلية من بدري */
+try{ localStorage.setItem('__pcc_probe','x'.repeat(200000)); localStorage.removeItem('__pcc_probe'); }catch(e){ try{localStorage.removeItem('__pcc_probe');}catch(e2){} freeBrowserSpace(); }
+recoverFromIdb();
 startSync();
 initTabConflictDetector();
 setTimeout(checkForNewerVersion,3000);
