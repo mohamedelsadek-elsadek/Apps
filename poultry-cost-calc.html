@@ -1105,7 +1105,7 @@ function repairState(st){
 /* ═══════════ نظام المزامنة السحابية — نفس النمط المُثبت في باقي التطبيقات ═══════════ */
 let __fbApplying=false, __fbTimer=null, __lastTs=0, __gotCloud=false, __mySeq=0;
 let __lastCloudSnap=0, __updateChecking=false, __multiTabWarned=false;
-const APP_VERSION='v14.1 — إصلاح امتلاء مساحة المتصفح + مدير التخزين';
+const APP_VERSION='v14.2 — الدورات السابقة: فتح كل بيانات أي دورة مقفولة';
 
 /* عدّاد سجلات حقيقي — يشمل كل المصفوفات المهمة، أساس حارس التراجع */
 function totalRecords(st){
@@ -1212,7 +1212,8 @@ function startSync(attempt){
     updateSyncBadge('offline'); return;
   }
   __mySeq=state.__seq||0;
-  SafeSync.loadBase(('pcc'+window.PCC_SFX)).then(()=>window.__fb.subscribe((payload)=>{
+  SafeSync.loadBase(('pcc'+window.PCC_SFX)).then(()=>window.__fb.subscribe(window.__pccOnCloud=(payload)=>{
+    if(window.__pccViewing){ window.__pccViewing.pending=payload; return; }   /* بنتفرج على دورة سابقة — التحديث يتطبق لما نرجع */
     try{
       const remote=JSON.parse(payload);
       __gotCloud=true;
@@ -1292,6 +1293,7 @@ let saveFailed = false;
 /* الحفظ آمن: لو المساحة اتملت بننضف النسخ التلقائية ونعيد المحاولة،
    ولو فشل برضو بنحذّر المستخدم بدل ما البرنامج يقف صامت */
 function save(){
+  if(window.__pccViewing){ toast('دي دورة سابقة — للعرض بس، التعديل مش بيتحفظ'); return false; }
   if(!__fbApplying) stampSync();   /* فورًا — مش مؤجل لحد ما الرفع يحصل */
   const payload = JSON.stringify(state);
   try{
@@ -1379,12 +1381,14 @@ function fmtBytes(n){ return n>=1048576 ? (n/1048576).toFixed(2)+' MB' : Math.ro
 function storageManagerHtml(){
   const ks=storageKeys(), total=ks.reduce((s,x)=>s+x.size,0), bk=ks.filter(x=>isBackupKey(x.k)).reduce((s,x)=>s+x.size,0);
   return `<div style="font-size:13px;margin-bottom:8px">المستخدم: <b>${fmtBytes(total)}</b> من حوالي 5 MB — منها نسخ احتياطية محلية: <b style="color:#b91c1c">${fmtBytes(bk)}</b></div>
-  <button class="btn" style="background:#1a7f4b;color:#fff;margin-bottom:10px" onclick="(function(){const f=freeBrowserSpace();toast('اتفضّى '+fmtBytes(f));if(saveFailed)save();renderStorageManager();})()">🧹 امسح كل النسخ الاحتياطية المحلية (آمن)</button>
+  <button class="btn" style="background:#1a7f4b;color:#fff;margin-bottom:10px" onclick="pccCleanStorage()">🧹 امسح كل النسخ الاحتياطية المحلية (آمن)</button>
   <div class="table-wrap"><table><thead><tr><th>المفتاح</th><th>الحجم</th><th></th></tr></thead><tbody>
   ${ks.slice(0,40).map(x=>`<tr><td class="rocell c-text" style="text-align:left;direction:ltr;font-size:12px">${esc(x.k)}${x.k===STORAGE_KEY?' ⭐':''}</td><td class="rocell c-num">${fmtBytes(x.size)}</td>
-  <td class="rocell">${isBackupKey(x.k)?`<button class="btn btn-ghost btn-sm" onclick="try{localStorage.removeItem(${esc(JSON.stringify(x.k))});}catch(e){} renderStorageManager();">🗑</button>`:''}</td></tr>`).join('')}
+  <td class="rocell">${isBackupKey(x.k)?`<button class="btn btn-ghost btn-sm" data-k="${esc(x.k)}" onclick="pccDelKey(this.dataset.k)">🗑</button>`:''}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
+function pccCleanStorage(){ const f=freeBrowserSpace(); toast('اتفضّى '+fmtBytes(f)); if(saveFailed) save(); renderStorageManager(); }
+function pccDelKey(k){ if(!isBackupKey(k)) return; try{localStorage.removeItem(k);}catch(e){} renderStorageManager(); }
 function renderStorageManager(){ const b=document.getElementById('storageMgrBody'); if(b) b.innerHTML=storageManagerHtml(); }
 function openStorageManager(){
   let m=document.getElementById('storageMgrModal');
@@ -1905,6 +1909,7 @@ function computed(){
 const TABS = [
   {id:"dash", label:"لوحة التحكم", icon:"📊"},
   {id:"kpi", label:"مؤشرات الأداء", icon:"🎯"},
+  {id:"history", label:"الدورات السابقة", icon:"📚"},
   {id:"daily", label:"المتابعة اليومية", icon:"📅"},
   {id:"weekly", label:"المتابعة الأسبوعية", icon:"📆"},
   {id:"costs", label:"التكاليف", icon:"🧮"},
@@ -1951,6 +1956,7 @@ function tabCount(id,c){
     case "daily": return state.daily.length;
     case "suppliers": return state.suppliers.length;
     case "vaccines": return state.vaccines.filter(v=>!v.done).length;
+    case "history": return (state.archivedCycles||[]).length;
     default: return null;
   }
 }
@@ -2562,7 +2568,9 @@ function wireSetup(){
       setupSnapshot: JSON.parse(JSON.stringify(state.setup)),
       dailyRecords: JSON.parse(JSON.stringify(state.daily)),
       salesRecords: JSON.parse(JSON.stringify(state.sales)),
-      measureOverrides: {}
+      measureOverrides: {},
+      /* نسخة كاملة من كل بيانات الدورة — عشان تقدر تفتحها تاني من «الدورات السابقة» */
+      fullState: (()=>{ const fs=JSON.parse(JSON.stringify(state)); delete fs.archivedCycles; delete fs.auditLog; return fs; })()
     });
     // reset per-cycle operational data; keep suppliers, and keep only "setup" (one-time) maintenance items
     // الرصيد الفاضل (علف/دوا) يترحّل كتكلفة أول للدورة الجديدة
@@ -4692,6 +4700,8 @@ let measureFilterYear = "الكل", measureFilterFarm = "الكل", measureFilte
 let measureFilterFrom = "", measureFilterTo = "";
 let measureSortBy = "dateReceived_desc";
 let measureWeeksToShow = 8;
+function pccMeasureWeeks(d){ measureWeeksToShow=Math.max(4,Math.min(8,measureWeeksToShow+d)); renderAll(); }
+function pccGoTab(id){ activeTab=id; renderAll(); }
 
 function measureAllYears(all){
   const ys = new Set();
@@ -4756,9 +4766,9 @@ function repFarmMeasureComparative(){
         <option value="avgAge" ${measureSortBy==="avgAge"?"selected":""}>متوسط العمر</option>
       </select>
       <span class="sub" style="margin:0">أسابيع:</span>
-      <button class="mini-btn" onclick="measureWeeksToShow=Math.max(4,measureWeeksToShow-1);renderAll()">−</button>
+      <button class="mini-btn" onclick="pccMeasureWeeks(-1)">−</button>
       <span style="font-weight:800">${measureWeeksToShow}</span>
-      <button class="mini-btn" onclick="measureWeeksToShow=Math.min(8,measureWeeksToShow+1);renderAll()">+</button>
+      <button class="mini-btn" onclick="pccMeasureWeeks(1)">+</button>
       <button class="btn btn-wheat btn-sm" onclick="addMeasureCustomRow()">➕ إضافة بند</button>
     </div>`;
 
@@ -6196,6 +6206,47 @@ function svgLine(points, w=560, h=140, color="#5b6fe0", fillColor=null){
   </svg>`;
 }
 
+/* ===================== الدورات السابقة ===================== */
+function panelHistory(){
+  const arr=(state.archivedCycles||[]).slice().reverse();
+  const card=a=>{
+    const s=a.setupSnapshot||{};
+    const sales=(a.salesRecords||[]), kg=sales.reduce((x,r)=>x+num(r.weightKg),0), rev=sales.reduce((x,r)=>x+num(r.amount),0);
+    return `<div class="card" style="border-inline-start:6px solid var(--wheat)">
+      <h2><span class="ic">🐔</span> ${esc(s.farmName||'')} — ${esc(a.cycleName||'دورة')}</h2>
+      <p class="sub">استلام ${esc(s.dateReceived||'—')} · اتقفلت ${esc(a.archivedAt||'—')} · ${esc(s.breed||'')}</p>
+      <div class="table-wrap"><table><thead><tr><th>الكتاكيت</th><th>إجمالي التكلفة</th><th>تكلفة الكيلو</th><th>المباع (كجم)</th><th>الإيراد</th><th>FCR</th><th>EPEF</th><th>الربح</th></tr></thead>
+      <tbody><tr><td class="num">${fmt(a.chicksCount)}</td><td class="num">${fmtMoney(a.totalCost)}</td><td class="num">${fmt(a.costPerKg,2)}</td><td class="num">${fmt(kg)}</td><td class="num">${fmtMoney(rev)}</td><td class="num">${fmt(a.fcr,2)}</td><td class="num">${fmt(a.epef||0,0)}</td>
+      <td class="num" style="font-weight:800;color:${num(a.profit)>=0?'var(--good)':'var(--bad)'}">${(num(a.profit)>=0?'+':'')+fmtMoney(a.profit)}</td></tr></tbody></table></div>
+      <div class="btn-row" style="margin-top:10px">
+        ${a.fullState?`<button class="btn btn-wheat" onclick="openArchivedCycle('${esc(a.id)}')">📂 افتح كل بيانات الدورة</button>`
+          :`<span class="note">الدورة دي اتقفلت قبل حفظ النسخة الكاملة — المتاح الملخص والمتابعة اليومية والبيع بس.</span>`}
+      </div></div>`;
+  };
+  return `<div class="card"><h2><span class="ic">📚</span> الدورات السابقة</h2>
+    <p class="sub">أي دورة تتقفل من الإعدادات («📦 أرشفة هذه الدورة») بتنزل هنا بكل بياناتها. دوس «افتح» تشوف كل الشاشات والتقارير بتاعتها زي ما كانت — للعرض بس.</p>
+    <button class="btn btn-ghost" onclick="pccGoArchive()">📦 قفل الدورة الحالية</button></div>
+    ${arr.length?arr.map(card).join(''):'<div class="note">لسه مفيش دورات مقفولة للمزرعة دي.</div>'}`;
+}
+function pccGoArchive(){ activeTab='setup'; renderAll(); setTimeout(()=>{const b=document.getElementById('s_archive'); if(b) b.scrollIntoView({behavior:'smooth',block:'center'});},50); }
+function openArchivedCycle(id){
+  const a=(state.archivedCycles||[]).find(x=>x.id===id); if(!a||!a.fullState) return;
+  window.__pccViewing={live:state, tab:activeTab, name:((a.setupSnapshot||{}).farmName||'')+' — '+(a.cycleName||'')};
+  const fs=JSON.parse(JSON.stringify(a.fullState));
+  state=Object.assign(defaultState(), fs, {archivedCycles:[]});
+  activeTab='dash'; renderAll(); window.scrollTo(0,0);
+}
+function closeArchivedCycle(){
+  const v=window.__pccViewing; if(!v) return;
+  state=v.live; window.__pccViewing=null; activeTab='history'; renderAll();
+  if(v.pending && window.__pccOnCloud) window.__pccOnCloud(v.pending);
+}
+function viewingBannerHtml(){
+  return `<div style="position:sticky;top:0;z-index:50;background:#a8822e;color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 14px rgba(0,0,0,.25)">
+    <b style="flex:1">📂 بتتفرج على دورة سابقة: ${esc(window.__pccViewing.name)} — للعرض بس</b>
+    <button class="btn" style="background:#fff;color:#7a5a12;font-weight:800" onclick="closeArchivedCycle()">↩️ رجوع للدورة الحالية</button></div>`;
+}
+
 function panelDash(){
   const c = computed();
   const s = state.setup;
@@ -6388,7 +6439,9 @@ function renderAll(){
     case "sales": html = panelSales(); break;
     case "kpi": html = panelKPI(); break;
     case "dash": html = panelDash(); break;
+    case "history": html = panelHistory(); break;
   }
+  if(window.__pccViewing) html = viewingBannerHtml() + html;
   main.innerHTML = `<div class="panel active">${html}</div>`;
 
   switch(activeTab){
@@ -6417,7 +6470,7 @@ function renderAll(){
         <h3 style="color:#b91c1c;margin:0 0 8px">⚠️ حصلت مشكلة في عرض الصفحة</h3>
         <p style="margin:0 0 12px">البيانات موجودة وسليمة، المشكلة في العرض بس. جرّب:</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" onclick="activeTab='setup';renderAll()">🏠 الرئيسية</button>
+          <button class="btn" onclick="pccGoTab('setup')">🏠 الرئيسية</button>
           <button class="btn" onclick="location.reload()">🔄 تحديث الصفحة</button>
         </div>
         <div style="font-size:11px;color:#9ca3af;margin-top:10px;direction:ltr;word-break:break-word">${String(e&&e.message||e).replace(/[<>&]/g,'')}</div>
@@ -6473,6 +6526,11 @@ startSync();
 initTabConflictDetector();
 setTimeout(checkForNewerVersion,3000);
 setInterval(checkForNewerVersion,60000);
+/* الدوال اللي بتتنادى من أزرار onclick لازم تبقى global (الكود كله جوه IIFE) */
+['openArchivedCycle','closeArchivedCycle','pccGoArchive','pccGoTab','pccMeasureWeeks','openStorageManager','renderStorageManager','pccCleanStorage','pccDelKey',
+ 'hardResetCache','forceReloadFresh','acceptConflict','rejectConflict','exportBackup','addAttendance','delAttendance','addMeasureCustomRow','delMeasureCustomRow',
+ 'repAdjFont','repAdjZoom','repExportExcel','repPrint','repScreenshot','repSetWidth','repShareWhatsImg','repShareWhatsPDF','repToPDF','restoreCloudSnap','toggleFarmCompare'
+].forEach(n=>{ try{ const f=eval(n); if(typeof f==='function' && typeof window[n]!=='function') window[n]=f; }catch(e){} });
 })();
 </script>
 <script>
