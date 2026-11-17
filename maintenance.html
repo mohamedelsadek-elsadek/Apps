@@ -392,6 +392,7 @@ tbody tr:nth-child(even) td{background-color:#fbf7ee}
 input,select,textarea{background-color:#fffdf8;color:#1b2a44}
 h2.sec{color:#fff!important}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 
@@ -1383,11 +1384,12 @@ function syInit(){
   (window.firebase?Promise.resolve():syLoad(V+"firebase-app-compat.js").then(function(){return syLoad(V+"firebase-database-compat.js");}))
   .then(function(){
     var app=firebase.apps.length?firebase.app():firebase.initializeApp(FB_CFG);
+    return (window.AppAuth?AppAuth.compat(firebase,app):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
     var db=firebase.database(app);
     db.ref(".info/connected").on("value",function(s){ if(!syPushing) syBadge(s.val()?"on":"", s.val()?"☁️ متزامن":"📴 أوفلاين"); });
     fbRef=db.ref(FB_PATH);
     return SafeSync.loadBase("siyanty");
-  }).then(function(){
+  })}).then(function(){
     fbRef.on("value",function(snap){
       var v=snap.val();
       if(!v){ if(!window.__ssFresh) syPushNow(); return; }   /* السحابة فاضية: ارفع اللي على الجهاز */

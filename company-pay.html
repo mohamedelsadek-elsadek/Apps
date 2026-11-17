@@ -113,6 +113,7 @@ td{background-color:#fffdf8}
 tr.grp td{background:#efe7d6!important;color:#10294d!important}
 tr.cur td{background:#f1f8f4!important}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <header>
@@ -704,6 +705,7 @@ function initSync(){
   (window.firebase?Promise.resolve():loadScript(V+'firebase-app-compat.js').then(function(){return loadScript(V+'firebase-database-compat.js')}))
   .then(function(){
     var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(DEFAULT_FB);
+    return (window.AppAuth?AppAuth.compat(firebase,app):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
     if(!fbDb){
       fbDb=firebase.database(app);
       fbDb.ref('.info/serverTimeOffset').on('value',function(s){srvOff=+s.val()||0});
@@ -718,7 +720,7 @@ function initSync(){
       fbListening=true;
       fbRoot.on('value',function(snap){ mergeCloud(snap.val()||{}); },function(err){syncUI('err','خطأ صلاحيات');warn(err)});
     }
-  }).catch(function(e){syncUI('err','مش متصل');warn(e)});
+  })}).catch(function(e){syncUI('err','مش متصل');warn(e)});
 }
 /* يدمج خريطة meta جاية ويرجّع المفاتيح اللي محليًا أحدث (عشان تتبعت) */
 function mergeMetaMap(kind,incoming){

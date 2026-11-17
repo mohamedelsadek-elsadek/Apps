@@ -136,6 +136,7 @@ select.xl.s-done{background-color:#eceef1!important;color:var(--gray)}
 }
 </style>
 
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <header>
@@ -1022,6 +1023,7 @@ function initSync(){
   (window.firebase?Promise.resolve():loadScript(V+'firebase-app-compat.js').then(function(){return loadScript(V+'firebase-database-compat.js')}))
   .then(function(){
     var app=firebase.apps.length?firebase.app():firebase.initializeApp(DEFAULT_FB);
+    return (window.AppAuth?AppAuth.compat(firebase,app):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
     if(!fbDb){
       fbDb=firebase.database(app);
       fbDb.ref('.info/serverTimeOffset').on('value',function(s){srvOff=+s.val()||0});
@@ -1029,7 +1031,7 @@ function initSync(){
     }
     fbDb.goOnline(); fbRoot=fbDb.ref(FB_PATH);
     if(!fbListening){fbListening=true;fbRoot.on('value',function(snap){mergeCloud(snap.val()||{})},function(err){syncUI('err','خطأ صلاحيات');warn(err)})}
-  }).catch(function(e){syncUI('err','مش متصل');warn(e)});
+  })}).catch(function(e){syncUI('err','مش متصل');warn(e)});
 }
 /* دمج سجل بسجل — الأحدث (u) يكسب، ومابنكتبش فوق سجل أحدث في السحابة */
 function mergeCloud(c){

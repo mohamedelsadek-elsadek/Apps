@@ -291,6 +291,7 @@ select { appearance:none; background-image:url("data:image/svg+xml;utf8,<svg fil
 html,body{background-color:#10294d!important}
 body{font-family:Cairo,-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -839,12 +840,13 @@ function loadScript(src){return new Promise((res,rej)=>{const s=document.createE
   (window.firebase?Promise.resolve():loadScript(V+'firebase-app-compat.js').then(()=>loadScript(V+'firebase-database-compat.js')))
   .then(()=>{
     const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB_CFG);
+    return (window.AppAuth?AppAuth.compat(firebase,app):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
     const db=firebase.database(app);
     db.ref('.info/connected').on('value',s=>syncBadge(s.val()?'on':'wait', s.val()?'☁️ متزامن':'📴 أوفلاين — هيتزامن لما النت يرجع'));
     fbRoot=db.ref(FB_PATH);
     fbRoot.child('items').on('value',s=>mergeItems(s.val()||{}),e=>{syncBadge('err','⚠️ خطأ مزامنة');console.warn(e);});
     fbRoot.child('meta').on('value',s=>mergeMeta(s.val()));
-  }).catch(e=>{syncBadge('err','⚠️ مش متصل');console.warn(e);});
+  })}).catch(e=>{syncBadge('err','⚠️ مش متصل');console.warn(e);});
 })();
 </script>
 </body>
