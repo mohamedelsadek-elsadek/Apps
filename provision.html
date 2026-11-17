@@ -161,6 +161,7 @@ tr.tot td{background:#efe7d6!important;color:#10294d!important}
 .bnav button.on{background:#f7f2e8!important;color:#10294d!important}
 .toast{background:#1f7a57!important;color:#fff!important}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -832,11 +833,12 @@ function initSync(){
   syncUI('wait','بيتصل...');var V='https://www.gstatic.com/firebasejs/10.12.2/';
   (window.firebase&&window.firebase.database?Promise.resolve():loadScript(V+'firebase-app-compat.js').then(function(){return loadScript(V+'firebase-database-compat.js')})).then(function(){
     var app;try{app=firebase.app('provwh')}catch(e){app=firebase.initializeApp(FB_CFG,'provwh')}
+    return (window.AppAuth?AppAuth.compat(firebase,app):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
     if(!fbDb){fbDb=firebase.database(app);fbDb.ref('.info/serverTimeOffset').on('value',function(s){srvOff=+s.val()||0});
       fbDb.ref('.info/connected').on('value',function(s){if(lsGet(LS_ON)==='OFF')return;if(s.val())syncUI('on','متزامن');else syncUI('wait','أوفلاين')})}
     fbDb.goOnline();fbRoot=fbDb.ref(FB_PATH);
     if(!fbL){fbL=true;fbRoot.on('value',function(s){mergeCloud(s.val()||{})},function(e){syncUI('err','خطأ صلاحيات');console.warn(e)})}
-  }).catch(function(){syncUI('err','مش متصل')});
+  })}).catch(function(){syncUI('err','مش متصل')});
 }
 function mergeCloud(c){var ch=false,up={};
   for(var k in c){var d=c[k];if(!validDoc(d,k))continue;var l=S.docs[k];if(!l||d.u>l.u){S.docs[k]=d;ch=true}}

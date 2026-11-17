@@ -2,7 +2,7 @@
  *
  * كل برنامج بيستدعيه قبل ما يقرا أو يكتب في Firebase، مرة واحدة لكل جهاز (الدخول بيتحفظ):
  *   - SDK الجديد (modular v9/v10):   await AppAuth.modular(app, '10.12.0')
- *   - SDK compat أو v8 (window.firebase): await AppAuth.compat(firebase)   (بعد initializeApp)
+ *   - SDK compat أو v8 (window.firebase): await AppAuth.compat(firebase, app)   (بعد initializeApp؛ app لو التطبيق بالاسم)
  *   - طلبات REST مباشرة:              const t = await AppAuth.restToken();  url + '?auth=' + t
  * وكمان: AppAuth.user() (الاسم/الإيميل الحالي)، AppAuth.signOut().
  * الصلاحيات نفسها في قواعد Firebase (acl/<uid>): كل حساب يشوف برامجه بس.
@@ -85,12 +85,12 @@
   }
 
   /* ---------- SDK compat / v8 (window.firebase) ---------- */
-  function compat(fb) {
+  function compat(fb, app) {   // app = تطبيق Firebase بالاسم (لو البرنامج عامل initializeApp(cfg, 'اسم'))
     fb = fb || window.firebase;
     var v = fb.SDK_VERSION || '9.23.0';
     var src = 'https://www.gstatic.com/firebasejs/' + v + '/firebase-auth' + (/^8\./.test(v) ? '' : '-compat') + '.js';
     return (typeof fb.auth === 'function' ? Promise.resolve() : loadScript(src)).then(function () {
-      var auth = fb.auth();
+      var auth = app && typeof app.auth === 'function' ? app.auth() : fb.auth();
       signOutFn = function () { return auth.signOut(); };
       return new Promise(function (r) { var un = auth.onAuthStateChanged(function (x) { un(); r(x); }); }).then(function (u) {
         if (u) return remember(u);
