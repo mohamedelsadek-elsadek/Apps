@@ -550,6 +550,7 @@ tbody tr:hover td{background:#f1f8f4!important}
 .nav-sep,.nav-title{color:#8a8f98}
 .ow-hero{background:linear-gradient(160deg,#173a6b,#0b1f3d)!important;border:1px solid #c9a24a!important;box-shadow:0 2px 0 rgba(0,0,0,.18)!important}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <div class="app">
@@ -680,6 +681,8 @@ async function fbInit(onData){
     databaseURL:cfg.databaseURL, projectId:cfg.projectId,
     storageBucket:cfg.storageBucket||'', appId:cfg.appId||''
   });
+  // تسجيل الدخول (مرة واحدة على الجهاز) قبل أي قراية من قاعدة برامج محمد
+  if (window.AppAuth && /my-app-sync-11ad9/.test(cfg.databaseURL||'')) await AppAuth.modular(FB.app, '10.12.0');
   FB.db = L.getDatabase(FB.app);
   const root = cfg.workspace || 'main';
   FB.ref   = L.ref(FB.db, 'farm/'+root+'/org');      // البنية الجديدة (شركات/مزارع)
