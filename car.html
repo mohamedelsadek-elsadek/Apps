@@ -158,6 +158,7 @@ select.xl.s-done{background-color:#eceef1!important;color:var(--gray)}
     <div><label>من</label><input type="date" id="pFrom"></div><div><label>إلى</label><input type="date" id="pTo"></div>
   </div>
   <div class="kpis" id="kpis"></div>
+  <div id="fuelAlert"></div>
   <div class="card"><h2>العربية دلوقتي <span class="mut" id="stAgo"></span></h2><div class="stat" id="carState"></div></div>
   <div class="charts">
     <div class="card chart"><h2>الكيلومترات شهريًا <span class="mut">آخر 6 شهور</span></h2><div id="kmChart"></div></div>
@@ -236,7 +237,7 @@ select.xl.s-done{background-color:#eceef1!important;color:var(--gray)}
      t:'fuel'  {date,amt,lit,ppl,km,n,by}                     ← من هنا أو من Claude
      t:'maint' {date,title,cost,km,n,by}
    car_log/state : {odo,trip_km,trip_min,car,ver,u}           ← حالة العربية (كل 10 دقايق) */
-var APP_VER='1.0';
+var APP_VER='1.1';
 var DEFAULT_FB={apiKey:"AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs",authDomain:"my-app-sync-11ad9.firebaseapp.com",
   databaseURL:"https://my-app-sync-11ad9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"my-app-sync-11ad9",
   storageBucket:"my-app-sync-11ad9.firebasestorage.app",messagingSenderId:"177039534756",appId:"1:177039534756:web:367ecccc684c2cdfdd1431"};
@@ -340,12 +341,30 @@ function renderHome(){
     var ago=Math.round((now()-s.u)/60000);
     $('stAgo').textContent='آخر تحديث: '+(ago<1?'دلوقتي':ago<60?'من '+ago+' د':ago<1440?'من '+Math.round(ago/60)+' س':'من '+Math.round(ago/1440)+' يوم');
     $('carState').innerHTML='<div><small>العداد التقريبي</small><b>'+(s.odo?f0(s.odo)+' كم':'—')+'</b></div><div><small>الرحلة الحالية</small><b>'+(s.trip_km>0.05?f1(s.trip_km)+' كم · '+hm(s.trip_min):'واقفة')+'</b></div>'
-      +'<div><small>العربية</small><b>'+esc(s.car||'—')+'</b></div><div><small>نسخة الشاشة</small><b>'+esc(s.ver||'—')+'</b></div>';
+      +'<div><small>العربية</small><b>'+esc(s.car||'—')+'</b></div><div><small>نسخة الشاشة</small><b>'+esc(s.ver||'—')+'</b></div>'
+      +(s.parked&&s.parked.lat?'<div class="full" style="grid-column:1/-1"><small>العربية راكنة فين (آخر وقفة '+tm(s.parked.t)+' '+(s.parked.t?new Date(s.parked.t).toLocaleDateString('en-GB'):'')+')</small><b><a href="https://www.google.com/maps/search/?api=1&query='+(+s.parked.lat)+','+(+s.parked.lon)+'" target="_blank" rel="noopener">📍 افتح في الخريطة</a></b></div>':'')
+      +docCell(s.doc_car,'رخصة العربية')+docCell(s.doc_driver,'رخصة القيادة')+docCell(s.doc_ins,'التأمين');
   }
+  var fa=fuelAlert();$('fuelAlert').innerHTML=fa?'<div class="alert"><b>⛽ تنبيه استهلاك:</b> '+fa+'</div>':'';
   var ms=[],d=new Date();for(var i=5;i>=0;i--){var x=new Date(d.getFullYear(),d.getMonth()-i,1);ms.push(ymd(x).slice(0,7))}
   var km=ms.map(function(m){return totals(m+'-01',m+'-31').km}),fu=ms.map(function(m){return totals(m+'-01',m+'-31').fuel}),ma=ms.map(function(m){return totals(m+'-01',m+'-31').maint});
   $('kmChart').innerHTML=bars(ms,[km],['var(--navy)'],f0);
   $('costChart').innerHTML=bars(ms,[fu,ma],['var(--navy)','var(--acc)'],f0);
+}
+function docCell(d,label){
+  if(!d)return '';var n=Math.round((new Date(d+'T12:00:00')-new Date(today()+'T12:00:00'))/864e5);
+  var cls=n<0?'neg':n<=14?'wrn':'pos',txt=n<0?'خلصت من '+(-n)+' يوم':n===0?'بتخلص النهارده':'باقي '+n+' يوم';
+  return '<div><small>'+label+' ('+d+')</small><b class="'+cls+'">'+txt+'</b></div>';
+}
+/* استهلاك كل تفويلة (من تفويلتين فيهم عداد ولترات): لو آخر واحدة أعلى من متوسط اللي قبلها بـ 20% → تنبيه */
+function fuelAlert(){
+  var f=live('fuel').filter(function(r){return +r.km>0&&+r.lit>0}).sort(function(x,y){return x.km-y.km});
+  if(f.length<4)return '';
+  var per=[];for(var i=1;i<f.length;i++){var d=f[i].km-f[i-1].km;if(d>20)per.push(+f[i].lit/d*100)}
+  if(per.length<3)return '';
+  var last=per[per.length-1],prev=per.slice(0,-1),avg=prev.reduce(function(a,b){return a+b},0)/prev.length;
+  if(last>avg*1.2)return 'آخر تفويلة '+f1(last)+' لتر/100كم، ومتوسطك '+f1(avg)+'. ممكن يكون ضغط الكاوتش أو البوجيهات أو فلتر الهوا.';
+  return '';
 }
 function bars(ms,series,cols,fmt){
   var W=600,H=220,pl=10,pb=34,pt=20,mx=1;series.forEach(function(s){s.forEach(function(v){if(v>mx)mx=v})});
