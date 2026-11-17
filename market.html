@@ -273,6 +273,7 @@ tbody tr:nth-child(even) td{background-color:#fbf7ee}
 input,select,textarea{background-color:#fffdf8;color:#1b2a44}
 .top-in h1,.top-in .sub,.top-in .logo{color:#fff!important}.top-in .sub{color:#c9d4e6!important}.sechead h2{color:#fff!important}.sechead .mini-add{color:#fff!important;border-color:rgba(255,255,255,.3)!important}.empty h3,.empty p,.empty .em{color:#c9d4e6!important}nav.tabs{background:#0b1f3d!important;border-top:2px solid #c9a24a!important}nav.tabs .tab{color:#b9c5da!important}nav.tabs .tab.on,nav.tabs .tab.active{background:#f7f2e8!important;color:#10294d!important}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 
@@ -1756,6 +1757,8 @@ function initFB(cfg){
   .then(function(){
     if(firebase.apps.length)firebase.app().delete().catch(function(){});
     firebase.initializeApp(cfg);
+      return (window.AppAuth?AppAuth.compat(firebase):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
+
     fbRef=firebase.database().ref("market");
     fbRef.on("value",function(snap){
       var cloud=snap.val();
@@ -1775,7 +1778,8 @@ function initFB(cfg){
       if(pChanged){try{fbRef.set(cloudPayload())}catch(e){}}
     },function(err){setDot("err");$("#fbStatus").textContent="خطأ اتصال: "+(err.code||"")});
     setDot("on");$("#fbStatus").textContent="مفعّلة ومتصلة ✓";
-  });
+  })
+});
 }
 function enableFB(){
   var raw=$("#fbConfig").value.trim();if(!raw){toast("الصق الإعدادات الأول");return}

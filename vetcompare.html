@@ -130,6 +130,7 @@ tbody tr:nth-child(even) td{background-color:#fbf7ee}
 input,select,textarea{background-color:#fffdf8;color:#1b2a44}
 .top h1,.top .sub{color:#fff!important}.top .sub{color:#c9d4e6!important}.top{border-bottom:2px solid #c9a24a}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -885,6 +886,8 @@ function initFB(cfg){
     .then(function(){return loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js")})
     .then(function(){
       if(!fbApp)fbApp=firebase.initializeApp(cfg);
+      return (window.AppAuth?AppAuth.compat(firebase):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
+
       fbRef=firebase.database().ref("vetcompare");
       
 
@@ -919,7 +922,8 @@ function initFB(cfg){
         fbApplying=false;
       });
       $("#syncToggle").textContent="✓ المزامنة مفعّلة";
-    });
+    })
+});
 }
 
 /* ============ كتالوج الفيتامينات ============ */

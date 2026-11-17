@@ -129,6 +129,7 @@ td{background-color:#fffdf8}
 tbody tr:nth-child(even) td{background-color:#fbf7ee}
 input,select,textarea{background-color:#fffdf8;color:#1b2a44}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 
@@ -329,7 +330,9 @@ function initStorage(){
     const s1=document.createElement('script'); s1.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js";
     s1.onload=()=>{const s2=document.createElement('script'); s2.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js";
       s2.onload=()=>{
-        firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); useFirebase=true;
+        firebase.initializeApp(FIREBASE_CONFIG);
+      (window.AppAuth?AppAuth.compat(firebase):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
+ db=firebase.database(); useFirebase=true;
         $('syncDot').style.display='block';
         db.ref('categories').on('value',s=>{
           const v=s.val();
@@ -342,7 +345,8 @@ function initStorage(){
           places=Object.keys(v).map(k=>({...v[k],id:k}));
           $('syncDot').textContent='✓ متزامن'; render(); autoBackup();
         });
-      }; document.head.appendChild(s2);
+      }).catch(function(e){console.warn(e)});
+}; document.head.appendChild(s2);
     }; document.head.appendChild(s1);
   } else {
     loadCats();

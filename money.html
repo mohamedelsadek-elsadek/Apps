@@ -120,6 +120,7 @@ body{font-family:Cairo,-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif}
 .mv .m,.mv .n{color:var(--mut)}
 .zero{color:var(--mut)}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -215,6 +216,7 @@ async function cloudInit(){
     await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
     let app;try{app=firebase.app('debtbook')}catch(e){app=firebase.initializeApp(FB_CFG,'debtbook')}
+    if(window.AppAuth) await AppAuth.compat(firebase,app);   // تسجيل الدخول مرة واحدة على الجهاز
     fbRef=app.database().ref(FB_PATH);
     fbRef.on('value',snap=>{
       const cloud=snap.val()||{};let changed=false;const up=[];

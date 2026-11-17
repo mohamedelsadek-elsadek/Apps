@@ -450,6 +450,7 @@ td{background-color:#fffdf8}
 tbody tr:nth-child(even) td{background-color:#fbf7ee}
 input,select,textarea{background-color:#fffdf8;color:#1b2a44}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 <header class="mast">
@@ -3648,10 +3649,13 @@ function initFirebase(){
       if(!window.firebase) throw new Error('firebase مش متحمّل');
       if(firebase.apps.length){ try{ firebase.app().delete(); }catch(e){} }
       firebase.initializeApp(DEFAULT_FB);
+      return (window.AppAuth?AppAuth.compat(firebase):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
+
       fbRef = firebase.database().ref(FB_PATH);
       fbReady = true;
       return SafeSync.loadBase('mathana');
     })
+})
     .then(()=>{
 
       fbRef.on('value', snap=>{

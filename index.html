@@ -367,6 +367,7 @@ tbody tr:nth-child(even) td{background-color:#fbf7ee}
 input,select,textarea{background-color:#fffdf8;color:#1b2a44}
 .brand h1{color:#fff!important}#subCount{color:#c9d4e6!important}.sortbar .lbl{color:#c9d4e6!important}.hsec-h,.hsec-h span{color:#fff!important;font-weight:800}.hsec-h{border-color:#c9a24a!important}.hsec-n{background:rgba(255,255,255,.12)!important;color:#fff!important}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 
@@ -1081,6 +1082,8 @@ function initFirebase(cfg){
       if(!window.firebase) throw new Error("firebase غير محمّل");
       if(firebase.apps.length) firebase.app().delete().catch(function(){});
       firebase.initializeApp(cfg);
+      return (window.AppAuth?AppAuth.compat(firebase):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
+
       fbDb=firebase.database();
       fbRef=fbDb.ref("appHub/links");
       fbRef.on("value",function(snap){
@@ -1091,7 +1094,8 @@ function initFirebase(cfg){
         mergeCloud(cloud);
       },function(err){ setDot("err"); fbStatusTxt("خطأ اتصال: "+(err.code||err.message||"")); });
       setDot("on"); fbStatusTxt("مفعّلة ومتصلة ✓");
-    });
+    })
+});
 }
 function mergeCloud(cloud){
   fbApplying=true;

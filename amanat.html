@@ -437,6 +437,7 @@ td{background-color:#fffdf8}
 tbody tr:nth-child(even) td{background-color:#fbf7ee}
 input,select,textarea{background-color:#fffdf8;color:#1b2a44}
 </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 
@@ -883,6 +884,8 @@ function initFirebaseIfConfigured(){
       fbApp = firebase.initializeApp(cfg);
       fbDb = firebase.database();
     }
+      (window.AppAuth&&/my-app-sync-11ad9/.test(cfg.databaseURL||'')?AppAuth.compat(firebase):Promise.resolve()).then(function(){   // تسجيل الدخول مرة واحدة على الجهاز
+
     fbDb.ref('amanat/data').on('value', snap => {
       const remote = snap.val();
       if(!remote) return;
@@ -901,7 +904,8 @@ function initFirebaseIfConfigured(){
       });
     });
     document.getElementById('syncStatus').textContent = '✅ متصل ومتزامن';
-  }catch(e){
+  }).catch(function(e){console.warn(e)});
+}catch(e){
     console.error('firebase init error', e);
     const el = document.getElementById('syncStatus');
     if(el) el.textContent = '❌ خطأ في إعدادات Firebase: ' + e.message;
