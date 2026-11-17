@@ -106,6 +106,25 @@
          "file": "lessons/ar-b2-ex-1.json"
         }
        ]
+      },
+      {
+       "id": "pr",
+       "title": "📝 مراجعة نهائية Progress عربي",
+       "ico": "📝",
+       "lessons": [
+        {
+         "id": "ar-b2-pr-1",
+         "title": "مراجعة 1: كريم والوقت المتجمد",
+         "ico": "⏰",
+         "file": "lessons/ar-b2-pr-1.json"
+        },
+        {
+         "id": "ar-b2-pr-2",
+         "title": "مراجعة 2: الحصان الهارب.. ربما خير",
+         "ico": "🐎",
+         "file": "lessons/ar-b2-pr-2.json"
+        }
+       ]
       }
      ]
     }
