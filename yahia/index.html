@@ -124,6 +124,7 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="../auth-gate.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -169,8 +170,9 @@ function mergeInto(T,r){ if(!r) return false; let ch=false;
 /* ---- مسار احتياطي بالـ REST لو مكتبة Firebase ماشتغلتش على الجهاز ---- */
 let REST=false, restPoll=null;
 const RURL=p=>FB.databaseURL+"/"+p+".json";
-async function rget(p){const r=await fetch(RURL(p),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json()}
-async function rput(p,d){const r=await fetch(RURL(p),{method:"PUT",body:JSON.stringify(d),headers:{"Content-Type":"application/json"}});if(!r.ok)throw new Error(r.status);return r.json()}
+async function rauth(p){const t=window.AppAuth?await AppAuth.restToken().catch(()=>null):null;return RURL(p)+(t?"?auth="+encodeURIComponent(t):"")}
+async function rget(p){const r=await fetch(await rauth(p),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json()}
+async function rput(p,d){const r=await fetch(await rauth(p),{method:"PUT",body:JSON.stringify(d),headers:{"Content-Type":"application/json"}});if(!r.ok)throw new Error(r.status);return r.json()}
 function restPush(){ if(!KID) return; const id=KID, snap=Object.assign({},S,{u:Date.now()}); rput("yahia_world/kids/"+id+"/state",snap).then(()=>{SYNC="on";setCloud()}).catch(()=>{SYNC="err";setCloud()}); }
 async function restPull(){ if(!KID) return; const id=KID;
   try{ const km=await rget("yahia_world/kids_meta")||{}; let ch=false,push=false;
@@ -193,6 +195,7 @@ function lessonVid(id){const v=VIDS[id];return v&&v.id&&!v.del?v.id:""}
 function setVid(lid,raw){const id=raw?ytId(raw):"";if(raw&&!id)return false;VIDS[lid]={id,del:!id,u:Date.now()};try{localStorage.setItem("yw-vids",JSON.stringify(VIDS))}catch(e){} if(REST)rput("yahia_world/videos/"+lid,VIDS[lid]).catch(()=>{}); else if(DB)try{DB.ref("yahia_world/videos/"+lid).set(VIDS[lid])}catch(e){} return true}
 function saveKids(){ try{localStorage.setItem("yw-kids",JSON.stringify(KIDS))}catch(e){} if(REST) rput("yahia_world/kids_meta",KIDS).catch(()=>{}); else if(DB) try{DB.ref("yahia_world/kids_meta").set(KIDS)}catch(e){} }
 function initSync(){ setTimeout(()=>{ if(SYNC!=="on") goRest(); setTimeout(diag,4000); setInterval(diag,90000); },8000); try{ if(!window.firebase) return goRest(); const app=firebase.apps.length?firebase.app():firebase.initializeApp(FB);
+  (window.AppAuth?AppAuth.compat(firebase,app):Promise.resolve()).then(()=>{   // تسجيل الدخول مرة واحدة على الجهاز
   DB=firebase.database(app);
   DB.ref("yahia_world/kids_meta").on("value",snap=>{ const r=snap.val()||{}; let ch=false, push=false;
     for(const id in r){ const k=r[id]; if(!KIDS[id]||(k.u||0)>(KIDS[id].u||0)){KIDS[id]=k;ch=true} }
@@ -204,6 +207,7 @@ function initSync(){ setTimeout(()=>{ if(SYNC!=="on") goRest(); setTimeout(diag,
   /* ترحيل الحالة القديمة yahia_world/state ليحيى مرة واحدة */
   DB.ref("yahia_world/state").once("value",snap=>{ const r=snap.val(); if(!r) return; DB.ref("yahia_world/kids/yahia/state").transaction(cur=>{ const T=Object.assign(BLANK(),cur||{}); mergeInto(T,r); T.u=Date.now(); return T; }).then(()=>DB.ref("yahia_world/state").remove()).catch(()=>{}); });
   if(KID) attachKid(KID);
+  }).catch(()=>{SYNC="err"});
  }catch(e){SYNC="err"} }
 function attachKid(id){ if(REST) return restPull(); if(!DB) return; if(REF) REF.off(); REF=DB.ref("yahia_world/kids/"+id+"/state");
   REF.on("value",snap=>{ if(KID!==id) return; SYNC="on"; const r=snap.val(); const ch=mergeInto(S,r); save(true);

@@ -11,7 +11,7 @@
   'use strict';
   var API_KEY = 'AIzaSyAp3pbA-jRE1IhgZiBGsC18s8XOC9lWATs';
   var REST_KEY = 'appauth.rest.v1';
-  var current = null, signOutFn = null, pending = null;
+  var current = null, signOutFn = null, pending = null, sdkUser = null;
 
   function loadScript(src) {
     return new Promise(function (res, rej) {
@@ -68,6 +68,7 @@
 
   function remember(u) {
     current = u ? { uid: u.uid || u.localId, email: u.email } : null;
+    if (u && typeof u.getIdToken === 'function') sdkUser = u;   // البرامج اللي فيها SDK و REST مع بعض: نفس الدخول
     return u;
   }
 
@@ -110,6 +111,8 @@
     }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); return j; }); });
   }
   function restToken() {
+    if (sdkUser) return sdkUser.getIdToken();
+    if (pending) return pending.then(function () { return restToken(); });
     var s = restLoad();
     if (s && s.idToken && Date.now() < s.exp - 60000) { remember({ uid: s.uid, email: s.email }); return Promise.resolve(s.idToken); }
     if (s && s.refreshToken) {
