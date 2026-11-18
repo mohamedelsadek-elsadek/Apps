@@ -38,15 +38,17 @@
         '#appauth-gate button{margin-top:16px;width:100%;min-height:48px;border:0;border-radius:11px;background:#1f7a57;color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer}' +
         '#appauth-gate button:disabled{opacity:.6}#appauth-gate .err{color:#c0262d;font-size:13px;font-weight:700;margin-top:10px;min-height:18px}</style>' +
         '<form autocomplete="on"><h2>🔐 تسجيل الدخول</h2><p>مرة واحدة على الجهاز ده. البيانات محمية ومحدش يشوفها غير الحسابات المسموح لها.</p>' +
-        '<label for="appauth-email">الإيميل</label><input id="appauth-email" type="email" autocomplete="username" inputmode="email" required>' +
-        '<label for="appauth-pass">الباسورد</label><input id="appauth-pass" type="password" autocomplete="current-password" required>' +
+        '<label for="appauth-email">الإيميل</label><input id="appauth-email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" required>' +
+        '<label for="appauth-pass">الباسورد</label><div style="position:relative"><input id="appauth-pass" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required style="padding-left:52px">' +
+        '<button type="button" id="appauth-eye" aria-label="إظهار الباسورد" style="position:absolute;left:4px;top:4px;margin:0;width:44px;min-height:38px;background:#efe7d6;color:#10294d;font-size:18px;padding:0">👁</button></div>' +
         '<button type="submit">دخول</button><div class="err" id="appauth-err"></div>' +
         '<a href="#" id="appauth-skip" style="display:block;text-align:center;margin-top:6px;font-size:13px;color:#6b7385">استخدم البرنامج على الجهاز ده من غير مزامنة</a></form>';
       (document.body || document.documentElement).appendChild(w);
       var f = w.querySelector('form'), btn = w.querySelector('button'), err = w.querySelector('#appauth-err');
       f.addEventListener('submit', function (ev) {
         ev.preventDefault();
-        var e = w.querySelector('#appauth-email').value.trim(), p = w.querySelector('#appauth-pass').value;
+        // المسافات اللي بتيجي مع النسخ واللصق بتبوّظ الباسورد: بتتشال (الباسوردات مفيهاش مسافات)
+        var e = w.querySelector('#appauth-email').value.replace(/\s+/g, '').toLowerCase(), p = w.querySelector('#appauth-pass').value.replace(/\s+/g, '');
         btn.disabled = true; err.textContent = '';
         tryLogin(e, p).then(function (u) {
           w.remove(); pending = null; resolve(u);
@@ -57,6 +59,9 @@
             : /too-many|TOO_MANY/i.test(c) ? 'محاولات كتير، استنى دقيقة'
             : 'الإيميل أو الباسورد غلط';
         });
+      });
+      w.querySelector('#appauth-eye').addEventListener('click', function () {
+        var i = w.querySelector('#appauth-pass'); i.type = i.type === 'password' ? 'text' : 'password';
       });
       w.querySelector('#appauth-skip').addEventListener('click', function (ev) {
         ev.preventDefault(); w.remove(); pending = null; reject(new Error('appauth-skipped'));
