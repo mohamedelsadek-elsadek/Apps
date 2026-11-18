@@ -1,0 +1,345 @@
+{
+ "title": "2D Shapes & Symmetry",
+ "activities": [
+  {
+   "type": "story",
+   "title": "The Shape Detectives",
+   "ico": "📖",
+   "keys": [
+    "polygon",
+    "regular",
+    "irregular",
+    "equilateral",
+    "isosceles",
+    "scalene",
+    "symmetry",
+    "quadrilateral",
+    "pentagon",
+    "hexagon",
+    "octagon"
+   ],
+   "scenes": [
+    {
+     "e": "🔺🟦",
+     "t": "A polygon is a closed 2D shape with straight sides, like triangles, quadrilaterals, pentagons and hexagons. A circle is NOT a polygon because it is curved."
+    },
+    {
+     "e": "🔢",
+     "t": "Names come from the number of sides: triangle 3, quadrilateral 4, pentagon 5, hexagon 6, heptagon 7, octagon 8, nonagon 9, decagon 10."
+    },
+    {
+     "e": "📐",
+     "t": "A regular polygon has all sides equal and all angles equal, like a square. An irregular polygon does not."
+    },
+    {
+     "e": "🔺",
+     "t": "Triangles: equilateral has 3 equal sides; isosceles has 2 equal sides; scalene has no equal sides."
+    },
+    {
+     "e": "🪞",
+     "t": "A line of symmetry is a mirror line that cuts a shape into two halves that match exactly."
+    },
+    {
+     "e": "🟦➕",
+     "t": "A square has 4 lines of symmetry. A rectangle has 2. An equilateral triangle has 3. An arrow has 1."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Maths Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Polygon",
+     "e": "🔷",
+     "k": "mean",
+     "a": "Closed shape with straight sides."
+    },
+    {
+     "w": "Regular",
+     "e": "⭐",
+     "k": "mean",
+     "a": "All sides and angles equal."
+    },
+    {
+     "w": "Irregular",
+     "e": "🔶",
+     "k": "mean",
+     "a": "Sides or angles not all equal."
+    },
+    {
+     "w": "Quadrilateral",
+     "e": "🟦",
+     "k": "mean",
+     "a": "Any 4-sided shape."
+    },
+    {
+     "w": "Pentagon",
+     "e": "⬠",
+     "k": "mean",
+     "a": "5 sides."
+    },
+    {
+     "w": "Hexagon",
+     "e": "⬡",
+     "k": "mean",
+     "a": "6 sides."
+    },
+    {
+     "w": "Octagon",
+     "e": "🛑",
+     "k": "mean",
+     "a": "8 sides."
+    },
+    {
+     "w": "Line of symmetry",
+     "e": "🪞",
+     "k": "mean",
+     "a": "Mirror line with two matching halves."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Sides",
+   "ico": "🧠",
+   "prompt": "Match the shape with its sides.",
+   "pairs": [
+    [
+     "triangle",
+     "3 sides"
+    ],
+    [
+     "quadrilateral",
+     "4 sides"
+    ],
+    [
+     "pentagon",
+     "5 sides"
+    ],
+    [
+     "hexagon",
+     "6 sides"
+    ],
+    [
+     "octagon",
+     "8 sides"
+    ],
+    [
+     "decagon",
+     "10 sides"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Polygon or Not?",
+   "ico": "🔷",
+   "prompt": "Is it a polygon?",
+   "bins": [
+    {
+     "id": "p",
+     "label": "Polygon",
+     "ico": "🔷",
+     "cls": "noun"
+    },
+    {
+     "id": "n",
+     "label": "Not a polygon",
+     "ico": "⭕",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "p": "Closed with straight sides.",
+    "n": "Open or has curves."
+   },
+   "items": [
+    [
+     "square",
+     "p"
+    ],
+    [
+     "triangle",
+     "p"
+    ],
+    [
+     "hexagon",
+     "p"
+    ],
+    [
+     "rectangle",
+     "p"
+    ],
+    [
+     "pentagon",
+     "p"
+    ],
+    [
+     "circle",
+     "n"
+    ],
+    [
+     "oval",
+     "n"
+    ],
+    [
+     "semicircle",
+     "n"
+    ],
+    [
+     "open shape",
+     "n"
+    ]
+   ]
+  },
+  {
+   "type": "calc",
+   "title": "Type the Answer",
+   "ico": "⌨️",
+   "items": [
+    {
+     "q": "How many sides does this shape have?",
+     "a": "5",
+     "v": "<svg viewBox=\"0 0 140 112\" width=\"150\"><polygon points=\"60,8 112,46 92,104 28,104 8,46\" fill=\"#cfe8ff\" stroke=\"#1e2a5a\" stroke-width=\"3\"/></svg>"
+    },
+    {
+     "q": "Count the sides of this shape:",
+     "a": "6",
+     "v": "<svg viewBox=\"0 0 140 112\" width=\"150\"><polygon points=\"35,10 85,10 112,55 85,100 35,100 8,55\" fill=\"#cfe8ff\" stroke=\"#1e2a5a\" stroke-width=\"3\"/></svg>"
+    },
+    {
+     "q": "How many sides? (a stop-sign shape)",
+     "a": "8",
+     "v": "<svg viewBox=\"0 0 140 112\" width=\"150\"><polygon points=\"40,8 80,8 108,36 108,76 80,104 40,104 12,76 12,36\" fill=\"#cfe8ff\" stroke=\"#1e2a5a\" stroke-width=\"3\"/></svg>"
+    },
+    {
+     "q": "How many lines of symmetry does a square have?",
+     "a": "4",
+     "v": "<svg viewBox=\"0 0 140 112\" width=\"150\"><polygon points=\"15,15 95,15 95,95 15,95\" fill=\"#cfe8ff\" stroke=\"#1e2a5a\" stroke-width=\"3\"/></svg>"
+    },
+    {
+     "q": "How many lines of symmetry does a rectangle have?",
+     "a": "2",
+     "v": "<svg viewBox=\"0 0 140 112\" width=\"150\"><polygon points=\"5,30 135,30 135,90 5,90\" fill=\"#cfe8ff\" stroke=\"#1e2a5a\" stroke-width=\"3\"/></svg>"
+    },
+    {
+     "q": "How many lines of symmetry does an equilateral triangle have?",
+     "a": "3",
+     "v": "<svg viewBox=\"0 0 140 112\" width=\"150\"><polygon points=\"60,10 110,100 10,100\" fill=\"#cfe8ff\" stroke=\"#1e2a5a\" stroke-width=\"3\"/></svg>"
+    },
+    {
+     "q": "How many equal sides does an isosceles triangle have?",
+     "a": "2"
+    },
+    {
+     "q": "How many sides does a decagon have?",
+     "a": "10"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "A triangle with 3 equal sides is called…",
+     "o": [
+      "scalene",
+      "equilateral",
+      "isosceles"
+     ],
+     "a": 1
+    },
+    {
+     "q": "A triangle with no equal sides is…",
+     "o": [
+      "isosceles",
+      "equilateral",
+      "scalene"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A 4-sided shape is a…",
+     "o": [
+      "quadrilateral",
+      "pentagon",
+      "triangle"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which is NOT a polygon?",
+     "o": [
+      "hexagon",
+      "square",
+      "circle"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A regular polygon has…",
+     "o": [
+      "no corners",
+      "all sides and angles equal",
+      "curved sides"
+     ],
+     "a": 1
+    },
+    {
+     "q": "An octagon has ___ sides.",
+     "o": [
+      "8",
+      "10",
+      "6"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A line of symmetry divides a shape into…",
+     "o": [
+      "different parts",
+      "two matching halves",
+      "three parts"
+     ],
+     "a": 1
+    },
+    {
+     "q": "How many lines of symmetry does an arrow ➡ have?",
+     "o": [
+      "2",
+      "0",
+      "1"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A stop sign is shaped like an…",
+     "o": [
+      "octagon",
+      "hexagon",
+      "pentagon"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which shape has 4 equal sides and 4 right angles?",
+     "o": [
+      "triangle",
+      "square",
+      "rectangle (not square)"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "ma-6",
+ "lang": "en",
+ "audio": {},
+ "source": "Maths Grade 3 — Revision B1 & B2 (Luxor & Qena sheets)"
+}

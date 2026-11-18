@@ -1,0 +1,272 @@
+{
+ "title": "Tally Charts & Pictographs",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Counting Sea Creatures",
+   "ico": "📖",
+   "keys": [
+    "data",
+    "tally",
+    "pictograph",
+    "key",
+    "survey"
+   ],
+   "scenes": [
+    {
+     "e": "🐠📋",
+     "t": "The class did a survey: which sea creature do you like best? We collect data and record it."
+    },
+    {
+     "e": "||||",
+     "t": "A tally chart uses marks. One mark for each vote. The fifth mark crosses the four: that group is 5. Then start again."
+    },
+    {
+     "e": "🐟",
+     "t": "To read a tally, count in fives and then add the ones. Five plus three more is 8."
+    },
+    {
+     "e": "🖼️",
+     "t": "A pictograph shows data with pictures. The KEY tells what one picture stands for, for example 🐠 = 2 pupils."
+    },
+    {
+     "e": "🧮",
+     "t": "If 🐠 = 2 pupils and there are 4 pictures, that is 4 × 2 = 8 pupils. Half a picture means 1 pupil."
+    },
+    {
+     "e": "❓",
+     "t": "We can answer questions from data: which is the most popular? how many more chose seahorse than stingray? 8 − 3 = 5."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Maths Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Data",
+     "e": "📊",
+     "k": "mean",
+     "a": "Information we collect."
+    },
+    {
+     "w": "Survey",
+     "e": "📋",
+     "k": "mean",
+     "a": "Asking people questions to collect data."
+    },
+    {
+     "w": "Tally",
+     "e": "||||",
+     "k": "mean",
+     "a": "Marks in groups of five."
+    },
+    {
+     "w": "Frequency",
+     "e": "🔢",
+     "k": "mean",
+     "a": "How many times something happens."
+    },
+    {
+     "w": "Pictograph",
+     "e": "🖼️",
+     "k": "mean",
+     "a": "Data shown with pictures."
+    },
+    {
+     "w": "Key",
+     "e": "🔑",
+     "k": "mean",
+     "a": "Tells what one picture stands for."
+    },
+    {
+     "w": "Most popular",
+     "e": "🏆",
+     "k": "mean",
+     "a": "The biggest number."
+    },
+    {
+     "w": "Least popular",
+     "e": "🔻",
+     "k": "mean",
+     "a": "The smallest number."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Tally",
+   "ico": "🧠",
+   "prompt": "Match the tally with its number.",
+   "pairs": [
+    [
+     "|||",
+     "3"
+    ],
+    [
+     "||||",
+     "4"
+    ],
+    [
+     "||||/",
+     "5"
+    ],
+    [
+     "||||/ |||",
+     "8"
+    ],
+    [
+     "||||/ ||",
+     "7"
+    ],
+    [
+     "||||/ ||||/",
+     "10"
+    ]
+   ]
+  },
+  {
+   "type": "calc",
+   "title": "Read the Tally Chart",
+   "ico": "⌨️",
+   "ordered": true,
+   "items": [
+    {
+     "q": "How many pupils chose Seahorse?",
+     "a": "8",
+     "v": "<svg viewBox=\"0 0 300 160\" width=\"300\"><style>text{font:13px sans-serif}</style><text x=\"4\" y=\"20\">Clown fish</text><text x=\"110\" y=\"20\" style=\"font:bold 16px monospace\">||||/ </text><text x=\"4\" y=\"45\">Stingray</text><text x=\"110\" y=\"45\" style=\"font:bold 16px monospace\">|||</text><text x=\"4\" y=\"70\">Octopus</text><text x=\"110\" y=\"70\" style=\"font:bold 16px monospace\">||||</text><text x=\"4\" y=\"95\">Seahorse</text><text x=\"110\" y=\"95\" style=\"font:bold 16px monospace\">||||/ |||</text><text x=\"4\" y=\"120\">Angel fish</text><text x=\"110\" y=\"120\" style=\"font:bold 16px monospace\">||||/ ||</text><text x=\"4\" y=\"145\">Puffer fish</text><text x=\"110\" y=\"145\" style=\"font:bold 16px monospace\">||||/ ||</text></svg>"
+    },
+    {
+     "q": "How many chose Puffer fish?",
+     "a": "7",
+     "v": "<svg viewBox=\"0 0 300 160\" width=\"300\"><style>text{font:13px sans-serif}</style><text x=\"4\" y=\"20\">Clown fish</text><text x=\"110\" y=\"20\" style=\"font:bold 16px monospace\">||||/ </text><text x=\"4\" y=\"45\">Stingray</text><text x=\"110\" y=\"45\" style=\"font:bold 16px monospace\">|||</text><text x=\"4\" y=\"70\">Octopus</text><text x=\"110\" y=\"70\" style=\"font:bold 16px monospace\">||||</text><text x=\"4\" y=\"95\">Seahorse</text><text x=\"110\" y=\"95\" style=\"font:bold 16px monospace\">||||/ |||</text><text x=\"4\" y=\"120\">Angel fish</text><text x=\"110\" y=\"120\" style=\"font:bold 16px monospace\">||||/ ||</text><text x=\"4\" y=\"145\">Puffer fish</text><text x=\"110\" y=\"145\" style=\"font:bold 16px monospace\">||||/ ||</text></svg>"
+    },
+    {
+     "q": "How many chose Stingray?",
+     "a": "3",
+     "v": "<svg viewBox=\"0 0 300 160\" width=\"300\"><style>text{font:13px sans-serif}</style><text x=\"4\" y=\"20\">Clown fish</text><text x=\"110\" y=\"20\" style=\"font:bold 16px monospace\">||||/ </text><text x=\"4\" y=\"45\">Stingray</text><text x=\"110\" y=\"45\" style=\"font:bold 16px monospace\">|||</text><text x=\"4\" y=\"70\">Octopus</text><text x=\"110\" y=\"70\" style=\"font:bold 16px monospace\">||||</text><text x=\"4\" y=\"95\">Seahorse</text><text x=\"110\" y=\"95\" style=\"font:bold 16px monospace\">||||/ |||</text><text x=\"4\" y=\"120\">Angel fish</text><text x=\"110\" y=\"120\" style=\"font:bold 16px monospace\">||||/ ||</text><text x=\"4\" y=\"145\">Puffer fish</text><text x=\"110\" y=\"145\" style=\"font:bold 16px monospace\">||||/ ||</text></svg>"
+    },
+    {
+     "q": "How many more chose Seahorse than Stingray?",
+     "a": "5",
+     "v": "<svg viewBox=\"0 0 300 160\" width=\"300\"><style>text{font:13px sans-serif}</style><text x=\"4\" y=\"20\">Clown fish</text><text x=\"110\" y=\"20\" style=\"font:bold 16px monospace\">||||/ </text><text x=\"4\" y=\"45\">Stingray</text><text x=\"110\" y=\"45\" style=\"font:bold 16px monospace\">|||</text><text x=\"4\" y=\"70\">Octopus</text><text x=\"110\" y=\"70\" style=\"font:bold 16px monospace\">||||</text><text x=\"4\" y=\"95\">Seahorse</text><text x=\"110\" y=\"95\" style=\"font:bold 16px monospace\">||||/ |||</text><text x=\"4\" y=\"120\">Angel fish</text><text x=\"110\" y=\"120\" style=\"font:bold 16px monospace\">||||/ ||</text><text x=\"4\" y=\"145\">Puffer fish</text><text x=\"110\" y=\"145\" style=\"font:bold 16px monospace\">||||/ ||</text></svg>"
+    },
+    {
+     "q": "How many chose Clown fish and Octopus together?",
+     "a": "9",
+     "v": "<svg viewBox=\"0 0 300 160\" width=\"300\"><style>text{font:13px sans-serif}</style><text x=\"4\" y=\"20\">Clown fish</text><text x=\"110\" y=\"20\" style=\"font:bold 16px monospace\">||||/ </text><text x=\"4\" y=\"45\">Stingray</text><text x=\"110\" y=\"45\" style=\"font:bold 16px monospace\">|||</text><text x=\"4\" y=\"70\">Octopus</text><text x=\"110\" y=\"70\" style=\"font:bold 16px monospace\">||||</text><text x=\"4\" y=\"95\">Seahorse</text><text x=\"110\" y=\"95\" style=\"font:bold 16px monospace\">||||/ |||</text><text x=\"4\" y=\"120\">Angel fish</text><text x=\"110\" y=\"120\" style=\"font:bold 16px monospace\">||||/ ||</text><text x=\"4\" y=\"145\">Puffer fish</text><text x=\"110\" y=\"145\" style=\"font:bold 16px monospace\">||||/ ||</text></svg>"
+    },
+    {
+     "q": "Key: 🐠 = 2 pupils. 🐠🐠🐠🐠 = ? pupils",
+     "a": "8"
+    },
+    {
+     "q": "Key: 🐠 = 2 pupils. 🐠🐠🐠 and half 🐠 = ? pupils",
+     "a": "7"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "||||/ means…",
+     "o": [
+      "4",
+      "5",
+      "1"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which creature is the most popular in the chart?",
+     "o": [
+      "Octopus",
+      "Stingray",
+      "Seahorse"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which is the least popular?",
+     "o": [
+      "Seahorse",
+      "Clown fish",
+      "Stingray"
+     ],
+     "a": 2
+    },
+    {
+     "q": "In a pictograph, the key tells us…",
+     "o": [
+      "what one picture stands for",
+      "the title",
+      "the date"
+     ],
+     "a": 0
+    },
+    {
+     "q": "If ⭐ = 10, then ⭐⭐⭐ =",
+     "o": [
+      "30",
+      "13",
+      "3"
+     ],
+     "a": 0
+    },
+    {
+     "q": "To show 12 with tallies you need…",
+     "o": [
+      "||||/ ||||/ ||",
+      "||||/ ||||",
+      "||||||||||||"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Asking people questions to collect data is a…",
+     "o": [
+      "sum",
+      "shape",
+      "survey"
+     ],
+     "a": 2
+    },
+    {
+     "q": "If 🍎 = 2, how do we show 5?",
+     "o": [
+      "🍎🍎🍎🍎🍎",
+      "🍎🍎 and half 🍎",
+      "🍎🍎🍎"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Total of 3, 4 and 5 =",
+     "o": [
+      "12",
+      "13",
+      "11"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A tally chart helps us…",
+     "o": [
+      "draw shapes",
+      "tell time",
+      "count and record data"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ],
+ "id": "ma-7",
+ "lang": "en",
+ "audio": {},
+ "source": "Maths Grade 3 — Revision B1 & B2 (Luxor & Qena sheets)"
+}

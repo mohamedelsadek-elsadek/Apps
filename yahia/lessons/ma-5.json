@@ -1,0 +1,376 @@
+{
+ "title": "Measures, Perimeter & Area",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Measuring Yahia's World",
+   "ico": "📖",
+   "keys": [
+    "millimetre",
+    "centimetre",
+    "metre",
+    "kilometre",
+    "gram",
+    "kilogram",
+    "millilitre",
+    "litre",
+    "perimeter",
+    "area"
+   ],
+   "scenes": [
+    {
+     "e": "📏",
+     "t": "We measure length in mm, cm, m and km. A pencil is measured in cm, a swimming pool in m, and the distance from Cairo to Port Said in km (about 220 km)."
+    },
+    {
+     "e": "🔁",
+     "t": "Remember: 1 metre = 100 centimetres, 1 kilometre = 1000 metres. So 2 m = 200 cm, ½ km = 500 m, and 3 km = 3000 m."
+    },
+    {
+     "e": "⚖️🥛",
+     "t": "Mass: 1 kilogram = 1000 grams. Capacity: 1 litre = 1000 millilitres."
+    },
+    {
+     "e": "🔲🚶",
+     "t": "Perimeter is the distance all the way around a shape. Add all the sides. A square with sides of 4 cm has perimeter 4 + 4 + 4 + 4 = 16 cm."
+    },
+    {
+     "e": "🟩",
+     "t": "A rectangle 5 cm by 4 cm has perimeter 5 + 4 + 5 + 4 = 18 cm."
+    },
+    {
+     "e": "🟦🔢",
+     "t": "Area is the space inside a shape. On a grid, count the squares! A rectangle 5 squares by 3 squares has area 15 square units."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Maths Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "1 m",
+     "e": "📏",
+     "k": "mean",
+     "a": "= 100 cm"
+    },
+    {
+     "w": "1 km",
+     "e": "🛣️",
+     "k": "mean",
+     "a": "= 1000 m"
+    },
+    {
+     "w": "1 kg",
+     "e": "⚖️",
+     "k": "mean",
+     "a": "= 1000 g"
+    },
+    {
+     "w": "1 litre",
+     "e": "🥛",
+     "k": "mean",
+     "a": "= 1000 ml"
+    },
+    {
+     "w": "1 cm",
+     "e": "📐",
+     "k": "mean",
+     "a": "= 10 mm"
+    },
+    {
+     "w": "Perimeter",
+     "e": "🚶",
+     "k": "mean",
+     "a": "The distance around a shape."
+    },
+    {
+     "w": "Area",
+     "e": "🟩",
+     "k": "mean",
+     "a": "The space inside; count the squares."
+    },
+    {
+     "w": "Square unit",
+     "e": "⬛",
+     "k": "mean",
+     "a": "One small grid square."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Best Unit",
+   "ico": "🧠",
+   "prompt": "Match each thing with the best unit.",
+   "pairs": [
+    [
+     "Length of a pencil",
+     "cm"
+    ],
+    [
+     "Length of a swimming pool",
+     "m"
+    ],
+    [
+     "Cairo to Port Said",
+     "km"
+    ],
+    [
+     "Thickness of a coin",
+     "mm"
+    ],
+    [
+     "Mass of a bag of rice",
+     "kg"
+    ],
+    [
+     "Water in a bottle",
+     "ml"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "mm, cm, m or km?",
+   "ico": "🐦",
+   "prompt": "Which unit would you use?",
+   "bins": [
+    {
+     "id": "mm",
+     "label": "mm",
+     "ico": "🐜",
+     "cls": "sun"
+    },
+    {
+     "id": "cm",
+     "label": "cm",
+     "ico": "✏️",
+     "cls": "noun"
+    },
+    {
+     "id": "m",
+     "label": "m",
+     "ico": "🏊",
+     "cls": "moon"
+    },
+    {
+     "id": "km",
+     "label": "km",
+     "ico": "🛣️",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "mm": "Very tiny lengths.",
+    "cm": "Small things like a pencil.",
+    "m": "Rooms, pools, people.",
+    "km": "Long distances between places."
+   },
+   "items": [
+    [
+     "an ant",
+     "mm"
+    ],
+    [
+     "a grain of rice",
+     "mm"
+    ],
+    [
+     "a pencil",
+     "cm"
+    ],
+    [
+     "a book",
+     "cm"
+    ],
+    [
+     "your hand",
+     "cm"
+    ],
+    [
+     "a swimming pool",
+     "m"
+    ],
+    [
+     "a classroom",
+     "m"
+    ],
+    [
+     "a football pitch",
+     "m"
+    ],
+    [
+     "Cairo to Alexandria",
+     "km"
+    ],
+    [
+     "Cairo to Port Said",
+     "km"
+    ],
+    [
+     "a car journey",
+     "km"
+    ]
+   ]
+  },
+  {
+   "type": "calc",
+   "title": "Type the Answer",
+   "ico": "⌨️",
+   "items": [
+    {
+     "q": "1 metre = ___ cm",
+     "a": "100"
+    },
+    {
+     "q": "1 kilogram = ___ g",
+     "a": "1000"
+    },
+    {
+     "q": "1 litre = ___ ml",
+     "a": "1000"
+    },
+    {
+     "q": "How many metres in 3 km?",
+     "a": "3000",
+     "u": "m"
+    },
+    {
+     "q": "2 m = ___ cm",
+     "a": "200"
+    },
+    {
+     "q": "½ km = ___ m",
+     "a": "500"
+    },
+    {
+     "q": "Perimeter of this square (each side 4 cm)?",
+     "a": "16",
+     "u": "cm",
+     "v": "<svg viewBox=\"0 0 212 108\" width=\"212\"><rect x=\"2\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"2\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"2\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"2\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"2\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/></svg>"
+    },
+    {
+     "q": "Perimeter of a rectangle 5 cm by 4 cm?",
+     "a": "18",
+     "u": "cm"
+    },
+    {
+     "q": "Area of the green shape?",
+     "a": "15",
+     "u": "squares",
+     "v": "<svg viewBox=\"0 0 212 134\" width=\"212\"><rect x=\"2\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/></svg>"
+    },
+    {
+     "q": "What is the area of this green shape?",
+     "a": "9",
+     "u": "squares",
+     "v": "<svg viewBox=\"0 0 212 134\" width=\"212\"><rect x=\"2\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"184\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"184\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"184\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/></svg>"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "The distance between Cairo and Port Said is about…",
+     "o": [
+      "220 mm",
+      "220 km",
+      "220 cm"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Best unit for the length of a swimming pool:",
+     "o": [
+      "mm",
+      "m",
+      "km"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Perimeter means…",
+     "o": [
+      "the space inside",
+      "the distance around a shape",
+      "the weight"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Area means…",
+     "o": [
+      "the distance around",
+      "the height",
+      "the space inside a shape"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A rectangle 5 cm by 3 cm has area…",
+     "o": [
+      "15 square cm",
+      "8 square cm",
+      "16 cm"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which rectangle has a perimeter of 18 cm?",
+     "o": [
+      "5 cm by 4 cm",
+      "6 cm by 4 cm",
+      "9 cm by 9 cm"
+     ],
+     "a": 0
+    },
+    {
+     "q": "1 cm = ___ mm",
+     "o": [
+      "10",
+      "100",
+      "1000"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which is heavier?",
+     "o": [
+      "900 g",
+      "2 kg",
+      "1500 g"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Half a litre =",
+     "o": [
+      "500 ml",
+      "50 ml",
+      "5 ml"
+     ],
+     "a": 0
+    },
+    {
+     "q": "400 cm =",
+     "o": [
+      "4 km",
+      "4 m",
+      "40 m"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "ma-5",
+ "lang": "en",
+ "audio": {},
+ "source": "Maths Grade 3 — Revision B1 & B2 (Luxor & Qena sheets)"
+}

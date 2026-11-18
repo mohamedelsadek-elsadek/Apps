@@ -121,6 +121,10 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 .wplan{display:flex;gap:10px;align-items:flex-start;background:#f6f3ff;border-radius:12px;padding:8px 10px;margin:6px 0;font-family:Cairo;font-size:16px}.wplan>b{background:#8a5cf6;color:#fff;border-radius:50%;min-width:26px;height:26px;text-align:center;line-height:26px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#e9fbf1;border:2px solid #2fb36d;border-radius:20px;padding:4px 12px;font-family:Cairo;font-size:17px}
 .wchk{display:block;font-family:Cairo;font-size:17px;padding:8px;border-radius:12px;background:#fff8e6;margin:6px 0}.wchk input{transform:scale(1.4);margin-inline-end:8px}
+.cv{display:flex;justify-content:center;margin:6px 0}.cv svg{max-width:100%;height:auto}
+.cans{font-size:34px;font-weight:800;text-align:center;background:#f6f3ff;border-radius:14px;padding:6px;margin:8px auto;min-width:120px;font-family:Nunito,system-ui}.cans small{font-size:18px;color:#777}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:6px auto;direction:ltr}.pk{font-size:26px;font-weight:800;padding:10px 0;border-radius:14px;border:0;background:#fff;box-shadow:0 3px 0 #d8d2ea;font-family:Nunito,system-ui;cursor:pointer}.pk.go{background:#2fb36d;color:#fff}.pk.del{background:#ffe1e1}
+.eggs span{font-size:18px}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -292,7 +296,7 @@ async function viewLesson(id){
   $("view").innerHTML=`<div class="top"><button class="back" onclick="route('subject','${meta.subject.id}')">${tr("→ الخريطة","← Map")}</button><span class="pill">${meta.ico} ${esc(L.title)}</span></div>
   <p class="crumb">${esc(meta.subject.title)} · ${esc(meta.block.title)} · ${esc(meta.unit.title)}</p>
   <div class="unit"><div class="path">${allVids(id).length?`<button class="stop vid" onclick="route('video')"><span class="ico">🎬</span><span><b>${tr("شوف بعينك","Watch & Learn")}</b><small>${tr("فيديو قصير عن الدرس",allVids(id).length+" short video"+(allVids(id).length>1?"s":""))}</small></span><span class="st">▶️</span></button>`:""}${L.activities.map((a,i)=>`<button class="stop ${d[i]?"done":""}" onclick="route('act',${i})">
-    <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||((a.sub||(LANG!=="ar"?{story:"Listen and read",cards:"Flip the cards",match:"Find the pairs",quiz:"The big quiz",lab:"Try it at home",write:"Writing"}:{story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير",lab:"جرّبها في البيت",write:"التعبير خطوة بخطوة"})[a.type])||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
+    <span class="ico">${a.ico||"⭐"}</span><span><b>${esc(a.title)}</b><small>${esc(a.prompt||((a.sub||(LANG!=="ar"?{story:"Listen and read",cards:"Flip the cards",match:"Find the pairs",quiz:"The big quiz",lab:"Try it at home",write:"Writing",calc:"Type the answer"}:{story:"اسمع وتابع",cards:"اقلب الكروت",match:"لاقي الأزواج",quiz:"الكويز الكبير",lab:"جرّبها في البيت",write:"التعبير خطوة بخطوة"})[a.type])||""))}</small></span><span class="st">${d[i]?"✅":"▶️"}</span></button>`).join("")}</div></div>`;
 }
 
 function allVids(id){const out=[],seen=new Set();const p=lessonVid(id);if(p){out.push({id:p,t:tr("فيديو اختاره بابا","Picked by Dad")});seen.add(p)}
@@ -306,7 +310,7 @@ function viewVideo(){const vs=allVids(LID);if(!vs.length)return route('lesson',L
   <div class="row2"><button class="btn g big" onclick="route('act',0)">${tr("يلا نبدأ القصة ←","Let's start →")}</button></div></div>`;
   document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{vi=+b.dataset.v;draw()});};draw();}
 function shell(inner){return `<div class="top"><button class="back" onclick="route('lesson','${LID}')">${tr("→ الدرس","← Lesson")}</button><span class="pill">${ACT.ico||""} ${esc(ACT.title)}</span></div>${inner}`}
-function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz,lab:actLab,write:actWrite})[ACT.type]();}
+function viewAct(i){AIDX=i;ACT=L.activities[i];({story:actStory,cards:actCards,match:actMatch,sort:actSort,quiz:actQuiz,lab:actLab,write:actWrite,calc:actCalc})[ACT.type]();}
 function finish(stars,title,sub,ico){
   const d=S.done[LID]=S.done[LID]||{}; const first=!d[AIDX]; d[AIDX]=true; if(first)S.stars+=stars; save(); confetti(); speak(title);
   const next=AIDX+1<L.activities.length?AIDX+1:null;
@@ -407,6 +411,34 @@ function actLab(){
     $("lGo").onclick=()=>{ if(st>=A.steps.length) return finish(2,tr("عالم صغير!","Little scientist!"),tr("عملت التجربة بنفسك.","You did the experiment yourself."),"🧪");
       st++; draw(); if(st<A.steps.length) speak(A.steps[st].t); else speak(A.result); };
   }; draw();
+}
+
+/* ---------- calc (math with keypad) ---------- */
+function actCalc(){
+  const A=ACT,order=A.ordered?A.items.map((_,i)=>i):shuffle(A.items.map((_,i)=>i)),res=[];let qi=0,score=0,val="",tries=0;
+  const norm=s=>String(s).replace(/\s+/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).toLowerCase();
+  const pets=["🐶","🐱","🐰","🐼","🐨","🦊","🐯","🐸","🐵","🦄"];
+  const bar=()=>order.map((_,i)=>`<span>${i<qi?(res[i]?"⭐":"⚪"):"▫️"}</span>`).join("");
+  const show=()=>{
+    if(qi>=order.length){S.eggs+=score;save();return finish(3,score>=order.length*0.8?tr("بطل الحساب!","Maths champion!"):tr("خلّصت التحدي!","Challenge complete!"),tr(`جاوبت ${score} من ${order.length} صح 🐥`,`You got ${score} of ${order.length} right 🐥`),score>=order.length*0.8?"🏆":"🧮")}
+    const Q=A.items[order[qi]]; val=""; tries=0;
+    const keys=(Q.keys||"7 8 9 4 5 6 1 2 3 0 ⌫ ✓").split(" ");
+    $("view").innerHTML=shell(`<div class="eggs">${bar()}</div><div class="card"><div class="anim">${pets[qi%10]}</div>
+      <div class="q" style="direction:ltr">${esc(Q.q)} <button class="back" style="font-size:16px" id="qs">🔊</button></div>
+      ${Q.v?`<div class="cv">${Q.v}</div>`:""}
+      <div class="cans" style="direction:ltr"><span id="cv">?</span>${Q.u?` <small>${esc(Q.u)}</small>`:""}</div>
+      <div class="pad">${keys.map(k=>`<button class="pk ${k==="✓"?"go":k==="⌫"?"del":""}" data-k="${k}">${k}</button>`).join("")}</div>
+      <div class="hint" id="ch"></div></div>`);
+    $("qs").onclick=()=>speak(Q.say||Q.q); speak(Q.say||Q.q);
+    document.querySelectorAll(".pk").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
+      if(k==="⌫"){val=val.slice(0,-1)}else if(k==="✓"){check();return}else if(val.length<10){val+=k}
+      $("cv").textContent=val||"?";});
+    const check=()=>{ if(!val) return; const ok=[].concat(Q.a).some(x=>norm(x)===norm(val));
+      if(ok){score+=tries?0:1;res[qi]=!tries;toast(tries?"👍":"⭐");speak(tr("برافو","Well done!"));qi++;const t=setTimeout(show,1000);stopGame=()=>clearTimeout(t);return}
+      tries++; if(tries<2){$("ch").textContent="🤔 "+(Q.hint||tr("حاول تاني","Try again!"));speak(tr("حاول تاني","Try again"));val="";$("cv").textContent="?";return}
+      miss(`${Q.q} ← ${[].concat(Q.a)[0]}`); $("ch").innerHTML=`✅ ${tr("الإجابة:","Answer:")} <b>${esc([].concat(Q.a)[0])}</b>${Q.why?"<br>"+esc(Q.why):""}`;
+      speak((LANG==="en"?"The answer is ":"الإجابة ")+[].concat(Q.a)[0]); res[qi]=false; qi++; const t=setTimeout(show,3200); stopGame=()=>clearTimeout(t); };
+  }; show();
 }
 
 /* ---------- write (تعبير) ---------- */

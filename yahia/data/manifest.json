@@ -139,10 +139,95 @@
   },
   {
    "id": "ma",
-   "title": "Math",
+   "title": "Maths",
    "ico": "➗",
    "color": "#2fb36d",
-   "status": "soon"
+   "status": "ready",
+   "lang": "en",
+   "blocks": [
+    {
+     "id": "rv",
+     "title": "Revision B1 & B2",
+     "units": [
+      {
+       "id": "u1",
+       "title": "Number",
+       "ico": "🔢",
+       "lessons": [
+        {
+         "id": "ma-1",
+         "title": "Numbers & Place Value",
+         "ico": "🔢",
+         "file": "lessons/ma-1.json",
+         "vq": "place value for kids grade 3"
+        },
+        {
+         "id": "ma-2",
+         "title": "Adding & Subtracting",
+         "ico": "➕",
+         "file": "lessons/ma-2.json",
+         "vq": "word problems addition subtraction grade 3"
+        },
+        {
+         "id": "ma-3",
+         "title": "Times Tables & Division",
+         "ico": "✖️",
+         "file": "lessons/ma-3.json",
+         "vq": "times tables song for kids"
+        },
+        {
+         "id": "ma-4",
+         "title": "Fractions",
+         "ico": "🍕",
+         "file": "lessons/ma-4.json",
+         "vq": "fractions for kids"
+        }
+       ]
+      },
+      {
+       "id": "u2",
+       "title": "Measures, Shapes & Data",
+       "ico": "📐",
+       "lessons": [
+        {
+         "id": "ma-5",
+         "title": "Measures, Perimeter & Area",
+         "ico": "📏",
+         "file": "lessons/ma-5.json",
+         "vq": "perimeter and area for kids"
+        },
+        {
+         "id": "ma-6",
+         "title": "2D Shapes & Symmetry",
+         "ico": "🔷",
+         "file": "lessons/ma-6.json",
+         "vq": "lines of symmetry for kids"
+        },
+        {
+         "id": "ma-7",
+         "title": "Tally Charts & Pictographs",
+         "ico": "📊",
+         "file": "lessons/ma-7.json",
+         "vq": "tally charts for kids"
+        }
+       ]
+      },
+      {
+       "id": "ex",
+       "title": "🏆 Test Practice",
+       "ico": "🏆",
+       "lessons": [
+        {
+         "id": "ma-ex-1",
+         "title": "🏆 Mock Test 1 (25 marks)",
+         "ico": "🏆",
+         "file": "lessons/ma-ex-1.json"
+        }
+       ]
+      }
+     ]
+    }
+   ]
   },
   {
    "id": "fr",

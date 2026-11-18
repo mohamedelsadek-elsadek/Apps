@@ -1,0 +1,365 @@
+{
+ "title": "Times Tables & Division",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Sandwiches for Everyone",
+   "ico": "📖",
+   "keys": [
+    "multiply",
+    "divide",
+    "groups",
+    "remainder",
+    "times table",
+    "commutative"
+   ],
+   "scenes": [
+    {
+     "e": "🥪✖️",
+     "t": "Multiplying is adding equal groups. A sandwich costs LE 4, so 6 sandwiches cost 6 × 4 = LE 24."
+    },
+    {
+     "e": "🔄",
+     "t": "We can multiply in any order: 7 × 5 = 5 × 7 = 35. This is called the commutative law."
+    },
+    {
+     "e": "🔟",
+     "t": "To multiply by 10, the digits move one place left: 10 × 7 = 70 and 80 × 4 = 320 (8 × 4 = 32, then ×10)."
+    },
+    {
+     "e": "➗🍪",
+     "t": "Dividing is sharing into equal groups. 35 ÷ 5 = 7 and 48 ÷ 4 = 12. Dividing by 10 moves digits right: 490 ÷ 10 = 49."
+    },
+    {
+     "e": "🧩",
+     "t": "Sometimes there is a remainder. 63 ÷ 5 = 12 remainder 3, because 12 × 5 = 60 and 3 are left over."
+    },
+    {
+     "e": "⭐🔵",
+     "t": "Iman needs 55 circles. Each sticker sheet has 5 circles. 55 ÷ 5 = 11 sheets."
+    },
+    {
+     "e": "🧠",
+     "t": "Know your tables! Numbers in the 5 times table end in 0 or 5. Numbers in the 4 times table are all even: 8, 36 ..."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Maths Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Multiply ×",
+     "e": "✖️",
+     "k": "mean",
+     "a": "Add equal groups."
+    },
+    {
+     "w": "Divide ÷",
+     "e": "➗",
+     "k": "mean",
+     "a": "Share into equal groups."
+    },
+    {
+     "w": "Remainder (R)",
+     "e": "🧩",
+     "k": "mean",
+     "a": "What is left over after dividing."
+    },
+    {
+     "w": "Product",
+     "e": "🎯",
+     "k": "mean",
+     "a": "The answer to a multiplication."
+    },
+    {
+     "w": "Commutative",
+     "e": "🔄",
+     "k": "mean",
+     "a": "7 × 5 = 5 × 7."
+    },
+    {
+     "w": "× 10",
+     "e": "🔟",
+     "k": "mean",
+     "a": "Digits move one place left."
+    },
+    {
+     "w": "÷ 10",
+     "e": "⬅️",
+     "k": "mean",
+     "a": "Digits move one place right."
+    },
+    {
+     "w": "5 times table",
+     "e": "✋",
+     "k": "mean",
+     "a": "Ends in 0 or 5."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Facts",
+   "ico": "🧠",
+   "prompt": "Match each sum with its answer.",
+   "pairs": [
+    [
+     "6 × 4",
+     "24"
+    ],
+    [
+     "7 × 5",
+     "35"
+    ],
+    [
+     "9 × 3",
+     "27"
+    ],
+    [
+     "10 × 7",
+     "70"
+    ],
+    [
+     "48 ÷ 4",
+     "12"
+    ],
+    [
+     "35 ÷ 5",
+     "7"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "In the 5 Times Table?",
+   "ico": "🐦",
+   "prompt": "Is it in the 5 times table?",
+   "bins": [
+    {
+     "id": "y",
+     "label": "Yes ×5",
+     "ico": "✋",
+     "cls": "noun"
+    },
+    {
+     "id": "n",
+     "label": "No",
+     "ico": "❌",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "y": "It ends in 0 or 5.",
+    "n": "It does not end in 0 or 5."
+   },
+   "items": [
+    [
+     "20",
+     "y"
+    ],
+    [
+     "55",
+     "y"
+    ],
+    [
+     "15",
+     "y"
+    ],
+    [
+     "35",
+     "y"
+    ],
+    [
+     "40",
+     "y"
+    ],
+    [
+     "52",
+     "n"
+    ],
+    [
+     "36",
+     "n"
+    ],
+    [
+     "14",
+     "n"
+    ],
+    [
+     "48",
+     "n"
+    ],
+    [
+     "21",
+     "n"
+    ]
+   ]
+  },
+  {
+   "type": "calc",
+   "title": "Type the Answer",
+   "ico": "⌨️",
+   "items": [
+    {
+     "q": "35 ÷ 5 =",
+     "a": "7"
+    },
+    {
+     "q": "Ten multiplied by seven =",
+     "a": "70"
+    },
+    {
+     "q": "80 × 4 =",
+     "a": "320"
+    },
+    {
+     "q": "A sandwich costs LE 4. What do 6 cost?",
+     "a": "24",
+     "u": "LE"
+    },
+    {
+     "q": "Water costs LE 2 a bottle. How many bottles for LE 18?",
+     "a": "9"
+    },
+    {
+     "q": "Iman needs 55 circles. A sheet has 5 circles. How many sheets?",
+     "a": "11"
+    },
+    {
+     "q": "490 ÷ 10 =",
+     "a": "49"
+    },
+    {
+     "q": "60 × 3 =",
+     "a": "180"
+    },
+    {
+     "q": "4 × ___ = 28",
+     "a": "7"
+    },
+    {
+     "q": "48 ÷ 4 =",
+     "a": "12"
+    },
+    {
+     "q": "63 ÷ 5 = ? (write like 12R3)",
+     "a": "12R3",
+     "keys": "1 2 3 4 5 6 7 8 9 0 R ⌫ ✓",
+     "hint": "How many 5s fit in 63? What is left?"
+    },
+    {
+     "q": "4 packs of 8 cups. How many cups?",
+     "a": "32"
+    },
+    {
+     "q": "A box has 10 apples. How many in 8 boxes?",
+     "a": "80"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "7 × 5 = 5 × ___",
+     "o": [
+      "5",
+      "35",
+      "7"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which numbers are both in the 4 times table?",
+     "o": [
+      "14 and 18",
+      "6 and 14",
+      "8 and 36"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which operation finds the cups in 4 packs of 8?",
+     "o": [
+      "8 × 4",
+      "8 + 4",
+      "8 ÷ 4"
+     ],
+     "a": 0
+    },
+    {
+     "q": "16 ÷ 2 =",
+     "o": [
+      "4",
+      "6",
+      "8"
+     ],
+     "a": 2
+    },
+    {
+     "q": "3 × 9 =",
+     "o": [
+      "36",
+      "27",
+      "24"
+     ],
+     "a": 1
+    },
+    {
+     "q": "50 ÷ 10 =",
+     "o": [
+      "40",
+      "500",
+      "5"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which number is in the 5 times table?",
+     "o": [
+      "36",
+      "52",
+      "55"
+     ],
+     "a": 2
+    },
+    {
+     "q": "27 ÷ 4 =",
+     "o": [
+      "6 R1",
+      "6 R3",
+      "7"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Double 45 =",
+     "o": [
+      "90",
+      "80",
+      "95"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Half of 18 =",
+     "o": [
+      "6",
+      "8",
+      "9"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ],
+ "id": "ma-3",
+ "lang": "en",
+ "audio": {},
+ "source": "Maths Grade 3 — Revision B1 & B2 (Luxor & Qena sheets)"
+}

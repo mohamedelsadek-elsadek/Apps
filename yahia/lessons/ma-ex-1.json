@@ -1,0 +1,171 @@
+{
+ "title": "🏆 Mock Test 1 (25 marks)",
+ "activities": [
+  {
+   "type": "calc",
+   "title": "Part 1: Calculate",
+   "ico": "🧮",
+   "sub": "Like the real test — no calculator!",
+   "ordered": true,
+   "items": [
+    {
+     "q": "490 ÷ 10 =",
+     "a": "49"
+    },
+    {
+     "q": "60 × 3 =",
+     "a": "180"
+    },
+    {
+     "q": "4 × ___ = 28",
+     "a": "7"
+    },
+    {
+     "q": "7 × 5 = 5 × ___",
+     "a": "7"
+    },
+    {
+     "q": "16 ÷ 2 =",
+     "a": "8"
+    },
+    {
+     "q": "63 ÷ 5 = (like 12R3)",
+     "a": "12R3",
+     "keys": "1 2 3 4 5 6 7 8 9 0 R ⌫ ✓"
+    },
+    {
+     "q": "2/7 + ___ = 1",
+     "a": "5/7",
+     "keys": "1 2 3 4 5 6 7 8 9 0 / ⌫ ✓"
+    },
+    {
+     "q": "1/4 + ___ = 1",
+     "a": "3/4",
+     "keys": "1 2 3 4 5 6 7 8 9 0 / ⌫ ✓"
+    },
+    {
+     "q": "Omar has 24 beads. ½ are black. How many black?",
+     "a": "12",
+     "u": "beads"
+    },
+    {
+     "q": "2 m = ___ cm",
+     "a": "200"
+    },
+    {
+     "q": "½ km = ___ m",
+     "a": "500"
+    },
+    {
+     "q": "10 × 7 =",
+     "a": "70"
+    },
+    {
+     "q": "A box has 10 apples. How many in 8 boxes?",
+     "a": "80",
+     "u": "apples"
+    },
+    {
+     "q": "Perimeter of the square (each side 3 cm)?",
+     "a": "12",
+     "u": "cm",
+     "v": "<svg viewBox=\"0 0 186 134\" width=\"186\"><rect x=\"2\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"132\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"106\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/></svg>"
+    },
+    {
+     "q": "Area of the shape?",
+     "a": "6",
+     "u": "squares",
+     "v": "<svg viewBox=\"0 0 186 108\" width=\"186\"><rect x=\"2\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"54\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"2\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"80\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"106\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"28\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"158\" y=\"28\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"54\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"54\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"2\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"28\" y=\"80\" width=\"26\" height=\"26\" fill=\"#7bd389\" stroke=\"#bbb\"/><rect x=\"54\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"80\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"106\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"132\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/><rect x=\"158\" y=\"80\" width=\"26\" height=\"26\" fill=\"#fff\" stroke=\"#bbb\"/></svg>"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Part 2: Choose",
+   "ico": "✅",
+   "ordered": true,
+   "items": [
+    {
+     "q": "Best unit for the length of a swimming pool:",
+     "o": [
+      "m",
+      "cm",
+      "km",
+      "mm"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Best unit for Cairo to Port Said:",
+     "o": [
+      "cm",
+      "m",
+      "mm",
+      "km"
+     ],
+     "a": 3
+    },
+    {
+     "q": "Best unit for the length of a pencil:",
+     "o": [
+      "m",
+      "cm",
+      "km"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which two numbers are in the 4 times table? 8, 14, 6, 36, 18",
+     "o": [
+      "6 and 18",
+      "14 and 18",
+      "8 and 36"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which numbers are in the 5 times table? 20, 52, 55, 36, 15",
+     "o": [
+      "55, 36, 15",
+      "20, 55, 15",
+      "20, 52, 36"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Mr Green buys 4 packs of 8 cups. Which operation?",
+     "o": [
+      "8 ÷ 4",
+      "8 × 4",
+      "8 + 4",
+      "8 − 4"
+     ],
+     "a": 1
+    },
+    {
+     "q": "3 whole pizzas and ¼ of a pizza:",
+     "o": [
+      "3¼",
+      "3½",
+      "4¼",
+      "4⅓"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A rectangle 5 cm by 3 cm has…",
+     "o": [
+      "area 15 square cm",
+      "perimeter 15 cm",
+      "area 8 square cm"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "ma-ex-1",
+ "lang": "en",
+ "audio": {},
+ "source": "Maths Grade 3 — Revision B1 & B2 (Luxor & Qena sheets)"
+}

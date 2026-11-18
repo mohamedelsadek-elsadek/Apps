@@ -1,0 +1,354 @@
+{
+ "title": "Adding & Subtracting",
+ "activities": [
+  {
+   "type": "story",
+   "title": "The Pencil Problem",
+   "ico": "📖",
+   "keys": [
+    "add",
+    "subtract",
+    "number bonds",
+    "total",
+    "left",
+    "difference"
+   ],
+   "scenes": [
+    {
+     "e": "➕🧮",
+     "t": "When we add, we put numbers together to find the total. 4 + 2 + 5 + 6 = 17. Tip: find pairs that make 10 first: 4 + 6 = 10, then 2 + 5 = 7, total 17!"
+    },
+    {
+     "e": "🔟💯",
+     "t": "Number bonds help: 35 + 65 = 100, and 300 + 700 = 1000. Use them to find missing numbers."
+    },
+    {
+     "e": "➖",
+     "t": "When we subtract, we take away. 530 − 20 = 510 and 8761 − 300 = 8461. Only the hundreds digit changes!"
+    },
+    {
+     "e": "✏️✏️",
+     "t": "John buys 12 pencils, then 7 more: 12 + 7 = 19. He gives 3 to his friend: 19 − 3 = 16 pencils left."
+    },
+    {
+     "e": "📏👧",
+     "t": "Wasima is 139 cm tall and Zeinab is 109 cm. How much taller? Find the difference: 139 − 109 = 30 cm."
+    },
+    {
+     "e": "🔍",
+     "t": "Read word problems carefully: 'total, altogether, more' often means add; 'left, fewer, how much taller, difference' often means subtract."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Maths Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Total",
+     "e": "➕",
+     "k": "mean",
+     "a": "The answer when we add."
+    },
+    {
+     "w": "Altogether",
+     "e": "🤝",
+     "k": "mean",
+     "a": "Add all the amounts."
+    },
+    {
+     "w": "Difference",
+     "e": "↔️",
+     "k": "mean",
+     "a": "Subtract the smaller from the bigger."
+    },
+    {
+     "w": "Left",
+     "e": "🧺",
+     "k": "mean",
+     "a": "Usually subtract."
+    },
+    {
+     "w": "Number bond to 10",
+     "e": "🔟",
+     "k": "mean",
+     "a": "4 + 6, 3 + 7, 2 + 8 ..."
+    },
+    {
+     "w": "Number bond to 100",
+     "e": "💯",
+     "k": "mean",
+     "a": "35 + 65, 40 + 60 ..."
+    },
+    {
+     "w": "Inverse",
+     "e": "🔄",
+     "k": "mean",
+     "a": "Subtraction undoes addition."
+    },
+    {
+     "w": "Check",
+     "e": "✅",
+     "k": "mean",
+     "a": "Use the inverse to check your answer."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory: Bonds",
+   "ico": "🧠",
+   "prompt": "Match the pairs that make 100 or 1000.",
+   "pairs": [
+    [
+     "35",
+     "65"
+    ],
+    [
+     "300",
+     "700"
+    ],
+    [
+     "45",
+     "55"
+    ],
+    [
+     "20",
+     "80"
+    ],
+    [
+     "250",
+     "750"
+    ],
+    [
+     "90",
+     "10"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Add or Subtract?",
+   "ico": "🐦",
+   "prompt": "Which operation does the word problem need?",
+   "bins": [
+    {
+     "id": "a",
+     "label": "Add +",
+     "ico": "➕",
+     "cls": "noun"
+    },
+    {
+     "id": "s",
+     "label": "Subtract −",
+     "ico": "➖",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "a": "We are putting amounts together.",
+    "s": "We are taking away or finding a difference."
+   },
+   "items": [
+    [
+     "how many altogether?",
+     "a"
+    ],
+    [
+     "what is the total?",
+     "a"
+    ],
+    [
+     "he buys 7 more",
+     "a"
+    ],
+    [
+     "she gets 5 more",
+     "a"
+    ],
+    [
+     "how many are left?",
+     "s"
+    ],
+    [
+     "how much taller?",
+     "s"
+    ],
+    [
+     "he gives 3 away",
+     "s"
+    ],
+    [
+     "how many fewer?",
+     "s"
+    ],
+    [
+     "she spends LE 9",
+     "s"
+    ]
+   ]
+  },
+  {
+   "type": "calc",
+   "title": "Type the Answer",
+   "ico": "⌨️",
+   "items": [
+    {
+     "q": "4 + 2 + 5 + 6 =",
+     "a": "17"
+    },
+    {
+     "q": "3 + 4 + 1 + 17 =",
+     "a": "25"
+    },
+    {
+     "q": "___ + 65 = 100",
+     "a": "35"
+    },
+    {
+     "q": "300 + ___ = 1000",
+     "a": "700"
+    },
+    {
+     "q": "10 + 90 + 40 =",
+     "a": "140"
+    },
+    {
+     "q": "530 − 20 =",
+     "a": "510"
+    },
+    {
+     "q": "8761 − 300 =",
+     "a": "8461"
+    },
+    {
+     "q": "2002 + 900 =",
+     "a": "2902"
+    },
+    {
+     "q": "John buys 12 pencils, then 7 more. He gives 3 away. How many are left?",
+     "a": "16",
+     "u": "pencils"
+    },
+    {
+     "q": "Wasima is 139 cm, Zeinab is 109 cm. How much taller is Wasima?",
+     "a": "30",
+     "u": "cm"
+    },
+    {
+     "q": "Leah has 36 flowers. She gives 15 to her mother. How many now?",
+     "a": "21",
+     "u": "flowers"
+    },
+    {
+     "q": "Jehan has LE 73. She spends LE 9. How much is left?",
+     "a": "64",
+     "u": "LE"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "6 + 7 + 4 =",
+     "o": [
+      "16",
+      "18",
+      "17"
+     ],
+     "a": 2
+    },
+    {
+     "q": "100 − 45 =",
+     "o": [
+      "55",
+      "45",
+      "65"
+     ],
+     "a": 0
+    },
+    {
+     "q": "450 + 300 =",
+     "o": [
+      "4800",
+      "480",
+      "750"
+     ],
+     "a": 2
+    },
+    {
+     "q": "1000 − 1 =",
+     "o": [
+      "990",
+      "900",
+      "999"
+     ],
+     "a": 2
+    },
+    {
+     "q": "'How many are left?' means…",
+     "o": [
+      "multiply",
+      "add",
+      "subtract"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which pair makes 100?",
+     "o": [
+      "60 + 50",
+      "70 + 40",
+      "60 + 40"
+     ],
+     "a": 2
+    },
+    {
+     "q": "6000 − 2000 =",
+     "o": [
+      "8000",
+      "3000",
+      "4000"
+     ],
+     "a": 2
+    },
+    {
+     "q": "To check 52 − 18 = 34, we do…",
+     "o": [
+      "52 + 18",
+      "34 − 18",
+      "34 + 18"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A toy costs LE 45. Yahia has LE 60. How much change?",
+     "o": [
+      "LE 25",
+      "LE 105",
+      "LE 15"
+     ],
+     "a": 2
+    },
+    {
+     "q": "99 + 1 =",
+     "o": [
+      "100",
+      "199",
+      "991"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "ma-2",
+ "lang": "en",
+ "audio": {},
+ "source": "Maths Grade 3 — Revision B1 & B2 (Luxor & Qena sheets)"
+}
