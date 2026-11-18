@@ -1,0 +1,236 @@
+{
+ "title": "🏆 Review: Units 1–4",
+ "activities": [
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "A ___ flies the airplane.",
+     "o": [
+      "cousin",
+      "farmer",
+      "pilot"
+     ],
+     "a": 2
+    },
+    {
+     "q": "The ___ grows vegetables.",
+     "o": [
+      "farmer",
+      "pilot",
+      "museum"
+     ],
+     "a": 0
+    },
+    {
+     "q": "We went on a school trip to the ___.",
+     "o": [
+      "museum",
+      "cousin",
+      "Goodbye"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Odd one out:",
+     "o": [
+      "Hello",
+      "Good morning",
+      "Goodbye",
+      "Sister"
+     ],
+     "a": 3
+    },
+    {
+     "q": "Odd one out:",
+     "o": [
+      "Sister",
+      "Teacher",
+      "Uncle",
+      "Brother",
+      "Mother"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Odd one out:",
+     "o": [
+      "Park",
+      "Library",
+      "Supermarket",
+      "Thank you"
+     ],
+     "a": 3
+    },
+    {
+     "q": "He ___ a pilot.",
+     "o": [
+      "am",
+      "are",
+      "is"
+     ],
+     "a": 2
+    },
+    {
+     "q": "They ___ to the garden yesterday.",
+     "o": [
+      "walked",
+      "walks",
+      "walk"
+     ],
+     "a": 0
+    },
+    {
+     "q": "I brush my ___ every morning.",
+     "o": [
+      "teeth",
+      "tooth",
+      "hair brush"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The girl is playing with ___ doll.",
+     "o": [
+      "his",
+      "my",
+      "her"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Yesterday, we ___ football after school.",
+     "o": [
+      "played",
+      "play",
+      "plays"
+     ],
+     "a": 0
+    },
+    {
+     "q": "My father ___ the car.",
+     "o": [
+      "driving",
+      "drive",
+      "drives"
+     ],
+     "a": 2
+    },
+    {
+     "q": "The book is ___ the table.",
+     "o": [
+      "between",
+      "on",
+      "in"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The cat is ___ the chair.",
+     "o": [
+      "in",
+      "under",
+      "between"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Fill: ___ is your name?",
+     "o": [
+      "Exam",
+      "Duck",
+      "What"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Fill: The ___ lives in a pond.",
+     "o": [
+      "duck",
+      "elephant",
+      "exam"
+     ],
+     "a": 0
+    },
+    {
+     "q": "You can't find your bag. You feel…",
+     "o": [
+      "polite",
+      "clean",
+      "worried"
+     ],
+     "a": 2
+    },
+    {
+     "q": "You say 'please' and 'thank you'. You are…",
+     "o": [
+      "happy",
+      "worried",
+      "polite"
+     ],
+     "a": 2
+    }
+   ]
+  },
+  {
+   "type": "write",
+   "title": "Writing: A Landmark I Visited",
+   "ico": "✍️",
+   "prompt": "Write 3–4 sentences about a landmark you visited in Egypt.",
+   "points": [
+    "Where did you go?",
+    "Who did you go with?",
+    "What did you see or do?",
+    "How did you feel?"
+   ],
+   "note": "Use capital letters, periods, and past tense verbs.",
+   "plan": [
+    [
+     "Start",
+     "Last summer, I visited …"
+    ],
+    [
+     "Who",
+     "I went with my …"
+    ],
+    [
+     "What",
+     "First, we … Then, we …"
+    ],
+    [
+     "Feeling",
+     "I felt … It was a great day!"
+    ]
+   ],
+   "links": [
+    "First,",
+    "Then,",
+    "After that,",
+    "Finally,",
+    "and",
+    "but",
+    "because"
+   ],
+   "punct": "Capital letter at the start • period (.) at the end • question mark (?) for questions",
+   "model": [
+    "Last summer, I visited the Pyramids of Giza.",
+    "I went with my family.",
+    "First, we took photos. Then, we rode a camel.",
+    "I felt happy and excited. It was a great day!"
+   ],
+   "check": [
+    "I wrote 3–4 sentences",
+    "I used past tense verbs (visited, went, saw)",
+    "I started each sentence with a capital letter",
+    "I ended each sentence with a period",
+    "I used First / Then / Finally"
+   ]
+  }
+ ],
+ "id": "x-en-r1",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 63–66"
+}

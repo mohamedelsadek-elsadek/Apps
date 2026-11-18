@@ -1,0 +1,299 @@
+{
+ "title": "Greetings & Introductions",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Meeting a New Friend",
+   "ico": "📖",
+   "keys": [
+    "Hello",
+    "Good morning",
+    "How are you",
+    "Nice to meet you",
+    "See you later",
+    "Goodbye"
+   ],
+   "scenes": [
+    {
+     "e": "👋😊",
+     "t": "{name} goes to school. Two girls, Sara and Lina, meet in the playground."
+    },
+    {
+     "e": "🌞",
+     "t": "Sara says: Hello! Lina says: Good morning!"
+    },
+    {
+     "e": "🙂",
+     "t": "Sara: How are you? Lina: I am fine, thank you. How are you? Sara: I'm fine too, thank you."
+    },
+    {
+     "e": "🏷️",
+     "t": "Sara: What's your name? Lina: My name is Lina. What's your name? Sara: My name is Sara."
+    },
+    {
+     "e": "🎂",
+     "t": "Lina: How old are you? Sara: I am 8 years old! I am in Primary 3."
+    },
+    {
+     "e": "🤝",
+     "t": "Lina: Nice to meet you, Sara! Sara: Nice to meet you too, Lina!"
+    },
+    {
+     "e": "👋🚶",
+     "t": "Lina: See you later! Sara: Goodbye! Now it is your turn: say hello to a new friend!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Hello!",
+     "e": "👋",
+     "k": "mean",
+     "a": "We say it when we meet someone."
+    },
+    {
+     "w": "Good morning!",
+     "e": "🌞",
+     "k": "mean",
+     "a": "We say it when we meet someone in the morning."
+    },
+    {
+     "w": "How are you?",
+     "e": "🙂",
+     "k": "mean",
+     "a": "We ask it when we check on someone."
+    },
+    {
+     "w": "I am fine, thank you.",
+     "e": "👍",
+     "k": "mean",
+     "a": "The answer to 'How are you?'"
+    },
+    {
+     "w": "Nice to meet you.",
+     "e": "🤝",
+     "k": "mean",
+     "a": "We say it when we meet someone new."
+    },
+    {
+     "w": "See you later!",
+     "e": "🕒",
+     "k": "mean",
+     "a": "We say it when we will see the person again."
+    },
+    {
+     "w": "Goodbye!",
+     "e": "👋",
+     "k": "mean",
+     "a": "We say it when we leave."
+    },
+    {
+     "w": "I am from Egypt.",
+     "e": "🇪🇬",
+     "k": "mean",
+     "a": "We use it to introduce ourselves."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match each phrase with when we use it.",
+   "pairs": [
+    [
+     "Good morning!",
+     "when you meet in the morning"
+    ],
+    [
+     "How are you?",
+     "when you check on someone"
+    ],
+    [
+     "Nice to meet you.",
+     "when you meet someone new"
+    ],
+    [
+     "See you later!",
+     "when you say goodbye"
+    ],
+    [
+     "My name is…",
+     "when you introduce yourself"
+    ],
+    [
+     "I am 8 years old.",
+     "to tell your age"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Hello or Goodbye?",
+   "ico": "🐦",
+   "prompt": "Do we say it when we MEET or when we LEAVE?",
+   "bins": [
+    {
+     "id": "m",
+     "label": "Meeting 👋",
+     "ico": "😊",
+     "cls": "noun"
+    },
+    {
+     "id": "l",
+     "label": "Leaving 🚶",
+     "ico": "👋",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "m": "We say it at the start.",
+    "l": "We say it at the end."
+   },
+   "items": [
+    [
+     "Hello!",
+     "m"
+    ],
+    [
+     "Good morning!",
+     "m"
+    ],
+    [
+     "Nice to meet you.",
+     "m"
+    ],
+    [
+     "How are you?",
+     "m"
+    ],
+    [
+     "Hi!",
+     "m"
+    ],
+    [
+     "Goodbye!",
+     "l"
+    ],
+    [
+     "See you later!",
+     "l"
+    ],
+    [
+     "Bye!",
+     "l"
+    ],
+    [
+     "See you tomorrow!",
+     "l"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "You meet someone new. You say:",
+     "o": [
+      "Good night!",
+      "Goodbye!",
+      "Nice to meet you."
+     ],
+     "a": 2
+    },
+    {
+     "q": "'How are you?' The answer is:",
+     "o": [
+      "I am fine, thank you.",
+      "I am 8 years old.",
+      "My name is Sara."
+     ],
+     "a": 0
+    },
+    {
+     "q": "You meet your teacher at 8 a.m. You say:",
+     "o": [
+      "Good morning!",
+      "Good night!",
+      "See you later!"
+     ],
+     "a": 0
+    },
+    {
+     "q": "You leave your friend. You say:",
+     "o": [
+      "How are you?",
+      "See you later!",
+      "Nice to meet you."
+     ],
+     "a": 1
+    },
+    {
+     "q": "Complete: My ___ is Mariam.",
+     "o": [
+      "fine",
+      "name",
+      "years"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Complete: I am 8 ___ old.",
+     "o": [
+      "name",
+      "years",
+      "morning"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Complete: Good ___, my name is Adam.",
+     "o": [
+      "later",
+      "meet",
+      "morning"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Complete: Nice to ___ you.",
+     "o": [
+      "meet",
+      "name",
+      "fine"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How old is Sara in the dialog?",
+     "o": [
+      "10 years old",
+      "7 years old",
+      "8 years old"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Sara is in…",
+     "o": [
+      "Primary 1",
+      "Primary 5",
+      "Primary 3"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u1-l1",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 6–9"
+}

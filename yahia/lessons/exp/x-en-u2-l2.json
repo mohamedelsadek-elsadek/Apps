@@ -1,0 +1,300 @@
+{
+ "title": "Celebrations & the 'x' sound",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Our Favourite Celebrations",
+   "ico": "📖",
+   "keys": [
+    "Eid Al-Fitr",
+    "Sham El-Nessim",
+    "Mother's Day",
+    "6th of October",
+    "exam",
+    "exit",
+    "example"
+   ],
+   "scenes": [
+    {
+     "e": "🌙🎉",
+     "t": "{name} talks about celebrations in Egypt with the teacher."
+    },
+    {
+     "e": "🕌",
+     "t": "Eid Al-Fitr comes after Ramadan. We wear new clothes and visit our family."
+    },
+    {
+     "e": "🥚🌸",
+     "t": "I love Sham El-Nessim, as we go to the garden all day, play, and eat salted fish."
+    },
+    {
+     "e": "💐",
+     "t": "On Mother's Day we give our mothers gifts and say 'thank you'."
+    },
+    {
+     "e": "🇪🇬🎖️",
+     "t": "My favourite celebration is the 6th of October. It reminds us how brave the Egyptian soldiers are."
+    },
+    {
+     "e": "🔤",
+     "t": "The letter x can sound like /gz/: exam, exit, example, examine, exist."
+    },
+    {
+     "e": "🚪",
+     "t": "Riddle: I start with E and have an X. I'm where you leave. What am I? An exit!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Eid Al-Fitr",
+     "e": "🌙",
+     "k": "mean",
+     "a": "A celebration after Ramadan."
+    },
+    {
+     "w": "Sham El-Nessim",
+     "e": "🥚",
+     "k": "mean",
+     "a": "Spring day: garden, play, salted fish."
+    },
+    {
+     "w": "Mother's Day",
+     "e": "💐",
+     "k": "mean",
+     "a": "We thank our mothers."
+    },
+    {
+     "w": "6th of October",
+     "e": "🎖️",
+     "k": "mean",
+     "a": "We remember the brave Egyptian soldiers."
+    },
+    {
+     "w": "exam",
+     "e": "📝",
+     "k": "mean",
+     "a": "A test at school. x = /gz/"
+    },
+    {
+     "w": "exit",
+     "e": "🚪",
+     "k": "mean",
+     "a": "The way out. x = /gz/"
+    },
+    {
+     "w": "example",
+     "e": "💡",
+     "k": "mean",
+     "a": "Something that shows how. x = /gz/"
+    },
+    {
+     "w": "examine",
+     "e": "🔍",
+     "k": "mean",
+     "a": "Look at something carefully."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the celebration with what we do.",
+   "pairs": [
+    [
+     "Sham El-Nessim",
+     "eat salted fish in the garden"
+    ],
+    [
+     "Mother's Day",
+     "give gifts to mothers"
+    ],
+    [
+     "6th of October",
+     "remember brave soldiers"
+    ],
+    [
+     "Eid Al-Fitr",
+     "new clothes after Ramadan"
+    ],
+    [
+     "exit",
+     "where you leave"
+    ],
+    [
+     "exam",
+     "questions to answer"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Has the /gz/ sound?",
+   "ico": "🔤",
+   "prompt": "Does the word have the x = /gz/ sound?",
+   "bins": [
+    {
+     "id": "y",
+     "label": "/gz/ sound",
+     "ico": "🔤",
+     "cls": "noun"
+    },
+    {
+     "id": "n",
+     "label": "no x",
+     "ico": "✖️",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "y": "The x says /gz/.",
+    "n": "There is no x sound here."
+   },
+   "items": [
+    [
+     "exam",
+     "y"
+    ],
+    [
+     "exit",
+     "y"
+    ],
+    [
+     "example",
+     "y"
+    ],
+    [
+     "examine",
+     "y"
+    ],
+    [
+     "exist",
+     "y"
+    ],
+    [
+     "easy",
+     "n"
+    ],
+    [
+     "egg",
+     "n"
+    ],
+    [
+     "eat",
+     "n"
+    ],
+    [
+     "eleven",
+     "n"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "We eat salted fish in the garden on…",
+     "o": [
+      "Mother's Day",
+      "6th of October",
+      "Sham El-Nessim"
+     ],
+     "a": 2
+    },
+    {
+     "q": "The 6th of October reminds us of…",
+     "o": [
+      "spring",
+      "Ramadan",
+      "the brave Egyptian soldiers"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which word has the /gz/ sound?",
+     "o": [
+      "eat",
+      "exam",
+      "egg"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Fill in: e_it",
+     "o": [
+      "s",
+      "x",
+      "g"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Fill in: e_ample",
+     "o": [
+      "k",
+      "x",
+      "z"
+     ],
+     "a": 1
+    },
+    {
+     "q": "I start with E and have an X. I'm where you leave.",
+     "o": [
+      "egg",
+      "exit",
+      "exam"
+     ],
+     "a": 1
+    },
+    {
+     "q": "I ask you questions, big and small. You have to answer them all.",
+     "o": [
+      "exit",
+      "exam",
+      "example"
+     ],
+     "a": 1
+    },
+    {
+     "q": "I have an ___ today.",
+     "o": [
+      "exam",
+      "eggs",
+      "exit"
+     ],
+     "a": 0
+    },
+    {
+     "q": "She ran to the ___.",
+     "o": [
+      "exit",
+      "exam",
+      "example"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Eid Al-Fitr comes after…",
+     "o": [
+      "winter",
+      "Ramadan",
+      "the exam"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u2-l2",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 32–35"
+}

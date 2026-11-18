@@ -1,0 +1,300 @@
+{
+ "title": "Classroom Rules & 'wh'",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Our Classroom Rules",
+   "ico": "📖",
+   "keys": [
+    "Raise your hand",
+    "Listen carefully",
+    "Sit down",
+    "Be kind",
+    "Keep your classroom clean",
+    "Don't shout",
+    "May I go to the bathroom?"
+   ],
+   "scenes": [
+    {
+     "e": "🏫📏",
+     "t": "In {name}'s class, everyone follows the classroom rules."
+    },
+    {
+     "e": "🙋",
+     "t": "If you want to answer, raise your hand."
+    },
+    {
+     "e": "👂",
+     "t": "When the teacher talks, listen carefully."
+    },
+    {
+     "e": "🪑",
+     "t": "When class starts, sit down. Don't run in class!"
+    },
+    {
+     "e": "💛",
+     "t": "Be kind to your classmates, and keep your classroom clean."
+    },
+    {
+     "e": "🤫",
+     "t": "Don't shout! If you need the bathroom, ask: May I go to the bathroom?"
+    },
+    {
+     "e": "🐋⚪",
+     "t": "Now the sound 'wh'! It says /w/: what, when, where, whale, wheel, white."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Raise your hand.",
+     "e": "🙋",
+     "k": "mean",
+     "a": "Do it when you want to speak or answer."
+    },
+    {
+     "w": "Listen carefully.",
+     "e": "👂",
+     "k": "mean",
+     "a": "Do it when the teacher talks."
+    },
+    {
+     "w": "Sit down.",
+     "e": "🪑",
+     "k": "mean",
+     "a": "Do it when class starts."
+    },
+    {
+     "w": "Be kind.",
+     "e": "💛",
+     "k": "mean",
+     "a": "Be nice to your classmates."
+    },
+    {
+     "w": "Keep your classroom clean.",
+     "e": "🧹",
+     "k": "mean",
+     "a": "Put rubbish in the bin."
+    },
+    {
+     "w": "Don't shout.",
+     "e": "🤫",
+     "k": "mean",
+     "a": "Speak quietly in class."
+    },
+    {
+     "w": "whale",
+     "e": "🐋",
+     "k": "mean",
+     "a": "'wh' says /w/."
+    },
+    {
+     "w": "wheel",
+     "e": "🛞",
+     "k": "mean",
+     "a": "'wh' says /w/."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the action with the rule.",
+   "pairs": [
+    [
+     "You want to answer",
+     "Raise your hand."
+    ],
+    [
+     "The teacher talks",
+     "Listen carefully."
+    ],
+    [
+     "Class starts",
+     "Sit down."
+    ],
+    [
+     "A friend is sad",
+     "Be kind."
+    ],
+    [
+     "Paper on the floor",
+     "Keep your classroom clean."
+    ],
+    [
+     "You need the bathroom",
+     "May I go to the bathroom?"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Good or Bad in Class?",
+   "ico": "🐦",
+   "prompt": "Is this a good thing to do in class?",
+   "bins": [
+    {
+     "id": "g",
+     "label": "Good ✅",
+     "ico": "😊",
+     "cls": "noun"
+    },
+    {
+     "id": "b",
+     "label": "Not good ❌",
+     "ico": "🙅",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "g": "It follows the classroom rules.",
+    "b": "It breaks a classroom rule."
+   },
+   "items": [
+    [
+     "raise your hand",
+     "g"
+    ],
+    [
+     "listen carefully",
+     "g"
+    ],
+    [
+     "sit down",
+     "g"
+    ],
+    [
+     "be kind",
+     "g"
+    ],
+    [
+     "keep the class clean",
+     "g"
+    ],
+    [
+     "shout loudly",
+     "b"
+    ],
+    [
+     "run in class",
+     "b"
+    ],
+    [
+     "throw paper on the floor",
+     "b"
+    ],
+    [
+     "talk when the teacher talks",
+     "b"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "When the teacher talks, you should…",
+     "o": [
+      "stand up",
+      "listen carefully",
+      "write fast"
+     ],
+     "a": 1
+    },
+    {
+     "q": "If you want to answer, …",
+     "o": [
+      "raise your hand",
+      "close your book",
+      "run"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The teacher says: '___ on page 5.'",
+     "o": [
+      "Open your book",
+      "Stand up",
+      "Eat"
+     ],
+     "a": 0
+    },
+    {
+     "q": "When class starts, we…",
+     "o": [
+      "leave",
+      "shout",
+      "sit down"
+     ],
+     "a": 2
+    },
+    {
+     "q": "If you need the bathroom, say…",
+     "o": [
+      "May I go to the bathroom?",
+      "Can I draw?",
+      "Is it break time?"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which word starts with 'wh'?",
+     "o": [
+      "wall",
+      "whale",
+      "hall"
+     ],
+     "a": 1
+    },
+    {
+     "q": "___ do you live?",
+     "o": [
+      "Where",
+      "White",
+      "Whale"
+     ],
+     "a": 0
+    },
+    {
+     "q": "I saw a big ___ in the ocean.",
+     "o": [
+      "wheel",
+      "white",
+      "whale"
+     ],
+     "a": 2
+    },
+    {
+     "q": "My shirt is ___.",
+     "o": [
+      "what",
+      "white",
+      "when"
+     ],
+     "a": 1
+    },
+    {
+     "q": "___ is your name?",
+     "o": [
+      "Where",
+      "Whale",
+      "What"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u1-l2",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 10–12"
+}

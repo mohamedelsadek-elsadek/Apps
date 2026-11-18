@@ -1,0 +1,311 @@
+{
+ "title": "My Goal, My Dream & Present Continuous",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Samer's Goal",
+   "ico": "📖",
+   "keys": [
+    "goal",
+    "try",
+    "step",
+    "plan",
+    "practice",
+    "celebrate",
+    "success",
+    "reach",
+    "is training",
+    "is kicking",
+    "is scoring"
+   ],
+   "scenes": [
+    {
+     "e": "🎯",
+     "t": "{name} learns words for dreams: goal, try, step, plan, practice, celebrate, success, reach."
+    },
+    {
+     "e": "⚽",
+     "t": "Samer is trying to get better at football."
+    },
+    {
+     "e": "🏃",
+     "t": "He is training every day."
+    },
+    {
+     "e": "💦",
+     "t": "He is kicking the ball and splashing in the mud."
+    },
+    {
+     "e": "👦👦",
+     "t": "Now, he is playing a match with his friends."
+    },
+    {
+     "e": "🥅🏅",
+     "t": "He is scoring a goal and is feeling very proud."
+    },
+    {
+     "e": "⏯️",
+     "t": "We use the present continuous for actions happening now: am / is / are + verb-ing. I am practicing. He is trying. They are celebrating."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "goal",
+     "e": "🎯",
+     "k": "mean",
+     "a": "Something you want to achieve."
+    },
+    {
+     "w": "try",
+     "e": "💪",
+     "k": "mean",
+     "a": "Do your best."
+    },
+    {
+     "w": "step",
+     "e": "🪜",
+     "k": "mean",
+     "a": "One small part of a plan."
+    },
+    {
+     "w": "plan",
+     "e": "🗒️",
+     "k": "mean",
+     "a": "What you will do to reach a goal."
+    },
+    {
+     "w": "practice",
+     "e": "🔁",
+     "k": "mean",
+     "a": "Do something again and again."
+    },
+    {
+     "w": "celebrate",
+     "e": "🎉",
+     "k": "mean",
+     "a": "Show you are happy about something."
+    },
+    {
+     "w": "success",
+     "e": "🏆",
+     "k": "mean",
+     "a": "When you reach your goal."
+    },
+    {
+     "w": "reach",
+     "e": "🙌",
+     "k": "mean",
+     "a": "Get to your goal."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the subject with the right verb.",
+   "pairs": [
+    [
+     "I",
+     "am practicing"
+    ],
+    [
+     "He",
+     "is trying"
+    ],
+    [
+     "They",
+     "are celebrating"
+    ],
+    [
+     "She",
+     "is making a plan"
+    ],
+    [
+     "We",
+     "are playing"
+    ],
+    [
+     "Samer",
+     "is scoring a goal"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "am, is or are + -ing?",
+   "ico": "⏯️",
+   "prompt": "Which word goes before the -ing verb?",
+   "bins": [
+    {
+     "id": "am",
+     "label": "am",
+     "ico": "🙋",
+     "cls": "noun"
+    },
+    {
+     "id": "is",
+     "label": "is",
+     "ico": "👦",
+     "cls": "sun"
+    },
+    {
+     "id": "are",
+     "label": "are",
+     "ico": "👥",
+     "cls": "moon"
+    }
+   ],
+   "why": {
+    "am": "With I.",
+    "is": "With he, she, it or one person.",
+    "are": "With you, we, they."
+   },
+   "items": [
+    [
+     "I ___ practicing",
+     "am"
+    ],
+    [
+     "Samer ___ training",
+     "is"
+    ],
+    [
+     "She ___ trying",
+     "is"
+    ],
+    [
+     "He ___ kicking the ball",
+     "is"
+    ],
+    [
+     "Mona ___ riding",
+     "is"
+    ],
+    [
+     "The boys ___ celebrating",
+     "are"
+    ],
+    [
+     "We ___ playing",
+     "are"
+    ],
+    [
+     "They ___ planting",
+     "are"
+    ],
+    [
+     "You ___ trying",
+     "are"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Samer is trying to get better at…",
+     "o": [
+      "swimming",
+      "math",
+      "football"
+     ],
+     "a": 2
+    },
+    {
+     "q": "How often is Samer training?",
+     "o": [
+      "once a year",
+      "every day",
+      "never"
+     ],
+     "a": 1
+    },
+    {
+     "q": "How is Samer feeling at the end?",
+     "o": [
+      "proud",
+      "sad",
+      "bored"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Samer ___ scoring a goal.",
+     "o": [
+      "am",
+      "is",
+      "are"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The boys ___ celebrating.",
+     "o": [
+      "is",
+      "am",
+      "are"
+     ],
+     "a": 2
+    },
+    {
+     "q": "I ___ practicing.",
+     "o": [
+      "am",
+      "is",
+      "are"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Present continuous of 'try':",
+     "o": [
+      "is trying",
+      "tries",
+      "tried"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Something you want to achieve:",
+     "o": [
+      "step",
+      "cheer",
+      "goal"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Show you are happy about something:",
+     "o": [
+      "practice",
+      "plan",
+      "celebrate"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Karim has a ___ to be a doctor.",
+     "o": [
+      "goal",
+      "step",
+      "success"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u6-l1",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 100–103"
+}

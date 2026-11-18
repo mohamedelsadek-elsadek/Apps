@@ -1,0 +1,295 @@
+{
+ "title": "Egypt's Landmarks, 'ck' & Punctuation",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Laila's Holiday Adventure",
+   "ico": "📖",
+   "keys": [
+    "Cairo Tower",
+    "Pyramids of Giza",
+    "Alexandria Library",
+    "capital letters",
+    "period",
+    "question mark"
+   ],
+   "scenes": [
+    {
+     "e": "🗼",
+     "t": "{name} reads about Laila. Laila visited the Cairo Tower with her family."
+    },
+    {
+     "e": "📸🏙️",
+     "t": "They took pictures and saw the whole city."
+    },
+    {
+     "e": "🔺🐪",
+     "t": "Next, they explored the great Pyramids of Giza. Laila loved the camels!"
+    },
+    {
+     "e": "🚆🌊",
+     "t": "Then, they traveled to Alexandria."
+    },
+    {
+     "e": "📚",
+     "t": "At the Alexandria Library, she read fun books. It was the best holiday she ever had!"
+    },
+    {
+     "e": "🦆",
+     "t": "'ck' makes the /k/ sound at the end of a word: duck, sock, back, neck, truck."
+    },
+    {
+     "e": "✍️",
+     "t": "We use a capital letter at the beginning of a sentence, a period (.) at the end, and a question mark (?) at the end of a question."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Cairo Tower",
+     "e": "🗼",
+     "k": "mean",
+     "a": "A tall tower in Cairo."
+    },
+    {
+     "w": "Pyramids of Giza",
+     "e": "🔺",
+     "k": "mean",
+     "a": "Built a long time ago in Egypt."
+    },
+    {
+     "w": "Alexandria Library",
+     "e": "📚",
+     "k": "mean",
+     "a": "A big library in Alexandria."
+    },
+    {
+     "w": "duck",
+     "e": "🦆",
+     "k": "mean",
+     "a": "'ck' says /k/."
+    },
+    {
+     "w": "truck",
+     "e": "🚚",
+     "k": "mean",
+     "a": "'ck' says /k/."
+    },
+    {
+     "w": "capital letter",
+     "e": "🔠",
+     "k": "mean",
+     "a": "At the start of a sentence."
+    },
+    {
+     "w": "period .",
+     "e": "⏺️",
+     "k": "mean",
+     "a": "At the end of a sentence."
+    },
+    {
+     "w": "question mark ?",
+     "e": "❓",
+     "k": "mean",
+     "a": "At the end of a question."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the place with what Laila did there.",
+   "pairs": [
+    [
+     "Cairo Tower",
+     "saw the whole city"
+    ],
+    [
+     "Pyramids of Giza",
+     "loved the camels"
+    ],
+    [
+     "Alexandria Library",
+     "read fun books"
+    ],
+    [
+     "duck",
+     "ck"
+    ],
+    [
+     "Do you like the park",
+     "?"
+    ],
+    [
+     "I saw the Pyramids",
+     "."
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Period or Question Mark?",
+   "ico": "✍️",
+   "prompt": "Which mark ends the sentence?",
+   "bins": [
+    {
+     "id": "p",
+     "label": "period .",
+     "ico": "⏺️",
+     "cls": "noun"
+    },
+    {
+     "id": "q",
+     "label": "question mark ?",
+     "ico": "❓",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "p": "It tells something.",
+    "q": "It asks something."
+   },
+   "items": [
+    [
+     "We went to the supermarket yesterday",
+     "p"
+    ],
+    [
+     "I saw the Pyramids with my family",
+     "p"
+    ],
+    [
+     "My house is next to the hospital",
+     "p"
+    ],
+    [
+     "Cairo Tower is very tall",
+     "p"
+    ],
+    [
+     "Do you like going to the park",
+     "q"
+    ],
+    [
+     "Where is the nearest hospital",
+     "q"
+    ],
+    [
+     "Did you visit the Cairo Tower",
+     "q"
+    ],
+    [
+     "Is the mall open today",
+     "q"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Where did Laila go first?",
+     "o": [
+      "The Pyramids",
+      "Alexandria Library",
+      "Cairo Tower"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Who did Laila go with?",
+     "o": [
+      "her family",
+      "her teacher",
+      "her friends"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What did Laila see at the Pyramids?",
+     "o": [
+      "horses",
+      "cars",
+      "camels"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What did she do at the Alexandria Library?",
+     "o": [
+      "wrote a story",
+      "drew pictures",
+      "read books"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Fill in: du__",
+     "o": [
+      "zz",
+      "ll",
+      "ck"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Fill in: so__",
+     "o": [
+      "ck",
+      "ss",
+      "ff"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which word has the /k/ sound?",
+     "o": [
+      "neck",
+      "need",
+      "nice"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Correct punctuation:",
+     "o": [
+      "we went to the park",
+      "We went to the park?",
+      "We went to the park."
+     ],
+     "a": 2
+    },
+    {
+     "q": "Correct punctuation:",
+     "o": [
+      "where is the hospital.",
+      "Where is the hospital.",
+      "Where is the hospital?"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Correct:",
+     "o": [
+      "Cairo tower is very tall",
+      "Cairo Tower is very tall.",
+      "cairo tower is very tall."
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u3-l2",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 50–54"
+}

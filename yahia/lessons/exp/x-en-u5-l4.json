@@ -1,0 +1,294 @@
+{
+ "title": "I Help My Community!",
+ "activities": [
+  {
+   "type": "story",
+   "title": "We Help Our Neighborhood!",
+   "ico": "📖",
+   "keys": [
+    "neighborhood",
+    "team",
+    "clean",
+    "plant",
+    "donate",
+    "proud"
+   ],
+   "scenes": [
+    {
+     "e": "🏘️",
+     "t": "{name} reads about Hady and Salma. Hady and Salma want to help their neighborhood. They work as a team."
+    },
+    {
+     "e": "🧹",
+     "t": "First, they clean the street."
+    },
+    {
+     "e": "🌳",
+     "t": "Then, they plant trees near the school."
+    },
+    {
+     "e": "👕🧸",
+     "t": "After that, they donate clothes and toys to children."
+    },
+    {
+     "e": "😊",
+     "t": "Everyone is happy. Their teacher says, 'Well done!'"
+    },
+    {
+     "e": "💪",
+     "t": "Teamwork makes the community better. Hady and Salma smile. They are proud to help."
+    },
+    {
+     "e": "💬",
+     "t": "Sara: What are you doing? Omar: I am helping clean the park. Sara: Can I help, too? Omar: Yes! Let's work together."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "neighborhood",
+     "e": "🏘️",
+     "k": "mean",
+     "a": "The area where you live."
+    },
+    {
+     "w": "community",
+     "e": "👨‍👩‍👧‍👦",
+     "k": "mean",
+     "a": "The people around us."
+    },
+    {
+     "w": "clean the street",
+     "e": "🧹",
+     "k": "mean",
+     "a": "Make the street tidy."
+    },
+    {
+     "w": "plant trees",
+     "e": "🌳",
+     "k": "mean",
+     "a": "Put trees in the ground."
+    },
+    {
+     "w": "donate",
+     "e": "🎁",
+     "k": "mean",
+     "a": "Give things to help people."
+    },
+    {
+     "w": "library",
+     "e": "📚",
+     "k": "mean",
+     "a": "We can donate books to it."
+    },
+    {
+     "w": "Well done!",
+     "e": "👏",
+     "k": "mean",
+     "a": "Great job!"
+    },
+    {
+     "w": "proud",
+     "e": "🏅",
+     "k": "mean",
+     "a": "Happy about what you did."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Put the story in order.",
+   "pairs": [
+    [
+     "1",
+     "Hady and Salma want to help."
+    ],
+    [
+     "2",
+     "First, they clean the street."
+    ],
+    [
+     "3",
+     "Then, they plant trees."
+    ],
+    [
+     "4",
+     "After that, they donate clothes and toys."
+    ],
+    [
+     "5",
+     "Their teacher says, 'Well done!'"
+    ],
+    [
+     "6",
+     "They are proud to help."
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Helps the community?",
+   "ico": "🐦",
+   "prompt": "Does it help the community?",
+   "bins": [
+    {
+     "id": "y",
+     "label": "Helps ✅",
+     "ico": "🤝",
+     "cls": "noun"
+    },
+    {
+     "id": "n",
+     "label": "Doesn't help ❌",
+     "ico": "🚯",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "y": "It makes the community better.",
+    "n": "It makes things worse."
+   },
+   "items": [
+    [
+     "clean the park",
+     "y"
+    ],
+    [
+     "plant flowers",
+     "y"
+    ],
+    [
+     "donate books to the library",
+     "y"
+    ],
+    [
+     "give old clothes",
+     "y"
+    ],
+    [
+     "help an old neighbor",
+     "y"
+    ],
+    [
+     "throw rubbish in the street",
+     "n"
+    ],
+    [
+     "break a tree",
+     "n"
+    ],
+    [
+     "shout at neighbors",
+     "n"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Who are the two children in the story?",
+     "o": [
+      "Omar and Sara",
+      "Mona and Karim",
+      "Hady and Salma"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What do Hady and Salma clean?",
+     "o": [
+      "the classroom",
+      "the street",
+      "the car"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What do they plant?",
+     "o": [
+      "flowers",
+      "vegetables",
+      "trees"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What do they donate?",
+     "o": [
+      "clothes and toys",
+      "books",
+      "food"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does their teacher say?",
+     "o": [
+      "Well done!",
+      "Sit down!",
+      "Try again!"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What is Omar doing?",
+     "o": [
+      "sleeping",
+      "playing football",
+      "helping clean the park"
+     ],
+     "a": 2
+    },
+    {
+     "q": "We can donate books to the school ___.",
+     "o": [
+      "street",
+      "kitchen",
+      "library"
+     ],
+     "a": 2
+    },
+    {
+     "q": "'First, they clean the street.' Correct?",
+     "o": [
+      "Yes, capital F and a period.",
+      "No, it needs a question mark."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Correct sentence:",
+     "o": [
+      "They plant trees near the school?",
+      "They plant trees near the school.",
+      "they plant trees near the school"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Teamwork makes the community…",
+     "o": [
+      "worse",
+      "smaller",
+      "better"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u5-l4",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 94–98"
+}

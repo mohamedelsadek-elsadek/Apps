@@ -1,0 +1,306 @@
+{
+ "title": "My Family Helps Me Grow & 'ph'",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Nour's Family",
+   "ico": "📖",
+   "keys": [
+    "takes me to school",
+    "cooks",
+    "helps me",
+    "reads me a story",
+    "phone",
+    "photo",
+    "elephant",
+    "graph",
+    "alphabet"
+   ],
+   "scenes": [
+    {
+     "e": "👨‍👩‍👧",
+     "t": "{name} reads about Nour. Hello, I'm Nour. I love my family."
+    },
+    {
+     "e": "🚗🏫",
+     "t": "My father and mother take me to school."
+    },
+    {
+     "e": "🍲",
+     "t": "They also cook me lunch. My mother cooks us food every day."
+    },
+    {
+     "e": "🧸",
+     "t": "My brother plays with me and helps me do my homework."
+    },
+    {
+     "e": "📚👵",
+     "t": "My grandmother reads me a story. I love my family. They help me grow."
+    },
+    {
+     "e": "📞",
+     "t": "The letters 'ph' make the /f/ sound: phone, photo, elephant, graph, alphabet."
+    },
+    {
+     "e": "📸",
+     "t": "Riddle: You press a button, I make a sound, a memory saved, forever found. What am I? A photo! And: I help you call your friend today. What am I? A phone!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "takes me to school",
+     "e": "🚗",
+     "k": "mean",
+     "a": "My father takes me to school."
+    },
+    {
+     "w": "cooks",
+     "e": "🍲",
+     "k": "mean",
+     "a": "My mother cooks us food every day."
+    },
+    {
+     "w": "helps",
+     "e": "🤝",
+     "k": "mean",
+     "a": "My brother helps me do my homework."
+    },
+    {
+     "w": "reads me a story",
+     "e": "📖",
+     "k": "mean",
+     "a": "My grandmother reads me a story."
+    },
+    {
+     "w": "phone",
+     "e": "📞",
+     "k": "mean",
+     "a": "'ph' says /f/."
+    },
+    {
+     "w": "photo",
+     "e": "📸",
+     "k": "mean",
+     "a": "'ph' says /f/."
+    },
+    {
+     "w": "elephant",
+     "e": "🐘",
+     "k": "mean",
+     "a": "'ph' says /f/."
+    },
+    {
+     "w": "alphabet",
+     "e": "🔤",
+     "k": "mean",
+     "a": "'ph' says /f/."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the family member with how they help.",
+   "pairs": [
+    [
+     "My father",
+     "takes me to school"
+    ],
+    [
+     "My mother",
+     "cooks us food"
+    ],
+    [
+     "My brother",
+     "helps me with homework"
+    ],
+    [
+     "My grandmother",
+     "reads me a story"
+    ],
+    [
+     "ph",
+     "/f/"
+    ],
+    [
+     "🐘",
+     "elephant"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "'ph' or 'f'?",
+   "ico": "🔤",
+   "prompt": "How is the /f/ sound written?",
+   "bins": [
+    {
+     "id": "ph",
+     "label": "ph",
+     "ico": "📞",
+     "cls": "noun"
+    },
+    {
+     "id": "f",
+     "label": "f",
+     "ico": "🐟",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "ph": "Here /f/ is written ph.",
+    "f": "Here /f/ is written f."
+   },
+   "items": [
+    [
+     "phone",
+     "ph"
+    ],
+    [
+     "photo",
+     "ph"
+    ],
+    [
+     "elephant",
+     "ph"
+    ],
+    [
+     "graph",
+     "ph"
+    ],
+    [
+     "alphabet",
+     "ph"
+    ],
+    [
+     "fish",
+     "f"
+    ],
+    [
+     "father",
+     "f"
+    ],
+    [
+     "family",
+     "f"
+    ],
+    [
+     "farmer",
+     "f"
+    ],
+    [
+     "fun",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Who plays with Nour?",
+     "o": [
+      "her teacher",
+      "her cousin",
+      "her brother"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Who takes Nour to school?",
+     "o": [
+      "her brother",
+      "her father and mother",
+      "her grandmother"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Nour loves her…",
+     "o": [
+      "family",
+      "phone",
+      "school bag"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Fill in: ___one",
+     "o": [
+      "ph",
+      "f",
+      "th"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Fill in: ele___ant",
+     "o": [
+      "v",
+      "f",
+      "ph"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Unscramble: o p h n e",
+     "o": [
+      "nopeh",
+      "hopen",
+      "phone"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which word has 'ph'?",
+     "o": [
+      "graph",
+      "giraffe",
+      "grape"
+     ],
+     "a": 0
+    },
+    {
+     "q": "I help you call your friend today. What am I?",
+     "o": [
+      "a graph",
+      "an elephant",
+      "a phone"
+     ],
+     "a": 2
+    },
+    {
+     "q": "My grandmother ___ me a story.",
+     "o": [
+      "cooks",
+      "drives",
+      "reads"
+     ],
+     "a": 2
+    },
+    {
+     "q": "My mother ___ us food every day.",
+     "o": [
+      "plays",
+      "cooks",
+      "reads"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u2-l3",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 36–38"
+}

@@ -1,0 +1,226 @@
+{
+ "title": "🏆 Review: Units 4–6",
+ "activities": [
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Feeling happy about what you did:",
+     "o": [
+      "team",
+      "proud",
+      "nervous"
+     ],
+     "a": 1
+    },
+    {
+     "q": "A group working together:",
+     "o": [
+      "plan",
+      "goal",
+      "team"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Something you want to achieve:",
+     "o": [
+      "nervous",
+      "celebrate",
+      "goal"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Feeling afraid or worried:",
+     "o": [
+      "nervous",
+      "excited",
+      "proud"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A way to get something done:",
+     "o": [
+      "plan",
+      "celebrate",
+      "team"
+     ],
+     "a": 0
+    },
+    {
+     "q": "To show happiness for something good:",
+     "o": [
+      "plan",
+      "goal",
+      "celebrate"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Amir was ___ after playing all day.",
+     "o": [
+      "shy",
+      "tired",
+      "excited"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Yara felt ___ when she fell in front of the class.",
+     "o": [
+      "shy",
+      "excited",
+      "happy"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Omar and Ziad ___ a bridge across the stream.",
+     "o": [
+      "built",
+      "are building",
+      "builds"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Mai ___ the dog gently.",
+     "o": [
+      "touches",
+      "touched",
+      "is touching"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Yesterday, Salma (plays / played) with her doll.",
+     "o": [
+      "plays",
+      "played"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Now, she (is eating / ate) her lunch.",
+     "o": [
+      "ate",
+      "is eating"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Last week, we (visit / visited) the zoo.",
+     "o": [
+      "visit",
+      "visited"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Look! The boys (run / are running) in the garden.",
+     "o": [
+      "run",
+      "are running"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Soft c word:",
+     "o": [
+      "city",
+      "cat",
+      "coat"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Hard g word:",
+     "o": [
+      "goat",
+      "giraffe",
+      "Egypt"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Linking word for reason:",
+     "o": [
+      "then",
+      "after",
+      "because"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Fix it: what did basel do every day",
+     "o": [
+      "What did basel do every day",
+      "what did Basel do every day.",
+      "What did Basel do every day?"
+     ],
+     "a": 2
+    }
+   ]
+  },
+  {
+   "type": "write",
+   "title": "Writing: My Goal Story",
+   "ico": "✍️",
+   "prompt": "Write a story about achieving a goal.",
+   "points": [
+    "What did you want to do?",
+    "What did you do to practice?",
+    "What happened in the end?",
+    "How did you feel?"
+   ],
+   "note": "Use the story frame and past tense verbs.",
+   "plan": [
+    [
+     "First",
+     "First, I wanted to …"
+    ],
+    [
+     "Then",
+     "Then, I …"
+    ],
+    [
+     "After that",
+     "After that, I …"
+    ],
+    [
+     "Finally",
+     "Finally, I felt …"
+    ]
+   ],
+   "links": [
+    "First,",
+    "Then,",
+    "After that,",
+    "Finally,",
+    "because",
+    "but"
+   ],
+   "punct": "Capital letter at the start • period (.) at the end • comma after First, Then, Finally",
+   "model": [
+    "First, I wanted to swim fast.",
+    "Then, I practiced every day at the club.",
+    "After that, I swam in a race with my friends.",
+    "Finally, I felt proud and happy because I won!"
+   ],
+   "check": [
+    "I used First, Then, After that, Finally",
+    "I used past tense verbs",
+    "I used capital letters and periods",
+    "I wrote how I felt"
+   ]
+  }
+ ],
+ "id": "x-en-r2",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 114–116"
+}

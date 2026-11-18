@@ -133,7 +133,7 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
 <body>
 <div class="wrap">
   <div class="top">
-    <button class="brand" onclick="route('home')">🌍 <span>عالم يحيى</span></button>
+    <button class="brand" onclick="route('home')">🌍 <span id="brandName">عالم يحيى</span></button>
     <div class="pills"><button class="pill" id="kidPill" onclick="route('kids')"></button><span class="pill">⭐ <b id="stars">0</b></span><span class="pill">🐥 <b id="eggsN">0</b></span><span class="pill" id="cloud" title="المزامنة مع بابا">⏳</span></div>
   </div>
   <div id="view"></div>
@@ -147,8 +147,15 @@ table{width:100%;border-collapse:collapse;font-family:Cairo;font-size:15px} td,t
    الصوت: audio/<lessonId>/<key>.mp3 لو موجود في lesson.audio، وإلا صوت الجهاز. */
 const $=id=>document.getElementById(id);
 let M=null, L=null, LID=null, ACT=null, AIDX=0;
+/* ---------- المناهج: كل طفل على منهج مدرسته ---------- */
+const CURS={nile:{name:"مدارس النيل الدولية",short:"🏫 النيل الدولية",file:"data/manifest.json"},
+            exp:{name:"مدارس اللغات التجريبية",short:"🏫 لغات تجريبي",file:"data/exp/manifest.json"}};
+const MS={};
+async function loadCur(c){ c=CURS[c]?c:"nile"; if(!MS[c]) MS[c]=await getJSON(CURS[c].file); return MS[c]; }
+const kidCur=k=>(k&&CURS[k.cur])?k.cur:"nile";
 /* ---------- اللاعبين (كل طفل ليه مساره) ---------- */
 const BLANK=()=>({stars:0,eggs:0,done:{},miss:[]});
+let NEWCUR="nile";
 const AVATARS=["🦁","🐯","🐼","🦊","🐰","🐻","🦄","🐸","🐧","🦋","🐬","🐥"];
 let KIDS={}, KID=null, S=BLANK();
 try{KIDS=JSON.parse(localStorage.getItem("yw-kids")||"{}")||{}}catch(e){}
@@ -216,7 +223,7 @@ function initSync(){ setTimeout(()=>{ if(SYNC!=="on") goRest(); setTimeout(diag,
 function attachKid(id){ if(REST) return restPull(); if(!DB) return; if(REF) REF.off(); REF=DB.ref("yahia_world/kids/"+id+"/state");
   REF.on("value",snap=>{ if(KID!==id) return; SYNC="on"; const r=snap.val(); const ch=mergeInto(S,r); save(true);
     if(ch||!r) pushSync(); if(ch) refreshView(); },()=>{SYNC="err"}); }
-function useKid(id){ KID=id; try{localStorage.setItem("yw-kid",id)}catch(e){} S=loadKidLocal(id); save(true); attachKid(id); $("kidPill").textContent=kid().emoji+" "+kid().name; route("home"); }
+async function useKid(id){ KID=id; for(const k in LCACHE) delete LCACHE[k]; try{M=await loadCur(kidCur(KIDS[id]))}catch(e){}; try{localStorage.setItem("yw-kid",id)}catch(e){} S=loadKidLocal(id); save(true); attachKid(id); $("kidPill").textContent=kid().emoji+" "+kid().name; route("home"); }
 function setCloud(){const c=$("cloud");if(c)c.textContent=SYNC==="on"?"☁️":SYNC==="err"?"⚠️":"⏳"}
 setInterval(setCloud,1500);
 function refreshView(){ const v=$("view"); const r=v&&v.dataset.r; if(r==="home")viewHome(); else if(r==="parent")viewParent(PKID); else if(r==="kids")viewKids(); }
@@ -250,7 +257,8 @@ const LCACHE={};
 async function loadLesson(id){
   if(LCACHE[id]) return LCACHE[id];
   const meta=findLesson(id); if(!meta||!meta.file) throw new Error("no lesson");
-  const d=await getJSON(meta.file); LCACHE[id]=d; d._blob={};
+  let d=await getJSON(meta.file); const nm=(d.lang&&d.lang!=="ar"&&kid().nameEn)||(kid()&&kid().name)||"";
+  d=JSON.parse(JSON.stringify(d).split("{name}").join(JSON.stringify(nm).slice(1,-1))); LCACHE[id]=d; d._blob={};
   /* الصفحة مش بتشغّل ملفات صوت مباشرة — بنحمّلها blob الأول */
   Object.entries(d.audio||{}).forEach(([k,p])=>fetch(p).then(r=>r.ok?r.blob():null).then(b=>{if(b)d._blob[k]=URL.createObjectURL(b)}).catch(()=>{}));
   return d;
@@ -269,7 +277,7 @@ function setLangFor(r,arg){ let lg="ar";
 function route(r,arg){stopGame();stopGame=()=>{};stopVoice();window.scrollTo(0,0);const v=$("view");v.style.animation="none";v.offsetHeight;v.style.animation="";
   v.dataset.r=r; setLangFor(r,arg); ({video:viewVideo,home:viewHome,subject:viewSubject,lesson:viewLesson,act:viewAct,parent:viewParent,kids:viewKids})[r](arg);}
 
-function viewHome(){
+function viewHome(){ try{const k=kid(); if(k){$("brandName").textContent="عالم "+k.name; document.title="عالم "+k.name+" — المنصة التعليمية"}}catch(e){}
   $("view").innerHTML=`<h1>أهلًا يا ${esc(kid().name)}! ${kid().emoji}</h1><p class="sub">اختار المادة وابدأ المغامرة! <button class="back" style="font-size:14px;padding:3px 10px" onclick="route('kids')">🔁 لاعب تاني</button></p>
   <div class="subs">${M.subjects.map(s=>`<button class="sub-t ${s.status!=="ready"?"soon":""}" style="background:${s.color}" ${s.status!=="ready"?"disabled":""} onclick="route('subject','${s.id}')">
     <span class="i">${s.ico}</span><span><b>${esc(s.title)}</b><br><small>${s.status==="ready"?countLessons(s)+" دروس جاهزة":"قريبًا 🔒"}</small></span></button>`).join("")}</div>
@@ -486,28 +494,36 @@ function actQuiz(){
 let NEWAV="🐯";
 function viewKids(){
   $("view").innerHTML=`<h1>مين بيلعب دلوقتي؟ 🎮</h1><p class="sub">كل واحد ليه نجومه ومزرعته ومستواه لوحده.</p>
-  <div class="subs">${liveKids().map(k=>`<button class="sub-t" style="background:${k.id===KID?"#2fb36d":"#8a5cf6"}" onclick="useKid('${k.id}')"><span class="i">${k.emoji}</span><span><b>${esc(k.name)}</b><br><small>${k.id===KID?"بيلعب دلوقتي ✓":"اضغط للعب"}</small></span></button>`).join("")}</div>
+  <div class="subs">${liveKids().map(k=>`<button class="sub-t" style="background:${k.id===KID?"#2fb36d":"#8a5cf6"}" onclick="useKid('${k.id}')"><span class="i">${k.emoji}</span><span><b>${esc(k.name)}</b><br><small>${CURS[kidCur(k)].short}${k.id===KID?" · بيلعب دلوقتي ✓":""}</small></span></button>`).join("")}</div>
   <div class="card" style="margin-top:14px"><h2>➕ لاعب جديد</h2>
    <input id="nkName" placeholder="اسم الطفل" style="width:100%;font-family:inherit;font-size:20px;padding:10px;border-radius:14px;border:2px solid #e3def0;margin-bottom:10px">
+   <input id="nkEn" placeholder="الاسم بالإنجليزي (اختياري) — Zain" style="width:100%;font-family:inherit;font-size:18px;padding:8px;border-radius:14px;border:2px solid #e3def0;margin-bottom:10px;direction:ltr">
    <div id="nkAv" style="display:flex;flex-wrap:wrap;gap:6px;font-size:30px;margin-bottom:10px">${AVATARS.map(a=>`<button class="back" style="font-size:28px;padding:4px 8px;${a===NEWAV?"outline:3px solid #ff9f2e":""}" data-a="${a}">${a}</button>`).join("")}</div>
-   <button class="btn g big" id="nkAdd">ضيف اللاعب</button></div>`;
+   <div style="font-family:Cairo;font-size:17px;margin-bottom:6px">المدرسة / المنهج:</div>
+   <div id="nkCur" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${Object.entries(CURS).map(([c,v])=>`<button class="back" data-c="${c}" style="font-size:17px;${c===NEWCUR?"outline:3px solid #ff9f2e;background:#fff3c4":""}">${v.short}</button>`).join("")}</div>
+   <button class="btn g big" id="nkAdd">ضيف اللاعب</button></div>
+  <div class="card"><h2>🏫 مدرسة كل طفل</h2><p class="note">لو عايز تغيّر منهج طفل، اختار المدرسة جنب اسمه.</p>
+   <table>${liveKids().map(k=>`<tr><td>${k.emoji} ${esc(k.name)}</td><td>${Object.entries(CURS).map(([c,v])=>`<button class="back" style="font-size:14px;margin:2px;${kidCur(k)===c?"background:#ffd23f":""}" data-kc="${k.id}|${c}">${v.short}</button>`).join("")}<br><button class="back" style="font-size:14px;margin:2px" data-ken="${k.id}">🔤 ${k.nameEn?esc(k.nameEn):"الاسم بالإنجليزي"}</button></td></tr>`).join("")}</table></div>`;
+  document.querySelectorAll("#nkCur [data-c]").forEach(b=>b.onclick=()=>{NEWCUR=b.dataset.c;document.querySelectorAll("#nkCur [data-c]").forEach(x=>{x.style.outline="";x.style.background=""});b.style.outline="3px solid #ff9f2e";b.style.background="#fff3c4"});
+  document.querySelectorAll("[data-ken]").forEach(b=>b.onclick=()=>{const id=b.dataset.ken; const v=prompt("اكتب اسم "+KIDS[id].name+" بالإنجليزي (بيظهر في قصص الإنجليزي)",KIDS[id].nameEn||""); if(v===null) return; KIDS[id]=Object.assign({},KIDS[id],{nameEn:v.trim(),u:Date.now()}); saveKids(); for(const k in LCACHE) delete LCACHE[k]; viewKids();});
+  document.querySelectorAll("[data-kc]").forEach(b=>b.onclick=async()=>{const [id,c]=b.dataset.kc.split("|"); KIDS[id]=Object.assign({},KIDS[id],{cur:c,u:Date.now()}); saveKids(); if(id===KID){for(const k in LCACHE) delete LCACHE[k]; try{M=await loadCur(c)}catch(e){}} viewKids();});
   document.querySelectorAll("#nkAv [data-a]").forEach(b=>b.onclick=()=>{NEWAV=b.dataset.a;document.querySelectorAll("#nkAv [data-a]").forEach(x=>x.style.outline="");b.style.outline="3px solid #ff9f2e"});
   $("nkAdd").onclick=()=>{const n=$("nkName").value.trim(); if(!n){$("nkName").focus();return}
-    const id="k"+Date.now().toString(36); KIDS[id]={id,name:n,emoji:NEWAV,c:Date.now(),u:Date.now()}; saveKids(); useKid(id);};
+    const id="k"+Date.now().toString(36); KIDS[id]={id,name:n,nameEn:($("nkEn").value||"").trim(),emoji:NEWAV,cur:NEWCUR,c:Date.now(),u:Date.now()}; saveKids(); useKid(id);};
 }
 /* ---------- صفحة بابا ---------- */
 let PKID=null;
-function viewParent(pid){
-  PKID=pid||PKID||KID; const k=KIDS[PKID]||kid();
+async function viewParent(pid){
+  PKID=pid||PKID||KID; const k=KIDS[PKID]||kid(); let PM=M; try{PM=await loadCur(kidCur(k))}catch(e){}
   const draw=T=>{
-    const rows=[];M.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const n=lessonDone(l.id,T);rows.push(`<tr><td>${l.ico} ${esc(l.title)}<br><span class="note">${esc(s.title)} · ${esc(b.title)}</span></td><td style="width:40%"><div class="bar"><i style="width:${Math.min(100,n/6*100)}%"></i></div><span class="note">${n} محطات</span></td></tr>`)}))));
+    const rows=[];PM.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const n=lessonDone(l.id,T);rows.push(`<tr><td>${l.ico} ${esc(l.title)}<br><span class="note">${esc(s.title)} · ${esc(b.title)}</span></td><td style="width:40%"><div class="bar"><i style="width:${Math.min(100,n/6*100)}%"></i></div><span class="note">${n} محطات</span></td></tr>`)}))));
     const m=T.miss.slice(-20).reverse();
     $("view").innerHTML=`<div class="top"><button class="back" onclick="route('home')">→ الرئيسية</button><span class="pill">👨‍👦 صفحة بابا</span></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${liveKids().map(x=>`<button class="back" style="${x.id===PKID?"background:#ffd23f":""}" onclick="viewParent('${x.id}')">${x.emoji} ${esc(x.name)}</button>`).join("")}</div>
-    <div class="card"><h2>تقدّم ${esc(k.name)}</h2><p class="note">⭐ ${T.stars} نجمة · 🐥 ${T.eggs} كتكوت</p><table>${rows.join("")}</table></div>
+    <div class="card"><h2>تقدّم ${esc(k.name)}</h2><p class="note">${CURS[kidCur(k)].name}</p><p class="note">⭐ ${T.stars} نجمة · 🐥 ${T.eggs} كتكوت</p><table>${rows.join("")}</table></div>
     <div class="card"><h2>غلط في إيه؟</h2>${m.length?`<table>${m.map(x=>`<tr><td>${esc(x.l)}<br><span class="note">${esc(x.a)}</span></td><td>${esc(x.what)}</td></tr>`).join("")}</table>`:`<p class="note">مفيش غلطات لحد دلوقتي 👏</p>`}</div>
-    <div class="card"><h2>🎬 فيديوهات الدروس</h2><p class="note">دوّر على فيديو قصير (أقل من 4 دقايق) واتفرج عليه الأول، وبعدين انسخ اللينك هنا. هيظهر ليحيى في أول الدرس باسم «شوف بعينك».</p>
-    <table>${vidRows()}</table></div>
+    <div class="card"><h2>🎬 فيديوهات الدروس</h2><p class="note">دوّر على فيديو قصير (أقل من 4 دقايق) واتفرج عليه الأول، وبعدين انسخ اللينك هنا. هيظهر لـ${esc(k.name)} في أول الدرس باسم «شوف بعينك».</p>
+    <table>${vidRows(PM)}</table></div>
     <div class="card note">${SYNC==="on"?"☁️ متزامن — كل طفل ليه مساره، وأي جهاز يشوف نفس المستوى.":SYNC==="err"?"⚠️ المزامنة مش شغالة دلوقتي — التقدّم محفوظ على الجهاز ده.":"⏳ بيوصل للمزامنة…"}</div>`;
   };
   const wire=()=>document.querySelectorAll("[data-vl]").forEach(b=>b.onclick=()=>{const lid=b.dataset.vl,inp=document.getElementById("vi-"+lid);
@@ -520,12 +536,12 @@ function viewParent(pid){
   if(DB&&!REST) DB.ref("yahia_world/kids/"+PKID+"/state").once("value",snap=>upd(snap.val())); else rget("yahia_world/kids/"+PKID+"/state").then(upd).catch(()=>{});
 }
 
-function vidRows(){const r=[];M.subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const v=lessonVid(l.id);
+function vidRows(PM){const r=[];(PM||M).subjects.forEach(s=>(s.blocks||[]).forEach(b=>b.units.forEach(u=>u.lessons.filter(l=>l.file).forEach(l=>{const v=lessonVid(l.id);
   const q=encodeURIComponent(l.vq||l.title);
   r.push(`<tr><td>${l.ico} ${esc(l.title)}<br><a class="note" href="https://www.youtube.com/results?search_query=${q}&sp=EgIYAQ%253D%253D" target="_blank" rel="noopener">🔎 دوّر على يوتيوب</a></td>
   <td><input id="vi-${l.id}" placeholder="الصق لينك الفيديو" value="${v?"https://youtu.be/"+v:""}" style="width:100%;padding:6px;border-radius:8px;border:1px solid #ccc;font:inherit;direction:ltr">
   <div style="margin-top:4px"><button class="back" data-vl="${l.id}">حفظ</button> ${v?`<button class="back" data-vl="${l.id}" data-x="1">مسح</button>`:""} <span class="vst note"></span></div></td></tr>`)}))));return r.join("")}
-(async()=>{ if(KID&&KIDS[KID]){S=loadKidLocal(KID);$("kidPill").textContent=kid().emoji+" "+kid().name} else $("kidPill").textContent="👤 اختار"; save(true); initSync(); try{M=await getJSON("data/manifest.json"); route(KID&&KIDS[KID]?"home":"kids")}catch(e){$("view").innerHTML=`<div class="err">مش قادر أحمّل المنصة. جرّب تفتحها تاني.</div>`}})();
+(async()=>{ if(KID&&KIDS[KID]){S=loadKidLocal(KID);$("kidPill").textContent=kid().emoji+" "+kid().name} else $("kidPill").textContent="👤 اختار"; save(true); initSync(); try{M=await loadCur(kidCur(KIDS[KID])); route(KID&&KIDS[KID]?"home":"kids")}catch(e){$("view").innerHTML=`<div class="err">مش قادر أحمّل المنصة. جرّب تفتحها تاني.</div>`}})();
 </script>
 </body>
 </html>

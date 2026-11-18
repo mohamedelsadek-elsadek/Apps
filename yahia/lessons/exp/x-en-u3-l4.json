@@ -1,0 +1,308 @@
+{
+ "title": "A School Trip & Past Simple (-ed)",
+ "activities": [
+  {
+   "type": "story",
+   "title": "A School Trip to the Zoo",
+   "ico": "📖",
+   "keys": [
+    "Last Monday",
+    "went",
+    "saw",
+    "ate",
+    "drank",
+    "played",
+    "walked",
+    "jumped"
+   ],
+   "scenes": [
+    {
+     "e": "🚌",
+     "t": "{name} reads about a trip. Last Monday, Grade Three students went on a trip to the zoo. They went by bus."
+    },
+    {
+     "e": "🦁🐒🐘",
+     "t": "At the zoo, they saw lions, monkeys, and elephants."
+    },
+    {
+     "e": "🎟️",
+     "t": "The ticket was 20 pounds."
+    },
+    {
+     "e": "🥪🧃",
+     "t": "For lunch, they ate sandwiches and chips. They drank juice and water."
+    },
+    {
+     "e": "😊",
+     "t": "Everyone had a good day!"
+    },
+    {
+     "e": "⏪",
+     "t": "We use the past simple for things that happened. For most verbs, add -ed: play → played, walk → walked, jump → jumped."
+    },
+    {
+     "e": "➕d",
+     "t": "If the verb ends in -e, just add -d: live → lived, smile → smiled, dance → danced, like → liked."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "played",
+     "e": "⚽",
+     "k": "mean",
+     "a": "play + ed"
+    },
+    {
+     "w": "walked",
+     "e": "🚶",
+     "k": "mean",
+     "a": "walk + ed"
+    },
+    {
+     "w": "jumped",
+     "e": "🦘",
+     "k": "mean",
+     "a": "jump + ed"
+    },
+    {
+     "w": "climbed",
+     "e": "🧗",
+     "k": "mean",
+     "a": "climb + ed"
+    },
+    {
+     "w": "smiled",
+     "e": "😊",
+     "k": "mean",
+     "a": "smile + d"
+    },
+    {
+     "w": "danced",
+     "e": "💃",
+     "k": "mean",
+     "a": "dance + d"
+    },
+    {
+     "w": "lived",
+     "e": "🏠",
+     "k": "mean",
+     "a": "live + d"
+    },
+    {
+     "w": "cleaned",
+     "e": "🧹",
+     "k": "mean",
+     "a": "clean + ed"
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the verb with its past form.",
+   "pairs": [
+    [
+     "play",
+     "played"
+    ],
+    [
+     "walk",
+     "walked"
+    ],
+    [
+     "smile",
+     "smiled"
+    ],
+    [
+     "dance",
+     "danced"
+    ],
+    [
+     "live",
+     "lived"
+    ],
+    [
+     "clean",
+     "cleaned"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "Add -ed or -d?",
+   "ico": "⏪",
+   "prompt": "To make the past, add -ed or just -d?",
+   "bins": [
+    {
+     "id": "ed",
+     "label": "add -ed",
+     "ico": "➕",
+     "cls": "noun"
+    },
+    {
+     "id": "d",
+     "label": "add -d",
+     "ico": "✏️",
+     "cls": "sun"
+    }
+   ],
+   "why": {
+    "ed": "Most verbs add -ed.",
+    "d": "Verbs ending in -e just add -d."
+   },
+   "items": [
+    [
+     "play",
+     "ed"
+    ],
+    [
+     "walk",
+     "ed"
+    ],
+    [
+     "jump",
+     "ed"
+    ],
+    [
+     "climb",
+     "ed"
+    ],
+    [
+     "clean",
+     "ed"
+    ],
+    [
+     "help",
+     "ed"
+    ],
+    [
+     "smile",
+     "d"
+    ],
+    [
+     "dance",
+     "d"
+    ],
+    [
+     "live",
+     "d"
+    ],
+    [
+     "like",
+     "d"
+    ],
+    [
+     "close",
+     "d"
+    ],
+    [
+     "bake",
+     "d"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Where did the class go?",
+     "o": [
+      "the museum",
+      "the park",
+      "the zoo"
+     ],
+     "a": 2
+    },
+    {
+     "q": "How did they go to the zoo?",
+     "o": [
+      "by bus",
+      "by car",
+      "by train"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What animals did they see?",
+     "o": [
+      "lions, monkeys, and elephants",
+      "cats and dogs",
+      "fish and birds"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How much was the ticket?",
+     "o": [
+      "10 pounds",
+      "20 pounds",
+      "50 pounds"
+     ],
+     "a": 1
+    },
+    {
+     "q": "We (cleaned / clean) our hands before eating.",
+     "o": [
+      "clean",
+      "cleaned"
+     ],
+     "a": 1
+    },
+    {
+     "q": "I (walk / walked) to school yesterday.",
+     "o": [
+      "walked",
+      "walk"
+     ],
+     "a": 0
+    },
+    {
+     "q": "I (play / played) with my friend after school.",
+     "o": [
+      "played",
+      "play"
+     ],
+     "a": 0
+    },
+    {
+     "q": "My grandma (bakes / baked) a cake yesterday.",
+     "o": [
+      "baked",
+      "bakes"
+     ],
+     "a": 0
+    },
+    {
+     "q": "My cousin (lived / lives) in Aswan two years ago.",
+     "o": [
+      "lives",
+      "lived"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Past of 'dance':",
+     "o": [
+      "dancing",
+      "danceed",
+      "danced"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u3-l4",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 58–62"
+}

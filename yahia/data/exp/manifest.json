@@ -1,0 +1,240 @@
+{
+ "curriculum": "exp",
+ "title": "مناهج اللغات التجريبية – الصف الثالث",
+ "subjects": [
+  {
+   "id": "en",
+   "title": "English",
+   "ico": "🇬🇧",
+   "color": "#8a5cf6",
+   "lang": "en",
+   "status": "ready",
+   "blocks": [
+    {
+     "id": "t1",
+     "title": "Term 1",
+     "units": [
+      {
+       "id": "u1",
+       "title": "Unit 1: Let's Learn Together!",
+       "ico": "🤝",
+       "lessons": [
+        {
+         "id": "x-en-u1-l1",
+         "title": "Greetings & Introductions",
+         "ico": "👋",
+         "file": "lessons/exp/x-en-u1-l1.json"
+        },
+        {
+         "id": "x-en-u1-l2",
+         "title": "Classroom Rules & 'wh'",
+         "ico": "🙋",
+         "file": "lessons/exp/x-en-u1-l2.json"
+        },
+        {
+         "id": "x-en-u1-l3",
+         "title": "Describing People & 'to be'",
+         "ico": "🧒",
+         "file": "lessons/exp/x-en-u1-l3.json"
+        },
+        {
+         "id": "x-en-u1-l4",
+         "title": "Daily Routines & Present Simple",
+         "ico": "⏰",
+         "file": "lessons/exp/x-en-u1-l4.json"
+        }
+       ]
+      },
+      {
+       "id": "u2",
+       "title": "Unit 2: My Family and I",
+       "ico": "👨‍👩‍👧",
+       "lessons": [
+        {
+         "id": "x-en-u2-l1",
+         "title": "Meet My Family & my/his/her",
+         "ico": "👨‍👩‍👧",
+         "file": "lessons/exp/x-en-u2-l1.json"
+        },
+        {
+         "id": "x-en-u2-l2",
+         "title": "Celebrations & the 'x' sound",
+         "ico": "🎉",
+         "file": "lessons/exp/x-en-u2-l2.json"
+        },
+        {
+         "id": "x-en-u2-l3",
+         "title": "My Family Helps Me Grow & 'ph'",
+         "ico": "📞",
+         "file": "lessons/exp/x-en-u2-l3.json"
+        },
+        {
+         "id": "x-en-u2-l4",
+         "title": "Jobs in My Family",
+         "ico": "👩‍⚕️",
+         "file": "lessons/exp/x-en-u2-l4.json"
+        }
+       ]
+      },
+      {
+       "id": "u3",
+       "title": "Unit 3: New Adventures",
+       "ico": "🗺️",
+       "lessons": [
+        {
+         "id": "x-en-u3-l1",
+         "title": "Places Around Me & Double Letters",
+         "ico": "📚",
+         "file": "lessons/exp/x-en-u3-l1.json"
+        },
+        {
+         "id": "x-en-u3-l2",
+         "title": "Egypt's Landmarks, 'ck' & Punctuation",
+         "ico": "🔺",
+         "file": "lessons/exp/x-en-u3-l2.json"
+        },
+        {
+         "id": "x-en-u3-l3",
+         "title": "Map It Out: Prepositions",
+         "ico": "🚗",
+         "file": "lessons/exp/x-en-u3-l3.json"
+        },
+        {
+         "id": "x-en-u3-l4",
+         "title": "A School Trip & Past Simple (-ed)",
+         "ico": "🦁",
+         "file": "lessons/exp/x-en-u3-l4.json"
+        },
+        {
+         "id": "x-en-r1",
+         "title": "🏆 Review: Units 1–4",
+         "ico": "🏆",
+         "file": "lessons/exp/x-en-r1.json"
+        }
+       ]
+      },
+      {
+       "id": "u4",
+       "title": "Unit 4: Let's Tell Stories!",
+       "ico": "📚",
+       "lessons": [
+        {
+         "id": "x-en-u4-l1",
+         "title": "How We Feel & Irregular Past",
+         "ico": "😊",
+         "file": "lessons/exp/x-en-u4-l1.json"
+        },
+        {
+         "id": "x-en-u4-l2",
+         "title": "A Helping Hand & Hard/Soft 'c'",
+         "ico": "🤝",
+         "file": "lessons/exp/x-en-u4-l2.json"
+        },
+        {
+         "id": "x-en-u4-l3",
+         "title": "A Big Win: Feelings & Linking Words",
+         "ico": "⚽",
+         "file": "lessons/exp/x-en-u4-l3.json"
+        }
+       ]
+      },
+      {
+       "id": "u5",
+       "title": "Unit 5: Together Is Better",
+       "ico": "🤗",
+       "lessons": [
+        {
+         "id": "x-en-u5-l1",
+         "title": "Teamwork & Chores",
+         "ico": "🧹",
+         "file": "lessons/exp/x-en-u5-l1.json"
+        },
+        {
+         "id": "x-en-u5-l2",
+         "title": "Teamwork at School, Action Verbs & Hard 'g'",
+         "ico": "🌉",
+         "file": "lessons/exp/x-en-u5-l2.json"
+        },
+        {
+         "id": "x-en-u5-l3",
+         "title": "Teamwork in Sports & Soft 'g'",
+         "ico": "🥅",
+         "file": "lessons/exp/x-en-u5-l3.json"
+        },
+        {
+         "id": "x-en-u5-l4",
+         "title": "I Help My Community!",
+         "ico": "🌳",
+         "file": "lessons/exp/x-en-u5-l4.json"
+        }
+       ]
+      },
+      {
+       "id": "u6",
+       "title": "Unit 6: Dare to Dream",
+       "ico": "🚀",
+       "lessons": [
+        {
+         "id": "x-en-u6-l1",
+         "title": "My Goal, My Dream & Present Continuous",
+         "ico": "🎯",
+         "file": "lessons/exp/x-en-u6-l1.json"
+        },
+        {
+         "id": "x-en-u6-l2",
+         "title": "A Day to Remember & spr / spl / scr",
+         "ico": "🚲",
+         "file": "lessons/exp/x-en-u6-l2.json"
+        },
+        {
+         "id": "x-en-u6-l3",
+         "title": "I Did It! & Helping Others Succeed",
+         "ico": "💯",
+         "file": "lessons/exp/x-en-u6-l3.json"
+        },
+        {
+         "id": "x-en-r2",
+         "title": "🏆 Review: Units 4–6",
+         "ico": "🏆",
+         "file": "lessons/exp/x-en-r2.json"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ar",
+   "title": "اللغة العربية",
+   "ico": "📚",
+   "color": "#ff9f2e",
+   "status": "soon",
+   "blocks": []
+  },
+  {
+   "id": "ma",
+   "title": "Maths",
+   "ico": "➗",
+   "color": "#2fb36d",
+   "status": "soon",
+   "blocks": []
+  },
+  {
+   "id": "sc",
+   "title": "Science",
+   "ico": "🔬",
+   "color": "#14a5c9",
+   "status": "soon",
+   "blocks": []
+  },
+  {
+   "id": "so",
+   "title": "الدراسات الاجتماعية",
+   "ico": "🌍",
+   "color": "#ff6fa5",
+   "status": "soon",
+   "blocks": []
+  }
+ ]
+}

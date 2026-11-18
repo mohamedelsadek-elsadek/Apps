@@ -1,0 +1,295 @@
+{
+ "title": "How We Feel & Irregular Past",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Adam and Omar in the Garden",
+   "ico": "📖",
+   "keys": [
+    "happy",
+    "sad",
+    "excited",
+    "angry",
+    "shy",
+    "tired",
+    "bored",
+    "scared",
+    "Then",
+    "Finally",
+    "proud"
+   ],
+   "scenes": [
+    {
+     "e": "😊😢",
+     "t": "{name} learns about feelings: happy, sad, excited, angry, shy, tired, bored, scared."
+    },
+    {
+     "e": "🌳🐱",
+     "t": "Adam and Omar were playing in the garden when they heard a cat cry."
+    },
+    {
+     "e": "👂",
+     "t": "Then, they quickly followed the sound, and soon they saw the cat stuck in a fence."
+    },
+    {
+     "e": "🤝",
+     "t": "Because the hole was small, Adam held the fence while Omar carefully pulled the cat out."
+    },
+    {
+     "e": "🐈💖",
+     "t": "Finally, the cat jumped free and licked their hands."
+    },
+    {
+     "e": "🏅",
+     "t": "Since they worked as a team, they saved the cat. They felt happy and proud."
+    },
+    {
+     "e": "🔁",
+     "t": "Some verbs are irregular: is → was, are → were, do → did, see → saw, come → came, have → had, go → went, eat → ate."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "happy",
+     "e": "😊",
+     "k": "mean",
+     "a": "I feel happy when I play."
+    },
+    {
+     "w": "sad",
+     "e": "😢",
+     "k": "mean",
+     "a": "I feel sad when I lose my toy."
+    },
+    {
+     "w": "excited",
+     "e": "🤩",
+     "k": "mean",
+     "a": "I was excited when I went to the zoo."
+    },
+    {
+     "w": "angry",
+     "e": "😠",
+     "k": "mean",
+     "a": "Very cross."
+    },
+    {
+     "w": "scared",
+     "e": "😨",
+     "k": "mean",
+     "a": "I felt scared when I watched a scary movie."
+    },
+    {
+     "w": "tired",
+     "e": "🥱",
+     "k": "mean",
+     "a": "I need to sleep."
+    },
+    {
+     "w": "bored",
+     "e": "😐",
+     "k": "mean",
+     "a": "Nothing fun to do."
+    },
+    {
+     "w": "proud",
+     "e": "🏅",
+     "k": "mean",
+     "a": "Happy about what you did."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the verb with its irregular past.",
+   "pairs": [
+    [
+     "is",
+     "was"
+    ],
+    [
+     "are",
+     "were"
+    ],
+    [
+     "see",
+     "saw"
+    ],
+    [
+     "go",
+     "went"
+    ],
+    [
+     "have",
+     "had"
+    ],
+    [
+     "come",
+     "came"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "How do they feel?",
+   "ico": "🐦",
+   "prompt": "Choose the feeling.",
+   "bins": [
+    {
+     "id": "h",
+     "label": "happy / excited",
+     "ico": "😊",
+     "cls": "noun"
+    },
+    {
+     "id": "s",
+     "label": "sad / scared",
+     "ico": "😢",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "h": "A good feeling.",
+    "s": "A bad feeling."
+   },
+   "items": [
+    [
+     "I got a gift",
+     "h"
+    ],
+    [
+     "We went to the zoo",
+     "h"
+    ],
+    [
+     "My team won",
+     "h"
+    ],
+    [
+     "I saved a cat",
+     "h"
+    ],
+    [
+     "My toy broke",
+     "s"
+    ],
+    [
+     "I watched a scary movie",
+     "s"
+    ],
+    [
+     "I fell and hurt my knee",
+     "s"
+    ],
+    [
+     "I lost my bag",
+     "s"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Adam and Omar (are / were) playing in the park.",
+     "o": [
+      "are",
+      "were"
+     ],
+     "a": 1
+    },
+    {
+     "q": "They (saw / see) a cat in trouble.",
+     "o": [
+      "saw",
+      "see"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The cat (jumped / jump) free.",
+     "o": [
+      "jump",
+      "jumped"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Omar (pull / pulled) the cat out.",
+     "o": [
+      "pulled",
+      "pull"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Both boys (felt / feel) proud.",
+     "o": [
+      "felt",
+      "feel"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Where did Adam and Omar play?",
+     "o": [
+      "at school",
+      "in the zoo",
+      "in the garden"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What was the problem?",
+     "o": [
+      "they lost a ball",
+      "a cat was stuck in a fence",
+      "it was raining"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Past of 'go':",
+     "o": [
+      "went",
+      "goed",
+      "gone"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Past of 'eat':",
+     "o": [
+      "eated",
+      "ate",
+      "eats"
+     ],
+     "a": 1
+    },
+    {
+     "q": "A linking word:",
+     "o": [
+      "Finally",
+      "Cat",
+      "Garden"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u4-l1",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 68–73"
+}

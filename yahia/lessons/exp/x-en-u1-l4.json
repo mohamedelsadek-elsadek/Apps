@@ -1,0 +1,302 @@
+{
+ "title": "Daily Routines & Present Simple",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Amir's Day",
+   "ico": "📖",
+   "keys": [
+    "wake up",
+    "brush my teeth",
+    "get dressed",
+    "have breakfast",
+    "go to school",
+    "do my homework",
+    "make my bed"
+   ],
+   "scenes": [
+    {
+     "e": "⏰",
+     "t": "{name} reads about Amir's daily routine. Hello, I am Amir. Every day, I wake up at 6 a.m."
+    },
+    {
+     "e": "🪥👕",
+     "t": "I brush my teeth and get dressed."
+    },
+    {
+     "e": "🍳🏫",
+     "t": "After I have breakfast, I go to school."
+    },
+    {
+     "e": "📚⚽",
+     "t": "I learn and play with my friends."
+    },
+    {
+     "e": "🏠✏️",
+     "t": "After school, I go home and do my homework."
+    },
+    {
+     "e": "➕s",
+     "t": "We use the present simple for routines. With he, she, it we add -s: He plays. She wakes up at 7 a.m."
+    },
+    {
+     "e": "➕es",
+     "t": "If the verb ends in ch, sh, x, ss or o, we add -es: he brushes, she watches, he goes."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "wake up",
+     "e": "⏰",
+     "k": "mean",
+     "a": "Open your eyes in the morning."
+    },
+    {
+     "w": "brush my teeth",
+     "e": "🪥",
+     "k": "mean",
+     "a": "Clean my teeth."
+    },
+    {
+     "w": "get dressed",
+     "e": "👕",
+     "k": "mean",
+     "a": "Put on my clothes."
+    },
+    {
+     "w": "make my bed",
+     "e": "🛏️",
+     "k": "mean",
+     "a": "Tidy my bed."
+    },
+    {
+     "w": "brush my hair",
+     "e": "💇",
+     "k": "mean",
+     "a": "Make my hair neat."
+    },
+    {
+     "w": "have breakfast",
+     "e": "🍳",
+     "k": "mean",
+     "a": "Eat in the morning."
+    },
+    {
+     "w": "go to school",
+     "e": "🏫",
+     "k": "mean",
+     "a": "Go to learn."
+    },
+    {
+     "w": "do my homework",
+     "e": "✏️",
+     "k": "mean",
+     "a": "School work at home."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the subject with the right verb.",
+   "pairs": [
+    [
+     "I",
+     "play"
+    ],
+    [
+     "He",
+     "plays"
+    ],
+    [
+     "She",
+     "watches"
+    ],
+    [
+     "We",
+     "go"
+    ],
+    [
+     "It",
+     "goes"
+    ],
+    [
+     "They",
+     "brush"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "-s or -es?",
+   "ico": "✏️",
+   "prompt": "With he / she / it, do we add -s or -es?",
+   "bins": [
+    {
+     "id": "s",
+     "label": "add -s",
+     "ico": "➕",
+     "cls": "noun"
+    },
+    {
+     "id": "es",
+     "label": "add -es",
+     "ico": "➕➕",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "s": "Most verbs just add -s.",
+    "es": "Verbs ending in ch, sh, x, ss or o add -es."
+   },
+   "items": [
+    [
+     "play",
+     "s"
+    ],
+    [
+     "wake",
+     "s"
+    ],
+    [
+     "eat",
+     "s"
+    ],
+    [
+     "read",
+     "s"
+    ],
+    [
+     "make",
+     "s"
+    ],
+    [
+     "brush",
+     "es"
+    ],
+    [
+     "watch",
+     "es"
+    ],
+    [
+     "go",
+     "es"
+    ],
+    [
+     "do",
+     "es"
+    ],
+    [
+     "wash",
+     "es"
+    ],
+    [
+     "fix",
+     "es"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "He (play / plays) football.",
+     "o": [
+      "play",
+      "plays"
+     ],
+     "a": 1
+    },
+    {
+     "q": "I (brush / brushes) my teeth.",
+     "o": [
+      "brush",
+      "brushes"
+     ],
+     "a": 0
+    },
+    {
+     "q": "They (go / goes) to school every day.",
+     "o": [
+      "goes",
+      "go"
+     ],
+     "a": 1
+    },
+    {
+     "q": "She (wake / wakes) up at 7 a.m.",
+     "o": [
+      "wakes",
+      "wake"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Mariam (brush / brushes) her teeth every morning.",
+     "o": [
+      "brushes",
+      "brush"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Judy (eat / eats) breakfast at 8 o'clock.",
+     "o": [
+      "eats",
+      "eat"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What time does Amir wake up?",
+     "o": [
+      "6 a.m.",
+      "8 a.m.",
+      "7 a.m."
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does Amir do after breakfast?",
+     "o": [
+      "He goes to school.",
+      "He watches TV.",
+      "He sleeps."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Where does Amir go after school?",
+     "o": [
+      "home",
+      "the zoo",
+      "the park"
+     ],
+     "a": 0
+    },
+    {
+     "q": "I ___ my bed when I wake up.",
+     "o": [
+      "do",
+      "have",
+      "make"
+     ],
+     "a": 2
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u1-l4",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 19–26"
+}

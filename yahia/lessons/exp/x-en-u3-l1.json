@@ -1,0 +1,326 @@
+{
+ "title": "Places Around Me & Double Letters",
+ "activities": [
+  {
+   "type": "story",
+   "title": "Youssef's Busy Day",
+   "ico": "📖",
+   "keys": [
+    "house",
+    "library",
+    "supermarket",
+    "train station",
+    "museum",
+    "park",
+    "First",
+    "Then"
+   ],
+   "scenes": [
+    {
+     "e": "🏠🌅",
+     "t": "{name} reads about Youssef. Youssef left his house early in the morning."
+    },
+    {
+     "e": "📚",
+     "t": "First, he went to the library to read a book."
+    },
+    {
+     "e": "🛒",
+     "t": "Then, he and his mom went shopping at the supermarket."
+    },
+    {
+     "e": "🚆",
+     "t": "They passed the train station and saw a big train."
+    },
+    {
+     "e": "🏛️",
+     "t": "After lunch, they visited the museum."
+    },
+    {
+     "e": "🛝",
+     "t": "In the afternoon, they played at the park. What a fun and busy day!"
+    },
+    {
+     "e": "🔔",
+     "t": "After a short vowel, we often double f, l, s, z at the end: cuff, bell, tell, miss, grass, buzz, jazz."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "house",
+     "e": "🏠",
+     "k": "mean",
+     "a": "Where you live."
+    },
+    {
+     "w": "library",
+     "e": "📚",
+     "k": "mean",
+     "a": "Where you read books."
+    },
+    {
+     "w": "supermarket",
+     "e": "🛒",
+     "k": "mean",
+     "a": "Where you buy food."
+    },
+    {
+     "w": "train station",
+     "e": "🚆",
+     "k": "mean",
+     "a": "Where you take the train."
+    },
+    {
+     "w": "museum",
+     "e": "🏛️",
+     "k": "mean",
+     "a": "Where you see old things."
+    },
+    {
+     "w": "park",
+     "e": "🛝",
+     "k": "mean",
+     "a": "Where you play with friends."
+    },
+    {
+     "w": "bell",
+     "e": "🔔",
+     "k": "mean",
+     "a": "Double 'll' at the end."
+    },
+    {
+     "w": "buzz",
+     "e": "🐝",
+     "k": "mean",
+     "a": "Double 'zz' at the end."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Memory Game",
+   "ico": "🧠",
+   "prompt": "Match the question with the place.",
+   "pairs": [
+    [
+     "Where do you buy food?",
+     "supermarket"
+    ],
+    [
+     "Where do you read books?",
+     "library"
+    ],
+    [
+     "Where do you play with friends?",
+     "park"
+    ],
+    [
+     "Where do you live?",
+     "house"
+    ],
+    [
+     "Where do you see old things?",
+     "museum"
+    ],
+    [
+     "Where do you take a train?",
+     "train station"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "card",
+   "title": "ff, ll, ss or zz?",
+   "ico": "🔤",
+   "prompt": "Which double letters end the word?",
+   "bins": [
+    {
+     "id": "ff",
+     "label": "ff",
+     "ico": "✋",
+     "cls": "sun"
+    },
+    {
+     "id": "ll",
+     "label": "ll",
+     "ico": "🔔",
+     "cls": "noun"
+    },
+    {
+     "id": "ss",
+     "label": "ss",
+     "ico": "🌱",
+     "cls": "moon"
+    },
+    {
+     "id": "zz",
+     "label": "zz",
+     "ico": "🐝",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "ff": "cuff, off, staff",
+    "ll": "bell, tell, well",
+    "ss": "miss, grass, class",
+    "zz": "buzz, fuzz, jazz"
+   },
+   "items": [
+    [
+     "off",
+     "ff"
+    ],
+    [
+     "cuff",
+     "ff"
+    ],
+    [
+     "staff",
+     "ff"
+    ],
+    [
+     "bell",
+     "ll"
+    ],
+    [
+     "tell",
+     "ll"
+    ],
+    [
+     "well",
+     "ll"
+    ],
+    [
+     "miss",
+     "ss"
+    ],
+    [
+     "grass",
+     "ss"
+    ],
+    [
+     "class",
+     "ss"
+    ],
+    [
+     "buzz",
+     "zz"
+    ],
+    [
+     "fuzz",
+     "zz"
+    ],
+    [
+     "jazz",
+     "zz"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Where did Youssef go first?",
+     "o": [
+      "park",
+      "museum",
+      "library"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Who did Youssef go to the supermarket with?",
+     "o": [
+      "his friend",
+      "his mom",
+      "his teacher"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What did Youssef see at the train station?",
+     "o": [
+      "a bus",
+      "a train",
+      "a boat"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Where did Youssef go after lunch?",
+     "o": [
+      "museum",
+      "supermarket",
+      "park"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Was Youssef's day busy or boring?",
+     "o": [
+      "boring",
+      "busy"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Where do you buy food?",
+     "o": [
+      "supermarket",
+      "library",
+      "museum"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Circle the double consonant word:",
+     "o": [
+      "grass",
+      "gra",
+      "gras"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Fill in: be__",
+     "o": [
+      "ff",
+      "zz",
+      "ll"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Fill in: bu__",
+     "o": [
+      "ll",
+      "ss",
+      "zz"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Fill in: mi__",
+     "o": [
+      "zz",
+      "ss",
+      "ff"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "x-en-u3-l1",
+ "lang": "en",
+ "audio": {},
+ "source": "English – Primary 3 – Term 1 (Ministry of Education) pp. 44–49"
+}
