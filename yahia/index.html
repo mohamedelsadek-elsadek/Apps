@@ -241,7 +241,8 @@ function unlockAudio(){ if(AUNLOCK) return; AUNLOCK=true;
  }
 document.addEventListener("pointerdown",unlockAudio,{once:false,capture:true});
 document.addEventListener("touchend",unlockAudio,{capture:true});
-function pickVoice(){try{const v=speechSynthesis.getVoices();arVoice=v.find(x=>/ar[-_]EG/i.test(x.lang))||v.find(x=>/^ar/i.test(x.lang))||null;enVoice=v.find(x=>/en[-_]US/i.test(x.lang)&&/Samantha|Google|Female|Aria|Jenny/i.test(x.name))||v.find(x=>/en[-_](US|GB)/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;frVoice=v.find(x=>/fr[-_]FR/i.test(x.lang)&&/Google|Amelie|Amélie|Thomas|Denise|Female/i.test(x.name))||v.find(x=>/fr[-_]FR/i.test(x.lang))||v.find(x=>/^fr/i.test(x.lang))||null}catch(e){}}
+function pickVoice(){try{const v=speechSynthesis.getVoices();arVoice=v.find(x=>/ar[-_]EG/i.test(x.lang))||v.find(x=>/^ar/i.test(x.lang))||null;const en=v.filter(x=>/^en[-_](US|GB|AU|IE)/i.test(x.lang)), rank=x=>(/Premium/i.test(x.name)?60:0)+(/Enhanced|Natural|Neural|Online/i.test(x.name)?40:0)+(/Siri/i.test(x.name)?30:0)+(/Ava|Zoe|Samantha|Aria|Jenny|Emma|Google US English|Google UK English Female|Serena|Karen|Moira/i.test(x.name)?20:0)+(/en[-_]US/i.test(x.lang)?5:0)-(/Fred|Albert|Bad|Bahh|Bells|Boing|Bubbles|Cellos|Wobble|Whisper|Zarvox|Trinoids|Organ|Jester|Superstar|Junior|Ralph|Kathy|Grandpa|Grandma|Eddy|Flo|Reed|Rocko|Sandy|Shelley/i.test(x.name)?100:0);
+  en.sort((a,b)=>rank(b)-rank(a)); enVoice=en[0]||v.find(x=>/^en/i.test(x.lang))||null;frVoice=v.find(x=>/fr[-_]FR/i.test(x.lang)&&/Google|Amelie|Amélie|Thomas|Denise|Female/i.test(x.name))||v.find(x=>/fr[-_]FR/i.test(x.lang))||v.find(x=>/^fr/i.test(x.lang))||null}catch(e){}}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
 function stopVoice(){try{if(curAudio){curAudio.pause();curAudio=null}speechSynthesis.cancel()}catch(e){}}
 function speak(text,key,onend,onmeta){
