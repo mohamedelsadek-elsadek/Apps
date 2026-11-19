@@ -342,7 +342,7 @@ function renderHome(){
     $('stAgo').textContent='آخر تحديث: '+(ago<1?'دلوقتي':ago<60?'من '+ago+' د':ago<1440?'من '+Math.round(ago/60)+' س':'من '+Math.round(ago/1440)+' يوم');
     $('carState').innerHTML='<div><small>العداد التقريبي</small><b>'+(s.odo?f0(s.odo)+' كم':'—')+'</b></div><div><small>الرحلة الحالية</small><b>'+(s.trip_km>0.05?f1(s.trip_km)+' كم · '+hm(s.trip_min):'واقفة')+'</b></div>'
       +'<div><small>العربية</small><b>'+esc(s.car||'—')+'</b></div><div><small>نسخة الشاشة</small><b>'+esc(s.ver||'—')+'</b></div>'
-      +(s.parked&&s.parked.lat?'<div class="full" style="grid-column:1/-1"><small>العربية راكنة فين (آخر وقفة '+tm(s.parked.t)+' '+(s.parked.t?new Date(s.parked.t).toLocaleDateString('en-GB'):'')+')</small><b><a href="https://www.google.com/maps/search/?api=1&query='+(+s.parked.lat)+','+(+s.parked.lon)+'" target="_blank" rel="noopener">📍 افتح في الخريطة</a></b></div>':'')
+      +(s.parked&&s.parked.lat?'<div class="full" style="grid-column:1/-1"><small>العربية راكنة فين (آخر وقفة '+tm(s.parked.t)+' '+(s.parked.t?new Date(s.parked.t).toLocaleDateString('en-GB'):'')+')</small><b><a href="https://www.google.com/maps/search/?api=1&query='+(+s.parked.lat)+','+(+s.parked.lon)+'" target="_blank" rel="noopener">📍 افتح في الخريطة</a></b>'+(s.parked.acc>0?' <small>(الدقة ± '+Math.round(+s.parked.acc)+' م)</small>':'')+'</div>':'')
       +docCell(s.doc_car,'رخصة العربية')+docCell(s.doc_driver,'رخصة القيادة')+docCell(s.doc_ins,'التأمين')+(Array.isArray(s.docs_extra)?s.docs_extra.map(function(x){return docCell(x.d,x.n)}).join(''):'');
   }
   var fa=fuelAlert();$('fuelAlert').innerHTML=fa?'<div class="alert"><b>⛽ تنبيه استهلاك:</b> '+fa+'</div>':'';
