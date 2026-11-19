@@ -525,11 +525,27 @@ async function viewParent(pid){
     <div class="card"><h2>غلط في إيه؟</h2>${m.length?`<table>${m.map(x=>`<tr><td>${esc(x.l)}<br><span class="note">${esc(x.a)}</span></td><td>${esc(x.what)}</td></tr>`).join("")}</table>`:`<p class="note">مفيش غلطات لحد دلوقتي 👏</p>`}</div>
     <div class="card"><h2>🎬 فيديوهات الدروس</h2><p class="note">دوّر على فيديو قصير (أقل من 4 دقايق) واتفرج عليه الأول، وبعدين انسخ اللينك هنا. هيظهر لـ${esc(k.name)} في أول الدرس باسم «شوف بعينك».</p>
     <table>${vidRows(PM)}</table></div>
+    <div class="card"><h2>🔑 حساب دخول لـ${esc(k.name)}</h2><p class="note">حساب بيفتح «عالم يحيى» بس — مش بيشوف أي برنامج تاني من برامجك. اعمله مرة واحدة وادّي الطفل الإيميل والباسورد.</p>
+     <input id="kaE" value="${esc((k.nameEn||k.id).toLowerCase().replace(/[^a-z0-9]/g,""))}.world@kids.app" style="width:100%;padding:8px;border-radius:10px;border:1px solid #ccc;font:inherit;direction:ltr;margin-bottom:6px">
+     <input id="kaP" value="${esc((k.nameEn||"kid").toLowerCase().replace(/[^a-z0-9]/g,""))}${Math.floor(1000+Math.random()*9000)}" style="width:100%;padding:8px;border-radius:10px;border:1px solid #ccc;font:inherit;direction:ltr;margin-bottom:6px">
+     <button class="btn g" id="kaGo">اعمل الحساب</button><div id="kaR" class="note" style="margin-top:8px"></div></div>
     <div class="card note">${SYNC==="on"?"☁️ متزامن — كل طفل ليه مساره، وأي جهاز يشوف نفس المستوى.":SYNC==="err"?"⚠️ المزامنة مش شغالة دلوقتي — التقدّم محفوظ على الجهاز ده.":"⏳ بيوصل للمزامنة…"}</div>`;
   };
-  const wire=()=>document.querySelectorAll("[data-vl]").forEach(b=>b.onclick=()=>{const lid=b.dataset.vl,inp=document.getElementById("vi-"+lid);
+  const wireKA=()=>{const g=$("kaGo"); if(!g) return; g.onclick=async()=>{const e=$("kaE").value.trim().toLowerCase(), pw=$("kaP").value.trim(), R=$("kaR");
+    if(pw.length<6){R.textContent="⚠️ الباسورد لازم 6 حروف أو أرقام على الأقل";return}
+    R.textContent="⏳ بعمل الحساب…"; g.disabled=true;
+    try{
+      if(!window.AppAuth) throw new Error("لازم تكون داخل بحسابك الأول");
+      const adm=await AppAuth.restToken();
+      const r=await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="+FB.apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:e,password:pw,returnSecureToken:true})});
+      const j=await r.json(); if(!r.ok) throw new Error(j.error&&j.error.message==="EMAIL_EXISTS"?"الإيميل ده متسجل قبل كده — غيّره":"تعذر عمل الحساب: "+(j.error&&j.error.message));
+      const w=await fetch(FB.databaseURL+"/acl/"+j.localId+".json?auth="+encodeURIComponent(adm),{method:"PUT",body:JSON.stringify({apps:{yahia_world:true},name:k.name+" — عالم يحيى"})});
+      if(!w.ok) throw new Error("الحساب اتعمل بس مقدرتش أديله صلاحية المنصة (حسابك مش أدمن؟)");
+      R.innerHTML=`✅ اتعمل! ابعت لـ${esc(k.name)}:<br><b style="direction:ltr;display:inline-block">🌐 mohamedelsadek-elsadek.github.io/Apps/yahia/<br>📧 ${esc(e)}<br>🔒 ${esc(pw)}</b>`;
+    }catch(err){R.textContent="⚠️ "+err.message; g.disabled=false}};};
+  const wire=()=>{wireKA(); document.querySelectorAll("[data-vl]").forEach(b=>b.onclick=()=>{const lid=b.dataset.vl,inp=document.getElementById("vi-"+lid);
     if(b.dataset.x){setVid(lid,"");inp.value="";b.parentNode.querySelector(".vst").textContent="";return}
-    if(setVid(lid,inp.value)){b.parentNode.querySelector(".vst").textContent="✅ اتحفظ"}else{b.parentNode.querySelector(".vst").textContent="⚠️ اللينك مش يوتيوب"}});
+    if(setVid(lid,inp.value)){b.parentNode.querySelector(".vst").textContent="✅ اتحفظ"}else{b.parentNode.querySelector(".vst").textContent="⚠️ اللينك مش يوتيوب"}});};
   const _d=draw; const draw2=T=>{_d(T);wire()};
   if(PKID===KID) return draw2(S);
   const T=loadKidLocal(PKID); draw2(T);
