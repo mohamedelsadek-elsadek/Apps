@@ -602,9 +602,15 @@ function limb(x,y,w,h,d,mat,ex){const piv=new THREE.Group(); piv.position.set(x,
   if(ex) piv.add(ex); Wb.add(piv); return piv;}
 function mkBoot(){const g=new THREE.Group(); const sh=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.088,0.15,10),bootM); sh.position.y=0.075; g.add(sh);
   const toe=new THREE.Mesh(new THREE.SphereGeometry(0.082,10,8),bootM); toe.scale.set(1,0.62,1.55); toe.position.set(0,0.05,0.06); g.add(toe); return g;}
-const bootL=mkBoot(); bootL.position.set(0,-0.82,0.04);
-const bootR=mkBoot(); bootR.position.set(0,-0.82,0.04);
-const legL=limb(-0.12,0.88,0.17,0.8,0.19,pants,bootL), legR=limb(0.12,0.88,0.17,0.8,0.19,pants,bootR);
+function mkLeg(x){const piv=new THREE.Group(); piv.position.set(x,0.88,0); Wb.add(piv);
+  const th=new THREE.Mesh(new THREE.CylinderGeometry(0.088,0.075,0.42,10),pants); th.position.y=-0.21; th.scale.z=1.12; piv.add(th);
+  const hip=new THREE.Mesh(new THREE.SphereGeometry(0.085,10,8),pants); hip.scale.z=1.12; piv.add(hip);
+  const knee=new THREE.Group(); knee.position.y=-0.42; piv.add(knee);
+  const sh=new THREE.Mesh(new THREE.CylinderGeometry(0.072,0.055,0.42,10),pants); sh.position.y=-0.19; sh.scale.z=1.1; knee.add(sh);
+  const kj=new THREE.Mesh(new THREE.SphereGeometry(0.07,10,8),pants); knee.add(kj);
+  const bt=mkBoot(); bt.position.set(0,-0.4,0.04); knee.add(bt);
+  piv.userData.knee=knee; return piv;}
+const legL=mkLeg(-0.12), legR=mkLeg(0.12);
 const torsoPts=[[0.205,-0.31],[0.175,-0.13],[0.225,0.10],[0.215,0.24],[0.10,0.30],[0.055,0.33]].map(([x,y])=>new THREE.Vector2(x,y));
 const torso=new THREE.Mesh(new THREE.LatheGeometry(torsoPts,14),suit); torso.position.y=1.18; torso.scale.z=0.68; Wb.add(torso);
 const belt=new THREE.Mesh(new THREE.CylinderGeometry(0.208,0.208,0.045,14),M('#2c3038',{roughness:0.6})); belt.position.y=0.92; belt.scale.z=0.68; Wb.add(belt);
@@ -618,7 +624,7 @@ const hL=new THREE.Mesh(handG,skin); hL.position.y=-0.58; const hR=hL.clone();
 const armL=limb(-0.26,1.44,0.12,0.56,0.13,shirtM,hL), armR=limb(0.26,1.44,0.12,0.56,0.13,shirtM,hR);
 const sack=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.3,0.3),sackM); sack.visible=false; Wb.add(sack);
 clickable(torso,'walk');
-const W={x:-12.2,z:-1.2,h:0,path:[],job:[],cur:null,anim:'idle',animT:0,ph:0,v:0,label:''};
+const W={x:-12.2,z:-1.2,h:0,path:[],job:[],cur:null,anim:'idle',animT:0,ph:0,v:0,turn:0,walkF:0,label:''};
 function isIn(x){return x>-10.05;}
 function clampSpot(x,z){return isIn(x)?[clamp(x,-9.7,-0.7),clamp(z,-3.75,3.75)]:[clamp(x,-15,-10.45),clamp(z,-5.5,5.5)];}
 function route(t){const pts=[],fi=isIn(W.x),ti=isIn(t[0]); if(fi&&!ti) pts.push(SPOT.doorIn,SPOT.doorOut); else if(!fi&&ti) pts.push(SPOT.doorOut,SPOT.doorIn); pts.push(clampSpot(t[0],t[1])); return pts;}
@@ -631,25 +637,27 @@ function workerUpdate(dt,frozen){
   if(!frozen){
     if(!W.cur&&W.job.length){W.cur=W.job.shift(); if(W.cur.go) W.path=route(W.cur.go); if(W.cur.act){W.animT=W.cur.t;}}
     const c=W.cur;
-    if(c&&c.go){const p=W.path[0]; if(!p){W.cur=null;} else {const dx=p[0]-W.x,dz=p[1]-W.z,d=Math.hypot(dx,dz); if(d<0.06){W.path.shift(); if(!W.path.length) W.cur=null;} else {const ts=2.6*k; W.v=Math.min(ts,W.v+7*dt); const st=Math.min(d,W.v*dt); W.x+=dx/d*st; W.z+=dz/d*st; let dh=Math.atan2(dx,dz)-W.h; while(dh>Math.PI)dh-=6.283; while(dh<-Math.PI)dh+=6.283; W.h+=dh*Math.min(1,dt*7);} } W.anim='walk';}
+    if(c&&c.go){const p=W.path[0]; if(!p){W.cur=null;} else {const dx=p[0]-W.x,dz=p[1]-W.z,d=Math.hypot(dx,dz); if(d<0.06){W.path.shift(); if(!W.path.length) W.cur=null;} else {let dh=Math.atan2(dx,dz)-W.h; while(dh>Math.PI)dh-=6.283; while(dh<-Math.PI)dh+=6.283; W.turn+=(clamp(dh,-1,1)-W.turn)*Math.min(1,dt*4); const ts=2.6*k*clamp(1.15-Math.abs(dh),0.15,1); W.v=Math.min(ts,W.v+7*dt); const st=Math.min(d,W.v*dt); W.x+=dx/d*st; W.z+=dz/d*st; W.h+=dh*Math.min(1,dt*7);} } W.anim='walk';}
     else if(c&&c.act){W.anim=c.act; if(c.face!=null) W.h=c.face; W.animT-=dt*k; if(W.animT<=0) W.cur=null;}
     else if(c&&c.fn){W.cur=null; c.fn();}
     else if(c&&c.carry!=null){sack.visible=c.carry; W.cur=null;}
     if(!W.cur&&!W.job.length){W.anim='idle'; W.label='';}
-    if(W.anim!=='walk') W.v=Math.max(0,W.v-9*dt);
+    if(W.anim!=='walk'){W.v=Math.max(0,W.v-9*dt); W.turn*=Math.max(0,1-dt*5);}
+    W.walkF+=((W.anim==='walk'?1:0)-W.walkF)*Math.min(1,dt*4);
     W.ph+=dt*(W.anim==='walk'?2.4*W.v:2.2);
     if(W.anim==='walk'&&AU.ctx){const sw0=Math.sin(W.ph); if(AU.stepPrev<=0&&sw0>0) sfx('step'); AU.stepPrev=sw0;}
     {const inNow=isIn(W.x); if(inNow!==AU.wasIn){AU.wasIn=inNow; if(AU.ctx&&S.phase!=='intro') sfx('creak');}}
   }
   Wg.position.set(W.x,0,W.z); Wg.rotation.y=W.h;
-  const a=W.anim, sw=a==='walk'?Math.sin(W.ph)*0.55*Math.min(1,W.v/2):0;
+  const a=W.anim, f=W.walkF, amp=f*Math.min(1,W.v/2), sw=Math.sin(W.ph)*0.55*amp;
   legL.rotation.x=sw; legR.rotation.x=-sw; armL.rotation.x=-sw*0.85; armR.rotation.x=sw*0.85;
-  Wb.position.y=(a==='walk'?Math.abs(Math.cos(W.ph))*0.045:0); torso.rotation.x=(a==='walk'?0.09:0);
-  Wb.rotation.z=(a==='walk'?Math.sin(W.ph)*0.045:0); armL.rotation.z=0.07; torso.scale.y=1+(a==='idle'?0.015*Math.sin(W.ph*1.2):0);
-  if(a==='crouch'){Wb.position.y=-0.32; legL.rotation.x=legR.rotation.x=-1.0; torso.rotation.x=0.35; armL.rotation.x=armR.rotation.x=-0.9+Math.sin(W.ph*2)*0.15;}
+  legL.userData.knee.rotation.x=-Math.max(0,Math.sin(W.ph-0.8))*0.85*amp; legR.userData.knee.rotation.x=-Math.max(0,Math.sin(W.ph+2.34))*0.85*amp;
+  Wb.position.y=Math.abs(Math.cos(W.ph))*0.045*amp; torso.rotation.x=0.09*f;
+  Wb.rotation.z=Math.sin(W.ph)*0.045*amp+W.turn*0.1*f; armL.rotation.z=0.02+0.06*f; torso.scale.y=1+(a==='idle'?0.015*Math.sin(W.ph*1.2):0);
+  if(a==='crouch'){Wb.position.y=-0.32; legL.rotation.x=legR.rotation.x=-1.0; legL.userData.knee.rotation.x=legR.userData.knee.rotation.x=1.15; torso.rotation.x=0.35; armL.rotation.x=armR.rotation.x=-0.9+Math.sin(W.ph*2)*0.15;}
   if(a==='pour'){armL.rotation.x=armR.rotation.x=-1.3; torso.rotation.x=0.2;}
   if(a==='panel'){armR.rotation.x=-1.5+Math.sin(W.ph*3)*0.12; armL.rotation.x=0;}
-  if(a==='phone'){armR.rotation.x=-2.6; armR.rotation.z=0.4;} else armR.rotation.z=-0.07;
+  if(a==='phone'){armR.rotation.x=-2.6; armR.rotation.z=0.4;} else armR.rotation.z=-(0.02+0.06*f);
   if(sack.visible){if(a==='pour'){sack.position.set(0,1.05,0.45); sack.rotation.x=0.9;} else {sack.position.set(0.05,1.6,-0.05); sack.rotation.x=0;}}
 }
 const ptrG=new THREE.Group(); ptrG.visible=false; scene.add(ptrG);
