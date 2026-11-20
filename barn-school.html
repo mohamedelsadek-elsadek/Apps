@@ -1,0 +1,1254 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>مدرسة العنبر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: full-screen 3D barn, HUD glass bars pinned top and bottom, sheets slide up, modals centered. Single committed look (warm barn + deep feed-green glass). */
+:root{
+  --glass: rgba(14,40,36,.90);
+  --glass-2: #1c4740;
+  --ink: #f6f0e1;
+  --muted: #b7c8bd;
+  --flame: #ff9a3c;
+  --straw: #e2bb6c;
+  --good: #63d993;
+  --warn: #ffcb4d;
+  --bad: #ff6b5b;
+  --line: rgba(246,240,225,.15);
+  --f-display: "Baloo Bhaijaan 2", "IBM Plex Sans Arabic", Tahoma, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", Tahoma, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html,body{height:100%;overflow:hidden;background:#24363a;color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.55}
+#app{position:fixed;inset:0}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--flame);outline-offset:2px}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+
+/* HUD */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;pointer-events:none;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) max(10px, env(safe-area-inset-right,0px)) 0 max(10px, env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column;gap:6px}
+#hud > *{pointer-events:auto}
+.toprow{display:flex;gap:8px;align-items:stretch;justify-content:space-between}
+.clock{border-radius:14px;padding:6px 12px;display:flex;gap:12px;align-items:center;min-width:0}
+.clock .day{font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1;color:var(--straw)}
+.clock .time{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}
+.clock .birds{font-size:12px;color:var(--muted);white-space:nowrap}
+.speed{display:flex;border-radius:14px;overflow:hidden}
+.speed button{background:none;border:0;padding:6px 11px;font-weight:700;font-size:14px;border-inline-start:1px solid var(--line)}
+.speed button:first-child{border:0}
+.speed button[aria-pressed="true"]{background:var(--flame);color:#2a1606}
+#gauges{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+#gauges::-webkit-scrollbar{display:none}
+.g{flex:0 0 auto;border-radius:12px;padding:5px 10px;display:flex;flex-direction:column;align-items:flex-start;gap:0;background:var(--glass);border:1px solid var(--line);min-width:78px;text-align:start}
+.g small{font-size:11px;color:var(--muted);line-height:1.2}
+.g b{font-size:16px;font-variant-numeric:tabular-nums;line-height:1.3}
+.g i{font-style:normal;font-size:10.5px;color:var(--muted)}
+.g[data-s="good"]{box-shadow:inset 0 -3px 0 var(--good)}
+.g[data-s="warn"]{box-shadow:inset 0 -3px 0 var(--warn)}
+.g[data-s="bad"]{box-shadow:inset 0 -3px 0 var(--bad);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{background:rgba(120,30,25,.9)}}
+.mood{border-radius:12px;padding:6px 12px;font-size:13.5px;display:flex;gap:8px;align-items:center;align-self:flex-start;max-width:100%}
+.mood .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;background:var(--good)}
+
+.g[data-s="good"] b::before{content:"✓ ";color:var(--good)}
+.g[data-s="warn"] b::before{content:"! ";color:var(--warn)}
+.g[data-s="bad"] b::before{content:"✕ ";color:var(--bad)}
+.optrow{display:flex;gap:6px;align-items:stretch}
+.optrow .opt{flex:1;min-width:0}
+.spk{flex:0 0 48px;min-height:48px;border:1px solid var(--line);background:var(--glass-2);border-radius:14px;font-size:19px}
+.mhead .spk{margin-inline-start:auto}
+.novoice .spk{display:none}
+.pics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
+.pic{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;padding:6px;text-align:center;font-size:14px;font-weight:700;line-height:1.4}
+.pic svg{width:100%;height:auto;display:block;border-radius:8px;margin-bottom:4px}
+.pic small{display:block;font-weight:500;color:var(--muted)}
+/* toasts */
+#toasts{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.toast{pointer-events:auto;max-width:420px;border-radius:14px;padding:9px 13px;font-size:14px;display:flex;gap:10px;align-items:flex-start;animation:tin .3s ease-out}
+.toast .who{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--straw);color:#3a2a0c;display:grid;place-items:center;font-weight:800;font-family:var(--f-display);font-size:14px}
+.toast.alarm{background:rgba(110,22,18,.95);border-color:var(--bad)}
+@keyframes tin{from{transform:translateY(-8px);opacity:0}}
+
+/* action bar */
+#actions{position:fixed;z-index:5;left:0;right:0;bottom:0;padding:8px max(8px, env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 8px) max(8px, env(safe-area-inset-left,0px));display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;background:linear-gradient(to top, rgba(10,28,25,.95), rgba(10,28,25,.75));border-top:1px solid var(--line)}
+#actions::-webkit-scrollbar{display:none}
+.act{flex:0 0 auto;width:78px;border:1px solid var(--line);background:var(--glass-2);border-radius:16px;padding:7px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13.5px;font-weight:700}
+.act .ic{font-size:28px;line-height:1.1}
+.act[aria-pressed="true"]{background:var(--flame);color:#2a1606;border-color:var(--flame)}
+.act.hot{background:var(--bad);border-color:#ffb3aa;animation:pulse 0.8s infinite}
+
+/* sheet */
+#sheet{position:fixed;z-index:7;left:max(8px, env(safe-area-inset-left,0px));right:max(8px, env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 92px);max-width:520px;margin-inline:auto;border-radius:20px;padding:14px 16px 16px;max-height:56vh;overflow:auto;animation:tin .25s}
+#sheet h2{font-family:var(--f-display);font-size:21px;margin:0 0 4px;font-weight:800;color:var(--straw)}
+#sheet .x{position:absolute;top:10px;inset-inline-end:10px;background:var(--glass-2);border:1px solid var(--line);border-radius:50%;width:32px;height:32px;font-size:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 12px;margin:8px 0;font-size:14px}
+.kv span{color:var(--muted)}
+.kv b{font-variant-numeric:tabular-nums;text-align:end}
+.btn{border:1px solid var(--line);background:var(--glass-2);border-radius:14px;padding:11px 16px;font-weight:700;font-size:16px;min-height:48px}
+.btn.pri{background:var(--flame);color:#2a1606;border-color:var(--flame)}
+.btn.big{font-size:26px;width:60px;padding:6px 0}
+.btn:disabled{opacity:.4}
+.note{font-size:15px;color:var(--muted);margin:6px 0;line-height:1.65}
+.note b{color:var(--ink)}
+.meter{height:10px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden;margin:4px 0 8px}
+.meter > div{height:100%;background:var(--good);transition:width .3s}
+.big-num{font-family:var(--f-display);font-size:34px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+
+/* modal */
+#modalWrap{position:fixed;inset:0;z-index:20;background:rgba(5,15,13,.55);display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 14px) max(14px, env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 14px) max(14px, env(safe-area-inset-left,0px))}
+#modal{width:100%;max-width:470px;max-height:100%;overflow:auto;border-radius:22px;padding:18px 18px 16px;background:#123631;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.45);animation:tin .25s}
+.mhead{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.avatar{width:42px;height:42px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:20px;background:var(--straw);color:#3a2a0c}
+.avatar.doc{background:#9fd8f0;color:#0d3346}
+.avatar.alarm{background:var(--bad);color:#fff}
+.mhead .who{font-size:12px;color:var(--muted)}
+.mhead h3{margin:0;font-family:var(--f-display);font-size:21px;line-height:1.2;font-weight:800;text-wrap:balance}
+.mbody{font-size:16.5px;line-height:1.8}
+.mbody p{margin:6px 0}
+.mbody ul{margin:6px 0;padding-inline-start:20px}
+.q{font-weight:700;margin:12px 0 8px;font-size:15.5px}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{text-align:start;border:1px solid var(--line);background:var(--glass-2);border-radius:14px;padding:12px 14px;font-size:16px;line-height:1.5;font-weight:600}
+.opt.ok{background:rgba(60,160,100,.35);border-color:var(--good)}
+.opt.no{background:rgba(180,50,40,.35);border-color:var(--bad)}
+.why{margin-top:10px;border-radius:14px;padding:10px 12px;font-size:14px;background:rgba(255,255,255,.06);border-inline-start:4px solid var(--good)}
+.why.no{border-inline-start-color:var(--bad)}
+.mfoot{display:flex;gap:8px;justify-content:flex-start;margin-top:14px;flex-wrap:wrap}
+.form{display:grid;grid-template-columns:1fr 110px;gap:8px 10px;align-items:center;margin-top:8px}
+.form label{font-size:14px}
+.form input{width:100%;font:inherit;font-variant-numeric:tabular-nums;font-size:16px;padding:7px 9px;border-radius:10px;border:1px solid var(--line);background:#0c2622;color:var(--ink);text-align:center}
+.res{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+.res td,.res th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:start;font-variant-numeric:tabular-nums}
+.res th{color:var(--muted);font-weight:500}
+.res .y{color:var(--good)} .res .n{color:var(--bad)}
+
+/* prep list */
+#prep{position:fixed;z-index:5;left:max(8px, env(safe-area-inset-left,0px));right:max(8px, env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 10px);max-width:520px;margin-inline:auto;border-radius:20px;padding:12px 14px}
+#prep h2{margin:0;font-family:var(--f-display);font-size:19px;color:var(--straw)}
+#prep .tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-top:8px}
+.task{display:flex;gap:8px;align-items:center;text-align:start;border:1px solid var(--line);background:var(--glass-2);border-radius:12px;padding:8px 10px;font-size:13.5px;font-weight:600}
+.task .n{width:22px;height:22px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:12px;background:rgba(255,255,255,.12)}
+.task.done{opacity:.6}
+.task.done .n{background:var(--good);color:#0d2a1a}
+
+/* intro & report */
+.screen{position:fixed;inset:0;z-index:30;overflow:auto;background:
+  radial-gradient(120% 80% at 80% 0%, rgba(255,154,60,.22), transparent 60%),
+  linear-gradient(170deg,#0f2e2a 0%,#173f38 55%,#2b3b2a 100%);
+  padding:calc(env(safe-area-inset-top,0px) + 28px) max(18px, env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 28px) max(18px, env(safe-area-inset-left,0px))}
+.screen .wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-size:12.5px;letter-spacing:.04em;color:var(--straw);font-weight:600}
+.screen h1{font-family:var(--f-display);font-size:46px;line-height:1.05;margin:0;font-weight:800;text-wrap:balance}
+.screen h1 em{font-style:normal;color:var(--flame)}
+.lead{font-size:16px;color:var(--muted);margin:0;line-height:1.75;max-width:62ch}
+.ladder{display:flex;flex-direction:column;gap:6px}
+.rung{display:flex;gap:12px;align-items:center;border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.rung .lv{font-family:var(--f-display);font-weight:800;font-size:22px;width:34px;text-align:center;color:var(--muted)}
+.rung b{display:block;font-size:15px}
+.rung small{color:var(--muted);font-size:12.5px}
+.rung.on{background:rgba(255,154,60,.14);border-color:var(--flame)}
+.rung.on .lv{color:var(--flame)}
+.rung .lock{margin-inline-start:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.field{display:flex;flex-direction:column;gap:4px}
+.field input{font:inherit;font-size:17px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0c2622;color:var(--ink)}
+.cta{font-family:var(--f-display);font-size:22px;font-weight:800;padding:12px 18px;border-radius:16px;border:0;background:var(--flame);color:#2a1606}
+.score-big{font-family:var(--f-display);font-size:72px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.grade{display:inline-block;padding:4px 14px;border-radius:999px;font-weight:700}
+.parts{display:flex;flex-direction:column;gap:8px}
+.part{border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.part .top{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.part .top span{font-variant-numeric:tabular-nums}
+.part small{color:var(--muted);display:block;margin-top:2px}
+.mist{border-radius:14px;padding:10px 12px;background:rgba(255,107,91,.1);border:1px solid rgba(255,107,91,.35);font-size:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tabs button{border:1px solid var(--line);background:var(--glass-2);border-radius:999px;padding:5px 12px;font-size:13px}
+.tabs button[aria-pressed="true"]{background:var(--straw);color:#3a2a0c}
+.tbl{overflow-x:auto}
+.tbl table{border-collapse:collapse;font-size:12.5px;min-width:520px}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:start;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl th{color:var(--straw);font-weight:600}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="app" dir="rtl" lang="ar">
+  <canvas id="scene" aria-label="العنبر ثلاثي الأبعاد"></canvas>
+
+  <header id="hud" hidden>
+    <div class="toprow">
+      <div class="clock glass">
+        <div class="day" id="hDay">يوم 0</div>
+        <div>
+          <div class="time" id="hTime">10:00</div>
+          <div class="birds" id="hBirds">10,000 كتكوت</div>
+        </div>
+      </div>
+      <div class="speed glass" id="speed">
+        <button data-sp="0" aria-pressed="false" aria-label="إيقاف">⏸</button>
+        <button data-sp="1" aria-pressed="true">×1</button>
+        <button data-sp="2" aria-pressed="false">×2</button>
+        <button data-sp="4" aria-pressed="false">×4</button>
+      </div>
+    </div>
+    <div id="gauges"></div>
+    <div class="toprow" style="justify-content:flex-start;flex-wrap:wrap"><div class="mood glass" id="mood"><span class="dot"></span><span id="moodTx">—</span></div><div class="mood glass" id="wStat">العامل: واقف</div><button class="mood glass" id="followBtn" aria-pressed="true" style="border:1px solid var(--line)">الكاميرا: تابع العامل</button><button class="mood glass" id="sndBtn" aria-pressed="true" style="border:1px solid var(--line)">🔊 الصوت</button></div>
+    <div id="toasts" aria-live="polite"></div>
+  </header>
+
+  <div id="prep" class="glass" hidden></div>
+  <nav id="actions" hidden></nav>
+  <section id="sheet" class="glass" hidden></section>
+  <div id="modalWrap" hidden><div id="modal" role="dialog" aria-modal="true"></div></div>
+
+  <div id="intro" class="screen">
+    <div class="wrap">
+      <div class="eyebrow">تدريب عمال مزارع التسمين · المستوى الأول</div>
+      <h1>مدرسة <em>العنبر</em></h1>
+      <p class="lead">إنت مسؤول عن عنبر فيه <b>10,000 كتكوت روس</b> في أول أسبوع، أسبوع التحضين. ده أهم أسبوع في الدورة: أي غلطة فيه بتبان في الوزن والنافق لحد يوم البيع. هتجهز العنبر، تستلم الكتاكيت، تظبط الحرارة والتهوية والعلف والمية، تلم النافق، وتكتب البيان اليومي. والمشرف هيعلمك خطوة بخطوة.</p>
+      <div class="ladder" aria-label="مستويات اللعبة">
+        <div class="rung on"><div class="lv">1</div><div><b>عامل مبتدئ</b><small>أسبوع التحضين: يوم 0 لـ 7، مع مساعدة المشرف</small></div></div>
+        <div class="rung"><div class="lv">2</div><div><b>عامل ماهر</b><small>الأسبوع 2 للتسويق من غير مساعدة</small></div><span class="lock">مقفول</span></div>
+        <div class="rung"><div class="lv">3</div><div><b>رئيس وردية</b><small>عدادات العلف، التحصينات، توزيع العمال</small></div><span class="lock">مقفول</span></div>
+        <div class="rung"><div class="lv">4</div><div><b>مهندس المزرعة</b><small>التشخيص، العلاج، برامج الإضاءة والتهوية</small></div><span class="lock">مقفول</span></div>
+        <div class="rung"><div class="lv">5</div><div><b>مدير المزرعة</b><small>التكاليف، المخزون، قرار البيع</small></div><span class="lock">مقفول</span></div>
+      </div>
+      <div class="field">
+        <label for="wName">اسم العامل</label>
+        <input id="wName" autocomplete="off" placeholder="مثلاً: أحمد سعيد">
+      </div>
+      <button class="cta" id="startBtn">ابدأ المستوى الأول</button>
+      <p class="note" id="bestTx"></p>
+    </div>
+  </div>
+
+  <div id="report" class="screen" hidden></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const f1=n=>(Math.round(n*10)/10).toFixed(1);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+/* ---------------- constants ---------------- */
+const BIRDS0=10000, VIS=360, SEC_PER_HOUR=10, START_HOUR=10, END_T=178;
+const FEED_CAP=150, TANK_CAP=3000, BAG=50;
+const BR=[[-7.5,-1.8],[-7.5,1.8],[-3,-1.8],[-3,1.8]];
+const LINES_Z=[-0.9,0.9];
+const FOUNT=[[-8.5,0],[-5.5,0],[-2.5,0]];
+const PAPERS=[[-8,-1.65],[-5,-1.65],[-2,-1.65],[-8,1.65],[-5,1.65],[-2,1.65]];
+const PANS=[[-9,-2.8],[-6.5,-2.8],[-4,-2.8],[-1.4,-2.8],[-9,2.8],[-6.5,2.8],[-4,2.8],[-1.4,2.8]];
+const AREA={x0:-9.6,x1:-0.6,z0:-3.6,z1:3.6};
+
+const targetT=a=>32.5-0.5*Math.min(a,7);
+const intake=a=>12+3.7*a;            // g/bird/day
+const ADG=a=>12.5+3.6*a;             // g/day potential
+const targetW=a=>0.93*(40+12.5*a+1.8*a*a)+2.8*(1-Math.min(1,a)); // approx Ross first week
+
+/* ---------------- state ---------------- */
+let S;
+function freshState(){
+  return {phase:'intro', t:0, speed:1, user0:false, name:'',
+    birds:BIRDS0, weight:40, cv:8,
+    T:21, RH:50, CO2:500, NH3:1, litterWet:0.08, heater:0, fans:0, feeder:0,
+    tank:TANK_CAP, meter:125430, prevMeter:125430, meterSnap:null,
+    line:['ok','ok'], linesFilled:false, power:true, lightsOn:false, litter:false, dip:false, paper:false,
+    outOff:0, disease:false, diseaseLevel:0, treated:false,
+    deadInHouse:0, deadAcc:0, deadTotal:0, deadSince:null, collectedToday:0, bagsToday:0, wasted:0,
+    tmax:-99, tmin:99, lastDay:0, mode:'ok',
+    thirstH:0, extremeH:0, emptyH:0, goodH:0, totalH:0, cropPen:0,
+    quizOk:0, quizN:0, ev:{}, evPts:0, evMax:0, recPts:0, recMax:0, records:[],
+    fatal:{}, mistakes:[], mistakeKeys:{}, hintCd:{}, prepDone:{}, fired:{}};
+}
+S=freshState();
+
+/* ---------------- three.js scene ---------------- */
+const canvas=$('#scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const hazeC=new THREE.Color('#b3aa80');
+const skyDay=new THREE.Color('#a8d0de'), skyNight=new THREE.Color('#1b2638');
+scene.background=skyDay.clone();
+scene.fog=new THREE.Fog(scene.background,34,80);
+const camera=new THREE.PerspectiveCamera(50,1,0.1,200);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.08;
+controls.maxPolarAngle=1.38; controls.minDistance=3; controls.maxDistance=32;
+controls.target.set(-4.8,0,0);
+
+const hemi=new THREE.HemisphereLight('#eaf3ff','#6b5a3c',0.55); scene.add(hemi);
+const sun=new THREE.DirectionalLight('#fff4dc',0.8); sun.position.set(-9,17,-10); scene.add(sun);
+sun.castShadow=true; {const sm=window.innerWidth<700?1024:2048; sun.shadow.mapSize.set(sm,sm); const sc=sun.shadow.camera; sc.left=-17; sc.right=15; sc.top=10; sc.bottom=-10; sc.near=1; sc.far=60; sun.shadow.bias=-0.0005; sun.shadow.radius=2;}
+const lamp=new THREE.PointLight('#fff2d0',0,22); lamp.position.set(-5,2.6,0); scene.add(lamp);
+
+const M=(c,o)=>new THREE.MeshLambertMaterial(Object.assign({color:c},o||{}));
+const clickables=[];
+function clickable(obj,panel){obj.userData.panel=panel; clickables.push(obj); return obj;}
+function box(w,h,d,x,y,z,m){const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); b.position.set(x,y,z); scene.add(b); return b;}
+
+function strawTex(base,n,len,hue){
+  const c=document.createElement('canvas'); c.width=c.height=256; const g=c.getContext('2d');
+  g.fillStyle=base; g.fillRect(0,0,256,256);
+  for(let i=0;i<n;i++){const x=Math.random()*256,y=Math.random()*256,a=Math.random()*Math.PI;
+    g.strokeStyle=`hsla(${hue+Math.random()*14},${35+Math.random()*30}%,${50+Math.random()*30}%,.85)`;
+    g.lineWidth=1+Math.random(); g.beginPath(); g.moveTo(x,y); g.lineTo(x+Math.cos(a)*len,y+Math.sin(a)*len); g.stroke();}
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
+}
+// ground
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(120,120),M('#879656')); ground.rotation.x=-Math.PI/2; ground.position.y=-0.02; scene.add(ground);
+const pad=new THREE.Mesh(new THREE.PlaneGeometry(26,13),M('#a49a86')); pad.rotation.x=-Math.PI/2; pad.position.set(-1,-0.01,0); scene.add(pad);
+// palms around the farm
+{const trunkM=M('#7a5a3a'), leafM=M('#4c7a3a');
+ [[-17,8],[-12,10.5],[-4,11.5],[4,10.5],[11,11],[16,8],[19,2],[-20,3]].forEach(([x,z],k)=>{const hgt=3+((k*7)%5)*0.35;
+  const t=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.2,hgt,6),trunkM); t.position.set(x,hgt/2,z); scene.add(t);
+  for(let i=0;i<7;i++){const piv=new THREE.Group(); piv.position.set(x,hgt,z); piv.rotation.y=i*0.9+k; const f=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.04,0.34),leafM); f.position.set(0.8,-0.18,0); f.rotation.z=-0.38; piv.add(f); scene.add(piv);}});}
+// floor
+const litterT=strawTex('#b7996a',2200,6,30); litterT.repeat.set(7,3);
+const floorM=M('#9a9a94');
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(20,8),floorM); floor.rotation.x=-Math.PI/2; floor.position.y=0.005; scene.add(floor);
+clickable(floor,'walk'); clickable(ground,'walk');
+// wet patch under line 1
+const wetM=new THREE.MeshBasicMaterial({color:'#4b3218',transparent:true,opacity:0,depthWrite:false});
+const wet=new THREE.Mesh(new THREE.PlaneGeometry(8.6,1.3),wetM); wet.rotation.x=-Math.PI/2; wet.position.set(-5,0.02,LINES_Z[0]); scene.add(wet);
+// walls
+const wallM=M('#ebe5d6'), trimM=M('#8a6a48'), steelM=M('#9aa3a6');
+box(20.3,2.4,0.15,0,1.2,4.08,wallM);
+box(0.15,2.4,8.3,-10.1,1.2,0,wallM);
+box(0.15,2.4,8.3,10.1,1.2,0,wallM);
+box(20.3,0.55,0.15,0,0.275,-4.08,wallM);
+for(let x=-10;x<=10.01;x+=2.5) box(0.14,0.75,0.14,x,0.375,-4.08,trimM);
+// door
+box(0.18,2.0,1.1,-10.12,1.0,-2.6,M('#5b4632'));
+// wall caps and gas lines (roof is left open so the player sees inside)
+box(20.3,0.1,0.22,0,2.45,4.08,trimM); box(0.22,0.1,8.3,-10.1,2.45,0,trimM); box(0.22,0.1,8.3,10.1,2.45,0,trimM);
+[-1.8,1.8].forEach(z=>box(9.6,0.05,0.05,-5.2,2.76,z,steelM));
+box(0.05,0.05,3.6,-10,2.76,0,steelM);
+// partition (chick guard)
+box(0.06,0.45,8,-0.25,0.225,0,M('#b88b52'));
+// controller / thermometer
+const ctrl=box(0.55,0.4,0.08,-5,1.5,3.98,M('#26343b'));
+const ctrlScr=new THREE.Mesh(new THREE.PlaneGeometry(0.42,0.22),new THREE.MeshBasicMaterial({color:'#62e08f'}));
+ctrlScr.position.set(-5,1.53,3.93); ctrlScr.rotation.y=Math.PI; scene.add(ctrlScr);
+clickable(ctrl,'heat'); clickable(ctrlScr,'heat');
+// foot dip
+const dipM=M('#7f7f7f');
+const dip=box(0.9,0.08,0.75,-10.8,0.04,-2.6,dipM); clickable(dip,'bio');
+// generator
+const gen=box(1.3,0.95,0.85,-12.2,0.48,1.4,M('#3d7a4a')); clickable(gen,'power');
+box(0.08,0.6,0.08,-12.6,1.2,1.2,M('#333'));
+// water tank + meter
+box(1.1,0.55,1.1,-9.3,0.275,-3.3,M('#6e6e6e'));
+const tankShell=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,1.3,18),new THREE.MeshLambertMaterial({color:'#e7eef0',transparent:true,opacity:0.45}));
+tankShell.position.set(-9.3,1.2,-3.3); scene.add(tankShell); clickable(tankShell,'water');
+const waterIn=new THREE.Mesh(new THREE.CylinderGeometry(0.46,0.46,1,18),M('#3b8fd0'));
+waterIn.position.set(-9.3,0.56,-3.3); scene.add(waterIn);
+const meterBox=box(0.22,0.18,0.12,-8.6,0.6,-3.6,M('#2a6fb0')); clickable(meterBox,'water');
+// nipple lines
+const lineM=M('#c9ced0');
+const lineMeshes=LINES_Z.map(z=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,8.8,8),lineM); l.rotation.z=Math.PI/2; l.position.set(-5,0.34,z); scene.add(l); clickable(l,'water'); return l;});
+const nipG=new THREE.SphereGeometry(0.035,6,5);
+const nips=new THREE.InstancedMesh(nipG,M('#d9433a'),50); {let k=0; const d=new THREE.Object3D(); LINES_Z.forEach(z=>{for(let i=0;i<25;i++){d.position.set(-9.2+i*0.35,0.29,z); d.updateMatrix(); nips.setMatrixAt(k++,d.matrix);}}); scene.add(nips);}
+// fountains
+const fountWater=[];
+FOUNT.forEach(([x,z])=>{
+  const b=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.26,0.07,16),M('#d6453b')); b.position.set(x,0.035,z); scene.add(b); clickable(b,'water');
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(0.17,14,10,0,Math.PI*2,0,Math.PI/2),new THREE.MeshLambertMaterial({color:'#eef6ff',transparent:true,opacity:0.6})); dome.position.set(x,0.07,z); scene.add(dome);
+  const w=new THREE.Mesh(new THREE.TorusGeometry(0.2,0.03,6,18),M('#4aa3e0')); w.rotation.x=Math.PI/2; w.position.set(x,0.075,z); w.visible=false; scene.add(w); fountWater.push(w);
+});
+// papers + feed on paper
+const paperM=M('#f2eee4'), feedT=strawTex('rgba(0,0,0,0)',900,3,30);
+const paperFeedM=new THREE.MeshLambertMaterial({map:feedT,color:'#d2a04e',transparent:true,opacity:0,depthWrite:false});
+const papers=PAPERS.map(([x,z])=>{
+  const p=new THREE.Mesh(new THREE.PlaneGeometry(1.8,0.9),paperM); p.rotation.x=-Math.PI/2; p.position.set(x,0.015,z); p.visible=false; scene.add(p); clickable(p,'feed');
+  const f=new THREE.Mesh(new THREE.PlaneGeometry(1.7,0.82),paperFeedM); f.rotation.x=-Math.PI/2; f.position.set(x,0.02,z); scene.add(f);
+  return p;
+});
+// pans
+const panFeed=[];
+PANS.forEach(([x,z])=>{
+  const r=new THREE.Mesh(new THREE.TorusGeometry(0.24,0.045,6,18),M('#c8382f')); r.rotation.x=Math.PI/2; r.position.set(x,0.05,z); scene.add(r); clickable(r,'feed');
+  const f=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.24,0.06,16),M('#c99647')); f.position.set(x,0.03,z); f.scale.y=0.01; scene.add(f); panFeed.push(f);
+});
+// brooders
+const haloT=(()=>{const c=document.createElement('canvas'); c.width=c.height=128; const g=c.getContext('2d'); const gr=g.createRadialGradient(64,64,4,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.5,'rgba(255,255,255,.45)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(c);})();
+const brooders=BR.map(([x,z])=>{
+  const g=new THREE.Group(); g.position.set(x,1.55,z); scene.add(g);
+  const can=new THREE.Mesh(new THREE.ConeGeometry(0.6,0.32,18,1,true),new THREE.MeshLambertMaterial({color:'#7f898e',side:THREE.DoubleSide})); g.add(can);
+  const rimM=new THREE.MeshBasicMaterial({color:'#5a3a22'}); const rim=new THREE.Mesh(new THREE.TorusGeometry(0.6,0.035,6,22),rimM); rim.rotation.x=Math.PI/2; rim.position.y=-0.16; g.add(rim);
+  const haloM=new THREE.MeshBasicMaterial({map:haloT,color:'#ff8a2a',transparent:true,opacity:0,depthWrite:false}); const halo=new THREE.Mesh(new THREE.PlaneGeometry(4.2,4.2),haloM); halo.rotation.x=-Math.PI/2; halo.position.set(x,0.012,z); scene.add(halo);
+  const glowM=new THREE.MeshBasicMaterial({color:'#ff8a2a',transparent:true,opacity:0}); const glow=new THREE.Mesh(new THREE.CircleGeometry(0.5,18),glowM); glow.rotation.x=Math.PI/2; glow.position.y=-0.15; g.add(glow);
+  const chain=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,1.6,4),M('#555')); chain.position.y=0.95; g.add(chain);
+  const pl=new THREE.PointLight('#ff9a4a',0,4.5,2); pl.position.y=-0.3; g.add(pl);
+  clickable(can,'heat'); clickable(glow,'heat');
+  return {g,glowM,pl,haloM,rimM};
+});
+// fans
+const fans=[];
+function makeFan(x,y,z,rad,rotY){
+  const g=new THREE.Group(); g.position.set(x,y,z); g.rotation.y=rotY; scene.add(g);
+  const fr=new THREE.Mesh(new THREE.BoxGeometry(rad*2.3,rad*2.3,0.12),M('#5d666b')); g.add(fr);
+  const hole=new THREE.Mesh(new THREE.CircleGeometry(rad,22),new THREE.MeshBasicMaterial({color:'#1c2226'})); hole.position.z=0.065; g.add(hole);
+  const hole2=hole.clone(); hole2.position.z=-0.065; hole2.rotation.y=Math.PI; g.add(hole2);
+  const bl=new THREE.Group(); bl.position.z=0.08; g.add(bl);
+  for(let i=0;i<3;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(rad*0.32,rad*0.95,0.02),M('#cfd6d8')); b.position.y=rad*0.48; const piv=new THREE.Group(); piv.rotation.z=i*2.094; piv.add(b); bl.add(piv);}
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(rad,0.03,6,24),M('#9aa3a6')); ring.position.z=0.07; g.add(ring);
+  clickable(fr,'fans'); fans.push(bl);
+}
+makeFan(-7,1.5,3.98,0.42,Math.PI); makeFan(-3,1.5,3.98,0.42,Math.PI);
+[-3,-1,1,3].forEach(z=>makeFan(10.0,1.15,z,0.62,-Math.PI/2));
+
+// chicks
+const bodyG=new THREE.SphereGeometry(0.1,10,8); bodyG.scale(1,0.86,1.18);
+const headG=new THREE.SphereGeometry(0.066,9,7);
+const beakG=new THREE.ConeGeometry(0.022,0.055,5); beakG.rotateX(Math.PI/2);
+const bodyI=new THREE.InstancedMesh(bodyG,M('#ffffff'),VIS);
+const headI=new THREE.InstancedMesh(headG,M('#ffffff'),VIS);
+const beakI=new THREE.InstancedMesh(beakG,M('#f08a24'),VIS);
+const deadI=new THREE.InstancedMesh(bodyG,M('#bfb08a'),24);
+const wingG=new THREE.SphereGeometry(0.062,7,5); wingG.scale(0.42,0.72,1.15);
+const wingM=M('#f2b322');
+const wingI=new THREE.InstancedMesh(wingG,wingM,VIS*2);
+const eyeI=new THREE.InstancedMesh(new THREE.SphereGeometry(0.015,5,4),new THREE.MeshBasicMaterial({color:'#151515'}),VIS*2);
+[wingI,eyeI].forEach(m=>{m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.count=0; m.frustumCulled=false; scene.add(m);});
+[bodyI,headI,beakI,deadI].forEach(m=>{m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(m);});
+const C={x:new Float32Array(VIS),z:new Float32Array(VIS),tx:new Float32Array(VIS),tz:new Float32Array(VIS),h:new Float32Array(VIS),w:new Float32Array(VIS),ph:new Float32Array(VIS),y:new Float32Array(VIS),feed:new Uint8Array(VIS),hue:new Float32Array(VIS)};
+const tmpCol=new THREE.Color();
+for(let i=0;i<VIS;i++){C.hue[i]=Math.random(); tmpCol.setHSL(0.118+C.hue[i]*0.02,0.98,0.56); bodyI.setColorAt(i,tmpCol); headI.setColorAt(i,tmpCol);}
+bodyI.instanceColor.needsUpdate=true; headI.instanceColor.needsUpdate=true;
+bodyI.count=headI.count=beakI.count=0; deadI.count=0;
+clickable(bodyI,'flock'); clickable(deadI,'dead');
+const deadPos=Array.from({length:24},()=>[rnd(AREA.x0+0.4,AREA.x1-0.4),rnd(AREA.z0+0.4,AREA.z1-0.4),Math.random()*6.28]);
+
+function resize(){
+  const w=window.innerWidth,h=window.innerHeight; renderer.setSize(w,h,false);
+  camera.aspect=w/h; camera.fov=w/h<0.8?62:48; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize); resize();
+function resetCamera(){
+  const narrow=window.innerWidth/window.innerHeight<0.8;
+  camera.position.set(narrow?-3.5:-2.5,narrow?11:9.5,narrow?-13:-12.5); controls.target.set(-4.8,0,0.2); controls.update();
+}
+resetCamera();
+
+/* tap to interact */
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let downAt=null;
+canvas.addEventListener('pointerdown',e=>{downAt=[e.clientX,e.clientY];});
+canvas.addEventListener('pointerup',e=>{
+  if(!downAt) return; const dx=e.clientX-downAt[0], dy=e.clientY-downAt[1]; downAt=null;
+  if(dx*dx+dy*dy>64 || S.phase==='intro') return;
+  ptr.x=e.clientX/window.innerWidth*2-1; ptr.y=-(e.clientY/window.innerHeight)*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(clickables,false)[0]; if(!hit) return;
+  const p=hit.object.userData.panel; if(!p) return;
+  const hx=hit.point.x, hz=hit.point.z;
+  if(p==='walk'){walkTo(hx,hz); return;}
+  if(S.phase==='prep'){ const map={bio:'dip',heat:'heat',water:'water',feed:'feed',fans:'vent'}; if(map[p]&&!S.prepDone[map[p]]) openPrep(map[p]); else walkTo(hx,hz); return; }
+  goFor(p,hx,hz);
+});
+
+/* ---------------- chicks behaviour ---------------- */
+function lineOk(k){return S.line[k]!=='clogged';}
+function pickTarget(i){
+  const m=S.mode; let x,z;
+  if(m==='rest'){const b=BR[i%4],a=Math.random()*6.28,r=0.3+Math.random()*1.4; x=b[0]+Math.cos(a)*r; z=b[1]+Math.sin(a)*r;}
+  else if(m==='cold'){const b=BR[i%4],a=Math.random()*6.28,r=0.1+Math.pow(Math.random(),1.5)*0.75; x=b[0]+Math.cos(a)*r; z=b[1]+Math.sin(a)*r;}
+  else if(m==='hot'){
+    if(Math.random()<0.6){x=rnd(AREA.x0,AREA.x1); z=Math.random()<0.5?AREA.z0+rnd(0,0.6):AREA.z1-rnd(0,0.6);}
+    else{z=rnd(AREA.z0,AREA.z1); x=Math.random()<0.5?AREA.x0+rnd(0,0.6):AREA.x1-rnd(0,0.5);}
+  } else {
+    const thirsty=S.thirstH>0.5, r=Math.random(); C.feed[i]=0;
+    if(r<(thirsty?0.15:0.3) && S.feeder>0.5){
+      C.feed[i]=1;
+      if(Math.random()<0.6){const p=PAPERS[(Math.random()*6)|0]; x=p[0]+rnd(-0.8,0.8); z=p[1]+rnd(-0.38,0.38);}
+      else{const p=PANS[(Math.random()*8)|0],a=Math.random()*6.28; x=p[0]+Math.cos(a)*0.32; z=p[1]+Math.sin(a)*0.32;}
+    } else if(r<(thirsty?0.85:0.55)){
+      let k=Math.random()<0.5?0:1; if(!lineOk(k)&&Math.random()<0.85) k=1-k;
+      if(Math.random()<0.25 && S.linesFilled){const f=FOUNT[(Math.random()*3)|0],a=Math.random()*6.28; x=f[0]+Math.cos(a)*0.3; z=f[1]+Math.sin(a)*0.3;}
+      else{x=rnd(-9.2,-0.9); z=LINES_Z[k]+(Math.random()<0.5?-0.13:0.13);}
+    } else {x=rnd(AREA.x0,AREA.x1); z=rnd(AREA.z0,AREA.z1);}
+  }
+  C.tx[i]=clamp(x,AREA.x0,AREA.x1); C.tz[i]=clamp(z,AREA.z0,AREA.z1);
+}
+function spawnChicks(){
+  for(let i=0;i<VIS;i++){const p=PAPERS[i%6]; C.x[i]=p[0]+rnd(-1,1); C.z[i]=p[1]+rnd(-0.6,0.6); C.y[i]=0.9+Math.random()*1.5; C.h[i]=Math.random()*6.28; C.w[i]=Math.random()*2; C.tx[i]=C.x[i]; C.tz[i]=C.z[i];}
+  bodyI.count=headI.count=beakI.count=VIS; wingI.count=eyeI.count=VIS*2;
+}
+const dummy=new THREE.Object3D();
+let lastMode='ok';
+function updateChicks(dt,time){
+  if(bodyI.count===0) return;
+  const s=Math.cbrt(S.weight/40);
+  const lethargic=S.disease&&S.diseaseLevel>0.25, pant=S.mode==='hot';
+  if(S.mode!==lastMode){lastMode=S.mode; for(let i=0;i<VIS;i++) C.w[i]=Math.random()*1.2;}
+  const sp=(S.mode==='rest'?0.15:0.55)*(S.speed>0?1:0.6);
+  for(let i=0;i<VIS;i++){
+    const sick=lethargic && i%9===0;
+    {const ax=C.x[i]-W.x, az=C.z[i]-W.z, ad=Math.hypot(ax,az); if(ad<0.75&&ad>0.001){const k=(0.75-ad)/ad*Math.min(1,dt*7); C.x[i]=clamp(C.x[i]+ax*k,AREA.x0,AREA.x1); C.z[i]=clamp(C.z[i]+az*k,AREA.z0,AREA.z1); if(ad<0.55){C.tx[i]=clamp(C.x[i]+ax/ad*1.2,AREA.x0,AREA.x1); C.tz[i]=clamp(C.z[i]+az/ad*1.2,AREA.z0,AREA.z1);}}}
+    if(C.y[i]>0){C.y[i]=Math.max(0,C.y[i]-dt*2.2);}
+    const dx=C.tx[i]-C.x[i], dz=C.tz[i]-C.z[i], d=Math.hypot(dx,dz);
+    let moving=false;
+    if(!sick && d>0.03){const st=Math.min(d,sp*dt); C.x[i]+=dx/d*st; C.z[i]+=dz/d*st; moving=true;
+      const th=Math.atan2(dx,dz); let dh=th-C.h[i]; while(dh>Math.PI)dh-=6.283; while(dh<-Math.PI)dh+=6.283; C.h[i]+=dh*Math.min(1,dt*8);}
+    else{C.w[i]-=dt; if(C.w[i]<=0){pickTarget(i); C.w[i]=rnd(0.6,3.5);}}
+    C.ph[i]+=dt*(moving?14:3);
+    const bob=moving?Math.abs(Math.sin(C.ph[i]))*0.025*s:0;
+    const peck=(!moving&&C.feed[i]&&S.mode==='ok')?Math.max(0,Math.sin(C.ph[i]*2.2))*0.06*s:0;
+    const sy=sick?0.8:1, yy=C.y[i]+0.085*s*sy+bob;
+    dummy.position.set(C.x[i],yy,C.z[i]); dummy.rotation.set(0,C.h[i],0); dummy.scale.set(s,s*sy,s); dummy.updateMatrix(); bodyI.setMatrixAt(i,dummy.matrix);
+    const fx=Math.sin(C.h[i]), fz=Math.cos(C.h[i]);
+    const hy=yy+(0.095-(sick?0.05:0))*s-peck, hf=0.085*s;
+    dummy.position.set(C.x[i]+fx*hf,hy,C.z[i]+fz*hf); dummy.scale.setScalar(s); dummy.updateMatrix(); headI.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(C.x[i]+fx*(hf+0.07*s),hy-0.005*s,C.z[i]+fz*(hf+0.07*s)); dummy.scale.set(s,s*(pant?2.1:1),s); dummy.updateMatrix(); beakI.setMatrixAt(i,dummy.matrix);
+    {const rx=fz, rz=-fx, sp=(pant?0.125:0.088)*s;
+     for(let k=0;k<2;k++){const sd=k?1:-1;
+       dummy.position.set(C.x[i]+rx*sp*sd,yy+0.005*s,C.z[i]+rz*sp*sd); dummy.rotation.set(0,C.h[i],sd*(pant?-0.9:-0.15)); dummy.scale.set(s,s*sy,s); dummy.updateMatrix(); wingI.setMatrixAt(i*2+k,dummy.matrix);
+       dummy.position.set(C.x[i]+fx*(hf+0.045*s)+rx*0.038*s*sd,hy+0.02*s,C.z[i]+fz*(hf+0.045*s)+rz*0.038*s*sd); dummy.rotation.set(0,0,0); dummy.scale.setScalar(sick?0.5*s:s); dummy.updateMatrix(); eyeI.setMatrixAt(i*2+k,dummy.matrix);}
+     dummy.rotation.set(0,C.h[i],0);}
+  }
+  bodyI.instanceMatrix.needsUpdate=headI.instanceMatrix.needsUpdate=beakI.instanceMatrix.needsUpdate=wingI.instanceMatrix.needsUpdate=eyeI.instanceMatrix.needsUpdate=true;
+  // colour: yellow -> cream as feathers start
+  if(Math.random()<0.02){const k=clamp((S.weight-40)/260,0,1);
+    for(let i=0;i<VIS;i++){tmpCol.setHSL(0.118+C.hue[i]*0.02-k*0.02,0.98-k*0.55,0.56+k*0.24); bodyI.setColorAt(i,tmpCol); headI.setColorAt(i,tmpCol);}
+    bodyI.instanceColor.needsUpdate=headI.instanceColor.needsUpdate=true; wingM.color.setHSL(0.11-k*0.02,0.9-k*0.5,0.5+k*0.28);}
+  // dead
+  const nd=S.deadInHouse>0?Math.min(24,Math.max(1,Math.ceil(S.deadInHouse/2))):0;
+  deadI.count=nd;
+  for(let i=0;i<nd;i++){const p=deadPos[i]; dummy.position.set(p[0],0.06*s,p[1]); dummy.rotation.set(0,p[2],Math.PI/2); dummy.scale.setScalar(s); dummy.updateMatrix(); deadI.setMatrixAt(i,dummy.matrix);}
+  deadI.instanceMatrix.needsUpdate=true;
+}
+
+
+/* ---------------- the worker (player) ---------------- */
+const SPOT={panel:[-5,3.45],bags:[-9.1,3.0],meter:[-8.65,-3.1],tank:[-8.65,-2.55],gen:[-11.6,0.7],dip:[-10.85,-2.6],bin:[-11.5,-3.6],doorIn:[-9.5,-2.6],doorOut:[-10.9,-2.6],flock:[-5.5,-0.35]};
+const sackM=M('#ece4cf');
+[[-9.5,3.6,0],[-9.0,3.6,0],[-8.5,3.6,0],[-9.25,3.6,1],[-8.75,3.6,1],[-9.0,3.6,2]].forEach(([x,z,l])=>{const b=box(0.48,0.2,0.34,x,0.1+l*0.2,z,sackM); clickable(b,'feed');});
+const bin=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.3,0.8,12),M('#3c4a3f')); bin.position.set(-11.7,0.4,-3.9); scene.add(bin);
+const Wg=new THREE.Group(); scene.add(Wg);
+const Wb=new THREE.Group(); Wg.add(Wb);
+const skin=M('#b47b52'), suit=M('#2d679c'), pants=M('#363b44'), boot=M('#f1f1ee');
+function limb(x,y,w,h,d,mat,ex){const piv=new THREE.Group(); piv.position.set(x,y,0); const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.y=-h/2; piv.add(m); if(ex) piv.add(ex); Wb.add(piv); return piv;}
+const bootL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.16,0.3),boot); bootL.position.set(0,-0.82,0.04);
+const bootR=bootL.clone();
+const legL=limb(-0.12,0.88,0.17,0.8,0.19,pants,bootL), legR=limb(0.12,0.88,0.17,0.8,0.19,pants,bootR);
+const torso=new THREE.Mesh(new THREE.BoxGeometry(0.48,0.62,0.27),suit); torso.position.y=1.18; Wb.add(torso);
+const headW=new THREE.Mesh(new THREE.SphereGeometry(0.135,14,10),skin); headW.position.y=1.63; Wb.add(headW);
+const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.145,0.145,0.08,14),M('#e8e2d2')); cap.position.y=1.73; Wb.add(cap);
+const brim=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.025,0.14),M('#e8e2d2')); brim.position.set(0,1.7,0.15); Wb.add(brim);
+const handG=new THREE.SphereGeometry(0.06,8,6);
+const hL=new THREE.Mesh(handG,skin); hL.position.y=-0.58; const hR=hL.clone();
+const armL=limb(-0.31,1.45,0.12,0.56,0.14,suit,hL), armR=limb(0.31,1.45,0.12,0.56,0.14,suit,hR);
+const sack=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.3,0.3),sackM); sack.visible=false; Wb.add(sack);
+clickable(torso,'walk');
+const W={x:-12.2,z:-1.2,h:0,path:[],job:[],cur:null,anim:'idle',animT:0,ph:0,label:''};
+function isIn(x){return x>-10.05;}
+function clampSpot(x,z){return isIn(x)?[clamp(x,-9.7,-0.7),clamp(z,-3.75,3.75)]:[clamp(x,-15,-10.45),clamp(z,-5.5,5.5)];}
+function route(t){const pts=[],fi=isIn(W.x),ti=isIn(t[0]); if(fi&&!ti) pts.push(SPOT.doorIn,SPOT.doorOut); else if(!fi&&ti) pts.push(SPOT.doorOut,SPOT.doorIn); pts.push(clampSpot(t[0],t[1])); return pts;}
+function job(label,steps){W.job=steps.slice(); W.cur=null; W.path=[]; W.label=label; sack.visible=false;}
+function walkTo(x,z){job('ماشي',[{go:[x,z]}]);}
+function atSpot(sp,r){return Math.hypot(W.x-sp[0],W.z-sp[1])<(r||0.5)&&!W.cur&&!W.job.length;}
+function atPanel(){return atSpot(SPOT.panel,0.6);}
+function workerUpdate(dt,frozen){
+  const k=S.phase==='run'?Math.max(1,S.speed):1;
+  if(!frozen){
+    if(!W.cur&&W.job.length){W.cur=W.job.shift(); if(W.cur.go) W.path=route(W.cur.go); if(W.cur.act){W.animT=W.cur.t;}}
+    const c=W.cur;
+    if(c&&c.go){const p=W.path[0]; if(!p){W.cur=null;} else {const dx=p[0]-W.x,dz=p[1]-W.z,d=Math.hypot(dx,dz); if(d<0.06){W.path.shift(); if(!W.path.length) W.cur=null;} else {const st=Math.min(d,2.6*k*dt); W.x+=dx/d*st; W.z+=dz/d*st; let dh=Math.atan2(dx,dz)-W.h; while(dh>Math.PI)dh-=6.283; while(dh<-Math.PI)dh+=6.283; W.h+=dh*Math.min(1,dt*10);} } W.anim='walk';}
+    else if(c&&c.act){W.anim=c.act; if(c.face!=null) W.h=c.face; W.animT-=dt*k; if(W.animT<=0) W.cur=null;}
+    else if(c&&c.fn){W.cur=null; c.fn();}
+    else if(c&&c.carry!=null){sack.visible=c.carry; W.cur=null;}
+    if(!W.cur&&!W.job.length){W.anim='idle'; W.label='';}
+    W.ph+=dt*(W.anim==='walk'?9*Math.min(2,k):3);
+  }
+  Wg.position.set(W.x,0,W.z); Wg.rotation.y=W.h;
+  const a=W.anim, sw=a==='walk'?Math.sin(W.ph)*0.6:0;
+  legL.rotation.x=sw; legR.rotation.x=-sw; armL.rotation.x=-sw*0.8; armR.rotation.x=sw*0.8;
+  Wb.position.y=0; torso.rotation.x=0;
+  if(a==='crouch'){Wb.position.y=-0.32; legL.rotation.x=legR.rotation.x=-1.0; torso.rotation.x=0.35; armL.rotation.x=armR.rotation.x=-0.9+Math.sin(W.ph*2)*0.15;}
+  if(a==='pour'){armL.rotation.x=armR.rotation.x=-1.3; torso.rotation.x=0.2;}
+  if(a==='panel'){armR.rotation.x=-1.5+Math.sin(W.ph*3)*0.12; armL.rotation.x=0;}
+  if(a==='phone'){armR.rotation.x=-2.6; armR.rotation.z=0.4;} else armR.rotation.z=0;
+  if(sack.visible){if(a==='pour'){sack.position.set(0,1.05,0.45); sack.rotation.x=0.9;} else {sack.position.set(0.05,1.6,-0.05); sack.rotation.x=0;}}
+}
+const ptrG=new THREE.Group(); ptrG.visible=false; scene.add(ptrG);
+const ptrMat=new THREE.MeshBasicMaterial({color:'#ffd92e'});
+const ptrRing=new THREE.Mesh(new THREE.TorusGeometry(0.6,0.055,8,30),ptrMat); ptrRing.rotation.x=Math.PI/2; ptrRing.position.y=0.07; ptrG.add(ptrRing);
+const ptrArrow=new THREE.Mesh(new THREE.ConeGeometry(0.24,0.55,10),ptrMat); ptrArrow.rotation.x=Math.PI; ptrG.add(ptrArrow);
+[ptrRing,ptrArrow].forEach(m=>m.userData.noShadow=true);
+function pointerTarget(){
+  if(S.phase==='prep'){const p=PREP.find(x=>!S.prepDone[x.id]); if(!p) return null; const sp=PREP_SPOT[p.id]; return typeof sp==='string'?SPOT[sp]:sp;}
+  if(S.phase!=='run') return null;
+  if(!S.power) return SPOT.gen;
+  if(S.feeder<FEED_CAP*0.15) return SPOT.bags;
+  if(S.mode==='cold'||S.mode==='hot'||S.CO2>3000) return SPOT.panel;
+  if(S.deadInHouse>0&&S.deadSince!=null&&S.t-S.deadSince>4) return [deadPos[0][0],deadPos[0][1]];
+  return null;
+}
+function updatePointer(time){
+  const t=(W.cur||W.job.length||modalOpen)?null:pointerTarget();
+  if(!t||Math.hypot(W.x-t[0],W.z-t[1])<0.7){ptrG.visible=false; return;}
+  ptrG.visible=true; ptrG.position.set(t[0],0,t[1]); const k=1+0.16*Math.sin(time*5); ptrRing.scale.set(k,k,1); ptrArrow.position.y=2.5+0.22*Math.sin(time*5);
+}
+let follow=true;
+const _prevT=new THREE.Vector3();
+function followCam(dt){
+  if(!follow||S.phase==='intro') return;
+  const goal=new THREE.Vector3(W.x,0.4,W.z);
+  _prevT.copy(controls.target);
+  controls.target.lerp(goal,Math.min(1,dt*2.2));
+  camera.position.add(controls.target.clone().sub(_prevT));
+}
+
+/* ---------------- scene visuals per frame ---------------- */
+function updateScene(dt){
+  const hod=(START_HOUR+S.t)%24;
+  const dayF=S.phase==='prep'?1:clamp(Math.sin((hod-6)/12*Math.PI)*1.6,0,1);
+  scene.background.copy(skyNight).lerp(skyDay,dayF); scene.fog.color.copy(scene.background);
+  sun.intensity=0.08+0.8*dayF;
+  const lit=S.lightsOn && S.power && !(hod>=3&&hod<4 && S.phase==='run');
+  hemi.intensity=0.24+0.24*dayF+(lit?0.16:0);
+  lamp.intensity=lit?0.9:0;
+  const h=S.heater/100;
+  brooders.forEach(b=>{b.glowM.opacity=h*0.95; b.pl.intensity=h*1.4; b.haloM.opacity=h*0.5; b.rimM.color.setRGB(0.35+0.65*h,0.23+0.3*h,0.13);});
+  {const bad=clamp(Math.max((S.CO2-2500)/2000,(S.NH3-12)/20),0,1); scene.fog.near=34-27*bad; scene.fog.far=80-42*bad; if(bad>0) scene.fog.color.lerp(hazeC,bad*0.7);}
+  const fe=S.power?S.fans:0;
+  fans.forEach((f,i)=>{if(i<fe) f.rotation.z+=dt*(i<2?14:10);});
+  ctrlScr.material.color.set(S.power?'#62e08f':'#3a3a3a');
+  waterIn.scale.y=Math.max(0.01,S.tank/TANK_CAP*1.2); waterIn.position.y=0.56+waterIn.scale.y/2;
+  fountWater.forEach(w=>w.visible=S.linesFilled && S.tank>1);
+  const fl=S.feeder/FEED_CAP;
+  paperFeedM.opacity=S.paper?clamp(fl*1.6,0,0.95):0;
+  panFeed.forEach(p=>p.scale.y=Math.max(0.01,fl));
+  wetM.opacity=clamp((S.litterWet-0.15)*1.1,0,0.8);
+  floorM.color.set(S.litter?'#cdbfa6':'#9a9a94'); if(S.litter&&!floorM.map){floorM.map=litterT; floorM.needsUpdate=true;}
+  dipM.color.set(S.dip?'#2f86c2':'#7f7f7f');
+}
+
+/* ---------------- simulation ---------------- */
+function simStep(dt){
+  S.t+=dt;
+  const H=START_HOUR+S.t, hod=H%24, age=S.t/24;
+  const tgt=targetT(age);
+  // outside weather + event offsets
+  let off=0; if(S.t>38&&S.t<47) off=-6; if(S.t>146&&S.t<153) off=7;
+  S.outOff+=(off-S.outOff)*Math.min(1,dt*0.8);
+  const out=17+5*Math.sin((hod-9)*Math.PI/12)+S.outOff;
+  const fe=S.power?S.fans:0, h=S.heater/100;
+  const dark=!S.power||(hod>=3&&hod<4);
+  // temperature
+  S.T+=(26*h+1.5+0.3*age-(0.5+0.35*fe)*(S.T-out))*dt;
+  const rhEq=clamp(55+25*S.litterWet+10*h-4*fe,25,95); S.RH+=(rhEq-S.RH)*Math.min(1,dt*0.6);
+  const co2Eq=500+(h*2600+300+30*age)/(0.35+0.65*fe); S.CO2+=(co2Eq-S.CO2)*Math.min(1,dt*1.5);
+  const nh3Eq=(1+0.5*age+40*Math.max(0,S.litterWet-0.2))/(0.3+0.6*fe); S.NH3+=(nh3Eq-S.NH3)*Math.min(1,dt*0.8);
+  // litter
+  if(S.line[0]==='leak') S.litterWet+=0.07*dt;
+  if(S.RH>72) S.litterWet+=(S.RH-72)*0.002*dt;
+  S.litterWet+=(0.002-0.003*fe)*dt; S.litterWet=clamp(S.litterWet,0.05,1);
+  // water availability
+  const lineF=((lineOk(0)?1:0)+(lineOk(1)?1:0))/2, avail=S.tank>1?lineF:0;
+  const dev=S.T-tgt;
+  const comfort=clamp(1-Math.max(0,Math.abs(dev)-1)*0.1,0.3,1);
+  const lightF=dark?0.25:1, waterOK=0.25+0.75*avail, air=(S.CO2>3000?0.9:1)*(S.NH3>20?0.88:1), dis=S.disease?0.85:1;
+  const pot=S.birds*intake(age)/23/1000;
+  const want=pot*comfort*waterOK*lightF*air*dis;
+  const eaten=Math.min(S.feeder,want*dt); S.feeder-=eaten;
+  const water=(want*(1.8+0.06*Math.max(0,dev))+0.3)*avail*dt;
+  S.tank=Math.max(0,S.tank-water); S.meter+=water;
+  if(S.power&&S.tank<0.85*TANK_CAP) S.tank=Math.min(TANK_CAP,S.tank+900*dt);
+  const ratio=pot>0?eaten/(pot*dt):1;
+  S.weight+=ADG(age)/24*dt*Math.max(age<1?0.08:0.03,ratio)*Math.sqrt(comfort);
+  // stress & uniformity
+  const stressed=Math.abs(dev)>2||avail<0.6||S.feeder<=0.5;
+  if(stressed) S.cv+=0.12*dt; else S.cv=Math.max(7.5,S.cv-0.01*dt);
+  if(avail<0.6) S.thirstH+=dt; else S.thirstH=Math.max(0,S.thirstH-dt*2);
+  if(Math.abs(dev)>5) S.extremeH+=dt; else S.extremeH=Math.max(0,S.extremeH-dt);
+  if(S.feeder<=0.5&&!dark) S.emptyH+=dt; else S.emptyH=0;
+  if(S.t<24){S.cropPen+=dt*((S.feeder<=0.5?6:0)+(avail<0.6?8:0)+(dev<-2?3:0)+(dev>2.5?2:0));}
+  if(S.thirstH>3) fatal('water','الكتاكيت فضلت من غير مية أكتر من 3 ساعات.');
+  if(S.extremeH>2) fatal('temp','الحرارة فضلت بعيدة عن المطلوب بأكتر من 5 درجات لأكتر من ساعتين.');
+  if(S.emptyH>4) fatal('feed','المعالف فضلت فاضية أكتر من 4 ساعات.');
+  if(S.emptyH>1) mistake('feedEmpty','العلف خلص من المعالف وفضل فاضي. القاعدة: ماتسيبش المعلف يفضى، املاه قبل ما ينزل تحت الربع.');
+  // mortality
+  let hz=(age<3?0.0012:0.0006)/24;
+  const cold=Math.max(0,tgt-1.5-S.T), hot=Math.max(0,S.T-tgt-2);
+  hz+=0.00006*cold*cold+0.0001*hot*hot;
+  if(S.CO2>3500) hz+=(S.CO2-3500)/1e7;
+  if(S.NH3>25) hz+=(S.NH3-25)*0.00002;
+  if(S.thirstH>2) hz+=0.0003*Math.min(4,S.thirstH-2);
+  if(S.disease) hz+=0.0003*S.diseaseLevel;
+  S.deadAcc+=S.birds*hz*dt; const d=Math.floor(S.deadAcc);
+  if(d>0){S.deadAcc-=d; S.birds-=d; S.deadInHouse+=d; S.deadTotal+=d; if(S.deadSince==null) S.deadSince=S.t;}
+  if(S.deadInHouse>0&&S.deadSince!=null&&S.t-S.deadSince>12) mistake('deadOld','سبت النافق في العنبر أكتر من 12 ساعة. النافق مصدر عدوى، يتلم كل لفة (على الأقل 3 مرات في اليوم) ويتشال بعيد عن العنبر.');
+  if(S.treated){S.diseaseLevel-=dt/18; if(S.diseaseLevel<=0){S.diseaseLevel=0;S.disease=false;}}
+  // comfort tracking
+  S.totalH+=dt;
+  if(Math.abs(dev)<=1.5&&S.CO2<3000&&S.NH3<20&&avail>0.7&&S.feeder>0.5) S.goodH+=dt;
+  S.tmax=Math.max(S.tmax,S.T); S.tmin=Math.min(S.tmin,S.T);
+  // mode
+  S.mode=dark?'rest':dev<-1.5?'cold':dev>1.5?'hot':'ok';
+  if(S.mode==='cold'&&S.ev.cold&&!S.ev.cold.end) S.ev.cold.bad+=dt;
+  if(S.mode==='hot'&&S.ev.hot&&!S.ev.hot.end) S.ev.hot.bad+=dt;
+  hints(dt,age,tgt,avail);
+  runEvents();
+  const dayNum=Math.floor(H/24);
+  if(dayNum>S.lastDay){S.lastDay=dayNum; dailyForm(dayNum-1);}
+  if(S.t>=END_T) endGame();
+}
+
+/* ---------------- hints (level 1 helper) ---------------- */
+function hint(key,text,cd,alarm){
+  if((S.hintCd[key]||-99)>S.t) return; S.hintCd[key]=S.t+(cd||4); toast(text,alarm?'!':'م',alarm);
+}
+function hints(dt,age,tgt,avail){
+  if(S.phase!=='run') return;
+  if(S.mode==='cold') hint('cold','الكتاكيت متلمّة تحت الدفايات وبتصوصو. دي بردانة. زوّد الدفاية.');
+  if(S.mode==='hot') hint('hot','الكتاكيت بعدت عن الدفايات وفاتحة مناقيرها. دي حرانة. قلل الدفاية.');
+  if(S.CO2>3000) hint('co2','الهوا تقيل وفيه ريحة غاز. شغّل شفاط كمان.',4);
+  if(S.NH3>20) hint('nh3','فيه ريحة نشادر بتحرق العين. شوف الفرشة المبلولة. وشغّل شفاط.',4);
+  if(S.feeder<FEED_CAP*0.15&&S.feeder>0.5) hint('feedLow','العلف قرّب يخلص. هات شكارة.',3);
+  if(S.feeder<=0.5) hint('feedOut','المعالف فاضية! الكتاكيت مش لاقية تاكل.',1.5,true);
+  if(S.tank<TANK_CAP*0.2) hint('tank','تنك المية قرب يخلص.',3,true);
+  if(S.deadInHouse>0&&S.deadSince!=null&&S.t-S.deadSince>6) hint('dead','فيه نافق في العنبر من بدري. لمّه دلوقتي.',6);
+}
+
+/* ---------------- events ---------------- */
+function addEvMax(n){S.evMax+=n;}
+function evPts(id,p,msg){const e=S.ev[id]; if(!e||e.scored) return; e.scored=true; S.evPts+=p; if(p>=7) sfx('done'); if(msg) toast(msg+` (+${p})`,'م');}
+const EVENTS=[
+ {at:0.4,fn:()=>{
+   modal({who:'المشرف',av:'م',say:'read',title:'اقرا الكتاكيت',html:`<p>الكتكوت هو الترمومتر الحقيقي. بص عليهم كل لفة.</p>
+   <div class="pics"><div class="pic">${chickPic('cold')}بردانين<small>متلمّين تحت الدفاية. زوّد الدفاية</small></div><div class="pic">${chickPic('hot')}حرانين<small>جنب الحيطان. قلل الدفاية</small></div><div class="pic">${chickPic('ok')}مرتاحين<small>متوزعين. سيبهم</small></div></div>
+   <p>اللون تحت كل رقم: أخضر تمام، أصفر خلي بالك، أحمر اتصرف دلوقتي.</p>
+   <p>الدايرة الصفرا والسهم بيوروك تروح فين. دوس على الأرض والعامل يمشي.</p>
+   <p>الحرارة والشفاطات من اللوحة اللي على الحيطة.</p>`});
+ }},
+ {at:3,fn:()=>toast('نصيحة: أول 3 أيام العلف قليل ومتكرر. املا المعالف كل ما تنزل، ماتحطش كمية كبيرة مرة واحدة.','م')},
+ {at:22,fn:()=>{S.ev.crop={start:22,done:false}; addEvMax(10);
+   modal({who:'المشرف',av:'م',say:'crop',title:'فحص الحوصلة بعد 24 ساعة',html:`<p>قرّبنا على 24 ساعة من الاستلام. امسك 20 كتكوت من أماكن مختلفة في العنبر وحسس على الحوصلة (تحت الرقبة).</p><p>الحوصلة المليانة طرية ومليانة علف ومية = الكتكوت لقى الأكل والمية. المطلوب <b>95% أو أكتر</b> مليانين.</p><p>دوس <b>افحص</b> تحت واختار فحص الحوصلة.</p>`});
+ }},
+ {at:34,fn:()=>{const e=S.ev.crop; if(e&&!e.done){e.done=true; evPts('crop',0); mistake('crop','مافحصتش الحوصلة في وقتها. الفحص ده بيقولك من بدري لو فيه كتاكيت مش لاقية أكل أو مية.');}}},
+ {at:38,fn:()=>{S.ev.cold={bad:0}; addEvMax(10);}},
+ {at:47.5,fn:()=>{const e=S.ev.cold; e.end=true; const p=e.bad<1?10:e.bad<3?6:2; S.ev.cold.scored=false; evPts('cold',p,p>=10?'عديت ليلة البرد والكتاكيت دافية':'ليلة البرد عدت، بس الكتاكيت بردت فترة');
+   if(p<10) mistake('coldNight','بالليل الجو بيبرد والحرارة بتنزل. لفة الليل مهمة: بص على توزيع الكتاكيت وزوّد الدفاية بدري قبل ما يتلموا.');}},
+ {at:54,fn:()=>{S.line[1]='clogged'; S.ev.clog={start:S.t}; addEvMax(10);}},
+ {at:54.6,fn:()=>{if(S.line[1]==='clogged') toast('الكتاكيت بتتزاحم على خط المية الأولاني، وناحية الخط التاني صوت صوصوة عالي.','!',true);}},
+ {at:76,fn:()=>{S.disease=true; S.diseaseLevel=1; S.ev.dis={start:S.t,wrong:0}; addEvMax(10);}},
+ {at:78,fn:()=>{if(S.disease&&!S.treated) toast('فيه كتاكيت واقفة مكانها خاملة، بطنها كبيرة وسرّتها مبلولة، والنافق النهارده أكتر من العادي.','!',true);}},
+ {at:84,fn:()=>{if(S.disease&&!S.treated) toast('النافق لسه زايد. اللي بيشوف حاجة غريبة لازم يبلّغ الدكتور على طول.','!',true);}},
+ {at:100,fn:()=>{S.power=false; S.ev.pow={start:S.t}; addEvMax(10); renderActions(); toast('الكهربا قطعت! النور والشفاطات وطلمبة المية وقفوا.','!',true);}},
+ {at:106,fn:()=>{if(!S.power){S.power=true; renderActions(); evPts('pow',0); mistake('power','الكهربا قعدت مقطوعة ومحدش شغل المولد. في الحالة دي الغازات بتعلى والمية بتخلص والكتاكيت بتتخنق. المولد يشتغل في خلال دقايق.'); toast('الكهربا رجعت لوحدها بعد 6 ساعات.','م');}}},
+ {at:116,fn:()=>{S.line[0]='leak'; S.ev.leak={start:S.t,fixed:false,lit:false,p:0}; addEvMax(10);}},
+ {at:128,fn:()=>{S.ev.vis={}; addEvMax(10);
+   modal({who:'البوابة',av:'!',avc:'alarm',say:'visitor',title:'زيارة على العنبر',html:'<p>سواق عربية العلف خلص التفريغ، وعايز يدخل العنبر يتفرج على الكتاكيت. العربية دي لفت على 4 مزارع النهارده.</p>',
+    quiz:{q:'تعمل إيه؟',opts:[
+     ['يدخل عادي، هو بس هيتفرج',0,'عربيات العلف وسواقينها بيلفوا على مزارع كتير، ودي من أخطر طرق نقل الأمراض بين المزارع.'],
+     ['مايدخلش. اللي ملوش شغل جوه مايدخلش، وأبلّغ المشرف',10,'صح. كل ما الزيارات تقل، الأمراض تقل. الأمان الحيوي أرخص من أي علاج.'],
+     ['يدخل بس يعدي على حوض المطهر',4,'أحسن من مفيش، بس هدومه وإيده ممكن تنقل ميكروب. الأحسن مايدخلش أصلاً، ولو لازم يبقى بإذن المشرف وبهدوم وبوت المزرعة.']]},
+    onAnswer:(o)=>{evPts('vis',o[1]); if(o[1]<10) mistake('visitor','دخول ناس من بره العنبر. أي حد ملوش شغل جوه مايدخلش، خصوصاً سواقين العربيات والتجار.');}});
+ }},
+ {at:146,fn:()=>{S.ev.hot={bad:0}; addEvMax(10);}},
+ {at:153.5,fn:()=>{const e=S.ev.hot; e.end=true; const p=e.bad<1?10:e.bad<3?6:2; evPts('hot',p,p>=10?'عديت يوم الحر صح':'يوم الحر عدى، بس الكتاكيت اتحرت فترة');
+   if(p<10) mistake('hotDay','الضهر الجو بيدفى لوحده. قلل الدفاية بدري وزوّد شفاط لو الكتاكيت بعدت عن الدفايات وفتحت مناقيرها.');}},
+ {at:166,fn:vaccineEvent},
+];
+function runEvents(){EVENTS.forEach((e,i)=>{if(!S.fired[i]&&S.t>=e.at){S.fired[i]=true; e.fn();}});}
+
+function vaccineEvent(){
+  S.ev.vac={}; addEvMax(10);
+  const rate=waterRate(), two=Math.round(rate*2/10)*10;
+  let pts=0; const add=o=>{if(o[1]) pts+=2.5;};
+  const done=()=>{evPts('vac',Math.round(pts)); if(pts<10) mistake('vaccine','خطوات التحصين في المية اتلخبطت. التحصين كائن حي ضعيف: من غير كلور، عطش ساعة لساعتين، مثبّت (لبن فرز)، وكمية مية يخلصوها في ساعتين تقريباً.');};
+  modal({who:'المشرف',av:'م',say:'vac1',title:'يوم التحصين في المية',html:'<p>النهارده يوم التحصين حسب برنامج الدكتور. اللقاح كائن حي ضعيف؛ أي كلور أو مطهر في المية بيموّته، والحر والشمس بيضعفوه.</p>',
+   quiz:{q:'الكلور يتقفل إمتى؟',opts:[['قبل التحصين بيومين ويرجع بعده بيوم (حسب كلام الدكتور)',1,'صح. بواقي الكلور في الخطوط بتموت اللقاح.'],['ساعة التحصين بس',0,'بواقي الكلور بتفضل في الخطوط والتنك وتموت اللقاح.'],['مش مهم',0,'مهم جداً، ممكن تصرف تحصين على الفاضي والقطيع يبقى من غير مناعة.']]},onAnswer:add});
+  modal({who:'المشرف',av:'م',say:'vac2',title:'العطش قبل التحصين',quiz:{q:'تعطّش الطيور قد إيه قبل ما تحط اللقاح؟',opts:[['ساعة لساعتين حسب الجو',1,'صح. عشان كلهم يشربوا مع بعض بسرعة.'],['يوم كامل',0,'عطش زيادة = إجهاد وخناق على السقايات.'],['مانعطشهمش خالص',0,'مش هيشربوا الكمية في الوقت المطلوب فاللقاح يضعف.']]},onAnswer:add});
+  modal({who:'المشرف',av:'م',say:`هنحسب كمية المية. الكتاكيت بتشرب ${fmt(rate)} لتر في الساعة.`,title:'كمية المية',html:`<p>الطيور بتشرب دلوقتي حوالي <b>${fmt(rate)} لتر في الساعة</b>.</p>`,quiz:{q:'تحط اللقاح في كام لتر مية؟',opts:[[`حوالي ${fmt(two)} لتر (اللي يشربوه في ساعتين)`,1,'صح. يخلصوها في ساعتين واللقاح لسه قوي.'],[`التنك كله ${fmt(TANK_CAP)} لتر`,0,'هيقعدوا يوم كامل يشربوا فيها واللقاح يموت قبلها.'],[`${fmt(Math.max(10,two/4))} لتر بس`,0,'قليلة؛ مش كل الطيور هتلحق تشرب جرعتها.']]},onAnswer:add});
+  modal({who:'المشرف',av:'م',say:'vac4',title:'المثبّت',quiz:{q:'تحط إيه في المية مع اللقاح؟',opts:[['لبن فرز بودرة (2 لـ 4 جم/لتر) قبل اللقاح بربع ساعة، أو المثبّت اللي الدكتور يقول عليه',1,'صح. بيحمي اللقاح من أي بواقي في المية.'],['شوية مطهر عشان المية تبقى نضيفة',0,'المطهر بيقتل اللقاح.'],['سكر',0,'السكر مش مثبّت للقاح.']]},onAnswer:add,onClose:done});
+}
+
+/* ---------------- daily record form ---------------- */
+function dailyForm(day){
+  const rec={day,dead:S.collectedToday,bags:S.bagsToday,meter:Math.round(S.meter),prev:Math.round(S.prevMeter),tmax:Math.round(S.tmax*10)/10,tmin:Math.round(S.tmin*10)/10,left:S.deadInHouse};
+  rec.used=rec.meter-rec.prev;
+  S.records.push(rec);
+  S.collectedToday=0; S.bagsToday=0; S.prevMeter=S.meter; S.tmax=-99; S.tmin=99;
+  const html=`<p>آخر اليوم ${day}. اكتب البيان زي ما بتكتبه على الورقة. اللي يتكتب صح النهارده بيخلي المهندس يعرف يحسب التحويل والنافق صح.</p>
+  ${rec.left?`<p class="note" style="color:var(--warn)">لسه فيه ${rec.left} نافق في العنبر ماتلموش. دول هيتحسبوا على بكرة، بس ماينفعش يفضلوا.</p>`:''}
+  <div class="form">
+   <label for="fDead">النافق اللي لميته النهارده</label><input id="fDead" inputmode="numeric">
+   <label for="fBags">شكاير العلف اللي اتفتحت النهارده</label><input id="fBags" inputmode="numeric">
+   <label for="fMeter">قراية عداد المية دلوقتي</label><input id="fMeter" inputmode="numeric">
+   <label for="fUsed">استهلاك المية النهارده (لتر)<br><small class="note">قراية امبارح: ${fmt(rec.prev).replace(/,/g,'')}</small></label><input id="fUsed" inputmode="numeric">
+   <label for="fTmax">أعلى حرارة في الترمومتر</label><input id="fTmax" inputmode="decimal">
+   <label for="fTmin">أقل حرارة في الترمومتر</label><input id="fTmin" inputmode="decimal">
+  </div>
+  <div class="row"><button class="btn" id="seeMeter">روح اقرا العداد</button><button class="btn" id="seeTherm">روح اقرا الترمومتر</button></div>
+  <p class="note" id="readOut"></p>`;
+  modal({who:'البيان اليومي',av:'ب',say:'form',title:`بيان يوم ${day}`,html,form:true,btn:'سلّم البيان',
+    onMount:()=>{
+      $('#seeMeter').onclick=()=>{$('#readOut').textContent=`العداد بيقول: ${rec.meter}`;};
+      $('#seeTherm').onclick=()=>{$('#readOut').textContent=`الترمومتر (أعلى/أقل من نص الليل اللي فات): أعلى ${f1(rec.tmax)}° · أقل ${f1(rec.tmin)}°`;};
+    },
+    onSubmit:()=>{
+      const v=id=>parseFloat(($('#'+id).value||'').replace(',', '.'));
+      const rows=[['النافق',v('fDead'),rec.dead,0],['شكاير العلف',v('fBags'),rec.bags,0],['قراية العداد',v('fMeter'),rec.meter,2],['استهلاك المية',v('fUsed'),rec.used,3],['أعلى حرارة',v('fTmax'),rec.tmax,0.6],['أقل حرارة',v('fTmin'),rec.tmin,0.6]];
+      let ok=0; const tr=rows.map(r=>{const good=!isNaN(r[1])&&Math.abs(r[1]-r[2])<=r[3]; if(good) ok++; return `<tr><td>${r[0]}</td><td>${isNaN(r[1])?'—':r[1]}</td><td>${r[2]}</td><td class="${good?'y':'n'}">${good?'صح':'غلط'}</td></tr>`;}).join('');
+      S.recPts+=ok; S.recMax+=6;
+      if(ok<4) mistake('records','البيان اليومي فيه أرقام غلط. سجّل النافق وشكاير العلف أول بأول في الكشكول، واقرا العداد والترمومتر بنفسك قبل ما تكتب.');
+      return `<p>طلّعت <b>${ok} من 6</b> صح.</p><table class="res"><tr><th>البند</th><th>كتبت</th><th>الصح</th><th></th></tr>${tr}</table>
+        ${ok<6?'<p class="note">نصيحة: شيل كشكول صغير، وكل ما تلم نافق أو تفتح شكارة اكتبها على طول.</p>':''}`;
+    }});
+}
+
+/* ---------------- fatal / mistakes ---------------- */
+function fatal(k,t){if(S.fatal[k]) return; S.fatal[k]=t; toast('غلطة كبيرة: '+t,'!',true);}
+function mistake(k,t){if(S.mistakeKeys[k]) return; S.mistakeKeys[k]=1; S.mistakes.push(t);}
+
+/* ---------------- sound & voice ---------------- */
+const AU={ctx:null,on:true,next:0};
+try{if(localStorage.getItem('barnSound')==='0') AU.on=false;}catch(e){}
+function auInit(){
+  if(AU.ctx) return; try{const Cx=window.AudioContext||window.webkitAudioContext; AU.ctx=new Cx();}catch(e){return;}
+  const c=AU.ctx; AU.master=c.createGain(); AU.master.gain.value=AU.on?1:0; AU.master.connect(c.destination);
+  AU.amb=c.createGain(); AU.amb.gain.value=0.4; AU.amb.connect(AU.master); AU.ui=c.createGain(); AU.ui.connect(AU.master);
+  const buf=c.createBuffer(1,c.sampleRate*2,c.sampleRate), d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; AU.noise=buf;
+  const loop=(type,f,q)=>{const sr=c.createBufferSource(); sr.buffer=buf; sr.loop=true; const fl=c.createBiquadFilter(); fl.type=type; fl.frequency.value=f; fl.Q.value=q; const g=c.createGain(); g.gain.value=0; sr.connect(fl); fl.connect(g); g.connect(AU.amb); sr.start(); return g;};
+  AU.fan=loop('bandpass',170,0.6); AU.hiss=loop('highpass',3500,0.5);
+  const o=c.createOscillator(); o.type='sawtooth'; o.frequency.value=48; const lf=c.createBiquadFilter(); lf.type='lowpass'; lf.frequency.value=180; AU.gen=c.createGain(); AU.gen.gain.value=0; o.connect(lf); lf.connect(AU.gen); AU.gen.connect(AU.amb); o.start();
+}
+function tone(f0,f1,dur,vol,type,when,dest){
+  const c=AU.ctx; if(!c) return; const t=c.currentTime+(when||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(dest||AU.ui); o.start(t); o.stop(t+dur+0.03);
+}
+function sfx(k){
+  const c=AU.ctx; if(!c) return;
+  if(k==='ok'){tone(660,660,.12,.16); tone(990,990,.2,.16,'sine',.12);}
+  else if(k==='bad'){tone(210,140,.32,.13,'square');}
+  else if(k==='alarm'){[0,.26,.52].forEach(w=>{tone(880,880,.12,.12,'square',w); tone(620,620,.12,.12,'square',w+.12);});}
+  else if(k==='done'){[523,659,784].forEach((f,i)=>tone(f,f,.15,.14,'triangle',i*.11));}
+  else if(k==='tap'){tone(520,520,.04,.05);}
+  else if(k==='pour'||k==='water'){const sr=c.createBufferSource(); sr.buffer=AU.noise; const fl=c.createBiquadFilter(); fl.type='bandpass'; fl.frequency.value=k==='pour'?2200:900; const g=c.createGain(), t=c.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.13,t+.06); g.gain.exponentialRampToValueAtTime(0.0001,t+1.2); sr.connect(fl); fl.connect(g); g.connect(AU.ui); sr.start(t); sr.stop(t+1.3);}
+}
+function audioTick(dt){
+  const c=AU.ctx; if(!c) return; const live=S.phase==='run'&&!modalOpen&&S.speed>0, t=c.currentTime;
+  AU.amb.gain.setTargetAtTime((live?1:(S.phase==='prep'?0.5:0.15))*(talking()?0.25:1),t,0.2);
+  AU.fan.gain.setTargetAtTime((S.power?S.fans:0)*0.035,t,0.4);
+  AU.hiss.gain.setTargetAtTime(S.heater/100*0.02,t,0.4);
+  AU.gen.gain.setTargetAtTime(S.genOn&&S.t<107?0.07:0,t,0.3);
+  if(!live||bodyI.count===0) return; AU.next-=dt; if(AU.next>0) return;
+  const m=S.mode; let iv,vol,f0,dur;
+  if(m==='cold'){iv=rnd(.04,.14);vol=.085;f0=rnd(3900,4600);dur=.13;}
+  else if(m==='hot'){iv=rnd(.5,1.4);vol=.025;f0=rnd(2600,3000);dur=.06;}
+  else if(m==='rest'){iv=rnd(1.5,3.5);vol=.012;f0=rnd(2800,3200);dur=.06;}
+  else{iv=rnd(.18,.7);vol=.04;f0=rnd(3000,3600);dur=.07;}
+  if(S.thirstH>0.5&&m!=='rest'){iv*=.5;vol*=1.4;}
+  AU.next=iv; tone(f0,f0*0.72,dur,vol,'sine',0,AU.amb);
+}
+const VO={ok:false,voice:null};
+function voInit(){
+  if(!('speechSynthesis' in window)){document.body.classList.add('novoice'); return;}
+  const pick=()=>{let vs=[]; try{vs=speechSynthesis.getVoices()||[];}catch(e){} VO.voice=vs.find(v=>/^ar[-_]EG/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null; VO.ok=!!VO.voice||vs.length===0; document.body.classList.toggle('novoice',!VO.ok);};
+  pick(); try{speechSynthesis.addEventListener('voiceschanged',pick);}catch(e){}
+}
+const LINES={"hello": "أهلاً بيك. أنا المشرف. هفضل معاك طول الأسبوع. العنبر لسه فاضي، والكتاكيت جاية. هنجهّز سبع حاجات الأول. دوس على الأرض والعامل يمشي.", "prep_dip": "قبل ما تدخل العنبر. البس بوت العنبر. وعدّي في حوض المطهر. واغسل إيدك. المرض بييجي على الرجلين.", "prep_litter": "الفرشة بتدفّي رجل الكتكوت. لازم تبقى نشارة ناشفة ونضيفة. وافردها بالتساوي.", "prep_heat": "الكتكوت مابيعرفش يدفّي نفسه. شغّل الدفايات قبل الكتاكيت بيوم. عشان الأرض نفسها تدفى.", "prep_water": "اغسل خطوط المية. واملاها قبل الكتاكيت بكام ساعة. الكتكوت اللي مايلاقيش مية بيموت.", "prep_feed": "أول تلات أيام. حط العلف على ورق جنب المية. حط شوية صغيرين. وزوّد كل شوية.", "prep_light": "أول أسبوع النور شغال طول اليوم. وساعة واحدة بس ضلمة. عشان الكتاكيت تتعود على الضلمة.", "prep_vent": "حتى في البرد. لازم شفاط واحد يفضل شغال. الدفاية للحرارة. والشفاط للهوا النضيف.", "arrive": "الكتاكيت وصلت. عدّ الكراتين. وبص على الكتاكيت. لازم تبقى نشيطة، وسرّتها مقفولة.", "unload": "هنفرّغ الكتاكيت دلوقتي.", "read": "الكتكوت هو الترمومتر بتاعك. لو متلمّين تحت الدفاية، يبقوا بردانين. زوّد الدفاية. لو بعيد جنب الحيطان، يبقوا حرانين. قلل الدفاية. لو متوزعين في كل حتة، يبقوا مرتاحين. والدايرة الصفرا بتوريك تروح فين.", "crop": "عدّى يوم على الكتاكيت. امسك عشرين كتكوت. وحسّس على الحوصلة تحت الرقبة. لازم تبقى مليانة وطرية. دوس على افحص.", "visitor": "سواق عربية العلف عايز يدخل العنبر. والعربية دي لفّت على أربع مزارع النهارده.", "vac1": "النهارده يوم التحصين. اللقاح ده حي. الكلور بيموّته. والحر بيضعفه.", "vac2": "هنعطّش الكتاكيت شوية قبل اللقاح.", "vac4": "هنحط في المية حاجة تحمي اللقاح.", "gen": "الكهربا قاطعة. هنشغّل المولد.", "doc_more": "اللي بتقوله مش هو اللي حاصل. ارجع بص على الكتاكيت التعبانة. وقولّي شايف إيه بالظبط.", "doc1": "ده التهاب في السرّة. هكتبلك دوا في المية. اسمعني كويس.", "doc3": "آخر حاجة. الدوا بيتدّي إزاي.", "doc_ok": "تمام. كويس إنك بلّغت. خليك متابع. وأي حاجة تتغير كلّمني على طول.", "form": "اليوم خلص. اكتب البيان. النافق. وشكاير العلف. وعداد المية. والحرارة."};
+/* turn on-screen text into something a voice can read: units and symbols as Egyptians say them */
+function spk(t){
+  return String(t||'')
+    .replace(/(\d+)\.5(?!\d)/g,'$1 ونص').replace(/(\d+)\.(\d)(?!\d)/g,'$1 و $2 من عشرة').replace(/(\d),(\d{3})/g,'$1$2')
+    .replace(/CO₂/g,'غاز الدفايات').replace(/ppm/gi,'')
+    .replace(/(\d)\s*°/g,'$1 درجة').replace(/°/g,' درجة')
+    .replace(/(\d)\s*%/g,'$1 في المية').replace(/%\s*(\d+)/g,'$1 في المية')
+    .replace(/جم\s*\/\s*لتر/g,'جرام لكل لتر').replace(/مل\s*\/\s*لتر/g,'ملّي لكل لتر')
+    .replace(/(\d)\s*كجم/g,'$1 كيلو').replace(/(\d)\s*جم(?=[\s.،)]|$)/g,'$1 جرام')
+    .replace(/(\d)\s*مل(?=[\s.،)]|$)/g,'$1 ملّي').replace(/(\d)\s*سم(?=[\s.،)]|$)/g,'$1 سنتي')
+    .replace(/(\d)\s*[–-]\s*(\d)/g,'$1 لـ $2').replace(/≈/g,'حوالي ').replace(/×/g,' في ').replace(/\+/g,' و ')
+    .replace(/[✓✕()«»"]/g,' ').replace(/\//g,' أو ').replace(/\s+/g,' ').trim();
+}
+function L(x){return LINES[x]||x;}
+function say(text,cut){
+  if(!VO.ok||!AU.on||!text) return;
+  try{
+    if(cut) speechSynthesis.cancel();
+    spk(text).split(/[.!؟:\n]+/).map(x=>x.trim()).filter(x=>x.length>1).forEach(part=>{
+      const u=new SpeechSynthesisUtterance(part); if(VO.voice) u.voice=VO.voice; u.lang=VO.voice?VO.voice.lang:'ar-EG'; u.rate=0.9; u.pitch=1; speechSynthesis.speak(u);});
+  }catch(e){}
+}
+function talking(){try{return VO.ok&&speechSynthesis.speaking;}catch(e){return false;}}
+function plain(html){const d=document.createElement('div'); d.innerHTML=html||''; return d.textContent.replace(/\s+/g,' ').trim();}
+function setSound(on){AU.on=on; if(AU.master) AU.master.gain.value=on?1:0; if(!on){try{speechSynthesis.cancel();}catch(e){}} const b=$('#sndBtn'); b.setAttribute('aria-pressed',on); b.textContent=on?'🔊 الصوت':'🔇 صامت'; try{localStorage.setItem('barnSound',on?'1':'0');}catch(e){}}
+$('#sndBtn').addEventListener('click',()=>setSound(!AU.on)); if(!AU.on) setSound(false);
+function chickPic(mode){
+  let d=''; let sd=mode==='cold'?3:mode==='hot'?11:7; const r=()=>{sd=(sd*9301+49297)%233280; return sd/233280;};
+  for(let i=0;i<30;i++){let x,y; if(mode==='cold'){const a=r()*6.28,q=4+r()*11; x=50+Math.cos(a)*q; y=38+Math.sin(a)*q*0.8;} else if(mode==='hot'){if(r()<0.5){x=6+r()*88; y=r()<0.5?6+r()*6:64+r()*6;} else {y=6+r()*64; x=r()<0.5?5+r()*7:88+r()*7;}} else {x=8+r()*84; y=8+r()*60;}
+    d+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="#ffd23f"/>`;}
+  return `<svg viewBox="0 0 100 76" role="img" aria-label=""><rect width="100" height="76" fill="#b39a72"/><circle cx="50" cy="38" r="19" fill="#ff8a2a" opacity=".35"/><circle cx="50" cy="38" r="7" fill="#6f7a80"/>${d}</svg>`;
+}
+
+/* ---------------- toast & modal ---------------- */
+function toast(text,who,alarm){
+  const el=document.createElement('div'); el.className='toast glass'+(alarm?' alarm':'');
+  el.innerHTML=`<span class="who">${who||'م'}</span><span>${text}</span>`;
+  if(alarm) sfx('alarm'); say(text,false);
+  const box=$('#toasts'); box.prepend(el); while(box.children.length>3) box.lastChild.remove();
+  setTimeout(()=>el.remove(),alarm?9000:7000);
+  el.onclick=()=>el.remove();
+}
+const MQ=[]; let modalOpen=false;
+function modal(st){MQ.push(st); if(!modalOpen) nextModal();}
+function nextModal(){
+  const st=MQ.shift();
+  if(!st){modalOpen=false; $('#modalWrap').hidden=true; return;}
+  modalOpen=true; $('#modalWrap').hidden=false; renderModal(st);
+}
+function renderModal(st){
+  const m=$('#modal');
+  let h=`<div class="mhead"><div class="avatar ${st.avc||''} ${st.who==='الدكتور'?'doc':''}">${st.av||'م'}</div><div><div class="who">${st.who||''}</div><h3>${st.title||''}</h3></div><button class="spk" id="mSpk" aria-label="اسمع الكلام تاني">🔊</button></div><div class="mbody">${st.html||''}`;
+  if(st.quiz){h+=`<div class="q">${st.quiz.q}</div><div class="opts">`+shuffle(st.quiz.opts.map((o,i)=>[o,i])).map(([o,i])=>`<div class="optrow"><button class="opt" data-i="${i}">${o[0]}</button><button class="spk" data-say="${i}" aria-label="اسمع الإجابة">🔊</button></div>`).join('')+`</div><div id="whyBox"></div>`;}
+  h+=`</div><div class="mfoot" id="mfoot"></div>`;
+  m.innerHTML=h; m.scrollTop=0;
+  const spoken=(st.say?[L(st.say),st.quiz?st.quiz.q:'']:[st.title,plain(st.html),st.quiz?st.quiz.q:'']).filter(Boolean).join('. '); say(spoken,true);
+  $('#mSpk').onclick=()=>say(spoken,true);
+  m.querySelectorAll('.spk[data-say]').forEach(b=>b.onclick=()=>say(st.quiz.opts[+b.dataset.say][0],true));
+  const foot=$('#mfoot');
+  const finish=()=>{if(st.onClose) st.onClose(); nextModal();};
+  if(st.quiz){
+    let answered=false;
+    m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(answered) return; answered=true;
+      const o=st.quiz.opts[+b.dataset.i], good=o[1]===true||o[1]>=1&&o[1]===Math.max(...st.quiz.opts.map(x=>+x[1]));
+      m.querySelectorAll('.opt').forEach(x=>{const oo=st.quiz.opts[+x.dataset.i]; const best=oo[1]===true||(+oo[1]===Math.max(...st.quiz.opts.map(y=>+y[1]))); if(best) x.classList.add('ok'); else if(x===b) x.classList.add('no');});
+      $('#whyBox').innerHTML=`<div class="why ${good?'':'no'}"><b>${good?'صح ✓':'مش ده'}</b> ${o[2]||''}</div>`;
+      sfx(good?'ok':'bad'); say((good?'صح كده. ':'لأ، مش ده. ')+(o[2]||''),true);
+      if(st.knowledge){S.quizN++; if(good) S.quizOk++;}
+      if(st.onAnswer) st.onAnswer(o,good);
+      const c=document.createElement('button'); c.className='btn pri'; c.textContent='كمّل'; c.onclick=finish; foot.appendChild(c); c.focus();
+      $('#whyBox').scrollIntoView({block:'nearest'});
+    });
+  } else if(st.form){
+    const c=document.createElement('button'); c.className='btn pri'; c.textContent=st.btn||'تمام';
+    c.onclick=()=>{const res=st.onSubmit(); m.querySelector('.mbody').innerHTML=res; foot.innerHTML=''; const k=document.createElement('button'); k.className='btn pri'; k.textContent='كمّل'; k.onclick=finish; foot.appendChild(k); m.scrollTop=0;};
+    foot.appendChild(c); if(st.onMount) st.onMount();
+  } else if(st.choices){
+    st.choices.forEach(ch=>{const c=document.createElement('button'); c.className='btn'+(ch.pri?' pri':''); c.textContent=ch.label; c.onclick=()=>{ch.fn&&ch.fn(); finish();}; foot.appendChild(c);});
+  } else {
+    const c=document.createElement('button'); c.className='btn pri'; c.textContent=st.btn||'فهمت'; c.onclick=finish; foot.appendChild(c);
+  }
+}
+
+/* ---------------- helpers for values ---------------- */
+function waterRate(){const age=S.t/24; return S.birds*intake(age)/23/1000*1.8+0.3;}
+function wetText(w){return w<0.25?'ناشفة ومفككة':w<0.4?'رطبة شوية':w<0.6?'مبلولة وبتعمل كورة في الإيد':'طين'}
+const MOOD={ok:['مرتاحين: متوزعين، بياكلوا وبيشربوا','var(--good)'],cold:['بردانين: متلمّين تحت الدفايات وبيصوصوا','var(--bad)'],hot:['حرانين: بعيد عن الدفايات وفاتحين مناقيرهم','var(--bad)'],rest:['هاديين/نايمين (ضلمة)','var(--muted)']};
+
+/* ---------------- HUD ---------------- */
+function lvl(v,good,warn){return v<=good?'good':v<=warn?'warn':'bad';}
+function renderHUD(){
+  if(S.phase==='intro') return;
+  const H=START_HOUR+S.t, hod=H%24, mm=Math.floor((hod%1)*60);
+  $('#hDay').textContent=S.phase==='prep'?'تجهيز':`يوم ${Math.floor(H/24)}`;
+  $('#hTime').textContent=S.phase==='prep'?'قبل الوصول':`${String(Math.floor(hod)).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+  $('#hBirds').textContent=S.phase==='prep'?'العنبر فاضي':`${fmt(S.birds)} طائر`;
+  const age=S.t/24, tg=targetT(age), dv=Math.abs(S.T-tg);
+  const G=[
+    ['heat','الحرارة',`${f1(S.T)}°`,`المطلوب ${f1(tg)}°`,S.phase==='prep'?'warn':lvl(dv,1.5,3)],
+    ['fans','الهوا',S.CO2<=2500?'نضيف':S.CO2<=3000?'تقيل':'خانق',`غاز ${fmt(S.CO2)}`,lvl(S.CO2,2500,3000)],
+    ['litter','ريحة النشادر',S.NH3<=10?'مفيش':S.NH3<=20?'موجودة':'بتحرق',`${fmt(S.NH3)} والمسموح 10`,lvl(S.NH3,10,20)],
+    ['fans','الرطوبة',`${fmt(S.RH)}%`,'60–70%',S.RH>=55&&S.RH<=72?'good':S.RH>=45&&S.RH<=80?'warn':'bad'],
+    ['feed','العلف',`${fmt(S.feeder/FEED_CAP*100)}%`,`${fmt(S.feeder)} كجم`,S.feeder<=0.5?'bad':S.feeder<FEED_CAP*0.2?'warn':'good'],
+    ['water','تنك المية',`${fmt(S.tank/TANK_CAP*100)}%`,!S.power?'الطلمبة واقفة':'الطلمبة شغالة',S.tank<TANK_CAP*0.15?'bad':S.tank<TANK_CAP*0.4||!S.power?'warn':'good'],
+    ['dead','نافق جوه',`${S.deadInHouse}`,'لازم يتلم',S.deadInHouse===0?'good':S.deadInHouse<15?'warn':'bad'],
+  ];
+  $('#gauges').innerHTML=G.map(g=>`<button class="g" data-p="${g[0]}" data-s="${g[4]}"><small>${g[1]}</small><b>${g[2]}</b><i>${g[3]}</i></button>`).join('');
+  const md=S.phase==='prep'?['لسه الكتاكيت ماوصلتش. جهّز العنبر','var(--warn)']:(MOOD[S.mode]||MOOD.ok);
+  $('#moodTx').textContent=(S.phase==='prep'?'':'الكتاكيت: ')+md[0]; $('#mood .dot').style.background=md[1];
+  $('#wStat').textContent='العامل: '+(W.label||'واقف');
+  if(!$('#sheet').hidden) refreshSheet();
+}
+$('#followBtn').addEventListener('click',()=>{follow=!follow; $('#followBtn').setAttribute('aria-pressed',follow); $('#followBtn').textContent=follow?'الكاميرا: تابع العامل':'الكاميرا: حرة';});
+$('#gauges').addEventListener('click',e=>{const b=e.target.closest('.g'); if(b&&S.phase==='run') openSheet(b.dataset.p);});
+
+/* ---------------- actions & sheets ---------------- */
+const ACTS=[['heat','🔥','الدفايات'],['fans','🌀','الشفاطات'],['feed','🌾','العلف'],['water','💧','المية'],['litter','🪵','الفرشة'],['dead','🧺','النافق'],['check','🔍','افحص'],['doctor','🩺','الدكتور'],['power','⚡','المولد'],['book','📘','الكتيب']];
+function renderActions(){
+  $('#actions').innerHTML=ACTS.map(a=>`<button class="act ${a[0]==='power'&&!S.power?'hot':''} ${a[0]==='dead'&&S.deadInHouse>20?'':''}" data-a="${a[0]}" aria-pressed="${S.sheet===a[0]}"><span class="ic" aria-hidden="true">${a[1]}</span>${a[2]}</button>`).join('');
+}
+$('#actions').addEventListener('click',e=>{const b=e.target.closest('.act'); if(!b) return; const a=b.dataset.a; if(S.sheet===a){closeSheet();return;} openSheet(a);});
+function openSheet(id){S.sheet=id; const sh=$('#sheet'); sh.innerHTML=`<button class="x" aria-label="اقفل">✕</button>`+(SHEETS[id]?SHEETS[id]():''); sh.hidden=false; sh.querySelector('.x').onclick=closeSheet; refreshSheet(); renderActions(); sh.scrollTop=0;}
+function closeSheet(){S.sheet=null; $('#sheet').hidden=true; renderActions();}
+$('#sheet').addEventListener('click',e=>{const b=e.target.closest('[data-do]'); if(!b||b.disabled) return; const f=DO[b.dataset.do]; if(f) f(b.dataset.arg); refreshSheet();});
+function V(){const age=S.t/24; return {
+  T:f1(S.T),tgt:f1(targetT(age)),tmax:S.tmax>-90?f1(S.tmax):'—',tmin:S.tmin<90?f1(S.tmin):'—',heater:S.heater,fans:S.fans,fansEff:S.power?S.fans:0,
+  co2:fmt(S.CO2),nh3:fmt(S.NH3),rh:fmt(S.RH),feedKg:fmt(S.feeder),feedPct:fmt(S.feeder/FEED_CAP*100),bags:S.bagsToday,
+  tank:fmt(S.tank),tankPct:fmt(S.tank/TANK_CAP*100),meter:S.meterSnap==null?'اضغط اقرا العداد':fmt(S.meterSnap).replace(/,/g,''),rate:fmt(waterRate()),
+  dead:S.deadInHouse,deadToday:S.collectedToday,wet:wetText(S.litterWet),birds:fmt(S.birds),power:S.power?'شغالة':'مقطوعة',
+  hourly:fmt(S.birds*intake(age)/23/1000),lasts:S.birds?f1(S.feeder/(S.birds*intake(age)/23/1000)):'—'};}
+function refreshSheet(){const v=V(); $('#sheet').querySelectorAll('[data-v]').forEach(el=>{el.textContent=v[el.dataset.v];});
+  $('#sheet').querySelectorAll('[data-bar]').forEach(el=>{const k=el.dataset.bar; const p=k==='feed'?S.feeder/FEED_CAP:k==='tank'?S.tank/TANK_CAP:k==='heat'?S.heater/100:0; el.style.width=clamp(p*100,0,100)+'%'; el.style.background=p<0.2&&k!=='heat'?'var(--bad)':k==='heat'?'var(--flame)':'var(--good)';});}
+
+function goFor(p,hx,hz){
+  const op=()=>openSheet(p);
+  if(p==='heat'||p==='fans') return job('رايح للوحة التحكم',[{go:SPOT.panel},{act:'panel',t:0.4,face:0},{fn:op}]);
+  if(p==='water') return job('رايح للتنك',[{go:SPOT.tank},{fn:op}]);
+  if(p==='power') return job('رايح للمولد',[{go:SPOT.gen},{fn:op}]);
+  if(p==='bio') return job('رايح للباب',[{go:SPOT.dip},{fn:op}]);
+  if(p==='flock') return job('رايح للكتاكيت',[{go:[hx,hz]},{fn:()=>openSheet('check')}]);
+  return job('ماشي',[{go:[hx-0.4,hz]},{fn:op}]);
+}
+function toPanel(p){job('رايح للوحة التحكم',[{go:SPOT.panel},{act:'panel',t:0.4,face:0},{fn:()=>openSheet(p)}]); toast('العامل رايح للوحة التحكم على الحيطة.','م');}
+let feedIdx=0;
+const FEED_SPOTS=PAPERS.map(p=>[p[0],p[1]+(p[1]>0?-0.75:0.75)]);
+function deadSpots(){const n=S.deadInHouse>0?Math.min(24,Math.max(1,Math.ceil(S.deadInHouse/2))):0; return deadPos.slice(0,Math.min(n,4)).map(q=>[q[0]+0.35,q[1]]);}
+S.lineSeenAt=[-99,-99]; S.checkOut='';
+const SHEETS={
+ heat:()=>`<h2>الدفايات والحرارة</h2>
+  <div class="kv"><span>الحرارة عند الكتاكيت دلوقتي</span><b><span data-v="T"></span>°</b><span>المطلوب لعمرهم</span><b><span data-v="tgt"></span>°</b><span>الترمومتر: أعلى / أقل</span><b><span data-v="tmax"></span>° / <span data-v="tmin"></span>°</b></div>
+  ${panelRow('heat')}
+  <div class="row"><button class="btn big" data-do="heat" data-arg="-5" aria-label="قلل" ${atPanel()?'':'disabled'}>−</button><div style="flex:1;min-width:120px"><div class="note">قوة الدفايات <b><span data-v="heater"></span>%</b></div><div class="meter"><div data-bar="heat"></div></div></div><button class="btn big" data-do="heat" data-arg="5" aria-label="زوّد" ${atPanel()?'':'disabled'}>+</button></div>
+  <p class="note">الحرارة بتتغير بالراحة (حوالي ساعة). غيّر خطوة واحدة واستنى وبص على الكتاكيت. المطلوب بينزل <b>نص درجة كل يوم</b> تقريباً. الليل أبرد، فالدفاية بتحتاج زيادة. الضهر أدفى، فقللها.</p>`,
+ fans:()=>`<h2>الشفاطات والتهوية</h2>
+  <div class="kv"><span>شفاطات شغالة</span><b><span data-v="fansEff"></span> من 6</b><span>غاز الدفايات (الهوا التقيل)</span><b><span data-v="co2"></span> ppm</b><span>ريحة النشادر</span><b><span data-v="nh3"></span></b><span>الرطوبة</span><b><span data-v="rh"></span>%</b></div>
+  ${panelRow('fans')}
+  <div class="row"><button class="btn big" data-do="fans" data-arg="-1" aria-label="قفل شفاط" ${atPanel()?'':'disabled'}>−</button><button class="btn big" data-do="fans" data-arg="1" aria-label="شغّل شفاط" ${atPanel()?'':'disabled'}>+</button></div>
+  <p class="note">أول أسبوع يكفي <b>شفاط واحد لاتنين</b> (تهوية صغرى) حتى في البرد. كل شفاط زيادة بيطلع الغازات بس بيبرد العنبر، فلازم تزوّد الدفاية معاه. لو قفلت كله: CO₂ يعلى فوق 3000 والكتاكيت تخمل وتموت.</p>`,
+ feed:()=>`<h2>العلف</h2>
+  <div class="kv"><span>في المعالف والورق</span><b><span data-v="feedKg"></span> من ${FEED_CAP} كجم</b><span>بياكلوا في الساعة</span><b>≈ <span data-v="hourly"></span> كجم</b><span>يكفي حوالي</span><b><span data-v="lasts"></span> ساعة</b><span>شكاير اتفتحت النهارده</span><b><span data-v="bags"></span></b></div>
+  <div class="meter"><div data-bar="feed"></div></div>
+  <div class="row"><button class="btn pri" data-do="bag" data-arg="1">افتح شكارة (50 كجم)</button><button class="btn" data-do="bag" data-arg="2">افتح شكارتين</button></div>
+  <p class="note">قليل ومتكرر: املا لما يقرب يخلص، ماتحطش زيادة عن اللي يتسع. العلف الزيادة على الورق بيتداس ويتوسخ ويضيع. وكل شكارة تفتحها <b>اكتبها</b> عشان البيان.</p>`,
+ water:()=>`<h2>المية</h2>
+  <div class="kv"><span>تنك المية</span><b><span data-v="tank"></span> لتر (<span data-v="tankPct"></span>%)</b><span>الكهربا والطلمبة</span><b><span data-v="power"></span></b><span>بيشربوا في الساعة</span><b>≈ <span data-v="rate"></span> لتر</b><span>عداد المية</span><b><span data-v="meter"></span></b></div>
+  <div class="meter"><div data-bar="tank"></div></div>
+  <div class="row"><button class="btn" data-do="readMeter">اقرا العداد</button><button class="btn" data-do="inspect" data-arg="0">افحص الخط 1</button><button class="btn" data-do="inspect" data-arg="1">افحص الخط 2</button></div>
+  <div id="lineOut">${lineOutHTML()}</div>
+  <p class="note">لفّ على الخطوط: دوس على النبل في أول الخط وآخره واتأكد إن المية نازلة، وبص تحتها: الفرشة لازم تفضل ناشفة. الكتاكيت المتزاحمة على خط واحد معناها إن التاني فيه مشكلة.</p>`,
+ litter:()=>`<h2>الفرشة</h2>
+  <div class="kv"><span>حالة الفرشة</span><b><span data-v="wet"></span></b><span>الأمونيا</span><b><span data-v="nh3"></span> ppm</b></div>
+  <div class="row"><button class="btn" data-do="turn">قلّب الفرشة</button><button class="btn pri" data-do="replace">شيل المبلول وحط نشارة جديدة</button></div>
+  <p class="note">اختبار الإيد: اقبض حتة فرشة في إيدك. لو اتفككت = ناشفة تمام. لو عملت كورة = مبلولة لازم تتشال. الفرشة المبلولة بتطلع أمونيا بتحرق عين الكتكوت ورجليه وبتعمل أمراض.</p>`,
+ dead:()=>`<h2>النافق</h2>
+  <div class="kv"><span>نافق في العنبر دلوقتي</span><b><span data-v="dead"></span></b><span>لميت النهارده</span><b><span data-v="deadToday"></span></b></div>
+  <div class="row"><button class="btn pri" data-do="collect">لم النافق</button></div>
+  <p class="note">لف على العنبر كله ولم النافق كل لفة (3 مرات في اليوم على الأقل). اكتب العدد على طول. النافق يتحط في كيس ويتشال بعيد عن العنبر في الحفرة أو المحرقة، مايتسابش جنب الباب.</p>`,
+ check:()=>`<h2>افحص الكتاكيت</h2>
+  <div class="row"><button class="btn pri" data-do="crop">فحص الحوصلة (20 كتكوت)</button><button class="btn" data-do="weigh">وزن عينة (50 كتكوت)</button><button class="btn" data-do="vent">قيس حرارة الكتكوت</button></div>
+  <div id="checkOut">${S.checkOut||''}</div>`,
+ flock:()=>`<h2>القطيع</h2><div class="kv"><span>عدد الطيور</span><b><span data-v="birds"></span></b><span>الحرارة / المطلوب</span><b><span data-v="T"></span>° / <span data-v="tgt"></span>°</b></div>
+  <p class="note">${(MOOD[S.mode]||MOOD.ok)[0]}. عشان تعرف الوزن أو امتلاء الحوصلة لازم تفحص عينة.</p><div class="row"><button class="btn" data-do="go" data-arg="check">افحص</button></div>`,
+ doctor:()=>`<h2>بلّغ الدكتور</h2><p class="note">لو شفت أي حاجة غريبة: نافق زايد، كتاكيت خاملة، إسهال، عطس، أكل أو شرب قليل. التبليغ بدري بيوفر طيور كتير. اختار اللي شايفه:</p>
+  <div class="opts"><button class="opt" data-do="report" data-arg="navel">نافق زايد، وكتاكيت خاملة بطنها كبيرة وسرتها مبلولة</button><button class="opt" data-do="report" data-arg="resp">كتاكيت بتعطس ونفسها صوت</button><button class="opt" data-do="report" data-arg="diar">إسهال وزرق مية</button><button class="opt" data-do="report" data-arg="none">مفيش حاجة، بس عايز أطمّن</button></div>`,
+ power:()=>`<h2>الكهربا والمولد</h2><div class="kv"><span>الكهربا</span><b><span data-v="power"></span></b></div>
+  ${S.power?'<p class="note">الكهربا شغالة. المولد لازم يتجرب كل أسبوع ويفضل جاهز: سولار، زيت، مية رادياتير، بطارية مشحونة.</p>':'<div class="row"><button class="btn pri" data-do="gen">شغّل المولد</button></div><p class="note">من غير كهربا: الشفاطات واقفة (الغازات بتعلى)، والطلمبة واقفة (التنك بيخلص)، والنور مطفي (الكتاكيت مش بتاكل).</p>'}`,
+ bio:()=>`<h2>حوض التطهير</h2><p class="note">قبل أي دخول: بوت العنبر، حوض المطهر، غسيل الإيد. المطهر في الحوض يتغير كل يوم أو لما يتوسخ. اللي ملوش شغل جوه مايدخلش.</p>`,
+ book:()=>bookHTML(),
+};
+const DO={
+ toPanel:a=>{closeSheet(); toPanel(a);},
+ heat:a=>{if(!atPanel()){toPanel('heat');return;} S.heater=clamp(S.heater+(+a),0,100);},
+ fans:a=>{if(!atPanel()){toPanel('fans');return;} if(!S.power){toast('الكهربا مقطوعة، الشفاطات مش هتشتغل.','!',true);return;} const n=clamp(S.fans+(+a),0,6); if(n===0) mistake('fans0','قفلت كل الشفاطات. حتى في البرد لازم تهوية صغرى عشان CO₂ والأمونيا.'); if(n>=4&&S.t<120) mistake('fansMany','شغّلت شفاطات كتير في التحضين. الكتكوت الصغير بيبرد من تيار الهوا، والتهوية الكبيرة للأعمار الكبيرة.'); S.fans=n;},
+ bag:a=>{const n=+a; closeSheet(); const steps=[]; for(let i=0;i<n;i++){const fs=FEED_SPOTS[feedIdx++%FEED_SPOTS.length]; steps.push({go:SPOT.bags},{act:'crouch',t:0.5},{carry:true},{go:fs},{act:'pour',t:1.3},{carry:false},{fn:()=>DO.bagNow(1)});} job('بيجيب علف ويفرّغه',steps); toast('العامل رايح يجيب شكارة من المخزن.','م');},
+ bagNow:a=>{sfx('pour'); const n=+a; for(let i=0;i<n;i++){const room=FEED_CAP-S.feeder; S.bagsToday++; if(room<BAG){S.wasted+=BAG-room; S.feeder=FEED_CAP; mistake('waste','حطيت علف أكتر من اللي المعالف تشيله. الزيادة بتتفرش وتتداس وتضيع.'); toast(`فتحت شكارة، بس المعالف كانت مليانة: ضاع حوالي ${fmt(BAG-room)} كجم`,'!',true);} else S.feeder+=BAG;}
+   toast(`فتحت ${n===1?'شكارة':'شكارتين'}. اكتبها.`,'م');},
+ readMeter:()=>{closeSheet(); job('رايح يقرا العداد',[{go:SPOT.meter},{act:'panel',t:0.6,face:Math.PI},{fn:()=>{S.meterSnap=Math.round(S.meter); openSheet('water');}}]);},
+ inspect:a=>{const k=+a, z=LINES_Z[k]+0.4; closeSheet(); job(`بيلف على الخط ${k+1}`,[{go:[-9.2,z]},{act:'crouch',t:0.4},{go:[-1.0,z]},{act:'crouch',t:0.6},{fn:()=>{S.lineSeenAt[k]=S.t; openSheet('water');}}]);},
+ flush:a=>{const k=+a, z=LINES_Z[k]+0.4; closeSheet(); job(`بيغسل الخط ${k+1}`,[{go:[-1.0,z]},{act:'crouch',t:2},{fn:()=>DO.flushNow(k)}]);},
+ flushNow:k=>{sfx('water'); if(S.line[k]==='clogged'){S.line[k]='ok'; const dt=S.t-S.ev.clog.start; const p=dt<1?10:dt<3?7:3; evPts('clog',p,'الخط اتغسل والمية رجعت'); if(p<10) mistake('clog','الخط المسدود اتأخر اكتشافه. لف على الخطوط كل لفة ودوس على النبل في آخر الخط.');} S.lineSeenAt[k]=S.t; openSheet('water');},
+ fixLeak:a=>{const k=+a, z=LINES_Z[k]+0.4; closeSheet(); job(`بيصلّح الخط ${k+1}`,[{go:[-5,z]},{act:'crouch',t:2.5},{fn:()=>DO.fixNow(k)}]);},
+ fixNow:k=>{if(S.line[k]==='leak'){S.line[k]='ok'; const e=S.ev.leak, dt=S.t-e.start; e.fixed=true; e.p+=dt<3?6:dt<8?4:2; if(dt>=3) mistake('leak','تسريب المية اتأخر. الفرشة المبلولة تحت الخطوط علامة إن الضغط عالي أو الارتفاع غلط.'); toast('التسريب اتصلّح. ماتنساش تشيل الفرشة المبلولة.','م'); if(e.lit) evPts('leak',e.p);} S.lineSeenAt[k]=S.t; openSheet('water');},
+ turn:()=>{closeSheet(); job('بيقلّب الفرشة',[{go:[-5,-1.4]},{act:'crouch',t:2},{go:[-3.5,1.2]},{act:'crouch',t:1.5},{fn:()=>DO.turnNow()}]);},
+ turnNow:()=>{if(S.litterWet<0.4){S.litterWet=Math.max(0.08,S.litterWet-0.1); toast('قلّبت الفرشة، الهوا دخلها ونشفت شوية.','م');} else toast('الفرشة مبلولة قوي، التقليب مش هيكفي. لازم تتشال.','!');},
+ replace:()=>{closeSheet(); job('بيغيّر الفرشة المبلولة',[{go:[-5,-1.45]},{act:'crouch',t:1.8},{go:SPOT.bags},{carry:true},{go:[-5,-1.45]},{act:'pour',t:2},{carry:false},{fn:()=>DO.replaceNow()}]);},
+ replaceNow:()=>{const was=S.litterWet; S.litterWet=0.12; toast('شلت الفرشة المبلولة وحطيت نشارة ناشفة.','م');
+   const e=S.ev.leak; if(e&&!e.lit&&was>0.3&&S.t>=e.start){e.lit=true; e.p+=S.t-e.start<8?4:2; if(e.fixed) evPts('leak',e.p); else toast('الفرشة اتغيرت، بس لو التسريب لسه موجود هتتبل تاني.','!');}
+   else if(was<0.25) mistake('replaceDry','غيّرت فرشة ناشفة على الفاضي. النشارة فلوس؛ اتغير المبلول بس.');},
+ collect:()=>{if(!S.deadInHouse){toast('مفيش نافق في العنبر دلوقتي.','م');return;} closeSheet(); const st=[]; deadSpots().forEach(q=>st.push({go:q},{act:'crouch',t:0.6})); st.push({carry:true},{go:SPOT.bin},{act:'pour',t:0.6},{carry:false},{fn:()=>DO.collectNow()}); job('بيلم النافق',st);},
+ collectNow:()=>{const n=S.deadInHouse; if(!n) return; S.collectedToday+=n; S.deadInHouse=0; S.deadSince=null;
+   modal({who:'المشرف',av:'م',say:`لميت ${n} نافق. اكتب العدد في الكشكول دلوقتي.`,title:`لميت ${n} نافق`,html:`<p>اكتب <b>${n}</b> في الكشكول دلوقتي. النهارده لميت لحد دلوقتي <b>${S.collectedToday}</b>.</p><p class="note">بص على النافق: لو فيه علامات متكررة (سرة ملتهبة، بطن كبيرة، جفاف، رجل مكسورة) بلّغ.</p>`});},
+ crop:()=>{closeSheet(); job('بيفحص الكتاكيت',[{go:SPOT.flock},{act:'crouch',t:2},{fn:()=>{DO.cropNow(); openSheet('check');}}]);},
+ cropNow:()=>{const e=S.ev.crop; let pct;
+   if(S.t<6){S.checkOut='<p class="note">بدري قوي. الفحص بعد 8 ساعات وبعد 24 ساعة من الوصول.</p>';return;}
+   pct=Math.round(clamp(98-S.cropPen-(S.t>30?0:0)+rnd(-1.5,1.5),55,100));
+   const n=Math.round(pct/5);
+   S.checkOut=`<p class="big-num" style="color:${pct>=95?'var(--good)':pct>=85?'var(--warn)':'var(--bad)'}">${pct}%</p><p class="note">${n} من 20 كتكوت حوصلتهم مليانة. ${pct>=95?'ممتاز، الكتاكيت لقت الأكل والمية.':'أقل من المطلوب (95%). السبب غالباً: علف خلص، مية مش واصلة، أو برد خلّاهم يتلموا ومايروحوش للأكل.'}</p>`;
+   if(e&&!e.done){e.done=true; const p=Math.max(1,(S.t<=28?10:5)-(pct>=95?0:2)); evPts('crop',p,'فحصت الحوصلة'); if(pct<95) mistake('cropLow',`امتلاء الحوصلة كان ${pct}% بس. أول 24 ساعة لازم الأكل والمية قدام الكتكوت والحرارة مظبوطة.`);}},
+ weigh:()=>{closeSheet(); job('بيفحص الكتاكيت',[{go:SPOT.flock},{act:'crouch',t:2},{fn:()=>{DO.weighNow(); openSheet('check');}}]);},
+ weighNow:()=>{const a=S.t/24, w=S.weight*(1+rnd(-0.015,0.015)), tw=targetW(a); S.checkOut=`<div class="kv"><span>متوسط الوزن</span><b>${fmt(w)} جم</b><span>المطلوب لعمرهم تقريباً</span><b>${fmt(tw)} جم</b><span>التجانس (CV)</span><b>${f1(S.cv)}%</b></div><p class="note">${w>=tw*0.97?'الوزن ماشي كويس.':'الوزن أقل من المطلوب. شوف الحرارة والعلف والمية.'} التجانس أحسن لما يكون أقل من 10%. الوزن بيتعمل بعينة من أماكن مختلفة في العنبر، مش من جنب الباب بس.</p>`;},
+ vent:()=>{closeSheet(); job('بيفحص الكتاكيت',[{go:SPOT.flock},{act:'crouch',t:2},{fn:()=>{DO.ventNow(); openSheet('check');}}]);},
+ ventNow:()=>{const vt=clamp(40+(S.T-targetT(S.t/24))*0.25+rnd(-0.1,0.1),38,42.5); S.checkOut=`<p class="big-num">${f1(vt)}°</p><p class="note">حرارة الكتكوت من فتحة المجمع. الطبيعي <b>39.5 لـ 40.5°</b>. ${vt<39.5?'أقل = بردان.':vt>40.5?'أعلى = حران.':'تمام.'}</p>`;},
+ go:a=>openSheet(a),
+ report:a=>{closeSheet(); job('بيكلم الدكتور',[{act:'phone',t:1.2},{fn:()=>doctorReport(a)}]);},
+ gen:()=>{closeSheet(); job('بيشغّل المولد',[{go:SPOT.gen},{act:'panel',t:1.2,face:Math.PI/2},{fn:()=>DO.genNow()}]);},
+ genNow:()=>{
+   modal({who:'المشرف',av:'م',say:'gen',title:'تشغيل المولد',quiz:{q:'قبل ما تشغّل المولد تبص على إيه بسرعة؟',opts:[['السولار والزيت ومية الرادياتير',true,'صح. وكل أسبوع يتجرب وهو شغال على حمل عشان يوم القطع يشتغل على طول.'],['ولا حاجة، أستنى الكهربا ترجع',false,'الشفاطات والطلمبة واقفين، الغازات بتعلى والمية هتخلص. كل دقيقة بتفرق.'],['أكلم صاحب المزرعة الأول وأستناه',false,'بلّغ آه، بس شغّل المولد الأول. ماتستناش.']]},
+     onAnswer:(o,good)=>{S.power=true; S.genOn=true; const dt=S.t-S.ev.pow.start; const p=(dt<0.25?10:dt<1?7:4)-(good?0:2); evPts('pow',p,'المولد اشتغل والكهربا رجعت'); renderActions(); if(dt>=1) mistake('powerLate','المولد اتأخر يشتغل. وقت القطع كل دقيقة بتفرق.');}});},
+};
+function doctorReport(a){
+  closeSheet();
+  if(S.disease&&!S.treated){
+    if(a!=='navel'){S.ev.dis.wrong++; modal({who:'الدكتور',av:'د',say:'doc_more',title:'وصفلي بالظبط',html:'<p>اللي بتقوله مش مطابق للي بيحصل. ارجع بص على الكتاكيت الخاملة وعلى النافق: البطن، السرة، الزرق. ابعتلي اللي شايفه بالظبط.</p>'}); return;}
+    const rate=waterRate(), six=Math.round(rate*6/10)*10;
+    modal({who:'الدكتور',av:'د',say:'doc1',title:'التهاب سرة وكيس صفار',html:'<p>شكلها التهاب سرة من الفقس. هكتبلك دوا في المية. اسمع الخطوات كويس.</p>',
+      quiz:{q:'قبل ما تحط الدوا في المية تعمل إيه؟',opts:[['أقفل الكلور وأنضف تنك الجرعة',true,'صح. الكلور ممكن يضعف بعض الأدوية.'],['أحط الدوا فوق الكلور عادي',false,'الكلور ممكن يبوّظ الدوا.'],['أحطه في العلف بدل المية',false,'الدكتور كتبه في المية؛ الكتكوت العيان بيشرب أكتر ما بياكل.']]},onAnswer:(o,g)=>{if(!g) S.ev.dis.wrong++;}});
+    modal({who:'الدكتور',av:'د',say:`الجرعة واحد ملّي لكل لتر مية. وتتحط في مية ست ساعات. الكتاكيت بتشرب ${fmt(rate)} لتر في الساعة.`,title:'حساب الجرعة',html:`<p>الجرعة <b>1 مل لكل لتر مية</b>، وتتحط في كمية المية اللي بيشربوها في <b>6 ساعات</b>.</p><p>هما بيشربوا دلوقتي حوالي <b>${fmt(rate)} لتر في الساعة</b>.</p>`,
+      quiz:{q:'هتحط كام مل دوا؟',opts:[[`${fmt(six)} مل في ${fmt(six)} لتر`,true,`صح. ${fmt(rate)} × 6 ساعات ≈ ${fmt(six)} لتر، يعني ${fmt(six)} مل.`],[`${fmt(rate)} مل`,false,'دي جرعة ساعة واحدة بس. الطيور هتاخد سدس الجرعة.'],[`${fmt(six*10)} مل`,false,'عشر أضعاف الجرعة! ده تسمم ممكن يموّت الطيور.'],[`${fmt(Math.max(1,six/10))} مل`,false,'قليلة قوي، الدوا مش هيأثر والميكروب هيتعود عليه.']]},onAnswer:(o,g)=>{if(!g) S.ev.dis.wrong++;}});
+    modal({who:'الدكتور',av:'د',say:'doc3',title:'إزاي تديه',quiz:{q:'الدوا يتدّي إزاي؟',opts:[['يتقلّب كويس في المية دي ويخلصوها في 6 ساعات، وبعدين مية عادية، ونكرر حسب المدة اللي قلتها',true,'صح. ومتوقفش الكورس بدري حتى لو النافق نزل.'],['أحطه في التنك الكبير كله ويفضل يومين',false,'الدوا بيضعف في المية مع الوقت، والجرعة هتبقى أقل من المطلوب.'],['أوقفه أول ما النافق ينزل',false,'وقف الدوا بدري بيرجّع المرض وبيعلّم الميكروب يقاوم.']]},
+      onAnswer:(o,g)=>{if(!g) S.ev.dis.wrong++;},
+      onClose:()=>{S.treated=true; const dt=S.t-S.ev.dis.start; const p=Math.max(1,(dt<4?10:dt<10?7:3)-S.ev.dis.wrong*2); evPts('dis',p,'الدوا اتحط صح والنافق هيبدأ ينزل'); if(dt>=4) mistake('disLate','التبليغ عن النافق الزايد اتأخر. أول ما تلاحظ نافق أكتر من العادي أو كتاكيت خاملة بلّغ على طول.'); if(S.ev.dis.wrong) mistake('dose','فيه غلط في خطوات الدوا أو حساب الجرعة. الجرعة = (لتر المية في الساعة × عدد الساعات) × الجرعة لكل لتر.');}});
+  } else {
+    modal({who:'الدكتور',av:'د',say:'doc_ok',title:'تمام، شكراً إنك بلّغت',html:`<p>${S.treated?'الكورس ماشي، كمّله لآخره وبلغني لو النافق مانزلش.':'من كلامك القطيع كويس دلوقتي. كمّل المتابعة، وأي حاجة تتغير بلّغني على طول. التبليغ مش عيب، السكوت هو الغلط.'}</p>`});
+  }
+}
+
+/* ---------------- handbook ---------------- */
+let bookTab='w1';
+function lineOutHTML(){let h='';[0,1].forEach(k=>{if(S.t-S.lineSeenAt[k]>1.5&&S.phase==='run') return; if(S.lineSeenAt[k]<0) return; const st=S.line[k];
+  if(st==='clogged') h+=`<p class="note"><b style="color:var(--bad)">الخط ${k+1}: النبل في آخر الخط مش بينزل مية خالص.</b> غالباً فلتر مسدود أو هوا في الخط.</p><div class="row"><button class="btn pri" data-do="flush" data-arg="${k}">اغسل الخط (فلاشنج) ونضف الفلتر</button></div>`;
+  else if(st==='leak') h+=`<p class="note"><b style="color:var(--bad)">الخط ${k+1}: النبل بيخر مية والفرشة تحته مبلولة.</b> الضغط عالي أو الخط واطي.</p><div class="row"><button class="btn pri" data-do="fixLeak" data-arg="${k}">اظبط الضغط وارتفاع الخط وغيّر النبل البايظ</button></div>`;
+  else h+=`<p class="note"><b style="color:var(--good)">الخط ${k+1}: المية نازلة كويس ومفيش خرّ.</b></p>`;}); return h;}
+function panelRow(p){return atPanel()?'<p class="note" style="color:var(--good)"><b>العامل واقف عند لوحة التحكم ✓</b></p>':`<div class="row"><button class="btn pri" data-do="toPanel" data-arg="${p}">روح للوحة التحكم</button><span class="note">التحكم من اللوحة اللي على الحيطة بس</span></div>`;}
+function bookHTML(){
+  const tabs=[['w1','أسبوع التحضين'],['cycle','الدورة كلها'],['read','اقرا الكتكوت'],['sos','الطوارئ']];
+  const t=`<div class="tabs">${tabs.map(x=>`<button data-do="tab" data-arg="${x[0]}" aria-pressed="${bookTab===x[0]}">${x[1]}</button>`).join('')}</div>`;
+  let b='';
+  if(bookTab==='w1'){
+    const rows=[0,1,2,3,4,5,6,7].map(d=>`<tr><td>${d}</td><td>${f1(targetT(d))}°</td><td>${d<=3?'60–70%':'50–70%'}</td><td>23 نور + 1 ضلمة</td><td>${fmt(intake(d))}</td><td>${fmt(intake(d)*1.8)}</td><td>${fmt(targetW(d))}</td></tr>`).join('');
+    b=`<div class="tbl"><table><tr><th>اليوم</th><th>الحرارة عند الكتكوت</th><th>الرطوبة</th><th>الإضاءة</th><th>علف جم/طائر/يوم</th><th>مية مل/طائر/يوم</th><th>الوزن جم</th></tr>${rows}</table></div>
+    <div class="kv" style="margin-top:10px"><span>حرارة الأرضية يوم الاستلام</span><b>28–30°</b><span>حرارة جسم الكتكوت</span><b>39.5–40.5°</b><span>سمك الفرشة</span><b>5–10 سم</b><span>الأمونيا</span><b>أقل من 10 (أقصى 20) ppm</b><span>CO₂</span><b>أقل من 3000 ppm</b><span>امتلاء الحوصلة بعد 8 ساعات</span><b>80% أو أكتر</b><span>امتلاء الحوصلة بعد 24 ساعة</span><b>95% أو أكتر</b><span>نافق الأسبوع الأول</span><b>أقل من 1%</b><span>نسبة المية للعلف</span><b>1.6–2 لتر لكل كجم</b><span>شدة الإضاءة في التحضين</span><b>30–40 لوكس</b></div>`;
+  } else if(bookTab==='cycle'){
+    const R=[['0','32–33°','42','—'],['7','29–30°','≈ 200','≈ 35'],['14','27–28°','≈ 500','≈ 75'],['21','25–26°','≈ 1000','≈ 120'],['28','23–24°','≈ 1600','≈ 160'],['35','21–22°','≈ 2200','≈ 190']];
+    b=`<div class="tbl"><table><tr><th>العمر</th><th>الحرارة</th><th>الوزن جم</th><th>علف جم/طائر/يوم</th></tr>${R.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>
+    <p class="note">أرقام استرشادية لسلالة روس، والمهندس بيظبطها حسب السلالة والجو والمزرعة. بعد يوم 7 الإضاءة بيبقى فيها ضلمة 4–6 ساعات حسب برنامج المهندس، والتهوية بتزيد مع الوزن.</p>`;
+  } else if(bookTab==='read'){
+    b=`<ul class="note" style="padding-inline-start:18px"><li><b>متلمّين تحت الدفاية</b> + صوصوة عالية = برد.</li><li><b>بعيد عن الدفاية جنب الحيطة</b> + فاتحين مناقيرهم وجناحاتهم = حر.</li><li><b>متجمعين في ناحية واحدة</b> = تيار هوا (شفاط أو باب مفتوح) من الناحية التانية.</li><li><b>متزاحمين على خط مية</b> = الخط التاني فيه مشكلة.</li><li><b>خاملين، عينهم مقفولة، ريشهم منفوش</b> = تعب أو مرض: بلّغ.</li><li><b>بطن كبيرة وسرة مبلولة</b> أول أيام = التهاب سرة: بلّغ.</li><li><b>رجلين ناشفة ومجعدة</b> = جفاف (مالقاش مية).</li></ul>`;
+  } else {
+    b=`<ul class="note" style="padding-inline-start:18px"><li><b>الكهربا قطعت:</b> شغّل المولد في خلال دقايق، واتأكد إن الشفاطات والطلمبة رجعوا.</li><li><b>المية وقفت:</b> افحص التنك والطلمبة والفلتر، واغسل الخط. الكتكوت مايستحملش من غير مية.</li><li><b>نافق زايد فجأة:</b> بلّغ الدكتور على طول، وابعت عينة نافق.</li><li><b>ريحة غاز أو صداع جوه العنبر:</b> زوّد التهوية فوراً، ودي علامة CO₂ عالي.</li><li><b>العلف هيخلص:</b> بلّغ المشرف قبلها بيومين على الأقل.</li><li><b>حد غريب عايز يدخل:</b> مايدخلش من غير إذن المشرف وبوت وهدوم المزرعة.</li></ul>`;
+  }
+  return `<h2>الكتيب</h2>${t}${b}`;
+}
+DO.tab=a=>{bookTab=a; openSheet('book');};
+
+/* ---------------- prep phase ---------------- */
+const PREP=[
+ {id:'dip',title:'حوض التطهير',html:'<p>أي ميكروب بيدخل العنبر بيدخل على رجلك أو هدومك أو العربيات. قبل ما تدخل: تلبس بوت العنبر، تعدي في حوض المطهر، وتغسل إيدك. المطهر في الحوض يتغير كل يوم أو لما يتوسخ.</p>',
+  q:'قبل ما تدخل العنبر تعمل إيه؟',opts:[['أدخل على طول، أنا نضيف',false,'الميكروب مش بيتشاف. أي حد بيدخل من غير تطهير ممكن يدخل مرض للعنبر كله.'],['ألبس بوت العنبر وأعدي في حوض المطهر وأغسل إيدي',true,'صح. ده أول خط دفاع عن الكتاكيت، واسمه الأمان الحيوي.'],['أغسل إيدي بس',false,'الإيد مش كفاية. الرجل هي أكتر حاجة بتدخّل ميكروب.']],apply:()=>{S.dip=true;}},
+ {id:'litter',title:'الفرشة',html:'<p>الفرشة بتدفي رجل الكتكوت وبتشرب الرطوبة والزرق. لازم تكون نشارة ناشفة ونضيفة، مفرودة بالتساوي. الأرض الساقعة بتبرّد الكتكوت من رجليه حتى لو الهوا دافي.</p>',
+  q:'سمك الفرشة كام؟',opts:[['1 لـ 2 سم',false,'رفيعة قوي؛ الأرض هتبرّد الكتاكيت والفرشة هتتبل بسرعة.'],['5 لـ 10 سم ومفرودة مستوية',true,'صح.'],['30 سم',false,'زيادة؛ الكتكوت الصغير هيتعب في المشي لحد الأكل والمية.']],apply:()=>{S.litter=true;}},
+ {id:'heat',title:'التدفئة قبل الوصول',html:'<p>الكتكوت مايعرفش يدفّي نفسه أول أسبوعين. العنبر لازم يتدفى قبل وصول الكتاكيت بـ 24 لـ 48 ساعة، عشان الأرضية والفرشة نفسها تدفى (28–30°) والهوا عند مستوى الكتكوت يبقى 32–33°.</p>',
+  q:'تشغّل الدفايات إمتى؟',opts:[['لما العربية توصل',false,'الهوا بيدفى بسرعة لكن الأرضية بتاخد يوم كامل، والكتكوت هيقعد على أرض ساقعة.'],['قبل الوصول بـ 24 لـ 48 ساعة',true,'صح. وبنقيس حرارة الأرضية مش الهوا بس.'],['مش لازم لو الجو حر',false,'حتى في الصيف الكتكوت محتاج 32–33° أول يوم. في الحر بنشغلها أقل، بس بالترمومتر.']],apply:()=>{S.heater=40; S.T=32;}},
+ {id:'water',title:'خطوط المية',html:'<p>اغسل الخطوط (فلاشنج) وطلّع منها المية القديمة، واملاها قبل الوصول بكام ساعة عشان المية تبقى فاترة. النبل يتظبط على مستوى عين الكتكوت أول يومين، ونحط سقايات صغيرة زيادة. الكتكوت لو مالقاش مية في أول ساعات بيجفف ويموت.</p>',
+  q:'ارتفاع النبل أول يوم؟',opts:[['على مستوى عين الكتكوت',true,'صح. وبعدين نرفعه مع الكبر بحيث الكتكوت يمد رقبته لفوق شوية.'],['فوق راسه بكتير',false,'مش هيطوله وهيعطش.'],['لازق في الأرض',false,'هيخر على الفرشة ويبلها ويطلع أمونيا.']],apply:()=>{S.linesFilled=true;}},
+ {id:'feed',title:'العلف على الورق',html:'<p>أول 3 أيام نحط علف بادي (فتات) على ورق جنب السقايات وفي أطباق صغيرة، عشان الكتكوت يلاقي الأكل وهو ماشي. كمية قليلة ونزوّد كذا مرة في اليوم: <b>قليل ومتكرر</b>.</p>',
+  q:'أول 3 أيام العلف يتحط فين؟',opts:[['في المعالف الكبيرة بس',false,'الكتكوت الصغير مش هيوصلها كويس.'],['على ورق وأطباق جنب المية، قليل ومتكرر',true,'صح.'],['مانحطش علف أول يوم',false,'غلط. الأكل بدري بيقوّي الأمعاء والمناعة وبيزوّد الوزن.']],apply:()=>{S.paper=true; S.feeder=60; papers.forEach(p=>p.visible=true);}},
+ {id:'light',title:'الإضاءة',html:'<p>أول أسبوع النور 23 ساعة وساعة ضلمة واحدة، عشان الكتاكيت تتعود على الضلمة فماتتخضّش لو النور قطع. النور قوي في منطقة التحضين (30–40 لوكس) عشان الكتكوت يشوف الأكل والمية.</p>',
+  q:'النور أول أسبوع كام ساعة؟',opts:[['12 ساعة',false,'قليل؛ الكتكوت مش هياكل كفاية.'],['23 ساعة نور + ساعة ضلمة',true,'صح.'],['24 ساعة من غير ضلمة',false,'ساعة الضلمة بتعوّدهم، فلو النور قطع مايتكوّموش فوق بعض.']],apply:()=>{S.lightsOn=true;}},
+ {id:'vent',title:'التهوية الصغرى',html:'<p>حتى في البرد لازم شفاط واحد على الأقل يشتغل. الدفايات بتطلّع ثاني أكسيد الكربون ورطوبة، والزرق بيطلّع أمونيا. القاعدة: <b>الحرارة بالدفاية، والهوا النضيف بالشفاط</b>.</p>',
+  q:'في البرد نقفل الشفاطات خالص؟',opts:[['أيوه عشان الحرارة',false,'الغازات هتتجمع. زوّد الدفاية بدل ما تخنق العنبر.'],['لأ، تهوية صغرى ونزوّد الدفاية لو الحرارة نزلت',true,'صح.'],['نفتح كل الشفاطات',false,'هتبرّد العنبر جامد وتصرف وقود على الفاضي.']],apply:()=>{S.fans=1;}},
+];
+function renderPrep(){
+  const done=PREP.filter(p=>S.prepDone[p.id]).length;
+  $('#prep').innerHTML=`<h2>جهّز العنبر قبل الكتاكيت (${done}/${PREP.length})</h2><p class="note" style="margin:2px 0 0">دوس على كل خطوة، أو على الحاجة نفسها في العنبر.</p><div class="tasks">${PREP.map((p,i)=>`<button class="task ${S.prepDone[p.id]?'done':''}" data-t="${p.id}"><span class="n">${S.prepDone[p.id]?'✓':i+1}</span>${p.title}</button>`).join('')}</div>`;
+}
+$('#prep').addEventListener('click',e=>{const b=e.target.closest('.task'); if(b&&!S.prepDone[b.dataset.t]) openPrep(b.dataset.t);});
+const PREP_SPOT={dip:'dip',litter:[-5,0.2],heat:[-7.5,-1.0],water:'tank',feed:[-5,-0.9],light:'panel',vent:'panel'};
+function openPrep(id){
+  const p=PREP.find(x=>x.id===id); if(!p) return;
+  const sp=PREP_SPOT[id], spot=typeof sp==='string'?SPOT[sp]:sp;
+  job('رايح يجهّز: '+p.title,[{go:spot},{act:sp==='panel'?'panel':'crouch',t:0.9,face:sp==='panel'?0:null},{fn:()=>openPrepModal(id)}]);
+}
+function openPrepModal(id){
+  const p=PREP.find(x=>x.id===id); if(!p||S.prepDone[id]) return;
+  modal({who:'المشرف',av:'م',say:'prep_'+p.id,title:p.title,html:p.html,knowledge:true,quiz:{q:p.q,opts:p.opts},
+    onAnswer:()=>{S.prepDone[id]=true; p.apply(); renderPrep(); renderHUD();},
+    onClose:()=>{if(PREP.every(x=>S.prepDone[x.id])) arrival();}});
+}
+function arrival(){
+  $('#prep').hidden=true;
+  modal({who:'المشرف',av:'م',say:'arrive',title:'الكتاكيت وصلت!',html:'<p>العربية وصلت ومعاها 10,000 كتكوت روس. عدّ الكراتين وقارنها بالفاتورة، وافتح كام كرتونة وبص على الكتاكيت: نشيطة، سرتها مقفولة، رجليها مش ناشفة.</p>',knowledge:true,
+    quiz:{q:'حرارة جسم الكتكوت الطبيعية (من فتحة المجمع)؟',opts:[['37°',false,'دي حرارة الإنسان. الكتكوت أعلى.'],['39.5 لـ 40.5°',true,'صح. أقل = بردان، أعلى = حران. بنقيسها في كام كتكوت بعد ساعتين من التفريغ.'],['43°',false,'ده حر شديد وخطر.']]}});
+  modal({who:'المشرف',av:'م',say:'unload',title:'التفريغ',knowledge:true,quiz:{q:'تفرّغ الكتاكيت إزاي؟',opts:[['بسرعة وبهدوء جنب العلف والمية',true,'صح. وكل كرتونة تتفرغ في مكانها عشان التوزيع يبقى متساوي.'],['أسيبهم في الكراتين لحد ما يهدوا',false,'كل ساعة في الكرتونة جفاف وجوع.'],['أرميهم من بعيد عشان أخلص بسرعة',false,'بيتعوروا ويتخضّوا ويقعدوا مايكلوش.']]},
+    onClose:startRun});
+}
+function startRun(){
+  S.phase='run'; S.t=0; S.lastDay=0; S.tmax=S.T; S.tmin=S.T; S.prevMeter=S.meter;
+  if(!S.prepDone.vent) S.fans=1;
+  spawnChicks(); $('#actions').hidden=false; renderActions(); renderHUD();
+  toast('الكتاكيت اتفرغت. يوم 0 بدأ.','م');
+}
+
+/* ---------------- end & report ---------------- */
+function endGame(){
+  if(S.phase==='end') return; S.phase='end'; closeSheet();
+  const mort=S.deadTotal/BIRDS0*100, w=S.weight;
+  const pMort=mort<=0.8?20:mort<=1?17:mort<=1.5?10:mort<=2?5:0;
+  const pW=Math.round(clamp((w-150)/(195-150),0,1)*15);
+  const comfort=S.totalH?S.goodH/S.totalH:0, pC=Math.round(clamp((comfort-0.5)/0.4,0,1)*15);
+  const pE=S.evMax?Math.round(S.evPts/S.evMax*25):0;
+  const pR=S.recMax?Math.round(S.recPts/S.recMax*15):0;
+  const pK=S.quizN?Math.round(S.quizOk/S.quizN*10):0;
+  const total=pMort+pW+pC+pE+pR+pK;
+  const fat=Object.values(S.fatal);
+  const pass=total>=70&&!fat.length;
+  const grade=!pass?['يعيد المستوى','var(--bad)']:total>=85?['ممتاز','var(--good)']:['ناجح','var(--warn)'];
+  try{const best=+localStorage.getItem('barnBest')||0; if(total>best){localStorage.setItem('barnBest',total); localStorage.setItem('barnBestName',S.name||'');}}catch(e){}
+  const part=(t,p,m,sub)=>`<div class="part"><div class="top">${t}<span>${p} / ${m}</span></div><div class="meter"><div style="width:${p/m*100}%;background:${p/m>=0.8?'var(--good)':p/m>=0.5?'var(--warn)':'var(--bad)'}"></div></div><small>${sub}</small></div>`;
+  $('#report').innerHTML=`<div class="wrap">
+    <div class="eyebrow">نتيجة المستوى الأول · ${S.name||'العامل'}</div>
+    <h1>آخر يوم <em>7</em></h1>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="score-big">${total}</div><div><div class="grade" style="background:${grade[1]};color:#13221c">${grade[0]}</div><p class="note" style="margin:6px 0 0">${pass?'المستوى الثاني (عامل ماهر) اتفتح.':'محتاج 70 نقطة ومن غير أخطاء كبيرة عشان تعدي.'}</p></div></div>
+    <div class="parts">
+      ${part('النافق',pMort,20,`${f1(mort)}% في الأسبوع (${S.deadTotal} طائر). المطلوب أقل من 1%.`)}
+      ${part('الوزن يوم 7',pW,15,`${fmt(w)} جم. المطلوب حوالي 190–200 جم. التجانس ${f1(S.cv)}%.`)}
+      ${part('راحة الكتاكيت',pC,15,`${fmt(comfort*100)}% من الوقت الحرارة والهوا والأكل والمية مظبوطين.`)}
+      ${part('التصرف في المشاكل',pE,25,`${fmt(S.evPts)} من ${S.evMax} نقطة في المواقف المفاجئة.`)}
+      ${part('البيان اليومي',pR,15,`${S.recPts} خانة صح من ${S.recMax}.`)}
+      ${part('المعلومات',pK,10,`${S.quizOk} إجابة صح من ${S.quizN} في التجهيز والاستلام.`)}
+    </div>
+    ${fat.length?`<h3 style="margin:6px 0 0;font-family:var(--f-display)">أخطاء كبيرة</h3>${fat.map(t=>`<div class="mist">${t}</div>`).join('')}`:''}
+    ${S.mistakes.length?`<h3 style="margin:6px 0 0;font-family:var(--f-display)">اتعلّم من دول</h3>${S.mistakes.map(t=>`<div class="mist">${t}</div>`).join('')}`:'<p class="note">مفيش أخطاء متسجلة. شغل نضيف.</p>'}
+    <p class="note">علف اتصرف: ${fmt(S.records.reduce((a,r)=>a+r.bags,0)+S.bagsToday)} شكارة · علف ضاع: ${fmt(S.wasted)} كجم.</p>
+    <button class="cta" id="againBtn">العب تاني</button>
+  </div>`;
+  $('#report').hidden=false;
+  $('#againBtn').onclick=()=>location.reload();
+}
+
+/* ---------------- speed / loop / start ---------------- */
+$('#speed').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; S.speed=+b.dataset.sp; $('#speed').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+function paused(){return modalOpen||S.speed===0;}
+scene.traverse(o=>{if(!o.isMesh) return; const ty=o.geometry.type, flat=ty==='PlaneGeometry'||ty==='CircleGeometry'; o.castShadow=!flat&&!o.material.transparent&&!o.userData.noShadow&&o.material.type!=='MeshBasicMaterial'; o.receiveShadow=flat&&o.material.type==='MeshLambertMaterial';});
+let last=performance.now(), hudT=0;
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if(S.phase==='run'&&!paused()){
+    let gh=dt*S.speed/SEC_PER_HOUR;
+    while(gh>1e-6&&S.phase==='run'&&!paused()){const s=Math.min(gh,1/12); simStep(s); gh-=s;}
+  }
+  workerUpdate(dt,modalOpen||(S.phase==='run'&&S.speed===0)); followCam(dt); updatePointer(now/1000); audioTick(dt);
+  updateChicks(dt,now/1000); updateScene(dt);
+  controls.update(); renderer.render(scene,camera);
+  hudT+=dt; if(hudT>0.25){hudT=0; renderHUD();}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+try{const b=localStorage.getItem('barnBest'); if(b) $('#bestTx').textContent=`أعلى نتيجة على الجهاز ده: ${b} (${localStorage.getItem('barnBestName')||''})`;}catch(e){}
+$('#startBtn').onclick=()=>{
+  auInit(); voInit(); try{AU.ctx&&AU.ctx.resume();}catch(e){}
+  S.name=$('#wName').value.trim(); S.phase='prep';
+  $('#intro').hidden=true; $('#hud').hidden=false; $('#prep').hidden=false; renderPrep(); renderHUD();
+  modal({who:'المشرف',av:'م',say:'hello',title:`أهلاً${S.name?' يا '+S.name:''}`,html:'<p>أنا المشرف، وهفضل معاك طول الأسبوع. العنبر لسه فاضي، والكتاكيت جاية. قبل ما توصل لازم نجهّز 7 حاجات. كل خطوة هشرحلك ليه بنعملها، وبعدين أسألك سؤال صغير.</p><p>إنت العامل اللي لابس أزرق. دوس على أي حتة في الأرض يمشي لها، ودوس على أي حاجة (الدفاية، التنك، الورق) يروح لها. الحرارة والشفاطات بتتظبط من <b>لوحة التحكم</b> اللي على الحيطة بس. اسحب بصباعك عشان تلف الكاميرا.</p>',btn:'يلا بينا'});
+};
+})();
+</script>
+
+</body></html>
