@@ -1,0 +1,423 @@
+{
+ "title": "Block 1 Revision Sheet",
+ "source": "ICT Grade 3 (Nile International) revision sheet with model answers",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Two Stars and a Wish",
+   "ico": "📖",
+   "keys": [
+    "netiquette"
+   ],
+   "scenes": [
+    {
+     "e": "⭐⭐💭",
+     "t": "When we comment on a friend's work, we use Two Stars and a Wish."
+    },
+    {
+     "e": "⭐💬",
+     "t": "Star one: I liked your clear explanation. Star two: Your pictures were helpful."
+    },
+    {
+     "e": "💭✨",
+     "t": "A wish: maybe you could add more information about staying safe online."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Multiple Choice",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What is an online discussion?",
+     "o": [
+      "Playing a computer game",
+      "Sharing ideas and information on the internet",
+      "Drawing on paper",
+      "Watching TV"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which of these is a benefit of online discussions?",
+     "o": [
+      "Learning from others",
+      "Losing information",
+      "Sharing passwords",
+      "Bullying people"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does Netiquette mean?",
+     "o": [
+      "Internet games",
+      "Being polite and respectful online",
+      "Creating an avatar",
+      "Signing out of Teams"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which information should you NOT share publicly?",
+     "o": [
+      "Your favorite color",
+      "Your favorite animal",
+      "Your home address",
+      "A drawing"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What is an avatar?",
+     "o": [
+      "A digital representation of a person",
+      "A password",
+      "A discussion topic",
+      "A file attached to a post"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What is your digital footprint?",
+     "o": [
+      "Your real footprint",
+      "Information and activities you leave behind online",
+      "Your computer screen",
+      "Your profile picture only"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which button would you use to enter an account you already have?",
+     "o": [
+      "Sign Up",
+      "Sign In",
+      "Sign Out",
+      "Create"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What should you do when you finish using a shared computer?",
+     "o": [
+      "Leave your account open",
+      "Save your password",
+      "Sign out",
+      "Give your password to a friend"
+     ],
+     "a": 2
+    },
+    {
+     "q": "What is a thread?",
+     "o": [
+      "A specific conversation within a forum",
+      "A password",
+      "A profile picture",
+      "A computer virus"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does embed mean?",
+     "o": [
+      "Delete a post",
+      "Insert media into a post",
+      "Sign out",
+      "Change your password"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which of these is an example of cyberbullying?",
+     "o": [
+      "Sending a kind message",
+      "Sending repeated threatening or mean messages",
+      "Sharing a homework answer",
+      "Saying Good job!"
+     ],
+     "a": 1
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Fill in the Blanks",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "A picture or digital representation of you online is called an ___.",
+     "o": [
+      "avatar",
+      "profile",
+      "topic"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Your name, bio and picture can be part of your ___.",
+     "o": [
+      "reply",
+      "profile",
+      "digital footprint"
+     ],
+     "a": 1
+    },
+    {
+     "q": "An online board where people discuss different subjects is a ___.",
+     "o": [
+      "reply",
+      "digital footprint",
+      "forum"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A file added to a post is called an ___.",
+     "o": [
+      "attachment",
+      "topic",
+      "edit"
+     ],
+     "a": 0
+    },
+    {
+     "q": "To answer someone's comment, you can ___.",
+     "o": [
+      "digital footprint",
+      "reply",
+      "avatar"
+     ],
+     "a": 1
+    },
+    {
+     "q": "You can ___ a post if you want to change something.",
+     "o": [
+      "digital footprint",
+      "profile",
+      "edit"
+     ],
+     "a": 2
+    },
+    {
+     "q": "The information you leave behind when using the internet is your ___.",
+     "o": [
+      "digital footprint",
+      "edit",
+      "reply"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Match It: Block 1",
+   "ico": "🧠",
+   "prompt": "Match each word with its meaning.",
+   "pairs": [
+    [
+     "Forum",
+     "An online discussion board"
+    ],
+    [
+     "Thread",
+     "A specific conversation"
+    ],
+    [
+     "Attachment",
+     "A file added to a post"
+    ],
+    [
+     "Reply",
+     "A response to another comment"
+    ],
+    [
+     "Embed",
+     "Insert media directly into a post"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "True or False: Block 1",
+   "ico": "🐦",
+   "prompt": "Catch each sentence and send it to True or False!",
+   "bins": [
+    {
+     "id": "t",
+     "label": "True",
+     "ico": "✅",
+     "cls": "noun"
+    },
+    {
+     "id": "f",
+     "label": "False",
+     "ico": "❌",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "t": "Yes, this is true.",
+    "f": "No, this is false."
+   },
+   "items": [
+    [
+     "You should respect other people's opinions online.",
+     "t"
+    ],
+    [
+     "It is safe to share your password with your online friends.",
+     "f"
+    ],
+    [
+     "An avatar must always be a real photograph of your face.",
+     "f"
+    ],
+    [
+     "You should think before responding to an online message.",
+     "t"
+    ],
+    [
+     "Using ALL CAPITAL LETTERS can look like shouting.",
+     "t"
+    ],
+    [
+     "You should ask permission before posting a friend's photo.",
+     "t"
+    ],
+    [
+     "You should leave your account open on a public computer.",
+     "f"
+    ],
+    [
+     "Everything you post online can contribute to your digital footprint.",
+     "t"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Steps and What Should You Do?",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Which step comes first when you are signing in to Microsoft Teams?",
+     "o": [
+      "Open Microsoft Teams",
+      "Click Sign In",
+      "Enter your school account",
+      "Enter your password"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which step comes second when you are signing in to Microsoft Teams?",
+     "o": [
+      "Open Microsoft Teams",
+      "Click Sign In",
+      "Enter your school account",
+      "Enter your password"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which step comes third when you are signing in to Microsoft Teams?",
+     "o": [
+      "Open Microsoft Teams",
+      "Click Sign In",
+      "Enter your school account",
+      "Enter your password"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which step comes fourth when you are signing in to Microsoft Teams?",
+     "o": [
+      "Open Microsoft Teams",
+      "Click Sign In",
+      "Enter your school account",
+      "Enter your password"
+     ],
+     "a": 3
+    },
+    {
+     "q": "Which step comes first when you are starting a Forum Discussion?",
+     "o": [
+      "Open the discussion forum",
+      "Choose a topic",
+      "Create a thread",
+      "Write and post your message"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which step comes second when you are starting a Forum Discussion?",
+     "o": [
+      "Open the discussion forum",
+      "Choose a topic",
+      "Create a thread",
+      "Write and post your message"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which step comes third when you are starting a Forum Discussion?",
+     "o": [
+      "Open the discussion forum",
+      "Choose a topic",
+      "Create a thread",
+      "Write and post your message"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which step comes fourth when you are starting a Forum Discussion?",
+     "o": [
+      "Open the discussion forum",
+      "Choose a topic",
+      "Create a thread",
+      "Write and post your message"
+     ],
+     "a": 3
+    },
+    {
+     "q": "Ahmed disagrees with his friend's opinion online. Which is better?",
+     "o": [
+      "Your idea is stupid!",
+      "I respectfully disagree because..."
+     ],
+     "a": 1
+    },
+    {
+     "q": "You are using a public computer and need to leave. What should you do?",
+     "o": [
+      "Leave your account open",
+      "Log out and do not save your password",
+      "Save your password"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Someone is cyberbullying you. What should you do?",
+     "o": [
+      "Take screenshots and tell a trusted adult",
+      "Bully them back",
+      "Keep it a secret"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "ict-b1-rs",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e417229b85f.mp3",
+  "s1": "audio/en/e2eae1f1ffe.mp3",
+  "s2": "audio/en/e45e8011278.mp3"
+ }
+}

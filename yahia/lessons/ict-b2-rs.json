@@ -1,0 +1,403 @@
+{
+ "title": "Block 2 Revision Sheet",
+ "source": "ICT Grade 3 (Nile International) revision sheet with model answers",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Excel Practice Sheet",
+   "ico": "📖",
+   "keys": [
+    "spreadsheet"
+   ],
+   "scenes": [
+    {
+     "e": "🍎🍊",
+     "t": "Look at the sheet. Row 1: Apples, 10, and 2 dollars. Row 2: Oranges, 5, and 1 dollar fifty."
+    },
+    {
+     "e": "🔢📍",
+     "t": "The value 5 is in cell B 2."
+    },
+    {
+     "e": "➕📊",
+     "t": "To find the total quantity in B 3, we write: equals SUM, open bracket, B 1 colon B 2, close bracket."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Multiple Choice",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What does a data logger do?",
+     "o": [
+      "Takes pictures",
+      "Collects and saves data automatically",
+      "Draws charts",
+      "Plays music"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which sensor measures how hot or cold something is?",
+     "o": [
+      "Light sensor",
+      "Sound sensor",
+      "Temperature sensor",
+      "Touch sensor"
+     ],
+     "a": 2
+    },
+    {
+     "q": "An ultrasonic sensor is used to measure...",
+     "o": [
+      "Sound",
+      "Distance",
+      "Light",
+      "Temperature"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What is a probe?",
+     "o": [
+      "A tool connected to a sensor to help reach and measure things",
+      "A type of computer game",
+      "A spreadsheet formula",
+      "A satellite in space"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does GPS stand for?",
+     "o": [
+      "Global Photo System",
+      "Great Programming Software",
+      "Global Positioning System",
+      "General Public Screen"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Adding location information to a photo is called:",
+     "o": [
+      "Geo-tracking",
+      "Geo-tagging",
+      "Data-logging",
+      "Embedding"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Following the movement of a school bus on a map is:",
+     "o": [
+      "Geo-tagging",
+      "Geo-tracking",
+      "Web browsing",
+      "Formatting"
+     ],
+     "a": 1
+    },
+    {
+     "q": "In Microsoft Excel, rows go:",
+     "o": [
+      "Across (horizontally)",
+      "Down (vertically)",
+      "In circles",
+      "Diagonally"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Columns in Excel go:",
+     "o": [
+      "Across",
+      "Down (vertically)",
+      "Randomly",
+      "Upward"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The intersection of a row and a column is called a:",
+     "o": [
+      "Range",
+      "Formula",
+      "Cell",
+      "Sheet"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which of these is a correct cell address?",
+     "o": [
+      "4B",
+      "B4",
+      "11AA",
+      "AB45"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Every formula or function in Excel must begin with which sign?",
+     "o": [
+      "Plus (+)",
+      "Equal sign (=)",
+      "Hash (#)",
+      "Minus (-)"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which function is used to add numbers together?",
+     "o": [
+      "=MIN()",
+      "=MAX()",
+      "=SUM()",
+      "=COUNT()"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which function finds the highest or maximum value?",
+     "o": [
+      "=MAX()",
+      "=MIN()",
+      "=SUM()",
+      "=AVERAGE()"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which chart looks like a circle divided into slices?",
+     "o": [
+      "Bar chart",
+      "Line chart",
+      "Pie chart",
+      "Text chart"
+     ],
+     "a": 2
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Fill in the Blanks",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "A ___ is like a tiny helper that can feel things around it like heat, light, or sound.",
+     "o": [
+      "sensor",
+      "GPS",
+      "fill handle"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A ___ is the hand or explorer that goes into something to help the sensor measure it.",
+     "o": [
+      "GPS",
+      "probe",
+      "fill handle"
+     ],
+     "a": 1
+    },
+    {
+     "q": "___ helps us find our location on a map using satellites.",
+     "o": [
+      "cell range",
+      "chart",
+      "GPS"
+     ],
+     "a": 2
+    },
+    {
+     "q": "A group of selected cells in Excel is called a ___.",
+     "o": [
+      "cell range",
+      "fill handle",
+      "sensor"
+     ],
+     "a": 0
+    },
+    {
+     "q": "You can use the ___ (small square at the bottom-right corner) to copy formulas quickly.",
+     "o": [
+      "probe",
+      "fill handle",
+      "GPS"
+     ],
+     "a": 1
+    },
+    {
+     "q": "A ___ is a visual representation of worksheet data that turns numbers into shapes and colors.",
+     "o": [
+      "probe",
+      "Geo-tagging",
+      "chart"
+     ],
+     "a": 2
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Match It: Block 2",
+   "ico": "🧠",
+   "prompt": "Match each word with its meaning.",
+   "pairs": [
+    [
+     "Light Sensor",
+     "Detects light (like in mobile phones or street lights)"
+    ],
+    [
+     "Geo-tracking",
+     "Follows the movement of a moving object"
+    ],
+    [
+     "Geo-tagging",
+     "Adds location information to a picture"
+    ],
+    [
+     "=SUM(A1:A4)",
+     "Adds all values from cell A1 to A4"
+    ],
+    [
+     "=AVERAGE(A1:A4)",
+     "Finds the average value of selected cells"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "True or False: Block 2",
+   "ico": "🐦",
+   "prompt": "Catch each sentence and send it to True or False!",
+   "bins": [
+    {
+     "id": "t",
+     "label": "True",
+     "ico": "✅",
+     "cls": "noun"
+    },
+    {
+     "id": "f",
+     "label": "False",
+     "ico": "❌",
+     "cls": "verb"
+    }
+   ],
+   "why": {
+    "t": "Yes, this is true.",
+    "f": "No, this is false."
+   },
+   "items": [
+    [
+     "A data logger collects and saves data automatically.",
+     "t"
+    ],
+    [
+     "A sound sensor is used to measure distance.",
+     "f"
+    ],
+    [
+     "GPS can help you find your school on a digital map.",
+     "t"
+    ],
+    [
+     "Geo-tagging means following a moving school bus.",
+     "f"
+    ],
+    [
+     "Rows in Excel are designated by numbers (1, 2, 3...).",
+     "t"
+    ],
+    [
+     "The formula =SUM(A1:A5) is used to find the lowest number.",
+     "f"
+    ],
+    [
+     "Charts make it easy to compare large amounts of data visually.",
+     "t"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Excel Practice",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "In the sheet (Apples 10, Oranges 5), what is the cell address of the value 5?",
+     "o": [
+      "A1",
+      "B1",
+      "B2",
+      "C2"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which formula gives the total quantity of apples and oranges?",
+     "o": [
+      "=SUM(B1:B2)",
+      "=AVERAGE(B1:B2)",
+      "=SUM(C1:C2)"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which step comes first when you make a chart in Excel?",
+     "o": [
+      "Type your numbers in the Excel worksheet",
+      "Use your mouse to select the data",
+      "Click Insert, then Chart",
+      "Choose the chart type you like (Bar, Pie, or Line)"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which step comes second when you make a chart in Excel?",
+     "o": [
+      "Type your numbers in the Excel worksheet",
+      "Use your mouse to select the data",
+      "Click Insert, then Chart",
+      "Choose the chart type you like (Bar, Pie, or Line)"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which step comes third when you make a chart in Excel?",
+     "o": [
+      "Type your numbers in the Excel worksheet",
+      "Use your mouse to select the data",
+      "Click Insert, then Chart",
+      "Choose the chart type you like (Bar, Pie, or Line)"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which step comes fourth when you make a chart in Excel?",
+     "o": [
+      "Type your numbers in the Excel worksheet",
+      "Use your mouse to select the data",
+      "Click Insert, then Chart",
+      "Choose the chart type you like (Bar, Pie, or Line)"
+     ],
+     "a": 3
+    }
+   ]
+  }
+ ],
+ "id": "ict-b2-rs",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e3b94ee32da.mp3",
+  "s1": "audio/en/ef9a2649e65.mp3",
+  "s2": "audio/en/ea5d4a0befe.mp3"
+ }
+}
