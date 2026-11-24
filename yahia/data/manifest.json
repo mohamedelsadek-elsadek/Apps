@@ -509,6 +509,127 @@
    ]
   },
   {
+   "id": "ict",
+   "title": "ICT",
+   "ico": "💻",
+   "color": "#6c5ce7",
+   "status": "ready",
+   "lang": "en",
+   "blocks": [
+    {
+     "id": "b1",
+     "title": "Block 1: Online Discussion",
+     "units": [
+      {
+       "id": "u1",
+       "title": "Unit 1: Online Discussion",
+       "ico": "💬",
+       "lessons": [
+        {
+         "id": "ict-b1-l1",
+         "title": "Online Discussion & Netiquette",
+         "ico": "💬",
+         "file": "lessons/ict-b1-l1.json"
+        },
+        {
+         "id": "ict-b1-l2",
+         "title": "Profile, Avatar & Digital Footprint",
+         "ico": "🧑‍🎤",
+         "file": "lessons/ict-b1-l2.json"
+        },
+        {
+         "id": "ict-b1-l3",
+         "title": "Safe Social Presence: Microsoft Teams",
+         "ico": "👥",
+         "file": "lessons/ict-b1-l3.json"
+        },
+        {
+         "id": "ict-b1-l4",
+         "title": "Forum, Thread, Post & Reply",
+         "ico": "🗂️",
+         "file": "lessons/ict-b1-l4.json"
+        },
+        {
+         "id": "ict-b1-l5",
+         "title": "E-safety & Cyberbullying",
+         "ico": "🛡️",
+         "file": "lessons/ict-b1-l5.json"
+        },
+        {
+         "id": "ict-b1-l6",
+         "title": "Block 1 Revision",
+         "ico": "🏆",
+         "file": "lessons/ict-b1-l6.json"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b2",
+     "title": "Block 2: Data Logging & Excel",
+     "units": [
+      {
+       "id": "u2",
+       "title": "Unit 2: Data Logging & Excel",
+       "ico": "📊",
+       "lessons": [
+        {
+         "id": "ict-b2-l1",
+         "title": "Data Logging & Sensors",
+         "ico": "🌡️",
+         "file": "lessons/ict-b2-l1.json"
+        },
+        {
+         "id": "ict-b2-l2",
+         "title": "GPS, Geo-tagging & Geo-tracking",
+         "ico": "📍",
+         "file": "lessons/ict-b2-l2.json"
+        },
+        {
+         "id": "ict-b2-l3",
+         "title": "Introduction to Spreadsheets",
+         "ico": "🧮",
+         "file": "lessons/ict-b2-l3.json"
+        },
+        {
+         "id": "ict-b2-l4",
+         "title": "Formulas & Functions",
+         "ico": "➕",
+         "file": "lessons/ict-b2-l4.json"
+        },
+        {
+         "id": "ict-b2-l5",
+         "title": "Charts in Excel",
+         "ico": "📈",
+         "file": "lessons/ict-b2-l5.json"
+        },
+        {
+         "id": "ict-b2-l6",
+         "title": "Block 2 Revision & Excel Challenge",
+         "ico": "🏆",
+         "file": "lessons/ict-b2-l6.json"
+        }
+       ]
+      },
+      {
+       "id": "ex",
+       "title": "🏆 Practice Paper",
+       "ico": "🏆",
+       "lessons": [
+        {
+         "id": "ict-b2-pp",
+         "title": "Practice Paper (Block 2)",
+         "ico": "📝",
+         "file": "lessons/ict-b2-pp.json"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
    "id": "so",
    "title": "الدراسات",
    "ico": "🌍",

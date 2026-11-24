@@ -331,7 +331,7 @@ async function loadLesson(id){
   d=JSON.parse(JSON.stringify(d).split("{name}").join(JSON.stringify(nm).slice(1,-1))); LCACHE[id]=d; d._blob={};
   /* الصفحة مش بتشغّل ملفات صوت مباشرة — بنحمّلها blob الأول */
   Object.entries(d.audio||{}).forEach(([k,p])=>fetch(p).then(r=>r.ok?r.blob():null).then(b=>{if(b)d._blob[k]=URL.createObjectURL(b)}).catch(()=>{}));
-  if(d.lang==="en") loadEnIdx().then(()=>{ try{ d.activities.forEach(x=>{ if(x.type==="cards")x.items.forEach(it=>{enClip(it.w);enClip(it.w+". "+it.a)}); else if(x.type==="sort")x.items.forEach(it=>enClip(it[0])); else if(x.type==="quiz")x.items.forEach(q=>{enClip(q.q);enClip("The right answer is: "+String(q.o[q.a]).replace(/[^A-Za-z0-9 ,.'-]/g,""))}) }) }catch(e){} });
+  if(d.lang==="en") loadEnIdx().then(()=>{ try{ d.activities.forEach(x=>{ if(x.type==="cards")x.items.forEach(it=>{enClip(it.w);enClip(it.w+". "+it.a)}); else if(x.type==="sort")x.items.forEach(it=>enClip(it[0])); else if(x.type==="quiz")x.items.forEach(q=>{enClip(q.q);enClip("The right answer is: "+String(q.o[q.a]).replace(/[^A-Za-z0-9 ,.'-]/g,""))}); else if(x.type==="match")x.pairs.forEach(p=>{enClip(p[0]);enClip(p[1])}); else if(x.type==="story")x.scenes.forEach(sc=>sc.t.split(" ").forEach(w=>{const c=w.replace(/[،؛:.!؟,?()"]/g,"");if((x.keys||[]).some(k=>c.toLowerCase().includes(k.toLowerCase())))enClip(c)})) }) }catch(e){} });
   return d;
 }
 function findLesson(id){for(const s of M.subjects)for(const b of (s.blocks||[]))for(const u of b.units)for(const l of u.lessons) if(l.id===id) return Object.assign({},l,{subject:s,block:b,unit:u}); return null}
