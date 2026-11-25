@@ -135,7 +135,164 @@
    "title": "English",
    "ico": "🔤",
    "color": "#8a5cf6",
-   "status": "soon"
+   "status": "ready",
+   "lang": "en",
+   "blocks": [
+    {
+     "id": "b2",
+     "title": "Block 2",
+     "units": [
+      {
+       "id": "u1",
+       "title": "Words & Grammar",
+       "ico": "🗣️",
+       "lessons": [
+        {
+         "id": "en-b2-l1",
+         "title": "My Family & My Body",
+         "ico": "👨‍👩‍👧",
+         "file": "lessons/en-b2-l1.json"
+        },
+        {
+         "id": "en-b2-l2",
+         "title": "Jobs & Places in Town",
+         "ico": "🏙️",
+         "file": "lessons/en-b2-l2.json"
+        },
+        {
+         "id": "en-b2-l3",
+         "title": "Sports & Free Time",
+         "ico": "⚽",
+         "file": "lessons/en-b2-l3.json"
+        },
+        {
+         "id": "en-b2-l4",
+         "title": "Food, Drinks & Clothes",
+         "ico": "🍔",
+         "file": "lessons/en-b2-l4.json"
+        },
+        {
+         "id": "en-b2-l5",
+         "title": "Days, Months & Weather",
+         "ico": "📅",
+         "file": "lessons/en-b2-l5.json"
+        },
+        {
+         "id": "en-b2-l6",
+         "title": "School, Countries & Toys",
+         "ico": "🏫",
+         "file": "lessons/en-b2-l6.json"
+        },
+        {
+         "id": "en-b2-l7",
+         "title": "Adjectives & Adverbs",
+         "ico": "🎨",
+         "file": "lessons/en-b2-l7.json"
+        },
+        {
+         "id": "en-b2-l8",
+         "title": "Linking & Question Words",
+         "ico": "🔗",
+         "file": "lessons/en-b2-l8.json"
+        }
+       ]
+      },
+      {
+       "id": "u2",
+       "title": "Reading Time",
+       "ico": "📖",
+       "lessons": [
+        {
+         "id": "en-b2-l9",
+         "title": "Tao Loves Books",
+         "ico": "📚",
+         "file": "lessons/en-b2-l9.json"
+        },
+        {
+         "id": "en-b2-l10",
+         "title": "Nelly the Nurse",
+         "ico": "🏥",
+         "file": "lessons/en-b2-l10.json"
+        },
+        {
+         "id": "en-b2-l11",
+         "title": "My Friend Elisabeth",
+         "ico": "💃",
+         "file": "lessons/en-b2-l11.json"
+        },
+        {
+         "id": "en-b2-l12",
+         "title": "Sue's Birthday Party",
+         "ico": "🎉",
+         "file": "lessons/en-b2-l12.json"
+        },
+        {
+         "id": "en-b2-l13",
+         "title": "Traveling Is Fun",
+         "ico": "✈️",
+         "file": "lessons/en-b2-l13.json"
+        },
+        {
+         "id": "en-b2-l14",
+         "title": "A Family Day",
+         "ico": "👨‍👩‍👧‍👦",
+         "file": "lessons/en-b2-l14.json"
+        },
+        {
+         "id": "en-b2-l15",
+         "title": "Father's Day",
+         "ico": "💙",
+         "file": "lessons/en-b2-l15.json"
+        },
+        {
+         "id": "en-b2-l16",
+         "title": "At the Airport",
+         "ico": "🛫",
+         "file": "lessons/en-b2-l16.json"
+        }
+       ]
+      },
+      {
+       "id": "rs",
+       "title": "📝 Revision",
+       "ico": "📝",
+       "lessons": [
+        {
+         "id": "en-b2-rs",
+         "title": "📝 Block 2 Revision",
+         "ico": "📝",
+         "file": "lessons/en-b2-rs.json"
+        }
+       ]
+      },
+      {
+       "id": "ex",
+       "title": "🏆 Test Practice",
+       "ico": "🏆",
+       "lessons": [
+        {
+         "id": "en-b2-t1",
+         "title": "🏆 Test Practice 1",
+         "ico": "🏆",
+         "file": "lessons/en-b2-t1.json"
+        },
+        {
+         "id": "en-b2-t2",
+         "title": "🏆 Test Practice 2",
+         "ico": "🏆",
+         "file": "lessons/en-b2-t2.json"
+        },
+        {
+         "id": "en-b2-t3",
+         "title": "🏆 Test Practice 3",
+         "ico": "🏆",
+         "file": "lessons/en-b2-t3.json"
+        }
+       ]
+      }
+     ]
+    }
+   ]
   },
   {
    "id": "ma",

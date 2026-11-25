@@ -1,0 +1,106 @@
+{
+ "title": "Reading: At the Airport",
+ "source": "NIES Grade 3 Block 2 Exam Practice 4 (Ms. Clara), Reading Part 3 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "At the Airport",
+   "ico": "📖",
+   "keys": [
+    "airport",
+    "flight",
+    "bag",
+    "subway"
+   ],
+   "scenes": [
+    {
+     "e": "🛫",
+     "t": "Two women were at the airport. They were waiting for their flight."
+    },
+    {
+     "e": "🎒",
+     "t": "The first woman had a red bag. The second woman carried a blue one. They sat next to each other. Both looked a bit tired."
+    },
+    {
+     "e": "🚇",
+     "t": "'The subway was very crowded today,' the woman with the red bag said. 'I had to stand all the way.'"
+    },
+    {
+     "e": "🎫",
+     "t": "The woman with the red bag bought a special ticket just for the airport. It costs a little more, but it's fast."
+    },
+    {
+     "e": "🚲",
+     "t": "'My friend came here on her bicycle once,' said the woman with the blue bag. 'It was fun but hard with luggage.'"
+    },
+    {
+     "e": "😊",
+     "t": "Soon, they heard the announcement for their flight. They picked up their bags and walked to their gate with a smile."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Who spoke first at the airport?",
+     "o": [
+      "The woman with the red bag",
+      "The woman with the blue bag",
+      "The pilot"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What color was the second woman's bag?",
+     "o": [
+      "Blue",
+      "Red",
+      "Green"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Why were both women a bit tired?",
+     "o": [
+      "They took the crowded subway",
+      "They ran to the airport",
+      "They woke up late"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Did the first woman buy a special ticket for the subway?",
+     "o": [
+      "Yes, she did",
+      "No, she didn't",
+      "No, she walked"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What was different about the airport ticket?",
+     "o": [
+      "It cost a little more but was fast",
+      "It was free",
+      "It was very slow"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l16",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/efb5622b50e.mp3",
+  "s1": "audio/en/e0e5c9be337.mp3",
+  "s2": "audio/en/e201374d651.mp3",
+  "s3": "audio/en/ecada6f1928.mp3",
+  "s4": "audio/en/e8d563f8053.mp3",
+  "s5": "audio/en/e4f86377dc8.mp3"
+ }
+}

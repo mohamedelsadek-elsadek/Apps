@@ -1,0 +1,132 @@
+{
+ "title": "Reading: Tao Loves Books",
+ "source": "NIES Grade 3 Block 2 revision booklet, Reading Part 3 text 1 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Tao Loves Books",
+   "ico": "📖",
+   "keys": [
+    "reading",
+    "books",
+    "library"
+   ],
+   "scenes": [
+    {
+     "e": "📚",
+     "t": "Tao enjoys reading books every evening."
+    },
+    {
+     "e": "🦁",
+     "t": "His favourite books are about animals and adventures."
+    },
+    {
+     "e": "✏️",
+     "t": "Reading helps Tao learn new words and interesting facts. It also helps him improve his spelling and writing."
+    },
+    {
+     "e": "👩‍🏫",
+     "t": "His teacher encourages the class to read every day."
+    },
+    {
+     "e": "🏫",
+     "t": "Tao visits the library on Fridays and chooses two books to take home."
+    },
+    {
+     "e": "🛏️",
+     "t": "He reads them before going to bed."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "When does Tao enjoy reading?",
+     "o": [
+      "In the evening",
+      "In the morning",
+      "At school"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What are his favourite books about?",
+     "o": [
+      "Animals and adventures",
+      "Cars and planes",
+      "Food and drinks"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does reading help Tao learn?",
+     "o": [
+      "New words and interesting facts",
+      "To swim fast",
+      "To cook food"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Name one skill that reading improves.",
+     "o": [
+      "Spelling",
+      "Running",
+      "Drawing"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Who encourages the class to read?",
+     "o": [
+      "His teacher",
+      "His mother",
+      "His cousin"
+     ],
+     "a": 0
+    },
+    {
+     "q": "When does Tao visit the library?",
+     "o": [
+      "On Fridays",
+      "On Sundays",
+      "On Mondays"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How many books does he choose?",
+     "o": [
+      "One",
+      "Two",
+      "Three"
+     ],
+     "a": 1
+    },
+    {
+     "q": "When does Tao read his books?",
+     "o": [
+      "Before going to bed",
+      "At breakfast",
+      "On the bus"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l9",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e5ec2418d9a.mp3",
+  "s1": "audio/en/e8f2a1ecb88.mp3",
+  "s2": "audio/en/e6e88d1f453.mp3",
+  "s3": "audio/en/e6878c5efbb.mp3",
+  "s4": "audio/en/ea8b6054035.mp3",
+  "s5": "audio/en/e273a8852a7.mp3"
+ }
+}

@@ -1,0 +1,267 @@
+{
+ "title": "Food, Drinks & Clothes",
+ "source": "NIES Grade 3 Block 2 revision booklet: food, drinks & clothes word banks",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Shopping with Dad",
+   "ico": "📖",
+   "keys": [
+    "food",
+    "drinks",
+    "clothes",
+    "fruit"
+   ],
+   "scenes": [
+    {
+     "e": "🛒",
+     "t": "On Friday, Yahia goes to the market with his dad. They need food and drinks."
+    },
+    {
+     "e": "🍎",
+     "t": "At the fruit stall, they buy apples, oranges, and grapes. Fruit is sweet and healthy."
+    },
+    {
+     "e": "🍗",
+     "t": "For lunch, Mom cooks chicken and rice. Yahia's favorite food is pizza!"
+    },
+    {
+     "e": "🥛",
+     "t": "Yahia drinks milk in the morning and juice with his lunch. Water is the best drink!"
+    },
+    {
+     "e": "👕",
+     "t": "Then they buy clothes: a new T-shirt, trousers, and a jacket for winter."
+    },
+    {
+     "e": "🧦",
+     "t": "Socks, shoes, and a cap too! Now Yahia is ready for school on Sunday."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "rice",
+     "e": "🍚",
+     "k": "mean",
+     "a": "A white food we eat with chicken or meat."
+    },
+    {
+     "w": "juice",
+     "e": "🧃",
+     "k": "mean",
+     "a": "A drink made from fruit."
+    },
+    {
+     "w": "milk",
+     "e": "🥛",
+     "k": "mean",
+     "a": "A white drink from cows."
+    },
+    {
+     "w": "jacket",
+     "e": "🧥",
+     "k": "mean",
+     "a": "We wear it when it is cold."
+    },
+    {
+     "w": "trousers",
+     "e": "👖",
+     "k": "mean",
+     "a": "We wear them on our legs."
+    },
+    {
+     "w": "dress",
+     "e": "👗",
+     "k": "mean",
+     "a": "Girls wear it to look nice."
+    },
+    {
+     "w": "T-shirt",
+     "e": "👕",
+     "k": "mean",
+     "a": "A light shirt with short sleeves."
+    },
+    {
+     "w": "shoes",
+     "e": "👟",
+     "k": "mean",
+     "a": "We wear them on our feet."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Match It",
+   "ico": "🧠",
+   "prompt": "Match each word with its meaning.",
+   "pairs": [
+    [
+     "milk",
+     "A white drink from cows"
+    ],
+    [
+     "jacket",
+     "We wear it when it is cold"
+    ],
+    [
+     "bread",
+     "The baker bakes it"
+    ],
+    [
+     "coffee",
+     "A hot drink for grown-ups"
+    ],
+    [
+     "cap",
+     "We wear it on our head"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Food, Drink or Clothes?",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it home!",
+   "bins": [
+    {
+     "id": "f",
+     "label": "Food",
+     "ico": "🍔",
+     "cls": "noun"
+    },
+    {
+     "id": "d",
+     "label": "Drinks",
+     "ico": "🧃",
+     "cls": "noun"
+    },
+    {
+     "id": "c",
+     "label": "Clothes",
+     "ico": "👕",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "rice",
+     "f"
+    ],
+    [
+     "milk",
+     "d"
+    ],
+    [
+     "jacket",
+     "c"
+    ],
+    [
+     "tomato",
+     "f"
+    ],
+    [
+     "tea",
+     "d"
+    ],
+    [
+     "trousers",
+     "c"
+    ],
+    [
+     "chicken",
+     "f"
+    ],
+    [
+     "coffee",
+     "d"
+    ],
+    [
+     "shirt",
+     "c"
+    ],
+    [
+     "cheese",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Which of these is a drink?",
+     "o": [
+      "milk",
+      "rice",
+      "jacket"
+     ],
+     "a": 0
+    },
+    {
+     "q": "We wear a ___ when it is cold.",
+     "o": [
+      "jacket",
+      "T-shirt",
+      "cap"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which one is a fruit?",
+     "o": [
+      "grapes",
+      "carrots",
+      "bread"
+     ],
+     "a": 0
+    },
+    {
+     "q": "We put ___ on our feet.",
+     "o": [
+      "shoes",
+      "hats",
+      "gloves"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does a baker bake?",
+     "o": [
+      "bread",
+      "milk",
+      "juice"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Chips, rice and chicken are...",
+     "o": [
+      "food",
+      "drinks",
+      "clothes"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l4",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e3d7acd556f.mp3",
+  "s1": "audio/en/e0d0517b4bf.mp3",
+  "s2": "audio/en/e8d530ab176.mp3",
+  "s3": "audio/en/ef0f51016a0.mp3",
+  "s4": "audio/en/ee3d512f89d.mp3",
+  "s5": "audio/en/e594c7b84dc.mp3"
+ }
+}

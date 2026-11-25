@@ -1,0 +1,210 @@
+{
+ "title": "Linking & Question Words",
+ "source": "NIES Grade 3 Block 2 revision booklet: linking words, WH-questions & relative pronouns posters",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Little Linkers",
+   "ico": "📖",
+   "keys": [
+    "because",
+    "so",
+    "and",
+    "but",
+    "or"
+   ],
+   "scenes": [
+    {
+     "e": "🔗",
+     "t": "Linking words join our ideas: and, but, or, because, and so."
+    },
+    {
+     "e": "🍎",
+     "t": "We use and for things that go together: I like apples and bananas."
+    },
+    {
+     "e": "🐻",
+     "t": "We use but to show a difference: The teddy is big but soft."
+    },
+    {
+     "e": "🍵",
+     "t": "We use or for a choice: Do you want tea or juice?"
+    },
+    {
+     "e": "😊",
+     "t": "We use because to give a reason: I am happy because I am learning English."
+    },
+    {
+     "e": "☔",
+     "t": "We use so for a result: It was raining, so I stayed home."
+    },
+    {
+     "e": "❓",
+     "t": "Question words help us ask: who for people, what for things, where for places, when for time, and why for reasons."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Linking Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "and",
+     "e": "➕",
+     "k": "mean",
+     "a": "Joins things that go together."
+    },
+    {
+     "w": "but",
+     "e": "↔️",
+     "k": "mean",
+     "a": "Shows a difference or contrast."
+    },
+    {
+     "w": "or",
+     "e": "🔀",
+     "k": "mean",
+     "a": "Shows a choice."
+    },
+    {
+     "w": "because",
+     "e": "💭",
+     "k": "mean",
+     "a": "Gives a reason."
+    },
+    {
+     "w": "so",
+     "e": "➡️",
+     "k": "mean",
+     "a": "Shows a result."
+    },
+    {
+     "w": "whose",
+     "e": "👤",
+     "k": "mean",
+     "a": "Asks who something belongs to."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Question Words",
+   "ico": "🧠",
+   "prompt": "Match each question word with what it asks about.",
+   "pairs": [
+    [
+     "Who",
+     "Asks about a person"
+    ],
+    [
+     "What",
+     "Asks about a thing or action"
+    ],
+    [
+     "Where",
+     "Asks about a place"
+    ],
+    [
+     "When",
+     "Asks about a time"
+    ],
+    [
+     "How many",
+     "Asks about a quantity"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "I am happy ___ I am learning English.",
+     "o": [
+      "because",
+      "so",
+      "but"
+     ],
+     "a": 0
+    },
+    {
+     "q": "I am hungry, ___ I am going to eat.",
+     "o": [
+      "because",
+      "so",
+      "or"
+     ],
+     "a": 1
+    },
+    {
+     "q": "He is small ___ fast.",
+     "o": [
+      "and",
+      "but",
+      "or"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Do you want tea ___ juice?",
+     "o": [
+      "or",
+      "but",
+      "so"
+     ],
+     "a": 0
+    },
+    {
+     "q": "We can sing ___ dance.",
+     "o": [
+      "and",
+      "but",
+      "so"
+     ],
+     "a": 0
+    },
+    {
+     "q": "___ is your teacher? - Mrs. Mona.",
+     "o": [
+      "Who",
+      "What",
+      "Where"
+     ],
+     "a": 0
+    },
+    {
+     "q": "___ do you live? - In Zagazig.",
+     "o": [
+      "When",
+      "Where",
+      "Why"
+     ],
+     "a": 1
+    },
+    {
+     "q": "___ pencil is this? - It's Yahia's.",
+     "o": [
+      "Who",
+      "Whose",
+      "Where"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l8",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e6001f9af36.mp3",
+  "s1": "audio/en/e92ff4d3d47.mp3",
+  "s2": "audio/en/e8aa41f2c0f.mp3",
+  "s3": "audio/en/e8792276b19.mp3",
+  "s4": "audio/en/e479124304f.mp3",
+  "s5": "audio/en/e6625282478.mp3",
+  "s6": "audio/en/e4498757b2d.mp3"
+ }
+}

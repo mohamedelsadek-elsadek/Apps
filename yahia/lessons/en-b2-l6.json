@@ -1,0 +1,271 @@
+{
+ "title": "School, Countries & Toys",
+ "source": "NIES Grade 3 Block 2 revision booklet: school subjects, countries & toys pages",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia at School",
+   "ico": "📖",
+   "keys": [
+    "subjects",
+    "school",
+    "countries"
+   ],
+   "scenes": [
+    {
+     "e": "🏫",
+     "t": "Yahia learns many subjects at school: English, Math, Science, Arabic, and ICT."
+    },
+    {
+     "e": "➕",
+     "t": "In Math, we learn numbers and shapes. In Science, we learn about living things and materials."
+    },
+    {
+     "e": "🔤",
+     "t": "In English, we learn to read, speak, and write. In ICT, we learn to use computers safely."
+    },
+    {
+     "e": "🌍",
+     "t": "Yahia also learns about countries around the world. Different countries, one big world!"
+    },
+    {
+     "e": "🗼",
+     "t": "France has the Eiffel Tower. Italy has the Colosseum. China has the Great Wall."
+    },
+    {
+     "e": "🔺",
+     "t": "And Egypt, our country, has the great Pyramids of Giza!"
+    },
+    {
+     "e": "🧸",
+     "t": "After school, Yahia plays with his toys: his ball, his kite, and his robot."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "School Subjects",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "Science",
+     "e": "🔬",
+     "k": "mean",
+     "a": "We learn about the natural world and how things work."
+    },
+    {
+     "w": "Math",
+     "e": "➕",
+     "k": "mean",
+     "a": "We learn numbers, shapes, and problem solving."
+    },
+    {
+     "w": "ICT",
+     "e": "💻",
+     "k": "mean",
+     "a": "We learn how to use computers safely and wisely."
+    },
+    {
+     "w": "Geography",
+     "e": "🗺️",
+     "k": "mean",
+     "a": "We learn about the Earth: countries, maps, land, and water."
+    },
+    {
+     "w": "History",
+     "e": "🏺",
+     "k": "mean",
+     "a": "We learn about the past: people, events, and important dates."
+    },
+    {
+     "w": "Art",
+     "e": "🎨",
+     "k": "mean",
+     "a": "We learn painting and drawing."
+    },
+    {
+     "w": "Music",
+     "e": "🎵",
+     "k": "mean",
+     "a": "We learn songs and musical instruments."
+    },
+    {
+     "w": "PE",
+     "e": "⚽",
+     "k": "mean",
+     "a": "We play sports and exercise at school."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Countries & Landmarks",
+   "ico": "🧠",
+   "prompt": "Match each country with its famous place.",
+   "pairs": [
+    [
+     "Egypt",
+     "The Pyramids of Giza"
+    ],
+    [
+     "France",
+     "The Eiffel Tower"
+    ],
+    [
+     "Italy",
+     "The Colosseum"
+    ],
+    [
+     "China",
+     "The Great Wall"
+    ],
+    [
+     "England",
+     "Big Ben"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Subject, Country or Toy?",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it home!",
+   "bins": [
+    {
+     "id": "s",
+     "label": "Subjects",
+     "ico": "📚",
+     "cls": "noun"
+    },
+    {
+     "id": "c",
+     "label": "Countries",
+     "ico": "🌍",
+     "cls": "noun"
+    },
+    {
+     "id": "t",
+     "label": "Toys",
+     "ico": "🧸",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "Math",
+     "s"
+    ],
+    [
+     "France",
+     "c"
+    ],
+    [
+     "kite",
+     "t"
+    ],
+    [
+     "Science",
+     "s"
+    ],
+    [
+     "Egypt",
+     "c"
+    ],
+    [
+     "robot",
+     "t"
+    ],
+    [
+     "English",
+     "s"
+    ],
+    [
+     "China",
+     "c"
+    ],
+    [
+     "ball",
+     "t"
+    ],
+    [
+     "History",
+     "s"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "In which subject do we learn numbers?",
+     "o": [
+      "Math",
+      "Music",
+      "Art"
+     ],
+     "a": 0
+    },
+    {
+     "q": "In which subject do we learn about computers?",
+     "o": [
+      "ICT",
+      "PE",
+      "History"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The Eiffel Tower is in...",
+     "o": [
+      "France",
+      "Egypt",
+      "China"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The Pyramids of Giza are in...",
+     "o": [
+      "Egypt",
+      "Italy",
+      "England"
+     ],
+     "a": 0
+    },
+    {
+     "q": "We learn about the past in...",
+     "o": [
+      "History",
+      "Math",
+      "ICT"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which one is a toy?",
+     "o": [
+      "kite",
+      "rice",
+      "jacket"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l6",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e361ea6ccac.mp3",
+  "s1": "audio/en/e6b01514c22.mp3",
+  "s2": "audio/en/eede05fc78a.mp3",
+  "s3": "audio/en/e4dca42abac.mp3",
+  "s4": "audio/en/e7c4cc7c1d0.mp3",
+  "s5": "audio/en/eb165a78cf1.mp3",
+  "s6": "audio/en/ea8462ddba9.mp3"
+ }
+}

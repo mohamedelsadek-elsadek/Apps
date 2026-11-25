@@ -1,0 +1,106 @@
+{
+ "title": "Reading: A Family Day",
+ "source": "NIES Grade 3 Block 2 Exam Practice 2 (Ms. Clara), Reading Part 3 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "A Family Day",
+   "ico": "📖",
+   "keys": [
+    "grandparents",
+    "family",
+    "garden",
+    "cake"
+   ],
+   "scenes": [
+    {
+     "e": "👨‍👩‍👧‍👦",
+     "t": "On Sunday, my mom and dad said, 'Let's visit grandpa and grandma.' I was happy. My sister and brother were too."
+    },
+    {
+     "e": "🏡",
+     "t": "We all love our grandparents' house. It is big and has a garden. My uncle, aunt, and cousins were there too."
+    },
+    {
+     "e": "⚽",
+     "t": "I played football with my brother and cousins. My sister talked with grandma and learned to knit."
+    },
+    {
+     "e": "🎂",
+     "t": "Aunt made a big cake for all of us. It was so tasty. We all ate the cake together."
+    },
+    {
+     "e": "🌳",
+     "t": "My dad helped grandpa in the garden. Mom talked with my aunt. The parents sat and talked about work and holidays."
+    },
+    {
+     "e": "📸",
+     "t": "The day ended with a big family photo. We all hugged and said goodbye. I can't wait for the next family gathering!"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What activity did the sister learn from grandma?",
+     "o": [
+      "Knitting",
+      "Cooking",
+      "Swimming"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Why did everyone eat cake?",
+     "o": [
+      "Aunt made a big cake for all of us",
+      "It was a birthday",
+      "They were hungry"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Who did dad help on Sunday?",
+     "o": [
+      "Grandpa",
+      "The uncle",
+      "The cousin"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Where did the family take the photo?",
+     "o": [
+      "At grandparents' house",
+      "At the park",
+      "At school"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What did grandfather love at the end of the day?",
+     "o": [
+      "Seeing his son and daughters with their families",
+      "Watching TV alone",
+      "Sleeping early"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l14",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/eb10f618fa1.mp3",
+  "s1": "audio/en/e0312130cd0.mp3",
+  "s2": "audio/en/ebdc17db7ec.mp3",
+  "s3": "audio/en/e0babfa73c3.mp3",
+  "s4": "audio/en/eb40990f417.mp3",
+  "s5": "audio/en/e6899a3ee3b.mp3"
+ }
+}

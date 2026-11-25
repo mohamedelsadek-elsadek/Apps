@@ -1,0 +1,112 @@
+{
+ "title": "Reading: Traveling Is Fun",
+ "source": "NIES Grade 3 Block 2 Exam Practice 1 (Ms. Clara), Reading Part 3 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Traveling Is Fun",
+   "ico": "📖",
+   "keys": [
+    "travel",
+    "plane",
+    "train",
+    "map",
+    "camera"
+   ],
+   "scenes": [
+    {
+     "e": "✈️",
+     "t": "Traveling is fun. People fly in planes. Others go by boat. Some take long train rides."
+    },
+    {
+     "e": "🏔️",
+     "t": "Many countries have different sights. Mountains, rivers and cities can be beautiful."
+    },
+    {
+     "e": "🗣️",
+     "t": "You can meet many friends. They may speak other languages. It's good to learn new words."
+    },
+    {
+     "e": "🎒",
+     "t": "When you travel, pack light. Only take what you need. A map is very useful. It helps you find places."
+    },
+    {
+     "e": "📷",
+     "t": "A camera is good too. You can take pictures. Remember to charge your camera."
+    },
+    {
+     "e": "🍜",
+     "t": "Try new foods when away. Some may be spicy. Others are sweet or sour. Eat where locals eat. It's often cheaper and better."
+    },
+    {
+     "e": "😊",
+     "t": "Always say 'please' and 'thank you.' It is polite. Be safe, plan your trip well, and enjoy your adventure!"
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What can help you find places when you travel?",
+     "o": [
+      "A map",
+      "A toy",
+      "A kite"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What should you do with your camera before traveling?",
+     "o": [
+      "Charge it",
+      "Wash it",
+      "Drop it"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Why should you eat where the locals eat?",
+     "o": [
+      "It's cheaper and better",
+      "It's expensive",
+      "It's far"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What types of food might you try when traveling?",
+     "o": [
+      "Spicy, sweet or sour",
+      "Only sweet",
+      "Only salty"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What is one thing you should always do to be polite?",
+     "o": [
+      "Say 'please' and 'thank you'",
+      "Shout loudly",
+      "Run fast"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l13",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/ed43953bbc8.mp3",
+  "s1": "audio/en/e31517344d6.mp3",
+  "s2": "audio/en/e0d5cc3c3b9.mp3",
+  "s3": "audio/en/e73743d901c.mp3",
+  "s4": "audio/en/e0087c25f4b.mp3",
+  "s5": "audio/en/e44c54987bd.mp3",
+  "s6": "audio/en/ec486a849d9.mp3"
+ }
+}

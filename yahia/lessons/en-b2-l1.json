@@ -1,0 +1,269 @@
+{
+ "title": "My Family & My Body",
+ "source": "NIES Grade 3 Block 2 revision booklet: family members & body parts word banks",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia's Big Family",
+   "ico": "📖",
+   "keys": [
+    "family",
+    "grandfather",
+    "grandmother",
+    "uncle",
+    "aunt",
+    "cousin",
+    "body"
+   ],
+   "scenes": [
+    {
+     "e": "👨‍👩‍👧",
+     "t": "Yahia has a big, happy family. His grandfather and grandmother live in Zagazig."
+    },
+    {
+     "e": "🏠",
+     "t": "On Fridays, the whole family meets. Uncle Samy and Aunt Mona come with their children."
+    },
+    {
+     "e": "🧒",
+     "t": "Yahia plays with his cousins. A cousin is the child of your uncle or aunt."
+    },
+    {
+     "e": "🪞",
+     "t": "Look at your body in the mirror! You have a head, hair, two eyes, two ears, a nose, and a mouth."
+    },
+    {
+     "e": "🦷",
+     "t": "Brush your teeth every morning and night to keep them white and strong."
+    },
+    {
+     "e": "🖐️",
+     "t": "We clap with our hands and fingers. We walk and run with our legs and feet."
+    },
+    {
+     "e": "💪",
+     "t": "Our shoulders, knees, elbows, and toes help us move and play every day."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "uncle",
+     "e": "👨",
+     "k": "mean",
+     "a": "The brother of your father or mother."
+    },
+    {
+     "w": "aunt",
+     "e": "👩",
+     "k": "mean",
+     "a": "The sister of your father or mother."
+    },
+    {
+     "w": "cousin",
+     "e": "🧒",
+     "k": "mean",
+     "a": "The child of your uncle or aunt."
+    },
+    {
+     "w": "grandfather",
+     "e": "👴",
+     "k": "mean",
+     "a": "The father of your father or mother."
+    },
+    {
+     "w": "grandmother",
+     "e": "👵",
+     "k": "mean",
+     "a": "The mother of your father or mother."
+    },
+    {
+     "w": "elbow",
+     "e": "💪",
+     "k": "mean",
+     "a": "The part in the middle of your arm that bends."
+    },
+    {
+     "w": "knee",
+     "e": "🦵",
+     "k": "mean",
+     "a": "The part in the middle of your leg that bends."
+    },
+    {
+     "w": "wrist",
+     "e": "⌚",
+     "k": "mean",
+     "a": "The part that joins your hand to your arm."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Match It",
+   "ico": "🧠",
+   "prompt": "Match each word with its meaning.",
+   "pairs": [
+    [
+     "grandfather",
+     "The father of your father"
+    ],
+    [
+     "cousin",
+     "The child of your uncle or aunt"
+    ],
+    [
+     "teeth",
+     "You brush them every day"
+    ],
+    [
+     "toes",
+     "They are at the end of your feet"
+    ],
+    [
+     "hair",
+     "It grows on your head"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Family or Body?",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it to its family!",
+   "bins": [
+    {
+     "id": "f",
+     "label": "Family",
+     "ico": "👪",
+     "cls": "noun"
+    },
+    {
+     "id": "b",
+     "label": "Body",
+     "ico": "🖐️",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "uncle",
+     "f"
+    ],
+    [
+     "nose",
+     "b"
+    ],
+    [
+     "cousin",
+     "f"
+    ],
+    [
+     "knee",
+     "b"
+    ],
+    [
+     "aunt",
+     "f"
+    ],
+    [
+     "mouth",
+     "b"
+    ],
+    [
+     "grandmother",
+     "f"
+    ],
+    [
+     "elbow",
+     "b"
+    ],
+    [
+     "sister",
+     "f"
+    ],
+    [
+     "foot",
+     "b"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Who is your mother's brother?",
+     "o": [
+      "My uncle",
+      "My cousin",
+      "My grandfather"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What do we brush every morning?",
+     "o": [
+      "Our teeth",
+      "Our toes",
+      "Our ears"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How many fingers do you have on two hands?",
+     "o": [
+      "Five",
+      "Ten",
+      "Twenty"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Your aunt's daughter is your...",
+     "o": [
+      "cousin",
+      "sister",
+      "grandmother"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which part joins your hand to your arm?",
+     "o": [
+      "The knee",
+      "The wrist",
+      "The elbow"
+     ],
+     "a": 1
+    },
+    {
+     "q": "We kick a ball with our...",
+     "o": [
+      "hands",
+      "feet",
+      "ears"
+     ],
+     "a": 1
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l1",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e037337a970.mp3",
+  "s1": "audio/en/ee9699290dc.mp3",
+  "s2": "audio/en/e81b03aa0d8.mp3",
+  "s3": "audio/en/ed0acc8076e.mp3",
+  "s4": "audio/en/e47d2a57722.mp3",
+  "s5": "audio/en/ef463b05563.mp3",
+  "s6": "audio/en/ee348eb4b12.mp3"
+ }
+}

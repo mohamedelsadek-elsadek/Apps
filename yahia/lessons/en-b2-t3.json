@@ -1,0 +1,311 @@
+{
+ "title": "🏆 Test Practice 3",
+ "source": "NIES Grade 3 Block 2 TEST-1 paper (Sound & Light)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Classify the Words",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it to its family!",
+   "bins": [
+    {
+     "id": "m",
+     "label": "Months",
+     "ico": "🗓️",
+     "cls": "noun"
+    },
+    {
+     "id": "s",
+     "label": "Seasons",
+     "ico": "🌷",
+     "cls": "noun"
+    },
+    {
+     "id": "t",
+     "label": "Tools",
+     "ico": "✏️",
+     "cls": "noun"
+    },
+    {
+     "id": "f",
+     "label": "Family",
+     "ico": "👪",
+     "cls": "noun"
+    },
+    {
+     "id": "a",
+     "label": "Adjectives",
+     "ico": "🎨",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "January",
+     "m"
+    ],
+    [
+     "summer",
+     "s"
+    ],
+    [
+     "backpack",
+     "t"
+    ],
+    [
+     "cousin",
+     "f"
+    ],
+    [
+     "March",
+     "m"
+    ],
+    [
+     "interesting",
+     "a"
+    ],
+    [
+     "ruler",
+     "t"
+    ],
+    [
+     "December",
+     "m"
+    ],
+    [
+     "aunt",
+     "f"
+    ],
+    [
+     "spring",
+     "s"
+    ],
+    [
+     "clever",
+     "a"
+    ],
+    [
+     "autumn",
+     "s"
+    ],
+    [
+     "pencil",
+     "t"
+    ],
+    [
+     "boring",
+     "a"
+    ],
+    [
+     "mother",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "story",
+   "title": "Sound & Light",
+   "ico": "📖",
+   "keys": [
+    "sound",
+    "light",
+    "waves",
+    "sun"
+   ],
+   "scenes": [
+    {
+     "e": "🔊",
+     "t": "Sound and light are important in our daily lives."
+    },
+    {
+     "e": "〰️",
+     "t": "Sound happens when something moves back and forth. This movement makes waves that travel through the air to our ears."
+    },
+    {
+     "e": "🎵",
+     "t": "Some sounds are loud, like music at a party, and some are quiet, like a soft knock on the door."
+    },
+    {
+     "e": "💡",
+     "t": "Light helps us see everything around us. The sun gives us natural light during the day."
+    },
+    {
+     "e": "🔦",
+     "t": "At night, we use lamps and phones to give us light. Light can be strong or weak."
+    },
+    {
+     "e": "👀",
+     "t": "When light shines on an object, we can see its shape and color. Without sound and light, it would be hard to see clearly or move safely."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "How does sound happen?",
+     "o": [
+      "When something moves back and forth",
+      "When the sun shines",
+      "When we open our eyes"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which is a loud sound from the text?",
+     "o": [
+      "Music at a party",
+      "A soft knock",
+      "A whisper"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does light help us do?",
+     "o": [
+      "See everything around us",
+      "Hear better",
+      "Run faster"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What are the two sources of light in the text?",
+     "o": [
+      "The sun and lamps",
+      "The moon and stars",
+      "Fire and candles"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What would be difficult without sound and light?",
+     "o": [
+      "To see clearly and move safely",
+      "To eat and drink",
+      "To read books"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Word Completion",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "This is a language you learn at school. People in England speak it. (E _ _ _ _ _ _ _)",
+     "o": [
+      "English",
+      "French",
+      "Arabic"
+     ],
+     "a": 0
+    },
+    {
+     "q": "In this subject you learn about animals, plants and nature. (S _ _ _ _ _ _ _)",
+     "o": [
+      "Science",
+      "Math",
+      "History"
+     ],
+     "a": 0
+    },
+    {
+     "q": "When you like something very much, you think it is... (E _ _ _ _ _ _ _ _)",
+     "o": [
+      "exciting",
+      "boring",
+      "easy"
+     ],
+     "a": 0
+    },
+    {
+     "q": "When you have a lot to do, you are... (B _ _ _)",
+     "o": [
+      "busy",
+      "lazy",
+      "free"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A person who helps the police to catch thieves. (D _ _ _ _ _ _ _ _)",
+     "o": [
+      "detective",
+      "dentist",
+      "doctor"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Jumbled Sentences",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Put in order: perfectly - do - I - homework - my - always",
+     "o": [
+      "I always do my homework perfectly.",
+      "I do always my homework perfectly.",
+      "Always I my homework do perfectly."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: visits - grandparents - his - usually - on - Mondays - he",
+     "o": [
+      "He usually visits his grandparents on Mondays.",
+      "He visits usually his grandparents on Mondays.",
+      "Usually he on Mondays visits his grandparents."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: cake - baking - delicious - sister - a - my - is",
+     "o": [
+      "My sister is baking a delicious cake.",
+      "My sister baking is a delicious cake.",
+      "A delicious cake my sister is baking is."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: movies - action - the - we - enjoy - on - TV - watching",
+     "o": [
+      "We enjoy watching action movies on TV.",
+      "We enjoy to watch action movies on TV.",
+      "Watching action movies we enjoy on TV is."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: is - girl - the - who's - purple - a - skirt - Helen - wearing",
+     "o": [
+      "Helen is the girl who's wearing a purple skirt.",
+      "Helen is the girl who's a purple skirt wearing.",
+      "The girl who's wearing a purple skirt Helen."
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-t3",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e4b47779bda.mp3",
+  "s1": "audio/en/ef3f1bc6749.mp3",
+  "s2": "audio/en/e51f634c585.mp3",
+  "s3": "audio/en/e333dbfbf13.mp3",
+  "s4": "audio/en/e166c85138f.mp3",
+  "s5": "audio/en/e7b4789f34b.mp3"
+ }
+}

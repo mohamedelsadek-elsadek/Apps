@@ -1,0 +1,343 @@
+{
+ "title": "🏆 Test Practice 1",
+ "source": "NIES Grade 3 Block 2 English Test (scanned test A: Basketball)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Classify the Words",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it to its family!",
+   "bins": [
+    {
+     "id": "f",
+     "label": "Food",
+     "ico": "🍔",
+     "cls": "noun"
+    },
+    {
+     "id": "c",
+     "label": "Clothes",
+     "ico": "👕",
+     "cls": "noun"
+    },
+    {
+     "id": "d",
+     "label": "Drinks",
+     "ico": "🧃",
+     "cls": "noun"
+    },
+    {
+     "id": "s",
+     "label": "Seasons",
+     "ico": "🌦️",
+     "cls": "noun"
+    },
+    {
+     "id": "y",
+     "label": "Days",
+     "ico": "📅",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "chips",
+     "f"
+    ],
+    [
+     "trousers",
+     "c"
+    ],
+    [
+     "milk",
+     "d"
+    ],
+    [
+     "winter",
+     "s"
+    ],
+    [
+     "Thursday",
+     "y"
+    ],
+    [
+     "tomato",
+     "f"
+    ],
+    [
+     "Friday",
+     "y"
+    ],
+    [
+     "summer",
+     "s"
+    ],
+    [
+     "tea",
+     "d"
+    ],
+    [
+     "jacket",
+     "c"
+    ],
+    [
+     "rice",
+     "f"
+    ],
+    [
+     "Monday",
+     "y"
+    ],
+    [
+     "spring",
+     "s"
+    ],
+    [
+     "coffee",
+     "d"
+    ],
+    [
+     "shirt",
+     "c"
+    ]
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Read and Match",
+   "ico": "🧠",
+   "prompt": "Match each description with its picture idea.",
+   "pairs": [
+    [
+     "Playing football at the club",
+     "Yesterday, I went with my brother to the club. We played football with our friends and had so much fun."
+    ],
+    [
+     "A secret singing talent",
+     "Singing is my secret talent. I have been practicing singing for 5 years, and my friends don't know anything about it."
+    ],
+    [
+     "Two friends forgive each other",
+     "Samy and John had a bad fight last Saturday. Luckily, they forgave each other today, which makes me really happy."
+    ],
+    [
+     "Tasty chicken fillet",
+     "Salma's favourite food is chicken fillet. One day, she invited me over and made it for me. It was tasty."
+    ],
+    [
+     "Calling friends after homework",
+     "Everyday, my sister calls her friends for a long time, but she makes sure to finish her homework before she calls them."
+    ]
+   ]
+  },
+  {
+   "type": "story",
+   "title": "Basketball",
+   "ico": "📖",
+   "keys": [
+    "basketball",
+    "ball",
+    "team",
+    "points"
+   ],
+   "scenes": [
+    {
+     "e": "🏀",
+     "t": "You play basketball with a big orange ball."
+    },
+    {
+     "e": "👥",
+     "t": "There are two teams with 5 players."
+    },
+    {
+     "e": "🎯",
+     "t": "Both teams try to get points by throwing the ball into a basket, which is three meters above the floor."
+    },
+    {
+     "e": "🏃",
+     "t": "You can throw, run and bounce the ball, but you can't run and carry the ball at the same time."
+    },
+    {
+     "e": "🏆",
+     "t": "The winning team is the team with more points after 40 minutes."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "How many players are there in a basketball team?",
+     "o": [
+      "Five",
+      "Seven",
+      "Eleven"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Can you run and carry the ball at the same time?",
+     "o": [
+      "No, you can't",
+      "Yes, you can",
+      "Only in the last minute"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How do you get points in basketball?",
+     "o": [
+      "By throwing the ball into a basket",
+      "By kicking the ball",
+      "By running fast"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does the ball look like?",
+     "o": [
+      "It is big and orange",
+      "It is small and white",
+      "It is green and round"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How many minutes do you play?",
+     "o": [
+      "40 minutes",
+      "20 minutes",
+      "90 minutes"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How do we know the winner?",
+     "o": [
+      "The team with more points",
+      "The tallest team",
+      "The fastest team"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Word Completion",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "A team sport with a basket and a hoop. (B _ _ _ _ _ _ _ _ _)",
+     "o": [
+      "basketball",
+      "baseball",
+      "badminton"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A winter sport on snow. (S _ _ _ _ _)",
+     "o": [
+      "skiing",
+      "skating",
+      "surfing"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Moving through water. (S _ _ _ _ _ _ _)",
+     "o": [
+      "swimming",
+      "sailing",
+      "skating"
+     ],
+     "a": 0
+    },
+    {
+     "q": "You kick the ball and score goals. (F _ _ _ _ _ _ _)",
+     "o": [
+      "football",
+      "fishing",
+      "running"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Moving fast on your feet. (R _ _ _ _ _ _)",
+     "o": [
+      "running",
+      "riding",
+      "rowing"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Jumbled Sentences",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Put in order: old - man - is - walking - slowly - the",
+     "o": [
+      "The old man is walking slowly.",
+      "The old man walking is slowly.",
+      "Slowly the old man is walking."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: where - does - Anna - homework - do - her",
+     "o": [
+      "Where does Anna do her homework?",
+      "Where Anna does do her homework?",
+      "Where does homework Anna do her?"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: cousins - who - play - have - tennis - I",
+     "o": [
+      "I have cousins who play tennis.",
+      "I have who cousins play tennis.",
+      "Cousins I have who play tennis."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: is - the - where - place - we - sail - where",
+     "o": [
+      "Where is the place where we sail?",
+      "Where the place is where we sail?",
+      "Where is we sail the place where?"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: plays - tennis - in - activity - she - the - centre",
+     "o": [
+      "She plays tennis in the activity centre.",
+      "She plays in the activity centre tennis.",
+      "Tennis she plays in the activity centre."
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-t1",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e746ca5732c.mp3",
+  "s1": "audio/en/e1dcf6a1d25.mp3",
+  "s2": "audio/en/e8fef656137.mp3",
+  "s3": "audio/en/ebc669039b8.mp3",
+  "s4": "audio/en/e2ad44c8eb2.mp3"
+ }
+}

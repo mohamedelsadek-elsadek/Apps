@@ -1,0 +1,315 @@
+{
+ "title": "🏆 Test Practice 2",
+ "source": "NIES Grade 3 Block 2 English Test (scanned test B: Nader)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Classify the Words",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it to its family!",
+   "bins": [
+    {
+     "id": "a",
+     "label": "Adjectives",
+     "ico": "🎨",
+     "cls": "noun"
+    },
+    {
+     "id": "v",
+     "label": "Adverbs",
+     "ico": "🏃",
+     "cls": "noun"
+    },
+    {
+     "id": "o",
+     "label": "Outside",
+     "ico": "🌳",
+     "cls": "noun"
+    },
+    {
+     "id": "i",
+     "label": "Inside",
+     "ico": "🏠",
+     "cls": "noun"
+    },
+    {
+     "id": "f",
+     "label": "Family",
+     "ico": "👪",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "carefully",
+     "v"
+    ],
+    [
+     "happy",
+     "a"
+    ],
+    [
+     "sailing",
+     "o"
+    ],
+    [
+     "dancing",
+     "i"
+    ],
+    [
+     "Suzi",
+     "f"
+    ],
+    [
+     "sad",
+     "a"
+    ],
+    [
+     "badly",
+     "v"
+    ],
+    [
+     "skating",
+     "o"
+    ],
+    [
+     "climb a wall",
+     "o"
+    ],
+    [
+     "Simon",
+     "f"
+    ],
+    [
+     "quickly",
+     "v"
+    ],
+    [
+     "good",
+     "a"
+    ],
+    [
+     "fishing",
+     "o"
+    ],
+    [
+     "watching TV",
+     "i"
+    ],
+    [
+     "Stella",
+     "f"
+    ]
+   ]
+  },
+  {
+   "type": "story",
+   "title": "Nader Likes Sports",
+   "ico": "📖",
+   "keys": [
+    "Nader",
+    "football",
+    "Hesham",
+    "cycling"
+   ],
+   "scenes": [
+    {
+     "e": "⚽",
+     "t": "My name is Nader. I like sports. I like football and basketball. I often play football after school."
+    },
+    {
+     "e": "🎾",
+     "t": "My brother Hesham likes tennis and swimming. He never plays football. He doesn't like it."
+    },
+    {
+     "e": "🏟️",
+     "t": "During the weekend, we both go to the club to practice our favorite sports."
+    },
+    {
+     "e": "🚲",
+     "t": "We usually ride our bikes because we feel happy when we go cycling."
+    },
+    {
+     "e": "🌟",
+     "t": "I hope to be a famous football player such as Abu-Treika."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What does Hesham like?",
+     "o": [
+      "Tennis and swimming",
+      "Football",
+      "Basketball"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Where do the two brothers go during the weekend?",
+     "o": [
+      "To the club",
+      "To school",
+      "To the beach"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What do they feel when they ride their bikes?",
+     "o": [
+      "Happy",
+      "Tired",
+      "Sad"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does Nader hope to be in the future?",
+     "o": [
+      "A famous football player",
+      "A doctor",
+      "A swimmer"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Nader likes ___.",
+     "o": [
+      "football",
+      "tennis",
+      "swimming"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Hesham ___ plays football.",
+     "o": [
+      "never",
+      "always",
+      "sometimes"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Word Completion",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Doing something with attention. (C _ _ _ _ _ _)",
+     "o": [
+      "careful",
+      "careless",
+      "clever"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Very, very bad. (T _ _ _ _ _ _ _)",
+     "o": [
+      "terrible",
+      "terrific",
+      "tired"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The opposite of slow. (Q _ _ _ _)",
+     "o": [
+      "quick",
+      "quiet",
+      "queen"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A doctor for your teeth. (D _ _ _ _ _ _)",
+     "o": [
+      "dentist",
+      "detective",
+      "doctor"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A team sport with a hoop. (B _ _ _ _ _ _ _ _ _)",
+     "o": [
+      "basketball",
+      "baseball",
+      "badminton"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Jumbled Sentences",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Put in order: runs - in - park - he - the - morning - every",
+     "o": [
+      "He runs in the park every morning.",
+      "He runs every morning in park the.",
+      "In the park he runs morning every."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: speaks - English - fluently - she",
+     "o": [
+      "She speaks English fluently.",
+      "She fluently speaks English is.",
+      "English she speaks fluently is."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: always - do - homework - my - time - on - I",
+     "o": [
+      "I always do my homework on time.",
+      "I do always my homework on time.",
+      "Always on time I my homework do."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: often - go - visit - we - to - grandparents - my",
+     "o": [
+      "We often go to visit my grandparents.",
+      "We go often to visit my grandparents.",
+      "Often we to visit my grandparents go."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: learning - different - subjects - school - are - at - we",
+     "o": [
+      "We are learning different subjects at school.",
+      "We learning are different subjects at school.",
+      "Different subjects we are learning at school is."
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-t2",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e6296d6fd81.mp3",
+  "s1": "audio/en/eae270127c2.mp3",
+  "s2": "audio/en/e55a573de2b.mp3",
+  "s3": "audio/en/e1bd2a48895.mp3",
+  "s4": "audio/en/e7646d027d5.mp3"
+ }
+}

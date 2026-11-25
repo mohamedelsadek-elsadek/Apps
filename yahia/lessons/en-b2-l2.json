@@ -1,0 +1,269 @@
+{
+ "title": "Jobs & Places in Town",
+ "source": "NIES Grade 3 Block 2 revision booklet: jobs & places word banks; Exam Practice 5 reading text",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Jobs That Help Us",
+   "ico": "📖",
+   "keys": [
+    "doctor",
+    "teacher",
+    "police",
+    "firefighter",
+    "mechanic",
+    "cleaner",
+    "job"
+   ],
+   "scenes": [
+    {
+     "e": "🌟",
+     "t": "Many people work in jobs that help us every day. They make our lives easier and safer."
+    },
+    {
+     "e": "🩺",
+     "t": "Doctors and nurses look after us when we are sick. They work at the hospital."
+    },
+    {
+     "e": "👩‍🏫",
+     "t": "Teachers help us learn new things at school. They teach us to read, write, and count."
+    },
+    {
+     "e": "👮",
+     "t": "Police officers keep us safe. They work day and night and catch people who break the law."
+    },
+    {
+     "e": "🚒",
+     "t": "Firefighters are brave. They put out fires and save people in danger."
+    },
+    {
+     "e": "🔧",
+     "t": "Mechanics fix our cars when they break down, and cleaners keep our schools and streets clean."
+    },
+    {
+     "e": "🙏",
+     "t": "All these jobs are very helpful. We thank these people for their hard work!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Jobs Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "nurse",
+     "e": "🏥",
+     "k": "mean",
+     "a": "She helps sick people and gives them medicine."
+    },
+    {
+     "w": "pilot",
+     "e": "✈️",
+     "k": "mean",
+     "a": "He flies planes and takes people to different places."
+    },
+    {
+     "w": "chef",
+     "e": "👨‍🍳",
+     "k": "mean",
+     "a": "He cooks delicious food in a restaurant."
+    },
+    {
+     "w": "firefighter",
+     "e": "🚒",
+     "k": "mean",
+     "a": "He puts out fires and helps people in danger."
+    },
+    {
+     "w": "dentist",
+     "e": "🦷",
+     "k": "mean",
+     "a": "He looks after our teeth."
+    },
+    {
+     "w": "vet",
+     "e": "🐕",
+     "k": "mean",
+     "a": "A doctor for animals."
+    },
+    {
+     "w": "librarian",
+     "e": "📚",
+     "k": "mean",
+     "a": "She works in the library and helps us find books."
+    },
+    {
+     "w": "builder",
+     "e": "🧱",
+     "k": "mean",
+     "a": "He builds houses and schools."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Who Does What?",
+   "ico": "🧠",
+   "prompt": "Match each job with what the person does.",
+   "pairs": [
+    [
+     "A pilot",
+     "He flies planes and takes people to different places."
+    ],
+    [
+     "A teacher",
+     "She teaches children at school."
+    ],
+    [
+     "A firefighter",
+     "He puts out fires and helps people in danger."
+    ],
+    [
+     "A doctor",
+     "She helps sick people and gives them medicine."
+    ],
+    [
+     "A baker",
+     "He bakes bread and cakes."
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Job or Place?",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it home!",
+   "bins": [
+    {
+     "id": "j",
+     "label": "Jobs",
+     "ico": "👷",
+     "cls": "noun"
+    },
+    {
+     "id": "p",
+     "label": "Places",
+     "ico": "🏙️",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "nurse",
+     "j"
+    ],
+    [
+     "hospital",
+     "p"
+    ],
+    [
+     "teacher",
+     "j"
+    ],
+    [
+     "library",
+     "p"
+    ],
+    [
+     "pilot",
+     "j"
+    ],
+    [
+     "airport",
+     "p"
+    ],
+    [
+     "chef",
+     "j"
+    ],
+    [
+     "restaurant",
+     "p"
+    ],
+    [
+     "vet",
+     "j"
+    ],
+    [
+     "school",
+     "p"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "This is a place where you can borrow books. (L _ _ _ _ _ _)",
+     "o": [
+      "library",
+      "hotel",
+      "garage"
+     ],
+     "a": 0
+    },
+    {
+     "q": "This is a building where people keep their cars. (G _ _ _ _ _)",
+     "o": [
+      "garden",
+      "garage",
+      "gym"
+     ],
+     "a": 1
+    },
+    {
+     "q": "People go there when they feel sick. (H _ _ _ _ _ _ _)",
+     "o": [
+      "hospital",
+      "hotel",
+      "house"
+     ],
+     "a": 0
+    },
+    {
+     "q": "This is a place where planes come and go. (A _ _ _ _ _ _)",
+     "o": [
+      "airport",
+      "station",
+      "farm"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A person who helps the police catch thieves. (D _ _ _ _ _ _ _ _)",
+     "o": [
+      "dentist",
+      "detective",
+      "diver"
+     ],
+     "a": 1
+    },
+    {
+     "q": "A person who takes photos is a...",
+     "o": [
+      "photographer",
+      "scientist",
+      "singer"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l2",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e50d98d8052.mp3",
+  "s1": "audio/en/e0ef1d9af6a.mp3",
+  "s2": "audio/en/e1df5132fb5.mp3",
+  "s3": "audio/en/ec5de7fae18.mp3",
+  "s4": "audio/en/e333994ccb8.mp3",
+  "s5": "audio/en/ee9723e9e57.mp3",
+  "s6": "audio/en/e5469460a22.mp3"
+ }
+}

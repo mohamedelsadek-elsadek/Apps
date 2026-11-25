@@ -1,0 +1,106 @@
+{
+ "title": "Reading: Father's Day",
+ "source": "NIES Grade 3 Block 2 Exam Practice 3 (Ms. Clara), Reading Part 3 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Father's Day",
+   "ico": "📖",
+   "keys": [
+    "Father",
+    "Day",
+    "gifts",
+    "love"
+   ],
+   "scenes": [
+    {
+     "e": "💙",
+     "t": "Father's Day is a special day to celebrate dads. On this day, we show love and care for our fathers."
+    },
+    {
+     "e": "🎁",
+     "t": "Many people give gifts or presents to their dads. A hug and a smile can make fathers very happy."
+    },
+    {
+     "e": "🍽️",
+     "t": "Some families prepare a special meal for their father. Others spend the whole day together doing fun activities."
+    },
+    {
+     "e": "💪",
+     "t": "My dad always supports me in everything I do. He has given me great advice throughout my life."
+    },
+    {
+     "e": "📚",
+     "t": "I remember many times when he helped me with my homework. His support makes me feel confident and strong."
+    },
+    {
+     "e": "💌",
+     "t": "You can write a card or give a simple gift. The most important thing is to show your love."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What can make fathers very happy on Father's Day?",
+     "o": [
+      "A hug and a smile",
+      "A big car",
+      "A new phone"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How does the author feel when supported by their dad?",
+     "o": [
+      "Confident and strong",
+      "Sad and tired",
+      "Angry"
+     ],
+     "a": 0
+    },
+    {
+     "q": "How can you celebrate Father's Day if you do not have much time?",
+     "o": [
+      "Write a card or give a simple gift",
+      "Buy a house",
+      "Travel abroad"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What is the main purpose of celebrating Father's Day?",
+     "o": [
+      "To show your love",
+      "To get gifts",
+      "To eat cake"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does sharing fun moments create?",
+     "o": [
+      "Lasting memories",
+      "Noise",
+      "A mess"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l15",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/ee7a0b83392.mp3",
+  "s1": "audio/en/e7651c547a6.mp3",
+  "s2": "audio/en/e7ddc50f41a.mp3",
+  "s3": "audio/en/e3b8f788608.mp3",
+  "s4": "audio/en/ecbf37efd4d.mp3",
+  "s5": "audio/en/ea574187d59.mp3"
+ }
+}

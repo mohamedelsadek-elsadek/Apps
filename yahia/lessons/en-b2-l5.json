@@ -1,0 +1,273 @@
+{
+ "title": "Days, Months & Weather",
+ "source": "NIES Grade 3 Block 2 revision booklet: days, months, seasons & weather word banks",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Yahia's Week",
+   "ico": "📖",
+   "keys": [
+    "week",
+    "days",
+    "months",
+    "seasons",
+    "weather"
+   ],
+   "scenes": [
+    {
+     "e": "📅",
+     "t": "There are seven days in a week. Yahia goes to school from Sunday to Thursday."
+    },
+    {
+     "e": "🎉",
+     "t": "Friday and Saturday are the weekend in Egypt. Yahia visits his grandparents on Friday."
+    },
+    {
+     "e": "🗓️",
+     "t": "There are twelve months in a year. Yahia's birthday is in March."
+    },
+    {
+     "e": "🌷",
+     "t": "There are four seasons: spring, summer, autumn, and winter."
+    },
+    {
+     "e": "☀️",
+     "t": "In summer, the weather is hot and sunny. We go to the beach!"
+    },
+    {
+     "e": "❄️",
+     "t": "In winter, it is cold and rainy. We wear warm jackets."
+    },
+    {
+     "e": "🌈",
+     "t": "In spring, flowers bloom and butterflies fly. In autumn, the leaves fall from the trees."
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "New Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "week",
+     "e": "📅",
+     "k": "mean",
+     "a": "Seven days."
+    },
+    {
+     "w": "month",
+     "e": "🗓️",
+     "k": "mean",
+     "a": "About four weeks. There are twelve in a year."
+    },
+    {
+     "w": "season",
+     "e": "🌦️",
+     "k": "mean",
+     "a": "A time of year: spring, summer, autumn, or winter."
+    },
+    {
+     "w": "sunny",
+     "e": "☀️",
+     "k": "mean",
+     "a": "The sun is shining."
+    },
+    {
+     "w": "rainy",
+     "e": "🌧️",
+     "k": "mean",
+     "a": "Water falls from the clouds."
+    },
+    {
+     "w": "windy",
+     "e": "🌬️",
+     "k": "mean",
+     "a": "The air moves fast and blows things."
+    },
+    {
+     "w": "snowy",
+     "e": "❄️",
+     "k": "mean",
+     "a": "White ice falls from the sky."
+    },
+    {
+     "w": "cloudy",
+     "e": "☁️",
+     "k": "mean",
+     "a": "The sky is full of clouds."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Seasons & Weather",
+   "ico": "🧠",
+   "prompt": "Match each word with its clue.",
+   "pairs": [
+    [
+     "spring",
+     "Flowers bloom"
+    ],
+    [
+     "summer",
+     "Hot and sunny"
+    ],
+    [
+     "autumn",
+     "Leaves fall from the trees"
+    ],
+    [
+     "winter",
+     "Cold and rainy"
+    ],
+    [
+     "Friday",
+     "The weekend in Egypt"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Day, Month or Season?",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it home!",
+   "bins": [
+    {
+     "id": "d",
+     "label": "Days",
+     "ico": "📅",
+     "cls": "noun"
+    },
+    {
+     "id": "m",
+     "label": "Months",
+     "ico": "🗓️",
+     "cls": "noun"
+    },
+    {
+     "id": "s",
+     "label": "Seasons",
+     "ico": "🌷",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "Monday",
+     "d"
+    ],
+    [
+     "January",
+     "m"
+    ],
+    [
+     "summer",
+     "s"
+    ],
+    [
+     "Thursday",
+     "d"
+    ],
+    [
+     "March",
+     "m"
+    ],
+    [
+     "winter",
+     "s"
+    ],
+    [
+     "Friday",
+     "d"
+    ],
+    [
+     "December",
+     "m"
+    ],
+    [
+     "spring",
+     "s"
+    ],
+    [
+     "Sunday",
+     "d"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "How many days are in a week?",
+     "o": [
+      "Five",
+      "Seven",
+      "Ten"
+     ],
+     "a": 1
+    },
+    {
+     "q": "What day comes after Thursday?",
+     "o": [
+      "Friday",
+      "Tuesday",
+      "Sunday"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Which of these is a season?",
+     "o": [
+      "summer",
+      "January",
+      "Friday"
+     ],
+     "a": 0
+    },
+    {
+     "q": "The weather is hot and sunny in...",
+     "o": [
+      "summer",
+      "winter",
+      "autumn"
+     ],
+     "a": 0
+    },
+    {
+     "q": "In Egypt, we go to school from ___ to Thursday.",
+     "o": [
+      "Sunday",
+      "Friday",
+      "Saturday"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Leaves fall from the trees in...",
+     "o": [
+      "autumn",
+      "spring",
+      "summer"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l5",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e30ac232949.mp3",
+  "s1": "audio/en/e051ee79b77.mp3",
+  "s2": "audio/en/e8ad6990c3c.mp3",
+  "s3": "audio/en/e5938f55850.mp3",
+  "s4": "audio/en/efdc6f92453.mp3",
+  "s5": "audio/en/eaeb1a7d4f4.mp3",
+  "s6": "audio/en/e1283186260.mp3"
+ }
+}

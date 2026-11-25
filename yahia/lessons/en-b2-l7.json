@@ -1,0 +1,262 @@
+{
+ "title": "Adjectives & Adverbs",
+ "source": "NIES Grade 3 Block 2 revision booklet: adjective vs adverb dictionary pages",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Careful or Carefully?",
+   "ico": "📖",
+   "keys": [
+    "adjective",
+    "adverb",
+    "carefully",
+    "quickly",
+    "slowly"
+   ],
+   "scenes": [
+    {
+     "e": "🎨",
+     "t": "An adjective describes a person, animal, or thing. The boy is careful. The car is fast."
+    },
+    {
+     "e": "🏃",
+     "t": "An adverb describes a verb: how someone does something. The boy walks carefully. The car goes fast."
+    },
+    {
+     "e": "✏️",
+     "t": "Look: quick becomes quickly, slow becomes slowly, happy becomes happily, and sad becomes sadly."
+    },
+    {
+     "e": "🌙",
+     "t": "Loud becomes loudly, and quiet becomes quietly. Easy becomes easily, and angry becomes angrily."
+    },
+    {
+     "e": "⭐",
+     "t": "Some words stay the same: fast is fast, hard is hard, and early is early."
+    },
+    {
+     "e": "🏆",
+     "t": "And one word is special: good becomes well. Yahia plays football well!"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Word Pairs",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "careful → carefully",
+     "e": "🐢",
+     "k": "mean",
+     "a": "He is a careful boy. He crosses the road carefully."
+    },
+    {
+     "w": "quick → quickly",
+     "e": "👟",
+     "k": "mean",
+     "a": "She is quick. She runs quickly in the race."
+    },
+    {
+     "w": "happy → happily",
+     "e": "😊",
+     "k": "mean",
+     "a": "The happy girl jumps happily in the park."
+    },
+    {
+     "w": "loud → loudly",
+     "e": "📢",
+     "k": "mean",
+     "a": "The loud children play loudly."
+    },
+    {
+     "w": "brave → bravely",
+     "e": "🦸",
+     "k": "mean",
+     "a": "The brave firefighter works bravely."
+    },
+    {
+     "w": "good → well",
+     "e": "⭐",
+     "k": "mean",
+     "a": "He is a good swimmer. He swims well."
+    },
+    {
+     "w": "fast → fast",
+     "e": "🚗",
+     "k": "mean",
+     "a": "A fast car goes fast. This word does not change!"
+    },
+    {
+     "w": "gentle → gently",
+     "e": "🐱",
+     "k": "mean",
+     "a": "Be gentle with the cat. Touch it gently."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Make the Adverb",
+   "ico": "🧠",
+   "prompt": "Match each adjective with its adverb.",
+   "pairs": [
+    [
+     "quick",
+     "quickly"
+    ],
+    [
+     "happy",
+     "happily"
+    ],
+    [
+     "careful",
+     "carefully"
+    ],
+    [
+     "good",
+     "well"
+    ],
+    [
+     "slow",
+     "slowly"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Adjective or Adverb?",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it home!",
+   "bins": [
+    {
+     "id": "a",
+     "label": "Adjective",
+     "ico": "🎨",
+     "cls": "noun"
+    },
+    {
+     "id": "v",
+     "label": "Adverb",
+     "ico": "🏃",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "happy",
+     "a"
+    ],
+    [
+     "quickly",
+     "v"
+    ],
+    [
+     "sad",
+     "a"
+    ],
+    [
+     "carefully",
+     "v"
+    ],
+    [
+     "good",
+     "a"
+    ],
+    [
+     "slowly",
+     "v"
+    ],
+    [
+     "brave",
+     "a"
+    ],
+    [
+     "loudly",
+     "v"
+    ],
+    [
+     "beautiful",
+     "a"
+    ],
+    [
+     "badly",
+     "v"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "An adjective describes...",
+     "o": [
+      "a person, animal, or thing",
+      "how we do something",
+      "a time"
+     ],
+     "a": 0
+    },
+    {
+     "q": "She walks ___ to school.",
+     "o": [
+      "slow",
+      "slowly",
+      "slower"
+     ],
+     "a": 1
+    },
+    {
+     "q": "He does his homework ___.",
+     "o": [
+      "good",
+      "well",
+      "best"
+     ],
+     "a": 1
+    },
+    {
+     "q": "The children play ___ in the playground.",
+     "o": [
+      "loud",
+      "loudly",
+      "louder"
+     ],
+     "a": 1
+    },
+    {
+     "q": "He is a good swimmer. He swims ___.",
+     "o": [
+      "good",
+      "well",
+      "goodly"
+     ],
+     "a": 1
+    },
+    {
+     "q": "Which word stays the same as an adverb?",
+     "o": [
+      "fast",
+      "happy",
+      "slow"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l7",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e3f62e29430.mp3",
+  "s1": "audio/en/e267727c302.mp3",
+  "s2": "audio/en/e0c50abac3e.mp3",
+  "s3": "audio/en/ee1cc4b3e63.mp3",
+  "s4": "audio/en/ed768508954.mp3",
+  "s5": "audio/en/ea6d0cc29c0.mp3"
+ }
+}

@@ -1,0 +1,267 @@
+{
+ "title": "Sports & Free Time",
+ "source": "NIES Grade 3 Block 2 revision booklet: sports, sports equipment, play/do/go poster",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Play, Do, Go!",
+   "ico": "📖",
+   "keys": [
+    "play",
+    "do",
+    "go",
+    "sport"
+   ],
+   "scenes": [
+    {
+     "e": "⚽",
+     "t": "Yahia loves sports! Do you know when to say play, do, and go?"
+    },
+    {
+     "e": "🏀",
+     "t": "We say play with sports that have a ball or a game: play football, play basketball, play tennis."
+    },
+    {
+     "e": "🥋",
+     "t": "We say do with individual activities and martial arts: do karate, do judo, do yoga."
+    },
+    {
+     "e": "🏊",
+     "t": "We say go with activities that end in -ing: go swimming, go running, go cycling."
+    },
+    {
+     "e": "🏄",
+     "t": "At the weekend, Yahia goes swimming and plays football with his friends."
+    },
+    {
+     "e": "🏆",
+     "t": "Sport keeps us strong and happy. What is your favorite sport?"
+    }
+   ]
+  },
+  {
+   "type": "cards",
+   "title": "Sports Words",
+   "ico": "🃏",
+   "items": [
+    {
+     "w": "football",
+     "e": "⚽",
+     "k": "mean",
+     "a": "A team game. You kick the ball and score goals."
+    },
+    {
+     "w": "swimming",
+     "e": "🏊",
+     "k": "mean",
+     "a": "Moving through water."
+    },
+    {
+     "w": "tennis",
+     "e": "🎾",
+     "k": "mean",
+     "a": "You hit the ball over a net with a racket."
+    },
+    {
+     "w": "cycling",
+     "e": "🚴",
+     "k": "mean",
+     "a": "Riding a bike."
+    },
+    {
+     "w": "karate",
+     "e": "🥋",
+     "k": "mean",
+     "a": "A martial art from Japan."
+    },
+    {
+     "w": "fishing",
+     "e": "🎣",
+     "k": "mean",
+     "a": "Catching fish from water."
+    },
+    {
+     "w": "climbing",
+     "e": "🧗",
+     "k": "mean",
+     "a": "Moving up rocks or a wall."
+    },
+    {
+     "w": "skating",
+     "e": "⛸️",
+     "k": "mean",
+     "a": "Moving on ice or wheels."
+    }
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Sport & Equipment",
+   "ico": "🧠",
+   "prompt": "Match each sport with what you need for it.",
+   "pairs": [
+    [
+     "tennis",
+     "a racket"
+    ],
+    [
+     "football",
+     "a goal"
+    ],
+    [
+     "swimming",
+     "goggles"
+    ],
+    [
+     "fishing",
+     "a fishing rod"
+    ],
+    [
+     "cycling",
+     "a helmet"
+    ]
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Play, Do or Go?",
+   "ico": "🐦",
+   "prompt": "Catch each activity and send it home!",
+   "bins": [
+    {
+     "id": "p",
+     "label": "play",
+     "ico": "⚽",
+     "cls": "noun"
+    },
+    {
+     "id": "d",
+     "label": "do",
+     "ico": "🥋",
+     "cls": "noun"
+    },
+    {
+     "id": "g",
+     "label": "go",
+     "ico": "🏊",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "football",
+     "p"
+    ],
+    [
+     "karate",
+     "d"
+    ],
+    [
+     "swimming",
+     "g"
+    ],
+    [
+     "tennis",
+     "p"
+    ],
+    [
+     "judo",
+     "d"
+    ],
+    [
+     "running",
+     "g"
+    ],
+    [
+     "basketball",
+     "p"
+    ],
+    [
+     "yoga",
+     "d"
+    ],
+    [
+     "cycling",
+     "g"
+    ],
+    [
+     "volleyball",
+     "p"
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Egg Adventure Quiz",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "We ___ football.",
+     "o": [
+      "play",
+      "do",
+      "go"
+     ],
+     "a": 0
+    },
+    {
+     "q": "We ___ karate.",
+     "o": [
+      "play",
+      "do",
+      "go"
+     ],
+     "a": 1
+    },
+    {
+     "q": "We ___ swimming.",
+     "o": [
+      "play",
+      "do",
+      "go"
+     ],
+     "a": 2
+    },
+    {
+     "q": "Which sport uses a racket?",
+     "o": [
+      "Tennis",
+      "Swimming",
+      "Running"
+     ],
+     "a": 0
+    },
+    {
+     "q": "This sport is about people moving through water. (S _ _ _ _ _ _ _)",
+     "o": [
+      "Sailing",
+      "Swimming",
+      "Skating"
+     ],
+     "a": 1
+    },
+    {
+     "q": "This sport is where people climb natural rocks. (C _ _ _ _ _ _ _)",
+     "o": [
+      "Climbing",
+      "Cycling",
+      "Camping"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l3",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e0e7b2dc090.mp3",
+  "s1": "audio/en/eeee0a7616e.mp3",
+  "s2": "audio/en/ed568258223.mp3",
+  "s3": "audio/en/ea924b89b1a.mp3",
+  "s4": "audio/en/e0afcd99b58.mp3",
+  "s5": "audio/en/e7395f36142.mp3"
+ }
+}

@@ -1,0 +1,132 @@
+{
+ "title": "Reading: My Friend Elisabeth",
+ "source": "NIES Grade 3 Block 2 revision booklet, Reading Part 3 text 3 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "My Friend Elisabeth",
+   "ico": "📖",
+   "keys": [
+    "Elisabeth",
+    "friend",
+    "Scottish"
+   ],
+   "scenes": [
+    {
+     "e": "💃",
+     "t": "This is my best friend Elisabeth. She is ten years old."
+    },
+    {
+     "e": "🏴",
+     "t": "She is from Scotland. She is Scottish."
+    },
+    {
+     "e": "👧",
+     "t": "She is tall and thin. She has got long brown hair and big brown eyes."
+    },
+    {
+     "e": "🤸",
+     "t": "She can dance and swim, but she can't play tennis. She likes dancing very much!"
+    },
+    {
+     "e": "🇫🇷",
+     "t": "She studies French. Her favourite colour is pink. Her favourite food is pizza."
+    },
+    {
+     "e": "🐶",
+     "t": "She likes dogs. She has got a small puppy: Spike. She is friendly and nice. She is happy."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "How old is Elisabeth?",
+     "o": [
+      "Ten",
+      "Eight",
+      "Twelve"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Where is she from?",
+     "o": [
+      "Scotland",
+      "England",
+      "France"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Can she play tennis?",
+     "o": [
+      "No, she can't",
+      "Yes, she can",
+      "Yes, very well"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Has she got short hair?",
+     "o": [
+      "No, she has got long hair",
+      "Yes, she has",
+      "Yes, very short"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does she study?",
+     "o": [
+      "French",
+      "German",
+      "Spanish"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What is her favourite colour?",
+     "o": [
+      "Pink",
+      "Blue",
+      "Green"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What is her puppy's name?",
+     "o": [
+      "Spike",
+      "Spot",
+      "Max"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What does she look like?",
+     "o": [
+      "Tall and thin with long brown hair",
+      "Short with curly hair",
+      "Small with black hair"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l11",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/ed6ae831ed8.mp3",
+  "s1": "audio/en/e708b6e7675.mp3",
+  "s2": "audio/en/ea6df0af520.mp3",
+  "s3": "audio/en/eac2ba6a5b8.mp3",
+  "s4": "audio/en/eb976f8c017.mp3",
+  "s5": "audio/en/e04270dac0e.mp3"
+ }
+}

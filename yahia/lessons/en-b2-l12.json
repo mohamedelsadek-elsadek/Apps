@@ -1,0 +1,118 @@
+{
+ "title": "Reading: Sue's Birthday Party",
+ "source": "NIES Grade 3 Block 2 revision booklet, Reading Part 3 text 4 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Sue's Birthday Party",
+   "ico": "📖",
+   "keys": [
+    "party",
+    "birthday",
+    "friends"
+   ],
+   "scenes": [
+    {
+     "e": "🎉",
+     "t": "Sue had a birthday party on Sunday. There were many of her friends there."
+    },
+    {
+     "e": "🎈",
+     "t": "There were fun games to play at Sue's party: ring games, balloon popping, pin the tail on the donkey, and lots more."
+    },
+    {
+     "e": "🌭",
+     "t": "There was lots of food too: hotdogs, popcorn, cotton candy, and more."
+    },
+    {
+     "e": "🤡",
+     "t": "There were clowns, horseback riding, and a bounce castle."
+    },
+    {
+     "e": "🎁",
+     "t": "All the children at the party had fun and they all got a party bag to take home."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What kind of party did Sue have?",
+     "o": [
+      "A birthday party",
+      "A slumber party",
+      "A pool party"
+     ],
+     "a": 0
+    },
+    {
+     "q": "When was Sue's party?",
+     "o": [
+      "On Sunday",
+      "On Saturday",
+      "On Friday"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Who was at the party?",
+     "o": [
+      "Many of her friends",
+      "Only her family",
+      "Her teachers"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Name one game at Sue's party.",
+     "o": [
+      "Ring games",
+      "Football",
+      "Chess"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Name one food at Sue's party.",
+     "o": [
+      "Hotdogs",
+      "Pizza",
+      "Salad"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What did the children leave with?",
+     "o": [
+      "A party bag",
+      "A toy car",
+      "A cake"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Other than food and games, what else was at the party?",
+     "o": [
+      "Clowns, horseback riding, and a bounce castle",
+      "A swimming pool",
+      "A magician"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l12",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/ee11f82b47b.mp3",
+  "s1": "audio/en/e6c9b126dda.mp3",
+  "s2": "audio/en/eca12252c34.mp3",
+  "s3": "audio/en/e3162be03d4.mp3",
+  "s4": "audio/en/e619b9f813f.mp3"
+ }
+}

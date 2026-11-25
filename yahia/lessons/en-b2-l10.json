@@ -1,0 +1,137 @@
+{
+ "title": "Reading: Nelly the Nurse",
+ "source": "NIES Grade 3 Block 2 revision booklet, Reading Part 3 text 2 (with model answers)",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Nelly the Nurse",
+   "ico": "📖",
+   "keys": [
+    "nurse",
+    "hospital",
+    "work"
+   ],
+   "scenes": [
+    {
+     "e": "🏥",
+     "t": "This is Nelly. She's a nurse. She's tall and thin. She works at the hospital. She looks after sick people."
+    },
+    {
+     "e": "🌅",
+     "t": "She gets up at six o'clock in the morning. She takes a shower and puts on her clothes."
+    },
+    {
+     "e": "🍳",
+     "t": "Then she eats breakfast at half past six. At seven o'clock, she drives her car to the hospital."
+    },
+    {
+     "e": "🧹",
+     "t": "Nelly starts work at eight o'clock. She cleans the rooms in the hospital. Then, she helps the doctors."
+    },
+    {
+     "e": "🍽️",
+     "t": "At twelve o'clock, she has lunch. She goes home at five o'clock."
+    },
+    {
+     "e": "🍲",
+     "t": "At home, she takes a shower and she cooks dinner. She has dinner at half past six in the evening. Then, she watches TV."
+    },
+    {
+     "e": "😴",
+     "t": "At ten o'clock, she goes to bed."
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Read & Answer",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "What is Nelly?",
+     "o": [
+      "A nurse",
+      "A doctor",
+      "A teacher"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Where does she work?",
+     "o": [
+      "At the hospital",
+      "At a school",
+      "At a restaurant"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Is Nelly fat?",
+     "o": [
+      "No, she is tall and thin",
+      "Yes, she is",
+      "She is short"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What time does she get up?",
+     "o": [
+      "At six o'clock",
+      "At seven o'clock",
+      "At eight o'clock"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What time does she have breakfast?",
+     "o": [
+      "At half past six",
+      "At seven o'clock",
+      "At nine o'clock"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Does she cook dinner at the hospital?",
+     "o": [
+      "No, she doesn't",
+      "Yes, she does",
+      "Yes, always"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What time does she have dinner?",
+     "o": [
+      "At half past six in the evening",
+      "At twelve o'clock",
+      "At ten o'clock"
+     ],
+     "a": 0
+    },
+    {
+     "q": "What time does she go to bed?",
+     "o": [
+      "At ten o'clock",
+      "At nine o'clock",
+      "At eleven o'clock"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-l10",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e5ddb891920.mp3",
+  "s1": "audio/en/ee9197af9bd.mp3",
+  "s2": "audio/en/e6fd38735c0.mp3",
+  "s3": "audio/en/e4a17a2d897.mp3",
+  "s4": "audio/en/ed14d83237c.mp3",
+  "s5": "audio/en/e71b3968223.mp3",
+  "s6": "audio/en/e818c89b044.mp3"
+ }
+}

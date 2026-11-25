@@ -1,0 +1,369 @@
+{
+ "title": "📝 Block 2 Revision",
+ "source": "NIES Grade 3 Block 2 revision booklet worksheets (with model answers) + TEST-1",
+ "videos": [],
+ "activities": [
+  {
+   "type": "story",
+   "title": "Exam Tips",
+   "ico": "📖",
+   "keys": [
+    "read",
+    "answer",
+    "words"
+   ],
+   "scenes": [
+    {
+     "e": "🏆",
+     "t": "Are you ready for the Block 2 exam, Yahia? Let's revise everything together!"
+    },
+    {
+     "e": "👀",
+     "t": "First, read the words slowly. Then, send each word to its family."
+    },
+    {
+     "e": "🧠",
+     "t": "In word completion, read the description and remember the first letter."
+    },
+    {
+     "e": "✍️",
+     "t": "In jumbled sentences, start with the capital letter and end with a full stop or question mark."
+    },
+    {
+     "e": "💪",
+     "t": "Take your time, read carefully, and you will do great!"
+    }
+   ]
+  },
+  {
+   "type": "sort",
+   "style": "bird",
+   "title": "Classify the Words",
+   "ico": "🐦",
+   "prompt": "Catch each word and send it to its family!",
+   "bins": [
+    {
+     "id": "s",
+     "label": "Subjects",
+     "ico": "📚",
+     "cls": "noun"
+    },
+    {
+     "id": "b",
+     "label": "Body",
+     "ico": "🖐️",
+     "cls": "noun"
+    },
+    {
+     "id": "c",
+     "label": "Colours",
+     "ico": "🎨",
+     "cls": "noun"
+    },
+    {
+     "id": "j",
+     "label": "Jobs",
+     "ico": "👷",
+     "cls": "noun"
+    },
+    {
+     "id": "d",
+     "label": "Days",
+     "ico": "📅",
+     "cls": "noun"
+    }
+   ],
+   "items": [
+    [
+     "math",
+     "s"
+    ],
+    [
+     "nose",
+     "b"
+    ],
+    [
+     "red",
+     "c"
+    ],
+    [
+     "teacher",
+     "j"
+    ],
+    [
+     "Monday",
+     "d"
+    ],
+    [
+     "English",
+     "s"
+    ],
+    [
+     "green",
+     "c"
+    ],
+    [
+     "astronaut",
+     "j"
+    ],
+    [
+     "Thursday",
+     "d"
+    ],
+    [
+     "doctor",
+     "j"
+    ],
+    [
+     "Wednesday",
+     "d"
+    ],
+    [
+     "leg",
+     "b"
+    ],
+    [
+     "science",
+     "s"
+    ],
+    [
+     "face",
+     "b"
+    ],
+    [
+     "yellow",
+     "c"
+    ]
+   ]
+  },
+  {
+   "type": "match",
+   "title": "Jobs Match",
+   "ico": "🧠",
+   "prompt": "Match each job with what the person does.",
+   "pairs": [
+    [
+     "A pilot",
+     "He flies planes and takes people to different places."
+    ],
+    [
+     "A teacher",
+     "She teaches children at school."
+    ],
+    [
+     "A firefighter",
+     "He puts out fires and helps people in danger."
+    ],
+    [
+     "A doctor",
+     "She helps sick people and gives them medicine."
+    ],
+    [
+     "A baker",
+     "He bakes bread and cakes."
+    ]
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Word Completion",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "You cross the river over this. (B _ _ _ _ _)",
+     "o": [
+      "bridge",
+      "bank",
+      "boat"
+     ],
+     "a": 0
+    },
+    {
+     "q": "Actors perform on the stage there. (T _ _ _ _ _ _)",
+     "o": [
+      "theatre",
+      "tower",
+      "tent"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A place where people keep their money. (B _ _ _)",
+     "o": [
+      "bank",
+      "barn",
+      "bin"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A place where people pay to sleep and eat meals. (H _ _ _ _)",
+     "o": [
+      "hotel",
+      "house",
+      "tent"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A person who writes news. (J _ _ _ _ _ _ _ _ _ _)",
+     "o": [
+      "journalist",
+      "judge",
+      "juggler"
+     ],
+     "a": 0
+    },
+    {
+     "q": "A person who trains a sports team. (C _ _ _ _)",
+     "o": [
+      "coach",
+      "cook",
+      "clown"
+     ],
+     "a": 0
+    },
+    {
+     "q": "When your stomach hurts, you have a... (S _ _ _ _ _ _ _ _ _ _)",
+     "o": [
+      "stomachache",
+      "headache",
+      "toothache"
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Jumbled Sentences",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "Put in order: loudly - playground - children - the - in - play - the",
+     "o": [
+      "The children play loudly in the playground.",
+      "The children loudly play in the playground.",
+      "The playground children play loudly in the."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: don't - go - on - we - Friday - school - to",
+     "o": [
+      "We don't go to school on Friday.",
+      "We don't go on Friday to school.",
+      "On Friday we don't to school go."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: has - got - curly - brown - he - hair",
+     "o": [
+      "He has got curly brown hair.",
+      "He has got brown curly hair.",
+      "Curly brown hair he has got."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: be - wants - a - she - doctor - to",
+     "o": [
+      "She wants to be a doctor.",
+      "She wants to doctor be a.",
+      "A doctor she wants be to."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: answered - that - quickly - Salem - question",
+     "o": [
+      "Salem answered that question quickly.",
+      "Salem quickly answered that question is.",
+      "That question Salem answered quickly is."
+     ],
+     "a": 0
+    },
+    {
+     "q": "Put in order: hospital - a - where - place - mustn't - the - you - shout - is",
+     "o": [
+      "A hospital is the place where you mustn't shout.",
+      "A hospital is where the place you mustn't shout.",
+      "The hospital a place is where you mustn't shout."
+     ],
+     "a": 0
+    }
+   ]
+  },
+  {
+   "type": "quiz",
+   "title": "Grammar Check",
+   "ico": "🥚",
+   "items": [
+    {
+     "q": "She speaks English ___.",
+     "o": [
+      "fluently",
+      "fluent",
+      "fluents"
+     ],
+     "a": 0
+    },
+    {
+     "q": "He runs ___ in the park every morning.",
+     "o": [
+      "quickly",
+      "quick",
+      "quicker"
+     ],
+     "a": 0
+    },
+    {
+     "q": "It was raining, ___ I stayed home.",
+     "o": [
+      "so",
+      "because",
+      "but"
+     ],
+     "a": 0
+    },
+    {
+     "q": "I'm happy ___ I'm learning English.",
+     "o": [
+      "because",
+      "so",
+      "or"
+     ],
+     "a": 0
+    },
+    {
+     "q": "This is the dog ___ loves the ball.",
+     "o": [
+      "which",
+      "who",
+      "where"
+     ],
+     "a": 0
+    },
+    {
+     "q": "That is the school ___ we learn and play.",
+     "o": [
+      "where",
+      "which",
+      "who"
+     ],
+     "a": 0
+    }
+   ]
+  }
+ ],
+ "id": "en-b2-rs",
+ "lang": "en",
+ "audio": {
+  "s0": "audio/en/e7f9fcb1811.mp3",
+  "s1": "audio/en/e649ab9e619.mp3",
+  "s2": "audio/en/e8f428ba0e5.mp3",
+  "s3": "audio/en/e7a52ff6d35.mp3",
+  "s4": "audio/en/e3e06016bc1.mp3"
+ }
+}
